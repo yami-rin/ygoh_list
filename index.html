@@ -20,6 +20,9 @@
             z-index: 1050;
             color: white;
         }
+        .set-choice-btn {
+            cursor: pointer;
+        }
     </style>
 </head>
 <body>
@@ -51,8 +54,8 @@
 
                             <div class="mb-3">
                                 <label for="set_code" class="form-label">型番</label>
-                                <input type="text" class="form-control" id="set_code" name="set_code" list="set_code_suggestions" required>
-                                <datalist id="set_code_suggestions"></datalist>
+                                <input type="text" class="form-control" id="set_code" name="set_code" required>
+                                <div id="set-rarity-choices" class="mt-2"></div>
                             </div>
 
                             <div class="mb-3">
@@ -136,7 +139,7 @@
             const nameInput = document.getElementById('name');
             const setCodeInput = document.getElementById('set_code');
             const rarityInput = document.getElementById('rarity');
-            const suggestionsDatalist = document.getElementById('set_code_suggestions');
+            const setRarityChoices = document.getElementById('set-rarity-choices');
 
             const exportBtn = document.getElementById('export-btn');
             const importBtn = document.getElementById('import-btn');
@@ -165,7 +168,7 @@
                         <td>${card['レアリティ'] || ''}</td>
                         <td>${card['枚数'] || ''}</td>
                         <td>${card['備考'] || ''}</td>
-                        <td><button class="btn btn-danger btn-sm" data-index="${index}">削除</button></td>
+                        <td><button class="btn btn-danger btn-sm delete-btn" data-index="${index}">削除</button></td>
                     `;
                     cardTableBody.appendChild(tr);
                 });
@@ -209,7 +212,7 @@
                 saveCollection();
                 renderTable(cardCollection);
                 addForm.reset();
-                suggestionsDatalist.innerHTML = '';
+                setRarityChoices.innerHTML = '';
             });
 
             searchForm.addEventListener('submit', (e) => {
@@ -233,13 +236,16 @@
             });
             
             cardTableBody.addEventListener('click', (e) => {
-                if (e.target.classList.contains('btn-danger')) {
+                if (e.target.classList.contains('delete-btn')) {
                     const index = parseInt(e.target.dataset.index, 10);
-                    if (confirm(`「${cardCollection[index]['名前']}」を削除しますか？`)) {
-                        cardCollection.splice(index, 1);
+                    // Find the original index in the main collection
+                    const cardNameToDelete = e.target.closest('tr').querySelector('td').textContent;
+                    const originalIndex = cardCollection.findIndex(card => card['名前'] === cardNameToDelete && card['型番'] === e.target.closest('tr').children[1].textContent);
+
+                    if (originalIndex !== -1 && confirm(`「${cardCollection[originalIndex]['名前']}」を削除しますか？`)) {
+                        cardCollection.splice(originalIndex, 1);
                         saveCollection();
-                        // Re-render based on current search filter
-                        searchForm.dispatchEvent(new Event('submit'));
+                        searchForm.dispatchEvent(new Event('submit', { bubbles: true }));
                     }
                 }
             });
@@ -253,14 +259,19 @@
             });
 
             fetchBtn.addEventListener('click', async () => {
-                const url = urlInput.value;
+                let url = urlInput.value;
                 if (!url) { alert('URLを入力してください。'); return; }
+
+                // Append request_locale=ja if not present
+                if (!url.includes('request_locale=ja')) {
+                    url += url.includes('?') ? '&request_locale=ja' : '?request_locale=ja';
+                }
                 
-                // Use a CORS proxy
-                const proxyUrl = `https://api.allorigins.win/raw?url=${encodeURIComponent(url)}`;
+                const proxyUrl = `https://corsproxy.io/?${encodeURIComponent(url)}`;
 
                 showLoading(true);
                 fetchBtn.disabled = true;
+                setRarityChoices.innerHTML = ''; // Clear previous choices
 
                 try {
                     const response = await fetch(proxyUrl);
@@ -271,23 +282,26 @@
                     const doc = parser.parseFromString(text, 'text/html');
 
                     const cardName = doc.querySelector('#card_image_1')?.alt || '';
-                    if (!cardName) throw new Error("カード名が見つかりません。");
+                    if (!cardName) throw new Error("カード名が見つかりません。サイトの構造が変更された可能性があります。");
 
                     nameInput.value = cardName;
                     
                     const setCodes = Array.from(doc.querySelectorAll('div.card_number')).map(div => div.textContent.trim());
                     const rarities = Array.from(doc.querySelectorAll('div.rarity p')).map(p => p.textContent.trim());
 
-                    suggestionsDatalist.innerHTML = '';
                     if (setCodes.length > 0) {
-                        setCodes.forEach((code, i) => {
-                            const option = document.createElement('option');
-                            option.value = code;
-                            option.textContent = rarities[i] || '';
-                            suggestionsDatalist.appendChild(option);
+                        const setsData = setCodes.map((code, i) => ({ set_code: code, rarity: rarities[i] || '' }));
+                        setsData.forEach(data => {
+                            const choiceBtn = document.createElement('button');
+                            choiceBtn.type = 'button';
+                            choiceBtn.className = 'btn btn-outline-primary btn-sm me-1 mb-1 set-choice-btn';
+                            choiceBtn.dataset.setCode = data.set_code;
+                            choiceBtn.dataset.rarity = data.rarity;
+                            choiceBtn.textContent = `${data.set_code} (${data.rarity})`;
+                            setRarityChoices.appendChild(choiceBtn);
                         });
-                        setCodeInput.value = setCodes[0];
-                        rarityInput.value = rarities[0] || '';
+                    } else {
+                        setRarityChoices.textContent = '収録情報が見つかりません。';
                     }
                     urlInput.value = '';
 
@@ -299,11 +313,11 @@
                     fetchBtn.disabled = false;
                 }
             });
-            
-            setCodeInput.addEventListener('input', (e) => {
-                const selectedOption = Array.from(suggestionsDatalist.options).find(opt => opt.value === e.target.value);
-                if (selectedOption) {
-                    rarityInput.value = selectedOption.textContent;
+
+            setRarityChoices.addEventListener('click', (e) => {
+                if (e.target.classList.contains('set-choice-btn')) {
+                    setCodeInput.value = e.target.dataset.setCode;
+                    rarityInput.value = e.target.dataset.rarity;
                 }
             });
 
