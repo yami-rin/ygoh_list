@@ -110,7 +110,7 @@
 
     <!-- Main App -->
     <div id="main-app">
-        <nav class="navbar navbar-expand-lg navbar-light bg-light mb-4">
+        <<nav class="navbar navbar-expand-lg navbar-light bg-light mb-4" data-bs-theme="light">
             <div class="container-fluid">
                 <span class="navbar-brand"><i class="bi bi-layers-fill"></i> カード管理</span>
                 <div class="d-flex align-items-center">
@@ -500,7 +500,7 @@
         document.getElementById('delete-account-btn').addEventListener('click', async () => {
             if (!currentUser) return;
             if (!confirm('本当にアカウントを削除しますか？この操作は元に戻せません。')) return;
-            if (!confirm('最終確認です。アカウントと全てのカードデータが永久に削除されます。よろしいですか？')) return;
+            if (!confirm('最終確認です。アカウントに紐づく全てのカードデータが永久に削除されます。よろしいですか？')) return;
             
             showLoading(true);
             try {
@@ -513,7 +513,8 @@
 
                 // 2. Delete the user account
                 await deleteUser(currentUser);
-                alert('アカウントが正常に削除されました。');
+                await signOut(auth);
+                alert('正常に削除されました。');
                 settingsModal.hide();
             } catch (error) {
                 showLoading(false);
