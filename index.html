@@ -123,7 +123,7 @@
                 <div class="modal-body">
                     <h6>新しいタグを追加</h6>
                     <form id="add-tag-form" class="input-group mb-3">
-                        <input type="text" id="new-tag-name" class="form-control" placeholder="新しいタグ名" required>
+                        <input type="text" id="new-tag-name" class="form-control" placeholder="新しいタグ名（カンマ区切りで複数入力可）" required>
                         <button class="btn btn-primary" type="submit">追加</button>
                     </form>
                     <hr>
@@ -188,6 +188,15 @@
                                 <div class="mb-3"><label for="rarity" class="form-label">レアリティ</label><input type="text" class="form-control" id="rarity" name="rarity"></div>
                                 <div class="mb-3"><label for="quantity" class="form-label">枚数</label><input type="number" class="form-control" id="quantity" name="quantity" value="1" min="1" required></div>
                                 <div class="mb-3">
+                                    <label class="form-label">登録先</label>
+                                    <div class="btn-group w-100" role="group">
+                                        <input type="radio" class="btn-check" name="add-type" id="add-to-collection" value="collection" checked>
+                                        <label class="btn btn-outline-primary" for="add-to-collection">所持カード</label>
+                                        <input type="radio" class="btn-check" name="add-type" id="add-to-wishlist" value="wishlist">
+                                        <label class="btn btn-outline-warning" for="add-to-wishlist">ウィッシュリスト</label>
+                                    </div>
+                                </div>
+                                <div class="mb-3">
                                     <label class="form-label">タグ</label>
                                     <div id="card-tags-container" class="mb-2"></div>
                                     <div id="tag-choices-container"></div>
@@ -201,7 +210,16 @@
                 <!-- Right Column: Search and List -->
                 <div class="col-lg-7">
                     <div class="card">
-                        <div class="card-header">カード検索 (総枚数: <span id="total-cards">0</span>)</div>
+                        <div class="card-header">
+                            <ul class="nav nav-tabs card-header-tabs">
+                                <li class="nav-item">
+                                    <a class="nav-link active" id="collection-tab" data-list-type="collection" href="#">所持カード (<span id="total-collection">0</span>)</a>
+                                </li>
+                                <li class="nav-item">
+                                    <a class="nav-link" id="wishlist-tab" data-list-type="wishlist" href="#">ウィッシュリスト (<span id="total-wishlist">0</span>)</a>
+                                </li>
+                            </ul>
+                        </div>
                         <div class="card-body">
                             <form id="search-form" class="row g-3 mb-4">
                                 <div class="col-md-6"><input type="text" name="search_name" class="form-control" placeholder="名前..."></div>
@@ -272,6 +290,8 @@
 
         // --- Global State ---
         let cardCollection = [];
+        let wishlistCollection = [];
+        let currentListType = 'collection'; // 'collection' or 'wishlist'
         let currentUser = null;
         let sortConfig = { key: '名前', direction: 'ascending' };
         let currentPage = 1;
@@ -292,7 +312,8 @@
         const logoutBtn = document.getElementById('logout-btn');
         const userEmailSpan = document.getElementById('user-email');
         const cardTableBody = document.getElementById('card-table-body');
-        const totalCardsSpan = document.getElementById('total-cards');
+        const totalCollectionSpan = document.getElementById('total-collection');
+        const totalWishlistSpan = document.getElementById('total-wishlist');
         const loadingOverlay = document.getElementById('loading-overlay');
         const addForm = document.getElementById('add-form');
         const searchForm = document.getElementById('search-form');
@@ -302,8 +323,13 @@
         // --- Utility & UI Functions ---
         const showLoading = (show) => { loadingOverlay.style.display = show ? 'flex' : 'none'; };
         
+        const getCurrentCollection = () => {
+            return currentListType === 'collection' ? cardCollection : wishlistCollection;
+        };
+        
         const renderTable = () => {
             // 1. ソート
+            const currentData = getCurrentCollection();
             filteredCardCollection.sort((a, b) => {
                 let valA = a.data[sortConfig.key];
                 let valB = b.data[sortConfig.key];
@@ -342,6 +368,7 @@
                         <td>${(card.data.tags || []).join(', ')}</td>
                         <td>
                             <button class="btn btn-primary btn-sm edit-btn" data-id="${card.id}"><i class="bi bi-pencil"></i></button>
+                            ${currentListType === 'wishlist' ? `<button class="btn btn-success btn-sm move-to-collection-btn" data-id="${card.id}" title="所持カードへ移動"><i class="bi bi-check-circle"></i></button>` : ''}
                             <button class="btn btn-danger btn-sm delete-btn" data-id="${card.id}"><i class="bi bi-trash"></i></button>
                         </td>
                     `;
@@ -351,6 +378,7 @@
 
             updatePaginationControls();
             updateSortIcons();
+            updateTotalCounts();
         };
 
         const updatePaginationControls = () => {
@@ -415,13 +443,21 @@
             });
         };
 
+        const updateTotalCounts = () => {
+            const totalCollection = cardCollection.reduce((sum, card) => sum + (card.data['枚数'] || 0), 0);
+            const totalWishlist = wishlistCollection.reduce((sum, card) => sum + (card.data['枚数'] || 0), 0);
+            totalCollectionSpan.textContent = totalCollection;
+            totalWishlistSpan.textContent = totalWishlist;
+        };
+        
         const applySearchAndFilter = () => {
             const searchName = document.querySelector('[name="search_name"]').value.toLowerCase();
             const searchSetCode = document.querySelector('[name="search_set_code"]').value.toLowerCase();
             const searchRarity = document.querySelector('[name="search_rarity"]').value.toLowerCase();
             const searchTags = document.querySelector('[name="search_tags"]').value.toLowerCase();
 
-            filteredCardCollection = cardCollection.filter(card => {
+            const currentData = getCurrentCollection();
+            filteredCardCollection = currentData.filter(card => {
                 const cardName = (card.data['名前'] || '').toLowerCase();
                 const cardSetCode = (card.data['型番'] || '').toLowerCase();
                 const cardRarity = (card.data['レアリティ'] || '').toLowerCase();
@@ -478,21 +514,42 @@
 
         document.getElementById('add-tag-form').addEventListener('submit', async (e) => {
             e.preventDefault();
-            const newTagName = document.getElementById('new-tag-name').value.trim();
-            if (!newTagName) return;
-            if (allTags.some(tag => tag.name === newTagName)) {
-                alert('同じ名前のタグが既に存在します。');
+            const inputValue = document.getElementById('new-tag-name').value.trim();
+            if (!inputValue) return;
+            
+            // カンマで分割してタグの配列を作成
+            const newTagNames = inputValue.split(',').map(tag => tag.trim()).filter(tag => tag.length > 0);
+            
+            if (newTagNames.length === 0) {
+                alert('有効なタグ名を入力してください。');
                 return;
             }
-
+            
             const tagsCollRef = getTagsCollectionRef();
-            if (tagsCollRef) {
-                await addDoc(tagsCollRef, { name: newTagName });
-            } else {
-                allTags.push({ id: `local_${Date.now()}`, name: newTagName });
+            const addedTags = [];
+            const duplicateTags = [];
+            
+            for (const newTagName of newTagNames) {
+                if (allTags.some(tag => tag.name === newTagName)) {
+                    duplicateTags.push(newTagName);
+                } else {
+                    if (tagsCollRef) {
+                        await addDoc(tagsCollRef, { name: newTagName });
+                    } else {
+                        allTags.push({ id: `local_${Date.now()}_${Math.random()}`, name: newTagName });
+                    }
+                    addedTags.push(newTagName);
+                }
             }
-            document.getElementById('new-tag-name').value = '';
-            await loadAllTags();
+            
+            if (duplicateTags.length > 0) {
+                alert(`以下のタグは既に存在するためスキップされました: ${duplicateTags.join(', ')}`);
+            }
+            
+            if (addedTags.length > 0) {
+                document.getElementById('new-tag-name').value = '';
+                await loadAllTags();
+            }
         });
 
         document.getElementById('existing-tags-list').addEventListener('click', async (e) => {
@@ -515,9 +572,10 @@
         });
 
         // --- Firestore Functions ---
-        const getCollectionRef = () => {
+        const getCollectionRef = (listType = 'collection') => {
             if (currentUser && currentUser.uid !== 'local_user') {
-                return collection(db, "users", currentUser.uid, "cards");
+                const collectionName = listType === 'collection' ? "cards" : "wishlist";
+                return collection(db, "users", currentUser.uid, collectionName);
             }
             return null;
         };
@@ -525,8 +583,14 @@
         const loadCollectionFromFirestore = async () => {
             if (!currentUser) return;
             showLoading(true);
-            const querySnapshot = await getDocs(query(getCollectionRef()));
-            cardCollection = querySnapshot.docs.map(doc => ({ id: doc.id, data: doc.data() }));
+            
+            // Load both collections
+            const cardSnapshot = await getDocs(query(getCollectionRef('collection')));
+            cardCollection = cardSnapshot.docs.map(doc => ({ id: doc.id, data: doc.data() }));
+            
+            const wishlistSnapshot = await getDocs(query(getCollectionRef('wishlist')));
+            wishlistCollection = wishlistSnapshot.docs.map(doc => ({ id: doc.id, data: doc.data() }));
+            
             applySearchAndFilter();
             showLoading(false);
         };
@@ -544,6 +608,7 @@
                 loadAllTags();
             } else {
                 cardCollection = [];
+                wishlistCollection = [];
                 applySearchAndFilter();
                 loadAllTags(); // ローカルモードでもタグをロード・初期化
                 document.getElementById('delete-account-btn').style.display = 'none';
@@ -557,6 +622,7 @@
             appLoader.style.display = 'none';
             authModal.show();
             cardCollection = [];
+            wishlistCollection = [];
             renderTable([]);
             document.getElementById('delete-account-btn').style.display = 'block';
         };
@@ -570,6 +636,25 @@
         });
 
         // --- Event Listeners ---
+        document.getElementById('tag-management-btn').addEventListener('click', () => tagManagementModal.show());
+        
+        // Tab switching
+        document.getElementById('collection-tab').addEventListener('click', (e) => {
+            e.preventDefault();
+            currentListType = 'collection';
+            document.getElementById('collection-tab').classList.add('active');
+            document.getElementById('wishlist-tab').classList.remove('active');
+            applySearchAndFilter();
+        });
+        
+        document.getElementById('wishlist-tab').addEventListener('click', (e) => {
+            e.preventDefault();
+            currentListType = 'wishlist';
+            document.getElementById('wishlist-tab').classList.add('active');
+            document.getElementById('collection-tab').classList.remove('active');
+            applySearchAndFilter();
+        });
+        
         document.getElementById('login-btn').addEventListener('click', async () => {
             const email = document.getElementById('email').value;
             const password = document.getElementById('password').value;
@@ -607,6 +692,7 @@
             e.preventDefault();
             showLoading(true);
             const formData = new FormData(addForm);
+            const addType = document.querySelector('input[name="add-type"]:checked').value;
             const newCard = {
                 '名前': formData.get('name'),
                 '型番': formData.get('set_code'),
@@ -615,7 +701,8 @@
                 'tags': [...currentCardTags] // タグを追加
             };
 
-            const collRef = getCollectionRef();
+            const targetCollection = addType === 'collection' ? cardCollection : wishlistCollection;
+            const collRef = getCollectionRef(addType);
             if (collRef) { // Firebaseモード
                 const q = query(collRef, 
                     where("名前", "==", newCard.名前),
@@ -626,15 +713,15 @@
 
                 if (existingDocs.empty) {
                     const docRef = await addDoc(collRef, newCard);
-                    cardCollection.push({ id: docRef.id, data: newCard });
+                    targetCollection.push({ id: docRef.id, data: newCard });
                 } else {
                     const existingDoc = existingDocs.docs[0];
                     await updateDoc(existingDoc.ref, { 枚数: increment(newCard.枚数) });
-                    const localCard = cardCollection.find(c => c.id === existingDoc.id);
+                    const localCard = targetCollection.find(c => c.id === existingDoc.id);
                     if(localCard) localCard.data.枚数 += newCard.枚数;
                 }
             } else { // ローカルモード
-                const existingCard = cardCollection.find(c => 
+                const existingCard = targetCollection.find(c => 
                     c.data.名前 === newCard.名前 && 
                     c.data.型番 === newCard.型番 && 
                     c.data.レアリティ === newCard.レアリティ
@@ -642,7 +729,7 @@
                 if (existingCard) {
                     existingCard.data.枚数 += newCard.枚数;
                 } else {
-                    cardCollection.push({ id: `local_${Date.now()}`, data: newCard });
+                    targetCollection.push({ id: `local_${Date.now()}`, data: newCard });
                 }
             }
             
@@ -655,24 +742,30 @@
             showLoading(false);
         });
 
-        cardTableBody.addEventListener('click', (e) => {
+        cardTableBody.addEventListener('click', async (e) => {
             const target = e.target.closest('button');
             if (!target) return;
 
             if (target.classList.contains('delete-btn')) {
                 const cardId = target.dataset.id;
                 const cardName = target.closest('tr').querySelector('td').textContent;
-                if (confirm(`「${cardName}」をコレクションから削除しますか？`)) {
-                    const collRef = getCollectionRef();
+                const listName = currentListType === 'collection' ? '所持カード' : 'ウィッシュリスト';
+                if (confirm(`「${cardName}」を${listName}から削除しますか？`)) {
+                    const collRef = getCollectionRef(currentListType);
                     if (collRef) { // Firebaseモード
                         deleteDoc(doc(collRef, cardId));
                     }
-                    cardCollection = cardCollection.filter(c => c.id !== cardId);
+                    if (currentListType === 'collection') {
+                        cardCollection = cardCollection.filter(c => c.id !== cardId);
+                    } else {
+                        wishlistCollection = wishlistCollection.filter(c => c.id !== cardId);
+                    }
                     applySearchAndFilter();
                 }
             } else if (target.classList.contains('edit-btn')) {
                 const cardId = target.dataset.id;
-                const card = cardCollection.find(c => c.id === cardId);
+                const currentData = getCurrentCollection();
+                const card = currentData.find(c => c.id === cardId);
                 if (card) {
                     document.getElementById('edit-card-id').value = card.id;
                     document.getElementById('edit-name').value = card.data.名前;
@@ -686,6 +779,30 @@
 
                     editCardModal.show();
                 }
+            } else if (target.classList.contains('move-to-collection-btn')) {
+                const cardId = target.dataset.id;
+                const card = wishlistCollection.find(c => c.id === cardId);
+                if (card && confirm(`「${card.data.名前}」を所持カードに移動しますか？`)) {
+                    // Move from wishlist to collection
+                    const wishlistRef = getCollectionRef('wishlist');
+                    const collectionRef = getCollectionRef('collection');
+                    
+                    if (collectionRef && wishlistRef) {
+                        // Add to collection
+                        const docRef = await addDoc(collectionRef, card.data);
+                        cardCollection.push({ id: docRef.id, data: card.data });
+                        
+                        // Remove from wishlist
+                        await deleteDoc(doc(wishlistRef, cardId));
+                        wishlistCollection = wishlistCollection.filter(c => c.id !== cardId);
+                    } else {
+                        // Local mode
+                        cardCollection.push({ id: `local_${Date.now()}`, data: card.data });
+                        wishlistCollection = wishlistCollection.filter(c => c.id !== cardId);
+                    }
+                    
+                    applySearchAndFilter();
+                }
             }
         });
 
@@ -696,12 +813,13 @@
                 tags: [...currentCardTags]
             };
 
-            const collRef = getCollectionRef();
+            const collRef = getCollectionRef(currentListType);
             if (collRef) { // Firebaseモード
                 await updateDoc(doc(collRef, cardId), updatedData);
             }
 
-            const localCard = cardCollection.find(c => c.id === cardId);
+            const targetCollection = currentListType === 'collection' ? cardCollection : wishlistCollection;
+            const localCard = targetCollection.find(c => c.id === cardId);
             if(localCard) {
                 localCard.data.枚数 = updatedData.枚数;
                 localCard.data.tags = updatedData.tags;
@@ -735,6 +853,13 @@
         });
 
         // --- Data Import / Export ---
+        const exportAllData = () => {
+            return {
+                collection: cardCollection.map(c => c.data),
+                wishlist: wishlistCollection.map(c => c.data)
+            };
+        };
+        
         const parseCsv = (text) => {
             const lines = text.trim().replace(/\r/g, '').split('\n');
             const header = lines[0].split(',').map(h => h.trim());
@@ -815,20 +940,30 @@
         });
 
         document.getElementById('export-json-btn').addEventListener('click', () => {
-            const dataStr = JSON.stringify(cardCollection.map(c => c.data), null, 4);
+            const exportData = exportAllData();
+            const dataStr = JSON.stringify(exportData, null, 4);
             const blob = new Blob([dataStr], { type: 'application/json' });
             const url = URL.createObjectURL(blob);
             const a = document.createElement('a'); a.href = url; a.download = 'yugioh_collection.json'; a.click(); URL.revokeObjectURL(url);
         });
 
         document.getElementById('export-csv-btn').addEventListener('click', () => {
-            const header = ['名前', '型番', 'レアリティ', '枚数', '備考'];
-            const rows = cardCollection.map(c => header.map(field => {
-                const value = c.data[field] || '';
-                const strValue = String(value);
-                return strValue.includes(',') ? `"${strValue}"` : strValue;
-            }).join(','));
-            const csvContent = [header.join(','), ...rows].join('\r\n');
+            const header = ['リスト種別', '名前', '型番', 'レアリティ', '枚数', 'タグ'];
+            const collectionRows = cardCollection.map(c => {
+                const row = ['所持カード', c.data['名前'], c.data['型番'], c.data['レアリティ'], c.data['枚数'], (c.data.tags || []).join(';')];
+                return row.map(value => {
+                    const strValue = String(value || '');
+                    return strValue.includes(',') ? `"${strValue}"` : strValue;
+                }).join(',');
+            });
+            const wishlistRows = wishlistCollection.map(c => {
+                const row = ['ウィッシュリスト', c.data['名前'], c.data['型番'], c.data['レアリティ'], c.data['枚数'], (c.data.tags || []).join(';')];
+                return row.map(value => {
+                    const strValue = String(value || '');
+                    return strValue.includes(',') ? `"${strValue}"` : strValue;
+                }).join(',');
+            });
+            const csvContent = [header.join(','), ...collectionRows, ...wishlistRows].join('\r\n');
             const blob = new Blob(["\uFEFF" + csvContent], { type: 'text/csv;charset=utf-8;' });
             const url = URL.createObjectURL(blob);
             const a = document.createElement('a'); a.href = url; a.download = 'yugioh_collection.csv'; a.click(); URL.revokeObjectURL(url);
