@@ -251,6 +251,26 @@
             </div>
         </div>
     </div>
+    
+    <!-- Bulk Tag Edit Modal -->
+    <div class="modal fade" id="bulk-tag-modal" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="bulk-tag-modal-title">タグ一括編集</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <p id="bulk-tag-modal-desc"></p>
+                    <div id="bulk-tag-choices-container"></div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">キャンセル</button>
+                    <button type="button" class="btn btn-primary" id="bulk-tag-save-btn">適用</button>
+                </div>
+            </div>
+        </div>
+    </div>
 
     <!-- Main App -->
     <div id="main-app">
@@ -371,6 +391,26 @@
                                 <div class="col-md-6"><input type="text" name="search_tags" class="form-control" placeholder="タグ..."></div>
                                 <div class="col-12 d-grid"><button type="submit" class="btn btn-info">検索</button></div>
                             </form>
+                            
+                            <!-- Bulk edit controls -->
+                            <div id="bulk-edit-controls" class="alert alert-info mb-2" style="display: none;">
+                                <div class="d-flex flex-wrap align-items-center gap-2">
+                                    <span id="selected-count">0件選択</span>
+                                    <button class="btn btn-sm btn-outline-primary" id="bulk-add-tags-btn">
+                                        <i class="bi bi-tags"></i> タグ追加
+                                    </button>
+                                    <button class="btn btn-sm btn-outline-warning" id="bulk-remove-tags-btn">
+                                        <i class="bi bi-tags"></i> タグ削除
+                                    </button>
+                                    <button class="btn btn-sm btn-outline-danger" id="bulk-delete-btn">
+                                        <i class="bi bi-trash"></i> 一括削除
+                                    </button>
+                                    <button class="btn btn-sm btn-secondary" id="clear-selection-btn">
+                                        <i class="bi bi-x-circle"></i> 選択解除
+                                    </button>
+                                </div>
+                            </div>
+                            
                             <div class="d-flex justify-content-between align-items-center mb-2">
                                 <div class="input-group w-auto">
                                     <label class="input-group-text" for="items-per-page">表示件数</label>
@@ -387,6 +427,9 @@
                                 <table class="table table-striped table-hover">
                                     <thead>
                                         <tr>
+                                            <th scope="col" style="width: 30px;">
+                                                <input type="checkbox" id="select-all-checkbox" class="form-check-input">
+                                            </th>
                                             <th scope="col" data-sort="名前" class="sortable">名前 <i class="bi bi-arrow-down-up"></i></th>
                                             <th scope="col" data-sort="型番" class="sortable">型番 <i class="bi bi-arrow-down-up"></i></th>
                                             <th scope="col" data-sort="レアリティ" class="sortable d-none d-md-table-cell">レアリティ <i class="bi bi-arrow-down-up"></i></th>
@@ -442,6 +485,7 @@
         let filteredCardCollection = [];
         let allTags = [];
         let currentCardTags = [];
+        let selectedCardIds = new Set();
 
         // --- DOM Elements ---
         const mainApp = document.getElementById('main-app');
@@ -451,6 +495,7 @@
         const howToUseModal = new bootstrap.Modal(document.getElementById('how-to-use-modal'));
         const settingsModal = new bootstrap.Modal(document.getElementById('settings-modal'));
         const tagManagementModal = new bootstrap.Modal(document.getElementById('tag-management-modal'));
+        const bulkTagModal = new bootstrap.Modal(document.getElementById('bulk-tag-modal'));
         const authError = document.getElementById('auth-error');
         const logoutBtn = document.getElementById('logout-btn');
         const userEmailSpan = document.getElementById('user-email');
@@ -516,7 +561,11 @@
                 paginatedItems.forEach(card => {
                     const tr = document.createElement('tr');
                     const tags = (card.data.tags || []).map(tag => escapeHtml(tag)).join(', ');
+                    const isChecked = selectedCardIds.has(card.id) ? 'checked' : '';
                     tr.innerHTML = `
+                        <td>
+                            <input type="checkbox" class="form-check-input card-checkbox" data-id="${escapeHtml(card.id)}" ${isChecked}>
+                        </td>
                         <td>${escapeHtml(card.data['名前'])}</td>
                         <td>${escapeHtml(card.data['型番'])}</td>
                         <td class="d-none d-md-table-cell">${escapeHtml(card.data['レアリティ'])}</td>
@@ -540,9 +589,14 @@
         const updatePaginationControls = () => {
             const totalPages = Math.ceil(filteredCardCollection.length / itemsPerPage);
             const controlsHtml = `
-                <span class="me-2">${totalPages > 0 ? currentPage : 0} / ${totalPages} ページ (${filteredCardCollection.length} 件)</span>
-                <button class="btn btn-outline-secondary btn-sm" ${currentPage <= 1 ? 'disabled' : ''} onclick="changePage(${currentPage - 1})">前へ</button>
-                <button class="btn btn-outline-secondary btn-sm ms-1" ${currentPage >= totalPages ? 'disabled' : ''} onclick="changePage(${currentPage + 1})">次へ</button>
+                <div class="d-flex flex-wrap align-items-center gap-2">
+                    <span>${totalPages > 0 ? currentPage : 0} / ${totalPages} ページ</span>
+                    <span>(${filteredCardCollection.length} 件)</span>
+                    <div class="btn-group" role="group">
+                        <button class="btn btn-outline-secondary btn-sm" ${currentPage <= 1 ? 'disabled' : ''} onclick="changePage(${currentPage - 1})">前へ</button>
+                        <button class="btn btn-outline-secondary btn-sm" ${currentPage >= totalPages ? 'disabled' : ''} onclick="changePage(${currentPage + 1})">次へ</button>
+                    </div>
+                </div>
             `;
             document.getElementById('pagination-controls').innerHTML = controlsHtml;
             document.getElementById('pagination-controls-bottom').innerHTML = controlsHtml;
@@ -792,8 +846,185 @@
             }
         });
 
+        // --- Bulk Edit Functions ---
+        const updateBulkEditControls = () => {
+            const bulkEditControls = document.getElementById('bulk-edit-controls');
+            const selectedCount = document.getElementById('selected-count');
+            
+            if (selectedCardIds.size > 0) {
+                bulkEditControls.style.display = 'block';
+                selectedCount.textContent = `${selectedCardIds.size}件選択`;
+            } else {
+                bulkEditControls.style.display = 'none';
+            }
+        };
+        
+        const handleBulkTagOperation = (operation) => {
+            if (selectedCardIds.size === 0) {
+                alert('カードが選択されていません。');
+                return;
+            }
+            
+            const modalTitle = document.getElementById('bulk-tag-modal-title');
+            const modalDesc = document.getElementById('bulk-tag-modal-desc');
+            const container = document.getElementById('bulk-tag-choices-container');
+            
+            modalTitle.textContent = operation === 'add' ? 'タグを追加' : 'タグを削除';
+            modalDesc.textContent = `${selectedCardIds.size}枚のカードに対して${operation === 'add' ? '追加' : '削除'}するタグを選択してください。`;
+            
+            container.innerHTML = '';
+            const selectedTags = new Set();
+            
+            allTags.forEach(tag => {
+                const btn = document.createElement('button');
+                btn.type = 'button';
+                btn.className = 'btn btn-outline-secondary btn-sm me-1 mb-1';
+                btn.textContent = tag.name;
+                btn.onclick = () => {
+                    if (selectedTags.has(tag.name)) {
+                        selectedTags.delete(tag.name);
+                        btn.classList.remove('btn-primary');
+                        btn.classList.add('btn-outline-secondary');
+                    } else {
+                        selectedTags.add(tag.name);
+                        btn.classList.remove('btn-outline-secondary');
+                        btn.classList.add('btn-primary');
+                    }
+                };
+                container.appendChild(btn);
+            });
+            
+            document.getElementById('bulk-tag-save-btn').onclick = async () => {
+                if (selectedTags.size === 0) {
+                    alert('タグが選択されていません。');
+                    return;
+                }
+                
+                showLoading(true);
+                try {
+                    for (const cardId of selectedCardIds) {
+                        const collection = getCurrentCollection();
+                        const card = collection.find(c => c.id === cardId);
+                        if (!card) continue;
+                        
+                        let updatedTags = [...(card.data.tags || [])];
+                        
+                        if (operation === 'add') {
+                            selectedTags.forEach(tag => {
+                                if (!updatedTags.includes(tag)) {
+                                    updatedTags.push(tag);
+                                }
+                            });
+                        } else {
+                            updatedTags = updatedTags.filter(tag => !selectedTags.has(tag));
+                        }
+                        
+                        const collRef = getCollectionRef(currentListType);
+                        if (collRef) {
+                            await updateDoc(doc(collRef, cardId), { tags: updatedTags });
+                        }
+                        card.data.tags = updatedTags;
+                    }
+                    
+                    bulkTagModal.hide();
+                    selectedCardIds.clear();
+                    updateBulkEditControls();
+                    renderTable();
+                    alert(`${selectedCardIds.size}枚のカードのタグを${operation === 'add' ? '追加' : '削除'}しました。`);
+                } catch (error) {
+                    console.error(error);
+                    alert('エラーが発生しました。');
+                } finally {
+                    showLoading(false);
+                }
+            };
+            
+            bulkTagModal.show();
+        };
+        
         // --- Event Listeners ---
         document.getElementById('tag-management-btn').addEventListener('click', () => tagManagementModal.show());
+        
+        // Bulk edit event listeners
+        document.getElementById('select-all-checkbox').addEventListener('change', (e) => {
+            const checkboxes = document.querySelectorAll('.card-checkbox');
+            checkboxes.forEach(checkbox => {
+                checkbox.checked = e.target.checked;
+                const cardId = checkbox.dataset.id;
+                if (e.target.checked) {
+                    selectedCardIds.add(cardId);
+                } else {
+                    selectedCardIds.delete(cardId);
+                }
+            });
+            updateBulkEditControls();
+        });
+        
+        document.addEventListener('change', (e) => {
+            if (e.target.classList.contains('card-checkbox')) {
+                const cardId = e.target.dataset.id;
+                if (e.target.checked) {
+                    selectedCardIds.add(cardId);
+                } else {
+                    selectedCardIds.delete(cardId);
+                }
+                updateBulkEditControls();
+                
+                // Update select-all checkbox
+                const allCheckboxes = document.querySelectorAll('.card-checkbox');
+                const checkedBoxes = document.querySelectorAll('.card-checkbox:checked');
+                const selectAllCheckbox = document.getElementById('select-all-checkbox');
+                selectAllCheckbox.checked = allCheckboxes.length > 0 && allCheckboxes.length === checkedBoxes.length;
+            }
+        });
+        
+        document.getElementById('bulk-add-tags-btn').addEventListener('click', () => handleBulkTagOperation('add'));
+        document.getElementById('bulk-remove-tags-btn').addEventListener('click', () => handleBulkTagOperation('remove'));
+        
+        document.getElementById('bulk-delete-btn').addEventListener('click', async () => {
+            if (selectedCardIds.size === 0) {
+                alert('カードが選択されていません。');
+                return;
+            }
+            
+            const listName = currentListType === 'collection' ? '所持カード' : 'ウィッシュリスト';
+            if (!confirm(`${selectedCardIds.size}枚のカードを${listName}から削除しますか？\nこの操作は元に戻せません。`)) {
+                return;
+            }
+            
+            showLoading(true);
+            try {
+                const collRef = getCollectionRef(currentListType);
+                const collection = getCurrentCollection();
+                
+                for (const cardId of selectedCardIds) {
+                    if (collRef) {
+                        await deleteDoc(doc(collRef, cardId));
+                    }
+                    const index = collection.findIndex(c => c.id === cardId);
+                    if (index > -1) {
+                        collection.splice(index, 1);
+                    }
+                }
+                
+                selectedCardIds.clear();
+                updateBulkEditControls();
+                applySearchAndFilter();
+                alert(`${selectedCardIds.size}枚のカードを削除しました。`);
+            } catch (error) {
+                console.error(error);
+                alert('削除中にエラーが発生しました。');
+            } finally {
+                showLoading(false);
+            }
+        });
+        
+        document.getElementById('clear-selection-btn').addEventListener('click', () => {
+            selectedCardIds.clear();
+            document.querySelectorAll('.card-checkbox').forEach(checkbox => checkbox.checked = false);
+            document.getElementById('select-all-checkbox').checked = false;
+            updateBulkEditControls();
+        });
         
         // Tab switching
         document.getElementById('collection-tab').addEventListener('click', (e) => {
@@ -1397,7 +1628,7 @@
                 const parser = new DOMParser();
                 const doc = parser.parseFromString(text, 'text/html');
                 const cardName = doc.querySelector('#card_image_1')?.alt || '';
-                if (!cardName) throw new Error("カード名が見つかりません。");
+                if (!cardName) throw new Error("カード名が見つかりません。サイトの構造が変更された可能性があります。");
                 document.getElementById('name').value = cardName;
                 const setCodes = Array.from(doc.querySelectorAll('div.card_number')).map(div => div.textContent.trim());
                 const rarities = Array.from(doc.querySelectorAll('div.rarity p')).map(p => p.textContent.trim());
