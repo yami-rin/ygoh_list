@@ -3,7 +3,7 @@
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>カード管理</title>
+    <title>遊戯王カード管理</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <style>
         body { background-color: #f8f9fa; }
@@ -61,8 +61,7 @@
                         <div class="mb-3"><label class="form-label">型番</label><input type="text" id="edit-set-code" class="form-control" readonly disabled></div>
                         <div class="mb-3"><label class="form-label">レアリティ</label><input type="text" id="edit-rarity" class="form-control" readonly disabled></div>
                         <div class="mb-3"><label for="edit-quantity" class="form-label">枚数</label><input type="number" id="edit-quantity" class="form-control" min="1" required></div>
-                        <div class="mb-3"><label for="edit-memo" class="form-label">備考</label><input type="text" id="edit-memo" class="form-control">
-                        </div>
+                        <div class="mb-3"><label for="edit-memo" class="form-label">備考</label><input type="text" id="edit-memo" class="form-control"></div>
                     </form>
                 </div>
                 <div class="modal-footer">
@@ -77,17 +76,18 @@
     <div id="main-app">
         <nav class="navbar navbar-expand-lg navbar-light bg-light mb-4">
             <div class="container-fluid">
-                <span class="navbar-brand">カード管理</span>
+                <span class="navbar-brand">遊戯王カード管理</span>
                 <div class="d-flex align-items-center">
                     <div class="dropdown me-3">
                         <button class="btn btn-secondary dropdown-toggle" type="button" id="data-dropdown" data-bs-toggle="dropdown">データ管理</button>
                         <ul class="dropdown-menu" aria-labelledby="data-dropdown">
                             <li><button class="dropdown-item" id="import-json-btn">JSONからインポート</button></li>
+                            <li><button class="dropdown-item" id="import-csv-btn">CSVからインポート</button></li>
                             <li><hr class="dropdown-divider"></li>
                             <li><button class="dropdown-item" id="export-json-btn">JSON形式でエクスポート</button></li>
                             <li><button class="dropdown-item" id="export-csv-btn">CSV形式でエクスポート</button></li>
                         </ul>
-                        <input type="file" id="import-file-input" accept=".json" style="display: none;">
+                        <input type="file" id="import-file-input" accept=".json,.csv" style="display: none;">
                     </div>
                     <span class="navbar-text me-3" id="user-email"></span>
                     <button id="logout-btn" class="btn btn-outline-danger">ログアウト</button>
@@ -131,7 +131,7 @@
                 <!-- Right Column: Search and List -->
                 <div class="col-lg-7">
                     <div class="card">
-                        <div class="card-header">カード検索 (総数: <span id="total-cards">0</span>枚)</div>
+                        <div class="card-header">カード検索 (総枚数: <span id="total-cards">0</span>)</div>
                         <div class="card-body">
                             <form id="search-form" class="row g-3 mb-4">
                                 <div class="col-md-6"><input type="text" name="search_name" class="form-control" placeholder="名前..."></div>
@@ -193,6 +193,7 @@
         const loadingOverlay = document.getElementById('loading-overlay');
         const addForm = document.getElementById('add-form');
         const searchForm = document.getElementById('search-form');
+        const importFileInput = document.getElementById('import-file-input');
 
         // --- Utility & UI Functions ---
         const showLoading = (show) => { loadingOverlay.style.display = show ? 'flex' : 'none'; };
@@ -217,7 +218,7 @@
                 `;
                 cardTableBody.appendChild(tr);
             });
-            totalCardsSpan.textContent = cardCollection.reduce((sum, card) => sum + card.data['枚数'], 0);
+            totalCardsSpan.textContent = cardCollection.reduce((sum, card) => sum + (card.data['枚数'] || 0), 0);
         };
 
         // --- Firestore Functions ---
@@ -357,6 +358,72 @@
         });
 
         // --- Data Import / Export ---
+        const parseCsv = (text) => {
+            const lines = text.trim().split('\n');
+            const header = lines[0].split(',').map(h => h.trim());
+            const cards = [];
+            for (let i = 1; i < lines.length; i++) {
+                const values = lines[i].split(',');
+                const card = {};
+                header.forEach((col, index) => {
+                    const value = values[index]?.trim() || '';
+                    if (col === '枚数') {
+                        card[col] = parseInt(value, 10) || 1;
+                    } else {
+                        card[col] = value.replace(/^"|"$/g, ''); // Remove surrounding quotes
+                    }
+                });
+                cards.push(card);
+            }
+            return cards;
+        };
+
+        const handleImport = async (text, format) => {
+            let importedCards;
+            try {
+                if (format === 'json') {
+                    importedCards = JSON.parse(text);
+                } else if (format === 'csv') {
+                    importedCards = parseCsv(text);
+                }
+                if (!Array.isArray(importedCards)) { throw new Error('Invalid file format'); }
+
+                if (!confirm(`${importedCards.length}枚のカードをインポートしますか？\n(重複するカードは枚数が加算されます)`)) return;
+                
+                showLoading(true);
+                const batch = writeBatch(db);
+                for (const card of importedCards) {
+                    const q = query(getCollectionRef(), where("名前", "==", card.名前), where("型番", "==", card.型番), where("レアリティ", "==", card.レアリティ));
+                    const existingDocs = await getDocs(q);
+                    if (existingDocs.empty) {
+                        batch.set(doc(getCollectionRef()), card);
+                    } else {
+                        batch.update(existingDocs.docs[0].ref, { 枚数: increment(card.枚数 || 1) });
+                    }
+                }
+                await batch.commit();
+                await loadCollectionFromFirestore(); // Reload from DB
+                showLoading(false);
+                alert('インポートが完了しました。');
+            } catch (err) {
+                showLoading(false);
+                alert(`インポート中にエラーが発生しました: ${err.message}`);
+                console.error(err);
+            }
+        };
+
+        document.getElementById('import-json-btn').addEventListener('click', () => importFileInput.click());
+        document.getElementById('import-csv-btn').addEventListener('click', () => importFileInput.click());
+        importFileInput.addEventListener('change', (e) => {
+            const file = e.target.files[0];
+            if (!file) return;
+            const reader = new FileReader();
+            const format = file.name.endsWith('.csv') ? 'csv' : 'json';
+            reader.onload = (event) => handleImport(event.target.result, format);
+            reader.readAsText(file);
+            e.target.value = '';
+        });
+
         document.getElementById('export-json-btn').addEventListener('click', () => {
             const dataStr = JSON.stringify(cardCollection.map(c => c.data), null, 4);
             const blob = new Blob([dataStr], { type: 'application/json' });
@@ -385,38 +452,6 @@
             URL.revokeObjectURL(url);
         });
 
-        document.getElementById('import-json-btn').addEventListener('click', () => document.getElementById('import-file-input').click());
-        document.getElementById('import-file-input').addEventListener('change', (e) => {
-            const file = e.target.files[0];
-            if (!file) return;
-            const reader = new FileReader();
-            reader.onload = async (event) => {
-                try {
-                    const importedCards = JSON.parse(event.target.result);
-                    if (!Array.isArray(importedCards)) { alert('無効なファイル形式です。'); return; }
-                    if (!confirm(`${importedCards.length}枚のカードをインポートしますか？\n(重複するカードは枚数が加算されます)`)) return;
-                    
-                    showLoading(true);
-                    const batch = writeBatch(db);
-                    for (const card of importedCards) {
-                        const q = query(getCollectionRef(), where("名前", "==", card.名前), where("型番", "==", card.型番), where("レアリティ", "==", card.レアリティ));
-                        const existingDocs = await getDocs(q);
-                        if (existingDocs.empty) {
-                            batch.set(doc(getCollectionRef()), card);
-                        } else {
-                            batch.update(existingDocs.docs[0].ref, { 枚数: increment(card.枚数 || 1) });
-                        }
-                    }
-                    await batch.commit();
-                    await loadCollectionFromFirestore(); // Reload from DB
-                    showLoading(false);
-                    alert('インポートが完了しました。');
-                } catch (err) { showLoading(false); alert('インポート中にエラーが発生しました。'); console.error(err); }
-            };
-            reader.readAsText(file);
-            e.target.value = '';
-        });
-
         // --- Fetch from URL (no changes needed) ---
         document.getElementById('paste-btn').addEventListener('click', async () => {
             try { document.getElementById('url').value = await navigator.clipboard.readText(); } catch (err) { console.error('Clipboard read failed: ', err); }
@@ -434,7 +469,7 @@
                 const parser = new DOMParser();
                 const doc = parser.parseFromString(text, 'text/html');
                 const cardName = doc.querySelector('#card_image_1')?.alt || '';
-                if (!cardName) throw new Error("カード名が見つかりません。サイトの構造が変更された可能性があります。");
+                if (!cardName) throw new Error("カード名が見つかりません。");
                 document.getElementById('name').value = cardName;
                 const setCodes = Array.from(doc.querySelectorAll('div.card_number')).map(div => div.textContent.trim());
                 const rarities = Array.from(doc.querySelectorAll('div.rarity p')).map(p => p.textContent.trim());
