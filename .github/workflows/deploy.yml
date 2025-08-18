@@ -1,27 +1,31 @@
+     name: Deploy to GitHub Pages
 
-name: Deploy to GitHub Pages
+     on:
+       push:
+         branches:
+           - main # Or your default branch
 
-on:
-  push:
-    branches:
-      - main # Or your default branch
+     jobs:
+       deploy:
+         runs-on: ubuntu-latest
+         # これらの権限設定を追加します
+         permissions:
+           contents: read
+           pages: write
+           id-token: write
+         steps:
+           - name: Checkout repository
+             uses: actions/checkout@v4
 
-jobs:
-  deploy:
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout repository
-        uses: actions/checkout@v4
+           - name: Setup Pages
+             uses: actions/configure-pages@v4
 
-      - name: Setup Pages
-        uses: actions/configure-pages@v4
+           - name: Upload artifact
+             uses: actions/upload-pages-artifact@v3
+             with:
+               # Upload the entire repository
+               path: '.'
 
-      - name: Upload artifact
-        uses: actions/upload-pages-artifact@v3
-        with:
-          # Upload the entire repository
-          path: '.'
-
-      - name: Deploy to GitHub Pages
-        id: deployment
-        uses: actions/deploy-pages@v4
+           - name: Deploy to GitHub Pages
+             id: deployment
+             uses: actions/deploy-pages@v4
