@@ -60,7 +60,11 @@
                     <div class="mb-3"><label class="form-label">型番</label><input type="text" id="edit-set-code" class="form-control" readonly disabled></div>
                     <div class="mb-3"><label class="form-label">レアリティ</label><input type="text" id="edit-rarity" class="form-control" readonly disabled></div>
                     <div class="mb-3"><label for="edit-quantity" class="form-label">枚数</label><input type="number" id="edit-quantity" class="form-control" min="1" required></div>
-                    <div class="mb-3"><label for="edit-memo" class="form-label">備考</label><input type="text" id="edit-memo" class="form-control"></div>
+                    <div class="mb-3">
+                        <label class="form-label">タグ</label>
+                        <div id="edit-card-tags-container" class="mb-2"></div>
+                        <div id="edit-tag-choices-container"></div>
+                    </div>
                 </form>
             </div>
             <div class="modal-footer">
@@ -108,6 +112,31 @@
         </div></div>
     </div>
 
+    <!-- Tag Management Modal -->
+    <div class="modal fade" id="tag-management-modal" tabindex="-1">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">タグ管理</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <h6>新しいタグを追加</h6>
+                    <form id="add-tag-form" class="input-group mb-3">
+                        <input type="text" id="new-tag-name" class="form-control" placeholder="新しいタグ名" required>
+                        <button class="btn btn-primary" type="submit">追加</button>
+                    </form>
+                    <hr>
+                    <h6>登録済みタグ一覧</h6>
+                    <div id="existing-tags-list"></div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">閉じる</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <!-- Main App -->
     <div id="main-app">
         <nav class="navbar navbar-expand-lg navbar-light bg-light mb-4" data-bs-theme="light">
@@ -126,6 +155,7 @@
                         </ul>
                         <input type="file" id="import-file-input" accept=".json,.csv" style="display: none;">
                     </div>
+                    <button class="btn btn-outline-secondary me-2" id="tag-management-btn"><i class="bi bi-tags"></i> タグ管理</button>
                     <button class="btn btn-outline-secondary me-3" id="settings-btn"><i class="bi bi-gear"></i> 設定</button>
                     <span class="navbar-text me-3" id="user-email"></span>
                     <button id="logout-btn" class="btn btn-danger"><i class="bi bi-box-arrow-right"></i> ログアウト</button>
@@ -157,7 +187,10 @@
                                 </div>
                                 <div class="mb-3"><label for="rarity" class="form-label">レアリティ</label><input type="text" class="form-control" id="rarity" name="rarity"></div>
                                 <div class="mb-3"><label for="quantity" class="form-label">枚数</label><input type="number" class="form-control" id="quantity" name="quantity" value="1" min="1" required></div>
-                                <div class="mb-3"><label for="memo" class="form-label">備考</label><input type="text" class="form-control" id="memo" name="memo">
+                                <div class="mb-3">
+                                    <label class="form-label">タグ</label>
+                                    <div id="card-tags-container" class="mb-2"></div>
+                                    <div id="tag-choices-container"></div>
                                 </div>
                                 <button type="submit" class="btn btn-success w-100">カードを追加</button>
                             </form>
@@ -174,14 +207,38 @@
                                 <div class="col-md-6"><input type="text" name="search_name" class="form-control" placeholder="名前..."></div>
                                 <div class="col-md-6"><input type="text" name="search_set_code" class="form-control" placeholder="型番..."></div>
                                 <div class="col-md-6"><input type="text" name="search_rarity" class="form-control" placeholder="レアリティ..."></div>
-                                <div class="col-md-6"><input type="text" name="search_memo" class="form-control" placeholder="備考..."></div>
+                                <div class="col-md-6"><input type="text" name="search_tags" class="form-control" placeholder="タグ..."></div>
                                 <div class="col-12 d-grid"><button type="submit" class="btn btn-info">検索</button></div>
                             </form>
+                            <div class="d-flex justify-content-between align-items-center mb-2">
+                                <div class="input-group w-auto">
+                                    <label class="input-group-text" for="items-per-page">表示件数</label>
+                                    <select class="form-select" id="items-per-page">
+                                        <option value="10">10</option>
+                                        <option value="20">20</option>
+                                        <option value="50" selected>50</option>
+                                        <option value="100">100</option>
+                                    </select>
+                                </div>
+                                <div id="pagination-controls"></div>
+                            </div>
                             <div class="table-responsive">
                                 <table class="table table-striped table-hover">
-                                    <thead><tr><th>名前</th><th>型番</th><th>レアリティ</th><th>枚数</th><th>備考</th><th>操作</th></tr></thead>
+                                    <thead>
+                                        <tr>
+                                            <th scope="col" data-sort="名前" class="sortable">名前 <i class="bi bi-arrow-down-up"></i></th>
+                                            <th scope="col" data-sort="型番" class="sortable">型番 <i class="bi bi-arrow-down-up"></i></th>
+                                            <th scope="col" data-sort="レアリティ" class="sortable">レアリティ <i class="bi bi-arrow-down-up"></i></th>
+                                            <th scope="col" data-sort="枚数" class="sortable">枚数 <i class="bi bi-arrow-down-up"></i></th>
+                                            <th scope="col" data-sort="tags">タグ</th>
+                                            <th scope="col">操作</th>
+                                        </tr>
+                                    </thead>
                                     <tbody id="card-table-body"></tbody>
                                 </table>
+                            </div>
+                            <div class="d-flex justify-content-center mt-2">
+                                <div id="pagination-controls-bottom"></div>
                             </div>
                         </div>
                     </div>
@@ -216,6 +273,12 @@
         // --- Global State ---
         let cardCollection = [];
         let currentUser = null;
+        let sortConfig = { key: '名前', direction: 'ascending' };
+        let currentPage = 1;
+        let itemsPerPage = 50;
+        let filteredCardCollection = [];
+        let allTags = [];
+        let currentCardTags = [];
 
         // --- DOM Elements ---
         const mainApp = document.getElementById('main-app');
@@ -224,6 +287,7 @@
         const editCardModal = new bootstrap.Modal(document.getElementById('edit-card-modal'));
         const howToUseModal = new bootstrap.Modal(document.getElementById('how-to-use-modal'));
         const settingsModal = new bootstrap.Modal(document.getElementById('settings-modal'));
+        const tagManagementModal = new bootstrap.Modal(document.getElementById('tag-management-modal'));
         const authError = document.getElementById('auth-error');
         const logoutBtn = document.getElementById('logout-btn');
         const userEmailSpan = document.getElementById('user-email');
@@ -238,28 +302,217 @@
         // --- Utility & UI Functions ---
         const showLoading = (show) => { loadingOverlay.style.display = show ? 'flex' : 'none'; };
         
-        const renderTable = (cards) => {
-            cardTableBody.innerHTML = '';
-            if (!cards || cards.length === 0) {
-                cardTableBody.innerHTML = '<tr><td colspan="6" class="text-center">該当するカードはありません。</td></tr>';
-            }
-            cards.sort((a, b) => a.data['名前'].localeCompare(b.data['名前'])).forEach(card => {
-                const tr = document.createElement('tr');
-                tr.innerHTML = `
-                    <td>${card.data['名前'] || ''}</td>
-                    <td>${card.data['型番'] || ''}</td>
-                    <td>${card.data['レアリティ'] || ''}</td>
-                    <td>${card.data['枚数'] || ''}</td>
-                    <td>${card.data['備考'] || ''}</td>
-                    <td>
-                        <button class="btn btn-primary btn-sm edit-btn" data-id="${card.id}"><i class="bi bi-pencil"></i></button>
-                        <button class="btn btn-danger btn-sm delete-btn" data-id="${card.id}"><i class="bi bi-trash"></i></button>
-                    </td>
-                `;
-                cardTableBody.appendChild(tr);
+        const renderTable = () => {
+            // 1. ソート
+            filteredCardCollection.sort((a, b) => {
+                let valA = a.data[sortConfig.key];
+                let valB = b.data[sortConfig.key];
+
+                // 数値と文字列の比較を考慮
+                if (sortConfig.key === '枚数') {
+                    valA = parseInt(valA, 10) || 0;
+                    valB = parseInt(valB, 10) || 0;
+                } else {
+                    valA = String(valA || '').toLowerCase();
+                    valB = String(valB || '').toLowerCase();
+                }
+
+                if (valA < valB) return sortConfig.direction === 'ascending' ? -1 : 1;
+                if (valA > valB) return sortConfig.direction === 'ascending' ? 1 : -1;
+                return 0;
             });
-            totalCardsSpan.textContent = cardCollection.reduce((sum, card) => sum + (card.data['枚数'] || 0), 0);
+
+            // 2. ページネーション
+            const startIndex = (currentPage - 1) * itemsPerPage;
+            const endIndex = startIndex + itemsPerPage;
+            const paginatedItems = filteredCardCollection.slice(startIndex, endIndex);
+
+            // 3. テーブル描画
+            cardTableBody.innerHTML = '';
+            if (paginatedItems.length === 0) {
+                cardTableBody.innerHTML = '<tr><td colspan="6" class="text-center">該当するカードはありません。</td></tr>';
+            } else {
+                paginatedItems.forEach(card => {
+                    const tr = document.createElement('tr');
+                    tr.innerHTML = `
+                        <td>${card.data['名前'] || ''}</td>
+                        <td>${card.data['型番'] || ''}</td>
+                        <td>${card.data['レアリティ'] || ''}</td>
+                        <td>${card.data['枚数'] || ''}</td>
+                        <td>${(card.data.tags || []).join(', ')}</td>
+                        <td>
+                            <button class="btn btn-primary btn-sm edit-btn" data-id="${card.id}"><i class="bi bi-pencil"></i></button>
+                            <button class="btn btn-danger btn-sm delete-btn" data-id="${card.id}"><i class="bi bi-trash"></i></button>
+                        </td>
+                    `;
+                    cardTableBody.appendChild(tr);
+                });
+            }
+
+            updatePaginationControls();
+            updateSortIcons();
         };
+
+        const updatePaginationControls = () => {
+            const totalPages = Math.ceil(filteredCardCollection.length / itemsPerPage);
+            const controlsHtml = `
+                <span class="me-2">${totalPages > 0 ? currentPage : 0} / ${totalPages} ページ (${filteredCardCollection.length} 件)</span>
+                <button class="btn btn-outline-secondary btn-sm" ${currentPage <= 1 ? 'disabled' : ''} onclick="changePage(${currentPage - 1})">前へ</button>
+                <button class="btn btn-outline-secondary btn-sm ms-1" ${currentPage >= totalPages ? 'disabled' : ''} onclick="changePage(${currentPage + 1})">次へ</button>
+            `;
+            document.getElementById('pagination-controls').innerHTML = controlsHtml;
+            document.getElementById('pagination-controls-bottom').innerHTML = controlsHtml;
+        };
+
+        window.changePage = (page) => {
+            currentPage = page;
+            renderTable();
+        };
+
+        const renderTagChoices = (containerId, selectedTags) => {
+            const container = document.getElementById(containerId);
+            container.innerHTML = '';
+            allTags.forEach(tag => {
+                const isSelected = selectedTags.includes(tag.name);
+                const btn = document.createElement('button');
+                btn.type = 'button';
+                btn.className = `btn btn-sm ${isSelected ? 'btn-primary' : 'btn-outline-secondary'} me-1 mb-1`;
+                btn.textContent = tag.name;
+                btn.onclick = () => toggleTag(tag.name, containerId.startsWith('edit'));
+                container.appendChild(btn);
+            });
+        };
+
+        const renderSelectedTags = (containerId, tags) => {
+            const container = document.getElementById(containerId);
+            container.innerHTML = tags.map(tag => `<span class="badge bg-secondary me-1">${tag}</span>`).join(' ');
+        };
+
+        window.toggleTag = (tagName, isEdit) => {
+            const index = currentCardTags.indexOf(tagName);
+            if (index > -1) {
+                currentCardTags.splice(index, 1);
+            } else {
+                currentCardTags.push(tagName);
+            }
+            if (isEdit) {
+                renderTagChoices('edit-tag-choices-container', currentCardTags);
+                renderSelectedTags('edit-card-tags-container', currentCardTags);
+            } else {
+                renderTagChoices('tag-choices-container', currentCardTags);
+                renderSelectedTags('card-tags-container', currentCardTags);
+            }
+        };
+
+        const updateSortIcons = () => {
+            document.querySelectorAll('th.sortable').forEach(th => {
+                const icon = th.querySelector('i');
+                if (th.dataset.sort === sortConfig.key) {
+                    icon.className = sortConfig.direction === 'ascending' ? 'bi bi-sort-down' : 'bi bi-sort-up';
+                } else {
+                    icon.className = 'bi bi-arrow-down-up';
+                }
+            });
+        };
+
+        const applySearchAndFilter = () => {
+            const searchName = document.querySelector('[name="search_name"]').value.toLowerCase();
+            const searchSetCode = document.querySelector('[name="search_set_code"]').value.toLowerCase();
+            const searchRarity = document.querySelector('[name="search_rarity"]').value.toLowerCase();
+            const searchTags = document.querySelector('[name="search_tags"]').value.toLowerCase();
+
+            filteredCardCollection = cardCollection.filter(card => {
+                const cardName = (card.data['名前'] || '').toLowerCase();
+                const cardSetCode = (card.data['型番'] || '').toLowerCase();
+                const cardRarity = (card.data['レアリティ'] || '').toLowerCase();
+                const cardTags = (card.data.tags || []).join(', ').toLowerCase();
+
+                return (
+                    (searchName === '' || cardName.includes(searchName)) &&
+                    (searchSetCode === '' || cardSetCode.includes(searchSetCode)) &&
+                    (searchRarity === '' || cardRarity.includes(searchRarity)) &&
+                    (searchTags === '' || cardTags.includes(searchTags))
+                );
+            });
+            currentPage = 1; // 検索実行時は1ページ目に戻る
+            renderTable();
+        };
+
+        const getTagsCollectionRef = () => {
+            if (currentUser && currentUser.uid !== 'local_user') {
+                return collection(db, "users", currentUser.uid, "tags");
+            }
+            return null;
+        };
+
+        const loadAllTags = async () => {
+            const tagsCollRef = getTagsCollectionRef();
+            if (tagsCollRef) {
+                const snapshot = await getDocs(query(tagsCollRef));
+                allTags = snapshot.docs.map(doc => ({ id: doc.id, name: doc.data().name })).sort((a, b) => a.name.localeCompare(b.name));
+            } else {
+                // ローカルモード用のダミータグ
+                if (allTags.length === 0) {
+                    allTags = [{ id: 'local1', name: 'デッキパーツ' }, { id: 'local2', name: 'コレクション' }];
+                }
+            }
+            renderTagManagementList();
+            // 現在開いているフォームのタグ選択肢も更新
+            if (addForm.offsetParent !== null) renderTagChoices('tag-choices-container', currentCardTags);
+            if (editCardModal._element.classList.contains('show')) renderTagChoices('edit-tag-choices-container', currentCardTags);
+        };
+
+        const renderTagManagementList = () => {
+            const container = document.getElementById('existing-tags-list');
+            container.innerHTML = '';
+            allTags.forEach(tag => {
+                const div = document.createElement('div');
+                div.className = 'd-flex justify-content-between align-items-center mb-2';
+                div.innerHTML = `
+                    <span>${tag.name}</span>
+                    <button class="btn btn-outline-danger btn-sm delete-tag-btn" data-id="${tag.id}" data-name="${tag.name}">削除</button>
+                `;
+                container.appendChild(div);
+            });
+        };
+
+        document.getElementById('add-tag-form').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const newTagName = document.getElementById('new-tag-name').value.trim();
+            if (!newTagName) return;
+            if (allTags.some(tag => tag.name === newTagName)) {
+                alert('同じ名前のタグが既に存在します。');
+                return;
+            }
+
+            const tagsCollRef = getTagsCollectionRef();
+            if (tagsCollRef) {
+                await addDoc(tagsCollRef, { name: newTagName });
+            } else {
+                allTags.push({ id: `local_${Date.now()}`, name: newTagName });
+            }
+            document.getElementById('new-tag-name').value = '';
+            await loadAllTags();
+        });
+
+        document.getElementById('existing-tags-list').addEventListener('click', async (e) => {
+            if (e.target.classList.contains('delete-tag-btn')) {
+                const tagId = e.target.dataset.id;
+                const tagName = e.target.dataset.name;
+                if (!confirm(`タグ「${tagName}」を削除しますか？
+このタグは全てのカードからも削除されます。`)) return;
+
+                const tagsCollRef = getTagsCollectionRef();
+                if (tagsCollRef) {
+                    await deleteDoc(doc(tagsCollRef, tagId));
+                    // TODO: 全カードからこのタグを削除するバッチ処理
+                } 
+                allTags = allTags.filter(t => t.id !== tagId);
+                // TODO: ローカルの全カードからこのタグを削除
+                
+                await loadAllTags();
+            }
+        });
 
         // --- Firestore Functions ---
         const getCollectionRef = () => {
@@ -274,7 +527,7 @@
             showLoading(true);
             const querySnapshot = await getDocs(query(getCollectionRef()));
             cardCollection = querySnapshot.docs.map(doc => ({ id: doc.id, data: doc.data() }));
-            renderTable(cardCollection);
+            applySearchAndFilter();
             showLoading(false);
         };
 
@@ -288,9 +541,11 @@
             // ローカルモードではFirestoreから読み込まない
             if (user.uid !== 'local_user') {
                 loadCollectionFromFirestore();
+                loadAllTags();
             } else {
                 cardCollection = [];
-                renderTable(cardCollection);
+                applySearchAndFilter();
+                loadAllTags(); // ローカルモードでもタグをロード・初期化
                 document.getElementById('delete-account-btn').style.display = 'none';
             }
             applyTheme();
@@ -357,7 +612,7 @@
                 '型番': formData.get('set_code'),
                 'レアリティ': formData.get('rarity'),
                 '枚数': parseInt(formData.get('quantity'), 10),
-                '備考': formData.get('memo')
+                'tags': [...currentCardTags] // タグを追加
             };
 
             const collRef = getCollectionRef();
@@ -391,8 +646,11 @@
                 }
             }
             
-            renderTable(cardCollection);
+            applySearchAndFilter();
             addForm.reset();
+            currentCardTags = [];
+            renderTagChoices('tag-choices-container', currentCardTags);
+            renderSelectedTags('card-tags-container', currentCardTags);
             document.getElementById('set-rarity-choices').innerHTML = '';
             showLoading(false);
         });
@@ -410,7 +668,7 @@
                         deleteDoc(doc(collRef, cardId));
                     }
                     cardCollection = cardCollection.filter(c => c.id !== cardId);
-                    renderTable(cardCollection);
+                    applySearchAndFilter();
                 }
             } else if (target.classList.contains('edit-btn')) {
                 const cardId = target.dataset.id;
@@ -421,7 +679,11 @@
                     document.getElementById('edit-set-code').value = card.data.型番;
                     document.getElementById('edit-rarity').value = card.data.レアリティ;
                     document.getElementById('edit-quantity').value = card.data.枚数;
-                    document.getElementById('edit-memo').value = card.data.備考;
+                    
+                    currentCardTags = [...(card.data.tags || [])]; // 既存タグをセット
+                    renderTagChoices('edit-tag-choices-container', currentCardTags);
+                    renderSelectedTags('edit-card-tags-container', currentCardTags);
+
                     editCardModal.show();
                 }
             }
@@ -431,7 +693,7 @@
             const cardId = document.getElementById('edit-card-id').value;
             const updatedData = {
                 枚数: parseInt(document.getElementById('edit-quantity').value, 10),
-                備考: document.getElementById('edit-memo').value
+                tags: [...currentCardTags]
             };
 
             const collRef = getCollectionRef();
@@ -442,22 +704,34 @@
             const localCard = cardCollection.find(c => c.id === cardId);
             if(localCard) {
                 localCard.data.枚数 = updatedData.枚数;
-                localCard.data.備考 = updatedData.備考;
+                localCard.data.tags = updatedData.tags;
             }
-            renderTable(cardCollection);
+            applySearchAndFilter();
             editCardModal.hide();
         });
 
         searchForm.addEventListener('submit', (e) => {
             e.preventDefault();
-            const filteredCards = cardCollection.filter(card => {
-                return ( (searchForm.search_name.value === '' || String(card.data['名前']||'').toLowerCase().includes(searchForm.search_name.value.toLowerCase()))
-                      && (searchForm.search_set_code.value === '' || String(card.data['型番']||'').toLowerCase().includes(searchForm.search_set_code.value.toLowerCase()))
-                      && (searchForm.search_rarity.value === '' || String(card.data['レアリティ']||'').toLowerCase().includes(searchForm.search_rarity.value.toLowerCase()))
-                      && (searchForm.search_memo.value === '' || String(card.data['備考']||'').toLowerCase().includes(searchForm.search_memo.value.toLowerCase()))
-                );
+            applySearchAndFilter();
+        });
+
+        document.getElementById('items-per-page').addEventListener('change', (e) => {
+            itemsPerPage = parseInt(e.target.value, 10);
+            currentPage = 1; // 表示件数変更時は1ページ目に戻る
+            renderTable();
+        });
+
+        document.querySelectorAll('th.sortable').forEach(th => {
+            th.addEventListener('click', () => {
+                const key = th.dataset.sort;
+                if (sortConfig.key === key) {
+                    sortConfig.direction = sortConfig.direction === 'ascending' ? 'descending' : 'ascending';
+                } else {
+                    sortConfig.key = key;
+                    sortConfig.direction = 'ascending';
+                }
+                renderTable();
             });
-            renderTable(filteredCards);
         });
 
         // --- Data Import / Export ---
@@ -506,7 +780,7 @@
                         }
                     }
                     await batch.commit();
-                    await loadCollectionFromFirestore();
+                    await loadCollectionFromFirestore(); // ここで applySearchAndFilter が呼ばれる
                 } else { // ローカルモード
                     for (const card of importedCards) {
                         const existingCard = cardCollection.find(c => 
@@ -520,7 +794,7 @@
                             cardCollection.push({ id: `local_${Date.now()}`, data: card });
                         }
                     }
-                    renderTable(cardCollection);
+                    applySearchAndFilter();
                 }
 
                 showLoading(false);
