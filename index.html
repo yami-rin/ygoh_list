@@ -1,4 +1,3 @@
-
 <!doctype html>
 <html lang="ja">
 <head>
@@ -11,108 +10,129 @@
         .container { max-width: 1200px; }
         .card { margin-bottom: 1.5rem; }
         .table-responsive { max-height: 450px; }
-        #loading-overlay {
+        #loading-overlay, #app-loader {
             position: fixed; top: 0; left: 0; width: 100%; height: 100%;
             background-color: rgba(0,0,0,0.5);
-            display: none;
+            display: flex;
             justify-content: center;
             align-items: center;
-            z-index: 1050;
+            z-index: 1060;
             color: white;
         }
-        .set-choice-btn {
-            cursor: pointer;
-        }
+        .set-choice-btn { cursor: pointer; }
+        #main-app { display: none; } /* Hide app until logged in */
     </style>
 </head>
 <body>
-    <div id="loading-overlay"><div class="spinner-border" role="status"><span class="visually-hidden">Loading...</span></div></div>
+    <!-- Full screen loader -->
+    <div id="app-loader">
+        <div class="spinner-border" style="width: 3rem; height: 3rem;" role="status"><span class="visually-hidden">Loading...</span></div>
+    </div>
 
-    <div class="container mt-4">
-        <h1 class="mb-4 text-center">遊戯王カード管理 Web</h1>
-
-        <div class="row">
-            <!-- 左側: カード登録 -->
-            <div class="col-lg-5">
-                <div class="card">
-                    <div class="card-header">カード登録</div>
-                    <div class="card-body">
-                        <form id="add-form">
-                            <div class="mb-3">
-                                <label for="url" class="form-label">公式DB URL</label>
-                                <div class="input-group">
-                                    <input type="url" class="form-control" id="url" placeholder="URLを入力...">
-                                    <button class="btn btn-outline-secondary" type="button" id="paste-btn">ペースト</button>
-                                    <button class="btn btn-primary" type="button" id="fetch-btn">読込</button>
-                                </div>
-                            </div>
-
-                            <div class="mb-3">
-                                <label for="name" class="form-label">名前</label>
-                                <input type="text" class="form-control" id="name" name="name" required>
-                            </div>
-
-                            <div class="mb-3">
-                                <label for="set_code" class="form-label">型番</label>
-                                <input type="text" class="form-control" id="set_code" name="set_code" required>
-                                <div id="set-rarity-choices" class="mt-2"></div>
-                            </div>
-
-                            <div class="mb-3">
-                                <label for="rarity" class="form-label">レアリティ</label>
-                                <input type="text" class="form-control" id="rarity" name="rarity">
-                            </div>
-
-                            <div class="mb-3">
-                                <label for="quantity" class="form-label">枚数</label>
-                                <input type="number" class="form-control" id="quantity" name="quantity" value="1" min="1" required>
-                            </div>
-
-                            <div class="mb-3">
-                                <label for="memo" class="form-label">備考</label>
-                                <input type="text" class="form-control" id="memo" name="memo">
-                            </div>
-
-                            <button type="submit" class="btn btn-success w-100">カードを追加</button>
-                        </form>
-                    </div>
+    <!-- Login Modal -->
+    <div class="modal fade" id="auth-modal" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="authModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="authModalLabel">ログインまたは新規登録</h5>
                 </div>
-                 <div class="card">
-                    <div class="card-header">データ管理</div>
-                    <div class="card-body">
-                        <p class="small text-muted">データはブラウザに保存されます。他の端末と共有する場合はファイルに保存・読込してください。</p>
-                        <div class="d-grid gap-2 d-md-flex justify-content-md-start">
-                            <button id="export-btn" class="btn btn-secondary">ファイルに保存</button>
-                            <button id="import-btn" class="btn btn-secondary">ファイルから読込</button>
-                            <input type="file" id="import-file" accept=".json" style="display: none;">
+                <div class="modal-body">
+                    <div id="auth-error" class="alert alert-danger" style="display: none;"></div>
+                    <form id="auth-form">
+                        <div class="mb-3">
+                            <label for="email" class="form-label">メールアドレス</label>
+                            <input type="email" class="form-control" id="email" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="password" class="form-label">パスワード</label>
+                            <input type="password" class="form-control" id="password" required>
+                        </div>
+                        <div class="d-grid gap-2">
+                            <button type="button" id="login-btn" class="btn btn-primary">ログイン</button>
+                            <button type="button" id="signup-btn" class="btn btn-secondary">新規登録</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Main App -->
+    <div id="main-app">
+        <nav class="navbar navbar-expand-lg navbar-light bg-light mb-4">
+            <div class="container-fluid">
+                <span class="navbar-brand">遊戯王カード管理</span>
+                <div class="d-flex">
+                    <span class="navbar-text me-3" id="user-email"></span>
+                    <button id="logout-btn" class="btn btn-outline-danger">ログアウト</button>
+                </div>
+            </div>
+        </nav>
+
+        <div class="container">
+             <div id="loading-overlay" style="display: none;"><div class="spinner-border" role="status"><span class="visually-hidden">Loading...</span></div></div>
+            <div class="row">
+                <!-- Left Column: Add Card -->
+                <div class="col-lg-5">
+                    <div class="card">
+                        <div class="card-header">カード登録</div>
+                        <div class="card-body">
+                            <form id="add-form">
+                                <div class="mb-3">
+                                    <label for="url" class="form-label">公式DB URL</label>
+                                    <div class="input-group">
+                                        <input type="url" class="form-control" id="url" placeholder="URLを入力...">
+                                        <button class="btn btn-outline-secondary" type="button" id="paste-btn">ペースト</button>
+                                        <button class="btn btn-primary" type="button" id="fetch-btn">読込</button>
+                                    </div>
+                                </div>
+                                <div class="mb-3">
+                                    <label for="name" class="form-label">名前</label>
+                                    <input type="text" class="form-control" id="name" name="name" required>
+                                </div>
+                                <div class="mb-3">
+                                    <label for="set_code" class="form-label">型番</label>
+                                    <input type="text" class="form-control" id="set_code" name="set_code" required>
+                                    <div id="set-rarity-choices" class="mt-2"></div>
+                                </div>
+                                <div class="mb-3">
+                                    <label for="rarity" class="form-label">レアリティ</label>
+                                    <input type="text" class="form-control" id="rarity" name="rarity">
+                                </div>
+                                <div class="mb-3">
+                                    <label for="quantity" class="form-label">枚数</label>
+                                    <input type="number" class="form-control" id="quantity" name="quantity" value="1" min="1" required>
+                                </div>
+                                <div class="mb-3">
+                                    <label for="memo" class="form-label">備考</label>
+                                    <input type="text" class="form-control" id="memo" name="memo">
+                                </div>
+                                <button type="submit" class="btn btn-success w-100">カードを追加</button>
+                            </form>
                         </div>
                     </div>
                 </div>
-            </div>
 
-            <!-- 右側: カード検索・一覧 -->
-            <div class="col-lg-7">
-                <div class="card">
-                    <div class="card-header">
-                        カード検索 (総数: <span id="total-cards">0</span>枚)
-                    </div>
-                    <div class="card-body">
-                        <form id="search-form" class="row g-3 mb-4">
-                            <div class="col-md-6"><input type="text" name="search_name" class="form-control" placeholder="名前..."></div>
-                            <div class="col-md-6"><input type="text" name="search_set_code" class="form-control" placeholder="型番..."></div>
-                            <div class="col-md-6"><input type="text" name="search_rarity" class="form-control" placeholder="レアリティ..."></div>
-                            <div class="col-md-6"><input type="text" name="search_memo" class="form-control" placeholder="備考..."></div>
-                            <div class="col-12 d-grid"><button type="submit" class="btn btn-info">検索</button></div>
-                        </form>
-                        
-                        <div class="table-responsive">
-                            <table class="table table-striped table-hover">
-                                <thead>
-                                    <tr><th>名前</th><th>型番</th><th>レアリティ</th><th>枚数</th><th>備考</th><th>操作</th></tr>
-                                </thead>
-                                <tbody id="card-table-body">
-                                </tbody>
-                            </table>
+                <!-- Right Column: Search and List -->
+                <div class="col-lg-7">
+                    <div class="card">
+                        <div class="card-header">カード検索 (総数: <span id="total-cards">0</span>枚)</div>
+                        <div class="card-body">
+                            <form id="search-form" class="row g-3 mb-4">
+                                <div class="col-md-6"><input type="text" name="search_name" class="form-control" placeholder="名前..."></div>
+                                <div class="col-md-6"><input type="text" name="search_set_code" class="form-control" placeholder="型番..."></div>
+                                <div class="col-md-6"><input type="text" name="search_rarity" class="form-control" placeholder="レアリティ..."></div>
+                                <div class="col-md-6"><input type="text" name="search_memo" class="form-control" placeholder="備考..."></div>
+                                <div class="col-12 d-grid"><button type="submit" class="btn btn-info">検索</button></div>
+                            </form>
+                            <div class="table-responsive">
+                                <table class="table table-striped table-hover">
+                                    <thead>
+                                        <tr><th>名前</th><th>型番</th><th>レアリティ</th><th>枚数</th><th>備考</th><th>操作</th></tr>
+                                    </thead>
+                                    <tbody id="card-table-body"></tbody>
+                                </table>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -120,246 +140,270 @@
         </div>
     </div>
 
-    <script>
-        document.addEventListener('DOMContentLoaded', () => {
-            const COLUMNS = ['型番', '名前', 'レアリティ', '枚数', '備考'];
-            let cardCollection = [];
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script type="module">
+        // Import Firebase modules
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/9.15.0/firebase-app.js";
+        import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/9.15.0/firebase-auth.js";
+        import { getFirestore, collection, getDocs, addDoc, deleteDoc, doc, query } from "https://www.gstatic.com/firebasejs/9.15.0/firebase-firestore.js";
 
-            // --- DOM Elements ---
-            const addForm = document.getElementById('add-form');
-            const searchForm = document.getElementById('search-form');
-            const cardTableBody = document.getElementById('card-table-body');
-            const totalCardsSpan = document.getElementById('total-cards');
-            const loadingOverlay = document.getElementById('loading-overlay');
+        // Your web app's Firebase configuration
+        const firebaseConfig = {
+            apiKey: "AIzaSyAOYKalLUb2hbghrjQUS8AWzxpLExBT7aU",
+            authDomain: "ygoh-9bcf6.firebaseapp.com",
+            projectId: "ygoh-9bcf6",
+            storageBucket: "ygoh-9bcf6.firebasestorage.app",
+            messagingSenderId: "1058357616781",
+            appId: "1:1058357616781:web:f25db127e2824226d942c4",
+            measurementId: "G-S4CCJC3HW9"
+        };
 
-            const urlInput = document.getElementById('url');
-            const pasteBtn = document.getElementById('paste-btn');
-            const fetchBtn = document.getElementById('fetch-btn');
-            
-            const nameInput = document.getElementById('name');
-            const setCodeInput = document.getElementById('set_code');
-            const rarityInput = document.getElementById('rarity');
-            const setRarityChoices = document.getElementById('set-rarity-choices');
+        // Initialize Firebase
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+        const db = getFirestore(app);
 
-            const exportBtn = document.getElementById('export-btn');
-            const importBtn = document.getElementById('import-btn');
-            const importFile = document.getElementById('import-file');
+        // --- Global State ---
+        let cardCollection = [];
+        let currentUser = null;
 
-            // --- Utility Functions ---
-            const showLoading = (show) => {
-                loadingOverlay.style.display = show ? 'flex' : 'none';
-            };
+        // --- DOM Elements ---
+        const mainApp = document.getElementById('main-app');
+        const appLoader = document.getElementById('app-loader');
+        const authModal = new bootstrap.Modal(document.getElementById('auth-modal'));
+        const authForm = document.getElementById('auth-form');
+        const authError = document.getElementById('auth-error');
+        const loginBtn = document.getElementById('login-btn');
+        const signupBtn = document.getElementById('signup-btn');
+        const logoutBtn = document.getElementById('logout-btn');
+        const userEmailSpan = document.getElementById('user-email');
+        
+        const addForm = document.getElementById('add-form');
+        const searchForm = document.getElementById('search-form');
+        const cardTableBody = document.getElementById('card-table-body');
+        const totalCardsSpan = document.getElementById('total-cards');
+        const loadingOverlay = document.getElementById('loading-overlay');
 
-            const saveCollection = () => {
-                localStorage.setItem('yugioh_collection', JSON.stringify(cardCollection));
-            };
+        const urlInput = document.getElementById('url');
+        const pasteBtn = document.getElementById('paste-btn');
+        const fetchBtn = document.getElementById('fetch-btn');
+        const nameInput = document.getElementById('name');
+        const setCodeInput = document.getElementById('set_code');
+        const rarityInput = document.getElementById('rarity');
+        const setRarityChoices = document.getElementById('set-rarity-choices');
 
-            const renderTable = (cards) => {
-                cardTableBody.innerHTML = '';
-                if (cards.length === 0) {
-                    cardTableBody.innerHTML = '<tr><td colspan="6" class="text-center">該当するカードはありません。</td></tr>';
-                    return;
-                }
-                cards.forEach((card, index) => {
-                    const tr = document.createElement('tr');
-                    tr.innerHTML = `
-                        <td>${card['名前'] || ''}</td>
-                        <td>${card['型番'] || ''}</td>
-                        <td>${card['レアリティ'] || ''}</td>
-                        <td>${card['枚数'] || ''}</td>
-                        <td>${card['備考'] || ''}</td>
-                        <td><button class="btn btn-danger btn-sm delete-btn" data-index="${index}">削除</button></td>
-                    `;
-                    cardTableBody.appendChild(tr);
-                });
-                totalCardsSpan.textContent = cardCollection.length;
-            };
+        // --- Utility & UI Functions ---
+        const showLoading = (show) => { loadingOverlay.style.display = show ? 'flex' : 'none'; };
+        
+        const renderTable = (cards) => {
+            cardTableBody.innerHTML = '';
+            if (!cards || cards.length === 0) {
+                cardTableBody.innerHTML = '<tr><td colspan="6" class="text-center">該当するカードはありません。</td></tr>';
+                return;
+            }
+            cards.forEach(card => {
+                const tr = document.createElement('tr');
+                tr.innerHTML = `
+                    <td>${card.data['名前'] || ''}</td>
+                    <td>${card.data['型番'] || ''}</td>
+                    <td>${card.data['レアリティ'] || ''}</td>
+                    <td>${card.data['枚数'] || ''}</td>
+                    <td>${card.data['備考'] || ''}</td>
+                    <td><button class="btn btn-danger btn-sm delete-btn" data-id="${card.id}">削除</button></td>
+                `;
+                cardTableBody.appendChild(tr);
+            });
+            totalCardsSpan.textContent = cardCollection.length;
+        };
 
-            // --- Main Logic ---
-            const init = async () => {
-                const savedCollection = localStorage.getItem('yugioh_collection');
-                if (savedCollection) {
-                    cardCollection = JSON.parse(savedCollection);
-                } else {
-                    try {
-                        const response = await fetch('cards.json');
-                        if (response.ok) {
-                            cardCollection = await response.json();
-                        } else {
-                            console.warn('cards.json not found, starting with empty collection.');
-                            cardCollection = [];
-                        }
-                    } catch (e) {
-                         console.error('Error fetching cards.json:', e);
-                         cardCollection = [];
-                    }
-                }
+        // --- Firestore Functions ---
+        const loadCollectionFromFirestore = async () => {
+            if (!currentUser) return;
+            showLoading(true);
+            const userCardCollectionRef = collection(db, "users", currentUser.uid, "cards");
+            const querySnapshot = await getDocs(query(userCardCollectionRef));
+            cardCollection = querySnapshot.docs.map(doc => ({ id: doc.id, data: doc.data() }));
+            renderTable(cardCollection);
+            showLoading(false);
+        };
+
+        const addCardToFirestore = async (cardData) => {
+            if (!currentUser) return;
+            try {
+                const userCardCollectionRef = collection(db, "users", currentUser.uid, "cards");
+                const docRef = await addDoc(userCardCollectionRef, cardData);
+                cardCollection.push({ id: docRef.id, data: cardData });
                 renderTable(cardCollection);
-            };
+            } catch (e) {
+                console.error("Error adding document: ", e);
+                alert("カードの追加に失敗しました。");
+            }
+        };
 
-            // --- Event Listeners ---
-            addForm.addEventListener('submit', (e) => {
-                e.preventDefault();
-                const formData = new FormData(addForm);
-                const newCard = {
-                    '名前': formData.get('name'),
-                    '型番': formData.get('set_code'),
-                    'レアリティ': formData.get('rarity'),
-                    '枚数': parseInt(formData.get('quantity'), 10),
-                    '備考': formData.get('memo')
-                };
-                cardCollection.push(newCard);
-                saveCollection();
+        const deleteCardFromFirestore = async (cardId) => {
+            if (!currentUser) return;
+            try {
+                await deleteDoc(doc(db, "users", currentUser.uid, "cards", cardId));
+                cardCollection = cardCollection.filter(card => card.id !== cardId);
                 renderTable(cardCollection);
-                addForm.reset();
-                setRarityChoices.innerHTML = '';
-            });
+            } catch (e) {
+                console.error("Error deleting document: ", e);
+                alert("カードの削除に失敗しました。");
+            }
+        };
 
-            searchForm.addEventListener('submit', (e) => {
-                e.preventDefault();
-                const formData = new FormData(searchForm);
-                const searchTerms = {
-                    '名前': formData.get('search_name').toLowerCase(),
-                    '型番': formData.get('search_set_code').toLowerCase(),
-                    'レアリティ': formData.get('search_rarity').toLowerCase(),
-                    '備考': formData.get('search_memo').toLowerCase()
-                };
-
-                const filteredCards = cardCollection.filter(card => {
-                    return Object.keys(searchTerms).every(key => {
-                        if (!searchTerms[key]) return true;
-                        const cardValue = String(card[key] || '').toLowerCase();
-                        return cardValue.includes(searchTerms[key]);
-                    });
-                });
-                renderTable(filteredCards);
-            });
-            
-            cardTableBody.addEventListener('click', (e) => {
-                if (e.target.classList.contains('delete-btn')) {
-                    const index = parseInt(e.target.dataset.index, 10);
-                    // Find the original index in the main collection
-                    const cardNameToDelete = e.target.closest('tr').querySelector('td').textContent;
-                    const originalIndex = cardCollection.findIndex(card => card['名前'] === cardNameToDelete && card['型番'] === e.target.closest('tr').children[1].textContent);
-
-                    if (originalIndex !== -1 && confirm(`「${cardCollection[originalIndex]['名前']}」を削除しますか？`)) {
-                        cardCollection.splice(originalIndex, 1);
-                        saveCollection();
-                        searchForm.dispatchEvent(new Event('submit', { bubbles: true }));
-                    }
-                }
-            });
-
-            pasteBtn.addEventListener('click', async () => {
-                try {
-                    urlInput.value = await navigator.clipboard.readText();
-                } catch (err) {
-                    console.error('Clipboard read failed: ', err);
-                }
-            });
-
-            fetchBtn.addEventListener('click', async () => {
-                let url = urlInput.value;
-                if (!url) { alert('URLを入力してください。'); return; }
-
-                // Append request_locale=ja if not present
-                if (!url.includes('request_locale=ja')) {
-                    url += url.includes('?') ? '&request_locale=ja' : '?request_locale=ja';
-                }
-                
-                const proxyUrl = `https://corsproxy.io/?${encodeURIComponent(url)}`;
-
-                showLoading(true);
-                fetchBtn.disabled = true;
-                setRarityChoices.innerHTML = ''; // Clear previous choices
-
-                try {
-                    const response = await fetch(proxyUrl);
-                    if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
-                    const text = await response.text();
-                    
-                    const parser = new DOMParser();
-                    const doc = parser.parseFromString(text, 'text/html');
-
-                    const cardName = doc.querySelector('#card_image_1')?.alt || '';
-                    if (!cardName) throw new Error("カード名が見つかりません。サイトの構造が変更された可能性があります。");
-
-                    nameInput.value = cardName;
-                    
-                    const setCodes = Array.from(doc.querySelectorAll('div.card_number')).map(div => div.textContent.trim());
-                    const rarities = Array.from(doc.querySelectorAll('div.rarity p')).map(p => p.textContent.trim());
-
-                    if (setCodes.length > 0) {
-                        const setsData = setCodes.map((code, i) => ({ set_code: code, rarity: rarities[i] || '' }));
-                        setsData.forEach(data => {
-                            const choiceBtn = document.createElement('button');
-                            choiceBtn.type = 'button';
-                            choiceBtn.className = 'btn btn-outline-primary btn-sm me-1 mb-1 set-choice-btn';
-                            choiceBtn.dataset.setCode = data.set_code;
-                            choiceBtn.dataset.rarity = data.rarity;
-                            choiceBtn.textContent = `${data.set_code} (${data.rarity})`;
-                            setRarityChoices.appendChild(choiceBtn);
-                        });
-                    } else {
-                        setRarityChoices.textContent = '収録情報が見つかりません。';
-                    }
-                    urlInput.value = '';
-
-                } catch (err) {
-                    alert(`エラー: ${err.message}`);
-                    console.error(err);
-                } finally {
-                    showLoading(false);
-                    fetchBtn.disabled = false;
-                }
-            });
-
-            setRarityChoices.addEventListener('click', (e) => {
-                if (e.target.classList.contains('set-choice-btn')) {
-                    setCodeInput.value = e.target.dataset.setCode;
-                    rarityInput.value = e.target.dataset.rarity;
-                }
-            });
-
-            exportBtn.addEventListener('click', () => {
-                const dataStr = JSON.stringify(cardCollection, null, 4);
-                const dataBlob = new Blob([dataStr], { type: 'application/json' });
-                const url = URL.createObjectURL(dataBlob);
-                const a = document.createElement('a');
-                a.href = url;
-                a.download = 'yugioh_collection_backup.json';
-                a.click();
-                URL.revokeObjectURL(url);
-            });
-
-            importBtn.addEventListener('click', () => importFile.click());
-            importFile.addEventListener('change', (e) => {
-                const file = e.target.files[0];
-                if (!file) return;
-
-                const reader = new FileReader();
-                reader.onload = (event) => {
-                    try {
-                        const importedCollection = JSON.parse(event.target.result);
-                        if (Array.isArray(importedCollection) && confirm('現在のコレクションを上書きしますか？')) {
-                            cardCollection = importedCollection;
-                            saveCollection();
-                            renderTable(cardCollection);
-                        } else {
-                            alert('無効なファイル形式です。');
-                        }
-                    } catch (err) {
-                        alert('ファイルの読み込みに失敗しました。');
-                        console.error(err);
-                    }
-                };
-                reader.readAsText(file);
-                importFile.value = ''; // Reset file input
-            });
-
-            // --- Initialize ---
-            init();
+        // --- Auth Functions ---
+        onAuthStateChanged(auth, (user) => {
+            if (user) {
+                currentUser = user;
+                userEmailSpan.textContent = user.email;
+                mainApp.style.display = 'block';
+                appLoader.style.display = 'none';
+                authModal.hide();
+                loadCollectionFromFirestore();
+            } else {
+                currentUser = null;
+                mainApp.style.display = 'none';
+                appLoader.style.display = 'none';
+                authModal.show();
+                cardCollection = [];
+                renderTable([]);
+            }
         });
+
+        loginBtn.addEventListener('click', async () => {
+            const email = authForm.email.value;
+            const password = authForm.password.value;
+            try {
+                await signInWithEmailAndPassword(auth, email, password);
+                authError.style.display = 'none';
+            } catch (error) {
+                authError.textContent = `ログインエラー: ${error.message}`;
+                authError.style.display = 'block';
+            }
+        });
+
+        signupBtn.addEventListener('click', async () => {
+            const email = authForm.email.value;
+            const password = authForm.password.value;
+            try {
+                await createUserWithEmailAndPassword(auth, email, password);
+                authError.style.display = 'none';
+            } catch (error) {
+                authError.textContent = `新規登録エラー: ${error.message}`;
+                authError.style.display = 'block';
+            }
+        });
+
+        logoutBtn.addEventListener('click', async () => {
+            await signOut(auth);
+        });
+
+        // --- Event Listeners (Adapted for Firestore) ---
+        addForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const formData = new FormData(addForm);
+            const newCard = {
+                '名前': formData.get('name'),
+                '型番': formData.get('set_code'),
+                'レアリティ': formData.get('rarity'),
+                '枚数': parseInt(formData.get('quantity'), 10),
+                '備考': formData.get('memo')
+            };
+            await addCardToFirestore(newCard);
+            addForm.reset();
+            setRarityChoices.innerHTML = '';
+        });
+
+        cardTableBody.addEventListener('click', (e) => {
+            if (e.target.classList.contains('delete-btn')) {
+                const cardId = e.target.dataset.id;
+                const cardName = e.target.closest('tr').querySelector('td').textContent;
+                if (confirm(`「${cardName}」を削除しますか？`)) {
+                    deleteCardFromFirestore(cardId);
+                }
+            }
+        });
+        
+        searchForm.addEventListener('submit', (e) => {
+            e.preventDefault();
+            const formData = new FormData(searchForm);
+            const searchTerms = {
+                '名前': formData.get('search_name').toLowerCase(),
+                '型番': formData.get('search_set_code').toLowerCase(),
+                'レアリティ': formData.get('search_rarity').toLowerCase(),
+                '備考': formData.get('search_memo').toLowerCase()
+            };
+
+            const filteredCards = cardCollection.filter(card => {
+                return Object.keys(searchTerms).every(key => {
+                    if (!searchTerms[key]) return true;
+                    const cardValue = String(card.data[key] || '').toLowerCase();
+                    return cardValue.includes(searchTerms[key]);
+                });
+            });
+            renderTable(filteredCards);
+        });
+
+        // --- Fetch from URL (no changes needed here) ---
+        pasteBtn.addEventListener('click', async () => {
+            try { urlInput.value = await navigator.clipboard.readText(); } catch (err) { console.error('Clipboard read failed: ', err); }
+        });
+
+        fetchBtn.addEventListener('click', async () => {
+            let url = urlInput.value;
+            if (!url) { alert('URLを入力してください。'); return; }
+            if (!url.includes('request_locale=ja')) { url += url.includes('?') ? '&request_locale=ja' : '?request_locale=ja'; }
+            
+            const proxyUrl = `https://corsproxy.io/?${encodeURIComponent(url)}`;
+            showLoading(true);
+            fetchBtn.disabled = true;
+            setRarityChoices.innerHTML = '';
+
+            try {
+                const response = await fetch(proxyUrl);
+                if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
+                const text = await response.text();
+                const parser = new DOMParser();
+                const doc = parser.parseFromString(text, 'text/html');
+                const cardName = doc.querySelector('#card_image_1')?.alt || '';
+                if (!cardName) throw new Error("カード名が見つかりません。");
+
+                nameInput.value = cardName;
+                const setCodes = Array.from(doc.querySelectorAll('div.card_number')).map(div => div.textContent.trim());
+                const rarities = Array.from(doc.querySelectorAll('div.rarity p')).map(p => p.textContent.trim());
+
+                if (setCodes.length > 0) {
+                    const setsData = setCodes.map((code, i) => ({ set_code: code, rarity: rarities[i] || '' }));
+                    setsData.forEach(data => {
+                        const choiceBtn = document.createElement('button');
+                        choiceBtn.type = 'button';
+                        choiceBtn.className = 'btn btn-outline-primary btn-sm me-1 mb-1 set-choice-btn';
+                        choiceBtn.dataset.setCode = data.set_code;
+                        choiceBtn.dataset.rarity = data.rarity;
+                        choiceBtn.textContent = `${data.set_code} (${data.rarity})`;
+                        setRarityChoices.appendChild(choiceBtn);
+                    });
+                } else {
+                    setRarityChoices.textContent = '収録情報が見つかりません。';
+                }
+                urlInput.value = '';
+            } catch (err) {
+                alert(`エラー: ${err.message}`);
+                console.error(err);
+            } finally {
+                showLoading(false);
+                fetchBtn.disabled = false;
+            }
+        });
+
+        setRarityChoices.addEventListener('click', (e) => {
+            if (e.target.classList.contains('set-choice-btn')) {
+                setCodeInput.value = e.target.dataset.setCode;
+                rarityInput.value = e.target.dataset.rarity;
+            }
+        });
+
     </script>
 </body>
 </html>
