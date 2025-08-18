@@ -3,7 +3,7 @@
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>遊戯王カード管理</title>
+    <title>カード管理</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css">
     <style>
@@ -59,9 +59,8 @@
                     <div class="mb-3"><label class="form-label">名前</label><input type="text" id="edit-name" class="form-control" readonly disabled></div>
                     <div class="mb-3"><label class="form-label">型番</label><input type="text" id="edit-set-code" class="form-control" readonly disabled></div>
                     <div class="mb-3"><label class="form-label">レアリティ</label><input type="text" id="edit-rarity" class="form-control" readonly disabled></div>
-                    <div class="mb-3"><label for="edit-quantity" class="form-label">枚数</label><input type="number" id="edit-quantity" class="form-control" min="1" required>
-                    <div class="mb-3"><label for="edit-memo" class="form-label">備考</label><input type="text" id="edit-memo" class="form-control">
-                    </div>
+                    <div class="mb-3"><label for="edit-quantity" class="form-label">枚数</label><input type="number" id="edit-quantity" class="form-control" min="1" required></div>
+                    <div class="mb-3"><label for="edit-memo" class="form-label">備考</label><input type="text" id="edit-memo" class="form-control"></div>
                 </form>
             </div>
             <div class="modal-footer">
@@ -79,7 +78,7 @@
                 <h6><i class="bi bi-person-plus"></i> アカウント</h6>
                 <p>最初にメールアドレスとパスワードで新規登録します。登録したアカウントでログインすると、あなたのカードデータがクラウドに保存され、どの端末からでもアクセスできます。</p>
                 <h6><i class="bi bi-search"></i> カードのURL読込</h6>
-                <p>遊戯王OCGカードデータベースのカードページのURLをコピーし、入力欄に貼り付けて（Ctrl+Vなど）「読込」ボタンを押すと、カード名や型番、レアリティの候補が自動で入力されます。</p>
+                <p>データベースのカードページのURLをコピーし、入力欄に貼り付けて「読込」ボタンを押すと、カード名や型番、レアリティの候補が自動で入力されます。</p>
                 <h6><i class="bi bi-card-list"></i> カードの登録と管理</h6>
                 <p>読み込んだ情報や手入力した情報を確認し、「カードを追加」ボタンでコレクションに登録します。一覧の「編集」ボタンで枚数や備考を、「削除」ボタンでカードそのものを削除できます。</p>
                 <h6><i class="bi bi-files"></i> データのインポート・エクスポート</h6>
@@ -111,9 +110,9 @@
 
     <!-- Main App -->
     <div id="main-app">
-        <nav class="navbar navbar-expand-lg navbar-light bg-light mb-4" data-bs-theme="light">
+        <<nav class="navbar navbar-expand-lg navbar-light bg-light mb-4" data-bs-theme="light">
             <div class="container-fluid">
-                <span class="navbar-brand"><i class="bi bi-layers-fill"></i> 遊戯王カード管理</span>
+                <span class="navbar-brand"><i class="bi bi-layers-fill"></i> カード管理</span>
                 <div class="d-flex align-items-center">
                     <button class="btn btn-outline-info me-2" id="how-to-use-btn"><i class="bi bi-question-circle"></i> 使い方</button>
                     <div class="dropdown me-2">
@@ -243,23 +242,22 @@
             cardTableBody.innerHTML = '';
             if (!cards || cards.length === 0) {
                 cardTableBody.innerHTML = '<tr><td colspan="6" class="text-center">該当するカードはありません。</td></tr>';
-            } else {
-                cards.sort((a, b) => a.data['名前'].localeCompare(b.data['名前'])).forEach(card => {
-                    const tr = document.createElement('tr');
-                    tr.innerHTML = `
-                        <td>${card.data['名前'] || ''}</td>
-                        <td>${card.data['型番'] || ''}</td>
-                        <td>${card.data['レアリティ'] || ''}</td>
-                        <td>${card.data['枚数'] || ''}</td>
-                        <td>${card.data['備考'] || ''}</td>
-                        <td>
-                            <button class="btn btn-primary btn-sm edit-btn" data-id="${card.id}"><i class="bi bi-pencil"></i></button>
-                            <button class="btn btn-danger btn-sm delete-btn" data-id="${card.id}"><i class="bi bi-trash"></i></button>
-                        </td>
-                    `;
-                    cardTableBody.appendChild(tr);
-                });
             }
+            cards.sort((a, b) => a.data['名前'].localeCompare(b.data['名前'])).forEach(card => {
+                const tr = document.createElement('tr');
+                tr.innerHTML = `
+                    <td>${card.data['名前'] || ''}</td>
+                    <td>${card.data['型番'] || ''}</td>
+                    <td>${card.data['レアリティ'] || ''}</td>
+                    <td>${card.data['枚数'] || ''}</td>
+                    <td>${card.data['備考'] || ''}</td>
+                    <td>
+                        <button class="btn btn-primary btn-sm edit-btn" data-id="${card.id}"><i class="bi bi-pencil"></i></button>
+                        <button class="btn btn-danger btn-sm delete-btn" data-id="${card.id}"><i class="bi bi-trash"></i></button>
+                    </td>
+                `;
+                cardTableBody.appendChild(tr);
+            });
             totalCardsSpan.textContent = cardCollection.reduce((sum, card) => sum + (card.data['枚数'] || 0), 0);
         };
 
@@ -391,22 +389,11 @@
 
         searchForm.addEventListener('submit', (e) => {
             e.preventDefault();
-            const searchName = searchForm.search_name.value.toLowerCase();
-            const searchSetCode = searchForm.search_set_code.value.toLowerCase();
-            const searchRarity = searchForm.search_rarity.value.toLowerCase();
-            const searchMemo = searchForm.search_memo.value.toLowerCase();
-
             const filteredCards = cardCollection.filter(card => {
-                const cardName = (card.data['名前'] || '').toLowerCase();
-                const cardSetCode = (card.data['型番'] || '').toLowerCase();
-                const cardRarity = (card.data['レアリティ'] || '').toLowerCase();
-                const cardMemo = (card.data['備考'] || '').toLowerCase();
-
-                return (
-                    (searchName === '' || cardName.includes(searchName)) &&
-                    (searchSetCode === '' || cardSetCode.includes(searchSetCode)) &&
-                    (searchRarity === '' || cardRarity.includes(searchRarity)) &&
-                    (searchMemo === '' || cardMemo.includes(searchMemo))
+                return ( (searchForm.search_name.value === '' || String(card.data['名前']||'').toLowerCase().includes(searchForm.search_name.value.toLowerCase()))
+                      && (searchForm.search_set_code.value === '' || String(card.data['型番']||'').toLowerCase().includes(searchForm.search_set_code.value.toLowerCase()))
+                      && (searchForm.search_rarity.value === '' || String(card.data['レアリティ']||'').toLowerCase().includes(searchForm.search_rarity.value.toLowerCase()))
+                      && (searchForm.search_memo.value === '' || String(card.data['備考']||'').toLowerCase().includes(searchForm.search_memo.value.toLowerCase()))
                 );
             });
             renderTable(filteredCards);
@@ -441,7 +428,7 @@
                 else if (format === 'csv') importedCards = parseCsv(text);
                 if (!Array.isArray(importedCards)) throw new Error('Invalid file format');
 
-                if (!confirm(`${importedCards.length}枚のカードをインポートしますか？\n(重複するカードは枚数が加算されます)`)) return; 
+                if (!confirm(`${importedCards.length}枚のカードをインポートしますか？\n(重複するカードは枚数が加算されます)`)) return;
                 
                 showLoading(true);
                 const batch = writeBatch(db);
@@ -458,11 +445,7 @@
                 await loadCollectionFromFirestore();
                 showLoading(false);
                 alert('インポートが完了しました。');
-            } catch (err) {
-                showLoading(false);
-                alert(`インポート中にエラーが発生しました: ${err.message}`);
-                console.error(err);
-            }
+            } catch (err) { showLoading(false); alert(`インポート中にエラーが発生しました: ${err.message}`); console.error(err); }
         };
 
         document.getElementById('import-json-btn').addEventListener('click', () => importFileInput.click());
@@ -501,27 +484,16 @@
         document.getElementById('how-to-use-btn').addEventListener('click', () => howToUseModal.show());
         document.getElementById('settings-btn').addEventListener('click', () => settingsModal.show());
 
-        const nav = document.querySelector('.navbar');
-
         darkModeToggle.addEventListener('change', (e) => {
             const theme = e.target.checked ? 'dark' : 'light';
             document.documentElement.setAttribute('data-bs-theme', theme);
             localStorage.setItem('theme', theme);
-            applyTheme();
         });
 
         const applyTheme = () => {
             const savedTheme = localStorage.getItem('theme') || 'light';
             document.documentElement.setAttribute('data-bs-theme', savedTheme);
             darkModeToggle.checked = savedTheme === 'dark';
-
-            if (savedTheme === 'dark') {
-                nav.classList.remove('navbar-light', 'bg-light');
-                nav.classList.add('navbar-dark', 'bg-dark');
-            } else {
-                nav.classList.remove('navbar-dark', 'bg-dark');
-                nav.classList.add('navbar-light', 'bg-light');
-            }
         };
         applyTheme(); // Apply theme on initial load
 
@@ -539,10 +511,10 @@
                 snapshot.docs.forEach(doc => batch.delete(doc.ref));
                 await batch.commit();
 
-                // 2. Delete the user account and automatically log out
+                // 2. Delete the user account
                 await deleteUser(currentUser);
-                await signOut(auth); // Explicitly sign out after deleting user
-                alert('アカウントが正常に削除されました。');
+                await signOut(auth);
+                alert('正常に削除されました。');
                 settingsModal.hide();
             } catch (error) {
                 showLoading(false);
@@ -569,7 +541,7 @@
                 const parser = new DOMParser();
                 const doc = parser.parseFromString(text, 'text/html');
                 const cardName = doc.querySelector('#card_image_1')?.alt || '';
-                if (!cardName) throw new Error("カード名が見つかりません。");
+                if (!cardName) throw new Error("カード名が見つかりません。サイトの構造が変更された可能性があります。");
                 document.getElementById('name').value = cardName;
                 const setCodes = Array.from(doc.querySelectorAll('div.card_number')).map(div => div.textContent.trim());
                 const rarities = Array.from(doc.querySelectorAll('div.rarity p')).map(p => p.textContent.trim());
