@@ -23,6 +23,41 @@
         }
         .set-choice-btn { cursor: pointer; }
         #main-app { display: none; } /* Hide app until logged in */
+        
+        /* Tag display optimization */
+        .tag-cell {
+            max-width: 150px;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+        .tag-cell:hover {
+            white-space: normal;
+            word-wrap: break-word;
+        }
+        
+        /* Mobile responsive styles */
+        @media (max-width: 768px) {
+            .navbar-brand { font-size: 1rem; }
+            .navbar-text { display: none !important; }
+            .btn-group-mobile { 
+                display: flex;
+                flex-direction: column;
+                gap: 0.5rem;
+            }
+            .table { font-size: 0.875rem; }
+            .btn-sm { padding: 0.25rem 0.5rem; font-size: 0.75rem; }
+            .modal-dialog { margin: 0.5rem; }
+            .nav-tabs .nav-link { padding: 0.5rem 0.75rem; font-size: 0.875rem; }
+            .dropdown-menu { font-size: 0.875rem; }
+        }
+        
+        @media (max-width: 576px) {
+            .container-fluid { padding: 0.5rem; }
+            .card-body { padding: 1rem; }
+            .table-responsive { max-height: 400px; }
+            .navbar-toggler { padding: 0.25rem 0.5rem; }
+        }
     </style>
 </head>
 <body>
@@ -103,7 +138,7 @@
                 <div class="ms-3">
                     <h6><i class="bi bi-search"></i> 方法1：公式DBから検索</h6>
                     <ol>
-                        <li>「カード名で検索」欄にカード名を入力</li>
+                        <li>「カード名で検索」欄にカード名を入力（例：「カメリア」）</li>
                         <li>「検索」ボタンをクリック</li>
                         <li>検索結果から目的のカードを選択</li>
                         <li>カード情報が自動で入力されます</li>
@@ -179,6 +214,10 @@
                     <input class="form-check-input" type="checkbox" role="switch" id="dark-mode-toggle">
                     <label class="form-check-label" for="dark-mode-toggle">ダークモード</label>
                 </div>
+                <div class="form-check form-switch mb-3">
+                    <input class="form-check-input" type="checkbox" role="switch" id="hide-email-toggle">
+                    <label class="form-check-label" for="hide-email-toggle">メールアドレスを非表示</label>
+                </div>
                 <hr>
                 <h6>アカウント削除</h6>
                 <p class="text-muted small">この操作は元に戻せません。アカウントに紐づく全てのカードデータが完全に削除されます。</p>
@@ -218,23 +257,43 @@
         <nav class="navbar navbar-expand-lg navbar-light bg-light mb-4" data-bs-theme="light">
             <div class="container-fluid">
                 <span class="navbar-brand"><i class="bi bi-layers-fill"></i> カード管理</span>
-                <div class="d-flex align-items-center">
-                    <button class="btn btn-outline-info me-2" id="how-to-use-btn"><i class="bi bi-question-circle"></i> 使い方</button>
-                    <div class="dropdown me-2">
-                        <button class="btn btn-secondary dropdown-toggle" type="button" data-bs-toggle="dropdown"><i class="bi bi-database"></i> データ管理</button>
-                        <ul class="dropdown-menu dropdown-menu-end">
-                            <li><button class="dropdown-item" id="import-json-btn">JSONからインポート</button></li>
-                            <li><button class="dropdown-item" id="import-csv-btn">CSVからインポート</button></li>
-                            <li><hr class="dropdown-divider"></li>
-                            <li><button class="dropdown-item" id="export-json-btn">JSON形式でエクスポート</button></li>
-                            <li><button class="dropdown-item" id="export-csv-btn">CSV形式でエクスポート</button></li>
-                        </ul>
-                        <input type="file" id="import-file-input" accept=".json,.csv" style="display: none;">
+                <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarContent">
+                    <span class="navbar-toggler-icon"></span>
+                </button>
+                <div class="collapse navbar-collapse" id="navbarContent">
+                    <div class="navbar-nav ms-auto d-flex flex-row flex-wrap gap-2 mt-2 mt-lg-0">
+                        <button class="btn btn-outline-info btn-sm" id="how-to-use-btn">
+                            <i class="bi bi-question-circle"></i>
+                            <span class="d-none d-sm-inline"> 使い方</span>
+                        </button>
+                        <div class="dropdown">
+                            <button class="btn btn-outline-secondary btn-sm dropdown-toggle" type="button" data-bs-toggle="dropdown">
+                                <i class="bi bi-database"></i>
+                                <span class="d-none d-sm-inline"> データ管理</span>
+                            </button>
+                            <ul class="dropdown-menu dropdown-menu-end">
+                                <li><button class="dropdown-item" id="import-json-btn">JSONからインポート</button></li>
+                                <li><button class="dropdown-item" id="import-csv-btn">CSVからインポート</button></li>
+                                <li><hr class="dropdown-divider"></li>
+                                <li><button class="dropdown-item" id="export-json-btn">JSON形式でエクスポート</button></li>
+                                <li><button class="dropdown-item" id="export-csv-btn">CSV形式でエクスポート</button></li>
+                            </ul>
+                            <input type="file" id="import-file-input" accept=".json,.csv" style="display: none;">
+                        </div>
+                        <button class="btn btn-outline-secondary btn-sm" id="tag-management-btn">
+                            <i class="bi bi-tags"></i>
+                            <span class="d-none d-sm-inline"> タグ</span>
+                        </button>
+                        <button class="btn btn-outline-secondary btn-sm" id="settings-btn">
+                            <i class="bi bi-gear"></i>
+                            <span class="d-none d-sm-inline"> 設定</span>
+                        </button>
+                        <span class="navbar-text d-none d-md-inline mx-2" id="user-email"></span>
+                        <button id="logout-btn" class="btn btn-danger btn-sm">
+                            <i class="bi bi-box-arrow-right"></i>
+                            <span class="d-none d-sm-inline"> ログアウト</span>
+                        </button>
                     </div>
-                    <button class="btn btn-outline-secondary me-2" id="tag-management-btn"><i class="bi bi-tags"></i> タグ管理</button>
-                    <button class="btn btn-outline-secondary me-3" id="settings-btn"><i class="bi bi-gear"></i> 設定</button>
-                    <span class="navbar-text me-3" id="user-email"></span>
-                    <button id="logout-btn" class="btn btn-danger"><i class="bi bi-box-arrow-right"></i> ログアウト</button>
                 </div>
             </div>
         </nav>
@@ -330,10 +389,10 @@
                                         <tr>
                                             <th scope="col" data-sort="名前" class="sortable">名前 <i class="bi bi-arrow-down-up"></i></th>
                                             <th scope="col" data-sort="型番" class="sortable">型番 <i class="bi bi-arrow-down-up"></i></th>
-                                            <th scope="col" data-sort="レアリティ" class="sortable">レアリティ <i class="bi bi-arrow-down-up"></i></th>
-                                            <th scope="col" data-sort="枚数" class="sortable">枚数 <i class="bi bi-arrow-down-up"></i></th>
-                                            <th scope="col" data-sort="tags">タグ</th>
-                                            <th scope="col">操作</th>
+                                            <th scope="col" data-sort="レアリティ" class="sortable d-none d-md-table-cell">レアリティ <i class="bi bi-arrow-down-up"></i></th>
+                                            <th scope="col" data-sort="枚数" class="sortable" style="width: 60px;">枚数 <i class="bi bi-arrow-down-up"></i></th>
+                                            <th scope="col" data-sort="tags" class="d-none d-sm-table-cell">タグ</th>
+                                            <th scope="col" style="width: 100px;">操作</th>
                                         </tr>
                                     </thead>
                                     <tbody id="card-table-body"></tbody>
@@ -403,9 +462,21 @@
         const searchForm = document.getElementById('search-form');
         const importFileInput = document.getElementById('import-file-input');
         const darkModeToggle = document.getElementById('dark-mode-toggle');
+        const hideEmailToggle = document.getElementById('hide-email-toggle');
 
         // --- Utility & UI Functions ---
         const showLoading = (show) => { loadingOverlay.style.display = show ? 'flex' : 'none'; };
+        
+        // XSS対策用のHTMLエスケープ関数
+        const escapeHtml = (str) => {
+            if (str == null) return '';
+            return String(str)
+                .replace(/&/g, '&amp;')
+                .replace(/</g, '&lt;')
+                .replace(/>/g, '&gt;')
+                .replace(/"/g, '&quot;')
+                .replace(/'/g, '&#039;');
+        };
         
         const getCurrentCollection = () => {
             return currentListType === 'collection' ? cardCollection : wishlistCollection;
@@ -444,16 +515,17 @@
             } else {
                 paginatedItems.forEach(card => {
                     const tr = document.createElement('tr');
+                    const tags = (card.data.tags || []).map(tag => escapeHtml(tag)).join(', ');
                     tr.innerHTML = `
-                        <td>${card.data['名前'] || ''}</td>
-                        <td>${card.data['型番'] || ''}</td>
-                        <td>${card.data['レアリティ'] || ''}</td>
-                        <td>${card.data['枚数'] || ''}</td>
-                        <td>${(card.data.tags || []).join(', ')}</td>
+                        <td>${escapeHtml(card.data['名前'])}</td>
+                        <td>${escapeHtml(card.data['型番'])}</td>
+                        <td class="d-none d-md-table-cell">${escapeHtml(card.data['レアリティ'])}</td>
+                        <td>${escapeHtml(card.data['枚数'])}</td>
+                        <td class="tag-cell d-none d-sm-table-cell" title="${escapeHtml(tags)}">${tags}</td>
                         <td>
-                            <button class="btn btn-primary btn-sm edit-btn" data-id="${card.id}"><i class="bi bi-pencil"></i></button>
-                            ${currentListType === 'wishlist' ? `<button class="btn btn-success btn-sm move-to-collection-btn" data-id="${card.id}" title="所持カードへ移動"><i class="bi bi-check-circle"></i></button>` : ''}
-                            <button class="btn btn-danger btn-sm delete-btn" data-id="${card.id}"><i class="bi bi-trash"></i></button>
+                            <button class="btn btn-primary btn-sm edit-btn" data-id="${escapeHtml(card.id)}"><i class="bi bi-pencil"></i></button>
+                            ${currentListType === 'wishlist' ? `<button class="btn btn-success btn-sm move-to-collection-btn" data-id="${escapeHtml(card.id)}" title="所持カードへ移動"><i class="bi bi-check-circle"></i></button>` : ''}
+                            <button class="btn btn-danger btn-sm delete-btn" data-id="${escapeHtml(card.id)}"><i class="bi bi-trash"></i></button>
                         </td>
                     `;
                     cardTableBody.appendChild(tr);
@@ -497,7 +569,7 @@
 
         const renderSelectedTags = (containerId, tags) => {
             const container = document.getElementById(containerId);
-            container.innerHTML = tags.map(tag => `<span class="badge bg-secondary me-1">${tag}</span>`).join(' ');
+            container.innerHTML = tags.map(tag => `<span class="badge bg-secondary me-1">${escapeHtml(tag)}</span>`).join(' ');
         };
 
         window.toggleTag = (tagName, isEdit) => {
@@ -589,8 +661,8 @@
                 const div = document.createElement('div');
                 div.className = 'd-flex justify-content-between align-items-center mb-2';
                 div.innerHTML = `
-                    <span>${tag.name}</span>
-                    <button class="btn btn-outline-danger btn-sm delete-tag-btn" data-id="${tag.id}" data-name="${tag.name}">削除</button>
+                    <span>${escapeHtml(tag.name)}</span>
+                    <button class="btn btn-outline-danger btn-sm delete-tag-btn" data-id="${escapeHtml(tag.id)}" data-name="${escapeHtml(tag.name)}">削除</button>
                 `;
                 container.appendChild(div);
             });
@@ -640,7 +712,7 @@
             if (e.target.classList.contains('delete-tag-btn')) {
                 const tagId = e.target.dataset.id;
                 const tagName = e.target.dataset.name;
-                if (!confirm(`タグ「${tagName}」を削除しますか？
+                if (!confirm(`タグ「${escapeHtml(tagName)}」を削除しますか？
 このタグは全てのカードからも削除されます。`)) return;
 
                 const tagsCollRef = getTagsCollectionRef();
@@ -682,7 +754,8 @@
         // --- Main Auth Logic ---
         const handleUserLogin = (user) => {
             currentUser = user;
-            userEmailSpan.textContent = user.email;
+            const hideEmail = localStorage.getItem('hideEmail') === 'true';
+            userEmailSpan.textContent = hideEmail ? '' : escapeHtml(user.email);
             mainApp.style.display = 'block';
             appLoader.style.display = 'none';
             authModal.hide();
@@ -966,49 +1039,134 @@
         };
 
         const handleImport = async (text, format) => {
-            let importedCards;
+            let importedData;
             try {
-                if (format === 'json') importedCards = JSON.parse(text);
-                else if (format === 'csv') importedCards = parseCsv(text);
-                if (!Array.isArray(importedCards)) throw new Error('Invalid file format');
+                if (format === 'json') {
+                    const parsed = JSON.parse(text);
+                    // Check if it's the new format with collection and wishlist
+                    if (parsed.collection && parsed.wishlist) {
+                        importedData = parsed;
+                    } else if (Array.isArray(parsed)) {
+                        // Old format - treat as collection only
+                        importedData = { collection: parsed, wishlist: [] };
+                    } else {
+                        throw new Error('Invalid JSON format');
+                    }
+                } else if (format === 'csv') {
+                    const cards = parseCsv(text);
+                    // Check if CSV has list type column
+                    const hasListType = cards.length > 0 && cards[0].リスト種別;
+                    if (hasListType) {
+                        importedData = {
+                            collection: cards.filter(c => c.リスト種別 === '所持カード'),
+                            wishlist: cards.filter(c => c.リスト種別 === 'ウィッシュリスト')
+                        };
+                        // Remove the list type column from the data
+                        [...importedData.collection, ...importedData.wishlist].forEach(c => delete c.リスト種別);
+                    } else {
+                        // Old format - treat as collection only
+                        importedData = { collection: cards, wishlist: [] };
+                    }
+                }
 
-                if (!confirm(`${importedCards.length}枚のカードをインポートしますか？\n(重複するカードは枚数が加算されます)`)) return;
+                const totalCards = importedData.collection.length + importedData.wishlist.length;
+                if (!confirm(`インポート内容:\n所持カード: ${importedData.collection.length}枚\nウィッシュリスト: ${importedData.wishlist.length}枚\n合計: ${totalCards}枚\n\nインポートしますか？\n(重複するカードは枚数が加算されます)`)) return;
                 
                 showLoading(true);
-                const collRef = getCollectionRef();
 
-                if (collRef) { // Firebaseモード
-                    const batch = writeBatch(db);
-                    for (const card of importedCards) {
-                        const q = query(collRef, where("名前", "==", card.名前), where("型番", "==", card.型番), where("レアリティ", "==", card.レアリティ));
-                        const existingDocs = await getDocs(q);
-                        if (existingDocs.empty) {
-                            batch.set(doc(collRef), card);
-                        } else {
-                            batch.update(existingDocs.docs[0].ref, { 枚数: increment(card.枚数 || 1) });
+                // Import collection
+                if (importedData.collection.length > 0) {
+                    const collRef = getCollectionRef('collection');
+                    if (collRef) { // Firebaseモード
+                        const batch = writeBatch(db);
+                        for (const card of importedData.collection) {
+                            // Parse tags if they're in semicolon format
+                            if (card.タグ && typeof card.タグ === 'string') {
+                                card.tags = card.タグ.split(';').filter(t => t.trim());
+                                delete card.タグ;
+                            }
+                            const q = query(collRef, where("名前", "==", card.名前), where("型番", "==", card.型番), where("レアリティ", "==", card.レアリティ));
+                            const existingDocs = await getDocs(q);
+                            if (existingDocs.empty) {
+                                batch.set(doc(collRef), card);
+                            } else {
+                                batch.update(existingDocs.docs[0].ref, { 枚数: increment(card.枚数 || 1) });
+                            }
+                        }
+                        await batch.commit();
+                    } else { // ローカルモード
+                        for (const card of importedData.collection) {
+                            if (card.タグ && typeof card.タグ === 'string') {
+                                card.tags = card.タグ.split(';').filter(t => t.trim());
+                                delete card.タグ;
+                            }
+                            const existingCard = cardCollection.find(c => 
+                                c.data.名前 === card.名前 && 
+                                c.data.型番 === card.型番 && 
+                                c.data.レアリティ === card.レアリティ
+                            );
+                            if (existingCard) {
+                                existingCard.data.枚数 += (card.枚数 || 1);
+                            } else {
+                                cardCollection.push({ id: `local_${Date.now()}_${Math.random()}`, data: card });
+                            }
                         }
                     }
-                    await batch.commit();
-                    await loadCollectionFromFirestore(); // ここで applySearchAndFilter が呼ばれる
-                } else { // ローカルモード
-                    for (const card of importedCards) {
-                        const existingCard = cardCollection.find(c => 
-                            c.data.名前 === card.名前 && 
-                            c.data.型番 === card.型番 && 
-                            c.data.レアリティ === card.レアリティ
-                        );
-                        if (existingCard) {
-                            existingCard.data.枚数 += (card.枚数 || 1);
-                        } else {
-                            cardCollection.push({ id: `local_${Date.now()}`, data: card });
+                }
+
+                // Import wishlist
+                if (importedData.wishlist.length > 0) {
+                    const wishRef = getCollectionRef('wishlist');
+                    if (wishRef) { // Firebaseモード
+                        const batch = writeBatch(db);
+                        for (const card of importedData.wishlist) {
+                            if (card.タグ && typeof card.タグ === 'string') {
+                                card.tags = card.タグ.split(';').filter(t => t.trim());
+                                delete card.タグ;
+                            }
+                            const q = query(wishRef, where("名前", "==", card.名前), where("型番", "==", card.型番), where("レアリティ", "==", card.レアリティ));
+                            const existingDocs = await getDocs(q);
+                            if (existingDocs.empty) {
+                                batch.set(doc(wishRef), card);
+                            } else {
+                                batch.update(existingDocs.docs[0].ref, { 枚数: increment(card.枚数 || 1) });
+                            }
+                        }
+                        await batch.commit();
+                    } else { // ローカルモード
+                        for (const card of importedData.wishlist) {
+                            if (card.タグ && typeof card.タグ === 'string') {
+                                card.tags = card.タグ.split(';').filter(t => t.trim());
+                                delete card.タグ;
+                            }
+                            const existingCard = wishlistCollection.find(c => 
+                                c.data.名前 === card.名前 && 
+                                c.data.型番 === card.型番 && 
+                                c.data.レアリティ === card.レアリティ
+                            );
+                            if (existingCard) {
+                                existingCard.data.枚数 += (card.枚数 || 1);
+                            } else {
+                                wishlistCollection.push({ id: `local_${Date.now()}_${Math.random()}`, data: card });
+                            }
                         }
                     }
+                }
+
+                // Reload if using Firebase, otherwise just refresh display
+                if (getCollectionRef()) {
+                    await loadCollectionFromFirestore();
+                } else {
                     applySearchAndFilter();
                 }
 
                 showLoading(false);
                 alert('インポートが完了しました。');
-            } catch (err) { showLoading(false); alert(`インポート中にエラーが発生しました: ${err.message}`); console.error(err); }
+            } catch (err) { 
+                showLoading(false); 
+                alert(`インポート中にエラーが発生しました: ${err.message}`); 
+                console.error(err); 
+            }
         };
 
         document.getElementById('import-json-btn').addEventListener('click', () => importFileInput.click());
@@ -1063,6 +1221,17 @@
             localStorage.setItem('theme', theme);
             applyTheme(); // 設定変更時に即時反映
         });
+        
+        hideEmailToggle.addEventListener('change', (e) => {
+            const hideEmail = e.target.checked;
+            localStorage.setItem('hideEmail', hideEmail);
+            if (currentUser) {
+                userEmailSpan.textContent = hideEmail ? '' : currentUser.email;
+            }
+        });
+        
+        // Initialize hide email setting
+        hideEmailToggle.checked = localStorage.getItem('hideEmail') === 'true';
 
         const applyTheme = () => {
             const savedTheme = localStorage.getItem('theme') || 'light';
