@@ -76,21 +76,97 @@
 
     <!-- How to Use Modal -->
     <div class="modal fade" id="how-to-use-modal" tabindex="-1">
-        <div class="modal-dialog modal-lg"><div class="modal-content">
+        <div class="modal-dialog modal-xl"><div class="modal-content">
             <div class="modal-header"><h5 class="modal-title">使い方ガイド</h5><button type="button" class="btn-close" data-bs-dismiss="modal"></button></div>
             <div class="modal-body">
-                <h6><i class="bi bi-person-plus"></i> アカウント</h6>
-                <p>最初にメールアドレスとパスワードで新規登録します。登録したアカウントでログインすると、あなたのカードデータがクラウドに保存され、どの端末からでもアクセスできます。</p>
-                <h6><i class="bi bi-search"></i> カードのURL読込</h6>
-                <p>データベースのカードページのURLをコピーし、入力欄に貼り付けて「読込」ボタンを押すと、カード名や型番、レアリティの候補が自動で入力されます。</p>
-                <h6><i class="bi bi-card-list"></i> カードの登録と管理</h6>
-                <p>読み込んだ情報や手入力した情報を確認し、「カードを追加」ボタンでコレクションに登録します。一覧の「編集」ボタンで枚数や備考を、「削除」ボタンでカードそのものを削除できます。</p>
-                <h6><i class="bi bi-files"></i> データのインポート・エクスポート</h6>
-                <p>「データ管理」メニューから、コレクション全体のバックアップをJSON形式やCSV形式（Excelで表示可能）でダウンロードできます。また、JSON/CSVファイルからデータを一括でインポートすることも可能です。</p>
-                <h6><i class="bi bi-gear"></i> 設定</h6>
-                <p>「設定」メニューから、画面の見た目をダークモードに切り替えることができます。また、アカウントが不要になった場合は、ここからアカウントと全てのカードデータを完全に削除することができます。この操作は元に戻せないのでご注意ください。</p>
+                <div class="alert alert-info">
+                    <i class="bi bi-info-circle"></i> <strong>公式データベース</strong>：
+                    <a href="https://www.db.yugioh-card.com/yugiohdb/card_search.action" target="_blank" class="alert-link">
+                        遊戯王オフィシャルカードデータベースを開く <i class="bi bi-box-arrow-up-right"></i>
+                    </a>
+                </div>
+                
+                <h5 class="mt-4 mb-3"><i class="bi bi-1-circle-fill text-primary"></i> 初めての方へ</h5>
+                <div class="ms-3">
+                    <h6><i class="bi bi-person-plus"></i> アカウント作成</h6>
+                    <ol>
+                        <li>メールアドレスとパスワードを入力して「新規登録」をクリック</li>
+                        <li>アカウントが作成され、自動でログインされます</li>
+                        <li>データはクラウドに保存され、どの端末からでもアクセス可能です</li>
+                    </ol>
+                    <div class="alert alert-warning">
+                        <small><i class="bi bi-exclamation-triangle"></i> ローカルモード：メールアドレスに「local」と入力すると、データをクラウドに保存せずブラウザ内でのみ管理できます</small>
+                    </div>
+                </div>
+                
+                <h5 class="mt-4 mb-3"><i class="bi bi-2-circle-fill text-primary"></i> カードの登録方法</h5>
+                <div class="ms-3">
+                    <h6><i class="bi bi-search"></i> 方法1：公式DBから検索</h6>
+                    <ol>
+                        <li>「カード名で検索」欄にカード名を入力</li>
+                        <li>「検索」ボタンをクリック</li>
+                        <li>検索結果から目的のカードを選択</li>
+                        <li>カード情報が自動で入力されます</li>
+                    </ol>
+                    
+                    <h6><i class="bi bi-link-45deg"></i> 方法2：URLから読み込み</h6>
+                    <ol>
+                        <li>公式DBでカードを検索し、カード詳細ページを開く</li>
+                        <li>URLをコピー（例：https://www.db.yugioh-card.com/yugiohdb/card_search.action?ope=2&cid=...)</li>
+                        <li>「公式DB URL」欄に貼り付けて「読込」をクリック</li>
+                        <li>複数の型番がある場合は、表示されるボタンから選択</li>
+                    </ol>
+                    
+                    <h6><i class="bi bi-pencil"></i> 方法3：手動入力</h6>
+                    <p>カード名、型番、レアリティを直接入力して登録できます</p>
+                </div>
+                
+                <h5 class="mt-4 mb-3"><i class="bi bi-3-circle-fill text-primary"></i> リストの種類</h5>
+                <div class="ms-3">
+                    <h6><i class="bi bi-collection"></i> 所持カード</h6>
+                    <p>実際に所持しているカードを管理します。枚数を記録し、コレクション全体を把握できます。</p>
+                    
+                    <h6><i class="bi bi-star"></i> ウィッシュリスト</h6>
+                    <p>今後入手したいカードを管理します。入手したら「所持カードへ移動」ボタン（<i class="bi bi-check-circle"></i>）で簡単に移動できます。</p>
+                </div>
+                
+                <h5 class="mt-4 mb-3"><i class="bi bi-4-circle-fill text-primary"></i> タグ機能</h5>
+                <div class="ms-3">
+                    <p>カードにタグを付けて分類できます。例：「デッキ用」「トレード用」「コレクション」など</p>
+                    <ul>
+                        <li>「タグ管理」ボタンからタグを作成（カンマ区切りで複数同時作成可）</li>
+                        <li>カード登録・編集時にタグを選択</li>
+                        <li>タグで検索して絞り込み可能</li>
+                    </ul>
+                </div>
+                
+                <h5 class="mt-4 mb-3"><i class="bi bi-5-circle-fill text-primary"></i> データ管理</h5>
+                <div class="ms-3">
+                    <h6><i class="bi bi-download"></i> エクスポート</h6>
+                    <ul>
+                        <li><strong>JSON形式</strong>：全データを完全にバックアップ</li>
+                        <li><strong>CSV形式</strong>：Excelで編集・閲覧可能</li>
+                    </ul>
+                    
+                    <h6><i class="bi bi-upload"></i> インポート</h6>
+                    <p>JSON/CSVファイルからデータを一括登録。重複するカードは枚数が加算されます。</p>
+                </div>
+                
+                <h5 class="mt-4 mb-3"><i class="bi bi-6-circle-fill text-primary"></i> その他の機能</h5>
+                <div class="ms-3">
+                    <h6><i class="bi bi-sort-down"></i> 並び替え・検索</h6>
+                    <p>カード一覧のヘッダーをクリックで並び替え、検索フォームで絞り込みができます。</p>
+                    
+                    <h6><i class="bi bi-moon-stars"></i> ダークモード</h6>
+                    <p>「設定」から画面をダークモードに切り替えられます。</p>
+                </div>
             </div>
-            <div class="modal-footer"><button type="button" class="btn btn-secondary" data-bs-dismiss="modal">閉じる</button></div>
+            <div class="modal-footer">
+                <a href="https://www.db.yugioh-card.com/yugiohdb/card_search.action" target="_blank" class="btn btn-primary">
+                    <i class="bi bi-box-arrow-up-right"></i> 公式DBを開く
+                </a>
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">閉じる</button>
+            </div>
         </div></div>
     </div>
 
@@ -172,6 +248,14 @@
                         <div class="card-header">カード登録</div>
                         <div class="card-body">
                             <form id="add-form">
+                                <div class="mb-3">
+                                    <label for="card-search" class="form-label">カード名で検索</label>
+                                    <div class="input-group">
+                                        <input type="text" class="form-control" id="card-search" placeholder="カード名を入力">
+                                        <button class="btn btn-success" type="button" id="search-db-btn">検索</button>
+                                    </div>
+                                    <div id="search-results" class="mt-2"></div>
+                                </div>
                                 <div class="mb-3">
                                     <label for="url" class="form-label">公式DB URL</label>
                                     <div class="input-group">
@@ -1028,6 +1112,108 @@
             }
         });
 
+        // --- Search from Official DB ---
+        document.getElementById('search-db-btn').addEventListener('click', async () => {
+            const searchKeyword = document.getElementById('card-search').value.trim();
+            if (!searchKeyword) {
+                alert('検索キーワードを入力してください。');
+                return;
+            }
+            
+            showLoading(true);
+            const searchUrl = `https://www.db.yugioh-card.com/yugiohdb/card_search.action?ope=1&sess=1&rp=10&mode=&sort=1&keyword=${encodeURIComponent(searchKeyword)}&stype=1&ctype=&othercon=2&starfr=&starto=&pscalefr=&pscaleto=&linkmarkerfr=&linkmarkerto=&link_m=2&atkfr=&atkto=&deffr=&defto=&releaseDStart=1&releaseMStart=1&releaseYStart=1999&releaseDEnd=&releaseMEnd=&releaseYEnd=`;
+            const proxyUrl = `https://corsproxy.io/?${encodeURIComponent(searchUrl)}`;
+            
+            try {
+                const response = await fetch(proxyUrl);
+                if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
+                const text = await response.text();
+                const parser = new DOMParser();
+                const doc = parser.parseFromString(text, 'text/html');
+                
+                // Extract card names and URLs
+                const cardNames = Array.from(doc.querySelectorAll('span.card_name')).map(span => span.textContent.trim());
+                const cardLinks = Array.from(doc.querySelectorAll('input.link_value')).map(input => input.value);
+                
+                const resultsDiv = document.getElementById('search-results');
+                resultsDiv.innerHTML = '';
+                
+                if (cardNames.length === 0) {
+                    resultsDiv.innerHTML = '<div class="alert alert-warning">検索結果が見つかりませんでした。</div>';
+                } else {
+                    resultsDiv.innerHTML = '<div class="alert alert-info mb-2">検索結果：' + cardNames.length + '件</div>';
+                    const listGroup = document.createElement('div');
+                    listGroup.className = 'list-group';
+                    
+                    cardNames.forEach((name, index) => {
+                        if (cardLinks[index]) {
+                            const button = document.createElement('button');
+                            button.type = 'button';
+                            button.className = 'list-group-item list-group-item-action';
+                            button.textContent = name;
+                            button.dataset.cardUrl = 'https://www.db.yugioh-card.com' + cardLinks[index];
+                            button.onclick = () => fetchCardDetails(button.dataset.cardUrl);
+                            listGroup.appendChild(button);
+                        }
+                    });
+                    
+                    resultsDiv.appendChild(listGroup);
+                }
+            } catch (err) {
+                alert(`検索エラー: ${err.message}`);
+                console.error(err);
+            } finally {
+                showLoading(false);
+            }
+        });
+        
+        const fetchCardDetails = async (cardUrl) => {
+            const url = cardUrl + (cardUrl.includes('request_locale=ja') ? '' : (cardUrl.includes('?') ? '&request_locale=ja' : '?request_locale=ja'));
+            const proxyUrl = `https://corsproxy.io/?${encodeURIComponent(url)}`;
+            showLoading(true);
+            
+            try {
+                const response = await fetch(proxyUrl);
+                if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
+                const text = await response.text();
+                const parser = new DOMParser();
+                const doc = parser.parseFromString(text, 'text/html');
+                
+                const cardName = doc.querySelector('#card_image_1')?.alt || '';
+                if (!cardName) throw new Error("カード名が見つかりません。");
+                
+                document.getElementById('name').value = cardName;
+                const setCodes = Array.from(doc.querySelectorAll('div.card_number')).map(div => div.textContent.trim());
+                const rarities = Array.from(doc.querySelectorAll('div.rarity p')).map(p => p.textContent.trim());
+                
+                const choicesEl = document.getElementById('set-rarity-choices');
+                choicesEl.innerHTML = '';
+                
+                if (setCodes.length > 0) {
+                    setCodes.map((code, i) => ({ set_code: code, rarity: rarities[i] || '' })).forEach(data => {
+                        const btn = document.createElement('button');
+                        btn.type = 'button';
+                        btn.className = 'btn btn-outline-primary btn-sm me-1 mb-1 set-choice-btn';
+                        btn.dataset.setCode = data.set_code;
+                        btn.dataset.rarity = data.rarity;
+                        btn.textContent = `${data.set_code} (${data.rarity})`;
+                        choicesEl.appendChild(btn);
+                    });
+                } else {
+                    choicesEl.textContent = '収録情報が見つかりません。';
+                }
+                
+                // Clear search results
+                document.getElementById('search-results').innerHTML = '';
+                document.getElementById('card-search').value = '';
+            } catch (err) {
+                alert(`エラー: ${err.message}`);
+                console.error(err);
+            } finally {
+                showLoading(false);
+            }
+        };
+        
         // --- Fetch from URL ---
         document.getElementById('fetch-btn').addEventListener('click', async () => {
             let url = document.getElementById('url').value;
@@ -1042,7 +1228,7 @@
                 const parser = new DOMParser();
                 const doc = parser.parseFromString(text, 'text/html');
                 const cardName = doc.querySelector('#card_image_1')?.alt || '';
-                if (!cardName) throw new Error("カード名が見つかりません。サイトの構造が変更された可能性があります。");
+                if (!cardName) throw new Error("カード名が見つかりません。");
                 document.getElementById('name').value = cardName;
                 const setCodes = Array.from(doc.querySelectorAll('div.card_number')).map(div => div.textContent.trim());
                 const rarities = Array.from(doc.querySelectorAll('div.rarity p')).map(p => p.textContent.trim());
