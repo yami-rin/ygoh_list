@@ -110,7 +110,7 @@
 
     <!-- Main App -->
     <div id="main-app">
-        <<nav class="navbar navbar-expand-lg navbar-light bg-light mb-4" data-bs-theme="light">
+        <nav class="navbar navbar-expand-lg navbar-light bg-light mb-4" data-bs-theme="light">
             <div class="container-fluid">
                 <span class="navbar-brand"><i class="bi bi-layers-fill"></i> カード管理</span>
                 <div class="d-flex align-items-center">
@@ -262,7 +262,12 @@
         };
 
         // --- Firestore Functions ---
-        const getCollectionRef = () => collection(db, "users", currentUser.uid, "cards");
+        const getCollectionRef = () => {
+            if (currentUser && currentUser.uid !== 'local_user') {
+                return collection(db, "users", currentUser.uid, "cards");
+            }
+            return null;
+        };
 
         const loadCollectionFromFirestore = async () => {
             if (!currentUser) return;
@@ -274,28 +279,56 @@
         };
 
         // --- Main Auth Logic ---
-        onAuthStateChanged(auth, (user) => {
-            if (user) {
-                currentUser = user;
-                userEmailSpan.textContent = user.email;
-                mainApp.style.display = 'block';
-                appLoader.style.display = 'none';
-                authModal.hide();
+        const handleUserLogin = (user) => {
+            currentUser = user;
+            userEmailSpan.textContent = user.email;
+            mainApp.style.display = 'block';
+            appLoader.style.display = 'none';
+            authModal.hide();
+            // ローカルモードではFirestoreから読み込まない
+            if (user.uid !== 'local_user') {
                 loadCollectionFromFirestore();
             } else {
-                currentUser = null;
-                mainApp.style.display = 'none';
-                appLoader.style.display = 'none';
-                authModal.show();
                 cardCollection = [];
-                renderTable([]);
+                renderTable(cardCollection);
+                document.getElementById('delete-account-btn').style.display = 'none';
+            }
+            applyTheme();
+        };
+
+        const handleUserLogout = () => {
+            currentUser = null;
+            mainApp.style.display = 'none';
+            appLoader.style.display = 'none';
+            authModal.show();
+            cardCollection = [];
+            renderTable([]);
+            document.getElementById('delete-account-btn').style.display = 'block';
+        };
+
+        onAuthStateChanged(auth, (user) => {
+            if (user) {
+                handleUserLogin(user);
+            } else {
+                handleUserLogout();
             }
         });
 
         // --- Event Listeners ---
         document.getElementById('login-btn').addEventListener('click', async () => {
+            const email = document.getElementById('email').value;
+            const password = document.getElementById('password').value;
+
+            if (email === 'local') {
+                // ローカルモード用のダミーユーザーを設定
+                currentUser = { uid: 'local_user', email: 'local@example.com' };
+                // onAuthStateChangedを手動で呼び出すか、同等の処理を行う
+                handleUserLogin(currentUser);
+                return;
+            }
+
             try {
-                await signInWithEmailAndPassword(auth, document.getElementById('email').value, document.getElementById('password').value);
+                await signInWithEmailAndPassword(auth, email, password);
                 authError.style.display = 'none';
             } catch (error) { authError.textContent = `ログインエラー: ${error.message}`; authError.style.display = 'block'; }
         });
@@ -307,7 +340,13 @@
             } catch (error) { authError.textContent = `新規登録エラー: ${error.message}`; authError.style.display = 'block'; }
         });
 
-        logoutBtn.addEventListener('click', () => signOut(auth));
+        logoutBtn.addEventListener('click', () => {
+            if (currentUser && currentUser.uid === 'local_user') {
+                window.location.reload();
+            } else {
+                signOut(auth);
+            }
+        });
 
         addForm.addEventListener('submit', async (e) => {
             e.preventDefault();
@@ -321,21 +360,35 @@
                 '備考': formData.get('memo')
             };
 
-            const q = query(getCollectionRef(), 
-                where("名前", "==", newCard.名前),
-                where("型番", "==", newCard.型番),
-                where("レアリティ", "==", newCard.レアリティ)
-            );
-            const existingDocs = await getDocs(q);
+            const collRef = getCollectionRef();
+            if (collRef) { // Firebaseモード
+                const q = query(collRef, 
+                    where("名前", "==", newCard.名前),
+                    where("型番", "==", newCard.型番),
+                    where("レアリティ", "==", newCard.レアリティ)
+                );
+                const existingDocs = await getDocs(q);
 
-            if (existingDocs.empty) {
-                const docRef = await addDoc(getCollectionRef(), newCard);
-                cardCollection.push({ id: docRef.id, data: newCard });
-            } else {
-                const existingDoc = existingDocs.docs[0];
-                await updateDoc(existingDoc.ref, { 枚数: increment(newCard.枚数) });
-                const localCard = cardCollection.find(c => c.id === existingDoc.id);
-                if(localCard) localCard.data.枚数 += newCard.枚数;
+                if (existingDocs.empty) {
+                    const docRef = await addDoc(collRef, newCard);
+                    cardCollection.push({ id: docRef.id, data: newCard });
+                } else {
+                    const existingDoc = existingDocs.docs[0];
+                    await updateDoc(existingDoc.ref, { 枚数: increment(newCard.枚数) });
+                    const localCard = cardCollection.find(c => c.id === existingDoc.id);
+                    if(localCard) localCard.data.枚数 += newCard.枚数;
+                }
+            } else { // ローカルモード
+                const existingCard = cardCollection.find(c => 
+                    c.data.名前 === newCard.名前 && 
+                    c.data.型番 === newCard.型番 && 
+                    c.data.レアリティ === newCard.レアリティ
+                );
+                if (existingCard) {
+                    existingCard.data.枚数 += newCard.枚数;
+                } else {
+                    cardCollection.push({ id: `local_${Date.now()}`, data: newCard });
+                }
             }
             
             renderTable(cardCollection);
@@ -352,7 +405,10 @@
                 const cardId = target.dataset.id;
                 const cardName = target.closest('tr').querySelector('td').textContent;
                 if (confirm(`「${cardName}」をコレクションから削除しますか？`)) {
-                    deleteDoc(doc(getCollectionRef(), cardId));
+                    const collRef = getCollectionRef();
+                    if (collRef) { // Firebaseモード
+                        deleteDoc(doc(collRef, cardId));
+                    }
                     cardCollection = cardCollection.filter(c => c.id !== cardId);
                     renderTable(cardCollection);
                 }
@@ -377,7 +433,12 @@
                 枚数: parseInt(document.getElementById('edit-quantity').value, 10),
                 備考: document.getElementById('edit-memo').value
             };
-            await updateDoc(doc(getCollectionRef(), cardId), updatedData);
+
+            const collRef = getCollectionRef();
+            if (collRef) { // Firebaseモード
+                await updateDoc(doc(collRef, cardId), updatedData);
+            }
+
             const localCard = cardCollection.find(c => c.id === cardId);
             if(localCard) {
                 localCard.data.枚数 = updatedData.枚数;
@@ -431,18 +492,37 @@
                 if (!confirm(`${importedCards.length}枚のカードをインポートしますか？\n(重複するカードは枚数が加算されます)`)) return;
                 
                 showLoading(true);
-                const batch = writeBatch(db);
-                for (const card of importedCards) {
-                    const q = query(getCollectionRef(), where("名前", "==", card.名前), where("型番", "==", card.型番), where("レアリティ", "==", card.レアリティ));
-                    const existingDocs = await getDocs(q);
-                    if (existingDocs.empty) {
-                        batch.set(doc(getCollectionRef()), card);
-                    } else {
-                        batch.update(existingDocs.docs[0].ref, { 枚数: increment(card.枚数 || 1) });
+                const collRef = getCollectionRef();
+
+                if (collRef) { // Firebaseモード
+                    const batch = writeBatch(db);
+                    for (const card of importedCards) {
+                        const q = query(collRef, where("名前", "==", card.名前), where("型番", "==", card.型番), where("レアリティ", "==", card.レアリティ));
+                        const existingDocs = await getDocs(q);
+                        if (existingDocs.empty) {
+                            batch.set(doc(collRef), card);
+                        } else {
+                            batch.update(existingDocs.docs[0].ref, { 枚数: increment(card.枚数 || 1) });
+                        }
                     }
+                    await batch.commit();
+                    await loadCollectionFromFirestore();
+                } else { // ローカルモード
+                    for (const card of importedCards) {
+                        const existingCard = cardCollection.find(c => 
+                            c.data.名前 === card.名前 && 
+                            c.data.型番 === card.型番 && 
+                            c.data.レアリティ === card.レアリティ
+                        );
+                        if (existingCard) {
+                            existingCard.data.枚数 += (card.枚数 || 1);
+                        } else {
+                            cardCollection.push({ id: `local_${Date.now()}`, data: card });
+                        }
+                    }
+                    renderTable(cardCollection);
                 }
-                await batch.commit();
-                await loadCollectionFromFirestore();
+
                 showLoading(false);
                 alert('インポートが完了しました。');
             } catch (err) { showLoading(false); alert(`インポート中にエラーが発生しました: ${err.message}`); console.error(err); }
@@ -488,12 +568,24 @@
             const theme = e.target.checked ? 'dark' : 'light';
             document.documentElement.setAttribute('data-bs-theme', theme);
             localStorage.setItem('theme', theme);
+            applyTheme(); // 設定変更時に即時反映
         });
 
         const applyTheme = () => {
             const savedTheme = localStorage.getItem('theme') || 'light';
             document.documentElement.setAttribute('data-bs-theme', savedTheme);
             darkModeToggle.checked = savedTheme === 'dark';
+
+            const nav = document.querySelector('.navbar');
+            if (nav) {
+                if (savedTheme === 'dark') {
+                    nav.classList.remove('navbar-light', 'bg-light');
+                    nav.classList.add('navbar-dark', 'bg-dark');
+                } else {
+                    nav.classList.remove('navbar-dark', 'bg-dark');
+                    nav.classList.add('navbar-light', 'bg-light');
+                }
+            }
         };
         applyTheme(); // Apply theme on initial load
 
