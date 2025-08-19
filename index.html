@@ -42,6 +42,20 @@
             min-width: fit-content;
         }
         
+        /* Ensure navbar buttons have consistent height */
+        .navbar-nav .btn,
+        .navbar-nav .dropdown > .btn {
+            height: 38px;
+            display: inline-flex;
+            align-items: center;
+        }
+        
+        /* Pagination controls responsive */
+        #pagination-controls,
+        #pagination-controls-bottom {
+            font-size: 0.9rem;
+        }
+        
         /* Mobile responsive styles */
         @media (max-width: 768px) {
             .navbar-brand { font-size: 1rem; }
@@ -81,6 +95,24 @@
                 font-size: 0.8rem;
             }
             .navbar-toggler { padding: 0.25rem 0.5rem; }
+            
+            /* Pagination controls on small screens */
+            #pagination-controls span,
+            #pagination-controls-bottom span {
+                font-size: 0.8rem;
+            }
+            #pagination-controls .btn-group,
+            #pagination-controls-bottom .btn-group {
+                flex-wrap: nowrap;
+            }
+            .d-flex.justify-content-between.align-items-center.mb-2 {
+                flex-direction: column;
+                gap: 0.5rem;
+            }
+            .d-flex.justify-content-between.align-items-center.mb-2 > * {
+                width: 100%;
+                justify-content: center;
+            }
         }
     </style>
 </head>
@@ -619,12 +651,12 @@
         const updatePaginationControls = () => {
             const totalPages = Math.ceil(filteredCardCollection.length / itemsPerPage);
             const controlsHtml = `
-                <div class="d-flex flex-wrap align-items-center gap-2">
-                    <span>${totalPages > 0 ? currentPage : 0} / ${totalPages} ページ</span>
-                    <span>(${filteredCardCollection.length} 件)</span>
-                    <div class="btn-group" role="group">
-                        <button class="btn btn-outline-secondary btn-sm" ${currentPage <= 1 ? 'disabled' : ''} onclick="changePage(${currentPage - 1})">前へ</button>
-                        <button class="btn btn-outline-secondary btn-sm" ${currentPage >= totalPages ? 'disabled' : ''} onclick="changePage(${currentPage + 1})">次へ</button>
+                <div class="d-flex flex-wrap align-items-center gap-1 gap-sm-2">
+                    <span class="text-nowrap">${totalPages > 0 ? currentPage : 0}/${totalPages}ページ</span>
+                    <span class="text-nowrap">(${filteredCardCollection.length}件)</span>
+                    <div class="btn-group btn-group-sm" role="group">
+                        <button class="btn btn-outline-secondary" ${currentPage <= 1 ? 'disabled' : ''} onclick="changePage(${currentPage - 1})">前へ</button>
+                        <button class="btn btn-outline-secondary" ${currentPage >= totalPages ? 'disabled' : ''} onclick="changePage(${currentPage + 1})">次へ</button>
                     </div>
                 </div>
             `;
@@ -1658,7 +1690,7 @@
                 const parser = new DOMParser();
                 const doc = parser.parseFromString(text, 'text/html');
                 const cardName = doc.querySelector('#card_image_1')?.alt || '';
-                if (!cardName) throw new Error("カード名が見つかりません。");
+                if (!cardName) throw new Error("カード名が見つかりません。サイトの構造が変更された可能性があります。");
                 document.getElementById('name').value = cardName;
                 const setCodes = Array.from(doc.querySelectorAll('div.card_number')).map(div => div.textContent.trim());
                 const rarities = Array.from(doc.querySelectorAll('div.rarity p')).map(p => p.textContent.trim());
