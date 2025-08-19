@@ -36,6 +36,21 @@
             word-wrap: break-word;
         }
         
+        /* Draggable tags styles */
+        .draggable-tag {
+            cursor: move;
+            transition: background-color 0.2s;
+        }
+        .draggable-tag:hover {
+            background-color: rgba(0, 123, 255, 0.1);
+        }
+        .draggable-tag.dragging {
+            opacity: 0.5;
+        }
+        .drag-over {
+            border-top: 2px solid #007bff;
+        }
+        
         /* Table header responsive styles */
         .table th {
             white-space: nowrap;
@@ -313,7 +328,8 @@
                     </form>
                     <hr>
                     <h6>登録済みタグ一覧</h6>
-                    <div id="existing-tags-list"></div>
+                    <small class="text-muted">※ドラッグ＆ドロップで順番を変更できます</small>
+                    <div id="existing-tags-list" class="mt-2"></div>
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">閉じる</button>
@@ -417,8 +433,8 @@
                                 </div>
                                 <div class="mb-3"><label for="name" class="form-label">名前</label><input type="text" class="form-control" id="name" name="name" required></div>
                                 <div class="mb-3">
-                                    <label for="set_code" class="form-label">型番</label>
-                                    <input type="text" class="form-control" id="set_code" name="set_code" required>
+                                    <label for="set_code" class="form-label">型番 <small class="text-muted">(任意)</small></label>
+                                    <input type="text" class="form-control" id="set_code" name="set_code">
                                     <div id="set-rarity-choices" class="mt-2"></div>
                                 </div>
                                 <div class="mb-3"><label for="rarity" class="form-label">レアリティ</label><input type="text" class="form-control" id="rarity" name="rarity"></div>
@@ -798,13 +814,34 @@
             const tagsCollRef = getTagsCollectionRef();
             if (tagsCollRef) {
                 const snapshot = await getDocs(query(tagsCollRef));
-                allTags = snapshot.docs.map(doc => ({ id: doc.id, name: doc.data().name })).sort((a, b) => a.name.localeCompare(b.name));
+                allTags = snapshot.docs.map(doc => ({ 
+                    id: doc.id, 
+                    name: doc.data().name,
+                    order: doc.data().order || 999
+                }));
             } else {
-                // ローカルモード用のダミータグ
-                if (allTags.length === 0) {
-                    allTags = [{ id: 'local1', name: 'デッキパーツ' }, { id: 'local2', name: 'コレクション' }];
+                // ローカルモード用 - localStorageから順番を読み込む
+                const savedTagsOrder = localStorage.getItem('tagsOrder');
+                if (savedTagsOrder) {
+                    try {
+                        allTags = JSON.parse(savedTagsOrder);
+                    } catch (e) {
+                        if (allTags.length === 0) {
+                            allTags = [
+                                { id: 'local1', name: 'デッキパーツ', order: 0 }, 
+                                { id: 'local2', name: 'コレクション', order: 1 }
+                            ];
+                        }
+                    }
+                } else if (allTags.length === 0) {
+                    allTags = [
+                        { id: 'local1', name: 'デッキパーツ', order: 0 }, 
+                        { id: 'local2', name: 'コレクション', order: 1 }
+                    ];
                 }
             }
+            // Sort by order
+            allTags.sort((a, b) => (a.order || 999) - (b.order || 999));
             renderTagManagementList();
             // 現在開いているフォームのタグ選択肢も更新
             if (addForm.offsetParent !== null) renderTagChoices('tag-choices-container', currentCardTags);
@@ -814,15 +851,105 @@
         const renderTagManagementList = () => {
             const container = document.getElementById('existing-tags-list');
             container.innerHTML = '';
-            allTags.forEach(tag => {
+            allTags.forEach((tag, index) => {
                 const div = document.createElement('div');
-                div.className = 'd-flex justify-content-between align-items-center mb-2';
+                div.className = 'd-flex justify-content-between align-items-center mb-2 p-2 border rounded draggable-tag';
+                div.draggable = true;
+                div.dataset.tagId = tag.id;
+                div.dataset.tagIndex = index;
                 div.innerHTML = `
-                    <span>${escapeHtml(tag.name)}</span>
+                    <span><i class="bi bi-grip-vertical me-2"></i>${escapeHtml(tag.name)}</span>
                     <button class="btn btn-outline-danger btn-sm delete-tag-btn" data-id="${escapeHtml(tag.id)}" data-name="${escapeHtml(tag.name)}">削除</button>
                 `;
+                
+                // Drag events
+                div.addEventListener('dragstart', handleTagDragStart);
+                div.addEventListener('dragend', handleTagDragEnd);
+                div.addEventListener('dragover', handleTagDragOver);
+                div.addEventListener('drop', handleTagDrop);
+                div.addEventListener('dragenter', handleTagDragEnter);
+                div.addEventListener('dragleave', handleTagDragLeave);
+                
                 container.appendChild(div);
             });
+        };
+        
+        // Drag and Drop handlers
+        let draggedTag = null;
+        
+        const handleTagDragStart = (e) => {
+            draggedTag = e.currentTarget;
+            e.currentTarget.classList.add('dragging');
+            e.dataTransfer.effectAllowed = 'move';
+        };
+        
+        const handleTagDragEnd = (e) => {
+            e.currentTarget.classList.remove('dragging');
+            document.querySelectorAll('.draggable-tag').forEach(tag => {
+                tag.classList.remove('drag-over');
+            });
+        };
+        
+        const handleTagDragOver = (e) => {
+            if (e.preventDefault) e.preventDefault();
+            e.dataTransfer.dropEffect = 'move';
+            return false;
+        };
+        
+        const handleTagDragEnter = (e) => {
+            if (draggedTag && e.currentTarget !== draggedTag) {
+                e.currentTarget.classList.add('drag-over');
+            }
+        };
+        
+        const handleTagDragLeave = (e) => {
+            e.currentTarget.classList.remove('drag-over');
+        };
+        
+        const handleTagDrop = async (e) => {
+            if (e.stopPropagation) e.stopPropagation();
+            e.currentTarget.classList.remove('drag-over');
+            
+            if (draggedTag && e.currentTarget !== draggedTag) {
+                const draggedIndex = parseInt(draggedTag.dataset.tagIndex);
+                const targetIndex = parseInt(e.currentTarget.dataset.tagIndex);
+                
+                // Reorder tags
+                const draggedItem = allTags[draggedIndex];
+                allTags.splice(draggedIndex, 1);
+                allTags.splice(targetIndex, 0, draggedItem);
+                
+                // Update order values
+                allTags.forEach((tag, index) => {
+                    tag.order = index;
+                });
+                
+                // Save order
+                await saveTagsOrder();
+                
+                // Re-render
+                renderTagManagementList();
+                renderTagChoices('tag-choices-container', currentCardTags);
+                renderTagChoices('edit-tag-choices-container', currentCardTags);
+            }
+            
+            return false;
+        };
+        
+        const saveTagsOrder = async () => {
+            const tagsCollRef = getTagsCollectionRef();
+            if (tagsCollRef) {
+                // Firebase mode - update order in database
+                const batch = writeBatch(db);
+                allTags.forEach(tag => {
+                    const tagDoc = doc(tagsCollRef, tag.id);
+                    batch.update(tagDoc, { order: tag.order });
+                });
+                await batch.commit();
+            } else {
+                // Local mode - save to localStorage
+                localStorage.setItem('tagsOrder', JSON.stringify(allTags));
+            }
         };
 
         document.getElementById('add-tag-form').addEventListener('submit', async (e) => {
@@ -846,10 +973,11 @@
                 if (allTags.some(tag => tag.name === newTagName)) {
                     duplicateTags.push(newTagName);
                 } else {
+                    const newOrder = allTags.length;
                     if (tagsCollRef) {
-                        await addDoc(tagsCollRef, { name: newTagName });
+                        await addDoc(tagsCollRef, { name: newTagName, order: newOrder });
                     } else {
-                        allTags.push({ id: `local_${Date.now()}_${Math.random()}`, name: newTagName });
+                        allTags.push({ id: `local_${Date.now()}_${Math.random()}`, name: newTagName, order: newOrder });
                     }
                     addedTags.push(newTagName);
                 }
@@ -1226,11 +1354,15 @@
                 // Wrap database operations with timeout
                 const dbOperation = async () => {
                     if (collRef) { // Firebaseモード
-                        const q = query(collRef, 
-                            where("名前", "==", newCard.名前),
-                            where("型番", "==", newCard.型番),
-                            where("レアリティ", "==", newCard.レアリティ)
-                        );
+                        // Build query based on available fields
+                        const constraints = [where("名前", "==", newCard.名前)];
+                        if (newCard.型番) {
+                            constraints.push(where("型番", "==", newCard.型番));
+                        }
+                        if (newCard.レアリティ) {
+                            constraints.push(where("レアリティ", "==", newCard.レアリティ));
+                        }
+                        const q = query(collRef, ...constraints);
                         const existingDocs = await getDocs(q);
 
                         if (existingDocs.empty) {
@@ -1243,11 +1375,12 @@
                             if(localCard) localCard.data.枚数 += newCard.枚数;
                         }
                     } else { // ローカルモード
-                        const existingCard = targetCollection.find(c => 
-                            c.data.名前 === newCard.名前 && 
-                            c.data.型番 === newCard.型番 && 
-                            c.data.レアリティ === newCard.レアリティ
-                        );
+                        const existingCard = targetCollection.find(c => {
+                            if (c.data.名前 !== newCard.名前) return false;
+                            if (newCard.型番 && c.data.型番 !== newCard.型番) return false;
+                            if (newCard.レアリティ && c.data.レアリティ !== newCard.レアリティ) return false;
+                            return true;
+                        });
                         if (existingCard) {
                             existingCard.data.枚数 += newCard.枚数;
                         } else {
@@ -1812,6 +1945,57 @@
             lastSearchKeyword = searchKeyword;
             updateSearchHistoryButton();
             
+            // First check if we have matching cards in our collection
+            const matchingCards = cardCollection.filter(card => 
+                card.data['名前'] && card.data['名前'].toLowerCase().includes(searchKeyword.toLowerCase())
+            );
+            
+            if (matchingCards.length > 0) {
+                // Show local cards first
+                const resultsDiv = document.getElementById('search-results');
+                resultsDiv.innerHTML = '';
+                
+                const localHeader = document.createElement('div');
+                localHeader.className = 'alert alert-success mb-2';
+                localHeader.innerHTML = `<strong>所持カードから見つかりました (${matchingCards.length}件)</strong>`;
+                resultsDiv.appendChild(localHeader);
+                
+                const localListGroup = document.createElement('div');
+                localListGroup.className = 'list-group mb-3';
+                
+                matchingCards.forEach(card => {
+                    const button = document.createElement('button');
+                    button.type = 'button';
+                    button.className = 'list-group-item list-group-item-action d-flex justify-content-between align-items-center';
+                    button.innerHTML = `
+                        <div>
+                            <strong>${escapeHtml(card.data['名前'])}</strong>
+                            ${card.data['型番'] ? `<small class="text-muted ms-2">${escapeHtml(card.data['型番'])}</small>` : ''}
+                            ${card.data['レアリティ'] ? `<span class="badge bg-secondary ms-2">${escapeHtml(card.data['レアリティ'])}</span>` : ''}
+                        </div>
+                        <span class="badge bg-primary">${card.data['枚数']}枚</span>
+                    `;
+                    button.onclick = () => {
+                        // Fill form with existing card data
+                        document.getElementById('name').value = card.data['名前'];
+                        document.getElementById('set_code').value = card.data['型番'] || '';
+                        document.getElementById('rarity').value = card.data['レアリティ'] || '';
+                        document.getElementById('quantity').value = 1;
+                        // Clear search results
+                        resultsDiv.innerHTML = '';
+                    };
+                    localListGroup.appendChild(button);
+                });
+                
+                resultsDiv.appendChild(localListGroup);
+                
+                // Add separator
+                const separator = document.createElement('div');
+                separator.className = 'alert alert-info mb-2';
+                separator.innerHTML = '公式DBからも検索しています...';
+                resultsDiv.appendChild(separator);
+            }
+            
             showLoading(true);
             const searchUrl = `https://www.db.yugioh-card.com/yugiohdb/card_search.action?ope=1&sess=1&rp=100&mode=&sort=1&keyword=${encodeURIComponent(searchKeyword)}&stype=1&ctype=&othercon=2&starfr=&starto=&pscaleto=&linkmarkerfr=&linkmarkerto=&link_m=2&atkfr=&atkto=&deffr=&defto=&releaseDStart=1&releaseMStart=1&releaseYStart=1999&releaseDEnd=&releaseMEnd=&releaseYEnd=`;
             const proxyUrl = `https://corsproxy.io/?${encodeURIComponent(searchUrl)}`;
@@ -1839,8 +2023,30 @@
                 });
                 searchResultsData.currentPage = 1;
                 
-                // Render paginated results
-                renderSearchResults();
+                // Render paginated results - append to existing local results if any
+                if (matchingCards.length > 0) {
+                    // Remove the "searching" message
+                    const resultsDiv = document.getElementById('search-results');
+                    const lastChild = resultsDiv.lastElementChild;
+                    if (lastChild && lastChild.classList.contains('alert-info') && lastChild.innerHTML.includes('検索しています')) {
+                        resultsDiv.removeChild(lastChild);
+                    }
+                    
+                    // Add official DB results header
+                    const dbHeader = document.createElement('div');
+                    dbHeader.className = 'alert alert-info mb-2';
+                    dbHeader.innerHTML = `<strong>公式DBの検索結果</strong>`;
+                    resultsDiv.appendChild(dbHeader);
+                    
+                    // Create a container for paginated results
+                    const dbResultsContainer = document.createElement('div');
+                    dbResultsContainer.id = 'db-search-results';
+                    resultsDiv.appendChild(dbResultsContainer);
+                    
+                    renderSearchResultsToContainer('db-search-results');
+                } else {
+                    renderSearchResults();
+                }
             } catch (err) {
                 alert(`検索エラー: ${err.message}`);
                 console.error(err);
@@ -1848,6 +2054,49 @@
                 showLoading(false);
             }
         });
+        
+        const renderSearchResultsToContainer = (containerId) => {
+            const container = document.getElementById(containerId);
+            const startIndex = (searchResultsData.currentPage - 1) * searchResultsData.itemsPerPage;
+            const endIndex = startIndex + searchResultsData.itemsPerPage;
+            const paginatedCards = searchResultsData.cards.slice(startIndex, endIndex);
+            const totalPages = Math.ceil(searchResultsData.cards.length / searchResultsData.itemsPerPage);
+            
+            container.innerHTML = '';
+            
+            if (searchResultsData.cards.length === 0) {
+                container.innerHTML = '<div class="alert alert-warning">公式DBに該当するカードが見つかりませんでした。</div>';
+                return;
+            }
+            
+            // Pagination info
+            const paginationInfo = document.createElement('div');
+            paginationInfo.className = 'd-flex justify-content-between align-items-center mb-2';
+            paginationInfo.innerHTML = `
+                <span>${searchResultsData.cards.length}件 (${searchResultsData.currentPage}/${totalPages}ページ)</span>
+                <div class="btn-group btn-group-sm" role="group">
+                    <button class="btn btn-outline-primary" ${searchResultsData.currentPage <= 1 ? 'disabled' : ''} onclick="changeSearchPage(${searchResultsData.currentPage - 1})">前へ</button>
+                    <button class="btn btn-outline-primary" ${searchResultsData.currentPage >= totalPages ? 'disabled' : ''} onclick="changeSearchPage(${searchResultsData.currentPage + 1})">次へ</button>
+                </div>
+            `;
+            container.appendChild(paginationInfo);
+            
+            // Results list
+            const listGroup = document.createElement('div');
+            listGroup.className = 'list-group';
+            
+            paginatedCards.forEach(card => {
+                const button = document.createElement('button');
+                button.type = 'button';
+                button.className = 'list-group-item list-group-item-action';
+                button.textContent = card.name;
+                button.dataset.cardUrl = card.url;
+                button.onclick = () => fetchCardDetails(button.dataset.cardUrl);
+                listGroup.appendChild(button);
+            });
+            
+            container.appendChild(listGroup);
+        };
         
         const fetchCardDetails = async (cardUrl) => {
             const url = cardUrl + (cardUrl.includes('request_locale=ja') ? '' : (cardUrl.includes('?') ? '&request_locale=ja' : '?request_locale=ja'));
@@ -1910,7 +2159,7 @@
                 const parser = new DOMParser();
                 const doc = parser.parseFromString(text, 'text/html');
                 const cardName = doc.querySelector('#card_image_1')?.alt || '';
-                if (!cardName) throw new Error("カード名が見つかりません。");
+                if (!cardName) throw new Error("カード名が見つかりません。サイトの構造が変更された可能性があります。");
                 document.getElementById('name').value = cardName;
                 const setCodes = Array.from(doc.querySelectorAll('div.card_number')).map(div => div.textContent.trim());
                 const rarities = Array.from(doc.querySelectorAll('div.rarity p')).map(p => p.textContent.trim());
