@@ -280,6 +280,14 @@
                     <input class="form-check-input" type="checkbox" role="switch" id="hide-email-toggle">
                     <label class="form-check-label" for="hide-email-toggle">メールアドレスを非表示</label>
                 </div>
+                <div class="form-check form-switch mb-3">
+                    <input class="form-check-input" type="checkbox" role="switch" id="show-search-history-toggle">
+                    <label class="form-check-label" for="show-search-history-toggle">前回の検索履歴ボタンを表示</label>
+                </div>
+                <div class="form-check form-switch mb-3">
+                    <input class="form-check-input" type="checkbox" role="switch" id="show-registration-history-toggle">
+                    <label class="form-check-label" for="show-registration-history-toggle">前回の登録履歴ボタンを表示</label>
+                </div>
                 <hr>
                 <h6>アカウント削除</h6>
                 <p class="text-muted small">この操作は元に戻せません。アカウントに紐づく全てのカードデータが完全に削除されます。</p>
@@ -394,6 +402,9 @@
                                     <div class="input-group">
                                         <input type="text" class="form-control" id="card-search" placeholder="カード名を入力">
                                         <button class="btn btn-success" type="button" id="search-db-btn">検索</button>
+                                        <button class="btn btn-outline-secondary" type="button" id="prev-search-btn" style="display: none;" title="前回の検索">
+                                            <i class="bi bi-clock-history"></i>
+                                        </button>
                                     </div>
                                     <div id="search-results" class="mt-2"></div>
                                 </div>
@@ -426,7 +437,12 @@
                                     <div id="card-tags-container" class="mb-2"></div>
                                     <div id="tag-choices-container"></div>
                                 </div>
-                                <button type="submit" class="btn btn-success w-100">カードを追加</button>
+                                <div class="d-flex gap-2">
+                                    <button type="submit" class="btn btn-success flex-grow-1">カードを追加</button>
+                                    <button type="button" class="btn btn-outline-secondary" id="prev-registration-btn" style="display: none;" title="前回の登録内容">
+                                        <i class="bi bi-arrow-counterclockwise"></i>
+                                    </button>
+                                </div>
                             </form>
                         </div>
                     </div>
@@ -570,9 +586,34 @@
         const importFileInput = document.getElementById('import-file-input');
         const darkModeToggle = document.getElementById('dark-mode-toggle');
         const hideEmailToggle = document.getElementById('hide-email-toggle');
+        const showSearchHistoryToggle = document.getElementById('show-search-history-toggle');
+        const showRegistrationHistoryToggle = document.getElementById('show-registration-history-toggle');
 
         // --- Utility & UI Functions ---
         const showLoading = (show) => { loadingOverlay.style.display = show ? 'flex' : 'none'; };
+        
+        // History button visibility functions
+        const updateSearchHistoryButton = () => {
+            const btn = document.getElementById('prev-search-btn');
+            const showHistory = localStorage.getItem('showSearchHistory') === 'true';
+            if (showHistory && lastSearchKeyword) {
+                btn.style.display = 'inline-block';
+                btn.title = `前回の検索: ${lastSearchKeyword}`;
+            } else {
+                btn.style.display = 'none';
+            }
+        };
+        
+        const updateRegistrationHistoryButton = () => {
+            const btn = document.getElementById('prev-registration-btn');
+            const showHistory = localStorage.getItem('showRegistrationHistory') === 'true';
+            if (showHistory && lastRegistrationData) {
+                btn.style.display = 'inline-block';
+                btn.title = `前回の登録: ${lastRegistrationData.name}`;
+            } else {
+                btn.style.display = 'none';
+            }
+        };
         
         // XSS対策用のHTMLエスケープ関数
         const escapeHtml = (str) => {
@@ -1150,6 +1191,17 @@
                 '枚数': parseInt(formData.get('quantity'), 10),
                 'tags': [...currentCardTags] // タグを追加
             };
+            
+            // Save registration data
+            lastRegistrationData = {
+                name: newCard['名前'],
+                setCode: newCard['型番'],
+                rarity: newCard['レアリティ'],
+                quantity: newCard['枚数'],
+                tags: [...currentCardTags],
+                addType: addType
+            };
+            updateRegistrationHistoryButton();
 
             const targetCollection = addType === 'collection' ? cardCollection : wishlistCollection;
             const collRef = getCollectionRef(addType);
@@ -1525,6 +1577,56 @@
         
         // Initialize hide email setting
         hideEmailToggle.checked = localStorage.getItem('hideEmail') === 'true';
+        
+        // Initialize history settings
+        showSearchHistoryToggle.checked = localStorage.getItem('showSearchHistory') === 'true';
+        showRegistrationHistoryToggle.checked = localStorage.getItem('showRegistrationHistory') === 'true';
+        
+        showSearchHistoryToggle.addEventListener('change', (e) => {
+            localStorage.setItem('showSearchHistory', e.target.checked);
+            updateSearchHistoryButton();
+        });
+        
+        showRegistrationHistoryToggle.addEventListener('change', (e) => {
+            localStorage.setItem('showRegistrationHistory', e.target.checked);
+            updateRegistrationHistoryButton();
+        });
+        
+        // Previous search button
+        document.getElementById('prev-search-btn').addEventListener('click', () => {
+            if (lastSearchKeyword) {
+                document.getElementById('card-search').value = lastSearchKeyword;
+                document.getElementById('search-db-btn').click();
+            }
+        });
+        
+        // Previous registration button
+        document.getElementById('prev-registration-btn').addEventListener('click', () => {
+            if (lastRegistrationData) {
+                document.getElementById('name').value = lastRegistrationData.name;
+                document.getElementById('set_code').value = lastRegistrationData.setCode;
+                document.getElementById('rarity').value = lastRegistrationData.rarity;
+                document.getElementById('quantity').value = lastRegistrationData.quantity;
+                
+                // Restore tags
+                currentCardTags = [...lastRegistrationData.tags];
+                renderTagChoices('tag-choices-container', currentCardTags);
+                renderSelectedTags('card-tags-container', currentCardTags);
+                
+                // Restore add type
+                if (lastRegistrationData.addType === 'collection') {
+                    document.getElementById('add-to-collection').checked = true;
+                } else {
+                    document.getElementById('add-to-wishlist').checked = true;
+                }
+            }
+        });
+        
+        // Initialize history buttons on page load
+        setTimeout(() => {
+            updateSearchHistoryButton();
+            updateRegistrationHistoryButton();
+        }, 100);
 
         const applyTheme = () => {
             const savedTheme = localStorage.getItem('theme') || 'light';
@@ -1576,6 +1678,8 @@
 
         // --- Search from Official DB ---
         let searchResultsData = { cards: [], currentPage: 1, itemsPerPage: 10 };
+        let lastSearchKeyword = '';
+        let lastRegistrationData = null;
         
         const renderSearchResults = () => {
             const resultsDiv = document.getElementById('search-results');
@@ -1645,8 +1749,12 @@
                 return;
             }
             
+            // Save search keyword
+            lastSearchKeyword = searchKeyword;
+            updateSearchHistoryButton();
+            
             showLoading(true);
-            const searchUrl = `https://www.db.yugioh-card.com/yugiohdb/card_search.action?ope=1&sess=1&rp=100&mode=&sort=1&keyword=${encodeURIComponent(searchKeyword)}&stype=1&ctype=&othercon=2&starfr=&starto=&pscalefr=&pscaleto=&linkmarkerfr=&linkmarkerto=&link_m=2&atkfr=&atkto=&deffr=&defto=&releaseDStart=1&releaseMStart=1&releaseYStart=1999&releaseDEnd=&releaseMEnd=&releaseYEnd=`;
+            const searchUrl = `https://www.db.yugioh-card.com/yugiohdb/card_search.action?ope=1&sess=1&rp=100&mode=&sort=1&keyword=${encodeURIComponent(searchKeyword)}&stype=1&ctype=&othercon=2&starfr=&starto=&pscaleto=&linkmarkerfr=&linkmarkerto=&link_m=2&atkfr=&atkto=&deffr=&defto=&releaseDStart=1&releaseMStart=1&releaseYStart=1999&releaseDEnd=&releaseMEnd=&releaseYEnd=`;
             const proxyUrl = `https://corsproxy.io/?${encodeURIComponent(searchUrl)}`;
             
             try {
@@ -1743,7 +1851,7 @@
                 const parser = new DOMParser();
                 const doc = parser.parseFromString(text, 'text/html');
                 const cardName = doc.querySelector('#card_image_1')?.alt || '';
-                if (!cardName) throw new Error("カード名が見つかりません。");
+                if (!cardName) throw new Error("カード名が見つかりません。サイトの構造が変更された可能性があります。");
                 document.getElementById('name').value = cardName;
                 const setCodes = Array.from(doc.querySelectorAll('div.card_number')).map(div => div.textContent.trim());
                 const rarities = Array.from(doc.querySelectorAll('div.rarity p')).map(p => p.textContent.trim());
