@@ -582,19 +582,6 @@
         setPersistence(auth, browserLocalPersistence).catch((error) => {
             console.warn("Error setting persistence:", error);
         });
-        
-        // Firestore接続テスト
-        console.log('Testing Firestore connection...');
-        getDocs(collection(db, 'battleRecords')).then(() => {
-            console.log('Firestore connection successful');
-        }).catch((error) => {
-            console.error('Firestore connection failed:', error);
-            if (error.code === 'permission-denied') {
-                console.error('Permission denied. Please check Firestore security rules.');
-            } else if (error.code === 'unavailable') {
-                console.error('Firestore is unavailable. Check your internet connection.');
-            }
-        });
 
         // Global state
         let currentUser = null;
@@ -615,19 +602,28 @@
             setupEventListeners();
             loadSettings();
             
-            // Check authentication
-            onAuthStateChanged(auth, (user) => {
-                if (user) {
-                    handleUserLogin(user);
-                } else if (isLocalMode || localStorage.getItem('isLocalMode') === 'true') {
-                    handleLocalMode();
-                } else {
+            // Check for local mode first for faster load
+            if (localStorage.getItem('isLocalMode') === 'true') {
+                handleLocalMode();
+                return;
+            }
+            
+            // Check authentication with timeout
+            let authResolved = false;
+            const authTimeout = setTimeout(() => {
+                if (!authResolved) {
+                    console.warn('Auth check timeout - showing login');
                     showAuthModal();
                 }
-            }, (error) => {
-                console.error('Auth state change error:', error);
-                // エラー時はローカルモードを提案
-                if (confirm('Firebaseへの接続に問題があります。ローカルモードで続行しますか？')) {
+            }, 3000);
+            
+            onAuthStateChanged(auth, (user) => {
+                authResolved = true;
+                clearTimeout(authTimeout);
+                
+                if (user) {
+                    handleUserLogin(user);
+                } else if (isLocalMode) {
                     handleLocalMode();
                 } else {
                     showAuthModal();
@@ -740,23 +736,25 @@
             }
         }
 
-        async function handleUserLogin(user) {
+        function handleUserLogin(user) {
             currentUser = user;
             document.getElementById('user-email').textContent = user.email;
             authModal.hide();
             document.getElementById('app-loader').style.display = 'none';
             document.getElementById('main-app').style.display = 'block';
-            await loadRecords();
+            // Load records asynchronously after showing UI
+            loadRecords();
         }
 
-        async function handleLocalMode() {
+        function handleLocalMode() {
             isLocalMode = true;
             currentUser = { uid: 'local_user', email: 'ローカルモード' };
             document.getElementById('user-email').textContent = 'ローカルモード';
             authModal.hide();
             document.getElementById('app-loader').style.display = 'none';
             document.getElementById('main-app').style.display = 'block';
-            await loadRecords();
+            // Load records asynchronously after showing UI
+            loadRecords();
         }
 
         function showAuthModal() {
