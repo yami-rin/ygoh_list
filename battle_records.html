@@ -907,43 +907,12 @@
                     // データをクリーンアップ
                     const cleanedData = cleanData(recordData);
                     
-                    // デバッグ用ログ
-                    console.log('Original recordData:', JSON.stringify(recordData, null, 2));
-                    console.log('Cleaned recordData:', JSON.stringify(cleanedData, null, 2));
-                    
-                    // undefinedが残っていないか再確認
-                    const checkForUndefined = (obj, path = '') => {
-                        for (const [key, value] of Object.entries(obj)) {
-                            const currentPath = path ? `${path}.${key}` : key;
-                            if (value === undefined) {
-                                console.error(`Found undefined at: ${currentPath}`);
-                            } else if (value && typeof value === 'object' && !Array.isArray(value)) {
-                                checkForUndefined(value, currentPath);
-                            } else if (Array.isArray(value)) {
-                                value.forEach((item, index) => {
-                                    if (item === undefined) {
-                                        console.error(`Found undefined at: ${currentPath}[${index}]`);
-                                    } else if (item && typeof item === 'object') {
-                                        checkForUndefined(item, `${currentPath}[${index}]`);
-                                    }
-                                });
-                            }
-                        }
-                    };
-                    
-                    checkForUndefined(cleanedData);
-                    
                     if (recordId) {
                         cleanedData.userId = currentUser.uid;
                         await updateDoc(doc(db, 'battleRecords', recordId), cleanedData);
                     } else {
                         cleanedData.userId = currentUser.uid;
                         cleanedData.createdAt = serverTimestamp();
-                        console.log('Final data to save (with timestamp):', cleanedData);
-                        
-                        // 最終チェック
-                        checkForUndefined(cleanedData);
-                        
                         await addDoc(collection(db, 'battleRecords'), cleanedData);
                     }
                     recordModal.hide();
