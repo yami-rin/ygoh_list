@@ -7,7 +7,7 @@
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css">
     <style>
-        body{background-color:#f8f9fa}[data-bs-theme="dark"] body{background-color:#212529}.container-fluid{max-width:1400px}.card{margin-bottom:1.5rem}#loading-overlay,#app-loader{position:fixed;top:0;left:0;width:100%;height:100%;background-color:rgba(0,0,0,0.6);display:flex;justify-content:center;align-items:center;z-index:1060;color:white}#main-app{display:none}.stat-card{background:linear-gradient(135deg,#667eea 0%,#764ba2 100%);color:white;border-radius:10px;padding:1.5rem;margin-bottom:1rem;cursor:pointer;transition:transform 0.2s}.stat-card:hover{transform:scale(1.02)}.stat-card.win{background:linear-gradient(135deg,#f093fb 0%,#f5576c 100%)}.stat-card.lose{background:linear-gradient(135deg,#4facfe 0%,#00f2fe 100%)}.record-row.win{background-color:rgba(40,167,69,0.1)}.record-row.lose{background-color:rgba(220,53,69,0.1)}.record-row.draw{background-color:rgba(255,193,7,0.1)}.tournament-badge{background:linear-gradient(135deg,#667eea 0%,#764ba2 100%);color:white;padding:0.5rem 1rem;border-radius:20px;display:inline-block;margin-right:0.5rem}.round-indicator{background:#6c757d;color:white;padding:0.25rem 0.75rem;border-radius:15px;font-size:0.9rem}.autocomplete-suggestions{position:absolute;border:1px solid #ccc;background:white;max-height:200px;overflow-y:auto;z-index:1000;width:100%}.autocomplete-suggestion{padding:0.5rem;cursor:pointer}.autocomplete-suggestion:hover{background:#f0f0f0}.navbar-nav{justify-content:center;width:100%}@media(max-width:768px){.navbar-brand{font-size:1rem}.table{font-size:0.875rem}.stat-card{padding:1rem}}
+        body{background-color:#f8f9fa}[data-bs-theme="dark"] body{background-color:#212529}.container-fluid{max-width:1400px}.card{margin-bottom:1.5rem}#loading-overlay,#app-loader{position:fixed;top:0;left:0;width:100%;height:100%;background-color:rgba(0,0,0,0.6);display:flex;justify-content:center;align-items:center;z-index:1060;color:white}#main-app{display:none}.stat-card{background:linear-gradient(135deg,#667eea 0%,#764ba2 100%);color:white;border-radius:10px;padding:1.5rem;margin-bottom:1rem;cursor:pointer;transition:transform 0.2s}.stat-card:hover{transform:scale(1.02)}.stat-card.win{background:linear-gradient(135deg,#f093fb 0%,#f5576c 100%)}.stat-card.lose{background:linear-gradient(135deg,#4facfe 0%,#00f2fe 100%)}.record-row.win{background-color:rgba(40,167,69,0.1)}.record-row.lose{background-color:rgba(220,53,69,0.1)}.record-row.draw{background-color:rgba(255,193,7,0.1)}.tournament-badge{background:linear-gradient(135deg,#667eea 0%,#764ba2 100%);color:white;padding:0.5rem 1rem;border-radius:20px;display:inline-block;margin-right:0.5rem}.round-indicator{background:#6c757d;color:white;padding:0.25rem 0.75rem;border-radius:15px;font-size:0.9rem}.autocomplete-suggestions{position:absolute;border:1px solid #ccc;background:white;max-height:200px;overflow-y:auto;z-index:1000;width:100%}.autocomplete-suggestion{padding:0.5rem;cursor:pointer}.autocomplete-suggestion:hover{background:#f0f0f0}.navbar-nav .btn{display:inline-flex;align-items:center}@media(max-width:768px){.navbar-brand{font-size:1rem}.table{font-size:0.875rem}.stat-card{padding:1rem}}
     </style>
 </head>
 <body>
@@ -85,9 +85,9 @@
                         </div>
                         <div class="row">
                             <div class="col-md-6 mb-3">
-                                <label for="tournament-store" class="form-label">店舗名 <span class="text-danger">*</span></label>
+                                <label for="tournament-store" class="form-label">店舗名</label>
                                 <div style="position: relative;">
-                                    <input type="text" class="form-control" id="tournament-store" required autocomplete="off">
+                                    <input type="text" class="form-control" id="tournament-store" autocomplete="off">
                                     <div id="store-suggestions" class="autocomplete-suggestions" style="display: none;"></div>
                                 </div>
                             </div>
@@ -132,6 +132,31 @@
         </div>
     </div>
 
+    <!-- Settings Modal -->
+    <div class="modal fade" id="settings-modal" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">設定</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="form-check form-switch mb-3">
+                        <input class="form-check-input" type="checkbox" id="show-statistics-filter" checked>
+                        <label class="form-check-label" for="show-statistics-filter">
+                            統計フィルターを表示
+                        </label>
+                    </div>
+                    <hr>
+                    <p class="text-muted">その他の設定は今後追加予定です</p>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-primary" data-bs-dismiss="modal">閉じる</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <!-- Tournament Preset Modal -->
     <div class="modal fade" id="preset-modal" tabindex="-1">
         <div class="modal-dialog">
@@ -145,7 +170,6 @@
                         <label class="form-label">新規プリセット追加</label>
                         <div class="input-group">
                             <input type="text" class="form-control" id="new-preset-name" placeholder="大会名">
-                            <input type="text" class="form-control" id="new-preset-store" placeholder="店舗名">
                             <button class="btn btn-success" id="add-preset-btn">追加</button>
                         </div>
                     </div>
@@ -167,10 +191,13 @@
                     <span class="navbar-toggler-icon"></span>
                 </button>
                 <div class="collapse navbar-collapse" id="navbarContent">
-                    <div class="navbar-nav ms-auto">
+                    <div class="navbar-nav ms-auto d-flex align-items-center">
                         <a href="index.html" class="btn btn-outline-primary btn-sm me-2">
                             <i class="bi bi-layers"></i> カード管理
                         </a>
+                        <button id="settings-btn" class="btn btn-outline-secondary btn-sm me-2">
+                            <i class="bi bi-gear"></i> 設定
+                        </button>
                         <span class="navbar-text me-2" id="user-email"></span>
                         <button id="logout-btn" class="btn btn-danger btn-sm">
                             <i class="bi bi-box-arrow-right"></i> ログアウト
@@ -186,7 +213,7 @@
             </div>
 
             <!-- Statistics Cards with Filters -->
-            <div class="card mb-4">
+            <div class="card mb-4" id="statistics-filter-card" style="display: none;">
                 <div class="card-body">
                     <h5 class="card-title">統計フィルター</h5>
                     <div class="row g-2">
@@ -365,6 +392,7 @@
         const tournamentModal = new bootstrap.Modal(document.getElementById('tournament-modal'));
         const roundsModal = new bootstrap.Modal(document.getElementById('rounds-modal'));
         const presetModal = new bootstrap.Modal(document.getElementById('preset-modal'));
+        const settingsModal = new bootstrap.Modal(document.getElementById('settings-modal'));
 
         const showLoading = (show) => document.getElementById('loading-overlay').style.display = show ? 'flex' : 'none';
 
@@ -392,6 +420,7 @@
             document.getElementById('login-btn').addEventListener('click', handleLogin);
             document.getElementById('signup-btn').addEventListener('click', handleSignup);
             document.getElementById('logout-btn').addEventListener('click', handleLogout);
+            document.getElementById('settings-btn').addEventListener('click', showSettingsModal);
             document.getElementById('add-tournament-btn').addEventListener('click', () => showTournamentModal());
             document.getElementById('add-record-btn').addEventListener('click', () => showSingleRecordModal());
             document.getElementById('start-tournament-btn').addEventListener('click', startTournament);
@@ -399,6 +428,7 @@
             document.getElementById('manage-presets-btn').addEventListener('click', () => showPresetModal());
             document.getElementById('add-preset-btn').addEventListener('click', addPreset);
             document.getElementById('apply-stat-filter').addEventListener('click', applyStatisticsFilter);
+            document.getElementById('show-statistics-filter').addEventListener('change', toggleStatisticsFilter);
             
             document.getElementById('tournament-participants').addEventListener('input', updateRoundsInfo);
             document.getElementById('tournament-preset').addEventListener('change', loadPreset);
@@ -473,6 +503,7 @@
             statusBadge.textContent = 'Firebase接続OK';
             statusBadge.className = 'badge bg-success ms-2';
             
+            loadSettings();
             loadData();
         }
 
@@ -488,7 +519,24 @@
             statusBadge.textContent = 'ローカルモード';
             statusBadge.className = 'badge bg-info ms-2';
             
+            loadSettings();
             loadData();
+        }
+        
+        function loadSettings() {
+            const showFilter = localStorage.getItem('showStatisticsFilter') !== 'false';
+            document.getElementById('show-statistics-filter').checked = showFilter;
+            document.getElementById('statistics-filter-card').style.display = showFilter ? 'block' : 'none';
+        }
+        
+        function showSettingsModal() {
+            settingsModal.show();
+        }
+        
+        function toggleStatisticsFilter() {
+            const show = document.getElementById('show-statistics-filter').checked;
+            localStorage.setItem('showStatisticsFilter', show.toString());
+            document.getElementById('statistics-filter-card').style.display = show ? 'block' : 'none';
         }
 
         function showAuthModal() {
@@ -552,8 +600,8 @@
             
             presets.forEach(preset => {
                 const option = document.createElement('option');
-                option.value = JSON.stringify(preset);
-                option.textContent = `${preset.name} @ ${preset.store}`;
+                option.value = preset.name;
+                option.textContent = preset.name;
                 select.appendChild(option);
             });
         }
@@ -561,22 +609,19 @@
         function loadPreset() {
             const value = document.getElementById('tournament-preset').value;
             if (value) {
-                const preset = JSON.parse(value);
-                document.getElementById('new-tournament-name').value = preset.name;
-                document.getElementById('tournament-store').value = preset.store;
+                document.getElementById('new-tournament-name').value = value;
             }
         }
 
         async function addPreset() {
             const name = document.getElementById('new-preset-name').value;
-            const store = document.getElementById('new-preset-store').value;
             
-            if (!name || !store) {
-                alert('大会名と店舗名を入力してください');
+            if (!name) {
+                alert('大会名を入力してください');
                 return;
             }
             
-            const preset = { name, store };
+            const preset = { name };
             presets.push(preset);
             
             if (isLocalMode) {
@@ -590,7 +635,6 @@
             }
             
             document.getElementById('new-preset-name').value = '';
-            document.getElementById('new-preset-store').value = '';
             loadPresetList();
             loadPresetOptions();
         }
@@ -608,7 +652,7 @@
                 const div = document.createElement('div');
                 div.className = 'mb-2 p-2 border rounded d-flex justify-content-between align-items-center';
                 div.innerHTML = `
-                    <span>${preset.name} @ ${preset.store}</span>
+                    <span>${preset.name}</span>
                     <button class="btn btn-sm btn-danger" onclick="deletePreset(${index})">
                         <i class="bi bi-trash"></i>
                     </button>
@@ -671,7 +715,7 @@
             const store = document.getElementById('tournament-store').value;
             const deck = document.getElementById('tournament-deck').value;
             
-            if (!date || !participants || !name || !store || !deck) {
+            if (!date || !participants || !name || !deck) {
                 alert('必須項目を入力してください');
                 return;
             }
