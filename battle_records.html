@@ -1,0 +1,1212 @@
+<!doctype html>
+<html lang="ja">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>戦績管理</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css">
+    <style>
+        body { background-color: #f8f9fa; }
+        [data-bs-theme="dark"] body { background-color: #212529; }
+        .container-fluid { max-width: 1400px; }
+        .card { margin-bottom: 1.5rem; }
+        .table-responsive { max-height: 600px; overflow-y: auto; }
+        #loading-overlay, #app-loader {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background-color: rgba(0,0,0,0.6);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 1060;
+            color: white;
+        }
+        #main-app { display: none; }
+        
+        /* Stats cards */
+        .stat-card {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border-radius: 10px;
+            padding: 1.5rem;
+            margin-bottom: 1rem;
+        }
+        .stat-card.win { background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%); }
+        .stat-card.lose { background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%); }
+        .stat-card.draw { background: linear-gradient(135deg, #43e97b 0%, #38f9d7 100%); }
+        
+        /* Record row styling */
+        .record-row.win { background-color: rgba(40, 167, 69, 0.1); }
+        .record-row.lose { background-color: rgba(220, 53, 69, 0.1); }
+        .record-row.draw { background-color: rgba(255, 193, 7, 0.1); }
+        [data-bs-theme="dark"] .record-row.win { background-color: rgba(40, 167, 69, 0.2); }
+        [data-bs-theme="dark"] .record-row.lose { background-color: rgba(220, 53, 69, 0.2); }
+        [data-bs-theme="dark"] .record-row.draw { background-color: rgba(255, 193, 7, 0.2); }
+        
+        /* Result badge */
+        .result-badge {
+            font-size: 1.2rem;
+            padding: 0.5rem 1rem;
+            border-radius: 20px;
+        }
+        
+        /* Mobile responsive */
+        @media (max-width: 768px) {
+            .navbar-brand { font-size: 1rem; }
+            .navbar-text { display: none !important; }
+            .table { font-size: 0.875rem; }
+            .stat-card { padding: 1rem; }
+            .modal-dialog { margin: 0.5rem; }
+        }
+        
+        @media (max-width: 576px) {
+            .container-fluid { padding: 0.5rem; }
+            .card-body { padding: 1rem; }
+            .table th, .table td { padding: 0.4rem 0.2rem; font-size: 0.8rem; }
+        }
+    </style>
+</head>
+<body>
+    <!-- Full screen loader -->
+    <div id="app-loader">
+        <div class="spinner-border" style="width: 3rem; height: 3rem;" role="status">
+            <span class="visually-hidden">Loading...</span>
+        </div>
+    </div>
+
+    <!-- Login Modal -->
+    <div class="modal fade" id="auth-modal" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">ログインまたは新規登録</h5>
+                </div>
+                <div class="modal-body">
+                    <div id="auth-error" class="alert alert-danger" style="display: none;"></div>
+                    <form id="auth-form">
+                        <div class="mb-3">
+                            <label for="email" class="form-label">メールアドレス</label>
+                            <input type="email" class="form-control" id="email" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="password" class="form-label">パスワード</label>
+                            <input type="password" class="form-control" id="password" required>
+                        </div>
+                        <div class="d-grid gap-2">
+                            <button type="button" id="login-btn" class="btn btn-primary">ログイン</button>
+                            <button type="button" id="signup-btn" class="btn btn-secondary">新規登録</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Add/Edit Record Modal -->
+    <div class="modal fade" id="record-modal" tabindex="-1">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="record-modal-title">戦績を追加</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="record-form">
+                        <input type="hidden" id="record-id">
+                        
+                        <!-- Basic Information -->
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label for="battle-date" class="form-label">対戦日 <span class="text-danger">*</span></label>
+                                <input type="date" class="form-control" id="battle-date" required>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label for="battle-format" class="form-label">対戦形式 <span class="text-danger">*</span></label>
+                                <select class="form-select" id="battle-format" required>
+                                    <option value="">選択してください</option>
+                                    <option value="シングル">シングル</option>
+                                    <option value="マッチ">マッチ（2本先取）</option>
+                                    <option value="スイスドロー">スイスドロー</option>
+                                    <option value="トーナメント">トーナメント</option>
+                                    <option value="フリー対戦">フリー対戦</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label for="tournament-name" class="form-label">大会名</label>
+                                <input type="text" class="form-control" id="tournament-name" placeholder="例: 週末大会、CS予選">
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label for="store-name" class="form-label">店舗名</label>
+                                <input type="text" class="form-control" id="store-name" placeholder="例: カードショップ○○">
+                            </div>
+                        </div>
+
+                        <!-- Deck Information -->
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label for="my-deck" class="form-label">使用デッキ <span class="text-danger">*</span></label>
+                                <input type="text" class="form-control" id="my-deck" required placeholder="例: ブルーアイズ">
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label for="opponent-deck" class="form-label">相手デッキ</label>
+                                <input type="text" class="form-control" id="opponent-deck" placeholder="例: エルドリッチ">
+                            </div>
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="opponent-name" class="form-label">対戦相手</label>
+                            <input type="text" class="form-control" id="opponent-name" placeholder="相手の名前（任意）">
+                        </div>
+
+                        <!-- Match Result -->
+                        <div class="mb-3">
+                            <label class="form-label">対戦結果 <span class="text-danger">*</span></label>
+                            <div class="btn-group w-100" role="group">
+                                <input type="radio" class="btn-check" name="result" id="result-win" value="win" required>
+                                <label class="btn btn-outline-success" for="result-win">
+                                    <i class="bi bi-trophy"></i> 勝利
+                                </label>
+                                <input type="radio" class="btn-check" name="result" id="result-lose" value="lose">
+                                <label class="btn btn-outline-danger" for="result-lose">
+                                    <i class="bi bi-x-circle"></i> 敗北
+                                </label>
+                                <input type="radio" class="btn-check" name="result" id="result-draw" value="draw">
+                                <label class="btn btn-outline-warning" for="result-draw">
+                                    <i class="bi bi-pause-circle"></i> 引き分け
+                                </label>
+                            </div>
+                        </div>
+
+                        <!-- Score (for match play) -->
+                        <div class="row" id="score-section" style="display: none;">
+                            <div class="col-6 mb-3">
+                                <label for="my-score" class="form-label">自分のスコア</label>
+                                <input type="number" class="form-control" id="my-score" min="0" max="3" placeholder="0">
+                            </div>
+                            <div class="col-6 mb-3">
+                                <label for="opponent-score" class="form-label">相手のスコア</label>
+                                <input type="number" class="form-control" id="opponent-score" min="0" max="3" placeholder="0">
+                            </div>
+                        </div>
+
+                        <!-- Match Details -->
+                        <div class="mb-3">
+                            <label for="match-notes" class="form-label">試合内容・メモ</label>
+                            <textarea class="form-control" id="match-notes" rows="4" 
+                                placeholder="例: 先攻を取って、初手で○○を展開。相手の××に対して△△で対応..."></textarea>
+                        </div>
+
+                        <!-- Tags -->
+                        <div class="mb-3">
+                            <label for="tags" class="form-label">タグ</label>
+                            <input type="text" class="form-control" id="tags" 
+                                placeholder="カンマ区切りで入力（例: 公認大会, 決勝戦, 新デッキ）">
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">キャンセル</button>
+                    <button type="button" id="save-record-btn" class="btn btn-primary">保存</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- View Details Modal -->
+    <div class="modal fade" id="details-modal" tabindex="-1">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">戦績詳細</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body" id="details-content">
+                    <!-- Content will be dynamically inserted -->
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-warning" id="edit-from-details-btn">
+                        <i class="bi bi-pencil"></i> 編集
+                    </button>
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">閉じる</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Settings Modal -->
+    <div class="modal fade" id="settings-modal" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">設定</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="form-check form-switch mb-3">
+                        <input class="form-check-input" type="checkbox" role="switch" id="dark-mode-toggle">
+                        <label class="form-check-label" for="dark-mode-toggle">ダークモード</label>
+                    </div>
+                    <div class="form-check form-switch mb-3">
+                        <input class="form-check-input" type="checkbox" role="switch" id="hide-email-toggle">
+                        <label class="form-check-label" for="hide-email-toggle">メールアドレスを非表示</label>
+                    </div>
+                    <hr>
+                    <h6>データ管理</h6>
+                    <div class="d-grid gap-2">
+                        <button class="btn btn-outline-primary" id="export-json-btn">
+                            <i class="bi bi-download"></i> JSON形式でエクスポート
+                        </button>
+                        <button class="btn btn-outline-primary" id="export-csv-btn">
+                            <i class="bi bi-download"></i> CSV形式でエクスポート
+                        </button>
+                        <button class="btn btn-outline-secondary" id="import-json-btn">
+                            <i class="bi bi-upload"></i> JSONからインポート
+                        </button>
+                        <button class="btn btn-outline-secondary" id="import-csv-btn">
+                            <i class="bi bi-upload"></i> CSVからインポート
+                        </button>
+                    </div>
+                    <input type="file" id="import-file-input" accept=".json,.csv" style="display: none;">
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">閉じる</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Main App -->
+    <div id="main-app">
+        <nav class="navbar navbar-expand-lg navbar-light bg-light mb-4" data-bs-theme="light">
+            <div class="container-fluid">
+                <span class="navbar-brand">
+                    <i class="bi bi-graph-up"></i> 戦績管理
+                </span>
+                <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarContent">
+                    <span class="navbar-toggler-icon"></span>
+                </button>
+                <div class="collapse navbar-collapse" id="navbarContent">
+                    <div class="navbar-nav ms-auto d-flex flex-row flex-wrap gap-2 mt-2 mt-lg-0">
+                        <a href="index.html" class="btn btn-outline-primary btn-sm">
+                            <i class="bi bi-layers"></i>
+                            <span class="d-none d-sm-inline"> カード管理</span>
+                        </a>
+                        <button class="btn btn-outline-secondary btn-sm" id="settings-btn">
+                            <i class="bi bi-gear"></i>
+                            <span class="d-none d-sm-inline"> 設定</span>
+                        </button>
+                        <span class="navbar-text d-none d-md-inline mx-2" id="user-email"></span>
+                        <button id="logout-btn" class="btn btn-danger btn-sm">
+                            <i class="bi bi-box-arrow-right"></i>
+                            <span class="d-none d-sm-inline"> ログアウト</span>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </nav>
+
+        <div class="container-fluid">
+            <div id="loading-overlay" style="display: none;">
+                <div class="spinner-border" role="status"></div>
+            </div>
+
+            <!-- Statistics Cards -->
+            <div class="row mb-4">
+                <div class="col-md-3 col-6">
+                    <div class="stat-card">
+                        <h6>総対戦数</h6>
+                        <h2 id="total-battles">0</h2>
+                    </div>
+                </div>
+                <div class="col-md-3 col-6">
+                    <div class="stat-card win">
+                        <h6>勝利数</h6>
+                        <h2 id="total-wins">0</h2>
+                    </div>
+                </div>
+                <div class="col-md-3 col-6">
+                    <div class="stat-card lose">
+                        <h6>敗北数</h6>
+                        <h2 id="total-loses">0</h2>
+                    </div>
+                </div>
+                <div class="col-md-3 col-6">
+                    <div class="stat-card draw">
+                        <h6>勝率</h6>
+                        <h2 id="win-rate">0%</h2>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Control Panel -->
+            <div class="card mb-4">
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-8">
+                            <!-- Filter Form -->
+                            <form id="filter-form" class="row g-2">
+                                <div class="col-md-3">
+                                    <input type="text" class="form-control form-control-sm" id="filter-deck" 
+                                        placeholder="デッキ名で検索">
+                                </div>
+                                <div class="col-md-3">
+                                    <input type="text" class="form-control form-control-sm" id="filter-opponent" 
+                                        placeholder="相手で検索">
+                                </div>
+                                <div class="col-md-3">
+                                    <input type="text" class="form-control form-control-sm" id="filter-tournament" 
+                                        placeholder="大会名で検索">
+                                </div>
+                                <div class="col-md-3">
+                                    <select class="form-select form-select-sm" id="filter-result">
+                                        <option value="">全ての結果</option>
+                                        <option value="win">勝利のみ</option>
+                                        <option value="lose">敗北のみ</option>
+                                        <option value="draw">引き分けのみ</option>
+                                    </select>
+                                </div>
+                                <div class="col-md-3">
+                                    <input type="date" class="form-control form-control-sm" id="filter-date-from" 
+                                        placeholder="開始日">
+                                </div>
+                                <div class="col-md-3">
+                                    <input type="date" class="form-control form-control-sm" id="filter-date-to" 
+                                        placeholder="終了日">
+                                </div>
+                                <div class="col-md-3">
+                                    <button type="submit" class="btn btn-info btn-sm w-100">
+                                        <i class="bi bi-search"></i> 検索
+                                    </button>
+                                </div>
+                                <div class="col-md-3">
+                                    <button type="button" class="btn btn-secondary btn-sm w-100" id="clear-filter-btn">
+                                        <i class="bi bi-x-circle"></i> クリア
+                                    </button>
+                                </div>
+                            </form>
+                        </div>
+                        <div class="col-md-4 text-end mt-3 mt-md-0">
+                            <button class="btn btn-success" id="add-record-btn">
+                                <i class="bi bi-plus-circle"></i> 戦績を追加
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Records Table -->
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="mb-0">戦績一覧</h5>
+                </div>
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <table class="table table-hover">
+                            <thead>
+                                <tr>
+                                    <th style="cursor: pointer;" data-sort="date">
+                                        日付 <i class="bi bi-arrow-down-up"></i>
+                                    </th>
+                                    <th>大会/店舗</th>
+                                    <th style="cursor: pointer;" data-sort="deck">
+                                        使用デッキ <i class="bi bi-arrow-down-up"></i>
+                                    </th>
+                                    <th>相手デッキ</th>
+                                    <th>形式</th>
+                                    <th style="cursor: pointer;" data-sort="result">
+                                        結果 <i class="bi bi-arrow-down-up"></i>
+                                    </th>
+                                    <th>スコア</th>
+                                    <th>操作</th>
+                                </tr>
+                            </thead>
+                            <tbody id="records-tbody">
+                                <!-- Records will be inserted here -->
+                            </tbody>
+                        </table>
+                    </div>
+                    <div id="no-records-message" class="text-center py-5" style="display: none;">
+                        <i class="bi bi-inbox" style="font-size: 3rem;"></i>
+                        <p class="mt-3">戦績がありません</p>
+                        <button class="btn btn-primary" onclick="document.getElementById('add-record-btn').click()">
+                            最初の戦績を追加
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script type="module">
+        // Firebase SDK imports
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/9.15.0/firebase-app.js";
+        import { 
+            getAuth, 
+            createUserWithEmailAndPassword, 
+            signInWithEmailAndPassword, 
+            onAuthStateChanged, 
+            signOut,
+            setPersistence,
+            browserLocalPersistence 
+        } from "https://www.gstatic.com/firebasejs/9.15.0/firebase-auth.js";
+        import { 
+            getFirestore, 
+            collection, 
+            getDocs, 
+            addDoc, 
+            deleteDoc, 
+            doc, 
+            query, 
+            where, 
+            updateDoc,
+            orderBy,
+            serverTimestamp 
+        } from "https://www.gstatic.com/firebasejs/9.15.0/firebase-firestore.js";
+
+        // Firebase configuration (same as card manager)
+        const firebaseConfig = {
+            apiKey: "AIzaSyAOYKalLUb2hbghrjQUS8AWzxpLExBT7aU",
+            authDomain: "card-manager-4c86c.firebaseapp.com",
+            projectId: "card-manager-4c86c",
+            storageBucket: "card-manager-4c86c.firebasestorage.app",
+            messagingSenderId: "1058357616781",
+            appId: "1:1058357616781:web:f25db127e2824226d942c4",
+            measurementId: "G-S4CCJC3HW9"
+        };
+
+        // Initialize Firebase
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+        const db = getFirestore(app);
+        
+        // Set authentication persistence
+        setPersistence(auth, browserLocalPersistence).catch((error) => {
+            console.error("Error setting persistence:", error);
+        });
+
+        // Global state
+        let currentUser = null;
+        let battleRecords = [];
+        let filteredRecords = [];
+        let sortConfig = { key: 'date', direction: 'desc' };
+        let isLocalMode = false;
+        let currentEditingRecord = null;
+
+        // DOM Elements
+        const authModal = new bootstrap.Modal(document.getElementById('auth-modal'));
+        const recordModal = new bootstrap.Modal(document.getElementById('record-modal'));
+        const detailsModal = new bootstrap.Modal(document.getElementById('details-modal'));
+        const settingsModal = new bootstrap.Modal(document.getElementById('settings-modal'));
+
+        // Initialize
+        document.addEventListener('DOMContentLoaded', () => {
+            setupEventListeners();
+            loadSettings();
+            
+            // Check authentication
+            onAuthStateChanged(auth, (user) => {
+                if (user) {
+                    handleUserLogin(user);
+                } else if (isLocalMode) {
+                    handleLocalMode();
+                } else {
+                    showAuthModal();
+                }
+            });
+        });
+
+        function setupEventListeners() {
+            // Auth
+            document.getElementById('login-btn').addEventListener('click', handleLogin);
+            document.getElementById('signup-btn').addEventListener('click', handleSignup);
+            document.getElementById('logout-btn').addEventListener('click', handleLogout);
+            
+            // Records
+            document.getElementById('add-record-btn').addEventListener('click', () => {
+                currentEditingRecord = null;
+                showRecordModal();
+            });
+            document.getElementById('save-record-btn').addEventListener('click', saveRecord);
+            document.getElementById('edit-from-details-btn').addEventListener('click', editFromDetails);
+            
+            // Battle format change
+            document.getElementById('battle-format').addEventListener('change', (e) => {
+                const scoreSection = document.getElementById('score-section');
+                if (e.target.value === 'マッチ' || e.target.value === 'スイスドロー') {
+                    scoreSection.style.display = 'block';
+                } else {
+                    scoreSection.style.display = 'none';
+                }
+            });
+            
+            // Filters
+            document.getElementById('filter-form').addEventListener('submit', (e) => {
+                e.preventDefault();
+                applyFilters();
+            });
+            document.getElementById('clear-filter-btn').addEventListener('click', clearFilters);
+            
+            // Settings
+            document.getElementById('settings-btn').addEventListener('click', () => settingsModal.show());
+            document.getElementById('dark-mode-toggle').addEventListener('change', toggleDarkMode);
+            document.getElementById('hide-email-toggle').addEventListener('change', toggleEmailVisibility);
+            
+            // Export/Import
+            document.getElementById('export-json-btn').addEventListener('click', exportJSON);
+            document.getElementById('export-csv-btn').addEventListener('click', exportCSV);
+            document.getElementById('import-json-btn').addEventListener('click', () => {
+                document.getElementById('import-file-input').accept = '.json';
+                document.getElementById('import-file-input').click();
+            });
+            document.getElementById('import-csv-btn').addEventListener('click', () => {
+                document.getElementById('import-file-input').accept = '.csv';
+                document.getElementById('import-file-input').click();
+            });
+            document.getElementById('import-file-input').addEventListener('change', handleImport);
+            
+            // Sort headers
+            document.querySelectorAll('th[data-sort]').forEach(th => {
+                th.addEventListener('click', () => sortRecords(th.dataset.sort));
+            });
+        }
+
+        // Authentication functions
+        async function handleLogin() {
+            const email = document.getElementById('email').value;
+            const password = document.getElementById('password').value;
+            const authError = document.getElementById('auth-error');
+            
+            if (email.toLowerCase() === 'local') {
+                isLocalMode = true;
+                localStorage.setItem('isLocalMode', 'true');
+                handleLocalMode();
+                return;
+            }
+            
+            try {
+                await signInWithEmailAndPassword(auth, email, password);
+                authError.style.display = 'none';
+            } catch (error) {
+                authError.textContent = `ログインエラー: ${error.message}`;
+                authError.style.display = 'block';
+            }
+        }
+
+        async function handleSignup() {
+            const email = document.getElementById('email').value;
+            const password = document.getElementById('password').value;
+            const authError = document.getElementById('auth-error');
+            
+            try {
+                await createUserWithEmailAndPassword(auth, email, password);
+                authError.style.display = 'none';
+            } catch (error) {
+                authError.textContent = `登録エラー: ${error.message}`;
+                authError.style.display = 'block';
+            }
+        }
+
+        function handleLogout() {
+            if (confirm('ログアウトしますか？')) {
+                if (isLocalMode) {
+                    isLocalMode = false;
+                    localStorage.removeItem('isLocalMode');
+                    currentUser = null;
+                    battleRecords = [];
+                    showAuthModal();
+                } else {
+                    signOut(auth);
+                }
+            }
+        }
+
+        function handleUserLogin(user) {
+            currentUser = user;
+            document.getElementById('user-email').textContent = user.email;
+            authModal.hide();
+            document.getElementById('app-loader').style.display = 'none';
+            document.getElementById('main-app').style.display = 'block';
+            loadRecords();
+        }
+
+        function handleLocalMode() {
+            currentUser = { uid: 'local_user', email: 'ローカルモード' };
+            document.getElementById('user-email').textContent = 'ローカルモード';
+            authModal.hide();
+            document.getElementById('app-loader').style.display = 'none';
+            document.getElementById('main-app').style.display = 'block';
+            loadLocalRecords();
+        }
+
+        function showAuthModal() {
+            document.getElementById('app-loader').style.display = 'none';
+            authModal.show();
+        }
+
+        // Record management
+        function showRecordModal(record = null) {
+            const modalTitle = document.getElementById('record-modal-title');
+            modalTitle.textContent = record ? '戦績を編集' : '戦績を追加';
+            
+            if (record) {
+                document.getElementById('record-id').value = record.id;
+                document.getElementById('battle-date').value = record.date;
+                document.getElementById('battle-format').value = record.format;
+                document.getElementById('tournament-name').value = record.tournament || '';
+                document.getElementById('store-name').value = record.store || '';
+                document.getElementById('my-deck').value = record.myDeck;
+                document.getElementById('opponent-deck').value = record.opponentDeck || '';
+                document.getElementById('opponent-name').value = record.opponent || '';
+                document.querySelector(`input[name="result"][value="${record.result}"]`).checked = true;
+                document.getElementById('my-score').value = record.myScore || '';
+                document.getElementById('opponent-score').value = record.opponentScore || '';
+                document.getElementById('match-notes').value = record.notes || '';
+                document.getElementById('tags').value = record.tags ? record.tags.join(', ') : '';
+                
+                // Show score section if needed
+                if (record.format === 'マッチ' || record.format === 'スイスドロー') {
+                    document.getElementById('score-section').style.display = 'block';
+                }
+            } else {
+                document.getElementById('record-form').reset();
+                document.getElementById('record-id').value = '';
+                document.getElementById('battle-date').value = new Date().toISOString().split('T')[0];
+                document.getElementById('score-section').style.display = 'none';
+            }
+            
+            recordModal.show();
+        }
+
+        async function saveRecord() {
+            const recordId = document.getElementById('record-id').value;
+            const recordData = {
+                date: document.getElementById('battle-date').value,
+                format: document.getElementById('battle-format').value,
+                tournament: document.getElementById('tournament-name').value,
+                store: document.getElementById('store-name').value,
+                myDeck: document.getElementById('my-deck').value,
+                opponentDeck: document.getElementById('opponent-deck').value,
+                opponent: document.getElementById('opponent-name').value,
+                result: document.querySelector('input[name="result"]:checked')?.value,
+                myScore: document.getElementById('my-score').value,
+                opponentScore: document.getElementById('opponent-score').value,
+                notes: document.getElementById('match-notes').value,
+                tags: document.getElementById('tags').value.split(',').map(t => t.trim()).filter(t => t),
+                updatedAt: new Date().toISOString()
+            };
+            
+            // Validation
+            if (!recordData.date || !recordData.format || !recordData.myDeck || !recordData.result) {
+                alert('必須項目を入力してください');
+                return;
+            }
+            
+            showLoading();
+            
+            try {
+                if (isLocalMode) {
+                    saveLocalRecord(recordId, recordData);
+                } else {
+                    if (recordId) {
+                        await updateDoc(doc(db, 'battleRecords', recordId), recordData);
+                    } else {
+                        recordData.userId = currentUser.uid;
+                        recordData.createdAt = serverTimestamp();
+                        await addDoc(collection(db, 'battleRecords'), recordData);
+                    }
+                }
+                
+                recordModal.hide();
+                loadRecords();
+            } catch (error) {
+                console.error('Error saving record:', error);
+                alert('保存中にエラーが発生しました');
+            } finally {
+                hideLoading();
+            }
+        }
+
+        function saveLocalRecord(recordId, recordData) {
+            let records = JSON.parse(localStorage.getItem('battleRecords') || '[]');
+            
+            if (recordId) {
+                const index = records.findIndex(r => r.id === recordId);
+                if (index !== -1) {
+                    records[index] = { ...records[index], ...recordData };
+                }
+            } else {
+                recordData.id = Date.now().toString();
+                recordData.createdAt = new Date().toISOString();
+                records.push(recordData);
+            }
+            
+            localStorage.setItem('battleRecords', JSON.stringify(records));
+        }
+
+        async function loadRecords() {
+            showLoading();
+            
+            try {
+                if (isLocalMode) {
+                    loadLocalRecords();
+                } else {
+                    const q = query(
+                        collection(db, 'battleRecords'),
+                        where('userId', '==', currentUser.uid),
+                        orderBy('date', 'desc')
+                    );
+                    const snapshot = await getDocs(q);
+                    battleRecords = snapshot.docs.map(doc => ({
+                        id: doc.id,
+                        ...doc.data()
+                    }));
+                }
+                
+                applyFilters();
+                updateStatistics();
+            } catch (error) {
+                console.error('Error loading records:', error);
+                if (error.code === 'failed-precondition') {
+                    // Index needs to be created
+                    try {
+                        const q = query(
+                            collection(db, 'battleRecords'),
+                            where('userId', '==', currentUser.uid)
+                        );
+                        const snapshot = await getDocs(q);
+                        battleRecords = snapshot.docs.map(doc => ({
+                            id: doc.id,
+                            ...doc.data()
+                        })).sort((a, b) => new Date(b.date) - new Date(a.date));
+                        applyFilters();
+                        updateStatistics();
+                    } catch (fallbackError) {
+                        console.error('Fallback error:', fallbackError);
+                    }
+                }
+            } finally {
+                hideLoading();
+            }
+        }
+
+        function loadLocalRecords() {
+            battleRecords = JSON.parse(localStorage.getItem('battleRecords') || '[]');
+            applyFilters();
+            updateStatistics();
+        }
+
+        async function deleteRecord(recordId) {
+            if (!confirm('この戦績を削除しますか？')) return;
+            
+            showLoading();
+            
+            try {
+                if (isLocalMode) {
+                    let records = JSON.parse(localStorage.getItem('battleRecords') || '[]');
+                    records = records.filter(r => r.id !== recordId);
+                    localStorage.setItem('battleRecords', JSON.stringify(records));
+                } else {
+                    await deleteDoc(doc(db, 'battleRecords', recordId));
+                }
+                
+                loadRecords();
+            } catch (error) {
+                console.error('Error deleting record:', error);
+                alert('削除中にエラーが発生しました');
+            } finally {
+                hideLoading();
+            }
+        }
+
+        function showRecordDetails(recordId) {
+            const record = battleRecords.find(r => r.id === recordId);
+            if (!record) return;
+            
+            currentEditingRecord = record;
+            
+            const resultBadge = {
+                win: '<span class="badge bg-success result-badge">勝利</span>',
+                lose: '<span class="badge bg-danger result-badge">敗北</span>',
+                draw: '<span class="badge bg-warning result-badge">引き分け</span>'
+            };
+            
+            const content = `
+                <div class="row">
+                    <div class="col-md-6">
+                        <h6 class="text-muted">基本情報</h6>
+                        <table class="table table-sm">
+                            <tr><th>日付</th><td>${record.date}</td></tr>
+                            <tr><th>形式</th><td>${record.format}</td></tr>
+                            <tr><th>大会名</th><td>${record.tournament || '-'}</td></tr>
+                            <tr><th>店舗</th><td>${record.store || '-'}</td></tr>
+                        </table>
+                    </div>
+                    <div class="col-md-6">
+                        <h6 class="text-muted">対戦情報</h6>
+                        <table class="table table-sm">
+                            <tr><th>使用デッキ</th><td>${record.myDeck}</td></tr>
+                            <tr><th>相手デッキ</th><td>${record.opponentDeck || '-'}</td></tr>
+                            <tr><th>対戦相手</th><td>${record.opponent || '-'}</td></tr>
+                            <tr><th>結果</th><td>${resultBadge[record.result]}</td></tr>
+                            ${record.myScore || record.opponentScore ? 
+                                `<tr><th>スコア</th><td>${record.myScore || 0} - ${record.opponentScore || 0}</td></tr>` : ''}
+                        </table>
+                    </div>
+                </div>
+                ${record.notes ? `
+                    <div class="mt-3">
+                        <h6 class="text-muted">試合内容・メモ</h6>
+                        <div class="card">
+                            <div class="card-body">
+                                <p class="mb-0" style="white-space: pre-wrap;">${record.notes}</p>
+                            </div>
+                        </div>
+                    </div>
+                ` : ''}
+                ${record.tags && record.tags.length > 0 ? `
+                    <div class="mt-3">
+                        <h6 class="text-muted">タグ</h6>
+                        <div>
+                            ${record.tags.map(tag => `<span class="badge bg-secondary me-1">${tag}</span>`).join('')}
+                        </div>
+                    </div>
+                ` : ''}
+            `;
+            
+            document.getElementById('details-content').innerHTML = content;
+            detailsModal.show();
+        }
+
+        function editFromDetails() {
+            detailsModal.hide();
+            if (currentEditingRecord) {
+                showRecordModal(currentEditingRecord);
+            }
+        }
+
+        // Display functions
+        function displayRecords() {
+            const tbody = document.getElementById('records-tbody');
+            const noRecordsMsg = document.getElementById('no-records-message');
+            
+            if (filteredRecords.length === 0) {
+                tbody.innerHTML = '';
+                noRecordsMsg.style.display = 'block';
+                return;
+            }
+            
+            noRecordsMsg.style.display = 'none';
+            
+            tbody.innerHTML = filteredRecords.map(record => {
+                const resultClass = `record-row ${record.result}`;
+                const resultBadge = {
+                    win: '<span class="badge bg-success">勝</span>',
+                    lose: '<span class="badge bg-danger">負</span>',
+                    draw: '<span class="badge bg-warning">引</span>'
+                };
+                
+                const score = (record.myScore || record.opponentScore) ? 
+                    `${record.myScore || 0}-${record.opponentScore || 0}` : '-';
+                
+                return `
+                    <tr class="${resultClass}">
+                        <td>${record.date}</td>
+                        <td>
+                            ${record.tournament || record.store || '-'}
+                        </td>
+                        <td><strong>${record.myDeck}</strong></td>
+                        <td>${record.opponentDeck || '-'}</td>
+                        <td>${record.format}</td>
+                        <td>${resultBadge[record.result]}</td>
+                        <td>${score}</td>
+                        <td>
+                            <button class="btn btn-sm btn-info" onclick="showRecordDetails('${record.id}')">
+                                <i class="bi bi-eye"></i>
+                            </button>
+                            <button class="btn btn-sm btn-warning" onclick="showRecordModal(battleRecords.find(r => r.id === '${record.id}'))">
+                                <i class="bi bi-pencil"></i>
+                            </button>
+                            <button class="btn btn-sm btn-danger" onclick="deleteRecord('${record.id}')">
+                                <i class="bi bi-trash"></i>
+                            </button>
+                        </td>
+                    </tr>
+                `;
+            }).join('');
+        }
+
+        function updateStatistics() {
+            const total = battleRecords.length;
+            const wins = battleRecords.filter(r => r.result === 'win').length;
+            const loses = battleRecords.filter(r => r.result === 'lose').length;
+            const draws = battleRecords.filter(r => r.result === 'draw').length;
+            const winRate = total > 0 ? ((wins / (wins + loses)) * 100).toFixed(1) : 0;
+            
+            document.getElementById('total-battles').textContent = total;
+            document.getElementById('total-wins').textContent = wins;
+            document.getElementById('total-loses').textContent = loses;
+            document.getElementById('win-rate').textContent = `${winRate}%`;
+        }
+
+        // Filter and sort functions
+        function applyFilters() {
+            const deck = document.getElementById('filter-deck').value.toLowerCase();
+            const opponent = document.getElementById('filter-opponent').value.toLowerCase();
+            const tournament = document.getElementById('filter-tournament').value.toLowerCase();
+            const result = document.getElementById('filter-result').value;
+            const dateFrom = document.getElementById('filter-date-from').value;
+            const dateTo = document.getElementById('filter-date-to').value;
+            
+            filteredRecords = battleRecords.filter(record => {
+                if (deck && !record.myDeck.toLowerCase().includes(deck) && 
+                    !(record.opponentDeck && record.opponentDeck.toLowerCase().includes(deck))) {
+                    return false;
+                }
+                if (opponent && !(record.opponent && record.opponent.toLowerCase().includes(opponent)) &&
+                    !(record.opponentDeck && record.opponentDeck.toLowerCase().includes(opponent))) {
+                    return false;
+                }
+                if (tournament && !(record.tournament && record.tournament.toLowerCase().includes(tournament)) &&
+                    !(record.store && record.store.toLowerCase().includes(tournament))) {
+                    return false;
+                }
+                if (result && record.result !== result) {
+                    return false;
+                }
+                if (dateFrom && record.date < dateFrom) {
+                    return false;
+                }
+                if (dateTo && record.date > dateTo) {
+                    return false;
+                }
+                return true;
+            });
+            
+            sortRecords(sortConfig.key, false);
+        }
+
+        function clearFilters() {
+            document.getElementById('filter-form').reset();
+            applyFilters();
+        }
+
+        function sortRecords(key, toggleDirection = true) {
+            if (toggleDirection && sortConfig.key === key) {
+                sortConfig.direction = sortConfig.direction === 'asc' ? 'desc' : 'asc';
+            } else if (toggleDirection) {
+                sortConfig.key = key;
+                sortConfig.direction = 'asc';
+            }
+            
+            filteredRecords.sort((a, b) => {
+                let aVal, bVal;
+                
+                switch(key) {
+                    case 'date':
+                        aVal = new Date(a.date);
+                        bVal = new Date(b.date);
+                        break;
+                    case 'deck':
+                        aVal = a.myDeck.toLowerCase();
+                        bVal = b.myDeck.toLowerCase();
+                        break;
+                    case 'result':
+                        const resultOrder = { win: 1, draw: 2, lose: 3 };
+                        aVal = resultOrder[a.result];
+                        bVal = resultOrder[b.result];
+                        break;
+                    default:
+                        return 0;
+                }
+                
+                if (sortConfig.direction === 'asc') {
+                    return aVal > bVal ? 1 : aVal < bVal ? -1 : 0;
+                } else {
+                    return aVal < bVal ? 1 : aVal > bVal ? -1 : 0;
+                }
+            });
+            
+            displayRecords();
+        }
+
+        // Export/Import functions
+        function exportJSON() {
+            const dataStr = JSON.stringify(battleRecords, null, 2);
+            const blob = new Blob([dataStr], { type: 'application/json' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `battle_records_${new Date().toISOString().split('T')[0]}.json`;
+            a.click();
+            URL.revokeObjectURL(url);
+        }
+
+        function exportCSV() {
+            const headers = ['日付', '大会名', '店舗', '形式', '使用デッキ', '相手', '相手デッキ', '結果', 'スコア', 'メモ', 'タグ'];
+            const rows = battleRecords.map(r => [
+                r.date,
+                r.tournament || '',
+                r.store || '',
+                r.format,
+                r.myDeck,
+                r.opponent || '',
+                r.opponentDeck || '',
+                r.result,
+                r.myScore && r.opponentScore ? `${r.myScore}-${r.opponentScore}` : '',
+                r.notes || '',
+                r.tags ? r.tags.join(';') : ''
+            ]);
+            
+            const csvContent = [headers, ...rows]
+                .map(row => row.map(cell => `"${cell}"`).join(','))
+                .join('\n');
+            
+            const blob = new Blob(['\ufeff' + csvContent], { type: 'text/csv;charset=utf-8;' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `battle_records_${new Date().toISOString().split('T')[0]}.csv`;
+            a.click();
+            URL.revokeObjectURL(url);
+        }
+
+        async function handleImport(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+            
+            const reader = new FileReader();
+            reader.onload = async (e) => {
+                try {
+                    if (file.name.endsWith('.json')) {
+                        const data = JSON.parse(e.target.result);
+                        await importRecords(data);
+                    } else if (file.name.endsWith('.csv')) {
+                        const csvData = parseCSV(e.target.result);
+                        await importRecords(csvData);
+                    }
+                } catch (error) {
+                    console.error('Import error:', error);
+                    alert('インポート中にエラーが発生しました');
+                }
+            };
+            reader.readAsText(file);
+            event.target.value = '';
+        }
+
+        function parseCSV(csvText) {
+            const lines = csvText.split('\n').filter(line => line.trim());
+            const headers = lines[0].split(',').map(h => h.replace(/"/g, '').trim());
+            
+            return lines.slice(1).map(line => {
+                const values = line.match(/(".*?"|[^,]+)/g).map(v => v.replace(/"/g, '').trim());
+                const record = {
+                    date: values[0],
+                    tournament: values[1],
+                    store: values[2],
+                    format: values[3],
+                    myDeck: values[4],
+                    opponent: values[5],
+                    opponentDeck: values[6],
+                    result: values[7],
+                    notes: values[9],
+                    tags: values[10] ? values[10].split(';') : []
+                };
+                
+                if (values[8]) {
+                    const [myScore, opponentScore] = values[8].split('-');
+                    record.myScore = myScore;
+                    record.opponentScore = opponentScore;
+                }
+                
+                return record;
+            });
+        }
+
+        async function importRecords(records) {
+            if (!confirm(`${records.length}件の戦績をインポートしますか？`)) return;
+            
+            showLoading();
+            
+            try {
+                for (const record of records) {
+                    if (isLocalMode) {
+                        record.id = Date.now().toString() + Math.random().toString(36).substr(2, 9);
+                        record.createdAt = new Date().toISOString();
+                    } else {
+                        record.userId = currentUser.uid;
+                        record.createdAt = serverTimestamp();
+                        await addDoc(collection(db, 'battleRecords'), record);
+                    }
+                }
+                
+                if (isLocalMode) {
+                    const existingRecords = JSON.parse(localStorage.getItem('battleRecords') || '[]');
+                    localStorage.setItem('battleRecords', JSON.stringify([...existingRecords, ...records]));
+                }
+                
+                loadRecords();
+                alert('インポートが完了しました');
+            } catch (error) {
+                console.error('Import error:', error);
+                alert('インポート中にエラーが発生しました');
+            } finally {
+                hideLoading();
+            }
+        }
+
+        // Settings functions
+        function loadSettings() {
+            const darkMode = localStorage.getItem('darkMode') === 'true';
+            const hideEmail = localStorage.getItem('hideEmail') === 'true';
+            
+            if (darkMode) {
+                document.body.setAttribute('data-bs-theme', 'dark');
+                document.querySelector('.navbar').setAttribute('data-bs-theme', 'dark');
+                document.getElementById('dark-mode-toggle').checked = true;
+            }
+            
+            if (hideEmail) {
+                document.getElementById('user-email').style.display = 'none';
+                document.getElementById('hide-email-toggle').checked = true;
+            }
+        }
+
+        function toggleDarkMode() {
+            const isDark = document.getElementById('dark-mode-toggle').checked;
+            if (isDark) {
+                document.body.setAttribute('data-bs-theme', 'dark');
+                document.querySelector('.navbar').setAttribute('data-bs-theme', 'dark');
+            } else {
+                document.body.removeAttribute('data-bs-theme');
+                document.querySelector('.navbar').setAttribute('data-bs-theme', 'light');
+            }
+            localStorage.setItem('darkMode', isDark);
+        }
+
+        function toggleEmailVisibility() {
+            const hide = document.getElementById('hide-email-toggle').checked;
+            document.getElementById('user-email').style.display = hide ? 'none' : 'inline';
+            localStorage.setItem('hideEmail', hide);
+        }
+
+        // Utility functions
+        function showLoading() {
+            document.getElementById('loading-overlay').style.display = 'flex';
+        }
+
+        function hideLoading() {
+            document.getElementById('loading-overlay').style.display = 'none';
+        }
+
+        // Make functions globally accessible
+        window.showRecordModal = showRecordModal;
+        window.deleteRecord = deleteRecord;
+        window.showRecordDetails = showRecordDetails;
+        window.sortRecords = sortRecords;
+    </script>
+</body>
+</html>
