@@ -814,11 +814,24 @@
             const tagsCollRef = getTagsCollectionRef();
             if (tagsCollRef) {
                 const snapshot = await getDocs(query(tagsCollRef));
-                allTags = snapshot.docs.map(doc => ({ 
+                allTags = snapshot.docs.map((doc, index) => ({ 
                     id: doc.id, 
                     name: doc.data().name,
-                    order: doc.data().order || 999
+                    order: doc.data().order !== undefined ? doc.data().order : index
                 }));
+                
+                // If no order field exists for any tags, assign order and save
+                let needsOrderUpdate = false;
+                allTags.forEach((tag, index) => {
+                    if (tag.order === undefined || tag.order === 999) {
+                        tag.order = index;
+                        needsOrderUpdate = true;
+                    }
+                });
+                
+                if (needsOrderUpdate) {
+                    await saveTagsOrder();
+                }
             } else {
                 // ローカルモード用 - localStorageから順番を読み込む
                 const savedTagsOrder = localStorage.getItem('tagsOrder');
@@ -841,7 +854,7 @@
                 }
             }
             // Sort by order
-            allTags.sort((a, b) => (a.order || 999) - (b.order || 999));
+            allTags.sort((a, b) => (a.order !== undefined ? a.order : 999) - (b.order !== undefined ? b.order : 999));
             renderTagManagementList();
             // 現在開いているフォームのタグ選択肢も更新
             if (addForm.offsetParent !== null) renderTagChoices('tag-choices-container', currentCardTags);
@@ -940,12 +953,20 @@
             const tagsCollRef = getTagsCollectionRef();
             if (tagsCollRef) {
                 // Firebase mode - update order in database
-                const batch = writeBatch(db);
-                allTags.forEach(tag => {
-                    const tagDoc = doc(tagsCollRef, tag.id);
-                    batch.update(tagDoc, { order: tag.order });
-                });
-                await batch.commit();
+                try {
+                    const batch = writeBatch(db);
+                    for (const tag of allTags) {
+                        const tagDoc = doc(tagsCollRef, tag.id);
+                        // Use set with merge to handle both existing and new documents
+                        batch.set(tagDoc, { 
+                            name: tag.name,
+                            order: tag.order 
+                        }, { merge: true });
+                    }
+                    await batch.commit();
+                } catch (error) {
+                    console.error('Error saving tag order:', error);
+                }
             } else {
                 // Local mode - save to localStorage
                 localStorage.setItem('tagsOrder', JSON.stringify(allTags));
@@ -973,9 +994,13 @@
                 if (allTags.some(tag => tag.name === newTagName)) {
                     duplicateTags.push(newTagName);
                 } else {
-                    const newOrder = allTags.length;
+                    // Calculate the maximum order value and add 1
+                    const maxOrder = allTags.reduce((max, tag) => Math.max(max, tag.order || 0), -1);
+                    const newOrder = maxOrder + 1;
+                    
                     if (tagsCollRef) {
-                        await addDoc(tagsCollRef, { name: newTagName, order: newOrder });
+                        const docRef = await addDoc(tagsCollRef, { name: newTagName, order: newOrder });
+                        allTags.push({ id: docRef.id, name: newTagName, order: newOrder });
                     } else {
                         allTags.push({ id: `local_${Date.now()}_${Math.random()}`, name: newTagName, order: newOrder });
                     }
@@ -989,7 +1014,16 @@
             
             if (addedTags.length > 0) {
                 document.getElementById('new-tag-name').value = '';
-                await loadAllTags();
+                // Save the updated order
+                if (!tagsCollRef) {
+                    // Save to localStorage for local mode
+                    localStorage.setItem('tagsOrder', JSON.stringify(allTags));
+                }
+                // Sort and re-render
+                allTags.sort((a, b) => (a.order !== undefined ? a.order : 999) - (b.order !== undefined ? b.order : 999));
+                renderTagManagementList();
+                renderTagChoices('tag-choices-container', currentCardTags);
+                renderTagChoices('edit-tag-choices-container', currentCardTags);
             }
         });
 
@@ -1005,10 +1039,20 @@
                     await deleteDoc(doc(tagsCollRef, tagId));
                     // TODO: 全カードからこのタグを削除するバッチ処理
                 } 
-                allTags = allTags.filter(t => t.id !== tagId);
-                // TODO: ローカルの全カードからこのタグを削除
                 
-                await loadAllTags();
+                // Remove tag and update order
+                allTags = allTags.filter(t => t.id !== tagId);
+                allTags.forEach((tag, index) => {
+                    tag.order = index;
+                });
+                
+                // Save updated order
+                await saveTagsOrder();
+                
+                // Re-render
+                renderTagManagementList();
+                renderTagChoices('tag-choices-container', currentCardTags);
+                renderTagChoices('edit-tag-choices-container', currentCardTags);
             }
         });
 
@@ -1934,6 +1978,14 @@
             renderSearchResults();
         };
         
+        // Add Enter key support for card search
+        document.getElementById('card-search').addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') {
+                e.preventDefault();
+                document.getElementById('search-db-btn').click();
+            }
+        });
+        
         document.getElementById('search-db-btn').addEventListener('click', async () => {
             const searchKeyword = document.getElementById('card-search').value.trim();
             if (!searchKeyword) {
@@ -2121,7 +2173,18 @@
                 choicesEl.innerHTML = '';
                 
                 if (setCodes.length > 0) {
-                    setCodes.map((code, i) => ({ set_code: code, rarity: rarities[i] || '' })).forEach(data => {
+                    // Create unique set-rarity combinations
+                    const uniqueSetRarities = new Map();
+                    setCodes.forEach((code, i) => {
+                        const rarity = rarities[i] || '';
+                        const key = `${code}_${rarity}`;
+                        if (!uniqueSetRarities.has(key)) {
+                            uniqueSetRarities.set(key, { set_code: code, rarity: rarity });
+                        }
+                    });
+                    
+                    // Create buttons for unique combinations
+                    Array.from(uniqueSetRarities.values()).forEach(data => {
                         const btn = document.createElement('button');
                         btn.type = 'button';
                         btn.className = 'btn btn-outline-primary btn-sm me-1 mb-1 set-choice-btn';
@@ -2159,14 +2222,25 @@
                 const parser = new DOMParser();
                 const doc = parser.parseFromString(text, 'text/html');
                 const cardName = doc.querySelector('#card_image_1')?.alt || '';
-                if (!cardName) throw new Error("カード名が見つかりません。サイトの構造が変更された可能性があります。");
+                if (!cardName) throw new Error("カード名が見つかりません。");
                 document.getElementById('name').value = cardName;
                 const setCodes = Array.from(doc.querySelectorAll('div.card_number')).map(div => div.textContent.trim());
                 const rarities = Array.from(doc.querySelectorAll('div.rarity p')).map(p => p.textContent.trim());
                 const choicesEl = document.getElementById('set-rarity-choices');
                 choicesEl.innerHTML = '';
                 if (setCodes.length > 0) {
-                    setCodes.map((code, i) => ({ set_code: code, rarity: rarities[i] || '' })).forEach(data => {
+                    // Create unique set-rarity combinations
+                    const uniqueSetRarities = new Map();
+                    setCodes.forEach((code, i) => {
+                        const rarity = rarities[i] || '';
+                        const key = `${code}_${rarity}`;
+                        if (!uniqueSetRarities.has(key)) {
+                            uniqueSetRarities.set(key, { set_code: code, rarity: rarity });
+                        }
+                    });
+                    
+                    // Create buttons for unique combinations
+                    Array.from(uniqueSetRarities.values()).forEach(data => {
                         const btn = document.createElement('button');
                         btn.type = 'button';
                         btn.className = 'btn btn-outline-primary btn-sm me-1 mb-1 set-choice-btn';
