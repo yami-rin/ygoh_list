@@ -1182,66 +1182,110 @@
         addForm.addEventListener('submit', async (e) => {
             e.preventDefault();
             showLoading(true);
-            const formData = new FormData(addForm);
-            const addType = document.querySelector('input[name="add-type"]:checked').value;
-            const newCard = {
-                '名前': formData.get('name'),
-                '型番': formData.get('set_code'),
-                'レアリティ': formData.get('rarity'),
-                '枚数': parseInt(formData.get('quantity'), 10),
-                'tags': [...currentCardTags] // タグを追加
-            };
             
-            // Save registration data
+            try {
+                // Set a timeout to prevent infinite loading
+                const timeoutPromise = new Promise((_, reject) => {
+                    setTimeout(() => reject(new Error('Operation timeout')), 30000); // 30 seconds timeout
+                });
+                
+                const formData = new FormData(addForm);
+                const addType = document.querySelector('input[name="add-type"]:checked').value;
+                const newCard = {
+                    '名前': formData.get('name'),
+                    '型番': formData.get('set_code'),
+                    'レアリティ': formData.get('rarity'),
+                    '枚数': parseInt(formData.get('quantity'), 10),
+                    'tags': [...currentCardTags] // タグを追加
+                };
+            
+            // Save registration data including set choices
+            const setChoices = [];
+            document.querySelectorAll('#set-rarity-choices .set-choice-btn').forEach(btn => {
+                setChoices.push({
+                    setCode: btn.dataset.setCode,
+                    rarity: btn.dataset.rarity,
+                    text: btn.textContent
+                });
+            });
+            
             lastRegistrationData = {
                 name: newCard['名前'],
                 setCode: newCard['型番'],
                 rarity: newCard['レアリティ'],
                 quantity: newCard['枚数'],
                 tags: [...currentCardTags],
-                addType: addType
+                addType: addType,
+                setChoices: setChoices
             };
             updateRegistrationHistoryButton();
 
-            const targetCollection = addType === 'collection' ? cardCollection : wishlistCollection;
-            const collRef = getCollectionRef(addType);
-            if (collRef) { // Firebaseモード
-                const q = query(collRef, 
-                    where("名前", "==", newCard.名前),
-                    where("型番", "==", newCard.型番),
-                    where("レアリティ", "==", newCard.レアリティ)
-                );
-                const existingDocs = await getDocs(q);
+                const targetCollection = addType === 'collection' ? cardCollection : wishlistCollection;
+                const collRef = getCollectionRef(addType);
+                
+                // Wrap database operations with timeout
+                const dbOperation = async () => {
+                    if (collRef) { // Firebaseモード
+                        const q = query(collRef, 
+                            where("名前", "==", newCard.名前),
+                            where("型番", "==", newCard.型番),
+                            where("レアリティ", "==", newCard.レアリティ)
+                        );
+                        const existingDocs = await getDocs(q);
 
-                if (existingDocs.empty) {
-                    const docRef = await addDoc(collRef, newCard);
-                    targetCollection.push({ id: docRef.id, data: newCard });
+                        if (existingDocs.empty) {
+                            const docRef = await addDoc(collRef, newCard);
+                            targetCollection.push({ id: docRef.id, data: newCard });
+                        } else {
+                            const existingDoc = existingDocs.docs[0];
+                            await updateDoc(existingDoc.ref, { 枚数: increment(newCard.枚数) });
+                            const localCard = targetCollection.find(c => c.id === existingDoc.id);
+                            if(localCard) localCard.data.枚数 += newCard.枚数;
+                        }
+                    } else { // ローカルモード
+                        const existingCard = targetCollection.find(c => 
+                            c.data.名前 === newCard.名前 && 
+                            c.data.型番 === newCard.型番 && 
+                            c.data.レアリティ === newCard.レアリティ
+                        );
+                        if (existingCard) {
+                            existingCard.data.枚数 += newCard.枚数;
+                        } else {
+                            targetCollection.push({ id: `local_${Date.now()}`, data: newCard });
+                        }
+                    }
+                };
+                
+                // Execute with timeout
+                await Promise.race([dbOperation(), timeoutPromise]);
+            
+                applySearchAndFilter();
+                addForm.reset();
+                currentCardTags = [];
+                renderTagChoices('tag-choices-container', currentCardTags);
+                renderSelectedTags('card-tags-container', currentCardTags);
+                document.getElementById('set-rarity-choices').innerHTML = '';
+                showLoading(false);
+                
+            } catch (error) {
+                showLoading(false);
+                console.error('カード追加エラー:', error);
+                
+                // Check error type
+                if (error.message === 'Operation timeout') {
+                    alert('操作がタイムアウトしました。ネットワーク接続を確認してください。');
+                } else if (error.code === 'permission-denied' || error.code === 'unauthenticated') {
+                    alert('セッションの有効期限が切れました。再度ログインしてください。');
+                    // Force re-authentication
+                    if (currentUser && currentUser.uid !== 'local_user') {
+                        signOut(auth);
+                    } else {
+                        window.location.reload();
+                    }
                 } else {
-                    const existingDoc = existingDocs.docs[0];
-                    await updateDoc(existingDoc.ref, { 枚数: increment(newCard.枚数) });
-                    const localCard = targetCollection.find(c => c.id === existingDoc.id);
-                    if(localCard) localCard.data.枚数 += newCard.枚数;
-                }
-            } else { // ローカルモード
-                const existingCard = targetCollection.find(c => 
-                    c.data.名前 === newCard.名前 && 
-                    c.data.型番 === newCard.型番 && 
-                    c.data.レアリティ === newCard.レアリティ
-                );
-                if (existingCard) {
-                    existingCard.data.枚数 += newCard.枚数;
-                } else {
-                    targetCollection.push({ id: `local_${Date.now()}`, data: newCard });
+                    alert(`カードの追加中にエラーが発生しました: ${error.message || 'Unknown error'}`);
                 }
             }
-            
-            applySearchAndFilter();
-            addForm.reset();
-            currentCardTags = [];
-            renderTagChoices('tag-choices-container', currentCardTags);
-            renderSelectedTags('card-tags-container', currentCardTags);
-            document.getElementById('set-rarity-choices').innerHTML = '';
-            showLoading(false);
         });
 
         cardTableBody.addEventListener('click', async (e) => {
@@ -1619,6 +1663,21 @@
                 } else {
                     document.getElementById('add-to-wishlist').checked = true;
                 }
+                
+                // Restore set-rarity choices
+                const choicesEl = document.getElementById('set-rarity-choices');
+                choicesEl.innerHTML = '';
+                if (lastRegistrationData.setChoices && lastRegistrationData.setChoices.length > 0) {
+                    lastRegistrationData.setChoices.forEach(choice => {
+                        const btn = document.createElement('button');
+                        btn.type = 'button';
+                        btn.className = 'btn btn-outline-primary btn-sm me-1 mb-1 set-choice-btn';
+                        btn.dataset.setCode = choice.setCode;
+                        btn.dataset.rarity = choice.rarity;
+                        btn.textContent = choice.text;
+                        choicesEl.appendChild(btn);
+                    });
+                }
             }
         });
         
@@ -1851,7 +1910,7 @@
                 const parser = new DOMParser();
                 const doc = parser.parseFromString(text, 'text/html');
                 const cardName = doc.querySelector('#card_image_1')?.alt || '';
-                if (!cardName) throw new Error("カード名が見つかりません。サイトの構造が変更された可能性があります。");
+                if (!cardName) throw new Error("カード名が見つかりません。");
                 document.getElementById('name').value = cardName;
                 const setCodes = Array.from(doc.querySelectorAll('div.card_number')).map(div => div.textContent.trim());
                 const rarities = Array.from(doc.querySelectorAll('div.rarity p')).map(p => p.textContent.trim());
