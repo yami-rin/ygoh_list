@@ -1,0 +1,2138 @@
+<!doctype html>
+<html lang="ja">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>カード管理 (テスト版)</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css">
+    <style>
+        body { background-color: #f8f9fa; }
+        [data-bs-theme="dark"] body { background-color: #212529; }
+        .container-fluid { max-width: 1400px; }
+        .card { margin-bottom: 1.5rem; }
+        .table-responsive { max-height: 500px; }
+        #loading-overlay, #app-loader {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background-color: rgba(0,0,0,0.6);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 1060;
+            color: white;
+        }
+        .set-choice-btn { cursor: pointer; }
+        #main-app { display: none; } /* Hide app until logged in */
+        
+        /* Tag display optimization */
+        .tag-cell {
+            max-width: 150px;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+        .tag-cell:hover {
+            white-space: normal;
+            word-wrap: break-word;
+        }
+        
+        /* Draggable tags styles */
+        .draggable-tag {
+            cursor: move;
+            transition: background-color 0.2s;
+        }
+        .draggable-tag:hover {
+            background-color: rgba(0, 123, 255, 0.1);
+        }
+        .draggable-tag.dragging {
+            opacity: 0.5;
+        }
+        .drag-over {
+            border-top: 2px solid #007bff;
+        }
+        
+        /* Table header responsive styles */
+        .table th {
+            white-space: nowrap;
+            min-width: fit-content;
+        }
+        
+        /* Ensure navbar buttons have consistent height */
+        .navbar-nav .btn,
+        .navbar-nav .dropdown > .btn {
+            height: 38px;
+            display: inline-flex;
+            align-items: center;
+        }
+        
+        /* Pagination controls responsive */
+        #pagination-controls,
+        #pagination-controls-bottom {
+            font-size: 0.9rem;
+        }
+        
+        /* Mobile responsive styles */
+        @media (max-width: 768px) {
+            .navbar-brand { font-size: 1rem; }
+            .navbar-text { display: none !important; }
+            .btn-group-mobile { 
+                display: flex;
+                flex-direction: column;
+                gap: 0.5rem;
+            }
+            .table { font-size: 0.875rem; }
+            .table th {
+                padding: 0.5rem 0.25rem;
+                font-size: 0.8rem;
+            }
+            .table th i {
+                font-size: 0.7rem;
+            }
+            .btn-sm { padding: 0.25rem 0.5rem; font-size: 0.75rem; }
+            .modal-dialog { margin: 0.5rem; }
+            .nav-tabs .nav-link { padding: 0.5rem 0.75rem; font-size: 0.875rem; }
+            .dropdown-menu { font-size: 0.875rem; }
+        }
+        
+        @media (max-width: 576px) {
+            .container-fluid { padding: 0.5rem; }
+            .card-body { padding: 1rem; }
+            .table-responsive { 
+                max-height: 400px;
+                overflow-x: auto;
+            }
+            .table th {
+                padding: 0.4rem 0.2rem;
+                font-size: 0.75rem;
+            }
+            .table td {
+                padding: 0.4rem 0.2rem;
+                font-size: 0.8rem;
+            }
+            .navbar-toggler { padding: 0.25rem 0.5rem; }
+            
+            /* Pagination controls on small screens */
+            #pagination-controls span,
+            #pagination-controls-bottom span {
+                font-size: 0.8rem;
+            }
+            #pagination-controls .btn-group,
+            #pagination-controls-bottom .btn-group {
+                flex-wrap: nowrap;
+            }
+            .d-flex.justify-content-between.align-items-center.mb-2 {
+                flex-direction: column;
+                gap: 0.5rem;
+            }
+            .d-flex.justify-content-between.align-items-center.mb-2 > * {
+                width: 100%;
+                justify-content: center;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Full screen loader -->
+    <div id="app-loader">
+        <div class="spinner-border" style="width: 3rem; height: 3rem;" role="status"><span class="visually-hidden">Loading...</span></div>
+    </div>
+
+    <!-- Login Modal -->
+    <div class="modal fade" id="auth-modal" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1">
+        <div class="modal-dialog"><div class="modal-content">
+            <div class="modal-header"><h5 class="modal-title">ログインまたは新規登録</h5></div>
+            <div class="modal-body">
+                <div id="auth-error" class="alert alert-danger" style="display: none;"></div>
+                <form id="auth-form">
+                    <div class="mb-3"><label for="email" class="form-label">メールアドレス</label><input type="email" class="form-control" id="email" required></div>
+                    <div class="mb-3"><label for="password" class="form-label">パスワード</label><input type="password" class="form-control" id="password" required></div>
+                    <div class="d-grid gap-2">
+                        <button type="button" id="login-btn" class="btn btn-primary">ログイン</button>
+                        <button type="button" id="signup-btn" class="btn btn-secondary">新規登録</button>
+                    </div>
+                </form>
+            </div>
+        </div></div>
+    </div>
+
+    <!-- Edit Card Modal -->
+    <div class="modal fade" id="edit-card-modal" tabindex="-1">
+        <div class="modal-dialog"><div class="modal-content">
+            <div class="modal-header"><h5 class="modal-title">カード情報の編集</h5><button type="button" class="btn-close" data-bs-dismiss="modal"></button></div>
+            <div class="modal-body">
+                <form id="edit-form">
+                    <input type="hidden" id="edit-card-id">
+                    <div class="mb-3"><label class="form-label">名前</label><input type="text" id="edit-name" class="form-control" readonly disabled></div>
+                    <div class="mb-3"><label class="form-label">型番</label><input type="text" id="edit-set-code" class="form-control" readonly disabled></div>
+                    <div class="mb-3"><label class="form-label">レアリティ</label><input type="text" id="edit-rarity" class="form-control" readonly disabled></div>
+                    <div class="mb-3"><label for="edit-quantity" class="form-label">枚数</label><input type="number" id="edit-quantity" class="form-control" min="1" required></div>
+                    <div class="mb-3">
+                        <label class="form-label">タグ</label>
+                        <div id="edit-card-tags-container" class="mb-2"></div>
+                        <div id="edit-tag-choices-container"></div>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">キャンセル</button>
+                <button type="button" id="save-edit-btn" class="btn btn-primary">変更を保存</button>
+            </div>
+        </div></div>
+    </div>
+
+    <!-- How to Use Modal -->
+    <div class="modal fade" id="how-to-use-modal" tabindex="-1">
+        <div class="modal-dialog modal-xl"><div class="modal-content">
+            <div class="modal-header"><h5 class="modal-title">使い方ガイド</h5><button type="button" class="btn-close" data-bs-dismiss="modal"></button></div>
+            <div class="modal-body">
+                <div class="alert alert-info">
+                    <i class="bi bi-info-circle"></i> <strong>公式データベース</strong>：
+                    <a href="https://www.db.yugioh-card.com/yugiohdb/card_search.action" target="_blank" class="alert-link">
+                        遊戯王オフィシャルカードデータベースを開く <i class="bi bi-box-arrow-up-right"></i>
+                    </a>
+                </div>
+                
+                <h5 class="mt-4 mb-3"><i class="bi bi-1-circle-fill text-primary"></i> 初めての方へ</h5>
+                <div class="ms-3">
+                    <h6><i class="bi bi-person-plus"></i> アカウント作成</h6>
+                    <ol>
+                        <li>メールアドレスとパスワードを入力して「新規登録」をクリック</li>
+                        <li>アカウントが作成され、自動でログインされます</li>
+                        <li>データはクラウドに保存され、どの端末からでもアクセス可能です</li>
+                    </ol>
+                    <div class="alert alert-warning">
+                        <small><i class="bi bi-exclamation-triangle"></i> ローカルモード：メールアドレスに「local」と入力すると、データをクラウドに保存せずブラウザ内でのみ管理できます</small>
+                    </div>
+                </div>
+                
+                <h5 class="mt-4 mb-3"><i class="bi bi-2-circle-fill text-primary"></i> カードの登録方法</h5>
+                <div class="ms-3">
+                    <h6><i class="bi bi-search"></i> 方法1：公式DBから検索</h6>
+                    <ol>
+                        <li>「カード名で検索」欄にカード名を入力（例：「カメリア」）</li>
+                        <li>「検索」ボタンをクリック</li>
+                        <li>検索結果から目的のカードを選択</li>
+                        <li>カード情報が自動で入力されます</li>
+                    </ol>
+                    
+                    <h6><i class="bi bi-link-45deg"></i> 方法2：URLから読み込み</h6>
+                    <ol>
+                        <li>公式DBでカードを検索し、カード詳細ページを開く</li>
+                        <li>URLをコピー（例：https://www.db.yugioh-card.com/yugiohdb/card_search.action?ope=2&cid=...)</li>
+                        <li>「公式DB URL」欄に貼り付けて「読込」をクリック</li>
+                        <li>複数の型番がある場合は、表示されるボタンから選択</li>
+                    </ol>
+                    
+                    <h6><i class="bi bi-pencil"></i> 方法3：手動入力</h6>
+                    <p>カード名、型番、レアリティを直接入力して登録できます</p>
+                </div>
+                
+                <h5 class="mt-4 mb-3"><i class="bi bi-3-circle-fill text-primary"></i> リストの種類</h5>
+                <div class="ms-3">
+                    <h6><i class="bi bi-collection"></i> 所持カード</h6>
+                    <p>実際に所持しているカードを管理します。枚数を記録し、コレクション全体を把握できます。</p>
+                    
+                    <h6><i class="bi bi-star"></i> ウィッシュリスト</h6>
+                    <p>今後入手したいカードを管理します。入手したら「所持カードへ移動」ボタン（<i class="bi bi-check-circle"></i>）で簡単に移動できます。</p>
+                </div>
+                
+                <h5 class="mt-4 mb-3"><i class="bi bi-4-circle-fill text-primary"></i> タグ機能</h5>
+                <div class="ms-3">
+                    <p>カードにタグを付けて分類できます。例：「デッキ用」「トレード用」「コレクション」など</p>
+                    <ul>
+                        <li>「タグ管理」ボタンからタグを作成（カンマ区切りで複数同時作成可）</li>
+                        <li>カード登録・編集時にタグを選択</li>
+                        <li>タグで検索して絞り込み可能</li>
+                    </ul>
+                </div>
+                
+                <h5 class="mt-4 mb-3"><i class="bi bi-5-circle-fill text-primary"></i> データ管理</h5>
+                <div class="ms-3">
+                    <h6><i class="bi bi-download"></i> エクスポート</h6>
+                    <ul>
+                        <li><strong>JSON形式</strong>：全データを完全にバックアップ</li>
+                        <li><strong>CSV形式</strong>：Excelで編集・閲覧可能</li>
+                    </ul>
+                    
+                    <h6><i class="bi bi-upload"></i> インポート</h6>
+                    <p>JSON/CSVファイルからデータを一括登録。重複するカードは枚数が加算されます。</p>
+                </div>
+                
+                <h5 class="mt-4 mb-3"><i class="bi bi-6-circle-fill text-primary"></i> その他の機能</h5>
+                <div class="ms-3">
+                    <h6><i class="bi bi-sort-down"></i> 並び替え・検索</h6>
+                    <p>カード一覧のヘッダーをクリックで並び替え、検索フォームで絞り込みができます。</p>
+                    
+                    <h6><i class="bi bi-check2-square"></i> 一括編集</h6>
+                    <p>複数のカードを選択して、タグの一括追加・削除や一括削除が可能です。カード一覧のチェックボックスで選択してください。</p>
+                    
+                    <h6><i class="bi bi-moon-stars"></i> ダークモード</h6>
+                    <p>「設定」から画面をダークモードに切り替えられます。</p>
+                    
+                    <h6><i class="bi bi-phone"></i> モバイル対応</h6>
+                    <p>スマートフォンやタブレットでも快適に利用できるよう、画面サイズに応じて自動的にレイアウトが調整されます。</p>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <a href="https://www.db.yugioh-card.com/yugiohdb/card_search.action" target="_blank" class="btn btn-primary">
+                    <i class="bi bi-box-arrow-up-right"></i> 公式DBを開く
+                </a>
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">閉じる</button>
+            </div>
+        </div></div>
+    </div>
+
+    <!-- Settings Modal -->
+    <div class="modal fade" id="settings-modal" tabindex="-1">
+        <div class="modal-dialog"><div class="modal-content">
+            <div class="modal-header"><h5 class="modal-title">設定</h5><button type="button" class="btn-close" data-bs-dismiss="modal"></button></div>
+            <div class="modal-body">
+                <div class="form-check form-switch mb-3">
+                    <input class="form-check-input" type="checkbox" role="switch" id="dark-mode-toggle">
+                    <label class="form-check-label" for="dark-mode-toggle">ダークモード</label>
+                </div>
+                <div class="form-check form-switch mb-3">
+                    <input class="form-check-input" type="checkbox" role="switch" id="hide-email-toggle">
+                    <label class="form-check-label" for="hide-email-toggle">メールアドレスを非表示</label>
+                </div>
+                <div class="form-check form-switch mb-3">
+                    <input class="form-check-input" type="checkbox" role="switch" id="show-search-history-toggle">
+                    <label class="form-check-label" for="show-search-history-toggle">前回の検索履歴ボタンを表示</label>
+                </div>
+                <div class="form-check form-switch mb-3">
+                    <input class="form-check-input" type="checkbox" role="switch" id="show-registration-history-toggle">
+                    <label class="form-check-label" for="show-registration-history-toggle">前回の登録履歴ボタンを表示</label>
+                </div>
+                <hr>
+                <h6>アカウント削除</h6>
+                <p class="text-muted small">この操作は元に戻せません。アカウントに紐づく全てのカードデータが完全に削除されます。</p>
+                <button class="btn btn-danger" id="delete-account-btn">アカウントを削除する</button>
+            </div>
+            <div class="modal-footer"><button type="button" class="btn btn-secondary" data-bs-dismiss="modal">閉じる</button></div>
+        </div></div>
+    </div>
+
+    <!-- Tag Management Modal -->
+    <div class="modal fade" id="tag-management-modal" tabindex="-1">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">タグ管理</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <h6>新しいタグを追加</h6>
+                    <form id="add-tag-form" class="input-group mb-3">
+                        <input type="text" id="new-tag-name" class="form-control" placeholder="新しいタグ名（カンマ区切りで複数入力可）" required>
+                        <button class="btn btn-primary" type="submit">追加</button>
+                    </form>
+                    <hr>
+                    <h6>登録済みタグ一覧</h6>
+                    <small class="text-muted">※ドラッグ＆ドロップで順番を変更できます</small>
+                    <div id="existing-tags-list" class="mt-2"></div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">閉じる</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Bulk Tag Edit Modal -->
+    <div class="modal fade" id="bulk-tag-modal" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="bulk-tag-modal-title">タグ一括編集</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <p id="bulk-tag-modal-desc"></p>
+                    <div id="bulk-tag-choices-container"></div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">キャンセル</button>
+                    <button type="button" class="btn btn-primary" id="bulk-tag-save-btn">適用</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Main App -->
+    <div id="main-app">
+        <nav class="navbar navbar-expand-lg navbar-light bg-light mb-4" data-bs-theme="light">
+            <div class="container-fluid">
+                <span class="navbar-brand"><i class="bi bi-layers-fill"></i> カード管理 (テスト版)</span>
+                <span id="firebase-status" class="badge bg-warning text-dark ms-2">接続中...</span>
+                <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarContent">
+                    <span class="navbar-toggler-icon"></span>
+                </button>
+                <div class="collapse navbar-collapse" id="navbarContent">
+                    <div class="navbar-nav ms-auto d-flex flex-row flex-wrap gap-2 mt-2 mt-lg-0">
+                        <button class="btn btn-outline-info btn-sm" id="how-to-use-btn">
+                            <i class="bi bi-question-circle"></i>
+                            <span class="d-none d-sm-inline"> 使い方</span>
+                        </button>
+                        <div class="dropdown d-inline-block">
+                            <button class="btn btn-outline-secondary btn-sm dropdown-toggle" type="button" data-bs-toggle="dropdown">
+                                <i class="bi bi-database"></i>
+                                <span class="d-none d-sm-inline"> データ管理</span>
+                            </button>
+                            <ul class="dropdown-menu dropdown-menu-end">
+                                <li><button class="dropdown-item" id="import-json-btn">JSONからインポート</button></li>
+                                <li><button class="dropdown-item" id="import-csv-btn">CSVからインポート</button></li>
+                                <li><hr class="dropdown-divider"></li>
+                                <li><button class="dropdown-item" id="export-json-btn">JSON形式でエクスポート</button></li>
+                                <li><button class="dropdown-item" id="export-csv-btn">CSV形式でエクスポート</button></li>
+                            </ul>
+                        </div>
+                        <input type="file" id="import-file-input" accept=".json,.csv" style="display: none;">
+                        <button class="btn btn-outline-secondary btn-sm" id="tag-management-btn">
+                            <i class="bi bi-tags"></i>
+                            <span class="d-none d-sm-inline"> タグ</span>
+                        </button>
+                        <button class="btn btn-outline-secondary btn-sm" id="settings-btn">
+                            <i class="bi bi-gear"></i>
+                            <span class="d-none d-sm-inline"> 設定</span>
+                        </button>
+                        <span class="navbar-text d-none d-md-inline mx-2" id="user-email"></span>
+                        <button id="logout-btn" class="btn btn-danger btn-sm">
+                            <i class="bi bi-box-arrow-right"></i>
+                            <span class="d-none d-sm-inline"> ログアウト</span>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </nav>
+
+        <div class="container-fluid">
+             <div id="loading-overlay" style="display: none;"><div class="spinner-border" role="status"></div></div>
+            <div class="row">
+                <!-- Left Column: Add Card -->
+                <div class="col-lg-5">
+                    <div class="card">
+                        <div class="card-header">カード登録</div>
+                        <div class="card-body">
+                            <form id="add-form">
+                                <div class="mb-3">
+                                    <label for="card-search" class="form-label">カード名で検索</label>
+                                    <div class="input-group">
+                                        <input type="text" class="form-control" id="card-search" placeholder="カード名を入力">
+                                        <button class="btn btn-success" type="button" id="search-db-btn">検索</button>
+                                        <button class="btn btn-outline-secondary" type="button" id="prev-search-btn" style="display: none;" title="前回の検索">
+                                            <i class="bi bi-clock-history"></i>
+                                        </button>
+                                    </div>
+                                    <div id="search-results" class="mt-2"></div>
+                                </div>
+                                <div class="mb-3">
+                                    <label for="url" class="form-label">公式DB URL</label>
+                                    <div class="input-group">
+                                        <input type="url" class="form-control" id="url" placeholder="URLをペースト (Ctrl+V)...">
+                                        <button class="btn btn-primary" type="button" id="fetch-btn">読込</button>
+                                    </div>
+                                </div>
+                                <div class="mb-3"><label for="name" class="form-label">名前</label><input type="text" class="form-control" id="name" name="name" required></div>
+                                <div class="mb-3">
+                                    <label for="set_code" class="form-label">型番 <small class="text-muted">(任意)</small></label>
+                                    <input type="text" class="form-control" id="set_code" name="set_code">
+                                    <div id="set-rarity-choices" class="mt-2"></div>
+                                </div>
+                                <div class="mb-3"><label for="rarity" class="form-label">レアリティ</label><input type="text" class="form-control" id="rarity" name="rarity"></div>
+                                <div class="mb-3"><label for="quantity" class="form-label">枚数</label><input type="number" class="form-control" id="quantity" name="quantity" value="1" min="1" required></div>
+                                <div class="mb-3">
+                                    <label class="form-label">登録先</label>
+                                    <div class="btn-group w-100" role="group">
+                                        <input type="radio" class="btn-check" name="add-type" id="add-to-collection" value="collection" checked>
+                                        <label class="btn btn-outline-primary" for="add-to-collection">所持カード</label>
+                                        <input type="radio" class="btn-check" name="add-type" id="add-to-wishlist" value="wishlist">
+                                        <label class="btn btn-outline-warning" for="add-to-wishlist">ウィッシュリスト</label>
+                                    </div>
+                                </div>
+                                <div class="mb-3">
+                                    <label class="form-label">タグ</label>
+                                    <div id="card-tags-container" class="mb-2"></div>
+                                    <div id="tag-choices-container"></div>
+                                </div>
+                                <div class="d-flex gap-2">
+                                    <button type="submit" class="btn btn-success flex-grow-1">カードを追加</button>
+                                    <button type="button" class="btn btn-outline-secondary" id="prev-registration-btn" style="display: none;" title="前回の登録内容">
+                                        <i class="bi bi-arrow-counterclockwise"></i>
+                                    </button>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Right Column: Search and List -->
+                <div class="col-lg-7">
+                    <div class="card">
+                        <div class="card-header">
+                            <ul class="nav nav-tabs card-header-tabs">
+                                <li class="nav-item">
+                                    <a class="nav-link active" id="collection-tab" data-list-type="collection" href="#">所持カード (<span id="total-collection">0</span>)</a>
+                                </li>
+                                <li class="nav-item">
+                                    <a class="nav-link" id="wishlist-tab" data-list-type="wishlist" href="#">ウィッシュリスト (<span id="total-wishlist">0</span>)</a>
+                                </li>
+                            </ul>
+                        </div>
+                        <div class="card-body">
+                            <form id="search-form" class="row g-3 mb-4">
+                                <div class="col-md-6"><input type="text" name="search_name" class="form-control" placeholder="名前..."></div>
+                                <div class="col-md-6"><input type="text" name="search_set_code" class="form-control" placeholder="型番..."></div>
+                                <div class="col-md-6"><input type="text" name="search_rarity" class="form-control" placeholder="レアリティ..."></div>
+                                <div class="col-md-6"><input type="text" name="search_tags" class="form-control" placeholder="タグ..."></div>
+                                <div class="col-12 d-grid"><button type="submit" class="btn btn-info">検索</button></div>
+                            </form>
+                            
+                            <!-- Bulk edit controls -->
+                            <div id="bulk-edit-controls" class="alert alert-info mb-2" style="display: none;">
+                                <div class="d-flex flex-wrap align-items-center gap-2">
+                                    <span id="selected-count">0件選択</span>
+                                    <button class="btn btn-sm btn-outline-primary" id="bulk-add-tags-btn">
+                                        <i class="bi bi-tags"></i> タグ追加
+                                    </button>
+                                    <button class="btn btn-sm btn-outline-warning" id="bulk-remove-tags-btn">
+                                        <i class="bi bi-tags"></i> タグ削除
+                                    </button>
+                                    <button class="btn btn-sm btn-outline-danger" id="bulk-delete-btn">
+                                        <i class="bi bi-trash"></i> 一括削除
+                                    </button>
+                                    <button class="btn btn-sm btn-secondary" id="clear-selection-btn">
+                                        <i class="bi bi-x-circle"></i> 選択解除
+                                    </button>
+                                </div>
+                            </div>
+                            
+                            <div class="d-flex justify-content-between align-items-center mb-2">
+                                <div class="input-group w-auto">
+                                    <label class="input-group-text" for="items-per-page">表示件数</label>
+                                    <select class="form-select" id="items-per-page">
+                                        <option value="10">10</option>
+                                        <option value="20">20</option>
+                                        <option value="50" selected>50</option>
+                                        <option value="100">100</option>
+                                    </select>
+                                </div>
+                                <div id="pagination-controls"></div>
+                            </div>
+                            <div class="table-responsive">
+                                <table class="table table-striped table-hover">
+                                    <thead>
+                                        <tr>
+                                            <th scope="col" style="width: 30px; min-width: 30px;">
+                                                <input type="checkbox" id="select-all-checkbox" class="form-check-input">
+                                            </th>
+                                            <th scope="col" data-sort="名前" class="sortable">名前<i class="bi bi-arrow-down-up ms-1"></i></th>
+                                            <th scope="col" data-sort="型番" class="sortable">型番<i class="bi bi-arrow-down-up ms-1"></i></th>
+                                            <th scope="col" data-sort="レアリティ" class="sortable d-none d-md-table-cell">レアリティ<i class="bi bi-arrow-down-up ms-1"></i></th>
+                                            <th scope="col" data-sort="枚数" class="sortable" style="min-width: 50px;">枚数<i class="bi bi-arrow-down-up ms-1"></i></th>
+                                            <th scope="col" data-sort="tags" class="d-none d-sm-table-cell">タグ</th>
+                                            <th scope="col" style="min-width: 80px;">操作</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="card-table-body"></tbody>
+                                </table>
+                            </div>
+                            <div class="d-flex justify-content-center mt-2">
+                                <div id="pagination-controls-bottom"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-app.js";
+        import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, onAuthStateChanged, signOut, deleteUser, setPersistence, browserLocalPersistence } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-auth.js";
+        import { getFirestore, collection, getDocs, addDoc, deleteDoc, doc, query, where, updateDoc, increment, writeBatch } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore.js";
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyAOYKalLUb2hbghrjQUS8AWzxpLExBT7aU",
+            authDomain: "ygoh-9bcf6.firebaseapp.com",
+            projectId: "ygoh-9bcf6",
+            storageBucket: "ygoh-9bcf6.firebasestorage.app",
+            messagingSenderId: "1058357616781",
+            appId: "1:1058357616781:web:f25db127e2824226d942c4",
+            measurementId: "G-S4CCJC3HW9"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+        const db = getFirestore(app);
+        
+        setPersistence(auth, browserLocalPersistence).catch((error) => {
+        });
+
+        let cardCollection = [];
+        let wishlistCollection = [];
+        let currentListType = 'collection'; // 'collection' or 'wishlist'
+        let currentUser = null;
+        let sortConfig = { key: '名前', direction: 'ascending' };
+        let currentPage = 1;
+        let itemsPerPage = 50;
+        let filteredCardCollection = [];
+        let allTags = [];
+        let currentCardTags = [];
+        let selectedCardIds = new Set();
+
+        const mainApp = document.getElementById('main-app');
+        const appLoader = document.getElementById('app-loader');
+        const authModal = new bootstrap.Modal(document.getElementById('auth-modal'));
+        const editCardModal = new bootstrap.Modal(document.getElementById('edit-card-modal'));
+        const howToUseModal = new bootstrap.Modal(document.getElementById('how-to-use-modal'));
+        const settingsModal = new bootstrap.Modal(document.getElementById('settings-modal'));
+        const tagManagementModal = new bootstrap.Modal(document.getElementById('tag-management-modal'));
+        const bulkTagModal = new bootstrap.Modal(document.getElementById('bulk-tag-modal'));
+        const authError = document.getElementById('auth-error');
+        const logoutBtn = document.getElementById('logout-btn');
+        const userEmailSpan = document.getElementById('user-email');
+        const cardTableBody = document.getElementById('card-table-body');
+        const totalCollectionSpan = document.getElementById('total-collection');
+        const totalWishlistSpan = document.getElementById('total-wishlist');
+        const loadingOverlay = document.getElementById('loading-overlay');
+        const addForm = document.getElementById('add-form');
+        const searchForm = document.getElementById('search-form');
+        const importFileInput = document.getElementById('import-file-input');
+        const darkModeToggle = document.getElementById('dark-mode-toggle');
+        const hideEmailToggle = document.getElementById('hide-email-toggle');
+        const showSearchHistoryToggle = document.getElementById('show-search-history-toggle');
+        const showRegistrationHistoryToggle = document.getElementById('show-registration-history-toggle');
+
+        const showLoading = (show) => { loadingOverlay.style.display = show ? 'flex' : 'none'; };
+        
+        const updateHistoryButton = (btnId, storageKey, data, titlePrefix) => {
+            const btn = document.getElementById(btnId);
+            const show = localStorage.getItem(storageKey) === 'true' && data;
+            btn.style.display = show ? 'inline-block' : 'none';
+            if (show) btn.title = `${titlePrefix}: ${typeof data === 'object' ? data.name : data}`;
+        };
+        const updateSearchHistoryButton = () => updateHistoryButton('prev-search-btn', 'showSearchHistory', lastSearchKeyword, '前回の検索');
+        const updateRegistrationHistoryButton = () => updateHistoryButton('prev-registration-btn', 'showRegistrationHistory', lastRegistrationData, '前回の登録');
+        
+        const escapeHtml = (str) => str == null ? '' : String(str).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#039;');
+        
+        const getCurrentCollection = () => currentListType === 'collection' ? cardCollection : wishlistCollection;
+        
+        const renderTable = () => {
+            const currentData = getCurrentCollection();
+            filteredCardCollection.sort((a, b) => {
+                let [vA, vB] = [a.data[sortConfig.key], b.data[sortConfig.key]];
+                if (sortConfig.key === '枚数') {
+                    [vA, vB] = [parseInt(vA, 10) || 0, parseInt(vB, 10) || 0];
+                } else {
+                    [vA, vB] = [String(vA || '').toLowerCase(), String(vB || '').toLowerCase()];
+                }
+                return vA === vB ? 0 : (vA < vB ? -1 : 1) * (sortConfig.direction === 'ascending' ? 1 : -1);
+            });
+
+            const startIndex = (currentPage - 1) * itemsPerPage;
+            const endIndex = startIndex + itemsPerPage;
+            const paginatedItems = filteredCardCollection.slice(startIndex, endIndex);
+
+            cardTableBody.innerHTML = '';
+            if (paginatedItems.length === 0) {
+                cardTableBody.innerHTML = '<tr><td colspan="6" class="text-center">該当するカードはありません。</td></tr>';
+            } else {
+                paginatedItems.forEach(card => {
+                    const tr = document.createElement('tr');
+                    const tags = (card.data.tags || []).map(tag => escapeHtml(tag)).join(', ');
+                    const isChecked = selectedCardIds.has(card.id) ? 'checked' : '';
+                    tr.innerHTML = `
+                        <td>
+                            <input type="checkbox" class="form-check-input card-checkbox" data-id="${escapeHtml(card.id)}" ${isChecked}>
+                        </td>
+                        <td>${escapeHtml(card.data['名前'])}</td>
+                        <td>${escapeHtml(card.data['型番'])}</td>
+                        <td class="d-none d-md-table-cell">${escapeHtml(card.data['レアリティ'])}</td>
+                        <td>${escapeHtml(card.data['枚数'])}</td>
+                        <td class="tag-cell d-none d-sm-table-cell" title="${escapeHtml(tags)}">${tags}</td>
+                        <td>
+                            <button class="btn btn-primary btn-sm edit-btn" data-id="${escapeHtml(card.id)}"><i class="bi bi-pencil"></i></button>
+                            ${currentListType === 'wishlist' ? `<button class="btn btn-success btn-sm move-to-collection-btn" data-id="${escapeHtml(card.id)}" title="所持カードへ移動"><i class="bi bi-check-circle"></i></button>` : ''}
+                            <button class="btn btn-danger btn-sm delete-btn" data-id="${escapeHtml(card.id)}"><i class="bi bi-trash"></i></button>
+                        </td>
+                    `;
+                    cardTableBody.appendChild(tr);
+                });
+            }
+
+            updatePaginationControls();
+            updateSortIcons();
+            updateTotalCounts();
+        };
+
+        const updatePaginationControls = () => {
+            const totalPages = Math.ceil(filteredCardCollection.length / itemsPerPage);
+            const controlsHtml = `
+                <div class="d-flex flex-wrap align-items-center gap-1 gap-sm-2">
+                    <span class="text-nowrap">${totalPages > 0 ? currentPage : 0}/${totalPages}ページ</span>
+                    <span class="text-nowrap">(${filteredCardCollection.length}件)</span>
+                    <div class="btn-group btn-group-sm" role="group">
+                        <button class="btn btn-outline-secondary" ${currentPage <= 1 ? 'disabled' : ''} onclick="changePage(${currentPage - 1})">前へ</button>
+                        <button class="btn btn-outline-secondary" ${currentPage >= totalPages ? 'disabled' : ''} onclick="changePage(${currentPage + 1})">次へ</button>
+                    </div>
+                </div>
+            `;
+            document.getElementById('pagination-controls').innerHTML = controlsHtml;
+            document.getElementById('pagination-controls-bottom').innerHTML = controlsHtml;
+        };
+
+        window.changePage = (page) => {
+            currentPage = page;
+            renderTable();
+        };
+
+        const renderTagChoices = (containerId, selectedTags) => {
+            const container = document.getElementById(containerId);
+            container.innerHTML = allTags.map(tag => 
+                `<button type="button" class="btn btn-sm ${selectedTags.includes(tag.name) ? 'btn-primary' : 'btn-outline-secondary'} me-1 mb-1" onclick="toggleTag('${escapeHtml(tag.name)}', ${containerId.startsWith('edit')})">${escapeHtml(tag.name)}</button>`
+            ).join('');
+        };
+
+        const renderSelectedTags = (containerId, tags) => document.getElementById(containerId).innerHTML = tags.map(tag => `<span class="badge bg-secondary me-1">${escapeHtml(tag)}</span>`).join(' ');
+
+        window.toggleTag = (tagName, isEdit) => {
+            const i = currentCardTags.indexOf(tagName);
+            i > -1 ? currentCardTags.splice(i, 1) : currentCardTags.push(tagName);
+            const [choices, tags] = isEdit ? ['edit-tag-choices-container', 'edit-card-tags-container'] : ['tag-choices-container', 'card-tags-container'];
+            renderTagChoices(choices, currentCardTags);
+            renderSelectedTags(tags, currentCardTags);
+        };
+
+        const updateSortIcons = () => {
+            document.querySelectorAll('th.sortable').forEach(th => {
+                const icon = th.querySelector('i');
+                if (th.dataset.sort === sortConfig.key) {
+                    icon.className = sortConfig.direction === 'ascending' ? 'bi bi-sort-down' : 'bi bi-sort-up';
+                } else {
+                    icon.className = 'bi bi-arrow-down-up';
+                }
+            });
+        };
+
+        const updateTotalCounts = () => {
+            const totalCollection = cardCollection.reduce((sum, card) => sum + (card.data['枚数'] || 0), 0);
+            const totalWishlist = wishlistCollection.reduce((sum, card) => sum + (card.data['枚数'] || 0), 0);
+            totalCollectionSpan.textContent = totalCollection;
+            totalWishlistSpan.textContent = totalWishlist;
+        };
+        
+        const applySearchAndFilter = () => {
+            const [sN,sC,sR,sT] = ['search_name','search_set_code','search_rarity','search_tags'].map(n=>document.querySelector(`[name="${n}"]`).value.toLowerCase());
+            filteredCardCollection = getCurrentCollection().filter(c => {
+                const d = c.data;
+                return (!sN || (d['名前']||'').toLowerCase().includes(sN)) && 
+                       (!sC || (d['型番']||'').toLowerCase().includes(sC)) && 
+                       (!sR || (d['レアリティ']||'').toLowerCase().includes(sR)) && 
+                       (!sT || (d.tags||[]).join(',').toLowerCase().includes(sT));
+            });
+            currentPage = 1;
+            renderTable();
+        };
+
+        const getTagsCollectionRef = () => currentUser?.uid !== 'local_user' ? collection(db, "users", currentUser.uid, "tags") : null;
+
+        const loadAllTags = async () => {
+            const tagsCollRef = getTagsCollectionRef();
+            if (tagsCollRef) {
+                const snapshot = await getDocs(query(tagsCollRef));
+                allTags = snapshot.docs.map((doc, index) => ({ 
+                    id: doc.id, 
+                    name: doc.data().name,
+                    order: doc.data().order !== undefined ? doc.data().order : index
+                }));
+                
+                let needsOrderUpdate = false;
+                allTags.forEach((tag, index) => {
+                    if (tag.order === undefined || tag.order === 999) {
+                        tag.order = index;
+                        needsOrderUpdate = true;
+                    }
+                });
+                
+                if (needsOrderUpdate) {
+                    await saveTagsOrder();
+                }
+            } else {
+                const savedTagsOrder = localStorage.getItem('tagsOrder');
+                if (savedTagsOrder) {
+                    try {
+                        allTags = JSON.parse(savedTagsOrder);
+                    } catch (e) {
+                        if (allTags.length === 0) {
+                            allTags = [
+                                { id: 'local1', name: 'デッキパーツ', order: 0 }, 
+                                { id: 'local2', name: 'コレクション', order: 1 }
+                            ];
+                        }
+                    }
+                } else if (allTags.length === 0) {
+                    allTags = [
+                        { id: 'local1', name: 'デッキパーツ', order: 0 }, 
+                        { id: 'local2', name: 'コレクション', order: 1 }
+                    ];
+                }
+            }
+            allTags.sort((a, b) => (a.order !== undefined ? a.order : 999) - (b.order !== undefined ? b.order : 999));
+            renderTagManagementList();
+            if (addForm.offsetParent !== null) renderTagChoices('tag-choices-container', currentCardTags);
+            if (editCardModal._element.classList.contains('show')) renderTagChoices('edit-tag-choices-container', currentCardTags);
+        };
+
+        const renderTagManagementList = () => {
+            const container = document.getElementById('existing-tags-list');
+            container.innerHTML = '';
+            allTags.forEach((tag, index) => {
+                const div = document.createElement('div');
+                div.className = 'd-flex justify-content-between align-items-center mb-2 p-2 border rounded draggable-tag';
+                div.draggable = true;
+                div.dataset.tagId = tag.id;
+                div.dataset.tagIndex = index;
+                div.innerHTML = `
+                    <span><i class="bi bi-grip-vertical me-2"></i>${escapeHtml(tag.name)}</span>
+                    <button class="btn btn-outline-danger btn-sm delete-tag-btn" data-id="${escapeHtml(tag.id)}" data-name="${escapeHtml(tag.name)}">削除</button>
+                `;
+                
+                div.addEventListener('dragstart', handleTagDragStart);
+                div.addEventListener('dragend', handleTagDragEnd);
+                div.addEventListener('dragover', handleTagDragOver);
+                div.addEventListener('drop', handleTagDrop);
+                div.addEventListener('dragenter', handleTagDragEnter);
+                div.addEventListener('dragleave', handleTagDragLeave);
+                
+                container.appendChild(div);
+            });
+        };
+        
+        let draggedTag = null;
+        
+        const handleTagDragStart = (e) => {
+            draggedTag = e.currentTarget;
+            e.currentTarget.classList.add('dragging');
+            e.dataTransfer.effectAllowed = 'move';
+        };
+        
+        const handleTagDragEnd = (e) => {
+            e.currentTarget.classList.remove('dragging');
+            document.querySelectorAll('.draggable-tag').forEach(tag => {
+                tag.classList.remove('drag-over');
+            });
+        };
+        
+        const handleTagDragOver = (e) => {
+            if (e.preventDefault) e.preventDefault();
+            e.dataTransfer.dropEffect = 'move';
+            return false;
+        };
+        
+        const handleTagDragEnter = (e) => {
+            if (draggedTag && e.currentTarget !== draggedTag) {
+                e.currentTarget.classList.add('drag-over');
+            }
+        };
+        
+        const handleTagDragLeave = (e) => {
+            e.currentTarget.classList.remove('drag-over');
+        };
+        
+        const handleTagDrop = async (e) => {
+            if (e.stopPropagation) e.stopPropagation();
+            e.currentTarget.classList.remove('drag-over');
+            
+            if (draggedTag && e.currentTarget !== draggedTag) {
+                const draggedIndex = parseInt(draggedTag.dataset.tagIndex);
+                const targetIndex = parseInt(e.currentTarget.dataset.tagIndex);
+                
+                const draggedItem = allTags[draggedIndex];
+                allTags.splice(draggedIndex, 1);
+                allTags.splice(targetIndex, 0, draggedItem);
+                
+                allTags.forEach((tag, index) => {
+                    tag.order = index;
+                });
+                
+                await saveTagsOrder();
+                
+                renderTagManagementList();
+                renderTagChoices('tag-choices-container', currentCardTags);
+                renderTagChoices('edit-tag-choices-container', currentCardTags);
+            }
+            
+            return false;
+        };
+        
+        const saveTagsOrder = async () => {
+            const tagsCollRef = getTagsCollectionRef();
+            if (tagsCollRef) {
+                try {
+                    const batch = writeBatch(db);
+                    for (const tag of allTags) {
+                        const tagDoc = doc(tagsCollRef, tag.id);
+                        batch.set(tagDoc, { 
+                            name: tag.name,
+                            order: tag.order 
+                        }, { merge: true });
+                    }
+                    await batch.commit();
+                } catch (error) {
+                }
+            } else {
+                localStorage.setItem('tagsOrder', JSON.stringify(allTags));
+            }
+        };
+
+        document.getElementById('add-tag-form').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const inputValue = document.getElementById('new-tag-name').value.trim();
+            if (!inputValue) return;
+            
+            const newTagNames = inputValue.split(',').map(tag => tag.trim()).filter(tag => tag.length > 0);
+            
+            if (newTagNames.length === 0) {
+                alert('有効なタグ名を入力してください。');
+                return;
+            }
+            
+            const tagsCollRef = getTagsCollectionRef();
+            const addedTags = [];
+            const duplicateTags = [];
+            
+            for (const newTagName of newTagNames) {
+                if (allTags.some(tag => tag.name === newTagName)) {
+                    duplicateTags.push(newTagName);
+                } else {
+                    const maxOrder = allTags.reduce((max, tag) => Math.max(max, tag.order || 0), -1);
+                    const newOrder = maxOrder + 1;
+                    
+                    if (tagsCollRef) {
+                        const docRef = await addDoc(tagsCollRef, { name: newTagName, order: newOrder });
+                        allTags.push({ id: docRef.id, name: newTagName, order: newOrder });
+                    } else {
+                        allTags.push({ id: `local_${Date.now()}_${Math.random()}`, name: newTagName, order: newOrder });
+                    }
+                    addedTags.push(newTagName);
+                }
+            }
+            
+            if (duplicateTags.length > 0) {
+                alert(`以下のタグは既に存在するためスキップされました: ${duplicateTags.join(', ')}`);
+            }
+            
+            if (addedTags.length > 0) {
+                document.getElementById('new-tag-name').value = '';
+                if (!tagsCollRef) {
+                    localStorage.setItem('tagsOrder', JSON.stringify(allTags));
+                }
+                allTags.sort((a, b) => (a.order !== undefined ? a.order : 999) - (b.order !== undefined ? b.order : 999));
+                renderTagManagementList();
+                renderTagChoices('tag-choices-container', currentCardTags);
+                renderTagChoices('edit-tag-choices-container', currentCardTags);
+            }
+        });
+
+        document.getElementById('existing-tags-list').addEventListener('click', async (e) => {
+            if (e.target.classList.contains('delete-tag-btn')) {
+                const tagId = e.target.dataset.id;
+                const tagName = e.target.dataset.name;
+                if (!confirm(`タグ「${escapeHtml(tagName)}」を削除しますか？
+このタグは全てのカードからも削除されます。`)) return;
+
+                const tagsCollRef = getTagsCollectionRef();
+                if (tagsCollRef) {
+                    await deleteDoc(doc(tagsCollRef, tagId));
+                } 
+                
+                allTags = allTags.filter(t => t.id !== tagId);
+                allTags.forEach((tag, index) => {
+                    tag.order = index;
+                });
+                
+                await saveTagsOrder();
+                
+                renderTagManagementList();
+                renderTagChoices('tag-choices-container', currentCardTags);
+                renderTagChoices('edit-tag-choices-container', currentCardTags);
+            }
+        });
+
+        const getCollectionRef = (listType = 'collection') => {
+            if (currentUser && currentUser.uid !== 'local_user') {
+                const collectionName = listType === 'collection' ? "cards" : "wishlist";
+                return collection(db, "users", currentUser.uid, collectionName);
+            }
+            return null;
+        };
+
+        const loadCollectionFromFirestore = async () => {
+            if (!currentUser) return;
+            showLoading(true);
+            
+            const cardSnapshot = await getDocs(query(getCollectionRef('collection')));
+            cardCollection = cardSnapshot.docs.map(doc => ({ id: doc.id, data: doc.data() }));
+            
+            const wishlistSnapshot = await getDocs(query(getCollectionRef('wishlist')));
+            wishlistCollection = wishlistSnapshot.docs.map(doc => ({ id: doc.id, data: doc.data() }));
+            
+            applySearchAndFilter();
+            showLoading(false);
+        };
+
+        // Firebase接続テスト関数
+        const testFirebaseConnection = async () => {
+            const statusBadge = document.getElementById('firebase-status');
+            try {
+                // Firestoreへの読み取りテスト
+                const testQuery = query(collection(db, 'cards'), where('userId', '==', currentUser.uid));
+                await getDocs(testQuery);
+                console.log('Firebase Firestore: 接続成功');
+                statusBadge.textContent = 'Firebase接続OK';
+                statusBadge.className = 'badge bg-success ms-2';
+            } catch (error) {
+                console.error('Firebase接続エラー:', error);
+                statusBadge.textContent = `Firebase エラー: ${error.code}`;
+                statusBadge.className = 'badge bg-danger ms-2';
+            }
+        };
+
+        const handleUserLogin = (user) => {
+            currentUser = user;
+            const hideEmail = localStorage.getItem('hideEmail') === 'true';
+            userEmailSpan.textContent = hideEmail ? '' : escapeHtml(user.email);
+            mainApp.style.display = 'block';
+            appLoader.style.display = 'none';
+            authModal.hide();
+            const statusBadge = document.getElementById('firebase-status');
+            if (user.uid !== 'local_user') {
+                // Firebase接続成功を表示
+                statusBadge.textContent = 'Firebase接続済み';
+                statusBadge.className = 'badge bg-success ms-2';
+                loadCollectionFromFirestore();
+                loadAllTags();
+                // Firebase接続テスト
+                testFirebaseConnection();
+            } else {
+                // ローカルモードを表示
+                statusBadge.textContent = 'ローカルモード';
+                statusBadge.className = 'badge bg-info ms-2';
+                cardCollection = [];
+                wishlistCollection = [];
+                applySearchAndFilter();
+                loadAllTags(); // ローカルモードでもタグをロード・初期化
+                document.getElementById('delete-account-btn').style.display = 'none';
+            }
+            applyTheme();
+        };
+
+        const handleUserLogout = () => {
+            currentUser = null;
+            mainApp.style.display = 'none';
+            appLoader.style.display = 'none';
+            authModal.show();
+            cardCollection = [];
+            wishlistCollection = [];
+            renderTable([]);
+            document.getElementById('delete-account-btn').style.display = 'block';
+        };
+
+        onAuthStateChanged(auth, (user) => {
+            if (user) {
+                handleUserLogin(user);
+            } else {
+                handleUserLogout();
+            }
+        }, (error) => {
+            console.error('認証状態の確認エラー:', error);
+            const statusBadge = document.getElementById('firebase-status');
+            if (statusBadge) {
+                statusBadge.textContent = `認証エラー: ${error.code}`;
+                statusBadge.className = 'badge bg-danger ms-2';
+            }
+        });
+
+        const updateBulkEditControls = () => {
+            const bulkEditControls = document.getElementById('bulk-edit-controls');
+            const selectedCount = document.getElementById('selected-count');
+            
+            if (selectedCardIds.size > 0) {
+                bulkEditControls.style.display = 'block';
+                selectedCount.textContent = `${selectedCardIds.size}件選択`;
+            } else {
+                bulkEditControls.style.display = 'none';
+            }
+        };
+        
+        const handleBulkTagOperation = (operation) => {
+            if (selectedCardIds.size === 0) {
+                alert('カードが選択されていません。');
+                return;
+            }
+            
+            const modalTitle = document.getElementById('bulk-tag-modal-title');
+            const modalDesc = document.getElementById('bulk-tag-modal-desc');
+            const container = document.getElementById('bulk-tag-choices-container');
+            
+            modalTitle.textContent = operation === 'add' ? 'タグを追加' : 'タグを削除';
+            modalDesc.textContent = `${selectedCardIds.size}枚のカードに対して${operation === 'add' ? '追加' : '削除'}するタグを選択してください。`;
+            
+            container.innerHTML = '';
+            const selectedTags = new Set();
+            
+            allTags.forEach(tag => {
+                const btn = document.createElement('button');
+                btn.type = 'button';
+                btn.className = 'btn btn-outline-secondary btn-sm me-1 mb-1';
+                btn.textContent = tag.name;
+                btn.onclick = () => {
+                    if (selectedTags.has(tag.name)) {
+                        selectedTags.delete(tag.name);
+                        btn.classList.remove('btn-primary');
+                        btn.classList.add('btn-outline-secondary');
+                    } else {
+                        selectedTags.add(tag.name);
+                        btn.classList.remove('btn-outline-secondary');
+                        btn.classList.add('btn-primary');
+                    }
+                };
+                container.appendChild(btn);
+            });
+            
+            document.getElementById('bulk-tag-save-btn').onclick = async () => {
+                if (selectedTags.size === 0) {
+                    alert('タグが選択されていません。');
+                    return;
+                }
+                
+                showLoading(true);
+                try {
+                    for (const cardId of selectedCardIds) {
+                        const collection = getCurrentCollection();
+                        const card = collection.find(c => c.id === cardId);
+                        if (!card) continue;
+                        
+                        let updatedTags = [...(card.data.tags || [])];
+                        
+                        if (operation === 'add') {
+                            selectedTags.forEach(tag => {
+                                if (!updatedTags.includes(tag)) {
+                                    updatedTags.push(tag);
+                                }
+                            });
+                        } else {
+                            updatedTags = updatedTags.filter(tag => !selectedTags.has(tag));
+                        }
+                        
+                        const collRef = getCollectionRef(currentListType);
+                        if (collRef) {
+                            await updateDoc(doc(collRef, cardId), { tags: updatedTags });
+                        }
+                        card.data.tags = updatedTags;
+                    }
+                    
+                    bulkTagModal.hide();
+                    selectedCardIds.clear();
+                    updateBulkEditControls();
+                    renderTable();
+                    alert(`${selectedCardIds.size}枚のカードのタグを${operation === 'add' ? '追加' : '削除'}しました。`);
+                } catch (error) {
+                    alert('エラーが発生しました。');
+                } finally {
+                    showLoading(false);
+                }
+            };
+            
+            bulkTagModal.show();
+        };
+        
+        document.getElementById('tag-management-btn').addEventListener('click', () => tagManagementModal.show());
+        
+        document.getElementById('select-all-checkbox').addEventListener('change', (e) => {
+            const checkboxes = document.querySelectorAll('.card-checkbox');
+            checkboxes.forEach(checkbox => {
+                checkbox.checked = e.target.checked;
+                const cardId = checkbox.dataset.id;
+                if (e.target.checked) {
+                    selectedCardIds.add(cardId);
+                } else {
+                    selectedCardIds.delete(cardId);
+                }
+            });
+            updateBulkEditControls();
+        });
+        
+        document.addEventListener('change', (e) => {
+            if (e.target.classList.contains('card-checkbox')) {
+                const cardId = e.target.dataset.id;
+                if (e.target.checked) {
+                    selectedCardIds.add(cardId);
+                } else {
+                    selectedCardIds.delete(cardId);
+                }
+                updateBulkEditControls();
+                
+                const allCheckboxes = document.querySelectorAll('.card-checkbox');
+                const checkedBoxes = document.querySelectorAll('.card-checkbox:checked');
+                const selectAllCheckbox = document.getElementById('select-all-checkbox');
+                selectAllCheckbox.checked = allCheckboxes.length > 0 && allCheckboxes.length === checkedBoxes.length;
+            }
+        });
+        
+        document.getElementById('bulk-add-tags-btn').addEventListener('click', () => handleBulkTagOperation('add'));
+        document.getElementById('bulk-remove-tags-btn').addEventListener('click', () => handleBulkTagOperation('remove'));
+        
+        document.getElementById('bulk-delete-btn').addEventListener('click', async () => {
+            if (selectedCardIds.size === 0) {
+                alert('カードが選択されていません。');
+                return;
+            }
+            
+            const listName = currentListType === 'collection' ? '所持カード' : 'ウィッシュリスト';
+            if (!confirm(`${selectedCardIds.size}枚のカードを${listName}から削除しますか？\nこの操作は元に戻せません。`)) {
+                return;
+            }
+            
+            showLoading(true);
+            try {
+                const collRef = getCollectionRef(currentListType);
+                const collection = getCurrentCollection();
+                
+                for (const cardId of selectedCardIds) {
+                    if (collRef) {
+                        await deleteDoc(doc(collRef, cardId));
+                    }
+                    const index = collection.findIndex(c => c.id === cardId);
+                    if (index > -1) {
+                        collection.splice(index, 1);
+                    }
+                }
+                
+                selectedCardIds.clear();
+                updateBulkEditControls();
+                applySearchAndFilter();
+                alert(`${selectedCardIds.size}枚のカードを削除しました。`);
+            } catch (error) {
+                alert('削除中にエラーが発生しました。');
+            } finally {
+                showLoading(false);
+            }
+        });
+        
+        document.getElementById('clear-selection-btn').addEventListener('click', () => {
+            selectedCardIds.clear();
+            document.querySelectorAll('.card-checkbox').forEach(checkbox => checkbox.checked = false);
+            document.getElementById('select-all-checkbox').checked = false;
+            updateBulkEditControls();
+        });
+        
+        document.getElementById('collection-tab').addEventListener('click', (e) => {
+            e.preventDefault();
+            currentListType = 'collection';
+            document.getElementById('collection-tab').classList.add('active');
+            document.getElementById('wishlist-tab').classList.remove('active');
+            applySearchAndFilter();
+        });
+        
+        document.getElementById('wishlist-tab').addEventListener('click', (e) => {
+            e.preventDefault();
+            currentListType = 'wishlist';
+            document.getElementById('wishlist-tab').classList.add('active');
+            document.getElementById('collection-tab').classList.remove('active');
+            applySearchAndFilter();
+        });
+        
+        document.getElementById('login-btn').addEventListener('click', async () => {
+            const email = document.getElementById('email').value;
+            const password = document.getElementById('password').value;
+
+            if (email === 'local') {
+                currentUser = { uid: 'local_user', email: 'local@example.com' };
+                handleUserLogin(currentUser);
+                return;
+            }
+
+            try {
+                await signInWithEmailAndPassword(auth, email, password);
+                authError.style.display = 'none';
+            } catch (error) { authError.textContent = `ログインエラー: ${error.message}`; authError.style.display = 'block'; }
+        });
+
+        document.getElementById('signup-btn').addEventListener('click', async () => {
+            try {
+                await createUserWithEmailAndPassword(auth, document.getElementById('email').value, document.getElementById('password').value);
+                authError.style.display = 'none';
+            } catch (error) { authError.textContent = `新規登録エラー: ${error.message}`; authError.style.display = 'block'; }
+        });
+
+        logoutBtn.addEventListener('click', () => {
+            if (currentUser && currentUser.uid === 'local_user') {
+                window.location.reload();
+            } else {
+                signOut(auth);
+            }
+        });
+
+        addForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            showLoading(true);
+            
+            try {
+                const timeoutPromise = new Promise((_, reject) => {
+                    setTimeout(() => reject(new Error('Operation timeout')), 30000); // 30 seconds timeout
+                });
+                
+                const formData = new FormData(addForm);
+                const addType = document.querySelector('input[name="add-type"]:checked').value;
+                const newCard = {
+                    '名前': formData.get('name'),
+                    '型番': formData.get('set_code'),
+                    'レアリティ': formData.get('rarity'),
+                    '枚数': parseInt(formData.get('quantity'), 10),
+                    'tags': [...currentCardTags] // タグを追加
+                };
+            
+            const setChoices = [];
+            document.querySelectorAll('#set-rarity-choices .set-choice-btn').forEach(btn => {
+                setChoices.push({
+                    setCode: btn.dataset.setCode,
+                    rarity: btn.dataset.rarity,
+                    text: btn.textContent
+                });
+            });
+            
+            lastRegistrationData = {
+                name: newCard['名前'],
+                setCode: newCard['型番'],
+                rarity: newCard['レアリティ'],
+                quantity: newCard['枚数'],
+                tags: [...currentCardTags],
+                addType: addType,
+                setChoices: setChoices
+            };
+            updateRegistrationHistoryButton();
+
+                const targetCollection = addType === 'collection' ? cardCollection : wishlistCollection;
+                const collRef = getCollectionRef(addType);
+                
+                const dbOperation = async () => {
+                    if (collRef) { // Firebaseモード
+                        const constraints = [where("名前", "==", newCard.名前)];
+                        if (newCard.型番) {
+                            constraints.push(where("型番", "==", newCard.型番));
+                        }
+                        if (newCard.レアリティ) {
+                            constraints.push(where("レアリティ", "==", newCard.レアリティ));
+                        }
+                        const q = query(collRef, ...constraints);
+                        const existingDocs = await getDocs(q);
+
+                        if (existingDocs.empty) {
+                            const docRef = await addDoc(collRef, newCard);
+                            targetCollection.push({ id: docRef.id, data: newCard });
+                        } else {
+                            const existingDoc = existingDocs.docs[0];
+                            await updateDoc(existingDoc.ref, { 枚数: increment(newCard.枚数) });
+                            const localCard = targetCollection.find(c => c.id === existingDoc.id);
+                            if(localCard) localCard.data.枚数 += newCard.枚数;
+                        }
+                    } else { // ローカルモード
+                        const existingCard = targetCollection.find(c => {
+                            if (c.data.名前 !== newCard.名前) return false;
+                            if (newCard.型番 && c.data.型番 !== newCard.型番) return false;
+                            if (newCard.レアリティ && c.data.レアリティ !== newCard.レアリティ) return false;
+                            return true;
+                        });
+                        if (existingCard) {
+                            existingCard.data.枚数 += newCard.枚数;
+                        } else {
+                            targetCollection.push({ id: `local_${Date.now()}`, data: newCard });
+                        }
+                    }
+                };
+                
+                // Execute with timeout
+                await Promise.race([dbOperation(), timeoutPromise]);
+            
+                applySearchAndFilter();
+                addForm.reset();
+                currentCardTags = [];
+                renderTagChoices('tag-choices-container', currentCardTags);
+                renderSelectedTags('card-tags-container', currentCardTags);
+                document.getElementById('set-rarity-choices').innerHTML = '';
+                showLoading(false);
+                
+            } catch (error) {
+                showLoading(false);
+                
+                // Check error type
+                if (error.message === 'Operation timeout') {
+                    alert('操作がタイムアウトしました。ネットワーク接続を確認してください。');
+                } else if (error.code === 'permission-denied' || error.code === 'unauthenticated') {
+                    alert('セッションの有効期限が切れました。再度ログインしてください。');
+                    // Force re-authentication
+                    if (currentUser && currentUser.uid !== 'local_user') {
+                        signOut(auth);
+                    } else {
+                        window.location.reload();
+                    }
+                } else {
+                    alert(`カードの追加中にエラーが発生しました: ${error.message || 'Unknown error'}`);
+                }
+            }
+        });
+
+        cardTableBody.addEventListener('click', async (e) => {
+            const target = e.target.closest('button');
+            if (!target) return;
+
+            if (target.classList.contains('delete-btn')) {
+                const cardId = target.dataset.id;
+                const cardName = target.closest('tr').querySelector('td').textContent;
+                const listName = currentListType === 'collection' ? '所持カード' : 'ウィッシュリスト';
+                if (confirm(`「${cardName}」を${listName}から削除しますか？`)) {
+                    const collRef = getCollectionRef(currentListType);
+                    if (collRef) { // Firebaseモード
+                        deleteDoc(doc(collRef, cardId));
+                    }
+                    if (currentListType === 'collection') {
+                        cardCollection = cardCollection.filter(c => c.id !== cardId);
+                    } else {
+                        wishlistCollection = wishlistCollection.filter(c => c.id !== cardId);
+                    }
+                    applySearchAndFilter();
+                }
+            } else if (target.classList.contains('edit-btn')) {
+                const cardId = target.dataset.id;
+                const currentData = getCurrentCollection();
+                const card = currentData.find(c => c.id === cardId);
+                if (card) {
+                    document.getElementById('edit-card-id').value = card.id;
+                    document.getElementById('edit-name').value = card.data.名前;
+                    document.getElementById('edit-set-code').value = card.data.型番;
+                    document.getElementById('edit-rarity').value = card.data.レアリティ;
+                    document.getElementById('edit-quantity').value = card.data.枚数;
+                    
+                    currentCardTags = [...(card.data.tags || [])]; // 既存タグをセット
+                    renderTagChoices('edit-tag-choices-container', currentCardTags);
+                    renderSelectedTags('edit-card-tags-container', currentCardTags);
+
+                    editCardModal.show();
+                }
+            } else if (target.classList.contains('move-to-collection-btn')) {
+                const cardId = target.dataset.id;
+                const card = wishlistCollection.find(c => c.id === cardId);
+                if (card && confirm(`「${card.data.名前}」を所持カードに移動しますか？`)) {
+                    // Move from wishlist to collection
+                    const wishlistRef = getCollectionRef('wishlist');
+                    const collectionRef = getCollectionRef('collection');
+                    
+                    if (collectionRef && wishlistRef) {
+                        // Add to collection
+                        const docRef = await addDoc(collectionRef, card.data);
+                        cardCollection.push({ id: docRef.id, data: card.data });
+                        
+                        // Remove from wishlist
+                        await deleteDoc(doc(wishlistRef, cardId));
+                        wishlistCollection = wishlistCollection.filter(c => c.id !== cardId);
+                    } else {
+                        // Local mode
+                        cardCollection.push({ id: `local_${Date.now()}`, data: card.data });
+                        wishlistCollection = wishlistCollection.filter(c => c.id !== cardId);
+                    }
+                    
+                    applySearchAndFilter();
+                }
+            }
+        });
+
+        document.getElementById('save-edit-btn').addEventListener('click', async () => {
+            const cardId = document.getElementById('edit-card-id').value;
+            const updatedData = {
+                枚数: parseInt(document.getElementById('edit-quantity').value, 10),
+                tags: [...currentCardTags]
+            };
+
+            const collRef = getCollectionRef(currentListType);
+            if (collRef) { // Firebaseモード
+                await updateDoc(doc(collRef, cardId), updatedData);
+            }
+
+            const targetCollection = currentListType === 'collection' ? cardCollection : wishlistCollection;
+            const localCard = targetCollection.find(c => c.id === cardId);
+            if(localCard) {
+                localCard.data.枚数 = updatedData.枚数;
+                localCard.data.tags = updatedData.tags;
+            }
+            applySearchAndFilter();
+            editCardModal.hide();
+        });
+
+        searchForm.addEventListener('submit', (e) => {
+            e.preventDefault();
+            applySearchAndFilter();
+        });
+
+        document.getElementById('items-per-page').addEventListener('change', (e) => {
+            itemsPerPage = parseInt(e.target.value, 10);
+            currentPage = 1; // 表示件数変更時は1ページ目に戻る
+            renderTable();
+        });
+
+        document.querySelectorAll('th.sortable').forEach(th => {
+            th.addEventListener('click', () => {
+                const key = th.dataset.sort;
+                if (sortConfig.key === key) {
+                    sortConfig.direction = sortConfig.direction === 'ascending' ? 'descending' : 'ascending';
+                } else {
+                    sortConfig.key = key;
+                    sortConfig.direction = 'ascending';
+                }
+                renderTable();
+            });
+        });
+
+        // --- Data Import / Export ---
+        const exportAllData = () => {
+            return {
+                collection: cardCollection.map(c => c.data),
+                wishlist: wishlistCollection.map(c => c.data)
+            };
+        };
+        
+        const parseCsv = (text) => {
+            const lines = text.trim().replace(/\r/g, '').split('\n');
+            const header = lines[0].split(',').map(h => h.trim());
+            const cards = [];
+            for (let i = 1; i < lines.length; i++) {
+                if (lines[i].trim() === '') continue;
+                const values = lines[i].split(',');
+                const card = {};
+                header.forEach((col, index) => {
+                    const value = values[index]?.trim() || '';
+                    if (col === '枚数') {
+                        card[col] = parseInt(value, 10) || 1;
+                    } else {
+                        card[col] = value.replace(/^"|"$/g, '');
+                    }
+                });
+                cards.push(card);
+            }
+            return cards;
+        };
+
+        const handleImport = async (text, format) => {
+            let importedData;
+            try {
+                if (format === 'json') {
+                    const parsed = JSON.parse(text);
+                    // Check if it's the new format with collection and wishlist
+                    if (parsed.collection && parsed.wishlist) {
+                        importedData = parsed;
+                    } else if (Array.isArray(parsed)) {
+                        // Old format - treat as collection only
+                        importedData = { collection: parsed, wishlist: [] };
+                    } else {
+                        throw new Error('Invalid JSON format');
+                    }
+                } else if (format === 'csv') {
+                    const cards = parseCsv(text);
+                    // Check if CSV has list type column
+                    const hasListType = cards.length > 0 && cards[0].リスト種別;
+                    if (hasListType) {
+                        importedData = {
+                            collection: cards.filter(c => c.リスト種別 === '所持カード'),
+                            wishlist: cards.filter(c => c.リスト種別 === 'ウィッシュリスト')
+                        };
+                        // Remove the list type column from the data
+                        [...importedData.collection, ...importedData.wishlist].forEach(c => delete c.リスト種別);
+                    } else {
+                        // Old format - treat as collection only
+                        importedData = { collection: cards, wishlist: [] };
+                    }
+                }
+
+                const totalCards = importedData.collection.length + importedData.wishlist.length;
+                if (!confirm(`インポート内容:\n所持カード: ${importedData.collection.length}枚\nウィッシュリスト: ${importedData.wishlist.length}枚\n合計: ${totalCards}枚\n\nインポートしますか？\n(重複するカードは枚数が加算されます)`)) return;
+                
+                showLoading(true);
+
+                // Import collection
+                if (importedData.collection.length > 0) {
+                    const collRef = getCollectionRef('collection');
+                    if (collRef) { // Firebaseモード
+                        const batch = writeBatch(db);
+                        for (const card of importedData.collection) {
+                            // Parse tags if they're in semicolon format
+                            if (card.タグ && typeof card.タグ === 'string') {
+                                card.tags = card.タグ.split(';').filter(t => t.trim());
+                                delete card.タグ;
+                            }
+                            const q = query(collRef, where("名前", "==", card.名前), where("型番", "==", card.型番), where("レアリティ", "==", card.レアリティ));
+                            const existingDocs = await getDocs(q);
+                            if (existingDocs.empty) {
+                                batch.set(doc(collRef), card);
+                            } else {
+                                batch.update(existingDocs.docs[0].ref, { 枚数: increment(card.枚数 || 1) });
+                            }
+                        }
+                        await batch.commit();
+                    } else { // ローカルモード
+                        for (const card of importedData.collection) {
+                            if (card.タグ && typeof card.タグ === 'string') {
+                                card.tags = card.タグ.split(';').filter(t => t.trim());
+                                delete card.タグ;
+                            }
+                            const existingCard = cardCollection.find(c => 
+                                c.data.名前 === card.名前 && 
+                                c.data.型番 === card.型番 && 
+                                c.data.レアリティ === card.レアリティ
+                            );
+                            if (existingCard) {
+                                existingCard.data.枚数 += (card.枚数 || 1);
+                            } else {
+                                cardCollection.push({ id: `local_${Date.now()}_${Math.random()}`, data: card });
+                            }
+                        }
+                    }
+                }
+
+                // Import wishlist
+                if (importedData.wishlist.length > 0) {
+                    const wishRef = getCollectionRef('wishlist');
+                    if (wishRef) { // Firebaseモード
+                        const batch = writeBatch(db);
+                        for (const card of importedData.wishlist) {
+                            if (card.タグ && typeof card.タグ === 'string') {
+                                card.tags = card.タグ.split(';').filter(t => t.trim());
+                                delete card.タグ;
+                            }
+                            const q = query(wishRef, where("名前", "==", card.名前), where("型番", "==", card.型番), where("レアリティ", "==", card.レアリティ));
+                            const existingDocs = await getDocs(q);
+                            if (existingDocs.empty) {
+                                batch.set(doc(wishRef), card);
+                            } else {
+                                batch.update(existingDocs.docs[0].ref, { 枚数: increment(card.枚数 || 1) });
+                            }
+                        }
+                        await batch.commit();
+                    } else { // ローカルモード
+                        for (const card of importedData.wishlist) {
+                            if (card.タグ && typeof card.タグ === 'string') {
+                                card.tags = card.タグ.split(';').filter(t => t.trim());
+                                delete card.タグ;
+                            }
+                            const existingCard = wishlistCollection.find(c => 
+                                c.data.名前 === card.名前 && 
+                                c.data.型番 === card.型番 && 
+                                c.data.レアリティ === card.レアリティ
+                            );
+                            if (existingCard) {
+                                existingCard.data.枚数 += (card.枚数 || 1);
+                            } else {
+                                wishlistCollection.push({ id: `local_${Date.now()}_${Math.random()}`, data: card });
+                            }
+                        }
+                    }
+                }
+
+                // Reload if using Firebase, otherwise just refresh display
+                if (getCollectionRef()) {
+                    await loadCollectionFromFirestore();
+                } else {
+                    applySearchAndFilter();
+                }
+
+                showLoading(false);
+                alert('インポートが完了しました。');
+            } catch (err) { 
+                showLoading(false); 
+                alert(`インポート中にエラーが発生しました: ${err.message}`); 
+                console.error(err); 
+            }
+        };
+
+        document.getElementById('import-json-btn').addEventListener('click', () => importFileInput.click());
+        document.getElementById('import-csv-btn').addEventListener('click', () => importFileInput.click());
+        importFileInput.addEventListener('change', (e) => {
+            const file = e.target.files[0];
+            if (!file) return;
+            const reader = new FileReader();
+            const format = file.name.endsWith('.csv') ? 'csv' : 'json';
+            reader.onload = (event) => handleImport(event.target.result, format);
+            reader.readAsText(file);
+            e.target.value = '';
+        });
+
+        document.getElementById('export-json-btn').addEventListener('click', () => {
+            const exportData = exportAllData();
+            const dataStr = JSON.stringify(exportData, null, 4);
+            const blob = new Blob([dataStr], { type: 'application/json' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a'); a.href = url; a.download = 'yugioh_collection.json'; a.click(); URL.revokeObjectURL(url);
+        });
+
+        document.getElementById('export-csv-btn').addEventListener('click', () => {
+            const header = ['リスト種別', '名前', '型番', 'レアリティ', '枚数', 'タグ'];
+            const collectionRows = cardCollection.map(c => {
+                const row = ['所持カード', c.data['名前'], c.data['型番'], c.data['レアリティ'], c.data['枚数'], (c.data.tags || []).join(';')];
+                return row.map(value => {
+                    const strValue = String(value || '');
+                    return strValue.includes(',') ? `"${strValue}"` : strValue;
+                }).join(',');
+            });
+            const wishlistRows = wishlistCollection.map(c => {
+                const row = ['ウィッシュリスト', c.data['名前'], c.data['型番'], c.data['レアリティ'], c.data['枚数'], (c.data.tags || []).join(';')];
+                return row.map(value => {
+                    const strValue = String(value || '');
+                    return strValue.includes(',') ? `"${strValue}"` : strValue;
+                }).join(',');
+            });
+            const csvContent = [header.join(','), ...collectionRows, ...wishlistRows].join('\r\n');
+            const blob = new Blob(["\uFEFF" + csvContent], { type: 'text/csv;charset=utf-8;' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a'); a.href = url; a.download = 'yugioh_collection.csv'; a.click(); URL.revokeObjectURL(url);
+        });
+
+        // --- Settings ---
+        document.getElementById('how-to-use-btn').addEventListener('click', () => howToUseModal.show());
+        document.getElementById('settings-btn').addEventListener('click', () => settingsModal.show());
+
+        darkModeToggle.addEventListener('change', (e) => {
+            const theme = e.target.checked ? 'dark' : 'light';
+            document.documentElement.setAttribute('data-bs-theme', theme);
+            localStorage.setItem('theme', theme);
+            applyTheme(); // 設定変更時に即時反映
+        });
+        
+        hideEmailToggle.addEventListener('change', (e) => {
+            const hideEmail = e.target.checked;
+            localStorage.setItem('hideEmail', hideEmail);
+            if (currentUser) {
+                userEmailSpan.textContent = hideEmail ? '' : currentUser.email;
+            }
+        });
+        
+        // Initialize hide email setting
+        hideEmailToggle.checked = localStorage.getItem('hideEmail') === 'true';
+        
+        // Initialize history settings
+        showSearchHistoryToggle.checked = localStorage.getItem('showSearchHistory') === 'true';
+        showRegistrationHistoryToggle.checked = localStorage.getItem('showRegistrationHistory') === 'true';
+        
+        showSearchHistoryToggle.addEventListener('change', (e) => {
+            localStorage.setItem('showSearchHistory', e.target.checked);
+            updateSearchHistoryButton();
+        });
+        
+        showRegistrationHistoryToggle.addEventListener('change', (e) => {
+            localStorage.setItem('showRegistrationHistory', e.target.checked);
+            updateRegistrationHistoryButton();
+        });
+        
+        // Previous search button
+        document.getElementById('prev-search-btn').addEventListener('click', () => {
+            if (lastSearchKeyword) {
+                document.getElementById('card-search').value = lastSearchKeyword;
+                document.getElementById('search-db-btn').click();
+            }
+        });
+        
+        // Previous registration button
+        document.getElementById('prev-registration-btn').addEventListener('click', () => {
+            if (lastRegistrationData) {
+                document.getElementById('name').value = lastRegistrationData.name;
+                document.getElementById('set_code').value = lastRegistrationData.setCode;
+                document.getElementById('rarity').value = lastRegistrationData.rarity;
+                document.getElementById('quantity').value = lastRegistrationData.quantity;
+                
+                // Restore tags
+                currentCardTags = [...lastRegistrationData.tags];
+                renderTagChoices('tag-choices-container', currentCardTags);
+                renderSelectedTags('card-tags-container', currentCardTags);
+                
+                // Restore add type
+                if (lastRegistrationData.addType === 'collection') {
+                    document.getElementById('add-to-collection').checked = true;
+                } else {
+                    document.getElementById('add-to-wishlist').checked = true;
+                }
+                
+                // Restore set-rarity choices
+                const choicesEl = document.getElementById('set-rarity-choices');
+                choicesEl.innerHTML = '';
+                if (lastRegistrationData.setChoices && lastRegistrationData.setChoices.length > 0) {
+                    lastRegistrationData.setChoices.forEach(choice => {
+                        const btn = document.createElement('button');
+                        btn.type = 'button';
+                        btn.className = 'btn btn-outline-primary btn-sm me-1 mb-1 set-choice-btn';
+                        btn.dataset.setCode = choice.setCode;
+                        btn.dataset.rarity = choice.rarity;
+                        btn.textContent = choice.text;
+                        choicesEl.appendChild(btn);
+                    });
+                }
+            }
+        });
+        
+        // Initialize history buttons on page load
+        setTimeout(() => {
+            updateSearchHistoryButton();
+            updateRegistrationHistoryButton();
+        }, 100);
+
+        const applyTheme = () => {
+            const savedTheme = localStorage.getItem('theme') || 'light';
+            document.documentElement.setAttribute('data-bs-theme', savedTheme);
+            darkModeToggle.checked = savedTheme === 'dark';
+
+            const nav = document.querySelector('.navbar');
+            if (nav) {
+                if (savedTheme === 'dark') {
+                    nav.classList.remove('navbar-light', 'bg-light');
+                    nav.classList.add('navbar-dark', 'bg-dark');
+                } else {
+                    nav.classList.remove('navbar-dark', 'bg-dark');
+                    nav.classList.add('navbar-light', 'bg-light');
+                }
+            }
+        };
+        applyTheme(); // Apply theme on initial load
+
+        document.getElementById('delete-account-btn').addEventListener('click', async () => {
+            if (!currentUser) return;
+            if (!confirm('本当にアカウントを削除しますか？この操作は元に戻せません。')) return;
+            if (!confirm('最終確認です。アカウントに紐づく全てのカードデータが永久に削除されます。よろしいですか？')) return;
+            
+            showLoading(true);
+            try {
+                // 1. Delete all card data from Firestore
+                const userCardCollectionRef = getCollectionRef();
+                const snapshot = await getDocs(query(userCardCollectionRef));
+                const batch = writeBatch(db);
+                snapshot.docs.forEach(doc => batch.delete(doc.ref));
+                await batch.commit();
+
+                // 2. Delete the user account
+                await deleteUser(currentUser);
+                await signOut(auth);
+                alert('正常に削除されました。');
+                settingsModal.hide();
+            } catch (error) {
+                showLoading(false);
+                if (error.code === 'auth/requires-recent-login') {
+                    alert('アカウント削除の前に、再ログインが必要です。一度ログアウトしてから、再度ログインし直した上でもう一度お試しください。');
+                } else {
+                    alert(`アカウントの削除中にエラーが発生しました: ${error.message}`);
+                }
+            }
+        });
+
+        // --- Search from Official DB ---
+        let searchResultsData = { cards: [], currentPage: 1, itemsPerPage: 10 };
+        let lastSearchKeyword = '';
+        let lastRegistrationData = null;
+        
+        const renderSearchResults = (containerId = 'search-results') => {
+            const container = document.getElementById(containerId);
+            const startIndex = (searchResultsData.currentPage - 1) * searchResultsData.itemsPerPage;
+            const endIndex = startIndex + searchResultsData.itemsPerPage;
+            const paginatedCards = searchResultsData.cards.slice(startIndex, endIndex);
+            const totalPages = Math.ceil(searchResultsData.cards.length / searchResultsData.itemsPerPage);
+            
+            container.innerHTML = '';
+            
+            if (searchResultsData.cards.length === 0) {
+                container.innerHTML = '<div class="alert alert-warning">検索結果が見つかりませんでした。</div>';
+                return;
+            }
+            
+            const header = document.createElement('div');
+            header.className = containerId === 'search-results' ? 
+                'alert alert-info mb-2 d-flex justify-content-between align-items-center flex-wrap gap-2' :
+                'd-flex justify-content-between align-items-center mb-2';
+            header.innerHTML = `
+                <span>${containerId === 'search-results' ? '検索結果：' : ''}${searchResultsData.cards.length}件 (${searchResultsData.currentPage}/${totalPages}ページ)</span>
+                <div class="btn-group btn-group-sm" role="group">
+                    <button class="btn btn-outline-primary" ${searchResultsData.currentPage <= 1 ? 'disabled' : ''} onclick="changeSearchPage(${searchResultsData.currentPage - 1})">前へ</button>
+                    <button class="btn btn-outline-primary" ${searchResultsData.currentPage >= totalPages ? 'disabled' : ''} onclick="changeSearchPage(${searchResultsData.currentPage + 1})">次へ</button>
+                </div>
+            `;
+            container.appendChild(header);
+            
+            const listGroup = document.createElement('div');
+            listGroup.className = 'list-group';
+            
+            paginatedCards.forEach(card => {
+                const button = document.createElement('button');
+                button.type = 'button';
+                button.className = 'list-group-item list-group-item-action';
+                button.textContent = card.name;
+                button.dataset.cardUrl = card.url;
+                button.onclick = () => fetchCardDetails(button.dataset.cardUrl);
+                listGroup.appendChild(button);
+            });
+            
+            container.appendChild(listGroup);
+            
+            if (totalPages > 1 && containerId === 'search-results') {
+                const bottomControls = document.createElement('div');
+                bottomControls.className = 'mt-2 d-flex justify-content-center';
+                bottomControls.innerHTML = `
+                    <div class="btn-group btn-group-sm" role="group">
+                        <button class="btn btn-outline-primary" ${searchResultsData.currentPage <= 1 ? 'disabled' : ''} onclick="changeSearchPage(${searchResultsData.currentPage - 1})">前へ</button>
+                        <button class="btn btn-outline-primary" ${searchResultsData.currentPage >= totalPages ? 'disabled' : ''} onclick="changeSearchPage(${searchResultsData.currentPage + 1})">次へ</button>
+                    </div>
+                `;
+                container.appendChild(bottomControls);
+            }
+        };
+        
+        window.changeSearchPage = (page) => {
+            searchResultsData.currentPage = page;
+            renderSearchResults();
+        };
+        
+        // Add Enter key support for card search
+        document.getElementById('card-search').addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') {
+                e.preventDefault();
+                document.getElementById('search-db-btn').click();
+            }
+        });
+        
+        document.getElementById('search-db-btn').addEventListener('click', async () => {
+            const searchKeyword = document.getElementById('card-search').value.trim();
+            if (!searchKeyword) {
+                alert('検索キーワードを入力してください。');
+                return;
+            }
+            
+            // Save search keyword
+            lastSearchKeyword = searchKeyword;
+            updateSearchHistoryButton();
+            
+            // First check if we have matching cards in our collection
+            const matchingCards = cardCollection.filter(card => 
+                card.data['名前'] && card.data['名前'].toLowerCase().includes(searchKeyword.toLowerCase())
+            );
+            
+            if (matchingCards.length > 0) {
+                // Show local cards first
+                const resultsDiv = document.getElementById('search-results');
+                resultsDiv.innerHTML = '';
+                
+                const localHeader = document.createElement('div');
+                localHeader.className = 'alert alert-success mb-2';
+                localHeader.innerHTML = `<strong>所持カードから見つかりました (${matchingCards.length}件)</strong>`;
+                resultsDiv.appendChild(localHeader);
+                
+                const localListGroup = document.createElement('div');
+                localListGroup.className = 'list-group mb-3';
+                
+                matchingCards.forEach(card => {
+                    const button = document.createElement('button');
+                    button.type = 'button';
+                    button.className = 'list-group-item list-group-item-action d-flex justify-content-between align-items-center';
+                    button.innerHTML = `
+                        <div>
+                            <strong>${escapeHtml(card.data['名前'])}</strong>
+                            ${card.data['型番'] ? `<small class="text-muted ms-2">${escapeHtml(card.data['型番'])}</small>` : ''}
+                            ${card.data['レアリティ'] ? `<span class="badge bg-secondary ms-2">${escapeHtml(card.data['レアリティ'])}</span>` : ''}
+                        </div>
+                        <span class="badge bg-primary">${card.data['枚数']}枚</span>
+                    `;
+                    button.onclick = () => {
+                        // Fill form with existing card data
+                        document.getElementById('name').value = card.data['名前'];
+                        document.getElementById('set_code').value = card.data['型番'] || '';
+                        document.getElementById('rarity').value = card.data['レアリティ'] || '';
+                        document.getElementById('quantity').value = 1;
+                        // Clear search results
+                        resultsDiv.innerHTML = '';
+                    };
+                    localListGroup.appendChild(button);
+                });
+                
+                resultsDiv.appendChild(localListGroup);
+                
+                // Add separator
+                const separator = document.createElement('div');
+                separator.className = 'alert alert-info mb-2';
+                separator.innerHTML = '公式DBからも検索しています...';
+                resultsDiv.appendChild(separator);
+            }
+            
+            showLoading(true);
+            const searchUrl = `https://www.db.yugioh-card.com/yugiohdb/card_search.action?ope=1&sess=1&rp=100&mode=&sort=1&keyword=${encodeURIComponent(searchKeyword)}&stype=1&ctype=&othercon=2&starfr=&starto=&pscaleto=&linkmarkerfr=&linkmarkerto=&link_m=2&atkfr=&atkto=&deffr=&defto=&releaseDStart=1&releaseMStart=1&releaseYStart=1999&releaseDEnd=&releaseMEnd=&releaseYEnd=`;
+            const proxyUrl = `https://corsproxy.io/?${encodeURIComponent(searchUrl)}`;
+            
+            try {
+                const response = await fetch(proxyUrl);
+                if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
+                const text = await response.text();
+                const parser = new DOMParser();
+                const doc = parser.parseFromString(text, 'text/html');
+                
+                // Extract card names and URLs
+                const cardNames = Array.from(doc.querySelectorAll('span.card_name')).map(span => span.textContent.trim());
+                const cardLinks = Array.from(doc.querySelectorAll('input.link_value')).map(input => input.value);
+                
+                // Store search results
+                searchResultsData.cards = [];
+                cardNames.forEach((name, index) => {
+                    if (cardLinks[index]) {
+                        searchResultsData.cards.push({
+                            name: name,
+                            url: 'https://www.db.yugioh-card.com' + cardLinks[index]
+                        });
+                    }
+                });
+                searchResultsData.currentPage = 1;
+                
+                // Render paginated results - append to existing local results if any
+                if (matchingCards.length > 0) {
+                    // Remove the "searching" message
+                    const resultsDiv = document.getElementById('search-results');
+                    const lastChild = resultsDiv.lastElementChild;
+                    if (lastChild && lastChild.classList.contains('alert-info') && lastChild.innerHTML.includes('検索しています')) {
+                        resultsDiv.removeChild(lastChild);
+                    }
+                    
+                    // Add official DB results header
+                    const dbHeader = document.createElement('div');
+                    dbHeader.className = 'alert alert-info mb-2';
+                    dbHeader.innerHTML = `<strong>公式DBの検索結果</strong>`;
+                    resultsDiv.appendChild(dbHeader);
+                    
+                    // Create a container for paginated results
+                    const dbResultsContainer = document.createElement('div');
+                    dbResultsContainer.id = 'db-search-results';
+                    resultsDiv.appendChild(dbResultsContainer);
+                    
+                    renderSearchResultsToContainer('db-search-results');
+                } else {
+                    renderSearchResults();
+                }
+            } catch (err) {
+                alert(`検索エラー: ${err.message}`);
+            } finally {
+                showLoading(false);
+            }
+        });
+        
+        const renderSearchResultsToContainer = (containerId) => renderSearchResults(containerId);
+        
+        const fetchCardDetails = async (cardUrl) => {
+            const url = cardUrl + (cardUrl.includes('request_locale=ja') ? '' : (cardUrl.includes('?') ? '&request_locale=ja' : '?request_locale=ja'));
+            const proxyUrl = `https://corsproxy.io/?${encodeURIComponent(url)}`;
+            showLoading(true);
+            
+            try {
+                const response = await fetch(proxyUrl);
+                if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
+                const text = await response.text();
+                const parser = new DOMParser();
+                const doc = parser.parseFromString(text, 'text/html');
+                
+                const cardName = doc.querySelector('#card_image_1')?.alt || '';
+                if (!cardName) throw new Error("カード名が見つかりません。");
+                
+                document.getElementById('name').value = cardName;
+                const setCodes = Array.from(doc.querySelectorAll('div.card_number')).map(div => div.textContent.trim());
+                const rarities = Array.from(doc.querySelectorAll('div.rarity p')).map(p => p.textContent.trim());
+                
+                const choicesEl = document.getElementById('set-rarity-choices');
+                choicesEl.innerHTML = '';
+                
+                if (setCodes.length > 0) {
+                    // Create unique set-rarity combinations
+                    const uniqueSetRarities = new Map();
+                    setCodes.forEach((code, i) => {
+                        const rarity = rarities[i] || '';
+                        const key = `${code}_${rarity}`;
+                        if (!uniqueSetRarities.has(key)) {
+                            uniqueSetRarities.set(key, { set_code: code, rarity: rarity });
+                        }
+                    });
+                    
+                    // Create buttons for unique combinations
+                    Array.from(uniqueSetRarities.values()).forEach(data => {
+                        const btn = document.createElement('button');
+                        btn.type = 'button';
+                        btn.className = 'btn btn-outline-primary btn-sm me-1 mb-1 set-choice-btn';
+                        btn.dataset.setCode = data.set_code;
+                        btn.dataset.rarity = data.rarity;
+                        btn.textContent = `${data.set_code} (${data.rarity})`;
+                        choicesEl.appendChild(btn);
+                    });
+                } else {
+                    choicesEl.textContent = '収録情報が見つかりません。';
+                }
+                
+                // Clear search results
+                document.getElementById('search-results').innerHTML = '';
+                document.getElementById('card-search').value = '';
+            } catch (err) {
+                alert(`エラー: ${err.message}`);
+            } finally {
+                showLoading(false);
+            }
+        };
+        
+        // --- Fetch from URL ---
+        document.getElementById('fetch-btn').addEventListener('click', async () => {
+            let url = document.getElementById('url').value;
+            if (!url) { alert('URLを入力してください。'); return; }
+            if (!url.includes('request_locale=ja')) { url += url.includes('?') ? '&request_locale=ja' : '?request_locale=ja'; }
+            const proxyUrl = `https://corsproxy.io/?${encodeURIComponent(url)}`;
+            showLoading(true);
+            try {
+                const response = await fetch(proxyUrl);
+                if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
+                const text = await response.text();
+                const parser = new DOMParser();
+                const doc = parser.parseFromString(text, 'text/html');
+                const cardName = doc.querySelector('#card_image_1')?.alt || '';
+                if (!cardName) throw new Error("カード名が見つかりません。");
+                document.getElementById('name').value = cardName;
+                const setCodes = Array.from(doc.querySelectorAll('div.card_number')).map(div => div.textContent.trim());
+                const rarities = Array.from(doc.querySelectorAll('div.rarity p')).map(p => p.textContent.trim());
+                const choicesEl = document.getElementById('set-rarity-choices');
+                choicesEl.innerHTML = '';
+                if (setCodes.length > 0) {
+                    // Create unique set-rarity combinations
+                    const uniqueSetRarities = new Map();
+                    setCodes.forEach((code, i) => {
+                        const rarity = rarities[i] || '';
+                        const key = `${code}_${rarity}`;
+                        if (!uniqueSetRarities.has(key)) {
+                            uniqueSetRarities.set(key, { set_code: code, rarity: rarity });
+                        }
+                    });
+                    
+                    // Create buttons for unique combinations
+                    Array.from(uniqueSetRarities.values()).forEach(data => {
+                        const btn = document.createElement('button');
+                        btn.type = 'button';
+                        btn.className = 'btn btn-outline-primary btn-sm me-1 mb-1 set-choice-btn';
+                        btn.dataset.setCode = data.set_code; btn.dataset.rarity = data.rarity;
+                        btn.textContent = `${data.set_code} (${data.rarity})`;
+                        choicesEl.appendChild(btn);
+                    });
+                } else { choicesEl.textContent = '収録情報が見つかりません。'; }
+                document.getElementById('url').value = '';
+            } catch (err) { alert(`エラー: ${err.message}`); } finally { showLoading(false); }
+        });
+        document.getElementById('set-rarity-choices').addEventListener('click', (e) => {
+            if (e.target.classList.contains('set-choice-btn')) {
+                document.getElementById('set_code').value = e.target.dataset.setCode;
+                document.getElementById('rarity').value = e.target.dataset.rarity;
+            }
+        });
+    </script>
+</body>
+</html>
