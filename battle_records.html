@@ -764,6 +764,7 @@
                         id: doc.id,
                         ...doc.data()
                     }));
+                    window.battleRecords = battleRecords;
                 }
                 
                 applyFilters();
@@ -782,6 +783,7 @@
                             id: doc.id,
                             ...doc.data()
                         })).sort((a, b) => new Date(b.date) - new Date(a.date));
+                        window.battleRecords = battleRecords;
                         applyFilters();
                         updateStatistics();
                     } catch (fallbackError) {
@@ -795,6 +797,7 @@
 
         function loadLocalRecords() {
             battleRecords = JSON.parse(localStorage.getItem('battleRecords') || '[]');
+            window.battleRecords = battleRecords;
             applyFilters();
             updateStatistics();
         }
@@ -1202,7 +1205,8 @@
             document.getElementById('loading-overlay').style.display = 'none';
         }
 
-        // Make functions globally accessible
+        // Make functions and data globally accessible
+        window.battleRecords = battleRecords;
         window.showRecordModal = showRecordModal;
         window.deleteRecord = deleteRecord;
         window.showRecordDetails = showRecordDetails;
