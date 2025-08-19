@@ -538,19 +538,33 @@
             const recordId = document.getElementById('record-id').value;
             const format = document.getElementById('battle-format').value;
             
+            // 基本データを収集（空文字列のまま、nullにしない）
             const recordData = {
                 date: document.getElementById('battle-date').value,
                 format: format,
                 myDeck: document.getElementById('my-deck').value,
                 result: document.querySelector('input[name="result"]:checked')?.value,
-                tournament: document.getElementById('tournament-name').value || null,
-                store: document.getElementById('store-name').value || null,
-                opponentDeck: document.getElementById('opponent-deck').value || null,
-                opponent: document.getElementById('opponent-name').value || null,
-                firstTurnChoice: document.querySelector('input[name="first-turn-choice"]:checked')?.value || null,
-                notes: document.getElementById('match-notes').value || null,
                 updatedAt: new Date().toISOString()
             };
+            
+            // オプションフィールド（値がある場合のみ追加）
+            const tournament = document.getElementById('tournament-name').value;
+            if (tournament) recordData.tournament = tournament;
+            
+            const store = document.getElementById('store-name').value;
+            if (store) recordData.store = store;
+            
+            const opponentDeck = document.getElementById('opponent-deck').value;
+            if (opponentDeck) recordData.opponentDeck = opponentDeck;
+            
+            const opponent = document.getElementById('opponent-name').value;
+            if (opponent) recordData.opponent = opponent;
+            
+            const firstTurnChoice = document.querySelector('input[name="first-turn-choice"]:checked')?.value;
+            if (firstTurnChoice) recordData.firstTurnChoice = firstTurnChoice;
+            
+            const notes = document.getElementById('match-notes').value;
+            if (notes) recordData.notes = notes;
             
             // マッチ戦の詳細
             if (format === 'マッチ' || format === 'スイスドロー') {
@@ -559,11 +573,10 @@
                     const first = document.getElementById(`game${i}-first`).value;
                     const result = document.getElementById(`game${i}-result`).value;
                     if (first || result) {
-                        games.push({
-                            gameNumber: i,
-                            first: first || null,
-                            result: result || null
-                        });
+                        const gameData = { gameNumber: i };
+                        if (first) gameData.first = first;
+                        if (result) gameData.result = result;
+                        games.push(gameData);
                     }
                 }
                 if (games.length > 0) {
@@ -594,17 +607,14 @@
                     }
                     localStorage.setItem('battleRecords', JSON.stringify(records));
                 } else {
-                    // Remove null values for Firestore
-                    const cleanData = Object.fromEntries(
-                        Object.entries(recordData).filter(([_, v]) => v != null)
-                    );
-                    cleanData.userId = currentUser.uid;
+                    // Firestore用にuserIdを追加
+                    recordData.userId = currentUser.uid;
                     
                     if (recordId) {
-                        await updateDoc(doc(db, 'battleRecords', recordId), cleanData);
+                        await updateDoc(doc(db, 'battleRecords', recordId), recordData);
                     } else {
-                        cleanData.createdAt = new Date().toISOString();
-                        await addDoc(collection(db, 'battleRecords'), cleanData);
+                        recordData.createdAt = new Date().toISOString();
+                        await addDoc(collection(db, 'battleRecords'), recordData);
                     }
                 }
                 
@@ -711,19 +721,28 @@
                     draw: '<span class="badge bg-warning">引</span>'
                 };
                 
+                // null/undefined値を安全に処理
+                const date = record.date || '';
+                const venue = record.tournament || record.store || '-';
+                const myDeck = record.myDeck || '';
+                const opponentDeck = record.opponentDeck || '-';
+                const format = record.format || '';
+                const result = record.result || 'draw';
+                const id = record.id || '';
+                
                 return `
-                    <tr class="record-row ${record.result}">
-                        <td>${record.date}</td>
-                        <td>${record.tournament || record.store || '-'}</td>
-                        <td><strong>${record.myDeck}</strong></td>
-                        <td>${record.opponentDeck || '-'}</td>
-                        <td>${record.format}</td>
-                        <td>${resultBadge[record.result]}</td>
+                    <tr class="record-row ${result}">
+                        <td>${date}</td>
+                        <td>${venue}</td>
+                        <td><strong>${myDeck}</strong></td>
+                        <td>${opponentDeck}</td>
+                        <td>${format}</td>
+                        <td>${resultBadge[result] || ''}</td>
                         <td>
-                            <button class="btn btn-sm btn-warning" onclick="showRecordModal(battleRecords.find(r => r.id === '${record.id}'))">
+                            <button class="btn btn-sm btn-warning" onclick="showRecordModal(battleRecords.find(r => r.id === '${id}'))">
                                 <i class="bi bi-pencil"></i>
                             </button>
-                            <button class="btn btn-sm btn-danger" onclick="deleteRecord('${record.id}')">
+                            <button class="btn btn-sm btn-danger" onclick="deleteRecord('${id}')">
                                 <i class="bi bi-trash"></i>
                             </button>
                         </td>
