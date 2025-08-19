@@ -1575,6 +1575,69 @@
         });
 
         // --- Search from Official DB ---
+        let searchResultsData = { cards: [], currentPage: 1, itemsPerPage: 10 };
+        
+        const renderSearchResults = () => {
+            const resultsDiv = document.getElementById('search-results');
+            const startIndex = (searchResultsData.currentPage - 1) * searchResultsData.itemsPerPage;
+            const endIndex = startIndex + searchResultsData.itemsPerPage;
+            const paginatedCards = searchResultsData.cards.slice(startIndex, endIndex);
+            const totalPages = Math.ceil(searchResultsData.cards.length / searchResultsData.itemsPerPage);
+            
+            resultsDiv.innerHTML = '';
+            
+            if (searchResultsData.cards.length === 0) {
+                resultsDiv.innerHTML = '<div class="alert alert-warning">検索結果が見つかりませんでした。</div>';
+                return;
+            }
+            
+            // Results header with pagination controls
+            const header = document.createElement('div');
+            header.className = 'alert alert-info mb-2 d-flex justify-content-between align-items-center flex-wrap gap-2';
+            header.innerHTML = `
+                <span>検索結果：${searchResultsData.cards.length}件 (${searchResultsData.currentPage}/${totalPages}ページ)</span>
+                <div class="btn-group btn-group-sm" role="group">
+                    <button class="btn btn-outline-primary" ${searchResultsData.currentPage <= 1 ? 'disabled' : ''} onclick="changeSearchPage(${searchResultsData.currentPage - 1})">前へ</button>
+                    <button class="btn btn-outline-primary" ${searchResultsData.currentPage >= totalPages ? 'disabled' : ''} onclick="changeSearchPage(${searchResultsData.currentPage + 1})">次へ</button>
+                </div>
+            `;
+            resultsDiv.appendChild(header);
+            
+            // Results list
+            const listGroup = document.createElement('div');
+            listGroup.className = 'list-group';
+            
+            paginatedCards.forEach(card => {
+                const button = document.createElement('button');
+                button.type = 'button';
+                button.className = 'list-group-item list-group-item-action';
+                button.textContent = card.name;
+                button.dataset.cardUrl = card.url;
+                button.onclick = () => fetchCardDetails(button.dataset.cardUrl);
+                listGroup.appendChild(button);
+            });
+            
+            resultsDiv.appendChild(listGroup);
+            
+            // Bottom pagination controls for convenience
+            if (totalPages > 1) {
+                const bottomControls = document.createElement('div');
+                bottomControls.className = 'mt-2 d-flex justify-content-center';
+                bottomControls.innerHTML = `
+                    <div class="btn-group btn-group-sm" role="group">
+                        <button class="btn btn-outline-primary" ${searchResultsData.currentPage <= 1 ? 'disabled' : ''} onclick="changeSearchPage(${searchResultsData.currentPage - 1})">前へ</button>
+                        <button class="btn btn-outline-primary" ${searchResultsData.currentPage >= totalPages ? 'disabled' : ''} onclick="changeSearchPage(${searchResultsData.currentPage + 1})">次へ</button>
+                    </div>
+                `;
+                resultsDiv.appendChild(bottomControls);
+            }
+        };
+        
+        window.changeSearchPage = (page) => {
+            searchResultsData.currentPage = page;
+            renderSearchResults();
+        };
+        
         document.getElementById('search-db-btn').addEventListener('click', async () => {
             const searchKeyword = document.getElementById('card-search').value.trim();
             if (!searchKeyword) {
@@ -1583,7 +1646,7 @@
             }
             
             showLoading(true);
-            const searchUrl = `https://www.db.yugioh-card.com/yugiohdb/card_search.action?ope=1&sess=1&rp=10&mode=&sort=1&keyword=${encodeURIComponent(searchKeyword)}&stype=1&ctype=&othercon=2&starfr=&starto=&pscalefr=&pscaleto=&linkmarkerfr=&linkmarkerto=&link_m=2&atkfr=&atkto=&deffr=&defto=&releaseDStart=1&releaseMStart=1&releaseYStart=1999&releaseDEnd=&releaseMEnd=&releaseYEnd=`;
+            const searchUrl = `https://www.db.yugioh-card.com/yugiohdb/card_search.action?ope=1&sess=1&rp=100&mode=&sort=1&keyword=${encodeURIComponent(searchKeyword)}&stype=1&ctype=&othercon=2&starfr=&starto=&pscalefr=&pscaleto=&linkmarkerfr=&linkmarkerto=&link_m=2&atkfr=&atkto=&deffr=&defto=&releaseDStart=1&releaseMStart=1&releaseYStart=1999&releaseDEnd=&releaseMEnd=&releaseYEnd=`;
             const proxyUrl = `https://corsproxy.io/?${encodeURIComponent(searchUrl)}`;
             
             try {
@@ -1597,30 +1660,20 @@
                 const cardNames = Array.from(doc.querySelectorAll('span.card_name')).map(span => span.textContent.trim());
                 const cardLinks = Array.from(doc.querySelectorAll('input.link_value')).map(input => input.value);
                 
-                const resultsDiv = document.getElementById('search-results');
-                resultsDiv.innerHTML = '';
+                // Store search results
+                searchResultsData.cards = [];
+                cardNames.forEach((name, index) => {
+                    if (cardLinks[index]) {
+                        searchResultsData.cards.push({
+                            name: name,
+                            url: 'https://www.db.yugioh-card.com' + cardLinks[index]
+                        });
+                    }
+                });
+                searchResultsData.currentPage = 1;
                 
-                if (cardNames.length === 0) {
-                    resultsDiv.innerHTML = '<div class="alert alert-warning">検索結果が見つかりませんでした。</div>';
-                } else {
-                    resultsDiv.innerHTML = '<div class="alert alert-info mb-2">検索結果：' + cardNames.length + '件</div>';
-                    const listGroup = document.createElement('div');
-                    listGroup.className = 'list-group';
-                    
-                    cardNames.forEach((name, index) => {
-                        if (cardLinks[index]) {
-                            const button = document.createElement('button');
-                            button.type = 'button';
-                            button.className = 'list-group-item list-group-item-action';
-                            button.textContent = name;
-                            button.dataset.cardUrl = 'https://www.db.yugioh-card.com' + cardLinks[index];
-                            button.onclick = () => fetchCardDetails(button.dataset.cardUrl);
-                            listGroup.appendChild(button);
-                        }
-                    });
-                    
-                    resultsDiv.appendChild(listGroup);
-                }
+                // Render paginated results
+                renderSearchResults();
             } catch (err) {
                 alert(`検索エラー: ${err.message}`);
                 console.error(err);
@@ -1690,7 +1743,7 @@
                 const parser = new DOMParser();
                 const doc = parser.parseFromString(text, 'text/html');
                 const cardName = doc.querySelector('#card_image_1')?.alt || '';
-                if (!cardName) throw new Error("カード名が見つかりません。サイトの構造が変更された可能性があります。");
+                if (!cardName) throw new Error("カード名が見つかりません。");
                 document.getElementById('name').value = cardName;
                 const setCodes = Array.from(doc.querySelectorAll('div.card_number')).map(div => div.textContent.trim());
                 const rarities = Array.from(doc.querySelectorAll('div.rarity p')).map(p => p.textContent.trim());
