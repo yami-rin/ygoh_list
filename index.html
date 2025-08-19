@@ -303,14 +303,6 @@
                     <input class="form-check-input" type="checkbox" role="switch" id="show-registration-history-toggle">
                     <label class="form-check-label" for="show-registration-history-toggle">前回の登録履歴ボタンを表示</label>
                 </div>
-                <div class="form-check form-switch mb-3">
-                    <input class="form-check-input" type="checkbox" role="switch" id="show-url-search-toggle">
-                    <label class="form-check-label" for="show-url-search-toggle">公式DB URL検索欄を表示</label>
-                </div>
-                <div class="form-check form-switch mb-3">
-                    <input class="form-check-input" type="checkbox" role="switch" id="keep-tags-toggle">
-                    <label class="form-check-label" for="keep-tags-toggle">カード追加後もタグを保持</label>
-                </div>
                 <hr>
                 <h6>アカウント削除</h6>
                 <p class="text-muted small">この操作は元に戻せません。アカウントに紐づく全てのカードデータが完全に削除されます。</p>
@@ -376,14 +368,14 @@
                 </button>
                 <div class="collapse navbar-collapse" id="navbarContent">
                     <div class="navbar-nav ms-auto d-flex flex-row flex-wrap gap-2 mt-2 mt-lg-0">
-                        <a href="battle_records.html" class="btn btn-outline-primary btn-sm">
-                            <i class="bi bi-graph-up"></i>
-                            <span class="d-none d-sm-inline"> 戦績管理</span>
-                        </a>
                         <button class="btn btn-outline-info btn-sm" id="how-to-use-btn">
                             <i class="bi bi-question-circle"></i>
                             <span class="d-none d-sm-inline"> 使い方</span>
                         </button>
+                        <a href="battle_records.html" class="btn btn-outline-primary btn-sm">
+                            <i class="bi bi-graph-up"></i>
+                            <span class="d-none d-sm-inline"> 戦績管理</span>
+                        </a>
                         <div class="dropdown d-inline-block">
                             <button class="btn btn-outline-secondary btn-sm dropdown-toggle" type="button" data-bs-toggle="dropdown">
                                 <i class="bi bi-database"></i>
@@ -436,7 +428,7 @@
                                     </div>
                                     <div id="search-results" class="mt-2"></div>
                                 </div>
-                                <div class="mb-3" id="url-search-container">
+                                <div class="mb-3">
                                     <label for="url" class="form-label">公式DB URL</label>
                                     <div class="input-group">
                                         <input type="url" class="form-control" id="url" placeholder="URLをペースト (Ctrl+V)...">
@@ -621,8 +613,6 @@
         const hideEmailToggle = document.getElementById('hide-email-toggle');
         const showSearchHistoryToggle = document.getElementById('show-search-history-toggle');
         const showRegistrationHistoryToggle = document.getElementById('show-registration-history-toggle');
-        const showUrlSearchToggle = document.getElementById('show-url-search-toggle');
-        const keepTagsToggle = document.getElementById('keep-tags-toggle');
 
         // --- Utility & UI Functions ---
         const showLoading = (show) => { loadingOverlay.style.display = show ? 'flex' : 'none'; };
@@ -648,13 +638,6 @@
             } else {
                 btn.style.display = 'none';
             }
-        };
-        
-        // URL search visibility function
-        const updateUrlSearchVisibility = () => {
-            const container = document.getElementById('url-search-container');
-            const showUrlSearch = localStorage.getItem('showUrlSearch') === 'true';
-            container.style.display = showUrlSearch ? 'block' : 'none';
         };
         
         // XSS対策用のHTMLエスケープ関数
@@ -1463,25 +1446,10 @@
                 await Promise.race([dbOperation(), timeoutPromise]);
             
                 applySearchAndFilter();
-                
-                // Check if we should keep tags
-                const keepTags = localStorage.getItem('keepTags') === 'true';
-                const savedTags = keepTags ? [...currentCardTags] : [];
-                
                 addForm.reset();
-                
-                if (keepTags && savedTags.length > 0) {
-                    // Restore tags
-                    currentCardTags = savedTags;
-                    renderTagChoices('tag-choices-container', currentCardTags);
-                    renderSelectedTags('card-tags-container', currentCardTags);
-                } else {
-                    // Clear tags
-                    currentCardTags = [];
-                    renderTagChoices('tag-choices-container', currentCardTags);
-                    renderSelectedTags('card-tags-container', currentCardTags);
-                }
-                
+                currentCardTags = [];
+                renderTagChoices('tag-choices-container', currentCardTags);
+                renderSelectedTags('card-tags-container', currentCardTags);
                 document.getElementById('set-rarity-choices').innerHTML = '';
                 showLoading(false);
                 
@@ -1844,10 +1812,6 @@
         showSearchHistoryToggle.checked = localStorage.getItem('showSearchHistory') === 'true';
         showRegistrationHistoryToggle.checked = localStorage.getItem('showRegistrationHistory') === 'true';
         
-        // Initialize new feature settings
-        showUrlSearchToggle.checked = localStorage.getItem('showUrlSearch') !== 'false'; // Default to true
-        keepTagsToggle.checked = localStorage.getItem('keepTags') === 'true';
-        
         showSearchHistoryToggle.addEventListener('change', (e) => {
             localStorage.setItem('showSearchHistory', e.target.checked);
             updateSearchHistoryButton();
@@ -1856,15 +1820,6 @@
         showRegistrationHistoryToggle.addEventListener('change', (e) => {
             localStorage.setItem('showRegistrationHistory', e.target.checked);
             updateRegistrationHistoryButton();
-        });
-        
-        showUrlSearchToggle.addEventListener('change', (e) => {
-            localStorage.setItem('showUrlSearch', e.target.checked);
-            updateUrlSearchVisibility();
-        });
-        
-        keepTagsToggle.addEventListener('change', (e) => {
-            localStorage.setItem('keepTags', e.target.checked);
         });
         
         // Previous search button
@@ -1912,11 +1867,10 @@
             }
         });
         
-        // Initialize history buttons and UI elements on page load
+        // Initialize history buttons on page load
         setTimeout(() => {
             updateSearchHistoryButton();
             updateRegistrationHistoryButton();
-            updateUrlSearchVisibility();
         }, 100);
 
         const applyTheme = () => {
@@ -2277,7 +2231,7 @@
                 const parser = new DOMParser();
                 const doc = parser.parseFromString(text, 'text/html');
                 const cardName = doc.querySelector('#card_image_1')?.alt || '';
-                if (!cardName) throw new Error("カード名が見つかりません。サイトの構造が変更された可能性があります。");
+                if (!cardName) throw new Error("カード名が見つかりません。");
                 document.getElementById('name').value = cardName;
                 const setCodes = Array.from(doc.querySelectorAll('div.card_number')).map(div => div.textContent.trim());
                 const rarities = Array.from(doc.querySelectorAll('div.rarity p')).map(p => p.textContent.trim());
