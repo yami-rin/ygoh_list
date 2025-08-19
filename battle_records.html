@@ -161,6 +161,21 @@
                             <input type="text" class="form-control" id="opponent-name" placeholder="相手の名前（任意）">
                         </div>
 
+                        <!-- First Turn Selection -->
+                        <div class="mb-3">
+                            <label class="form-label">先攻後攻選択権</label>
+                            <div class="btn-group w-100" role="group">
+                                <input type="radio" class="btn-check" name="first-turn-choice" id="choice-me" value="me">
+                                <label class="btn btn-outline-primary" for="choice-me">
+                                    <i class="bi bi-person-fill"></i> 自分が選択
+                                </label>
+                                <input type="radio" class="btn-check" name="first-turn-choice" id="choice-opponent" value="opponent">
+                                <label class="btn btn-outline-secondary" for="choice-opponent">
+                                    <i class="bi bi-person"></i> 相手が選択
+                                </label>
+                            </div>
+                        </div>
+
                         <!-- Match Result -->
                         <div class="mb-3">
                             <label class="form-label">対戦結果 <span class="text-danger">*</span></label>
@@ -180,15 +195,95 @@
                             </div>
                         </div>
 
-                        <!-- Score (for match play) -->
-                        <div class="row" id="score-section" style="display: none;">
-                            <div class="col-6 mb-3">
-                                <label for="my-score" class="form-label">自分のスコア</label>
-                                <input type="number" class="form-control" id="my-score" min="0" max="3" placeholder="0">
+                        <!-- Match Games Details (for match play) -->
+                        <div id="match-details-section" style="display: none;">
+                            <h6 class="mb-3">各ゲーム詳細</h6>
+                            
+                            <!-- Game 1 -->
+                            <div class="card mb-2">
+                                <div class="card-body p-2">
+                                    <div class="row align-items-center">
+                                        <div class="col-md-2">
+                                            <strong>1戦目</strong>
+                                        </div>
+                                        <div class="col-md-5">
+                                            <div class="btn-group btn-group-sm w-100" role="group">
+                                                <input type="radio" class="btn-check" name="game1-first" id="game1-first-me" value="me">
+                                                <label class="btn btn-outline-info" for="game1-first-me">自分先攻</label>
+                                                <input type="radio" class="btn-check" name="game1-first" id="game1-first-opp" value="opponent">
+                                                <label class="btn btn-outline-info" for="game1-first-opp">相手先攻</label>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-5">
+                                            <div class="btn-group btn-group-sm w-100" role="group">
+                                                <input type="radio" class="btn-check" name="game1-result" id="game1-win" value="win">
+                                                <label class="btn btn-outline-success" for="game1-win">勝利</label>
+                                                <input type="radio" class="btn-check" name="game1-result" id="game1-lose" value="lose">
+                                                <label class="btn btn-outline-danger" for="game1-lose">敗北</label>
+                                                <input type="radio" class="btn-check" name="game1-result" id="game1-draw" value="draw">
+                                                <label class="btn btn-outline-warning" for="game1-draw">引分</label>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
                             </div>
-                            <div class="col-6 mb-3">
-                                <label for="opponent-score" class="form-label">相手のスコア</label>
-                                <input type="number" class="form-control" id="opponent-score" min="0" max="3" placeholder="0">
+                            
+                            <!-- Game 2 -->
+                            <div class="card mb-2">
+                                <div class="card-body p-2">
+                                    <div class="row align-items-center">
+                                        <div class="col-md-2">
+                                            <strong>2戦目</strong>
+                                        </div>
+                                        <div class="col-md-5">
+                                            <div class="btn-group btn-group-sm w-100" role="group">
+                                                <input type="radio" class="btn-check" name="game2-first" id="game2-first-me" value="me">
+                                                <label class="btn btn-outline-info" for="game2-first-me">自分先攻</label>
+                                                <input type="radio" class="btn-check" name="game2-first" id="game2-first-opp" value="opponent">
+                                                <label class="btn btn-outline-info" for="game2-first-opp">相手先攻</label>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-5">
+                                            <div class="btn-group btn-group-sm w-100" role="group">
+                                                <input type="radio" class="btn-check" name="game2-result" id="game2-win" value="win">
+                                                <label class="btn btn-outline-success" for="game2-win">勝利</label>
+                                                <input type="radio" class="btn-check" name="game2-result" id="game2-lose" value="lose">
+                                                <label class="btn btn-outline-danger" for="game2-lose">敗北</label>
+                                                <input type="radio" class="btn-check" name="game2-result" id="game2-draw" value="draw">
+                                                <label class="btn btn-outline-warning" for="game2-draw">引分</label>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <!-- Game 3 -->
+                            <div class="card mb-2">
+                                <div class="card-body p-2">
+                                    <div class="row align-items-center">
+                                        <div class="col-md-2">
+                                            <strong>3戦目</strong>
+                                        </div>
+                                        <div class="col-md-5">
+                                            <div class="btn-group btn-group-sm w-100" role="group">
+                                                <input type="radio" class="btn-check" name="game3-first" id="game3-first-me" value="me">
+                                                <label class="btn btn-outline-info" for="game3-first-me">自分先攻</label>
+                                                <input type="radio" class="btn-check" name="game3-first" id="game3-first-opp" value="opponent">
+                                                <label class="btn btn-outline-info" for="game3-first-opp">相手先攻</label>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-5">
+                                            <div class="btn-group btn-group-sm w-100" role="group">
+                                                <input type="radio" class="btn-check" name="game3-result" id="game3-win" value="win">
+                                                <label class="btn btn-outline-success" for="game3-win">勝利</label>
+                                                <input type="radio" class="btn-check" name="game3-result" id="game3-lose" value="lose">
+                                                <label class="btn btn-outline-danger" for="game3-lose">敗北</label>
+                                                <input type="radio" class="btn-check" name="game3-result" id="game3-draw" value="draw">
+                                                <label class="btn btn-outline-warning" for="game3-draw">引分</label>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
                             </div>
                         </div>
 
@@ -419,7 +514,7 @@
                                     <th style="cursor: pointer;" data-sort="result">
                                         結果 <i class="bi bi-arrow-down-up"></i>
                                     </th>
-                                    <th>スコア</th>
+                                    <th>詳細</th>
                                     <th>操作</th>
                                 </tr>
                             </thead>
@@ -535,11 +630,11 @@
             
             // Battle format change
             document.getElementById('battle-format').addEventListener('change', (e) => {
-                const scoreSection = document.getElementById('score-section');
+                const matchDetailsSection = document.getElementById('match-details-section');
                 if (e.target.value === 'マッチ' || e.target.value === 'スイスドロー') {
-                    scoreSection.style.display = 'block';
+                    matchDetailsSection.style.display = 'block';
                 } else {
-                    scoreSection.style.display = 'none';
+                    matchDetailsSection.style.display = 'none';
                 }
             });
             
@@ -662,20 +757,40 @@
                 document.getElementById('opponent-deck').value = record.opponentDeck || '';
                 document.getElementById('opponent-name').value = record.opponent || '';
                 document.querySelector(`input[name="result"][value="${record.result}"]`).checked = true;
-                document.getElementById('my-score').value = record.myScore || '';
-                document.getElementById('opponent-score').value = record.opponentScore || '';
+                
+                // 先攻後攻選択権
+                if (record.firstTurnChoice) {
+                    document.querySelector(`input[name="first-turn-choice"][value="${record.firstTurnChoice}"]`).checked = true;
+                }
+                
                 document.getElementById('match-notes').value = record.notes || '';
                 document.getElementById('tags').value = record.tags ? record.tags.join(', ') : '';
                 
-                // Show score section if needed
+                // マッチ戦詳細の復元
                 if (record.format === 'マッチ' || record.format === 'スイスドロー') {
-                    document.getElementById('score-section').style.display = 'block';
+                    document.getElementById('match-details-section').style.display = 'block';
+                    
+                    // 各ゲームの情報を復元
+                    if (record.games && record.games.length > 0) {
+                        record.games.forEach(game => {
+                            if (game.first) {
+                                const firstRadio = document.querySelector(`input[name="game${game.gameNumber}-first"][value="${game.first}"]`);
+                                if (firstRadio) firstRadio.checked = true;
+                            }
+                            if (game.result) {
+                                const resultRadio = document.querySelector(`input[name="game${game.gameNumber}-result"][value="${game.result}"]`);
+                                if (resultRadio) resultRadio.checked = true;
+                            }
+                        });
+                    }
+                } else {
+                    document.getElementById('match-details-section').style.display = 'none';
                 }
             } else {
                 document.getElementById('record-form').reset();
                 document.getElementById('record-id').value = '';
                 document.getElementById('battle-date').value = new Date().toISOString().split('T')[0];
-                document.getElementById('score-section').style.display = 'none';
+                document.getElementById('match-details-section').style.display = 'none';
             }
             
             recordModal.show();
@@ -683,21 +798,38 @@
 
         async function saveRecord() {
             const recordId = document.getElementById('record-id').value;
+            const format = document.getElementById('battle-format').value;
+            
             const recordData = {
                 date: document.getElementById('battle-date').value,
-                format: document.getElementById('battle-format').value,
+                format: format,
                 tournament: document.getElementById('tournament-name').value,
                 store: document.getElementById('store-name').value,
                 myDeck: document.getElementById('my-deck').value,
                 opponentDeck: document.getElementById('opponent-deck').value,
                 opponent: document.getElementById('opponent-name').value,
                 result: document.querySelector('input[name="result"]:checked')?.value,
-                myScore: document.getElementById('my-score').value,
-                opponentScore: document.getElementById('opponent-score').value,
+                firstTurnChoice: document.querySelector('input[name="first-turn-choice"]:checked')?.value,
                 notes: document.getElementById('match-notes').value,
                 tags: document.getElementById('tags').value.split(',').map(t => t.trim()).filter(t => t),
                 updatedAt: new Date().toISOString()
             };
+            
+            // マッチ戦の詳細情報を収集
+            if (format === 'マッチ' || format === 'スイスドロー') {
+                recordData.games = [];
+                for (let i = 1; i <= 3; i++) {
+                    const gameFirst = document.querySelector(`input[name="game${i}-first"]:checked`)?.value;
+                    const gameResult = document.querySelector(`input[name="game${i}-result"]:checked`)?.value;
+                    if (gameFirst || gameResult) {
+                        recordData.games.push({
+                            gameNumber: i,
+                            first: gameFirst,
+                            result: gameResult
+                        });
+                    }
+                }
+            }
             
             // Validation
             if (!recordData.date || !recordData.format || !recordData.myDeck || !recordData.result) {
@@ -710,6 +842,8 @@
             try {
                 if (isLocalMode) {
                     saveLocalRecord(recordId, recordData);
+                    recordModal.hide();
+                    await loadRecords();
                 } else {
                     if (recordId) {
                         await updateDoc(doc(db, 'battleRecords', recordId), recordData);
@@ -718,13 +852,12 @@
                         recordData.createdAt = serverTimestamp();
                         await addDoc(collection(db, 'battleRecords'), recordData);
                     }
+                    recordModal.hide();
+                    await loadRecords();
                 }
-                
-                recordModal.hide();
-                loadRecords();
             } catch (error) {
                 console.error('Error saving record:', error);
-                alert('保存中にエラーが発生しました');
+                alert('保存中にエラーが発生しました: ' + error.message);
             } finally {
                 hideLoading();
             }
@@ -837,6 +970,17 @@
                 draw: '<span class="badge bg-warning result-badge">引き分け</span>'
             };
             
+            const firstTurnText = {
+                me: '自分が選択',
+                opponent: '相手が選択'
+            };
+            
+            const gameResultBadge = {
+                win: '<span class="badge bg-success">勝利</span>',
+                lose: '<span class="badge bg-danger">敗北</span>',
+                draw: '<span class="badge bg-warning">引分</span>'
+            };
+            
             const content = `
                 <div class="row">
                     <div class="col-md-6">
@@ -855,11 +999,34 @@
                             <tr><th>相手デッキ</th><td>${record.opponentDeck || '-'}</td></tr>
                             <tr><th>対戦相手</th><td>${record.opponent || '-'}</td></tr>
                             <tr><th>結果</th><td>${resultBadge[record.result]}</td></tr>
-                            ${record.myScore || record.opponentScore ? 
-                                `<tr><th>スコア</th><td>${record.myScore || 0} - ${record.opponentScore || 0}</td></tr>` : ''}
+                            ${record.firstTurnChoice ? 
+                                `<tr><th>先攻後攻選択権</th><td>${firstTurnText[record.firstTurnChoice] || '-'}</td></tr>` : ''}
                         </table>
                     </div>
                 </div>
+                ${record.games && record.games.length > 0 ? `
+                    <div class="mt-3">
+                        <h6 class="text-muted">各ゲーム詳細</h6>
+                        <table class="table table-sm">
+                            <thead>
+                                <tr>
+                                    <th>ゲーム</th>
+                                    <th>先攻</th>
+                                    <th>結果</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                ${record.games.map(game => `
+                                    <tr>
+                                        <td>${game.gameNumber}戦目</td>
+                                        <td>${game.first === 'me' ? '自分' : game.first === 'opponent' ? '相手' : '-'}</td>
+                                        <td>${gameResultBadge[game.result] || '-'}</td>
+                                    </tr>
+                                `).join('')}
+                            </tbody>
+                        </table>
+                    </div>
+                ` : ''}
                 ${record.notes ? `
                     <div class="mt-3">
                         <h6 class="text-muted">試合内容・メモ</h6>
@@ -912,8 +1079,17 @@
                     draw: '<span class="badge bg-warning">引</span>'
                 };
                 
-                const score = (record.myScore || record.opponentScore) ? 
-                    `${record.myScore || 0}-${record.opponentScore || 0}` : '-';
+                // 詳細情報の作成
+                let detailInfo = [];
+                if (record.firstTurnChoice) {
+                    detailInfo.push(record.firstTurnChoice === 'me' ? '自分選択' : '相手選択');
+                }
+                if (record.games && record.games.length > 0) {
+                    const wins = record.games.filter(g => g.result === 'win').length;
+                    const loses = record.games.filter(g => g.result === 'lose').length;
+                    detailInfo.push(`${wins}-${loses}`);
+                }
+                const detailText = detailInfo.length > 0 ? detailInfo.join(' / ') : '-';
                 
                 return `
                     <tr class="${resultClass}">
@@ -925,7 +1101,7 @@
                         <td>${record.opponentDeck || '-'}</td>
                         <td>${record.format}</td>
                         <td>${resultBadge[record.result]}</td>
-                        <td>${score}</td>
+                        <td><small>${detailText}</small></td>
                         <td>
                             <button class="btn btn-sm btn-info" onclick="showRecordDetails('${record.id}')">
                                 <i class="bi bi-eye"></i>
