@@ -719,22 +719,25 @@
             }
         }
 
-        function handleUserLogin(user) {
+        async function handleUserLogin(user) {
+            console.log('handleUserLogin called with user:', user.email);
             currentUser = user;
             document.getElementById('user-email').textContent = user.email;
             authModal.hide();
             document.getElementById('app-loader').style.display = 'none';
             document.getElementById('main-app').style.display = 'block';
-            loadRecords();
+            await loadRecords();
         }
 
-        function handleLocalMode() {
+        async function handleLocalMode() {
+            console.log('handleLocalMode called');
+            isLocalMode = true;
             currentUser = { uid: 'local_user', email: 'ローカルモード' };
             document.getElementById('user-email').textContent = 'ローカルモード';
             authModal.hide();
             document.getElementById('app-loader').style.display = 'none';
             document.getElementById('main-app').style.display = 'block';
-            loadLocalRecords();
+            await loadRecords();
         }
 
         function showAuthModal() {
@@ -797,8 +800,10 @@
         }
 
         async function saveRecord() {
+            console.log('saveRecord started');
             const recordId = document.getElementById('record-id').value;
             const format = document.getElementById('battle-format').value;
+            console.log('RecordId:', recordId, 'Format:', format);
             
             const recordData = {
                 date: document.getElementById('battle-date').value,
@@ -831,81 +836,122 @@
                 }
             }
             
+            console.log('RecordData:', recordData);
+            
             // Validation
             if (!recordData.date || !recordData.format || !recordData.myDeck || !recordData.result) {
+                console.error('Validation failed:', { 
+                    date: recordData.date, 
+                    format: recordData.format, 
+                    myDeck: recordData.myDeck, 
+                    result: recordData.result 
+                });
                 alert('必須項目を入力してください');
                 return;
             }
             
+            console.log('Validation passed, showing loading...');
             showLoading();
             
             try {
+                console.log('isLocalMode:', isLocalMode);
+                console.log('currentUser:', currentUser);
+                
                 if (isLocalMode) {
+                    console.log('Saving to localStorage...');
                     saveLocalRecord(recordId, recordData);
+                    console.log('Closing modal...');
                     recordModal.hide();
+                    console.log('Loading records...');
                     await loadRecords();
+                    console.log('Save completed (local)');
                 } else {
+                    console.log('Saving to Firebase...');
                     if (recordId) {
+                        console.log('Updating existing record:', recordId);
                         await updateDoc(doc(db, 'battleRecords', recordId), recordData);
                     } else {
+                        console.log('Creating new record...');
                         recordData.userId = currentUser.uid;
                         recordData.createdAt = serverTimestamp();
-                        await addDoc(collection(db, 'battleRecords'), recordData);
+                        const docRef = await addDoc(collection(db, 'battleRecords'), recordData);
+                        console.log('Document created with ID:', docRef.id);
                     }
+                    console.log('Closing modal...');
                     recordModal.hide();
+                    console.log('Loading records...');
                     await loadRecords();
+                    console.log('Save completed (Firebase)');
                 }
             } catch (error) {
                 console.error('Error saving record:', error);
+                console.error('Error stack:', error.stack);
                 alert('保存中にエラーが発生しました: ' + error.message);
             } finally {
+                console.log('Hiding loading...');
                 hideLoading();
             }
         }
 
         function saveLocalRecord(recordId, recordData) {
+            console.log('saveLocalRecord called with recordId:', recordId);
             let records = JSON.parse(localStorage.getItem('battleRecords') || '[]');
+            console.log('Current records count:', records.length);
             
             if (recordId) {
                 const index = records.findIndex(r => r.id === recordId);
                 if (index !== -1) {
                     records[index] = { ...records[index], ...recordData };
+                    console.log('Updated existing record at index:', index);
                 }
             } else {
                 recordData.id = Date.now().toString();
                 recordData.createdAt = new Date().toISOString();
                 records.push(recordData);
+                console.log('Added new record with ID:', recordData.id);
             }
             
             localStorage.setItem('battleRecords', JSON.stringify(records));
+            console.log('Saved to localStorage, new count:', records.length);
         }
 
         async function loadRecords() {
+            console.log('loadRecords started');
             showLoading();
             
             try {
                 if (isLocalMode) {
+                    console.log('Loading from localStorage...');
                     loadLocalRecords();
                 } else {
+                    console.log('Loading from Firebase, userId:', currentUser?.uid);
                     const q = query(
                         collection(db, 'battleRecords'),
                         where('userId', '==', currentUser.uid),
                         orderBy('date', 'desc')
                     );
+                    console.log('Query created, fetching documents...');
                     const snapshot = await getDocs(q);
+                    console.log('Documents fetched, count:', snapshot.size);
                     battleRecords = snapshot.docs.map(doc => ({
                         id: doc.id,
                         ...doc.data()
                     }));
                     window.battleRecords = battleRecords;
+                    console.log('Records loaded:', battleRecords.length);
                 }
                 
+                console.log('Applying filters...');
                 applyFilters();
+                console.log('Updating statistics...');
                 updateStatistics();
+                console.log('loadRecords completed');
             } catch (error) {
                 console.error('Error loading records:', error);
+                console.error('Error details:', error.code, error.message);
                 if (error.code === 'failed-precondition') {
                     // Index needs to be created
+                    console.log('Attempting fallback query without orderBy...');
                     try {
                         const q = query(
                             collection(db, 'battleRecords'),
@@ -917,20 +963,35 @@
                             ...doc.data()
                         })).sort((a, b) => new Date(b.date) - new Date(a.date));
                         window.battleRecords = battleRecords;
+                        console.log('Fallback successful, loaded:', battleRecords.length);
                         applyFilters();
                         updateStatistics();
                     } catch (fallbackError) {
                         console.error('Fallback error:', fallbackError);
+                        // エラーが発生しても空配列で初期化
+                        battleRecords = [];
+                        window.battleRecords = battleRecords;
+                        applyFilters();
+                        updateStatistics();
                     }
+                } else {
+                    // その他のエラーでも空配列で初期化
+                    battleRecords = [];
+                    window.battleRecords = battleRecords;
+                    applyFilters();
+                    updateStatistics();
                 }
             } finally {
+                console.log('loadRecords finally block');
                 hideLoading();
             }
         }
 
         function loadLocalRecords() {
+            console.log('loadLocalRecords called');
             battleRecords = JSON.parse(localStorage.getItem('battleRecords') || '[]');
             window.battleRecords = battleRecords;
+            console.log('Loaded from localStorage:', battleRecords.length, 'records');
             applyFilters();
             updateStatistics();
         }
@@ -1374,11 +1435,23 @@
 
         // Utility functions
         function showLoading() {
-            document.getElementById('loading-overlay').style.display = 'flex';
+            console.log('showLoading called');
+            const overlay = document.getElementById('loading-overlay');
+            if (overlay) {
+                overlay.style.display = 'flex';
+            } else {
+                console.error('loading-overlay element not found');
+            }
         }
 
         function hideLoading() {
-            document.getElementById('loading-overlay').style.display = 'none';
+            console.log('hideLoading called');
+            const overlay = document.getElementById('loading-overlay');
+            if (overlay) {
+                overlay.style.display = 'none';
+            } else {
+                console.error('loading-overlay element not found');
+            }
         }
 
         // Make functions and data globally accessible
