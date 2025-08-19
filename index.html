@@ -36,6 +36,12 @@
             word-wrap: break-word;
         }
         
+        /* Table header responsive styles */
+        .table th {
+            white-space: nowrap;
+            min-width: fit-content;
+        }
+        
         /* Mobile responsive styles */
         @media (max-width: 768px) {
             .navbar-brand { font-size: 1rem; }
@@ -46,6 +52,13 @@
                 gap: 0.5rem;
             }
             .table { font-size: 0.875rem; }
+            .table th {
+                padding: 0.5rem 0.25rem;
+                font-size: 0.8rem;
+            }
+            .table th i {
+                font-size: 0.7rem;
+            }
             .btn-sm { padding: 0.25rem 0.5rem; font-size: 0.75rem; }
             .modal-dialog { margin: 0.5rem; }
             .nav-tabs .nav-link { padding: 0.5rem 0.75rem; font-size: 0.875rem; }
@@ -55,7 +68,18 @@
         @media (max-width: 576px) {
             .container-fluid { padding: 0.5rem; }
             .card-body { padding: 1rem; }
-            .table-responsive { max-height: 400px; }
+            .table-responsive { 
+                max-height: 400px;
+                overflow-x: auto;
+            }
+            .table th {
+                padding: 0.4rem 0.2rem;
+                font-size: 0.75rem;
+            }
+            .table td {
+                padding: 0.4rem 0.2rem;
+                font-size: 0.8rem;
+            }
             .navbar-toggler { padding: 0.25rem 0.5rem; }
         }
     </style>
@@ -192,8 +216,14 @@
                     <h6><i class="bi bi-sort-down"></i> 並び替え・検索</h6>
                     <p>カード一覧のヘッダーをクリックで並び替え、検索フォームで絞り込みができます。</p>
                     
+                    <h6><i class="bi bi-check2-square"></i> 一括編集</h6>
+                    <p>複数のカードを選択して、タグの一括追加・削除や一括削除が可能です。カード一覧のチェックボックスで選択してください。</p>
+                    
                     <h6><i class="bi bi-moon-stars"></i> ダークモード</h6>
                     <p>「設定」から画面をダークモードに切り替えられます。</p>
+                    
+                    <h6><i class="bi bi-phone"></i> モバイル対応</h6>
+                    <p>スマートフォンやタブレットでも快適に利用できるよう、画面サイズに応じて自動的にレイアウトが調整されます。</p>
                 </div>
             </div>
             <div class="modal-footer">
@@ -286,7 +316,7 @@
                             <i class="bi bi-question-circle"></i>
                             <span class="d-none d-sm-inline"> 使い方</span>
                         </button>
-                        <div class="dropdown">
+                        <div class="dropdown d-inline-block">
                             <button class="btn btn-outline-secondary btn-sm dropdown-toggle" type="button" data-bs-toggle="dropdown">
                                 <i class="bi bi-database"></i>
                                 <span class="d-none d-sm-inline"> データ管理</span>
@@ -298,8 +328,8 @@
                                 <li><button class="dropdown-item" id="export-json-btn">JSON形式でエクスポート</button></li>
                                 <li><button class="dropdown-item" id="export-csv-btn">CSV形式でエクスポート</button></li>
                             </ul>
-                            <input type="file" id="import-file-input" accept=".json,.csv" style="display: none;">
                         </div>
+                        <input type="file" id="import-file-input" accept=".json,.csv" style="display: none;">
                         <button class="btn btn-outline-secondary btn-sm" id="tag-management-btn">
                             <i class="bi bi-tags"></i>
                             <span class="d-none d-sm-inline"> タグ</span>
@@ -427,15 +457,15 @@
                                 <table class="table table-striped table-hover">
                                     <thead>
                                         <tr>
-                                            <th scope="col" style="width: 30px;">
+                                            <th scope="col" style="width: 30px; min-width: 30px;">
                                                 <input type="checkbox" id="select-all-checkbox" class="form-check-input">
                                             </th>
-                                            <th scope="col" data-sort="名前" class="sortable">名前 <i class="bi bi-arrow-down-up"></i></th>
-                                            <th scope="col" data-sort="型番" class="sortable">型番 <i class="bi bi-arrow-down-up"></i></th>
-                                            <th scope="col" data-sort="レアリティ" class="sortable d-none d-md-table-cell">レアリティ <i class="bi bi-arrow-down-up"></i></th>
-                                            <th scope="col" data-sort="枚数" class="sortable" style="width: 60px;">枚数 <i class="bi bi-arrow-down-up"></i></th>
+                                            <th scope="col" data-sort="名前" class="sortable">名前<i class="bi bi-arrow-down-up ms-1"></i></th>
+                                            <th scope="col" data-sort="型番" class="sortable">型番<i class="bi bi-arrow-down-up ms-1"></i></th>
+                                            <th scope="col" data-sort="レアリティ" class="sortable d-none d-md-table-cell">レアリティ<i class="bi bi-arrow-down-up ms-1"></i></th>
+                                            <th scope="col" data-sort="枚数" class="sortable" style="min-width: 50px;">枚数<i class="bi bi-arrow-down-up ms-1"></i></th>
                                             <th scope="col" data-sort="tags" class="d-none d-sm-table-cell">タグ</th>
-                                            <th scope="col" style="width: 100px;">操作</th>
+                                            <th scope="col" style="min-width: 80px;">操作</th>
                                         </tr>
                                     </thead>
                                     <tbody id="card-table-body"></tbody>
@@ -1628,7 +1658,7 @@
                 const parser = new DOMParser();
                 const doc = parser.parseFromString(text, 'text/html');
                 const cardName = doc.querySelector('#card_image_1')?.alt || '';
-                if (!cardName) throw new Error("カード名が見つかりません。サイトの構造が変更された可能性があります。");
+                if (!cardName) throw new Error("カード名が見つかりません。");
                 document.getElementById('name').value = cardName;
                 const setCodes = Array.from(doc.querySelectorAll('div.card_number')).map(div => div.textContent.trim());
                 const rarities = Array.from(doc.querySelectorAll('div.rarity p')).map(p => p.textContent.trim());
