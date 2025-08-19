@@ -605,59 +605,29 @@
 
         const showLoading = (show) => { loadingOverlay.style.display = show ? 'flex' : 'none'; };
         
-        const updateSearchHistoryButton = () => {
-            const btn = document.getElementById('prev-search-btn');
-            const showHistory = localStorage.getItem('showSearchHistory') === 'true';
-            if (showHistory && lastSearchKeyword) {
-                btn.style.display = 'inline-block';
-                btn.title = `前回の検索: ${lastSearchKeyword}`;
-            } else {
-                btn.style.display = 'none';
-            }
+        const updateHistoryButton = (btnId, storageKey, data, titlePrefix) => {
+            const btn = document.getElementById(btnId);
+            const show = localStorage.getItem(storageKey) === 'true' && data;
+            btn.style.display = show ? 'inline-block' : 'none';
+            if (show) btn.title = `${titlePrefix}: ${typeof data === 'object' ? data.name : data}`;
         };
+        const updateSearchHistoryButton = () => updateHistoryButton('prev-search-btn', 'showSearchHistory', lastSearchKeyword, '前回の検索');
+        const updateRegistrationHistoryButton = () => updateHistoryButton('prev-registration-btn', 'showRegistrationHistory', lastRegistrationData, '前回の登録');
         
-        const updateRegistrationHistoryButton = () => {
-            const btn = document.getElementById('prev-registration-btn');
-            const showHistory = localStorage.getItem('showRegistrationHistory') === 'true';
-            if (showHistory && lastRegistrationData) {
-                btn.style.display = 'inline-block';
-                btn.title = `前回の登録: ${lastRegistrationData.name}`;
-            } else {
-                btn.style.display = 'none';
-            }
-        };
+        const escapeHtml = (str) => str == null ? '' : String(str).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#039;');
         
-        const escapeHtml = (str) => {
-            if (str == null) return '';
-            return String(str)
-                .replace(/&/g, '&amp;')
-                .replace(/</g, '&lt;')
-                .replace(/>/g, '&gt;')
-                .replace(/"/g, '&quot;')
-                .replace(/'/g, '&#039;');
-        };
-        
-        const getCurrentCollection = () => {
-            return currentListType === 'collection' ? cardCollection : wishlistCollection;
-        };
+        const getCurrentCollection = () => currentListType === 'collection' ? cardCollection : wishlistCollection;
         
         const renderTable = () => {
             const currentData = getCurrentCollection();
             filteredCardCollection.sort((a, b) => {
-                let valA = a.data[sortConfig.key];
-                let valB = b.data[sortConfig.key];
-
+                let [vA, vB] = [a.data[sortConfig.key], b.data[sortConfig.key]];
                 if (sortConfig.key === '枚数') {
-                    valA = parseInt(valA, 10) || 0;
-                    valB = parseInt(valB, 10) || 0;
+                    [vA, vB] = [parseInt(vA, 10) || 0, parseInt(vB, 10) || 0];
                 } else {
-                    valA = String(valA || '').toLowerCase();
-                    valB = String(valB || '').toLowerCase();
+                    [vA, vB] = [String(vA || '').toLowerCase(), String(vB || '').toLowerCase()];
                 }
-
-                if (valA < valB) return sortConfig.direction === 'ascending' ? -1 : 1;
-                if (valA > valB) return sortConfig.direction === 'ascending' ? 1 : -1;
-                return 0;
+                return vA === vB ? 0 : (vA < vB ? -1 : 1) * (sortConfig.direction === 'ascending' ? 1 : -1);
             });
 
             const startIndex = (currentPage - 1) * itemsPerPage;
@@ -719,37 +689,19 @@
 
         const renderTagChoices = (containerId, selectedTags) => {
             const container = document.getElementById(containerId);
-            container.innerHTML = '';
-            allTags.forEach(tag => {
-                const isSelected = selectedTags.includes(tag.name);
-                const btn = document.createElement('button');
-                btn.type = 'button';
-                btn.className = `btn btn-sm ${isSelected ? 'btn-primary' : 'btn-outline-secondary'} me-1 mb-1`;
-                btn.textContent = tag.name;
-                btn.onclick = () => toggleTag(tag.name, containerId.startsWith('edit'));
-                container.appendChild(btn);
-            });
+            container.innerHTML = allTags.map(tag => 
+                `<button type="button" class="btn btn-sm ${selectedTags.includes(tag.name) ? 'btn-primary' : 'btn-outline-secondary'} me-1 mb-1" onclick="toggleTag('${escapeHtml(tag.name)}', ${containerId.startsWith('edit')})">${escapeHtml(tag.name)}</button>`
+            ).join('');
         };
 
-        const renderSelectedTags = (containerId, tags) => {
-            const container = document.getElementById(containerId);
-            container.innerHTML = tags.map(tag => `<span class="badge bg-secondary me-1">${escapeHtml(tag)}</span>`).join(' ');
-        };
+        const renderSelectedTags = (containerId, tags) => document.getElementById(containerId).innerHTML = tags.map(tag => `<span class="badge bg-secondary me-1">${escapeHtml(tag)}</span>`).join(' ');
 
         window.toggleTag = (tagName, isEdit) => {
-            const index = currentCardTags.indexOf(tagName);
-            if (index > -1) {
-                currentCardTags.splice(index, 1);
-            } else {
-                currentCardTags.push(tagName);
-            }
-            if (isEdit) {
-                renderTagChoices('edit-tag-choices-container', currentCardTags);
-                renderSelectedTags('edit-card-tags-container', currentCardTags);
-            } else {
-                renderTagChoices('tag-choices-container', currentCardTags);
-                renderSelectedTags('card-tags-container', currentCardTags);
-            }
+            const i = currentCardTags.indexOf(tagName);
+            i > -1 ? currentCardTags.splice(i, 1) : currentCardTags.push(tagName);
+            const [choices, tags] = isEdit ? ['edit-tag-choices-container', 'edit-card-tags-container'] : ['tag-choices-container', 'card-tags-container'];
+            renderTagChoices(choices, currentCardTags);
+            renderSelectedTags(tags, currentCardTags);
         };
 
         const updateSortIcons = () => {
@@ -771,35 +723,19 @@
         };
         
         const applySearchAndFilter = () => {
-            const searchName = document.querySelector('[name="search_name"]').value.toLowerCase();
-            const searchSetCode = document.querySelector('[name="search_set_code"]').value.toLowerCase();
-            const searchRarity = document.querySelector('[name="search_rarity"]').value.toLowerCase();
-            const searchTags = document.querySelector('[name="search_tags"]').value.toLowerCase();
-
-            const currentData = getCurrentCollection();
-            filteredCardCollection = currentData.filter(card => {
-                const cardName = (card.data['名前'] || '').toLowerCase();
-                const cardSetCode = (card.data['型番'] || '').toLowerCase();
-                const cardRarity = (card.data['レアリティ'] || '').toLowerCase();
-                const cardTags = (card.data.tags || []).join(', ').toLowerCase();
-
-                return (
-                    (searchName === '' || cardName.includes(searchName)) &&
-                    (searchSetCode === '' || cardSetCode.includes(searchSetCode)) &&
-                    (searchRarity === '' || cardRarity.includes(searchRarity)) &&
-                    (searchTags === '' || cardTags.includes(searchTags))
-                );
+            const [sN,sC,sR,sT] = ['search_name','search_set_code','search_rarity','search_tags'].map(n=>document.querySelector(`[name="${n}"]`).value.toLowerCase());
+            filteredCardCollection = getCurrentCollection().filter(c => {
+                const d = c.data;
+                return (!sN || (d['名前']||'').toLowerCase().includes(sN)) && 
+                       (!sC || (d['型番']||'').toLowerCase().includes(sC)) && 
+                       (!sR || (d['レアリティ']||'').toLowerCase().includes(sR)) && 
+                       (!sT || (d.tags||[]).join(',').toLowerCase().includes(sT));
             });
-            currentPage = 1; // 検索実行時は1ページ目に戻る
+            currentPage = 1;
             renderTable();
         };
 
-        const getTagsCollectionRef = () => {
-            if (currentUser && currentUser.uid !== 'local_user') {
-                return collection(db, "users", currentUser.uid, "tags");
-            }
-            return null;
-        };
+        const getTagsCollectionRef = () => currentUser?.uid !== 'local_user' ? collection(db, "users", currentUser.uid, "tags") : null;
 
         const loadAllTags = async () => {
             const tagsCollRef = getTagsCollectionRef();
