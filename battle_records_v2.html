@@ -1,0 +1,1093 @@
+<!doctype html>
+<html lang="ja">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>戦績管理</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css">
+    <style>
+        body{background-color:#f8f9fa}[data-bs-theme="dark"] body{background-color:#212529}.container-fluid{max-width:1400px}.card{margin-bottom:1.5rem}#loading-overlay,#app-loader{position:fixed;top:0;left:0;width:100%;height:100%;background-color:rgba(0,0,0,0.6);display:flex;justify-content:center;align-items:center;z-index:1060;color:white}#main-app{display:none}.stat-card{background:linear-gradient(135deg,#667eea 0%,#764ba2 100%);color:white;border-radius:10px;padding:1.5rem;margin-bottom:1rem;cursor:pointer;transition:transform 0.2s}.stat-card:hover{transform:scale(1.02)}.stat-card.win{background:linear-gradient(135deg,#f093fb 0%,#f5576c 100%)}.stat-card.lose{background:linear-gradient(135deg,#4facfe 0%,#00f2fe 100%)}.record-row.win{background-color:rgba(40,167,69,0.1)}.record-row.lose{background-color:rgba(220,53,69,0.1)}.record-row.draw{background-color:rgba(255,193,7,0.1)}.tournament-badge{background:linear-gradient(135deg,#667eea 0%,#764ba2 100%);color:white;padding:0.5rem 1rem;border-radius:20px;display:inline-block;margin-right:0.5rem}.round-indicator{background:#6c757d;color:white;padding:0.25rem 0.75rem;border-radius:15px;font-size:0.9rem}.autocomplete-suggestions{position:absolute;border:1px solid #ccc;background:white;max-height:200px;overflow-y:auto;z-index:1000;width:100%}.autocomplete-suggestion{padding:0.5rem;cursor:pointer}.autocomplete-suggestion:hover{background:#f0f0f0}.navbar-nav{justify-content:center;width:100%}@media(max-width:768px){.navbar-brand{font-size:1rem}.table{font-size:0.875rem}.stat-card{padding:1rem}}
+    </style>
+</head>
+<body>
+    <!-- App Loader -->
+    <div id="app-loader">
+        <div class="spinner-border" style="width: 3rem; height: 3rem;" role="status">
+            <span class="visually-hidden">Loading...</span>
+        </div>
+    </div>
+
+    <!-- Login Modal -->
+    <div class="modal fade" id="auth-modal" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">ログインまたは新規登録</h5>
+                </div>
+                <div class="modal-body">
+                    <div id="auth-error" class="alert alert-danger" style="display: none;"></div>
+                    <form id="auth-form">
+                        <div class="mb-3">
+                            <label for="email" class="form-label">メールアドレス</label>
+                            <input type="email" class="form-control" id="email" required>
+                            <small class="text-muted">ローカルモードの場合は「local」と入力</small>
+                        </div>
+                        <div class="mb-3">
+                            <label for="password" class="form-label">パスワード</label>
+                            <input type="password" class="form-control" id="password" required>
+                        </div>
+                        <div class="d-grid gap-2">
+                            <button type="button" id="login-btn" class="btn btn-primary">ログイン</button>
+                            <button type="button" id="signup-btn" class="btn btn-secondary">新規登録</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Tournament Registration Modal -->
+    <div class="modal fade" id="tournament-modal" tabindex="-1">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">大会を登録</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="tournament-form">
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label for="tournament-date" class="form-label">開催日 <span class="text-danger">*</span></label>
+                                <input type="date" class="form-control" id="tournament-date" required>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label for="tournament-participants" class="form-label">参加人数 <span class="text-danger">*</span></label>
+                                <input type="number" class="form-control" id="tournament-participants" min="2" max="32" required>
+                                <small class="text-muted">自動でラウンド数が計算されます</small>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label for="tournament-preset" class="form-label">大会プリセット</label>
+                                <select class="form-select" id="tournament-preset">
+                                    <option value="">選択してください</option>
+                                </select>
+                                <button type="button" class="btn btn-sm btn-outline-secondary mt-2" id="manage-presets-btn">
+                                    <i class="bi bi-gear"></i> プリセット管理
+                                </button>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label for="new-tournament-name" class="form-label">大会名 <span class="text-danger">*</span></label>
+                                <input type="text" class="form-control" id="new-tournament-name" required>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label for="tournament-store" class="form-label">店舗名 <span class="text-danger">*</span></label>
+                                <div style="position: relative;">
+                                    <input type="text" class="form-control" id="tournament-store" required autocomplete="off">
+                                    <div id="store-suggestions" class="autocomplete-suggestions" style="display: none;"></div>
+                                </div>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label for="tournament-deck" class="form-label">使用デッキ <span class="text-danger">*</span></label>
+                                <input type="text" class="form-control" id="tournament-deck" required>
+                            </div>
+                        </div>
+                        <div class="alert alert-info">
+                            <i class="bi bi-info-circle"></i> 
+                            <span id="rounds-info">参加人数を入力すると必要ラウンド数が表示されます</span>
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">キャンセル</button>
+                    <button type="button" id="start-tournament-btn" class="btn btn-primary">大会を開始</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Tournament Rounds Modal -->
+    <div class="modal fade" id="rounds-modal" tabindex="-1" data-bs-backdrop="static">
+        <div class="modal-dialog modal-xl">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">
+                        <span id="tournament-title"></span>
+                        <span class="round-indicator ms-2" id="current-round"></span>
+                    </h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <div id="rounds-container"></div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">後で続ける</button>
+                    <button type="button" id="save-tournament-btn" class="btn btn-primary">大会結果を保存</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Tournament Preset Modal -->
+    <div class="modal fade" id="preset-modal" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">大会プリセット管理</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="mb-3">
+                        <label class="form-label">新規プリセット追加</label>
+                        <div class="input-group">
+                            <input type="text" class="form-control" id="new-preset-name" placeholder="大会名">
+                            <input type="text" class="form-control" id="new-preset-store" placeholder="店舗名">
+                            <button class="btn btn-success" id="add-preset-btn">追加</button>
+                        </div>
+                    </div>
+                    <div id="preset-list"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Main App -->
+    <div id="main-app">
+        <nav class="navbar navbar-expand-lg navbar-light bg-light mb-4">
+            <div class="container-fluid">
+                <span class="navbar-brand">
+                    <i class="bi bi-graph-up"></i> 戦績管理
+                </span>
+                <span id="firebase-status" class="badge bg-warning text-dark ms-2">接続中...</span>
+                <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarContent">
+                    <span class="navbar-toggler-icon"></span>
+                </button>
+                <div class="collapse navbar-collapse" id="navbarContent">
+                    <div class="navbar-nav ms-auto">
+                        <a href="index.html" class="btn btn-outline-primary btn-sm me-2">
+                            <i class="bi bi-layers"></i> カード管理
+                        </a>
+                        <span class="navbar-text me-2" id="user-email"></span>
+                        <button id="logout-btn" class="btn btn-danger btn-sm">
+                            <i class="bi bi-box-arrow-right"></i> ログアウト
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </nav>
+
+        <div class="container-fluid">
+            <div id="loading-overlay" style="display: none;">
+                <div class="spinner-border" role="status"></div>
+            </div>
+
+            <!-- Statistics Cards with Filters -->
+            <div class="card mb-4">
+                <div class="card-body">
+                    <h5 class="card-title">統計フィルター</h5>
+                    <div class="row g-2">
+                        <div class="col-md-3">
+                            <label class="form-label small">期間</label>
+                            <select class="form-select form-select-sm" id="stat-period">
+                                <option value="all">全期間</option>
+                                <option value="month">今月</option>
+                                <option value="3months">過去3ヶ月</option>
+                                <option value="6months">過去6ヶ月</option>
+                                <option value="year">今年</option>
+                            </select>
+                        </div>
+                        <div class="col-md-3">
+                            <label class="form-label small">デッキ</label>
+                            <select class="form-select form-select-sm" id="stat-deck">
+                                <option value="">全デッキ</option>
+                            </select>
+                        </div>
+                        <div class="col-md-3">
+                            <label class="form-label small">大会</label>
+                            <select class="form-select form-select-sm" id="stat-tournament">
+                                <option value="">全大会</option>
+                            </select>
+                        </div>
+                        <div class="col-md-3">
+                            <label class="form-label small">&nbsp;</label>
+                            <button class="btn btn-primary btn-sm w-100" id="apply-stat-filter">
+                                <i class="bi bi-funnel"></i> 適用
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="row mb-4">
+                <div class="col-md-3 col-6">
+                    <div class="stat-card">
+                        <h6>総対戦数</h6>
+                        <h2 id="total-battles">0</h2>
+                    </div>
+                </div>
+                <div class="col-md-3 col-6">
+                    <div class="stat-card win">
+                        <h6>勝利数</h6>
+                        <h2 id="total-wins">0</h2>
+                    </div>
+                </div>
+                <div class="col-md-3 col-6">
+                    <div class="stat-card lose">
+                        <h6>敗北数</h6>
+                        <h2 id="total-loses">0</h2>
+                    </div>
+                </div>
+                <div class="col-md-3 col-6">
+                    <div class="stat-card">
+                        <h6>勝率</h6>
+                        <h2 id="win-rate">0%</h2>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Control Panel -->
+            <div class="card mb-4">
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-8">
+                            <form id="filter-form" class="row g-2">
+                                <div class="col-md-4">
+                                    <input type="text" class="form-control form-control-sm" id="filter-deck" placeholder="デッキ名で検索">
+                                </div>
+                                <div class="col-md-4">
+                                    <select class="form-select form-select-sm" id="filter-result">
+                                        <option value="">全ての結果</option>
+                                        <option value="win">勝利のみ</option>
+                                        <option value="lose">敗北のみ</option>
+                                        <option value="draw">引き分けのみ</option>
+                                    </select>
+                                </div>
+                                <div class="col-md-4">
+                                    <button type="submit" class="btn btn-info btn-sm w-100">
+                                        <i class="bi bi-search"></i> 検索
+                                    </button>
+                                </div>
+                            </form>
+                        </div>
+                        <div class="col-md-4 text-end mt-3 mt-md-0">
+                            <button class="btn btn-primary me-2" id="add-tournament-btn">
+                                <i class="bi bi-trophy"></i> 大会登録
+                            </button>
+                            <button class="btn btn-success" id="add-record-btn">
+                                <i class="bi bi-plus-circle"></i> 単発戦績
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Active Tournaments -->
+            <div id="active-tournaments" class="mb-4" style="display: none;">
+                <div class="card border-primary">
+                    <div class="card-header bg-primary text-white">
+                        <h5 class="mb-0">進行中の大会</h5>
+                    </div>
+                    <div class="card-body" id="active-tournaments-list"></div>
+                </div>
+            </div>
+
+            <!-- Records Table -->
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="mb-0">戦績一覧</h5>
+                </div>
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <table class="table table-hover">
+                            <thead>
+                                <tr>
+                                    <th>日付</th>
+                                    <th>大会/店舗</th>
+                                    <th>ラウンド</th>
+                                    <th>使用デッキ</th>
+                                    <th>相手デッキ</th>
+                                    <th>結果</th>
+                                    <th>操作</th>
+                                </tr>
+                            </thead>
+                            <tbody id="records-tbody">
+                            </tbody>
+                        </table>
+                    </div>
+                    <div id="no-records-message" class="text-center py-5" style="display: none;">
+                        <i class="bi bi-inbox" style="font-size: 3rem;"></i>
+                        <p class="mt-3">戦績がありません</p>
+                        <button class="btn btn-primary" onclick="document.getElementById('add-tournament-btn').click()">
+                            大会を登録する
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-app.js";
+        import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, onAuthStateChanged, signOut, setPersistence, browserLocalPersistence } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-auth.js";
+        import { getFirestore, collection, getDocs, addDoc, deleteDoc, doc, query, where, updateDoc, getDoc, setDoc } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore.js";
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyAOYKalLUb2hbghrjQUS8AWzxpLExBT7aU",
+            authDomain: "ygoh-9bcf6.firebaseapp.com",
+            projectId: "ygoh-9bcf6",
+            storageBucket: "ygoh-9bcf6.firebasestorage.app",
+            messagingSenderId: "515041224138",
+            appId: "1:515041224138:web:8de47b38ed9cc1bb8afd37",
+            measurementId: "G-ZGSRE8MHZ2"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+        const db = getFirestore(app);
+        setPersistence(auth, browserLocalPersistence);
+
+        let currentUser = null;
+        let battleRecords = [];
+        let filteredRecords = [];
+        let isLocalMode = false;
+        let stores = [];
+        let tournaments = [];
+        let presets = [];
+        let currentTournament = null;
+        let activeTournaments = [];
+
+        const authModal = new bootstrap.Modal(document.getElementById('auth-modal'));
+        const tournamentModal = new bootstrap.Modal(document.getElementById('tournament-modal'));
+        const roundsModal = new bootstrap.Modal(document.getElementById('rounds-modal'));
+        const presetModal = new bootstrap.Modal(document.getElementById('preset-modal'));
+
+        const showLoading = (show) => document.getElementById('loading-overlay').style.display = show ? 'flex' : 'none';
+
+        // Initialize
+        document.addEventListener('DOMContentLoaded', () => {
+            setupEventListeners();
+            
+            if (localStorage.getItem('isLocalMode') === 'true') {
+                handleLocalMode();
+                return;
+            }
+
+            onAuthStateChanged(auth, (user) => {
+                if (user) {
+                    handleUserLogin(user);
+                } else if (isLocalMode) {
+                    handleLocalMode();
+                } else {
+                    showAuthModal();
+                }
+            });
+        });
+
+        function setupEventListeners() {
+            document.getElementById('login-btn').addEventListener('click', handleLogin);
+            document.getElementById('signup-btn').addEventListener('click', handleSignup);
+            document.getElementById('logout-btn').addEventListener('click', handleLogout);
+            document.getElementById('add-tournament-btn').addEventListener('click', () => showTournamentModal());
+            document.getElementById('add-record-btn').addEventListener('click', () => showSingleRecordModal());
+            document.getElementById('start-tournament-btn').addEventListener('click', startTournament);
+            document.getElementById('save-tournament-btn').addEventListener('click', saveTournamentResults);
+            document.getElementById('manage-presets-btn').addEventListener('click', () => showPresetModal());
+            document.getElementById('add-preset-btn').addEventListener('click', addPreset);
+            document.getElementById('apply-stat-filter').addEventListener('click', applyStatisticsFilter);
+            
+            document.getElementById('tournament-participants').addEventListener('input', updateRoundsInfo);
+            document.getElementById('tournament-preset').addEventListener('change', loadPreset);
+            document.getElementById('tournament-store').addEventListener('input', showStoreSuggestions);
+            document.getElementById('tournament-store').addEventListener('focus', showStoreSuggestions);
+            
+            document.getElementById('filter-form').addEventListener('submit', (e) => {
+                e.preventDefault();
+                applyFilters();
+            });
+            
+            // Close autocomplete on click outside
+            document.addEventListener('click', (e) => {
+                if (!e.target.closest('#tournament-store') && !e.target.closest('#store-suggestions')) {
+                    document.getElementById('store-suggestions').style.display = 'none';
+                }
+            });
+        }
+
+        async function handleLogin() {
+            const email = document.getElementById('email').value;
+            const password = document.getElementById('password').value;
+            
+            if (email.toLowerCase() === 'local') {
+                isLocalMode = true;
+                localStorage.setItem('isLocalMode', 'true');
+                handleLocalMode();
+                return;
+            }
+            
+            try {
+                await signInWithEmailAndPassword(auth, email, password);
+            } catch (error) {
+                document.getElementById('auth-error').textContent = `エラー: ${error.message}`;
+                document.getElementById('auth-error').style.display = 'block';
+            }
+        }
+
+        async function handleSignup() {
+            const email = document.getElementById('email').value;
+            const password = document.getElementById('password').value;
+            
+            try {
+                await createUserWithEmailAndPassword(auth, email, password);
+            } catch (error) {
+                document.getElementById('auth-error').textContent = `エラー: ${error.message}`;
+                document.getElementById('auth-error').style.display = 'block';
+            }
+        }
+
+        function handleLogout() {
+            if (confirm('ログアウトしますか？')) {
+                if (isLocalMode) {
+                    isLocalMode = false;
+                    localStorage.removeItem('isLocalMode');
+                    currentUser = null;
+                    showAuthModal();
+                } else {
+                    signOut(auth);
+                }
+            }
+        }
+
+        function handleUserLogin(user) {
+            currentUser = user;
+            document.getElementById('user-email').textContent = user.email;
+            authModal.hide();
+            document.getElementById('app-loader').style.display = 'none';
+            document.getElementById('main-app').style.display = 'block';
+            
+            const statusBadge = document.getElementById('firebase-status');
+            statusBadge.textContent = 'Firebase接続OK';
+            statusBadge.className = 'badge bg-success ms-2';
+            
+            loadData();
+        }
+
+        function handleLocalMode() {
+            isLocalMode = true;
+            currentUser = { uid: 'local_user', email: 'ローカルモード' };
+            document.getElementById('user-email').textContent = 'ローカルモード';
+            authModal.hide();
+            document.getElementById('app-loader').style.display = 'none';
+            document.getElementById('main-app').style.display = 'block';
+            
+            const statusBadge = document.getElementById('firebase-status');
+            statusBadge.textContent = 'ローカルモード';
+            statusBadge.className = 'badge bg-info ms-2';
+            
+            loadData();
+        }
+
+        function showAuthModal() {
+            document.getElementById('app-loader').style.display = 'none';
+            authModal.show();
+        }
+
+        function calculateRounds(participants) {
+            if (participants <= 2) return 1;
+            if (participants <= 4) return 2;
+            if (participants <= 8) return 3;
+            if (participants <= 16) return 4;
+            if (participants <= 32) return 5;
+            return Math.ceil(Math.log2(participants));
+        }
+
+        function updateRoundsInfo() {
+            const participants = parseInt(document.getElementById('tournament-participants').value) || 0;
+            const rounds = calculateRounds(participants);
+            const info = document.getElementById('rounds-info');
+            
+            if (participants >= 2) {
+                info.innerHTML = `<i class="bi bi-info-circle"></i> ${participants}人参加 → <strong>${rounds}回戦</strong>制で実施されます`;
+            } else {
+                info.innerHTML = '<i class="bi bi-info-circle"></i> 参加人数を入力すると必要ラウンド数が表示されます';
+            }
+        }
+
+        function showTournamentModal() {
+            document.getElementById('tournament-form').reset();
+            document.getElementById('tournament-date').value = new Date().toISOString().split('T')[0];
+            loadPresetOptions();
+            tournamentModal.show();
+        }
+
+        function showSingleRecordModal() {
+            // 単発戦績用のモーダル（既存のrecord-modalを使用）
+            alert('単発戦績の追加機能は別途実装予定です');
+        }
+
+        function showPresetModal() {
+            loadPresetList();
+            presetModal.show();
+        }
+
+        async function loadPresetOptions() {
+            const select = document.getElementById('tournament-preset');
+            select.innerHTML = '<option value="">選択してください</option>';
+            
+            if (isLocalMode) {
+                presets = JSON.parse(localStorage.getItem('tournamentPresets') || '[]');
+            } else {
+                try {
+                    const doc = await getDoc(doc(db, 'users', currentUser.uid));
+                    presets = doc.data()?.presets || [];
+                } catch (error) {
+                    console.error('Error loading presets:', error);
+                    presets = [];
+                }
+            }
+            
+            presets.forEach(preset => {
+                const option = document.createElement('option');
+                option.value = JSON.stringify(preset);
+                option.textContent = `${preset.name} @ ${preset.store}`;
+                select.appendChild(option);
+            });
+        }
+
+        function loadPreset() {
+            const value = document.getElementById('tournament-preset').value;
+            if (value) {
+                const preset = JSON.parse(value);
+                document.getElementById('new-tournament-name').value = preset.name;
+                document.getElementById('tournament-store').value = preset.store;
+            }
+        }
+
+        async function addPreset() {
+            const name = document.getElementById('new-preset-name').value;
+            const store = document.getElementById('new-preset-store').value;
+            
+            if (!name || !store) {
+                alert('大会名と店舗名を入力してください');
+                return;
+            }
+            
+            const preset = { name, store };
+            presets.push(preset);
+            
+            if (isLocalMode) {
+                localStorage.setItem('tournamentPresets', JSON.stringify(presets));
+            } else {
+                try {
+                    await setDoc(doc(db, 'users', currentUser.uid), { presets }, { merge: true });
+                } catch (error) {
+                    console.error('Error saving preset:', error);
+                }
+            }
+            
+            document.getElementById('new-preset-name').value = '';
+            document.getElementById('new-preset-store').value = '';
+            loadPresetList();
+            loadPresetOptions();
+        }
+
+        function loadPresetList() {
+            const list = document.getElementById('preset-list');
+            list.innerHTML = '<h6>登録済みプリセット</h6>';
+            
+            if (presets.length === 0) {
+                list.innerHTML += '<p class="text-muted">プリセットがありません</p>';
+                return;
+            }
+            
+            presets.forEach((preset, index) => {
+                const div = document.createElement('div');
+                div.className = 'mb-2 p-2 border rounded d-flex justify-content-between align-items-center';
+                div.innerHTML = `
+                    <span>${preset.name} @ ${preset.store}</span>
+                    <button class="btn btn-sm btn-danger" onclick="deletePreset(${index})">
+                        <i class="bi bi-trash"></i>
+                    </button>
+                `;
+                list.appendChild(div);
+            });
+        }
+
+        window.deletePreset = async function(index) {
+            presets.splice(index, 1);
+            
+            if (isLocalMode) {
+                localStorage.setItem('tournamentPresets', JSON.stringify(presets));
+            } else {
+                try {
+                    await setDoc(doc(db, 'users', currentUser.uid), { presets }, { merge: true });
+                } catch (error) {
+                    console.error('Error deleting preset:', error);
+                }
+            }
+            
+            loadPresetList();
+            loadPresetOptions();
+        };
+
+        function showStoreSuggestions() {
+            const input = document.getElementById('tournament-store');
+            const value = input.value.toLowerCase();
+            const suggestions = document.getElementById('store-suggestions');
+            
+            if (value.length < 1) {
+                suggestions.style.display = 'none';
+                return;
+            }
+            
+            const matches = [...new Set(stores)].filter(store => 
+                store.toLowerCase().includes(value)
+            ).slice(0, 5);
+            
+            if (matches.length === 0) {
+                suggestions.style.display = 'none';
+                return;
+            }
+            
+            suggestions.innerHTML = matches.map(store => 
+                `<div class="autocomplete-suggestion" onclick="selectStore('${store}')">${store}</div>`
+            ).join('');
+            suggestions.style.display = 'block';
+        }
+
+        window.selectStore = function(store) {
+            document.getElementById('tournament-store').value = store;
+            document.getElementById('store-suggestions').style.display = 'none';
+        };
+
+        async function startTournament() {
+            const date = document.getElementById('tournament-date').value;
+            const participants = parseInt(document.getElementById('tournament-participants').value);
+            const name = document.getElementById('new-tournament-name').value;
+            const store = document.getElementById('tournament-store').value;
+            const deck = document.getElementById('tournament-deck').value;
+            
+            if (!date || !participants || !name || !store || !deck) {
+                alert('必須項目を入力してください');
+                return;
+            }
+            
+            const rounds = calculateRounds(participants);
+            currentTournament = {
+                date,
+                participants,
+                name,
+                store,
+                deck,
+                rounds,
+                currentRound: 1,
+                matches: []
+            };
+            
+            // 店舗名を記憶
+            if (!stores.includes(store)) {
+                stores.push(store);
+                saveStores();
+            }
+            
+            tournamentModal.hide();
+            showRoundsModal();
+        }
+
+        function showRoundsModal() {
+            document.getElementById('tournament-title').textContent = currentTournament.name;
+            document.getElementById('current-round').textContent = `${currentTournament.rounds}回戦制`;
+            
+            const container = document.getElementById('rounds-container');
+            container.innerHTML = '';
+            
+            for (let i = 1; i <= currentTournament.rounds; i++) {
+                const roundDiv = document.createElement('div');
+                roundDiv.className = 'mb-4';
+                roundDiv.innerHTML = `
+                    <h6 class="mb-3">
+                        <span class="badge bg-secondary">第${i}回戦</span>
+                    </h6>
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label">対戦相手</label>
+                            <input type="text" class="form-control" id="round${i}-opponent" placeholder="相手の名前">
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label">相手デッキ</label>
+                            <input type="text" class="form-control" id="round${i}-deck" placeholder="相手のデッキ">
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label">先攻選択権</label>
+                            <select class="form-select" id="round${i}-first">
+                                <option value="">選択してください</option>
+                                <option value="me">自分</option>
+                                <option value="opponent">相手</option>
+                            </select>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label">結果 <span class="text-danger">*</span></label>
+                            <select class="form-select" id="round${i}-result" required>
+                                <option value="">選択してください</option>
+                                <option value="win">勝利</option>
+                                <option value="lose">敗北</option>
+                                <option value="draw">引き分け</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">メモ</label>
+                        <textarea class="form-control" id="round${i}-notes" rows="2"></textarea>
+                    </div>
+                    <hr>
+                `;
+                container.appendChild(roundDiv);
+            }
+            
+            roundsModal.show();
+        }
+
+        async function saveTournamentResults() {
+            const matches = [];
+            
+            for (let i = 1; i <= currentTournament.rounds; i++) {
+                const result = document.getElementById(`round${i}-result`).value;
+                if (!result) {
+                    alert(`第${i}回戦の結果を入力してください`);
+                    return;
+                }
+                
+                const match = {
+                    round: i,
+                    opponent: document.getElementById(`round${i}-opponent`).value || null,
+                    opponentDeck: document.getElementById(`round${i}-deck`).value || null,
+                    firstTurnChoice: document.getElementById(`round${i}-first`).value || null,
+                    result: result,
+                    notes: document.getElementById(`round${i}-notes`).value || null
+                };
+                matches.push(match);
+            }
+            
+            showLoading(true);
+            
+            try {
+                // 各ラウンドを個別の戦績として保存
+                for (const match of matches) {
+                    const recordData = {
+                        date: currentTournament.date,
+                        tournament: currentTournament.name,
+                        store: currentTournament.store,
+                        myDeck: currentTournament.deck,
+                        round: `R${match.round}`,
+                        format: 'トーナメント',
+                        result: match.result,
+                        createdAt: new Date().toISOString(),
+                        updatedAt: new Date().toISOString()
+                    };
+                    
+                    // オプションフィールド
+                    if (match.opponent) recordData.opponent = match.opponent;
+                    if (match.opponentDeck) recordData.opponentDeck = match.opponentDeck;
+                    if (match.firstTurnChoice) recordData.firstTurnChoice = match.firstTurnChoice;
+                    if (match.notes) recordData.notes = match.notes;
+                    
+                    if (isLocalMode) {
+                        recordData.id = Date.now().toString() + Math.random().toString(36).substr(2, 9);
+                        let records = JSON.parse(localStorage.getItem('battleRecords') || '[]');
+                        records.push(recordData);
+                        localStorage.setItem('battleRecords', JSON.stringify(records));
+                    } else {
+                        recordData.userId = currentUser.uid;
+                        await addDoc(collection(db, 'battleRecords'), recordData);
+                    }
+                }
+                
+                roundsModal.hide();
+                currentTournament = null;
+                await loadRecords();
+                alert('大会結果を保存しました');
+            } catch (error) {
+                console.error('Error saving tournament:', error);
+                alert('保存中にエラーが発生しました');
+            } finally {
+                showLoading(false);
+            }
+        }
+
+        async function loadData() {
+            showLoading(true);
+            
+            try {
+                await Promise.all([
+                    loadRecords(),
+                    loadStores(),
+                    loadPresets()
+                ]);
+                updateStatisticsOptions();
+            } catch (error) {
+                console.error('Error loading data:', error);
+            } finally {
+                showLoading(false);
+            }
+        }
+
+        async function loadRecords() {
+            try {
+                if (isLocalMode) {
+                    battleRecords = JSON.parse(localStorage.getItem('battleRecords') || '[]');
+                } else {
+                    const q = query(collection(db, 'battleRecords'), where('userId', '==', currentUser.uid));
+                    const snapshot = await getDocs(q);
+                    battleRecords = snapshot.docs.map(doc => ({
+                        id: doc.id,
+                        ...doc.data()
+                    }));
+                }
+                
+                battleRecords.sort((a, b) => {
+                    const dateCompare = new Date(b.date) - new Date(a.date);
+                    if (dateCompare !== 0) return dateCompare;
+                    
+                    // 同じ日付なら大会名でソート
+                    if (a.tournament && b.tournament) {
+                        const tournamentCompare = a.tournament.localeCompare(b.tournament);
+                        if (tournamentCompare !== 0) return tournamentCompare;
+                    }
+                    
+                    // 同じ大会ならラウンドでソート
+                    if (a.round && b.round) {
+                        return a.round.localeCompare(b.round);
+                    }
+                    
+                    return 0;
+                });
+                
+                applyFilters();
+                updateStatistics();
+            } catch (error) {
+                console.error('Error loading records:', error);
+                battleRecords = [];
+                applyFilters();
+            }
+        }
+
+        async function loadStores() {
+            if (isLocalMode) {
+                stores = JSON.parse(localStorage.getItem('stores') || '[]');
+            } else {
+                try {
+                    const doc = await getDoc(doc(db, 'users', currentUser.uid));
+                    stores = doc.data()?.stores || [];
+                } catch (error) {
+                    stores = [];
+                }
+            }
+            
+            // 既存の戦績からも店舗名を収集
+            battleRecords.forEach(record => {
+                if (record.store && !stores.includes(record.store)) {
+                    stores.push(record.store);
+                }
+            });
+        }
+
+        async function loadPresets() {
+            if (isLocalMode) {
+                presets = JSON.parse(localStorage.getItem('tournamentPresets') || '[]');
+            } else {
+                try {
+                    const doc = await getDoc(doc(db, 'users', currentUser.uid));
+                    presets = doc.data()?.presets || [];
+                } catch (error) {
+                    presets = [];
+                }
+            }
+        }
+
+        async function saveStores() {
+            if (isLocalMode) {
+                localStorage.setItem('stores', JSON.stringify(stores));
+            } else {
+                try {
+                    await setDoc(doc(db, 'users', currentUser.uid), { stores }, { merge: true });
+                } catch (error) {
+                    console.error('Error saving stores:', error);
+                }
+            }
+        }
+
+        function updateStatisticsOptions() {
+            // デッキ一覧を更新
+            const deckSelect = document.getElementById('stat-deck');
+            const decks = [...new Set(battleRecords.map(r => r.myDeck).filter(d => d))];
+            deckSelect.innerHTML = '<option value="">全デッキ</option>';
+            decks.forEach(deck => {
+                deckSelect.innerHTML += `<option value="${deck}">${deck}</option>`;
+            });
+            
+            // 大会一覧を更新
+            const tournamentSelect = document.getElementById('stat-tournament');
+            const tournaments = [...new Set(battleRecords.map(r => r.tournament).filter(t => t))];
+            tournamentSelect.innerHTML = '<option value="">全大会</option>';
+            tournaments.forEach(tournament => {
+                tournamentSelect.innerHTML += `<option value="${tournament}">${tournament}</option>`;
+            });
+        }
+
+        function applyStatisticsFilter() {
+            const period = document.getElementById('stat-period').value;
+            const deck = document.getElementById('stat-deck').value;
+            const tournament = document.getElementById('stat-tournament').value;
+            
+            let filtered = [...battleRecords];
+            
+            // 期間フィルター
+            if (period !== 'all') {
+                const now = new Date();
+                let startDate = new Date();
+                
+                switch (period) {
+                    case 'month':
+                        startDate.setMonth(now.getMonth() - 1);
+                        break;
+                    case '3months':
+                        startDate.setMonth(now.getMonth() - 3);
+                        break;
+                    case '6months':
+                        startDate.setMonth(now.getMonth() - 6);
+                        break;
+                    case 'year':
+                        startDate.setFullYear(now.getFullYear() - 1);
+                        break;
+                }
+                
+                filtered = filtered.filter(r => new Date(r.date) >= startDate);
+            }
+            
+            // デッキフィルター
+            if (deck) {
+                filtered = filtered.filter(r => r.myDeck === deck);
+            }
+            
+            // 大会フィルター
+            if (tournament) {
+                filtered = filtered.filter(r => r.tournament === tournament);
+            }
+            
+            // 統計を更新
+            const total = filtered.length;
+            const wins = filtered.filter(r => r.result === 'win').length;
+            const loses = filtered.filter(r => r.result === 'lose').length;
+            const winRate = total > 0 ? ((wins / (wins + loses)) * 100).toFixed(1) : 0;
+            
+            document.getElementById('total-battles').textContent = total;
+            document.getElementById('total-wins').textContent = wins;
+            document.getElementById('total-loses').textContent = loses;
+            document.getElementById('win-rate').textContent = `${winRate}%`;
+        }
+
+        function applyFilters() {
+            const deck = document.getElementById('filter-deck').value.toLowerCase();
+            const result = document.getElementById('filter-result').value;
+            
+            filteredRecords = battleRecords.filter(record => {
+                if (deck && !record.myDeck.toLowerCase().includes(deck) && 
+                    !(record.opponentDeck && record.opponentDeck.toLowerCase().includes(deck))) {
+                    return false;
+                }
+                if (result && record.result !== result) {
+                    return false;
+                }
+                return true;
+            });
+            
+            displayRecords();
+        }
+
+        function displayRecords() {
+            const tbody = document.getElementById('records-tbody');
+            const noRecordsMsg = document.getElementById('no-records-message');
+            
+            if (filteredRecords.length === 0) {
+                tbody.innerHTML = '';
+                noRecordsMsg.style.display = 'block';
+                return;
+            }
+            
+            noRecordsMsg.style.display = 'none';
+            
+            tbody.innerHTML = filteredRecords.map(record => {
+                const resultBadge = {
+                    win: '<span class="badge bg-success">勝</span>',
+                    lose: '<span class="badge bg-danger">負</span>',
+                    draw: '<span class="badge bg-warning">引</span>'
+                };
+                
+                const date = record.date || '';
+                const venue = record.tournament ? 
+                    `<span class="tournament-badge">${record.tournament}</span>${record.store || ''}` : 
+                    (record.store || '-');
+                const round = record.round || '-';
+                const myDeck = record.myDeck || '';
+                const opponentDeck = record.opponentDeck || '-';
+                const result = record.result || 'draw';
+                const id = record.id || '';
+                
+                return `
+                    <tr class="record-row ${result}">
+                        <td>${date}</td>
+                        <td>${venue}</td>
+                        <td>${round}</td>
+                        <td><strong>${myDeck}</strong></td>
+                        <td>${opponentDeck}</td>
+                        <td>${resultBadge[result] || ''}</td>
+                        <td>
+                            <button class="btn btn-sm btn-danger" onclick="deleteRecord('${id}')">
+                                <i class="bi bi-trash"></i>
+                            </button>
+                        </td>
+                    </tr>
+                `;
+            }).join('');
+        }
+
+        async function deleteRecord(recordId) {
+            if (!confirm('この戦績を削除しますか？')) return;
+            
+            showLoading(true);
+            
+            try {
+                if (isLocalMode) {
+                    let records = JSON.parse(localStorage.getItem('battleRecords') || '[]');
+                    records = records.filter(r => r.id !== recordId);
+                    localStorage.setItem('battleRecords', JSON.stringify(records));
+                } else {
+                    await deleteDoc(doc(db, 'battleRecords', recordId));
+                }
+                
+                await loadRecords();
+            } catch (error) {
+                console.error('Error deleting record:', error);
+                alert('削除中にエラーが発生しました');
+            } finally {
+                showLoading(false);
+            }
+        }
+
+        function updateStatistics() {
+            applyStatisticsFilter();
+        }
+
+        // Make functions globally accessible
+        window.deleteRecord = deleteRecord;
+        window.deletePreset = deletePreset;
+        window.selectStore = selectStore;
+    </script>
+</body>
+</html>
