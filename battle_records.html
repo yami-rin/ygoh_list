@@ -557,9 +557,7 @@
             doc, 
             query, 
             where, 
-            updateDoc,
-            orderBy,
-            serverTimestamp 
+            updateDoc
         } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore.js";
 
         // Firebase configuration (same as card manager)
@@ -931,7 +929,7 @@
                         await updateDoc(doc(db, 'battleRecords', recordId), cleanedData);
                     } else {
                         cleanedData.userId = currentUser.uid;
-                        cleanedData.createdAt = serverTimestamp();
+                        cleanedData.createdAt = new Date().toISOString();
                         await addDoc(collection(db, 'battleRecords'), cleanedData);
                     }
                     recordModal.hide();
@@ -971,14 +969,19 @@
                 } else {
                     const q = query(
                         collection(db, 'battleRecords'),
-                        where('userId', '==', currentUser.uid),
-                        orderBy('date', 'desc')
+                        where('userId', '==', currentUser.uid)
                     );
                     const snapshot = await getDocs(q);
                     battleRecords = snapshot.docs.map(doc => ({
                         id: doc.id,
                         ...doc.data()
                     }));
+                    // Sort by date in JavaScript instead of Firestore
+                    battleRecords.sort((a, b) => {
+                        const dateA = new Date(a.date || 0);
+                        const dateB = new Date(b.date || 0);
+                        return dateB - dateA; // Descending order
+                    });
                     window.battleRecords = battleRecords;
                 }
                 
@@ -989,38 +992,20 @@
                 console.error('Error code:', error.code);
                 console.error('Error message:', error.message);
                 
-                if (error.code === 'failed-precondition' || error.message?.includes('index')) {
-                    // Index needs to be created
-                    try {
-                        const q = query(
-                            collection(db, 'battleRecords'),
-                            where('userId', '==', currentUser.uid)
-                        );
-                        const snapshot = await getDocs(q);
-                        battleRecords = snapshot.docs.map(doc => ({
-                            id: doc.id,
-                            ...doc.data()
-                        })).sort((a, b) => new Date(b.date) - new Date(a.date));
-                        window.battleRecords = battleRecords;
-                        applyFilters();
-                        updateStatistics();
-                    } catch (fallbackError) {
-                        console.error('Fallback error:', fallbackError);
-                        console.log('Index creation link: https://console.firebase.google.com/project/card-manager-4c86c/firestore/indexes');
-                        alert('インデックスの作成が必要です。コンソールに表示されたリンクからインデックスを作成してください。');
-                        // エラーが発生しても空配列で初期化
-                        battleRecords = [];
-                        window.battleRecords = battleRecords;
-                        applyFilters();
-                        updateStatistics();
-                    }
+                if (error.code === 'permission-denied') {
+                    console.error('Permission denied. Please check Firestore security rules.');
+                    alert('アクセスが拒否されました。Firebaseの設定を確認してください。');
+                } else if (error.code === 'unavailable') {
+                    console.error('Firestore is unavailable.');
+                    alert('Firestoreに接続できません。インターネット接続を確認してください。');
                 } else {
-                    // その他のエラーでも空配列で初期化
-                    battleRecords = [];
-                    window.battleRecords = battleRecords;
-                    applyFilters();
-                    updateStatistics();
+                    console.error('Unknown error:', error.code, error.message);
                 }
+                // エラーが発生しても空配列で初期化
+                battleRecords = [];
+                window.battleRecords = battleRecords;
+                applyFilters();
+                updateStatistics();
             } finally {
                 hideLoading();
             }
@@ -1415,7 +1400,7 @@
                         record.createdAt = new Date().toISOString();
                     } else {
                         record.userId = currentUser.uid;
-                        record.createdAt = serverTimestamp();
+                        record.createdAt = new Date().toISOString();
                         await addDoc(collection(db, 'battleRecords'), record);
                     }
                 }
