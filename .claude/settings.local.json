@@ -2,7 +2,9 @@
   "permissions": {
     "allow": [
       "Bash(git push:*)",
-      "Bash(git add:*)"
+      "Bash(git add:*)",
+      "Bash(start C:Usersとうふcard_manager_webbattle_records_v2.html)",
+      "Bash(start \"\" \"C:\\Users\\とうふ\\card_manager_web\\battle_records_v2.html\")"
     ],
     "deny": [],
     "ask": []
