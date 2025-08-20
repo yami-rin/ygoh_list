@@ -7,7 +7,7 @@
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css">
     <style>
-        body{background-color:#f8f9fa}[data-bs-theme="dark"] body{background-color:#212529}.container-fluid{max-width:1400px}.card{margin-bottom:1.5rem}#loading-overlay,#app-loader{position:fixed;top:0;left:0;width:100%;height:100%;background-color:rgba(0,0,0,0.6);display:flex;justify-content:center;align-items:center;z-index:1060;color:white}#main-app{display:none}.stat-card{background:linear-gradient(135deg,#667eea 0%,#764ba2 100%);color:white;border-radius:10px;padding:1.5rem;margin-bottom:1rem;cursor:pointer;transition:transform 0.2s}.stat-card:hover{transform:scale(1.02)}.stat-card.win{background:linear-gradient(135deg,#f093fb 0%,#f5576c 100%)}.stat-card.lose{background:linear-gradient(135deg,#4facfe 0%,#00f2fe 100%)}.record-row.win{background-color:rgba(40,167,69,0.1)}.record-row.lose{background-color:rgba(220,53,69,0.1)}.record-row.draw{background-color:rgba(255,193,7,0.1)}.tournament-badge{background:linear-gradient(135deg,#667eea 0%,#764ba2 100%);color:white;padding:0.5rem 1rem;border-radius:20px;display:inline-block;margin-right:0.5rem}.round-indicator{background:#6c757d;color:white;padding:0.25rem 0.75rem;border-radius:15px;font-size:0.9rem}.autocomplete-suggestions{position:absolute;border:1px solid #ccc;background:white;max-height:200px;overflow-y:auto;z-index:1000;width:100%}.autocomplete-suggestion{padding:0.5rem;cursor:pointer}.autocomplete-suggestion:hover{background:#f0f0f0}.navbar-nav .btn{display:inline-flex;align-items:center}@media(max-width:768px){.navbar-brand{font-size:1rem}.table{font-size:0.875rem}.stat-card{padding:1rem}}
+        body{background-color:#f8f9fa}[data-bs-theme="dark"] body{background-color:#212529}.container-fluid{max-width:1400px}.card{margin-bottom:1.5rem}#loading-overlay,#app-loader{position:fixed;top:0;left:0;width:100%;height:100%;background-color:rgba(0,0,0,0.6);display:flex;justify-content:center;align-items:center;z-index:1060;color:white}#main-app{display:none}.stat-card{background:linear-gradient(135deg,#667eea 0%,#764ba2 100%);color:white;border-radius:10px;padding:1.5rem;margin-bottom:1rem;cursor:pointer;transition:transform 0.2s}.stat-card:hover{transform:scale(1.02)}.stat-card.win{background:linear-gradient(135deg,#f093fb 0%,#f5576c 100%)}.stat-card.lose{background:linear-gradient(135deg,#4facfe 0%,#00f2fe 100%)}.record-row.win{background-color:rgba(40,167,69,0.1)}.record-row.lose{background-color:rgba(220,53,69,0.1)}.record-row.draw{background-color:rgba(255,193,7,0.1)}.tournament-badge{background:linear-gradient(135deg,#667eea 0%,#764ba2 100%);color:white;padding:0.5rem 1rem;border-radius:20px;display:inline-block;margin-right:0.5rem}.round-indicator{background:#6c757d;color:white;padding:0.25rem 0.75rem;border-radius:15px;font-size:0.9rem}.autocomplete-suggestions{position:absolute;border:1px solid #ccc;background:white;max-height:200px;overflow-y:auto;z-index:1000;width:100%}.autocomplete-suggestion{padding:0.5rem;cursor:pointer}.autocomplete-suggestion:hover{background:#f0f0f0}.navbar-nav .btn{display:inline-flex;align-items:center}.tournament-group{margin-bottom:1rem;border:1px solid #dee2e6;border-radius:0.5rem;overflow:hidden}[data-bs-theme="dark"] .tournament-group{border-color:#495057}.tournament-header{background:#f8f9fa;padding:0.75rem;cursor:pointer;display:flex;justify-content:space-between;align-items:center}[data-bs-theme="dark"] .tournament-header{background:#343a40}.tournament-header:hover{background:#e9ecef}[data-bs-theme="dark"] .tournament-header:hover{background:#495057}.tournament-rounds{display:none;padding:0}.tournament-rounds.show{display:block}[data-bs-theme="dark"] .autocomplete-suggestions{background:#212529;border-color:#495057}[data-bs-theme="dark"] .autocomplete-suggestion:hover{background:#343a40}@media(max-width:768px){.navbar-brand{font-size:1rem}.table{font-size:0.875rem}.stat-card{padding:1rem}}
     </style>
 </head>
 <body>
@@ -143,13 +143,17 @@
                 </div>
                 <div class="modal-body">
                     <div class="form-check form-switch mb-3">
+                        <input class="form-check-input" type="checkbox" id="dark-mode-toggle">
+                        <label class="form-check-label" for="dark-mode-toggle">
+                            ダークモード
+                        </label>
+                    </div>
+                    <div class="form-check form-switch mb-3">
                         <input class="form-check-input" type="checkbox" id="show-statistics-filter" checked>
                         <label class="form-check-label" for="show-statistics-filter">
                             統計フィルターを表示
                         </label>
                     </div>
-                    <hr>
-                    <p class="text-muted">その他の設定は今後追加予定です</p>
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-primary" data-bs-dismiss="modal">閉じる</button>
@@ -187,7 +191,6 @@
                 <span class="navbar-brand">
                     <i class="bi bi-graph-up"></i> 戦績管理
                 </span>
-                <span id="firebase-status" class="badge bg-warning text-dark ms-2">接続中...</span>
                 <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarContent">
                     <span class="navbar-toggler-icon"></span>
                 </button>
@@ -305,9 +308,6 @@
                             <button class="btn btn-primary me-2" id="add-tournament-btn">
                                 <i class="bi bi-trophy"></i> 大会登録
                             </button>
-                            <button class="btn btn-success" id="add-record-btn">
-                                <i class="bi bi-plus-circle"></i> 単発戦績
-                            </button>
                         </div>
                     </div>
                 </div>
@@ -423,7 +423,6 @@
             document.getElementById('logout-btn').addEventListener('click', handleLogout);
             document.getElementById('settings-btn').addEventListener('click', showSettingsModal);
             document.getElementById('add-tournament-btn').addEventListener('click', () => showTournamentModal());
-            document.getElementById('add-record-btn').addEventListener('click', () => showSingleRecordModal());
             document.getElementById('start-tournament-btn').addEventListener('click', startTournament);
             document.getElementById('save-round-btn').addEventListener('click', saveCurrentRound);
             document.getElementById('save-tournament-btn').addEventListener('click', saveTournamentResults);
@@ -434,6 +433,7 @@
             });
             document.getElementById('apply-stat-filter').addEventListener('click', applyStatisticsFilter);
             document.getElementById('show-statistics-filter').addEventListener('change', toggleStatisticsFilter);
+            document.getElementById('dark-mode-toggle').addEventListener('change', toggleDarkMode);
             
             document.getElementById('tournament-participants').addEventListener('input', updateRoundsInfo);
             document.getElementById('tournament-preset').addEventListener('change', loadPreset);
@@ -504,9 +504,6 @@
             document.getElementById('app-loader').style.display = 'none';
             document.getElementById('main-app').style.display = 'block';
             
-            const statusBadge = document.getElementById('firebase-status');
-            statusBadge.textContent = 'Firebase接続OK';
-            statusBadge.className = 'badge bg-success ms-2';
             
             loadSettings();
             loadData();
@@ -520,9 +517,6 @@
             document.getElementById('app-loader').style.display = 'none';
             document.getElementById('main-app').style.display = 'block';
             
-            const statusBadge = document.getElementById('firebase-status');
-            statusBadge.textContent = 'ローカルモード';
-            statusBadge.className = 'badge bg-info ms-2';
             
             loadSettings();
             loadData();
@@ -532,6 +526,13 @@
             const showFilter = localStorage.getItem('showStatisticsFilter') !== 'false';
             document.getElementById('show-statistics-filter').checked = showFilter;
             document.getElementById('statistics-filter-card').style.display = showFilter ? 'block' : 'none';
+            
+            // Dark mode settings
+            const darkMode = localStorage.getItem('darkMode') === 'true';
+            document.getElementById('dark-mode-toggle').checked = darkMode;
+            if (darkMode) {
+                document.documentElement.setAttribute('data-bs-theme', 'dark');
+            }
         }
         
         function showSettingsModal() {
@@ -542,6 +543,16 @@
             const show = document.getElementById('show-statistics-filter').checked;
             localStorage.setItem('showStatisticsFilter', show.toString());
             document.getElementById('statistics-filter-card').style.display = show ? 'block' : 'none';
+        }
+        
+        function toggleDarkMode() {
+            const darkMode = document.getElementById('dark-mode-toggle').checked;
+            localStorage.setItem('darkMode', darkMode.toString());
+            if (darkMode) {
+                document.documentElement.setAttribute('data-bs-theme', 'dark');
+            } else {
+                document.documentElement.removeAttribute('data-bs-theme');
+            }
         }
 
         function showAuthModal() {
@@ -577,10 +588,6 @@
             tournamentModal.show();
         }
 
-        function showSingleRecordModal() {
-            // 単発戦績用のモーダル（既存のrecord-modalを使用）
-            alert('単発戦績の追加機能は別途実装予定です');
-        }
 
         function showPresetModal() {
             loadPresetList();
@@ -591,18 +598,7 @@
             const select = document.getElementById('tournament-preset');
             select.innerHTML = '<option value="">選択してください</option>';
             
-            if (isLocalMode) {
-                presets = JSON.parse(localStorage.getItem('tournamentPresets') || '[]');
-            } else {
-                try {
-                    const doc = await getDoc(doc(db, 'users', currentUser.uid));
-                    presets = doc.data()?.presets || [];
-                } catch (error) {
-                    console.error('Error loading presets:', error);
-                    presets = [];
-                }
-            }
-            
+            // Use the presets already loaded
             presets.forEach(preset => {
                 const option = document.createElement('option');
                 option.value = preset.name;
@@ -942,6 +938,7 @@
                     loadPresets()
                 ]);
                 updateStatisticsOptions();
+                loadPresetOptions(); // Load preset options after presets are loaded
             } catch (error) {
                 console.error('Error loading data:', error);
             } finally {
@@ -1014,8 +1011,8 @@
                 presets = JSON.parse(localStorage.getItem('tournamentPresets') || '[]');
             } else {
                 try {
-                    const doc = await getDoc(doc(db, 'users', currentUser.uid));
-                    presets = doc.data()?.presets || [];
+                    const userDoc = await getDoc(doc(db, 'users', currentUser.uid));
+                    presets = userDoc.data()?.presets || [];
                 } catch (error) {
                     presets = [];
                 }
@@ -1134,24 +1131,103 @@
             
             noRecordsMsg.style.display = 'none';
             
-            tbody.innerHTML = filteredRecords.map(record => {
-                const resultBadge = {
-                    win: '<span class="badge bg-success">勝</span>',
-                    lose: '<span class="badge bg-danger">負</span>',
-                    draw: '<span class="badge bg-warning">引</span>'
-                };
+            // Group records by tournament
+            const tournamentGroups = {};
+            const singleRecords = [];
+            
+            filteredRecords.forEach(record => {
+                if (record.tournament) {
+                    const key = `${record.tournament}_${record.date}`;
+                    if (!tournamentGroups[key]) {
+                        tournamentGroups[key] = {
+                            tournament: record.tournament,
+                            date: record.date,
+                            store: record.store,
+                            myDeck: record.myDeck,
+                            rounds: []
+                        };
+                    }
+                    tournamentGroups[key].rounds.push(record);
+                } else {
+                    singleRecords.push(record);
+                }
+            });
+            
+            // Sort rounds within each tournament
+            Object.values(tournamentGroups).forEach(group => {
+                group.rounds.sort((a, b) => {
+                    const roundA = parseInt(a.round?.replace('R', '') || '0');
+                    const roundB = parseInt(b.round?.replace('R', '') || '0');
+                    return roundA - roundB;
+                });
+            });
+            
+            const resultBadge = {
+                win: '<span class="badge bg-success">勝</span>',
+                lose: '<span class="badge bg-danger">負</span>',
+                draw: '<span class="badge bg-warning">引</span>'
+            };
+            
+            let html = '';
+            
+            // Display tournament groups
+            Object.values(tournamentGroups).forEach((group, index) => {
+                const wins = group.rounds.filter(r => r.result === 'win').length;
+                const losses = group.rounds.filter(r => r.result === 'lose').length;
+                const draws = group.rounds.filter(r => r.result === 'draw').length;
                 
+                html += `
+                    <tr class="tournament-header" onclick="toggleTournamentGroup('tournament-${index}')">
+                        <td>${group.date}</td>
+                        <td colspan="2">
+                            <span class="tournament-badge">${group.tournament}</span>
+                            ${group.store || ''}
+                        </td>
+                        <td><strong>${group.myDeck}</strong></td>
+                        <td>
+                            ${wins}勝${losses}負${draws > 0 ? `${draws}分` : ''}
+                            <i class="bi bi-chevron-down float-end" id="chevron-tournament-${index}"></i>
+                        </td>
+                        <td></td>
+                        <td>
+                            <button class="btn btn-sm btn-primary me-1" onclick="editTournament('${group.rounds[0].id}')" title="編集">
+                                <i class="bi bi-pencil"></i>
+                            </button>
+                        </td>
+                    </tr>
+                `;
+                
+                // Add rounds (initially hidden)
+                group.rounds.forEach(record => {
+                    html += `
+                        <tr class="record-row ${record.result} tournament-rounds tournament-${index}">
+                            <td></td>
+                            <td></td>
+                            <td>${record.round || '-'}</td>
+                            <td></td>
+                            <td>${record.opponentDeck || '-'}</td>
+                            <td>${resultBadge[record.result] || ''}</td>
+                            <td>
+                                <button class="btn btn-sm btn-danger" onclick="deleteRecord('${record.id}')">
+                                    <i class="bi bi-trash"></i>
+                                </button>
+                            </td>
+                        </tr>
+                    `;
+                });
+            });
+            
+            // Display single records
+            singleRecords.forEach(record => {
                 const date = record.date || '';
-                const venue = record.tournament ? 
-                    `<span class="tournament-badge">${record.tournament}</span>${record.store || ''}` : 
-                    (record.store || '-');
+                const venue = record.store || '-';
                 const round = record.round || '-';
                 const myDeck = record.myDeck || '';
                 const opponentDeck = record.opponentDeck || '-';
                 const result = record.result || 'draw';
                 const id = record.id || '';
                 
-                return `
+                html += `
                     <tr class="record-row ${result}">
                         <td>${date}</td>
                         <td>${venue}</td>
@@ -1160,18 +1236,43 @@
                         <td>${opponentDeck}</td>
                         <td>${resultBadge[result] || ''}</td>
                         <td>
-                            ${record.tournament ? `
-                            <button class="btn btn-sm btn-primary me-1" onclick="editTournament('${id}')" title="編集">
-                                <i class="bi bi-pencil"></i>
-                            </button>` : ''}
                             <button class="btn btn-sm btn-danger" onclick="deleteRecord('${id}')">
                                 <i class="bi bi-trash"></i>
                             </button>
                         </td>
                     </tr>
                 `;
-            }).join('');
+            });
+            
+            tbody.innerHTML = html;
         }
+        
+        function toggleTournamentGroup(groupId) {
+            const rounds = document.querySelectorAll(`.${groupId}`);
+            const chevron = document.getElementById(`chevron-${groupId}`);
+            
+            rounds.forEach(round => {
+                if (round.style.display === 'none' || !round.style.display) {
+                    round.style.display = 'table-row';
+                } else {
+                    round.style.display = 'none';
+                }
+            });
+            
+            if (chevron) {
+                if (chevron.classList.contains('bi-chevron-down')) {
+                    chevron.classList.remove('bi-chevron-down');
+                    chevron.classList.add('bi-chevron-up');
+                } else {
+                    chevron.classList.remove('bi-chevron-up');
+                    chevron.classList.add('bi-chevron-down');
+                }
+            }
+            
+            event.stopPropagation();
+        }
+        
+        window.toggleTournamentGroup = toggleTournamentGroup;
 
         async function deleteRecord(recordId) {
             if (!confirm('この戦績を削除しますか？')) return;
