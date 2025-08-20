@@ -101,7 +101,7 @@
                                 <label for="tournament-format" class="form-label">マッチ形式 <span class="text-danger">*</span></label>
                                 <select class="form-select" id="tournament-format" required>
                                     <option value="single">シングル</option>
-                                    <option value="bo3" selected>BO3</option>
+                                    <option value="match" selected>マッチ</option>
                                 </select>
                             </div>
                         </div>
@@ -134,7 +134,7 @@
                     <div id="rounds-container"></div>
                 </div>
                 <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">後で続ける</button>
+                    <button type="button" class="btn btn-secondary" id="continue-later-btn">後で続ける</button>
                     <button type="button" id="save-round-btn" class="btn btn-primary">現在のラウンドを保存</button>
                     <button type="button" id="save-tournament-btn" class="btn btn-success">大会を終了</button>
                 </div>
@@ -321,6 +321,9 @@
                             <button class="btn btn-primary me-2" id="add-tournament-btn">
                                 <i class="bi bi-trophy"></i> 大会登録
                             </button>
+                            <button class="btn btn-warning me-2" id="resume-tournament-btn" style="display:none;">
+                                <i class="bi bi-play-circle"></i> 大会を再開
+                            </button>
                         </div>
                     </div>
                 </div>
@@ -447,9 +450,11 @@
                 }
             });
             document.getElementById('add-tournament-btn').addEventListener('click', () => showTournamentModal());
+            document.getElementById('resume-tournament-btn').addEventListener('click', resumeTournament);
             document.getElementById('start-tournament-btn').addEventListener('click', startTournament);
             document.getElementById('save-round-btn').addEventListener('click', saveCurrentRound);
             document.getElementById('save-tournament-btn').addEventListener('click', saveTournamentResults);
+            document.getElementById('continue-later-btn').addEventListener('click', saveTournamentProgress);
             document.getElementById('manage-presets-btn').addEventListener('click', () => showPresetModal());
             document.getElementById('add-preset-btn').addEventListener('click', (e) => {
                 e.preventDefault();
@@ -856,13 +861,13 @@
                             </select>
                         </div>
                     </div>
-                    ${currentTournament.format === 'bo3' ? `
-                    <div class="row" id="round${i}-bo3">
+                    ${currentTournament.format === 'match' ? `
+                    <div class="row" id="round${i}-match">
                         <div class="col-12 mb-3">
-                            <label class="form-label">BO3結果</label>
+                            <label class="form-label">マッチ結果</label>
                             <div class="btn-group d-block" role="group">
                                 <div class="mb-2">
-                                    <span class="me-2">第1ゲーム:</span>
+                                    <span class="me-2">1R:</span>
                                     <div class="btn-group" role="group">
                                         <input type="radio" class="btn-check" name="round${i}-game1" id="round${i}-game1-win" value="○">
                                         <label class="btn btn-outline-success" for="round${i}-game1-win">○</label>
@@ -873,7 +878,7 @@
                                     </div>
                                 </div>
                                 <div class="mb-2">
-                                    <span class="me-2">第2ゲーム:</span>
+                                    <span class="me-2">2R:</span>
                                     <div class="btn-group" role="group">
                                         <input type="radio" class="btn-check" name="round${i}-game2" id="round${i}-game2-win" value="○">
                                         <label class="btn btn-outline-success" for="round${i}-game2-win">○</label>
@@ -884,7 +889,7 @@
                                     </div>
                                 </div>
                                 <div class="mb-2">
-                                    <span class="me-2">第3ゲーム:</span>
+                                    <span class="me-2">3R:</span>
                                     <div class="btn-group" role="group">
                                         <input type="radio" class="btn-check" name="round${i}-game3" id="round${i}-game3-win" value="○">
                                         <label class="btn btn-outline-success" for="round${i}-game3-win">○</label>
@@ -911,6 +916,91 @@
         }
 
         let savedRounds = {};
+        let tournamentProgress = {};
+        
+        function saveTournamentProgress() {
+            // Save current input values
+            tournamentProgress = {
+                tournament: currentTournament,
+                savedRounds: savedRounds,
+                inputs: {}
+            };
+            
+            // Save all input values for each round
+            for (let i = 1; i <= currentTournament.rounds; i++) {
+                tournamentProgress.inputs[`round${i}`] = {
+                    opponent: document.getElementById(`round${i}-opponent`)?.value || '',
+                    deck: document.getElementById(`round${i}-deck`)?.value || '',
+                    first: document.getElementById(`round${i}-first`)?.value || '',
+                    result: document.getElementById(`round${i}-result`)?.value || '',
+                    notes: document.getElementById(`round${i}-notes`)?.value || ''
+                };
+                
+                if (currentTournament.format === 'match') {
+                    tournamentProgress.inputs[`round${i}`].game1 = document.querySelector(`input[name="round${i}-game1"]:checked`)?.value || '';
+                    tournamentProgress.inputs[`round${i}`].game2 = document.querySelector(`input[name="round${i}-game2"]:checked`)?.value || '';
+                    tournamentProgress.inputs[`round${i}`].game3 = document.querySelector(`input[name="round${i}-game3"]:checked`)?.value || '';
+                }
+            }
+            
+            // Save to localStorage
+            localStorage.setItem('tournamentProgress', JSON.stringify(tournamentProgress));
+            
+            roundsModal.hide();
+            alert('大会の進行状況を保存しました。後で続けることができます。');
+        }
+        
+        function loadTournamentProgress() {
+            const saved = localStorage.getItem('tournamentProgress');
+            if (!saved) return false;
+            
+            try {
+                tournamentProgress = JSON.parse(saved);
+                currentTournament = tournamentProgress.tournament;
+                savedRounds = tournamentProgress.savedRounds || {};
+                
+                // Restore input values after modal is shown
+                setTimeout(() => {
+                    for (let i = 1; i <= currentTournament.rounds; i++) {
+                        const inputs = tournamentProgress.inputs[`round${i}`];
+                        if (inputs) {
+                            if (document.getElementById(`round${i}-opponent`)) {
+                                document.getElementById(`round${i}-opponent`).value = inputs.opponent || '';
+                                document.getElementById(`round${i}-deck`).value = inputs.deck || '';
+                                document.getElementById(`round${i}-first`).value = inputs.first || '';
+                                document.getElementById(`round${i}-result`).value = inputs.result || '';
+                                document.getElementById(`round${i}-notes`).value = inputs.notes || '';
+                                
+                                if (currentTournament.format === 'match' && inputs.game1) {
+                                    if (inputs.game1) document.querySelector(`input[name="round${i}-game1"][value="${inputs.game1}"]`)?.click();
+                                    if (inputs.game2) document.querySelector(`input[name="round${i}-game2"][value="${inputs.game2}"]`)?.click();
+                                    if (inputs.game3) document.querySelector(`input[name="round${i}-game3"][value="${inputs.game3}"]`)?.click();
+                                }
+                                
+                                // Disable fields if already saved
+                                if (savedRounds[i]) {
+                                    document.getElementById(`round${i}-result`).disabled = true;
+                                    document.getElementById(`round${i}-opponent`).disabled = true;
+                                    document.getElementById(`round${i}-deck`).disabled = true;
+                                    document.getElementById(`round${i}-first`).disabled = true;
+                                    document.getElementById(`round${i}-notes`).disabled = true;
+                                    if (currentTournament.format === 'match') {
+                                        document.querySelectorAll(`input[name="round${i}-game1"]`).forEach(input => input.disabled = true);
+                                        document.querySelectorAll(`input[name="round${i}-game2"]`).forEach(input => input.disabled = true);
+                                        document.querySelectorAll(`input[name="round${i}-game3"]`).forEach(input => input.disabled = true);
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }, 100);
+                
+                return true;
+            } catch (error) {
+                console.error('Error loading tournament progress:', error);
+                return false;
+            }
+        }
 
         async function saveCurrentRound() {
             // 現在入力されているラウンドを特定
@@ -939,7 +1029,7 @@
             try {
                 let bo3Result = '';
                 
-                if (currentTournament.format === 'bo3') {
+                if (currentTournament.format === 'match') {
                     const game1 = document.querySelector(`input[name="round${currentRoundNum}-game1"]:checked`)?.value || '';
                     const game2 = document.querySelector(`input[name="round${currentRoundNum}-game2"]:checked`)?.value || '';
                     const game3 = document.querySelector(`input[name="round${currentRoundNum}-game3"]:checked`)?.value || '';
@@ -953,7 +1043,7 @@
                     myDeck: currentTournament.deck,
                     round: `R${currentRoundNum}`,
                     format: 'トーナメント',
-                    matchFormat: format,
+                    matchFormat: currentTournament.format,
                     result: result,
                     opponent: document.getElementById(`round${currentRoundNum}-opponent`).value || null,
                     opponentDeck: document.getElementById(`round${currentRoundNum}-deck`).value || null,
@@ -982,7 +1072,7 @@
                 document.getElementById(`round${currentRoundNum}-deck`).disabled = true;
                 document.getElementById(`round${currentRoundNum}-first`).disabled = true;
                 document.getElementById(`round${currentRoundNum}-notes`).disabled = true;
-                if (currentTournament.format === 'bo3') {
+                if (currentTournament.format === 'match') {
                     document.querySelectorAll(`input[name="round${currentRoundNum}-game1"]`).forEach(input => input.disabled = true);
                     document.querySelectorAll(`input[name="round${currentRoundNum}-game2"]`).forEach(input => input.disabled = true);
                     document.querySelectorAll(`input[name="round${currentRoundNum}-game3"]`).forEach(input => input.disabled = true);
@@ -997,6 +1087,8 @@
                         roundsModal.hide();
                         currentTournament = null;
                         savedRounds = {};
+                        localStorage.removeItem('tournamentProgress');
+                        document.getElementById('resume-tournament-btn').style.display = 'none';
                     }
                 }
             } catch (error) {
@@ -1047,6 +1139,8 @@
             roundsModal.hide();
             currentTournament = null;
             savedRounds = {};
+            localStorage.removeItem('tournamentProgress'); // Clear saved progress
+            document.getElementById('resume-tournament-btn').style.display = 'none';
             alert('大会を終了しました');
             await loadRecords();
         }
@@ -1062,10 +1156,23 @@
                 ]);
                 updateStatisticsOptions();
                 loadPresetOptions(); // Load preset options after presets are loaded
+                
+                // Check for saved tournament progress
+                if (localStorage.getItem('tournamentProgress')) {
+                    document.getElementById('resume-tournament-btn').style.display = 'inline-block';
+                }
             } catch (error) {
                 console.error('Error loading data:', error);
             } finally {
                 showLoading(false);
+            }
+        }
+        
+        function resumeTournament() {
+            if (loadTournamentProgress()) {
+                showRoundsModal();
+            } else {
+                alert('保存された大会データの読み込みに失敗しました');
             }
         }
 
