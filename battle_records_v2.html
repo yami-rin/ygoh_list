@@ -126,7 +126,8 @@
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">後で続ける</button>
-                    <button type="button" id="save-tournament-btn" class="btn btn-primary">大会結果を保存</button>
+                    <button type="button" id="save-round-btn" class="btn btn-primary">現在のラウンドを保存</button>
+                    <button type="button" id="save-tournament-btn" class="btn btn-success">大会を終了</button>
                 </div>
             </div>
         </div>
@@ -424,9 +425,13 @@
             document.getElementById('add-tournament-btn').addEventListener('click', () => showTournamentModal());
             document.getElementById('add-record-btn').addEventListener('click', () => showSingleRecordModal());
             document.getElementById('start-tournament-btn').addEventListener('click', startTournament);
+            document.getElementById('save-round-btn').addEventListener('click', saveCurrentRound);
             document.getElementById('save-tournament-btn').addEventListener('click', saveTournamentResults);
             document.getElementById('manage-presets-btn').addEventListener('click', () => showPresetModal());
-            document.getElementById('add-preset-btn').addEventListener('click', addPreset);
+            document.getElementById('add-preset-btn').addEventListener('click', (e) => {
+                e.preventDefault();
+                addPreset();
+            });
             document.getElementById('apply-stat-filter').addEventListener('click', applyStatisticsFilter);
             document.getElementById('show-statistics-filter').addEventListener('change', toggleStatisticsFilter);
             
@@ -653,7 +658,7 @@
                 div.className = 'mb-2 p-2 border rounded d-flex justify-content-between align-items-center';
                 div.innerHTML = `
                     <span>${preset.name}</span>
-                    <button class="btn btn-sm btn-danger" onclick="deletePreset(${index})">
+                    <button class="btn btn-sm btn-danger" onclick="deletePreset('${preset.name.replace(/'/g, "\\'")}')">
                         <i class="bi bi-trash"></i>
                     </button>
                 `;
@@ -661,7 +666,9 @@
             });
         }
 
-        window.deletePreset = async function(index) {
+        window.deletePreset = async function(presetName) {
+            const index = presets.findIndex(p => p.name === presetName);
+            if (index === -1) return;
             presets.splice(index, 1);
             
             if (isLocalMode) {
@@ -719,6 +726,9 @@
                 alert('必須項目を入力してください');
                 return;
             }
+            
+            // ラウンド保存状態をリセット
+            savedRounds = {};
             
             const rounds = calculateRounds(participants);
             currentTournament = {
@@ -797,71 +807,129 @@
             roundsModal.show();
         }
 
-        async function saveTournamentResults() {
-            const matches = [];
-            
+        let savedRounds = {};
+
+        async function saveCurrentRound() {
+            // 現在入力されているラウンドを特定
+            let currentRoundNum = null;
             for (let i = 1; i <= currentTournament.rounds; i++) {
                 const result = document.getElementById(`round${i}-result`).value;
-                if (!result) {
-                    alert(`第${i}回戦の結果を入力してください`);
-                    return;
+                if (result && !savedRounds[i]) {
+                    currentRoundNum = i;
+                    break;
                 }
-                
-                const match = {
-                    round: i,
-                    opponent: document.getElementById(`round${i}-opponent`).value || null,
-                    opponentDeck: document.getElementById(`round${i}-deck`).value || null,
-                    firstTurnChoice: document.getElementById(`round${i}-first`).value || null,
-                    result: result,
-                    notes: document.getElementById(`round${i}-notes`).value || null
-                };
-                matches.push(match);
+            }
+            
+            if (!currentRoundNum) {
+                alert('保存するラウンドの結果を入力してください');
+                return;
+            }
+            
+            const result = document.getElementById(`round${currentRoundNum}-result`).value;
+            if (!result) {
+                alert(`第${currentRoundNum}回戦の結果を入力してください`);
+                return;
             }
             
             showLoading(true);
             
             try {
-                // 各ラウンドを個別の戦績として保存
-                for (const match of matches) {
-                    const recordData = {
-                        date: currentTournament.date,
-                        tournament: currentTournament.name,
-                        store: currentTournament.store,
-                        myDeck: currentTournament.deck,
-                        round: `R${match.round}`,
-                        format: 'トーナメント',
-                        result: match.result,
-                        createdAt: new Date().toISOString(),
-                        updatedAt: new Date().toISOString()
-                    };
-                    
-                    // オプションフィールド
-                    if (match.opponent) recordData.opponent = match.opponent;
-                    if (match.opponentDeck) recordData.opponentDeck = match.opponentDeck;
-                    if (match.firstTurnChoice) recordData.firstTurnChoice = match.firstTurnChoice;
-                    if (match.notes) recordData.notes = match.notes;
-                    
-                    if (isLocalMode) {
-                        recordData.id = Date.now().toString() + Math.random().toString(36).substr(2, 9);
-                        let records = JSON.parse(localStorage.getItem('battleRecords') || '[]');
-                        records.push(recordData);
-                        localStorage.setItem('battleRecords', JSON.stringify(records));
-                    } else {
-                        recordData.userId = currentUser.uid;
-                        await addDoc(collection(db, 'battleRecords'), recordData);
-                    }
+                const recordData = {
+                    date: currentTournament.date,
+                    tournament: currentTournament.name,
+                    store: currentTournament.store,
+                    myDeck: currentTournament.deck,
+                    round: `R${currentRoundNum}`,
+                    format: 'トーナメント',
+                    result: result,
+                    opponent: document.getElementById(`round${currentRoundNum}-opponent`).value || null,
+                    opponentDeck: document.getElementById(`round${currentRoundNum}-deck`).value || null,
+                    firstTurnChoice: document.getElementById(`round${currentRoundNum}-first`).value || null,
+                    notes: document.getElementById(`round${currentRoundNum}-notes`).value || null,
+                    createdAt: new Date().toISOString(),
+                    updatedAt: new Date().toISOString()
+                };
+                
+                if (isLocalMode) {
+                    recordData.id = Date.now().toString() + Math.random().toString(36).substr(2, 9);
+                    let records = JSON.parse(localStorage.getItem('battleRecords') || '[]');
+                    records.push(recordData);
+                    localStorage.setItem('battleRecords', JSON.stringify(records));
+                } else {
+                    recordData.userId = currentUser.uid;
+                    await addDoc(collection(db, 'battleRecords'), recordData);
                 }
                 
-                roundsModal.hide();
-                currentTournament = null;
+                savedRounds[currentRoundNum] = true;
+                
+                // 入力フィールドを無効化
+                document.getElementById(`round${currentRoundNum}-result`).disabled = true;
+                document.getElementById(`round${currentRoundNum}-opponent`).disabled = true;
+                document.getElementById(`round${currentRoundNum}-deck`).disabled = true;
+                document.getElementById(`round${currentRoundNum}-first`).disabled = true;
+                document.getElementById(`round${currentRoundNum}-notes`).disabled = true;
+                
                 await loadRecords();
-                alert('大会結果を保存しました');
+                alert(`第${currentRoundNum}回戦の結果を保存しました`);
+                
+                // 全ラウンド完了チェック
+                if (Object.keys(savedRounds).length === currentTournament.rounds) {
+                    if (confirm('全ラウンドの結果を保存しました。大会を終了しますか？')) {
+                        roundsModal.hide();
+                        currentTournament = null;
+                        savedRounds = {};
+                    }
+                }
             } catch (error) {
-                console.error('Error saving tournament:', error);
+                console.error('Error saving round:', error);
                 alert('保存中にエラーが発生しました');
             } finally {
                 showLoading(false);
             }
+        }
+
+        async function editTournament(recordId) {
+            const record = battleRecords.find(r => r.id === recordId);
+            if (!record || !record.tournament) return;
+            
+            // 大会モーダルを編集モードで開く
+            document.getElementById('tournament-date').value = record.date;
+            document.getElementById('new-tournament-name').value = record.tournament;
+            document.getElementById('tournament-store').value = record.store || '';
+            document.getElementById('tournament-deck').value = record.myDeck || '';
+            
+            // 編集モードフラグを設定
+            currentEditingId = recordId;
+            tournamentModal.show();
+        }
+
+        window.editTournament = editTournament;
+        let currentEditingId = null;
+
+        async function saveTournamentResults() {
+            // 未保存のラウンドを確認
+            const unsavedRounds = [];
+            for (let i = 1; i <= currentTournament.rounds; i++) {
+                if (!savedRounds[i]) {
+                    const result = document.getElementById(`round${i}-result`).value;
+                    if (result) {
+                        unsavedRounds.push(i);
+                    }
+                }
+            }
+            
+            if (unsavedRounds.length > 0) {
+                if (!confirm(`未保存のラウンド（第${unsavedRounds.join(', ')}回戦）があります。保存せずに大会を終了しますか？`)) {
+                    return;
+                }
+            }
+            
+            // 大会を終了
+            roundsModal.hide();
+            currentTournament = null;
+            savedRounds = {};
+            alert('大会を終了しました');
+            await loadRecords();
         }
 
         async function loadData() {
@@ -1092,6 +1160,10 @@
                         <td>${opponentDeck}</td>
                         <td>${resultBadge[result] || ''}</td>
                         <td>
+                            ${record.tournament ? `
+                            <button class="btn btn-sm btn-primary me-1" onclick="editTournament('${id}')" title="編集">
+                                <i class="bi bi-pencil"></i>
+                            </button>` : ''}
                             <button class="btn btn-sm btn-danger" onclick="deleteRecord('${id}')">
                                 <i class="bi bi-trash"></i>
                             </button>
