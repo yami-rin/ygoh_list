@@ -1050,6 +1050,17 @@
                             const game3Radio = document.querySelector(`input[name="round${currentMatchRound}-game3"][value="${inputs.game3}"]`);
                             if (game3Radio) game3Radio.checked = true;
                         }
+                        
+                        // Load first/second choices for each game
+                        if (inputs.game1First) {
+                            document.getElementById(`round${currentMatchRound}-game1-first`).value = inputs.game1First;
+                        }
+                        if (inputs.game2First) {
+                            document.getElementById(`round${currentMatchRound}-game2-first`).value = inputs.game2First;
+                        }
+                        if (inputs.game3First) {
+                            document.getElementById(`round${currentMatchRound}-game3-first`).value = inputs.game3First;
+                        }
                     }
                 }
             }
@@ -1079,7 +1090,10 @@
                 notes: document.getElementById(`round${roundNum}-notes`)?.value || '',
                 game1: document.querySelector(`input[name="round${roundNum}-game1"]:checked`)?.value || '',
                 game2: document.querySelector(`input[name="round${roundNum}-game2"]:checked`)?.value || '',
-                game3: document.querySelector(`input[name="round${roundNum}-game3"]:checked`)?.value || ''
+                game3: document.querySelector(`input[name="round${roundNum}-game3"]:checked`)?.value || '',
+                game1First: document.getElementById(`round${roundNum}-game1-first`)?.value || '',
+                game2First: document.getElementById(`round${roundNum}-game2-first`)?.value || '',
+                game3First: document.getElementById(`round${roundNum}-game3-first`)?.value || ''
             };
         }
         
@@ -1166,7 +1180,14 @@
         }
         
         async function saveRoundData(roundNum) {
-            const result = document.getElementById(`round${roundNum}-result`).value;
+            // Get result based on format
+            let result;
+            if (currentTournament.format === 'match') {
+                result = document.querySelector(`input[name="round${roundNum}-result"]:checked`)?.value;
+            } else {
+                result = document.getElementById(`round${roundNum}-result`)?.value;
+            }
+            
             if (!result) return;
             
             // Check if we're editing an existing round
@@ -1192,11 +1213,19 @@
             }
             
             let bo3Result = '';
+            let gameFirstChoices = {};
             if (currentTournament.format === 'match') {
                 const game1 = document.querySelector(`input[name="round${roundNum}-game1"]:checked`)?.value || '';
                 const game2 = document.querySelector(`input[name="round${roundNum}-game2"]:checked`)?.value || '';
                 const game3 = document.querySelector(`input[name="round${roundNum}-game3"]:checked`)?.value || '';
                 bo3Result = `${game1}${game2}${game3}`;
+                
+                // Get first/second choices for each game
+                gameFirstChoices = {
+                    game1First: document.getElementById(`round${roundNum}-game1-first`)?.value || '',
+                    game2First: document.getElementById(`round${roundNum}-game2-first`)?.value || '',
+                    game3First: document.getElementById(`round${roundNum}-game3-first`)?.value || ''
+                };
             }
             
             const recordData = {
@@ -1208,11 +1237,12 @@
                 format: 'トーナメント',
                 matchFormat: currentTournament.format,
                 result: result,
-                opponent: document.getElementById(`round${roundNum}-opponent`).value || null,
-                opponentDeck: document.getElementById(`round${roundNum}-deck`).value || null,
-                firstTurnChoice: document.getElementById(`round${roundNum}-first`).value || null,
+                opponent: document.getElementById(`round${roundNum}-opponent`)?.value || null,
+                opponentDeck: document.getElementById(`round${roundNum}-deck`)?.value || null,
+                firstTurnChoice: document.getElementById(`round${roundNum}-first`)?.value || gameFirstChoices.game1First || null,
                 bo3Result: bo3Result || null,
-                notes: document.getElementById(`round${roundNum}-notes`).value || null,
+                gameFirstChoices: currentTournament.format === 'match' ? gameFirstChoices : null,
+                notes: document.getElementById(`round${roundNum}-notes`)?.value || null,
                 createdAt: new Date().toISOString(),
                 updatedAt: new Date().toISOString()
             };
@@ -1235,23 +1265,32 @@
             tournamentProgress = {
                 tournament: currentTournament,
                 savedRounds: savedRounds,
+                currentMatchRound: currentMatchRound || 1,
                 inputs: {}
             };
             
+            // For match format, save current round data first
+            if (currentTournament.format === 'match' && currentMatchRound) {
+                saveMatchRoundToMemory(currentMatchRound);
+                // Copy from temporary storage
+                if (tournamentProgress.inputs) {
+                    Object.assign(tournamentProgress.inputs, tournamentProgress.inputs);
+                }
+            }
+            
             // Save all input values for each round
-            for (let i = 1; i <= currentTournament.rounds; i++) {
-                tournamentProgress.inputs[`round${i}`] = {
-                    opponent: document.getElementById(`round${i}-opponent`)?.value || '',
-                    deck: document.getElementById(`round${i}-deck`)?.value || '',
-                    first: document.getElementById(`round${i}-first`)?.value || '',
-                    result: document.getElementById(`round${i}-result`)?.value || '',
-                    notes: document.getElementById(`round${i}-notes`)?.value || ''
-                };
-                
-                if (currentTournament.format === 'match') {
-                    tournamentProgress.inputs[`round${i}`].game1 = document.querySelector(`input[name="round${i}-game1"]:checked`)?.value || '';
-                    tournamentProgress.inputs[`round${i}`].game2 = document.querySelector(`input[name="round${i}-game2"]:checked`)?.value || '';
-                    tournamentProgress.inputs[`round${i}`].game3 = document.querySelector(`input[name="round${i}-game3"]:checked`)?.value || '';
+            if (currentTournament.format === 'match') {
+                // For match format, inputs are already saved in saveMatchRoundToMemory
+            } else {
+                // For single format, collect all inputs
+                for (let i = 1; i <= currentTournament.rounds; i++) {
+                    tournamentProgress.inputs[`round${i}`] = {
+                        opponent: document.getElementById(`round${i}-opponent`)?.value || '',
+                        deck: document.getElementById(`round${i}-deck`)?.value || '',
+                        first: document.getElementById(`round${i}-first`)?.value || '',
+                        result: document.getElementById(`round${i}-result`)?.value || '',
+                        notes: document.getElementById(`round${i}-notes`)?.value || ''
+                    };
                 }
             }
             
@@ -1572,11 +1611,22 @@
             }
             
             // 大会を終了
-            roundsModal.hide();
             currentTournament = null;
             savedRounds = {};
+            currentMatchRound = 1;
+            tournamentProgress = {};
             localStorage.removeItem('tournamentProgress'); // Clear saved progress
             document.getElementById('resume-tournament-btn').style.display = 'none';
+            
+            // Hide modal properly
+            const modalElement = document.getElementById('rounds-modal');
+            const modalInstance = bootstrap.Modal.getInstance(modalElement);
+            if (modalInstance) {
+                modalInstance.hide();
+            } else {
+                roundsModal.hide();
+            }
+            
             alert('大会を終了しました');
             await loadRecords();
         }
