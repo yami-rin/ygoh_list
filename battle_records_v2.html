@@ -926,6 +926,22 @@
                             </div>
                         </div>
                         
+                        <div class="row mb-3">
+                            <div class="col-12">
+                                <label class="form-label">先攻選択権</label>
+                                <div class="btn-group d-flex" role="group">
+                                    <input type="radio" class="btn-check" name="round${currentMatchRound}-choice" id="round${currentMatchRound}-choice-self" value="自分">
+                                    <label class="btn btn-outline-success" for="round${currentMatchRound}-choice-self">
+                                        <i class="bi bi-person-fill"></i> 自分
+                                    </label>
+                                    <input type="radio" class="btn-check" name="round${currentMatchRound}-choice" id="round${currentMatchRound}-choice-opponent" value="相手">
+                                    <label class="btn btn-outline-danger" for="round${currentMatchRound}-choice-opponent">
+                                        <i class="bi bi-person"></i> 相手
+                                    </label>
+                                </div>
+                            </div>
+                        </div>
+                        
                         <h6 class="mb-3">マッチ結果</h6>
                         <div class="row">
                             <div class="col-md-4 mb-3">
@@ -939,12 +955,19 @@
                                     <label class="btn btn-outline-warning" for="round${currentMatchRound}-game1-draw">△ 引分</label>
                                 </div>
                                 <div class="mt-2">
-                                    <label class="form-label d-block" style="font-size: 0.9rem;">先攻/後攻</label>
-                                    <div class="btn-group" role="group">
+                                    <label class="form-label d-block" style="font-size: 0.85rem;">選択権</label>
+                                    <div class="btn-group btn-group-sm mb-2" role="group">
+                                        <input type="radio" class="btn-check" name="round${currentMatchRound}-game1-choice" id="round${currentMatchRound}-game1-choice-self" value="自分">
+                                        <label class="btn btn-outline-success" for="round${currentMatchRound}-game1-choice-self">自分</label>
+                                        <input type="radio" class="btn-check" name="round${currentMatchRound}-game1-choice" id="round${currentMatchRound}-game1-choice-opponent" value="相手">
+                                        <label class="btn btn-outline-danger" for="round${currentMatchRound}-game1-choice-opponent">相手</label>
+                                    </div>
+                                    <label class="form-label d-block" style="font-size: 0.85rem;">先攻/後攻</label>
+                                    <div class="btn-group btn-group-sm" role="group">
                                         <input type="radio" class="btn-check" name="round${currentMatchRound}-game1-first" id="round${currentMatchRound}-game1-first-first" value="先">
-                                        <label class="btn btn-outline-primary btn-sm" for="round${currentMatchRound}-game1-first-first">先攻</label>
+                                        <label class="btn btn-outline-primary" for="round${currentMatchRound}-game1-first-first">先攻</label>
                                         <input type="radio" class="btn-check" name="round${currentMatchRound}-game1-first" id="round${currentMatchRound}-game1-first-second" value="後">
-                                        <label class="btn btn-outline-info btn-sm" for="round${currentMatchRound}-game1-first-second">後攻</label>
+                                        <label class="btn btn-outline-info" for="round${currentMatchRound}-game1-first-second">後攻</label>
                                     </div>
                                 </div>
                             </div>
@@ -959,12 +982,19 @@
                                     <label class="btn btn-outline-warning" for="round${currentMatchRound}-game2-draw">△ 引分</label>
                                 </div>
                                 <div class="mt-2">
-                                    <label class="form-label d-block" style="font-size: 0.9rem;">先攻/後攻</label>
-                                    <div class="btn-group" role="group">
+                                    <label class="form-label d-block" style="font-size: 0.85rem;">選択権</label>
+                                    <div class="btn-group btn-group-sm mb-2" role="group">
+                                        <input type="radio" class="btn-check" name="round${currentMatchRound}-game2-choice" id="round${currentMatchRound}-game2-choice-self" value="自分">
+                                        <label class="btn btn-outline-success" for="round${currentMatchRound}-game2-choice-self">自分</label>
+                                        <input type="radio" class="btn-check" name="round${currentMatchRound}-game2-choice" id="round${currentMatchRound}-game2-choice-opponent" value="相手">
+                                        <label class="btn btn-outline-danger" for="round${currentMatchRound}-game2-choice-opponent">相手</label>
+                                    </div>
+                                    <label class="form-label d-block" style="font-size: 0.85rem;">先攻/後攻</label>
+                                    <div class="btn-group btn-group-sm" role="group">
                                         <input type="radio" class="btn-check" name="round${currentMatchRound}-game2-first" id="round${currentMatchRound}-game2-first-first" value="先">
-                                        <label class="btn btn-outline-primary btn-sm" for="round${currentMatchRound}-game2-first-first">先攻</label>
+                                        <label class="btn btn-outline-primary" for="round${currentMatchRound}-game2-first-first">先攻</label>
                                         <input type="radio" class="btn-check" name="round${currentMatchRound}-game2-first" id="round${currentMatchRound}-game2-first-second" value="後">
-                                        <label class="btn btn-outline-info btn-sm" for="round${currentMatchRound}-game2-first-second">後攻</label>
+                                        <label class="btn btn-outline-info" for="round${currentMatchRound}-game2-first-second">後攻</label>
                                     </div>
                                 </div>
                             </div>
@@ -979,12 +1009,19 @@
                                     <label class="btn btn-outline-warning" for="round${currentMatchRound}-game3-draw">△ 引分</label>
                                 </div>
                                 <div class="mt-2">
-                                    <label class="form-label d-block" style="font-size: 0.9rem;">先攻/後攻</label>
-                                    <div class="btn-group" role="group">
+                                    <label class="form-label d-block" style="font-size: 0.85rem;">選択権</label>
+                                    <div class="btn-group btn-group-sm mb-2" role="group">
+                                        <input type="radio" class="btn-check" name="round${currentMatchRound}-game3-choice" id="round${currentMatchRound}-game3-choice-self" value="自分">
+                                        <label class="btn btn-outline-success" for="round${currentMatchRound}-game3-choice-self">自分</label>
+                                        <input type="radio" class="btn-check" name="round${currentMatchRound}-game3-choice" id="round${currentMatchRound}-game3-choice-opponent" value="相手">
+                                        <label class="btn btn-outline-danger" for="round${currentMatchRound}-game3-choice-opponent">相手</label>
+                                    </div>
+                                    <label class="form-label d-block" style="font-size: 0.85rem;">先攻/後攻</label>
+                                    <div class="btn-group btn-group-sm" role="group">
                                         <input type="radio" class="btn-check" name="round${currentMatchRound}-game3-first" id="round${currentMatchRound}-game3-first-first" value="先">
-                                        <label class="btn btn-outline-primary btn-sm" for="round${currentMatchRound}-game3-first-first">先攻</label>
+                                        <label class="btn btn-outline-primary" for="round${currentMatchRound}-game3-first-first">先攻</label>
                                         <input type="radio" class="btn-check" name="round${currentMatchRound}-game3-first" id="round${currentMatchRound}-game3-first-second" value="後">
-                                        <label class="btn btn-outline-info btn-sm" for="round${currentMatchRound}-game3-first-second">後攻</label>
+                                        <label class="btn btn-outline-info" for="round${currentMatchRound}-game3-first-second">後攻</label>
                                     </div>
                                 </div>
                             </div>
@@ -1043,6 +1080,12 @@
                             if (resultRadio) resultRadio.checked = true;
                         }
                         
+                        // Load choice for the round
+                        if (inputs.choice) {
+                            const choiceRadio = document.querySelector(`input[name="round${currentMatchRound}-choice"][value="${inputs.choice}"]`);
+                            if (choiceRadio) choiceRadio.checked = true;
+                        }
+                        
                         // Load game results
                         if (inputs.game1) {
                             const game1Radio = document.querySelector(`input[name="round${currentMatchRound}-game1"][value="${inputs.game1}"]`);
@@ -1055,6 +1098,20 @@
                         if (inputs.game3) {
                             const game3Radio = document.querySelector(`input[name="round${currentMatchRound}-game3"][value="${inputs.game3}"]`);
                             if (game3Radio) game3Radio.checked = true;
+                        }
+                        
+                        // Load choice for each game
+                        if (inputs.game1Choice) {
+                            const game1ChoiceRadio = document.querySelector(`input[name="round${currentMatchRound}-game1-choice"][value="${inputs.game1Choice}"]`);
+                            if (game1ChoiceRadio) game1ChoiceRadio.checked = true;
+                        }
+                        if (inputs.game2Choice) {
+                            const game2ChoiceRadio = document.querySelector(`input[name="round${currentMatchRound}-game2-choice"][value="${inputs.game2Choice}"]`);
+                            if (game2ChoiceRadio) game2ChoiceRadio.checked = true;
+                        }
+                        if (inputs.game3Choice) {
+                            const game3ChoiceRadio = document.querySelector(`input[name="round${currentMatchRound}-game3-choice"][value="${inputs.game3Choice}"]`);
+                            if (game3ChoiceRadio) game3ChoiceRadio.checked = true;
                         }
                         
                         // Load first/second choices for each game
@@ -1097,9 +1154,13 @@
                 deck: document.getElementById(`round${roundNum}-deck`)?.value || '',
                 result: document.querySelector(`input[name="round${roundNum}-result"]:checked`)?.value || '',
                 notes: document.getElementById(`round${roundNum}-notes`)?.value || '',
+                choice: document.querySelector(`input[name="round${roundNum}-choice"]:checked`)?.value || '',
                 game1: document.querySelector(`input[name="round${roundNum}-game1"]:checked`)?.value || '',
                 game2: document.querySelector(`input[name="round${roundNum}-game2"]:checked`)?.value || '',
                 game3: document.querySelector(`input[name="round${roundNum}-game3"]:checked`)?.value || '',
+                game1Choice: document.querySelector(`input[name="round${roundNum}-game1-choice"]:checked`)?.value || '',
+                game2Choice: document.querySelector(`input[name="round${roundNum}-game2-choice"]:checked`)?.value || '',
+                game3Choice: document.querySelector(`input[name="round${roundNum}-game3-choice"]:checked`)?.value || '',
                 game1First: document.querySelector(`input[name="round${roundNum}-game1-first"]:checked`)?.value || '',
                 game2First: document.querySelector(`input[name="round${roundNum}-game2-first"]:checked`)?.value || '',
                 game3First: document.querySelector(`input[name="round${roundNum}-game3-first"]:checked`)?.value || ''
@@ -1237,8 +1298,11 @@
                 const game3 = document.querySelector(`input[name="round${roundNum}-game3"]:checked`)?.value || '';
                 bo3Result = `${game1}${game2}${game3}`;
                 
-                // Get first/second choices for each game
+                // Get choices and first/second for each game
                 gameFirstChoices = {
+                    game1Choice: document.querySelector(`input[name="round${roundNum}-game1-choice"]:checked`)?.value || '',
+                    game2Choice: document.querySelector(`input[name="round${roundNum}-game2-choice"]:checked`)?.value || '',
+                    game3Choice: document.querySelector(`input[name="round${roundNum}-game3-choice"]:checked`)?.value || '',
                     game1First: document.querySelector(`input[name="round${roundNum}-game1-first"]:checked`)?.value || '',
                     game2First: document.querySelector(`input[name="round${roundNum}-game2-first"]:checked`)?.value || '',
                     game3First: document.querySelector(`input[name="round${roundNum}-game3-first"]:checked`)?.value || ''
@@ -1256,7 +1320,7 @@
                 result: result,
                 opponent: document.getElementById(`round${roundNum}-opponent`)?.value || null,
                 opponentDeck: document.getElementById(`round${roundNum}-deck`)?.value || null,
-                firstTurnChoice: document.getElementById(`round${roundNum}-first`)?.value || gameFirstChoices.game1First || null,
+                firstTurnChoice: document.getElementById(`round${roundNum}-first`)?.value || document.querySelector(`input[name="round${roundNum}-choice"]:checked`)?.value || null,
                 bo3Result: bo3Result || null,
                 gameFirstChoices: currentTournament.format === 'match' ? gameFirstChoices : null,
                 notes: document.getElementById(`round${roundNum}-notes`)?.value || null,
