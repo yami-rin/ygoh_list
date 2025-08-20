@@ -7,7 +7,7 @@
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css">
     <style>
-        body{background-color:#f8f9fa}[data-bs-theme="dark"] body{background-color:#212529}.navbar{background-color:#f8f9fa}[data-bs-theme="dark"] .navbar{background-color:#212529;border-bottom:1px solid #495057}.container-fluid{max-width:1400px}.card{margin-bottom:1.5rem}#loading-overlay,#app-loader{position:fixed;top:0;left:0;width:100%;height:100%;background-color:rgba(0,0,0,0.6);display:flex;justify-content:center;align-items:center;z-index:1060;color:white}#main-app{display:none}.stat-card{background:linear-gradient(135deg,#667eea 0%,#764ba2 100%);color:white;border-radius:10px;padding:1.5rem;margin-bottom:1rem;cursor:pointer;transition:transform 0.2s}.stat-card:hover{transform:scale(1.02)}.stat-card.win{background:linear-gradient(135deg,#f093fb 0%,#f5576c 100%)}.stat-card.lose{background:linear-gradient(135deg,#4facfe 0%,#00f2fe 100%)}.record-row.win{background-color:rgba(40,167,69,0.1)}.record-row.lose{background-color:rgba(220,53,69,0.1)}.record-row.draw{background-color:rgba(255,193,7,0.1)}.tournament-badge{background:linear-gradient(135deg,#667eea 0%,#764ba2 100%);color:white;padding:0.5rem 1rem;border-radius:20px;display:inline-block;margin-right:0.5rem}.round-indicator{background:#6c757d;color:white;padding:0.25rem 0.75rem;border-radius:15px;font-size:0.9rem}.autocomplete-suggestions{position:absolute;border:1px solid #ccc;background:white;max-height:200px;overflow-y:auto;z-index:1000;width:100%}.autocomplete-suggestion{padding:0.5rem;cursor:pointer}.autocomplete-suggestion:hover{background:#f0f0f0}.navbar-nav .btn{display:inline-flex;align-items:center}.tournament-group{margin-bottom:1rem;border:1px solid #dee2e6;border-radius:0.5rem;overflow:hidden}[data-bs-theme="dark"] .tournament-group{border-color:#495057}.tournament-header{padding:0.75rem;cursor:pointer;display:flex;justify-content:space-between;align-items:center}.tournament-header:hover{background:#e9ecef}[data-bs-theme="dark"] .tournament-header:hover{background:#495057}.tournament-rounds{display:none;padding:0}.tournament-rounds.show{display:block}[data-bs-theme="dark"] .autocomplete-suggestions{background:#212529;border-color:#495057}[data-bs-theme="dark"] .autocomplete-suggestion:hover{background:#343a40}@media(max-width:768px){.navbar-brand{font-size:1rem}.table{font-size:0.875rem}.stat-card{padding:1rem}}
+        body{background-color:#f8f9fa}[data-bs-theme="dark"] body{background-color:#212529}.navbar{background-color:#f8f9fa}[data-bs-theme="dark"] .navbar{background-color:#212529;border-bottom:1px solid #495057}.container-fluid{max-width:1400px}.card{margin-bottom:1.5rem}#loading-overlay,#app-loader{position:fixed;top:0;left:0;width:100%;height:100%;background-color:rgba(0,0,0,0.6);display:flex;justify-content:center;align-items:center;z-index:1060;color:white}#main-app{display:none}.stat-card{background:linear-gradient(135deg,#667eea 0%,#764ba2 100%);color:white;border-radius:10px;padding:1.5rem;margin-bottom:1rem;cursor:pointer;transition:transform 0.2s}.stat-card:hover{transform:scale(1.02)}.stat-card.win{background:linear-gradient(135deg,#f093fb 0%,#f5576c 100%)}.stat-card.lose{background:linear-gradient(135deg,#4facfe 0%,#00f2fe 100%)}.record-row.win{background-color:rgba(40,167,69,0.1)}.record-row.lose{background-color:rgba(220,53,69,0.1)}.record-row.draw{background-color:rgba(255,193,7,0.1)}.tournament-badge{background:linear-gradient(135deg,#667eea 0%,#764ba2 100%);color:white;padding:0.5rem 1rem;border-radius:20px;display:inline-block;margin-right:0.5rem}.round-indicator{background:#6c757d;color:white;padding:0.25rem 0.75rem;border-radius:15px;font-size:0.9rem}.autocomplete-suggestions{position:absolute;border:1px solid #ccc;background:white;max-height:200px;overflow-y:auto;z-index:1000;width:100%}.autocomplete-suggestion{padding:0.5rem;cursor:pointer}.autocomplete-suggestion:hover{background:#f0f0f0}.navbar-nav .btn{display:inline-flex;align-items:center}.tournament-group{margin-bottom:1rem;border:1px solid #dee2e6;border-radius:0.5rem;overflow:hidden}[data-bs-theme="dark"] .tournament-group{border-color:#495057}.tournament-header td{padding:0.75rem}.tournament-header:hover{background:#e9ecef}[data-bs-theme="dark"] .tournament-header:hover{background:#495057}.tournament-rounds{display:none;padding:0}.tournament-rounds.show{display:block}[data-bs-theme="dark"] .autocomplete-suggestions{background:#212529;border-color:#495057}[data-bs-theme="dark"] .autocomplete-suggestion:hover{background:#343a40}@media(max-width:768px){.navbar-brand{font-size:1rem}.table{font-size:0.875rem}.stat-card{padding:1rem}}
     </style>
 </head>
 <body>
@@ -134,8 +134,7 @@
                     <div id="rounds-container"></div>
                 </div>
                 <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" id="continue-later-btn">後で続ける</button>
-                    <button type="button" id="save-round-btn" class="btn btn-primary">現在のラウンドを保存</button>
+                    <button type="button" class="btn btn-secondary" id="continue-later-btn">保存して後で続ける</button>
                     <button type="button" id="save-tournament-btn" class="btn btn-success">大会を終了</button>
                 </div>
             </div>
@@ -452,9 +451,8 @@
             document.getElementById('add-tournament-btn').addEventListener('click', () => showTournamentModal());
             document.getElementById('resume-tournament-btn').addEventListener('click', resumeTournament);
             document.getElementById('start-tournament-btn').addEventListener('click', startTournament);
-            document.getElementById('save-round-btn').addEventListener('click', saveCurrentRound);
             document.getElementById('save-tournament-btn').addEventListener('click', saveTournamentResults);
-            document.getElementById('continue-later-btn').addEventListener('click', saveTournamentProgress);
+            document.getElementById('continue-later-btn').addEventListener('click', saveAndContinueLater);
             document.getElementById('manage-presets-btn').addEventListener('click', () => showPresetModal());
             document.getElementById('add-preset-btn').addEventListener('click', (e) => {
                 e.preventDefault();
@@ -920,6 +918,85 @@
         let savedRounds = {};
         let tournamentProgress = {};
         
+        async function saveAndContinueLater() {
+            // First save any current round that has data
+            for (let i = 1; i <= currentTournament.rounds; i++) {
+                const result = document.getElementById(`round${i}-result`).value;
+                if (result && !savedRounds[i]) {
+                    // Save this round first
+                    await saveRoundData(i);
+                }
+            }
+            
+            // Then save progress for continuing later
+            saveTournamentProgress();
+        }
+        
+        async function saveRoundData(roundNum) {
+            const result = document.getElementById(`round${roundNum}-result`).value;
+            if (!result) return;
+            
+            // Check if we're editing an existing round
+            if (currentEditingId) {
+                // Find and delete the old record for this round
+                const oldRecord = battleRecords.find(r => 
+                    r.tournament === currentTournament.name && 
+                    r.date === currentTournament.date &&
+                    r.myDeck === currentTournament.deck &&
+                    r.round === `R${roundNum}`
+                );
+                
+                if (oldRecord) {
+                    // Delete the old record
+                    if (isLocalMode) {
+                        let records = JSON.parse(localStorage.getItem('battleRecords') || '[]');
+                        records = records.filter(r => r.id !== oldRecord.id);
+                        localStorage.setItem('battleRecords', JSON.stringify(records));
+                    } else {
+                        await deleteDoc(doc(db, 'battleRecords', oldRecord.id));
+                    }
+                }
+            }
+            
+            let bo3Result = '';
+            if (currentTournament.format === 'match') {
+                const game1 = document.querySelector(`input[name="round${roundNum}-game1"]:checked`)?.value || '';
+                const game2 = document.querySelector(`input[name="round${roundNum}-game2"]:checked`)?.value || '';
+                const game3 = document.querySelector(`input[name="round${roundNum}-game3"]:checked`)?.value || '';
+                bo3Result = `${game1}${game2}${game3}`;
+            }
+            
+            const recordData = {
+                date: currentTournament.date,
+                tournament: currentTournament.name,
+                store: currentTournament.store,
+                myDeck: currentTournament.deck,
+                round: `R${roundNum}`,
+                format: 'トーナメント',
+                matchFormat: currentTournament.format,
+                result: result,
+                opponent: document.getElementById(`round${roundNum}-opponent`).value || null,
+                opponentDeck: document.getElementById(`round${roundNum}-deck`).value || null,
+                firstTurnChoice: document.getElementById(`round${roundNum}-first`).value || null,
+                bo3Result: bo3Result || null,
+                notes: document.getElementById(`round${roundNum}-notes`).value || null,
+                createdAt: new Date().toISOString(),
+                updatedAt: new Date().toISOString()
+            };
+            
+            if (isLocalMode) {
+                recordData.id = Date.now().toString() + Math.random().toString(36).substr(2, 9);
+                let records = JSON.parse(localStorage.getItem('battleRecords') || '[]');
+                records.push(recordData);
+                localStorage.setItem('battleRecords', JSON.stringify(records));
+            } else {
+                recordData.userId = currentUser.uid;
+                await addDoc(collection(db, 'battleRecords'), recordData);
+            }
+            
+            savedRounds[roundNum] = true;
+        }
+        
         function saveTournamentProgress() {
             // Save current input values
             tournamentProgress = {
@@ -1135,6 +1212,84 @@
 
         window.editTournament = editTournament;
         let currentEditingId = null;
+        
+        function editRound(recordId) {
+            const record = battleRecords.find(r => r.id === recordId);
+            if (!record) return;
+            
+            // Find all tournament records to recreate the tournament context
+            const tournamentRecords = battleRecords.filter(r => 
+                r.tournament === record.tournament && 
+                r.date === record.date &&
+                r.myDeck === record.myDeck
+            );
+            
+            // Create tournament context
+            const maxRound = Math.max(...tournamentRecords.map(r => {
+                const roundNum = parseInt(r.round?.replace('R', '') || '0');
+                return roundNum;
+            }));
+            
+            currentTournament = {
+                date: record.date,
+                name: record.tournament,
+                store: record.store,
+                deck: record.myDeck,
+                format: record.matchFormat || 'single',
+                rounds: maxRound,
+                participants: Math.pow(2, maxRound)
+            };
+            
+            // Mark already saved rounds
+            savedRounds = {};
+            tournamentRecords.forEach(r => {
+                const roundNum = parseInt(r.round?.replace('R', '') || '0');
+                if (roundNum > 0) {
+                    savedRounds[roundNum] = true;
+                }
+            });
+            
+            // Show the rounds modal
+            showRoundsModal();
+            
+            // After modal is shown, populate the specific round data
+            setTimeout(() => {
+                const roundNum = parseInt(record.round?.replace('R', '') || '0');
+                if (roundNum > 0 && document.getElementById(`round${roundNum}-opponent`)) {
+                    document.getElementById(`round${roundNum}-opponent`).value = record.opponent || '';
+                    document.getElementById(`round${roundNum}-deck`).value = record.opponentDeck || '';
+                    document.getElementById(`round${roundNum}-first`).value = record.firstTurnChoice || '';
+                    document.getElementById(`round${roundNum}-result`).value = record.result || '';
+                    document.getElementById(`round${roundNum}-notes`).value = record.notes || '';
+                    
+                    // If match format and has BO3 results
+                    if (record.matchFormat === 'match' && record.bo3Result) {
+                        const results = record.bo3Result.split('');
+                        if (results[0]) document.querySelector(`input[name="round${roundNum}-game1"][value="${results[0]}"]`)?.click();
+                        if (results[1]) document.querySelector(`input[name="round${roundNum}-game2"][value="${results[1]}"]`)?.click();
+                        if (results[2]) document.querySelector(`input[name="round${roundNum}-game3"][value="${results[2]}"]`)?.click();
+                    }
+                    
+                    // Re-enable fields for editing this specific round
+                    savedRounds[roundNum] = false;
+                    document.getElementById(`round${roundNum}-result`).disabled = false;
+                    document.getElementById(`round${roundNum}-opponent`).disabled = false;
+                    document.getElementById(`round${roundNum}-deck`).disabled = false;
+                    document.getElementById(`round${roundNum}-first`).disabled = false;
+                    document.getElementById(`round${roundNum}-notes`).disabled = false;
+                    if (record.matchFormat === 'match') {
+                        document.querySelectorAll(`input[name="round${roundNum}-game1"]`).forEach(input => input.disabled = false);
+                        document.querySelectorAll(`input[name="round${roundNum}-game2"]`).forEach(input => input.disabled = false);
+                        document.querySelectorAll(`input[name="round${roundNum}-game3"]`).forEach(input => input.disabled = false);
+                    }
+                    
+                    // Delete the old record when saving
+                    currentEditingId = recordId;
+                }
+            }, 200);
+        }
+        
+        window.editRound = editRound;
 
         async function saveTournamentResults() {
             // 未保存のラウンドを確認
@@ -1435,21 +1590,21 @@
                 const draws = group.rounds.filter(r => r.result === 'draw').length;
                 
                 html += `
-                    <tr class="tournament-header" onclick="toggleTournamentGroup('tournament-${index}')">
-                        <td>${group.date}</td>
-                        <td>
+                    <tr class="tournament-header">
+                        <td onclick="toggleTournamentGroup('tournament-${index}')" style="cursor: pointer;">${group.date}</td>
+                        <td onclick="toggleTournamentGroup('tournament-${index}')" style="cursor: pointer;">
                             <span class="tournament-badge">${group.tournament}</span>
                             ${group.store || ''}
                         </td>
-                        <td>-</td>
-                        <td><strong>${group.myDeck}</strong></td>
-                        <td>-</td>
-                        <td>
+                        <td onclick="toggleTournamentGroup('tournament-${index}')" style="cursor: pointer;">-</td>
+                        <td onclick="toggleTournamentGroup('tournament-${index}')" style="cursor: pointer;"><strong>${group.myDeck}</strong></td>
+                        <td onclick="toggleTournamentGroup('tournament-${index}')" style="cursor: pointer;">-</td>
+                        <td onclick="toggleTournamentGroup('tournament-${index}')" style="cursor: pointer;">
                             ${wins}-${losses}${draws > 0 ? `-${draws}` : ''}
                             <i class="bi bi-chevron-down float-end" id="chevron-tournament-${index}"></i>
                         </td>
                         <td>
-                            <button class="btn btn-sm btn-primary me-1" onclick="editTournament('${group.rounds[0].id}')" title="編集">
+                            <button class="btn btn-sm btn-primary me-1" onclick="editTournament('${group.rounds[0].id}')" title="大会編集">
                                 <i class="bi bi-pencil"></i>
                             </button>
                             <button class="btn btn-sm btn-info me-1" onclick="tweetTournamentResult('${index}')" title="ツイート">
@@ -1470,6 +1625,9 @@
                             <td>${record.opponentDeck || '-'}</td>
                             <td>${resultBadge[record.result] || ''}</td>
                             <td>
+                                <button class="btn btn-sm btn-warning me-1" onclick="editRound('${record.id}')" title="ラウンド編集">
+                                    <i class="bi bi-pencil-square"></i>
+                                </button>
                                 <button class="btn btn-sm btn-danger" onclick="deleteRecord('${record.id}')">
                                     <i class="bi bi-trash"></i>
                                 </button>
