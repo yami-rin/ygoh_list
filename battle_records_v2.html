@@ -822,97 +822,276 @@
             document.getElementById('tournament-title').textContent = currentTournament.name;
             document.getElementById('current-round').textContent = `${currentTournament.rounds}回戦制`;
             
+            // If match format, show round-by-round interface
+            if (currentTournament.format === 'match') {
+                showMatchRoundInterface();
+            } else {
+                // Normal single game format
+                const container = document.getElementById('rounds-container');
+                container.innerHTML = '';
+                
+                for (let i = 1; i <= currentTournament.rounds; i++) {
+                    const roundDiv = document.createElement('div');
+                    roundDiv.className = 'mb-4';
+                    roundDiv.innerHTML = `
+                        <h6 class="mb-3">
+                            <span class="badge bg-secondary">第${i}回戦</span>
+                        </h6>
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label">対戦相手</label>
+                                <input type="text" class="form-control" id="round${i}-opponent" placeholder="相手の名前">
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label">相手デッキ</label>
+                                <input type="text" class="form-control" id="round${i}-deck" placeholder="相手のデッキ">
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label">先攻選択権</label>
+                                <select class="form-select" id="round${i}-first">
+                                    <option value="">選択してください</option>
+                                    <option value="先">先攻</option>
+                                    <option value="後">後攻</option>
+                                </select>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label">結果 <span class="text-danger">*</span></label>
+                                <select class="form-select" id="round${i}-result" required>
+                                    <option value="">選択してください</option>
+                                    <option value="win">勝利</option>
+                                    <option value="lose">敗北</option>
+                                    <option value="draw">引き分け</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">メモ</label>
+                            <textarea class="form-control" id="round${i}-notes" rows="2"></textarea>
+                        </div>
+                        <hr>
+                    `;
+                    container.appendChild(roundDiv);
+                }
+                
+                roundsModal.show();
+            }
+        }
+        
+        let currentMatchRound = 1;
+        
+        function showMatchRoundInterface() {
             const container = document.getElementById('rounds-container');
             container.innerHTML = '';
             
-            for (let i = 1; i <= currentTournament.rounds; i++) {
-                const roundDiv = document.createElement('div');
-                roundDiv.className = 'mb-4';
-                roundDiv.innerHTML = `
-                    <h6 class="mb-3">
-                        <span class="badge bg-secondary">第${i}回戦</span>
-                    </h6>
-                    <div class="row">
-                        <div class="col-md-6 mb-3">
-                            <label class="form-label">対戦相手</label>
-                            <input type="text" class="form-control" id="round${i}-opponent" placeholder="相手の名前">
-                        </div>
-                        <div class="col-md-6 mb-3">
-                            <label class="form-label">相手デッキ</label>
-                            <input type="text" class="form-control" id="round${i}-deck" placeholder="相手のデッキ">
-                        </div>
+            // Create navigation header
+            const navHeader = document.createElement('div');
+            navHeader.className = 'mb-4';
+            navHeader.innerHTML = `
+                <div class="d-flex justify-content-between align-items-center">
+                    <h5>
+                        <span class="badge bg-primary">第${currentMatchRound}回戦</span>
+                        <span class="text-muted ms-2">(${currentMatchRound} / ${currentTournament.rounds})</span>
+                    </h5>
+                    <div>
+                        ${currentMatchRound > 1 ? `
+                            <button class="btn btn-outline-secondary me-2" onclick="navigateMatchRound(${currentMatchRound - 1})">
+                                <i class="bi bi-chevron-left"></i> 前のラウンド
+                            </button>
+                        ` : ''}
+                        ${currentMatchRound < currentTournament.rounds ? `
+                            <button class="btn btn-outline-secondary" onclick="navigateMatchRound(${currentMatchRound + 1})">
+                                次のラウンド <i class="bi bi-chevron-right"></i>
+                            </button>
+                        ` : ''}
                     </div>
-                    <div class="row">
-                        <div class="col-md-6 mb-3">
-                            <label class="form-label">先攻選択権</label>
-                            <select class="form-select" id="round${i}-first">
-                                <option value="">選択してください</option>
-                                <option value="先">先攻</option>
-                                <option value="後">後攻</option>
-                            </select>
+                </div>
+            `;
+            container.appendChild(navHeader);
+            
+            // Create round content
+            const roundContent = document.createElement('div');
+            roundContent.innerHTML = `
+                <div class="card">
+                    <div class="card-body">
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label">対戦相手</label>
+                                <input type="text" class="form-control" id="round${currentMatchRound}-opponent" placeholder="相手の名前">
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label">相手デッキ</label>
+                                <input type="text" class="form-control" id="round${currentMatchRound}-deck" placeholder="相手のデッキ">
+                            </div>
                         </div>
-                        <div class="col-md-6 mb-3">
-                            <label class="form-label">結果 <span class="text-danger">*</span></label>
-                            <select class="form-select" id="round${i}-result" required>
-                                <option value="">選択してください</option>
-                                <option value="win">勝利</option>
-                                <option value="lose">敗北</option>
-                                <option value="draw">引き分け</option>
-                            </select>
-                        </div>
-                    </div>
-                    ${currentTournament.format === 'match' ? `
-                    <div class="row" id="round${i}-match">
-                        <div class="col-12 mb-3">
-                            <label class="form-label">マッチ結果</label>
-                            <div class="btn-group d-block" role="group">
-                                <div class="mb-2">
-                                    <span class="me-2">1R:</span>
-                                    <div class="btn-group" role="group">
-                                        <input type="radio" class="btn-check" name="round${i}-game1" id="round${i}-game1-win" value="○">
-                                        <label class="btn btn-outline-success" for="round${i}-game1-win">○</label>
-                                        <input type="radio" class="btn-check" name="round${i}-game1" id="round${i}-game1-lose" value="×">
-                                        <label class="btn btn-outline-danger" for="round${i}-game1-lose">×</label>
-                                        <input type="radio" class="btn-check" name="round${i}-game1" id="round${i}-game1-draw" value="△">
-                                        <label class="btn btn-outline-warning" for="round${i}-game1-draw">△</label>
-                                    </div>
+                        
+                        <h6 class="mb-3">マッチ結果</h6>
+                        <div class="row">
+                            <div class="col-md-4 mb-3">
+                                <label class="form-label">第1ゲーム</label>
+                                <div class="btn-group d-flex" role="group">
+                                    <input type="radio" class="btn-check" name="round${currentMatchRound}-game1" id="round${currentMatchRound}-game1-win" value="○">
+                                    <label class="btn btn-outline-success" for="round${currentMatchRound}-game1-win">○ 勝利</label>
+                                    <input type="radio" class="btn-check" name="round${currentMatchRound}-game1" id="round${currentMatchRound}-game1-lose" value="×">
+                                    <label class="btn btn-outline-danger" for="round${currentMatchRound}-game1-lose">× 敗北</label>
+                                    <input type="radio" class="btn-check" name="round${currentMatchRound}-game1" id="round${currentMatchRound}-game1-draw" value="△">
+                                    <label class="btn btn-outline-warning" for="round${currentMatchRound}-game1-draw">△ 引分</label>
                                 </div>
-                                <div class="mb-2">
-                                    <span class="me-2">2R:</span>
-                                    <div class="btn-group" role="group">
-                                        <input type="radio" class="btn-check" name="round${i}-game2" id="round${i}-game2-win" value="○">
-                                        <label class="btn btn-outline-success" for="round${i}-game2-win">○</label>
-                                        <input type="radio" class="btn-check" name="round${i}-game2" id="round${i}-game2-lose" value="×">
-                                        <label class="btn btn-outline-danger" for="round${i}-game2-lose">×</label>
-                                        <input type="radio" class="btn-check" name="round${i}-game2" id="round${i}-game2-draw" value="△">
-                                        <label class="btn btn-outline-warning" for="round${i}-game2-draw">△</label>
-                                    </div>
+                                <div class="mt-2">
+                                    <select class="form-select" id="round${currentMatchRound}-game1-first">
+                                        <option value="">先攻/後攻</option>
+                                        <option value="先">先攻</option>
+                                        <option value="後">後攻</option>
+                                    </select>
                                 </div>
-                                <div class="mb-2">
-                                    <span class="me-2">3R:</span>
-                                    <div class="btn-group" role="group">
-                                        <input type="radio" class="btn-check" name="round${i}-game3" id="round${i}-game3-win" value="○">
-                                        <label class="btn btn-outline-success" for="round${i}-game3-win">○</label>
-                                        <input type="radio" class="btn-check" name="round${i}-game3" id="round${i}-game3-lose" value="×">
-                                        <label class="btn btn-outline-danger" for="round${i}-game3-lose">×</label>
-                                        <input type="radio" class="btn-check" name="round${i}-game3" id="round${i}-game3-draw" value="△">
-                                        <label class="btn btn-outline-warning" for="round${i}-game3-draw">△</label>
-                                    </div>
+                            </div>
+                            <div class="col-md-4 mb-3">
+                                <label class="form-label">第2ゲーム</label>
+                                <div class="btn-group d-flex" role="group">
+                                    <input type="radio" class="btn-check" name="round${currentMatchRound}-game2" id="round${currentMatchRound}-game2-win" value="○">
+                                    <label class="btn btn-outline-success" for="round${currentMatchRound}-game2-win">○ 勝利</label>
+                                    <input type="radio" class="btn-check" name="round${currentMatchRound}-game2" id="round${currentMatchRound}-game2-lose" value="×">
+                                    <label class="btn btn-outline-danger" for="round${currentMatchRound}-game2-lose">× 敗北</label>
+                                    <input type="radio" class="btn-check" name="round${currentMatchRound}-game2" id="round${currentMatchRound}-game2-draw" value="△">
+                                    <label class="btn btn-outline-warning" for="round${currentMatchRound}-game2-draw">△ 引分</label>
+                                </div>
+                                <div class="mt-2">
+                                    <select class="form-select" id="round${currentMatchRound}-game2-first">
+                                        <option value="">先攻/後攻</option>
+                                        <option value="先">先攻</option>
+                                        <option value="後">後攻</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="col-md-4 mb-3">
+                                <label class="form-label">第3ゲーム</label>
+                                <div class="btn-group d-flex" role="group">
+                                    <input type="radio" class="btn-check" name="round${currentMatchRound}-game3" id="round${currentMatchRound}-game3-win" value="○">
+                                    <label class="btn btn-outline-success" for="round${currentMatchRound}-game3-win">○ 勝利</label>
+                                    <input type="radio" class="btn-check" name="round${currentMatchRound}-game3" id="round${currentMatchRound}-game3-lose" value="×">
+                                    <label class="btn btn-outline-danger" for="round${currentMatchRound}-game3-lose">× 敗北</label>
+                                    <input type="radio" class="btn-check" name="round${currentMatchRound}-game3" id="round${currentMatchRound}-game3-draw" value="△">
+                                    <label class="btn btn-outline-warning" for="round${currentMatchRound}-game3-draw">△ 引分</label>
+                                </div>
+                                <div class="mt-2">
+                                    <select class="form-select" id="round${currentMatchRound}-game3-first">
+                                        <option value="">先攻/後攻</option>
+                                        <option value="先">先攻</option>
+                                        <option value="後">後攻</option>
+                                    </select>
                                 </div>
                             </div>
                         </div>
+                        
+                        <div class="row">
+                            <div class="col-12 mb-3">
+                                <label class="form-label">マッチ結果 <span class="text-danger">*</span></label>
+                                <select class="form-select" id="round${currentMatchRound}-result" required onchange="autoCalculateMatchResult(${currentMatchRound})">
+                                    <option value="">選択してください</option>
+                                    <option value="win">勝利</option>
+                                    <option value="lose">敗北</option>
+                                    <option value="draw">引き分け</option>
+                                </select>
+                            </div>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label class="form-label">メモ</label>
+                            <textarea class="form-control" id="round${currentMatchRound}-notes" rows="3" placeholder="このラウンドのメモ"></textarea>
+                        </div>
+                        
+                        <div class="d-flex justify-content-between">
+                            <button class="btn btn-success" onclick="saveMatchRound(${currentMatchRound})">
+                                <i class="bi bi-check-lg"></i> このラウンドを保存
+                            </button>
+                            ${savedRounds[currentMatchRound] ? `
+                                <span class="badge bg-success">保存済み</span>
+                            ` : ''}
+                        </div>
                     </div>
-                    ` : ''}
-                    <div class="mb-3">
-                        <label class="form-label">メモ</label>
-                        <textarea class="form-control" id="round${i}-notes" rows="2"></textarea>
-                    </div>
-                    <hr>
-                `;
-                container.appendChild(roundDiv);
+                </div>
+            `;
+            container.appendChild(roundContent);
+            
+            // Load saved data if exists
+            if (tournamentProgress && tournamentProgress.inputs) {
+                const inputs = tournamentProgress.inputs[`round${currentMatchRound}`];
+                if (inputs) {
+                    if (document.getElementById(`round${currentMatchRound}-opponent`)) {
+                        document.getElementById(`round${currentMatchRound}-opponent`).value = inputs.opponent || '';
+                        document.getElementById(`round${currentMatchRound}-deck`).value = inputs.deck || '';
+                        document.getElementById(`round${currentMatchRound}-result`).value = inputs.result || '';
+                        document.getElementById(`round${currentMatchRound}-notes`).value = inputs.notes || '';
+                        
+                        // Load game results
+                        if (inputs.game1) {
+                            const game1Radio = document.querySelector(`input[name="round${currentMatchRound}-game1"][value="${inputs.game1}"]`);
+                            if (game1Radio) game1Radio.checked = true;
+                        }
+                        if (inputs.game2) {
+                            const game2Radio = document.querySelector(`input[name="round${currentMatchRound}-game2"][value="${inputs.game2}"]`);
+                            if (game2Radio) game2Radio.checked = true;
+                        }
+                        if (inputs.game3) {
+                            const game3Radio = document.querySelector(`input[name="round${currentMatchRound}-game3"][value="${inputs.game3}"]`);
+                            if (game3Radio) game3Radio.checked = true;
+                        }
+                    }
+                }
             }
             
             roundsModal.show();
+        }
+        
+        window.navigateMatchRound = function(roundNum) {
+            // Save current round data to memory
+            if (currentTournament.format === 'match') {
+                saveMatchRoundToMemory(currentMatchRound);
+            }
+            
+            currentMatchRound = roundNum;
+            showMatchRoundInterface();
+        };
+        
+        function saveMatchRoundToMemory(roundNum) {
+            if (!tournamentProgress.inputs) {
+                tournamentProgress.inputs = {};
+            }
+            
+            tournamentProgress.inputs[`round${roundNum}`] = {
+                opponent: document.getElementById(`round${roundNum}-opponent`)?.value || '',
+                deck: document.getElementById(`round${roundNum}-deck`)?.value || '',
+                result: document.getElementById(`round${roundNum}-result`)?.value || '',
+                notes: document.getElementById(`round${roundNum}-notes`)?.value || '',
+                game1: document.querySelector(`input[name="round${roundNum}-game1"]:checked`)?.value || '',
+                game2: document.querySelector(`input[name="round${roundNum}-game2"]:checked`)?.value || '',
+                game3: document.querySelector(`input[name="round${roundNum}-game3"]:checked`)?.value || ''
+            };
+        }
+        
+        window.saveMatchRound = async function(roundNum) {
+            const result = document.getElementById(`round${roundNum}-result`).value;
+            if (!result) {
+                alert('マッチ結果を選択してください');
+                return;
+            }
+            
+            // Save to memory first
+            saveMatchRoundToMemory(roundNum);
+            
+            // Save to database
+            await saveRoundData(roundNum);
+            
+            alert(`第${roundNum}回戦を保存しました`);
+            
+            // Refresh the interface to show saved status
+            showMatchRoundInterface();
+        };
+        
+        window.autoCalculateMatchResult = function(roundNum) {
+            // This can be enhanced to auto-calculate based on game results
+            // For now, it's just a placeholder for future enhancement
         }
 
         let savedRounds = {};
@@ -1342,7 +1521,7 @@
             }
         }
         
-        function resumeTournament() {
+        window.resumeTournament = function() {
             if (loadTournamentProgress()) {
                 showRoundsModal();
             } else {
