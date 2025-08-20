@@ -162,8 +162,32 @@
                             統計フィルターを表示
                         </label>
                     </div>
+                    <hr>
+                    <h6 class="mb-3">ツイートテンプレート設定</h6>
+                    <div class="mb-3">
+                        <label class="form-label" style="font-size: 0.9rem;">使用可能な変数</label>
+                        <div class="small text-muted" style="font-family: monospace; background: #f8f9fa; padding: 8px; border-radius: 3px;">
+                            {tournament} - 大会名<br>
+                            {store} - 店舗名<br>
+                            {deck} - 使用デッキ<br>
+                            {date} - 日付<br>
+                            {wins} - 勝利数<br>
+                            {losses} - 敗北数<br>
+                            {draws} - 引き分け数<br>
+                            {rounds} - 各ラウンド結果<br>
+                            {url} - サイトURL
+                        </div>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">テンプレート</label>
+                        <textarea id="tweet-template-setting" class="form-control" rows="8" placeholder="ツイートのテンプレートを入力"></textarea>
+                    </div>
+                    <button type="button" class="btn btn-sm btn-secondary" onclick="resetTweetTemplate()">
+                        <i class="bi bi-arrow-clockwise"></i> デフォルトに戻す
+                    </button>
                 </div>
                 <div class="modal-footer">
+                    <button type="button" class="btn btn-success" onclick="saveTweetTemplate()">保存</button>
                     <button type="button" class="btn btn-primary" data-bs-dismiss="modal">閉じる</button>
                 </div>
             </div>
@@ -566,6 +590,9 @@
         }
         
         function showSettingsModal() {
+            // Load current tweet template
+            const templateField = document.getElementById('tweet-template-setting');
+            templateField.value = localStorage.getItem('tweetTemplate') || getDefaultTweetTemplate();
             settingsModal.show();
         }
         
@@ -2101,37 +2128,22 @@
             const group = groups[index];
             if (!group) return;
             
-            // Create modal for tweet template editing
+            // Create modal for tweet preview
             const modalHtml = `
                 <div class="modal fade" id="tweet-modal" tabindex="-1">
                     <div class="modal-dialog modal-lg">
                         <div class="modal-content">
                             <div class="modal-header">
-                                <h5 class="modal-title">ツイート内容の編集</h5>
+                                <h5 class="modal-title">ツイート内容の確認</h5>
                                 <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
                             </div>
                             <div class="modal-body">
                                 <div class="mb-3">
-                                    <label class="form-label">テンプレート変数</label>
-                                    <ul class="list-unstyled" style="font-family: monospace; background: #f8f9fa; padding: 10px; border-radius: 5px;">
-                                        <li>{tournament} - 大会名</li>
-                                        <li>{store} - 店舗名</li>
-                                        <li>{deck} - 使用デッキ</li>
-                                        <li>{date} - 日付</li>
-                                        <li>{wins} - 勝利数</li>
-                                        <li>{losses} - 敗北数</li>
-                                        <li>{draws} - 引き分け数</li>
-                                        <li>{rounds} - 各ラウンド結果</li>
-                                        <li>{url} - サイトURL</li>
-                                    </ul>
-                                </div>
-                                <div class="mb-3">
                                     <label class="form-label">ツイート内容</label>
-                                    <textarea id="tweet-template" class="form-control" rows="10"></textarea>
+                                    <textarea id="tweet-content" class="form-control" rows="10"></textarea>
                                 </div>
-                                <div class="mb-3">
-                                    <label class="form-label">プレビュー</label>
-                                    <div id="tweet-preview" class="p-3 border rounded" style="background: #f8f9fa; white-space: pre-wrap;"></div>
+                                <div class="text-muted small">
+                                    ※ テンプレートの変更は設定から行ってください
                                 </div>
                             </div>
                             <div class="modal-footer">
@@ -2168,14 +2180,8 @@
                 roundsText += `R${idx + 1}: ${round.opponentDeck || '不明'} ${firstTurn}${bo3Result ? bo3Result : resultMark}\n`;
             });
             
-            // Default template
-            const defaultTemplate = `"{tournament}" {store}
-使用「{deck}」
-戦績: {wins}-{losses}${draws > 0 ? `-${draws}` : ''}
-
-{rounds}
-
-{url}`;
+            // Get template from settings
+            const template = localStorage.getItem('tweetTemplate') || getDefaultTweetTemplate();
             
             // Store data for template replacement
             window.tweetData = {
@@ -2190,23 +2196,16 @@
                 url: window.location.href
             };
             
-            // Set template and update preview
-            const templateField = document.getElementById('tweet-template');
-            templateField.value = localStorage.getItem('tweetTemplate') || defaultTemplate;
+            // Apply template
+            let tweetText = template;
+            Object.keys(window.tweetData).forEach(key => {
+                const regex = new RegExp(`\\{${key}\\}`, 'g');
+                tweetText = tweetText.replace(regex, window.tweetData[key]);
+            });
             
-            // Update preview function
-            window.updateTweetPreview = function() {
-                let text = templateField.value;
-                Object.keys(window.tweetData).forEach(key => {
-                    const regex = new RegExp(`\\{${key}\\}`, 'g');
-                    text = text.replace(regex, window.tweetData[key]);
-                });
-                document.getElementById('tweet-preview').textContent = text;
-            };
-            
-            // Add event listener
-            templateField.addEventListener('input', updateTweetPreview);
-            updateTweetPreview();
+            // Set content
+            const contentField = document.getElementById('tweet-content');
+            contentField.value = tweetText;
             
             // Show modal
             const tweetModal = new bootstrap.Modal(document.getElementById('tweet-modal'));
@@ -2214,16 +2213,8 @@
         }
         
         window.sendTweet = function() {
-            const templateField = document.getElementById('tweet-template');
-            // Save template for next time
-            localStorage.setItem('tweetTemplate', templateField.value);
-            
-            // Get final text
-            let text = templateField.value;
-            Object.keys(window.tweetData).forEach(key => {
-                const regex = new RegExp(`\\{${key}\\}`, 'g');
-                text = text.replace(regex, window.tweetData[key]);
-            });
+            const contentField = document.getElementById('tweet-content');
+            const text = contentField.value;
             
             // Open Twitter
             const tweetUrl = `https://twitter.com/intent/tweet?text=${encodeURIComponent(text)}`;
@@ -2231,6 +2222,27 @@
             
             // Close modal
             bootstrap.Modal.getInstance(document.getElementById('tweet-modal')).hide();
+        };
+        
+        function getDefaultTweetTemplate() {
+            return `"{tournament}" {store}
+使用「{deck}」
+戦績: {wins}-{losses}
+
+{rounds}
+
+{url}`;
+        }
+        
+        window.resetTweetTemplate = function() {
+            const templateField = document.getElementById('tweet-template-setting');
+            templateField.value = getDefaultTweetTemplate();
+        };
+        
+        window.saveTweetTemplate = function() {
+            const templateField = document.getElementById('tweet-template-setting');
+            localStorage.setItem('tweetTemplate', templateField.value);
+            alert('ツイートテンプレートを保存しました');
         };
         
         window.tweetTournamentResult = tweetTournamentResult;
