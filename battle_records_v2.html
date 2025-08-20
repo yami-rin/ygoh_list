@@ -96,6 +96,15 @@
                                 <input type="text" class="form-control" id="tournament-deck" required>
                             </div>
                         </div>
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label for="tournament-format" class="form-label">マッチ形式 <span class="text-danger">*</span></label>
+                                <select class="form-select" id="tournament-format" required>
+                                    <option value="single">シングル</option>
+                                    <option value="bo3" selected>BO3</option>
+                                </select>
+                            </div>
+                        </div>
                         <div class="alert alert-info">
                             <i class="bi bi-info-circle"></i> 
                             <span id="rounds-info">参加人数を入力すると必要ラウンド数が表示されます</span>
@@ -289,8 +298,9 @@
                                 <div class="col-md-3">
                                     <input type="text" class="form-control form-control-sm" id="filter-deck" placeholder="デッキ名で検索">
                                 </div>
-                                <div class="col-md-3">
-                                    <input type="text" class="form-control form-control-sm" id="filter-tournament" placeholder="大会名で検索">
+                                <div class="col-md-3" style="position: relative;">
+                                    <input type="text" class="form-control form-control-sm" id="filter-tournament" placeholder="大会名で検索" autocomplete="off">
+                                    <div id="tournament-search-suggestions" class="autocomplete-suggestions" style="display: none;"></div>
                                 </div>
                                 <div class="col-md-3">
                                     <select class="form-select form-select-sm" id="filter-result">
@@ -426,6 +436,16 @@
             document.getElementById('signup-btn').addEventListener('click', handleSignup);
             document.getElementById('logout-btn').addEventListener('click', handleLogout);
             document.getElementById('settings-btn').addEventListener('click', showSettingsModal);
+            
+            // Close autocomplete on click outside
+            document.addEventListener('click', (e) => {
+                if (!e.target.closest('#tournament-store') && !e.target.closest('#store-suggestions')) {
+                    document.getElementById('store-suggestions').style.display = 'none';
+                }
+                if (!e.target.closest('#filter-tournament') && !e.target.closest('#tournament-search-suggestions')) {
+                    document.getElementById('tournament-search-suggestions').style.display = 'none';
+                }
+            });
             document.getElementById('add-tournament-btn').addEventListener('click', () => showTournamentModal());
             document.getElementById('start-tournament-btn').addEventListener('click', startTournament);
             document.getElementById('save-round-btn').addEventListener('click', saveCurrentRound);
@@ -443,6 +463,9 @@
             document.getElementById('tournament-preset').addEventListener('change', loadPreset);
             document.getElementById('tournament-store').addEventListener('input', showStoreSuggestions);
             document.getElementById('tournament-store').addEventListener('focus', showStoreSuggestions);
+            
+            document.getElementById('filter-tournament').addEventListener('input', showTournamentSearchSuggestions);
+            document.getElementById('filter-tournament').addEventListener('focus', showTournamentSearchSuggestions);
             
             document.getElementById('filter-form').addEventListener('submit', (e) => {
                 e.preventDefault();
@@ -714,6 +737,42 @@
             document.getElementById('tournament-store').value = store;
             document.getElementById('store-suggestions').style.display = 'none';
         };
+        
+        function showTournamentSearchSuggestions() {
+            const input = document.getElementById('filter-tournament');
+            const value = input.value.toLowerCase();
+            const suggestionsDiv = document.getElementById('tournament-search-suggestions');
+            
+            if (!value) {
+                suggestionsDiv.style.display = 'none';
+                return;
+            }
+            
+            const tournamentNames = [...new Set([
+                ...presets.map(p => p.name),
+                ...battleRecords.filter(r => r.tournament).map(r => r.tournament)
+            ])];
+            
+            const matches = tournamentNames.filter(name => 
+                name.toLowerCase().includes(value)
+            );
+            
+            if (matches.length === 0) {
+                suggestionsDiv.style.display = 'none';
+                return;
+            }
+            
+            suggestionsDiv.innerHTML = matches.slice(0, 5).map(name => 
+                `<div class="autocomplete-suggestion" onclick="selectTournamentSearch('${name.replace(/'/g, "\\'")}')">${name}</div>`
+            ).join('');
+            
+            suggestionsDiv.style.display = 'block';
+        }
+        
+        window.selectTournamentSearch = function(tournament) {
+            document.getElementById('filter-tournament').value = tournament;
+            document.getElementById('tournament-search-suggestions').style.display = 'none';
+        };
 
         async function startTournament() {
             const date = document.getElementById('tournament-date').value;
@@ -721,6 +780,7 @@
             const name = document.getElementById('new-tournament-name').value;
             const store = document.getElementById('tournament-store').value;
             const deck = document.getElementById('tournament-deck').value;
+            const format = document.getElementById('tournament-format').value;
             
             if (!date || !participants || !name || !deck) {
                 alert('必須項目を入力してください');
@@ -737,6 +797,7 @@
                 name,
                 store,
                 deck,
+                format,
                 rounds,
                 currentRound: 1,
                 matches: []
@@ -777,14 +838,7 @@
                         </div>
                     </div>
                     <div class="row">
-                        <div class="col-md-4 mb-3">
-                            <label class="form-label">マッチ形式</label>
-                            <select class="form-select" id="round${i}-format" onchange="toggleBO3Fields(${i})">
-                                <option value="single">シングル</option>
-                                <option value="bo3">BO3</option>
-                            </select>
-                        </div>
-                        <div class="col-md-4 mb-3">
+                        <div class="col-md-6 mb-3">
                             <label class="form-label">先攻選択権</label>
                             <select class="form-select" id="round${i}-first">
                                 <option value="">選択してください</option>
@@ -792,7 +846,7 @@
                                 <option value="後">後攻</option>
                             </select>
                         </div>
-                        <div class="col-md-4 mb-3">
+                        <div class="col-md-6 mb-3">
                             <label class="form-label">結果 <span class="text-danger">*</span></label>
                             <select class="form-select" id="round${i}-result" required>
                                 <option value="">選択してください</option>
@@ -802,35 +856,48 @@
                             </select>
                         </div>
                     </div>
-                    <div class="row" id="round${i}-bo3" style="display:none;">
-                        <div class="col-md-4 mb-3">
-                            <label class="form-label">第1ゲーム</label>
-                            <select class="form-select" id="round${i}-game1">
-                                <option value="">-</option>
-                                <option value="○">○ 勝利</option>
-                                <option value="×">× 敗北</option>
-                                <option value="△">△ 引分</option>
-                            </select>
-                        </div>
-                        <div class="col-md-4 mb-3">
-                            <label class="form-label">第2ゲーム</label>
-                            <select class="form-select" id="round${i}-game2">
-                                <option value="">-</option>
-                                <option value="○">○ 勝利</option>
-                                <option value="×">× 敗北</option>
-                                <option value="△">△ 引分</option>
-                            </select>
-                        </div>
-                        <div class="col-md-4 mb-3">
-                            <label class="form-label">第3ゲーム</label>
-                            <select class="form-select" id="round${i}-game3">
-                                <option value="">-</option>
-                                <option value="○">○ 勝利</option>
-                                <option value="×">× 敗北</option>
-                                <option value="△">△ 引分</option>
-                            </select>
+                    ${currentTournament.format === 'bo3' ? `
+                    <div class="row" id="round${i}-bo3">
+                        <div class="col-12 mb-3">
+                            <label class="form-label">BO3結果</label>
+                            <div class="btn-group d-block" role="group">
+                                <div class="mb-2">
+                                    <span class="me-2">第1ゲーム:</span>
+                                    <div class="btn-group" role="group">
+                                        <input type="radio" class="btn-check" name="round${i}-game1" id="round${i}-game1-win" value="○">
+                                        <label class="btn btn-outline-success" for="round${i}-game1-win">○</label>
+                                        <input type="radio" class="btn-check" name="round${i}-game1" id="round${i}-game1-lose" value="×">
+                                        <label class="btn btn-outline-danger" for="round${i}-game1-lose">×</label>
+                                        <input type="radio" class="btn-check" name="round${i}-game1" id="round${i}-game1-draw" value="△">
+                                        <label class="btn btn-outline-warning" for="round${i}-game1-draw">△</label>
+                                    </div>
+                                </div>
+                                <div class="mb-2">
+                                    <span class="me-2">第2ゲーム:</span>
+                                    <div class="btn-group" role="group">
+                                        <input type="radio" class="btn-check" name="round${i}-game2" id="round${i}-game2-win" value="○">
+                                        <label class="btn btn-outline-success" for="round${i}-game2-win">○</label>
+                                        <input type="radio" class="btn-check" name="round${i}-game2" id="round${i}-game2-lose" value="×">
+                                        <label class="btn btn-outline-danger" for="round${i}-game2-lose">×</label>
+                                        <input type="radio" class="btn-check" name="round${i}-game2" id="round${i}-game2-draw" value="△">
+                                        <label class="btn btn-outline-warning" for="round${i}-game2-draw">△</label>
+                                    </div>
+                                </div>
+                                <div class="mb-2">
+                                    <span class="me-2">第3ゲーム:</span>
+                                    <div class="btn-group" role="group">
+                                        <input type="radio" class="btn-check" name="round${i}-game3" id="round${i}-game3-win" value="○">
+                                        <label class="btn btn-outline-success" for="round${i}-game3-win">○</label>
+                                        <input type="radio" class="btn-check" name="round${i}-game3" id="round${i}-game3-lose" value="×">
+                                        <label class="btn btn-outline-danger" for="round${i}-game3-lose">×</label>
+                                        <input type="radio" class="btn-check" name="round${i}-game3" id="round${i}-game3-draw" value="△">
+                                        <label class="btn btn-outline-warning" for="round${i}-game3-draw">△</label>
+                                    </div>
+                                </div>
+                            </div>
                         </div>
                     </div>
+                    ` : ''}
                     <div class="mb-3">
                         <label class="form-label">メモ</label>
                         <textarea class="form-control" id="round${i}-notes" rows="2"></textarea>
@@ -870,14 +937,13 @@
             showLoading(true);
             
             try {
-                const format = document.getElementById(`round${currentRoundNum}-format`).value;
                 let bo3Result = '';
                 
-                if (format === 'bo3') {
-                    const game1 = document.getElementById(`round${currentRoundNum}-game1`).value;
-                    const game2 = document.getElementById(`round${currentRoundNum}-game2`).value;
-                    const game3 = document.getElementById(`round${currentRoundNum}-game3`).value;
-                    bo3Result = `${game1 || '-'}${game2 || '-'}${game3 || '-'}`;
+                if (currentTournament.format === 'bo3') {
+                    const game1 = document.querySelector(`input[name="round${currentRoundNum}-game1"]:checked`)?.value || '';
+                    const game2 = document.querySelector(`input[name="round${currentRoundNum}-game2"]:checked`)?.value || '';
+                    const game3 = document.querySelector(`input[name="round${currentRoundNum}-game3"]:checked`)?.value || '';
+                    bo3Result = `${game1}${game2}${game3}`;
                 }
                 
                 const recordData = {
@@ -915,12 +981,11 @@
                 document.getElementById(`round${currentRoundNum}-opponent`).disabled = true;
                 document.getElementById(`round${currentRoundNum}-deck`).disabled = true;
                 document.getElementById(`round${currentRoundNum}-first`).disabled = true;
-                document.getElementById(`round${currentRoundNum}-format`).disabled = true;
                 document.getElementById(`round${currentRoundNum}-notes`).disabled = true;
-                if (format === 'bo3') {
-                    document.getElementById(`round${currentRoundNum}-game1`).disabled = true;
-                    document.getElementById(`round${currentRoundNum}-game2`).disabled = true;
-                    document.getElementById(`round${currentRoundNum}-game3`).disabled = true;
+                if (currentTournament.format === 'bo3') {
+                    document.querySelectorAll(`input[name="round${currentRoundNum}-game1"]`).forEach(input => input.disabled = true);
+                    document.querySelectorAll(`input[name="round${currentRoundNum}-game2"]`).forEach(input => input.disabled = true);
+                    document.querySelectorAll(`input[name="round${currentRoundNum}-game3"]`).forEach(input => input.disabled = true);
                 }
                 
                 await loadRecords();
@@ -1247,11 +1312,11 @@
                         </td>
                         <td>-</td>
                         <td><strong>${group.myDeck}</strong></td>
+                        <td>-</td>
                         <td>
                             ${wins}-${losses}${draws > 0 ? `-${draws}` : ''}
                             <i class="bi bi-chevron-down float-end" id="chevron-tournament-${index}"></i>
                         </td>
-                        <td>-</td>
                         <td>
                             <button class="btn btn-sm btn-primary me-1" onclick="editTournament('${group.rounds[0].id}')" title="編集">
                                 <i class="bi bi-pencil"></i>
@@ -1266,7 +1331,7 @@
                 // Add rounds (initially hidden)
                 group.rounds.forEach(record => {
                     html += `
-                        <tr class="record-row ${record.result} tournament-rounds tournament-${index}">
+                        <tr class="record-row ${record.result} tournament-rounds tournament-${index}" style="display: none;">
                             <td></td>
                             <td></td>
                             <td>${record.round || '-'}</td>
@@ -1357,17 +1422,17 @@
             const group = groups[index];
             if (!group) return;
             
-            let tweetText = `「${group.tournament}」 使用「${group.myDeck}」\n`;
+            let tweetText = `${group.tournament} 使用${group.myDeck}\n`;
             
             // Add each round result
             group.rounds.forEach(round => {
                 const firstTurn = round.firstTurnChoice || '';
                 const bo3Result = round.bo3Result || '';
-                tweetText += `「${round.opponentDeck || '不明'}」 ${firstTurn}${bo3Result}\n`;
+                tweetText += `${round.opponentDeck || '不明'} ${firstTurn}${bo3Result}\n`;
             });
             
             // Add comment and URL
-            tweetText += `\n`;
+            tweetText += `\n\n`;
             tweetText += window.location.href;
             
             // Open Twitter with pre-filled text
