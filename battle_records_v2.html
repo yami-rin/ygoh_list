@@ -485,6 +485,14 @@
                     const suggestions = document.getElementById('opponent-deck-suggestions');
                     if (suggestions) suggestions.style.display = 'none';
                 }
+                if (!e.target.closest('#master-duel-regulation') && !e.target.closest('#regulation-suggestions')) {
+                    const suggestions = document.getElementById('regulation-suggestions');
+                    if (suggestions) suggestions.style.display = 'none';
+                }
+                if (!e.target.closest('#master-duel-deck') && !e.target.closest('#deck-suggestions')) {
+                    const suggestions = document.getElementById('deck-suggestions');
+                    if (suggestions) suggestions.style.display = 'none';
+                }
             });
             document.getElementById('add-tournament-btn').addEventListener('click', () => showTournamentModal());
             document.getElementById('resume-tournament-btn').addEventListener('click', resumeTournament);
@@ -666,9 +674,13 @@
                 
                 // テーブルヘッダーの変更
                 const tableHeaders = document.querySelectorAll('th');
-                tableHeaders.forEach(th => {
+                let roundColumnIndex = -1;
+                tableHeaders.forEach((th, index) => {
                     if (th.textContent === '大会/店舗') th.textContent = 'レギュレーション';
-                    if (th.textContent === 'ラウンド') th.style.display = 'none';
+                    if (th.textContent === 'ラウンド') {
+                        th.style.display = 'none';
+                        roundColumnIndex = index;
+                    }
                 });
                 
                 // 進行中の大会 → 進行中の対戦
@@ -700,7 +712,10 @@
                 const tableHeaders = document.querySelectorAll('th');
                 tableHeaders.forEach(th => {
                     if (th.textContent === 'レギュレーション') th.textContent = '大会/店舗';
-                    if (th.style.display === 'none' && th.textContent === '') th.style.display = '';
+                    // Restore the Round column display
+                    if (th.textContent === 'ラウンド' || (th.style.display === 'none' && th.textContent === '')) {
+                        th.style.display = '';
+                    }
                 });
                 
                 const activeTitle = document.querySelector('#active-tournaments h5');
@@ -741,92 +756,73 @@
         }
 
         function showTournamentModal() {
+            // In Master Duel mode, skip tournament modal and go directly to rounds modal
+            if (isMasterDuelMode) {
+                // Set up temporary tournament data
+                const date = new Date().toISOString().split('T')[0];
+                currentTournament = {
+                    date: date,
+                    participants: 2,
+                    name: `MD_${date}_${Date.now()}`,
+                    store: '',  // Will be set in rounds modal
+                    deck: '',  // Will be set in rounds modal
+                    format: 'single',
+                    rounds: 1,
+                    currentRound: 1,
+                    matches: [],
+                    isMasterDuel: true
+                };
+                
+                // Go directly to rounds modal
+                showRoundsModal();
+                return;
+            }
+            
+            // Normal mode
             document.getElementById('tournament-form').reset();
             document.getElementById('tournament-date').value = new Date().toISOString().split('T')[0];
             
-            // Apply UI for Master Duel mode when opening modal
             const modal = document.querySelector('#tournament-modal .modal-title');
             const startBtn = document.getElementById('start-tournament-btn');
-            if (isMasterDuelMode) {
-                modal.textContent = '対戦を登録';
-                startBtn.textContent = '対戦登録';
-                
-                // Hide date, participants, tournament name
-                const dateDiv = document.getElementById('tournament-date').closest('.col-md-6');
-                if (dateDiv) dateDiv.style.display = 'none';
-                
-                const participantsDiv = document.getElementById('tournament-participants').closest('.col-md-6');
-                if (participantsDiv) participantsDiv.style.display = 'none';
-                
-                const tournamentNameDiv = document.getElementById('new-tournament-name').closest('.col-md-6');
-                if (tournamentNameDiv) tournamentNameDiv.style.display = 'none';
-                
-                // Hide presets
-                const presetDiv = document.getElementById('tournament-preset').closest('.col-md-6');
-                if (presetDiv) presetDiv.style.display = 'none';
-                
-                // Hide match format
-                const formatDiv = document.getElementById('tournament-format').closest('.col-md-6');
-                if (formatDiv) formatDiv.style.display = 'none';
-                
-                // Hide deck input (will be per-match)
-                const deckDiv = document.getElementById('tournament-deck').closest('.col-md-6');
-                if (deckDiv) deckDiv.style.display = 'none';
-                
-                // Change store to regulation
-                const storeLabel = document.querySelector('label[for="tournament-store"]');
-                if (storeLabel) storeLabel.innerHTML = 'レギュレーション <span class="text-danger">*</span>';
-                
-                // Make regulation full width
-                const storeDiv = document.getElementById('tournament-store').closest('.col-md-6');
-                if (storeDiv) {
-                    storeDiv.classList.remove('col-md-6');
-                    storeDiv.classList.add('col-md-12');
-                }
-                
-                // For Master Duel, set participants to 2 (1v1) and format to single
-                document.getElementById('tournament-participants').value = '2';
-                document.getElementById('tournament-format').value = 'single';
-            } else {
-                modal.textContent = '大会を登録';
-                startBtn.textContent = '大会を開始';
-                
-                // Show all normal mode fields
-                const dateDiv = document.getElementById('tournament-date').closest('.col-md-6');
-                if (dateDiv) dateDiv.style.display = '';
-                
-                const participantsDiv = document.getElementById('tournament-participants').closest('.col-md-6');
-                if (participantsDiv) participantsDiv.style.display = '';
-                
-                const tournamentNameDiv = document.getElementById('new-tournament-name').closest('.col-md-6');
-                if (tournamentNameDiv) tournamentNameDiv.style.display = '';
-                
-                const presetDiv = document.getElementById('tournament-preset').closest('.col-md-6');
-                if (presetDiv) presetDiv.style.display = '';
-                
-                const formatDiv = document.getElementById('tournament-format').closest('.col-md-6');
-                if (formatDiv) formatDiv.style.display = '';
-                
-                const deckDiv = document.getElementById('tournament-deck').closest('.col-md-6');
-                if (deckDiv) deckDiv.style.display = '';
-                
-                // Change regulation back to store
-                const storeLabel = document.querySelector('label[for="tournament-store"]');
-                if (storeLabel) storeLabel.innerHTML = '店舗名';
-                
-                // Restore store div width
-                const storeDiv = document.getElementById('tournament-store').closest('.col-md-6, .col-md-12');
-                if (storeDiv) {
-                    storeDiv.classList.remove('col-md-12');
-                    storeDiv.classList.add('col-md-6');
-                }
-                
-                // Change match name back to tournament name
-                const tournamentNameLabel = document.querySelector('label[for="new-tournament-name"]');
-                if (tournamentNameLabel) tournamentNameLabel.innerHTML = '大会名 <span class="text-danger">*</span>';
-                
-                loadPresetOptions();
+            
+            modal.textContent = '大会を登録';
+            startBtn.textContent = '大会を開始';
+            
+            // Show all normal mode fields
+            const dateDiv = document.getElementById('tournament-date').closest('.col-md-6');
+            if (dateDiv) dateDiv.style.display = '';
+            
+            const participantsDiv = document.getElementById('tournament-participants').closest('.col-md-6');
+            if (participantsDiv) participantsDiv.style.display = '';
+            
+            const tournamentNameDiv = document.getElementById('new-tournament-name').closest('.col-md-6');
+            if (tournamentNameDiv) tournamentNameDiv.style.display = '';
+            
+            const presetDiv = document.getElementById('tournament-preset').closest('.col-md-6');
+            if (presetDiv) presetDiv.style.display = '';
+            
+            const formatDiv = document.getElementById('tournament-format').closest('.col-md-6');
+            if (formatDiv) formatDiv.style.display = '';
+            
+            const deckDiv = document.getElementById('tournament-deck').closest('.col-md-6');
+            if (deckDiv) deckDiv.style.display = '';
+            
+            // Change regulation back to store
+            const storeLabel = document.querySelector('label[for="tournament-store"]');
+            if (storeLabel) storeLabel.innerHTML = '店舗名';
+            
+            // Restore store div width
+            const storeDiv = document.getElementById('tournament-store').closest('.col-md-6, .col-md-12');
+            if (storeDiv) {
+                storeDiv.classList.remove('col-md-12');
+                storeDiv.classList.add('col-md-6');
             }
+            
+            // Change match name back to tournament name
+            const tournamentNameLabel = document.querySelector('label[for="new-tournament-name"]');
+            if (tournamentNameLabel) tournamentNameLabel.innerHTML = '大会名 <span class="text-danger">*</span>';
+            
+            loadPresetOptions();
             
             tournamentModal.show();
         }
@@ -1080,12 +1076,13 @@
         }
 
         function showRoundsModal() {
-            document.getElementById('tournament-title').textContent = currentTournament.name;
-            
-            // Master Duel mode doesn't show round count
+            // Master Duel mode title and round info
             if (isMasterDuelMode) {
-                document.getElementById('current-round').textContent = 'マスターデュエル対戦';
+                document.getElementById('tournament-title').textContent = 'マスターデュエル対戦記録';
+                document.getElementById('current-round').style.display = 'none';
             } else {
+                document.getElementById('tournament-title').textContent = currentTournament.name;
+                document.getElementById('current-round').style.display = '';
                 document.getElementById('current-round').textContent = `${currentTournament.rounds}回戦制`;
             }
             
@@ -1164,6 +1161,22 @@
             masterDuelDiv.innerHTML = `
                 <div class="row">
                     <div class="col-md-6 mb-3">
+                        <label class="form-label">レギュレーション <span class="text-danger">*</span></label>
+                        <div style="position: relative;">
+                            <input type="text" class="form-control" id="master-duel-regulation" placeholder="レギュレーション" required autocomplete="off">
+                            <div id="regulation-suggestions" class="autocomplete-suggestions" style="display: none;"></div>
+                        </div>
+                    </div>
+                    <div class="col-md-6 mb-3">
+                        <label class="form-label">自分の使用デッキ <span class="text-danger">*</span></label>
+                        <div style="position: relative;">
+                            <input type="text" class="form-control" id="master-duel-deck" placeholder="使用デッキ" required autocomplete="off">
+                            <div id="deck-suggestions" class="autocomplete-suggestions" style="display: none;"></div>
+                        </div>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-md-6 mb-3">
                         <label class="form-label">対戦相手の名前</label>
                         <input type="text" class="form-control" id="master-duel-opponent-name" placeholder="対戦相手の名前（任意）">
                     </div>
@@ -1220,7 +1233,19 @@
             document.getElementById('save-tournament-btn').style.display = 'none';
             document.getElementById('continue-later-btn').innerHTML = '<i class="bi bi-check-circle"></i> 保存';
             
-            // Setup autocomplete for opponent deck
+            // Setup autocomplete for all fields
+            const regulationInput = document.getElementById('master-duel-regulation');
+            if (regulationInput) {
+                regulationInput.addEventListener('input', showRegulationSuggestions);
+                regulationInput.addEventListener('focus', showRegulationSuggestions);
+            }
+            
+            const deckInput = document.getElementById('master-duel-deck');
+            if (deckInput) {
+                deckInput.addEventListener('input', showDeckSuggestions);
+                deckInput.addEventListener('focus', showDeckSuggestions);
+            }
+            
             const opponentDeckInput = document.getElementById('master-duel-opponent-deck');
             if (opponentDeckInput) {
                 opponentDeckInput.addEventListener('input', showOpponentDeckSuggestions);
@@ -1228,6 +1253,73 @@
             }
             
             roundsModal.show();
+        }
+        
+        function showRegulationSuggestions() {
+            const input = document.getElementById('master-duel-regulation');
+            const value = input.value.toLowerCase();
+            const suggestions = document.getElementById('regulation-suggestions');
+            
+            const sourceList = [...regulationPresets];
+            
+            // Add previously used regulations
+            battleRecords.forEach(record => {
+                if (record.isMasterDuel && record.store && !sourceList.includes(record.store)) {
+                    sourceList.push(record.store);
+                }
+            });
+            
+            const matches = value ? 
+                sourceList.filter(reg => reg.toLowerCase().includes(value)) : 
+                sourceList;
+            
+            if (matches.length === 0) {
+                suggestions.style.display = 'none';
+                return;
+            }
+            
+            suggestions.innerHTML = matches.map(reg => 
+                `<div class="autocomplete-suggestion" onclick="selectRegulation('${reg}')">${reg}</div>`
+            ).join('');
+            suggestions.style.display = 'block';
+        }
+        
+        window.selectRegulation = function(regulation) {
+            document.getElementById('master-duel-regulation').value = regulation;
+            document.getElementById('regulation-suggestions').style.display = 'none';
+        }
+        
+        function showDeckSuggestions() {
+            const input = document.getElementById('master-duel-deck');
+            const value = input.value.toLowerCase();
+            const suggestions = document.getElementById('deck-suggestions');
+            
+            // Collect all previously used decks
+            const deckList = [];
+            battleRecords.forEach(record => {
+                if (record.isMasterDuel && record.myDeck && !deckList.includes(record.myDeck)) {
+                    deckList.push(record.myDeck);
+                }
+            });
+            
+            const matches = value ? 
+                deckList.filter(deck => deck.toLowerCase().includes(value)) : 
+                deckList;
+            
+            if (matches.length === 0) {
+                suggestions.style.display = 'none';
+                return;
+            }
+            
+            suggestions.innerHTML = matches.slice(0, 10).map(deck => 
+                `<div class="autocomplete-suggestion" onclick="selectDeck('${deck.replace(/'/g, "\\'")}')">${deck}</div>`
+            ).join('');
+            suggestions.style.display = 'block';
+        }
+        
+        window.selectDeck = function(deck) {
+            document.getElementById('master-duel-deck').value = deck;
+            document.getElementById('deck-suggestions').style.display = 'none';
         }
         
         function showOpponentDeckSuggestions() {
@@ -1571,6 +1663,8 @@
         let tournamentProgress = {};
         
         async function saveMasterDuelMatch() {
+            const regulation = document.getElementById('master-duel-regulation')?.value;
+            const myDeck = document.getElementById('master-duel-deck')?.value;
             const opponentName = document.getElementById('master-duel-opponent-name')?.value;
             const opponentDeck = document.getElementById('master-duel-opponent-deck')?.value;
             const choice = document.querySelector('input[name="master-duel-choice"]:checked')?.value;
@@ -1578,35 +1672,57 @@
             const result = document.querySelector('input[name="master-duel-result"]:checked')?.value;
             const notes = document.getElementById('master-duel-notes')?.value;
             
-            if (!opponentDeck || !result) {
-                alert('対戦相手のデッキと試合結果を入力してください');
+            if (!regulation || !myDeck || !opponentDeck || !result) {
+                alert('レギュレーション、使用デッキ、対戦相手のデッキ、試合結果を入力してください');
                 return;
             }
             
-            // Create record
+            // Create record with proper userId for Firestore
             const record = {
                 date: currentTournament.date,
                 tournament: opponentName || '',  // Store opponent name as tournament
-                store: currentTournament.store, // This is regulation in Master Duel mode
+                store: regulation, // Store regulation as store
                 round: '',  // No round in Master Duel
-                myDeck: '',  // No deck tracking in Master Duel mode
+                myDeck: myDeck,
                 opponentDeck: opponentDeck || '',
                 result: result,
                 first: first || '',
                 choice: choice || '',
                 notes: notes || '',
                 timestamp: Date.now(),
-                isMasterDuel: true
+                isMasterDuel: true,
+                userId: currentUser.uid  // Add userId for Firestore query
             };
             
             // Save to database
             if (isLocalMode) {
                 const localRecords = JSON.parse(localStorage.getItem('battleRecords') || '[]');
-                localRecords.push(record);
+                
+                // If editing, update the existing record
+                if (currentEditingRecord) {
+                    const index = localRecords.findIndex(r => r.id === currentEditingRecord.id);
+                    if (index !== -1) {
+                        record.id = currentEditingRecord.id;
+                        localRecords[index] = record;
+                    } else {
+                        localRecords.push(record);
+                    }
+                } else {
+                    // Generate ID for new local record
+                    record.id = `local_${Date.now()}`;
+                    localRecords.push(record);
+                }
+                
                 localStorage.setItem('battleRecords', JSON.stringify(localRecords));
             } else {
                 try {
-                    await addDoc(collection(db, 'users', currentUser.uid, 'battles'), record);
+                    if (currentEditingRecord) {
+                        // Update existing record
+                        await updateDoc(doc(db, 'battleRecords', currentEditingRecord.id), record);
+                    } else {
+                        // Add new record
+                        await addDoc(collection(db, 'battleRecords'), record);
+                    }
                 } catch (error) {
                     console.error('Error saving record:', error);
                     alert('保存中にエラーが発生しました');
@@ -1614,7 +1730,11 @@
                 }
             }
             
+            // Clear editing flag
+            currentEditingRecord = null;
+            
             // Clear form for next match without any dialogs
+            // Keep regulation and own deck for convenience
             document.getElementById('master-duel-opponent-name').value = '';
             document.getElementById('master-duel-opponent-deck').value = '';
             const checkedChoice = document.querySelector('input[name="master-duel-choice"]:checked');
@@ -1627,7 +1747,7 @@
             
             // Close modal and reload records silently
             roundsModal.hide();
-            loadRecords();
+            await loadRecords();
         }
         
         async function saveAndContinueLater() {
@@ -2365,7 +2485,10 @@
             }
             
             filteredRecords.forEach(record => {
-                if (record.tournament) {
+                // Master Duel records should always be treated as single records
+                if (record.isMasterDuel) {
+                    singleRecords.push(record);
+                } else if (record.tournament && !record.isMasterDuel) {
                     const key = `${record.tournament}_${record.date}_${record.myDeck}`;
                     if (!tournamentGroups[key]) {
                         tournamentGroups[key] = {
@@ -2419,20 +2542,39 @@
                     statusDisplay = `${wins}-${losses}${draws > 0 ? `-${draws}` : ''}`;
                 }
                 
+                // Build tournament header row based on mode
+                if (isMasterDuelMode) {
+                    html += `
+                        <tr class="tournament-header ${group.inProgress ? 'table-warning' : ''}">
+                            <td onclick="${group.inProgress ? '' : `toggleTournamentGroup('tournament-${index}')`}" style="cursor: pointer;">${group.date}</td>
+                            <td onclick="${group.inProgress ? '' : `toggleTournamentGroup('tournament-${index}')`}" style="cursor: pointer;">
+                                <span class="tournament-badge">${group.tournament}</span>
+                                ${group.store || ''}
+                            </td>
+                            <td onclick="${group.inProgress ? '' : `toggleTournamentGroup('tournament-${index}')`}" style="cursor: pointer;"><strong>${group.myDeck}</strong></td>
+                            <td onclick="${group.inProgress ? '' : `toggleTournamentGroup('tournament-${index}')`}" style="cursor: pointer;">-</td>
+                            <td onclick="${group.inProgress ? '' : `toggleTournamentGroup('tournament-${index}')`}" style="cursor: pointer;">
+                                ${statusDisplay}
+                                ${group.inProgress ? '' : `<i class="bi bi-chevron-down float-end" id="chevron-tournament-${index}"></i>`}
+                            </td>`;
+                } else {
+                    html += `
+                        <tr class="tournament-header ${group.inProgress ? 'table-warning' : ''}">
+                            <td onclick="${group.inProgress ? '' : `toggleTournamentGroup('tournament-${index}')`}" style="cursor: pointer;">${group.date}</td>
+                            <td onclick="${group.inProgress ? '' : `toggleTournamentGroup('tournament-${index}')`}" style="cursor: pointer;">
+                                <span class="tournament-badge">${group.tournament}</span>
+                                ${group.store || ''}
+                            </td>
+                            <td onclick="${group.inProgress ? '' : `toggleTournamentGroup('tournament-${index}')`}" style="cursor: pointer;">-</td>
+                            <td onclick="${group.inProgress ? '' : `toggleTournamentGroup('tournament-${index}')`}" style="cursor: pointer;"><strong>${group.myDeck}</strong></td>
+                            <td onclick="${group.inProgress ? '' : `toggleTournamentGroup('tournament-${index}')`}" style="cursor: pointer;">-</td>
+                            <td onclick="${group.inProgress ? '' : `toggleTournamentGroup('tournament-${index}')`}" style="cursor: pointer;">
+                                ${statusDisplay}
+                                ${group.inProgress ? '' : `<i class="bi bi-chevron-down float-end" id="chevron-tournament-${index}"></i>`}
+                            </td>`;
+                }
+                
                 html += `
-                    <tr class="tournament-header ${group.inProgress ? 'table-warning' : ''}">
-                        <td onclick="${group.inProgress ? '' : `toggleTournamentGroup('tournament-${index}')`}" style="cursor: pointer;">${group.date}</td>
-                        <td onclick="${group.inProgress ? '' : `toggleTournamentGroup('tournament-${index}')`}" style="cursor: pointer;">
-                            <span class="tournament-badge">${group.tournament}</span>
-                            ${group.store || ''}
-                        </td>
-                        <td onclick="${group.inProgress ? '' : `toggleTournamentGroup('tournament-${index}')`}" style="cursor: pointer;">-</td>
-                        <td onclick="${group.inProgress ? '' : `toggleTournamentGroup('tournament-${index}')`}" style="cursor: pointer;"><strong>${group.myDeck}</strong></td>
-                        <td onclick="${group.inProgress ? '' : `toggleTournamentGroup('tournament-${index}')`}" style="cursor: pointer;">-</td>
-                        <td onclick="${group.inProgress ? '' : `toggleTournamentGroup('tournament-${index}')`}" style="cursor: pointer;">
-                            ${statusDisplay}
-                            ${group.inProgress ? '' : `<i class="bi bi-chevron-down float-end" id="chevron-tournament-${index}"></i>`}
-                        </td>
                         <td>
                             ${group.inProgress ? `
                                 <button class="btn btn-sm btn-success me-1" onclick="resumeTournament()" title="大会を再開">
@@ -2484,26 +2626,57 @@
                 const date = record.date || '';
                 const venue = record.store || '-';
                 const round = record.isMasterDuel ? '' : (record.round || '-');
-                const myDeck = record.myDeck || '';
+                const myDeck = record.myDeck || '-';  // Show '-' if empty
                 const opponentDeck = record.opponentDeck || '-';
                 const result = record.result || 'draw';
                 const id = record.id || '';
                 
-                html += `
-                    <tr class="record-row ${result}">
-                        <td>${date}</td>
-                        <td>${venue}</td>
-                        <td>${isMasterDuelMode ? '' : round}</td>
-                        <td><strong>${myDeck}</strong></td>
-                        <td>${opponentDeck}</td>
-                        <td>${resultBadge[result] || ''}</td>
-                        <td>
-                            <button class="btn btn-sm btn-danger" onclick="deleteRecord('${id}')">
-                                <i class="bi bi-trash"></i>
-                            </button>
-                        </td>
-                    </tr>
+                // For Master Duel, show only regulation
+                let displayVenue = venue;
+                
+                // Edit button for Master Duel records
+                let actionButtons = `
+                    <button class="btn btn-sm btn-danger" onclick="deleteRecord('${id}')">
+                        <i class="bi bi-trash"></i>
+                    </button>
                 `;
+                
+                if (record.isMasterDuel) {
+                    actionButtons = `
+                        <button class="btn btn-sm btn-warning me-1" onclick="editMasterDuelRecord('${id}')" title="編集">
+                            <i class="bi bi-pencil-square"></i>
+                        </button>
+                        <button class="btn btn-sm btn-danger" onclick="deleteRecord('${id}')">
+                            <i class="bi bi-trash"></i>
+                        </button>
+                    `;
+                }
+                
+                // Build table row based on mode
+                if (isMasterDuelMode) {
+                    html += `
+                        <tr class="record-row ${result}">
+                            <td>${date}</td>
+                            <td>${displayVenue}</td>
+                            <td><strong>${myDeck}</strong></td>
+                            <td>${opponentDeck}</td>
+                            <td>${resultBadge[result] || ''}</td>
+                            <td>${actionButtons}</td>
+                        </tr>
+                    `;
+                } else {
+                    html += `
+                        <tr class="record-row ${result}">
+                            <td>${date}</td>
+                            <td>${displayVenue}</td>
+                            <td>${round}</td>
+                            <td><strong>${myDeck}</strong></td>
+                            <td>${opponentDeck}</td>
+                            <td>${resultBadge[result] || ''}</td>
+                            <td>${actionButtons}</td>
+                        </tr>
+                    `;
+                }
             });
             
             tbody.innerHTML = html;
@@ -2738,6 +2911,68 @@
                 showLoading(false);
             }
         }
+        
+        let currentEditingRecord = null;
+        
+        async function editMasterDuelRecord(recordId) {
+            // Find the record to edit
+            const record = battleRecords.find(r => r.id === recordId);
+            if (!record) {
+                alert('編集する戦績が見つかりません');
+                return;
+            }
+            
+            currentEditingRecord = record;
+            
+            // Set up tournament data for editing
+            currentTournament = {
+                date: record.date,
+                participants: 2,
+                name: `MD_${record.date}_${Date.now()}`,
+                store: record.store,
+                deck: record.myDeck,
+                format: 'single',
+                rounds: 1,
+                currentRound: 1,
+                matches: [],
+                isMasterDuel: true
+            };
+            
+            // Show the rounds modal
+            showRoundsModal();
+            
+            // Fill in the fields with existing data
+            setTimeout(() => {
+                if (document.getElementById('master-duel-regulation')) {
+                    document.getElementById('master-duel-regulation').value = record.store || '';
+                }
+                if (document.getElementById('master-duel-deck')) {
+                    document.getElementById('master-duel-deck').value = record.myDeck || '';
+                }
+                if (document.getElementById('master-duel-opponent-name')) {
+                    document.getElementById('master-duel-opponent-name').value = record.tournament || '';
+                }
+                if (document.getElementById('master-duel-opponent-deck')) {
+                    document.getElementById('master-duel-opponent-deck').value = record.opponentDeck || '';
+                }
+                // Set radio buttons
+                if (record.choice) {
+                    const choiceRadio = document.querySelector(`input[name="master-duel-choice"][value="${record.choice}"]`);
+                    if (choiceRadio) choiceRadio.checked = true;
+                }
+                if (record.first) {
+                    const firstRadio = document.querySelector(`input[name="master-duel-first"][value="${record.first}"]`);
+                    if (firstRadio) firstRadio.checked = true;
+                }
+                if (record.result) {
+                    const resultRadio = document.querySelector(`input[name="master-duel-result"][value="${record.result}"]`);
+                    if (resultRadio) resultRadio.checked = true;
+                }
+                if (document.getElementById('master-duel-notes')) {
+                    document.getElementById('master-duel-notes').value = record.notes || '';
+                }
+            }, 100);
+        }
 
         function updateStatistics() {
             applyStatisticsFilter();
@@ -2745,6 +2980,7 @@
 
         // Make functions globally accessible
         window.deleteRecord = deleteRecord;
+        window.editMasterDuelRecord = editMasterDuelRecord;
         window.deletePreset = deletePreset;
         window.selectStore = selectStore;
     </script>
