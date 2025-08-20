@@ -1649,36 +1649,24 @@
                 return;
             }
             
+            let unsavedRounds = [];
+            
             // Handle match format differently
             if (currentTournament.format === 'match') {
                 // For match format, check for unsaved rounds
-                const unsavedRounds = [];
                 for (let i = 1; i <= currentTournament.rounds; i++) {
                     if (!savedRounds[i]) {
                         unsavedRounds.push(i);
                     }
                 }
-                
-                if (unsavedRounds.length > 0) {
-                    if (!confirm(`未保存のラウンド（第${unsavedRounds.join(', ')}回戦）があります。保存せずに大会を終了しますか？`)) {
-                        return;
-                    }
-                }
             } else {
                 // For single format, check for result inputs
-                const unsavedRounds = [];
                 for (let i = 1; i <= currentTournament.rounds; i++) {
                     if (!savedRounds[i]) {
                         const result = document.getElementById(`round${i}-result`)?.value;
                         if (result) {
                             unsavedRounds.push(i);
                         }
-                    }
-                }
-                
-                if (unsavedRounds.length > 0) {
-                    if (!confirm(`未保存のラウンド（第${unsavedRounds.join(', ')}回戦）があります。保存せずに大会を終了しますか？`)) {
-                        return;
                     }
                 }
             }
