@@ -822,6 +822,11 @@
             document.getElementById('tournament-title').textContent = currentTournament.name;
             document.getElementById('current-round').textContent = `${currentTournament.rounds}回戦制`;
             
+            // Always reset to round 1 for new tournaments
+            if (!savedRounds || Object.keys(savedRounds).length === 0) {
+                currentMatchRound = 1;
+            }
+            
             // If match format, show round-by-round interface
             if (currentTournament.format === 'match') {
                 showMatchRoundInterface();
@@ -1981,12 +1986,18 @@
                                 <button class="btn btn-sm btn-success me-1" onclick="resumeTournament()" title="大会を再開">
                                     <i class="bi bi-play-fill"></i>
                                 </button>
+                                <button class="btn btn-sm btn-danger" onclick="deleteTournamentProgress()" title="大会を削除">
+                                    <i class="bi bi-trash"></i>
+                                </button>
                             ` : `
                                 <button class="btn btn-sm btn-primary me-1" onclick="editTournament('${group.rounds[0]?.id}')" title="大会編集">
                                     <i class="bi bi-pencil"></i>
                                 </button>
                                 <button class="btn btn-sm btn-info me-1" onclick="tweetTournamentResult('${index}')" title="ツイート">
                                     <i class="bi bi-twitter"></i>
+                                </button>
+                                <button class="btn btn-sm btn-danger" onclick="deleteTournament('${group.rounds[0]?.tournament}', '${group.date}', '${group.myDeck}')" title="大会を削除">
+                                    <i class="bi bi-trash"></i>
                                 </button>
                             `}
                         </td>
@@ -2090,31 +2101,183 @@
             const group = groups[index];
             if (!group) return;
             
-            let tweetText = `${group.tournament}`;
-            if (group.store) {
-                tweetText += `${group.store} `;
-            } else {
-                tweetText += ` `;
-            }
-            tweetText += `使用${group.myDeck}\n`;
+            // Create modal for tweet template editing
+            const modalHtml = `
+                <div class="modal fade" id="tweet-modal" tabindex="-1">
+                    <div class="modal-dialog modal-lg">
+                        <div class="modal-content">
+                            <div class="modal-header">
+                                <h5 class="modal-title">ツイート内容の編集</h5>
+                                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                            </div>
+                            <div class="modal-body">
+                                <div class="mb-3">
+                                    <label class="form-label">テンプレート変数</label>
+                                    <ul class="list-unstyled" style="font-family: monospace; background: #f8f9fa; padding: 10px; border-radius: 5px;">
+                                        <li>{tournament} - 大会名</li>
+                                        <li>{store} - 店舗名</li>
+                                        <li>{deck} - 使用デッキ</li>
+                                        <li>{date} - 日付</li>
+                                        <li>{wins} - 勝利数</li>
+                                        <li>{losses} - 敗北数</li>
+                                        <li>{draws} - 引き分け数</li>
+                                        <li>{rounds} - 各ラウンド結果</li>
+                                        <li>{url} - サイトURL</li>
+                                    </ul>
+                                </div>
+                                <div class="mb-3">
+                                    <label class="form-label">ツイート内容</label>
+                                    <textarea id="tweet-template" class="form-control" rows="10"></textarea>
+                                </div>
+                                <div class="mb-3">
+                                    <label class="form-label">プレビュー</label>
+                                    <div id="tweet-preview" class="p-3 border rounded" style="background: #f8f9fa; white-space: pre-wrap;"></div>
+                                </div>
+                            </div>
+                            <div class="modal-footer">
+                                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">キャンセル</button>
+                                <button type="button" class="btn btn-primary" onclick="sendTweet()">
+                                    <i class="bi bi-twitter"></i> ツイートする
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `;
             
-            // Add each round result
-            group.rounds.forEach(round => {
+            // Remove existing modal if any
+            const existingModal = document.getElementById('tweet-modal');
+            if (existingModal) {
+                existingModal.remove();
+            }
+            
+            // Add modal to body
+            document.body.insertAdjacentHTML('beforeend', modalHtml);
+            
+            // Calculate statistics
+            const wins = group.rounds.filter(r => r.result === 'win').length;
+            const losses = group.rounds.filter(r => r.result === 'lose').length;
+            const draws = group.rounds.filter(r => r.result === 'draw').length;
+            
+            // Format rounds
+            let roundsText = '';
+            group.rounds.forEach((round, idx) => {
                 const firstTurn = round.firstTurnChoice || '';
                 const bo3Result = round.bo3Result || '';
-                tweetText += `${round.opponentDeck || '不明'} ${firstTurn}${bo3Result}\n`;
+                const resultMark = round.result === 'win' ? '○' : round.result === 'lose' ? '×' : '△';
+                roundsText += `R${idx + 1}: ${round.opponentDeck || '不明'} ${firstTurn}${bo3Result ? bo3Result : resultMark}\n`;
             });
             
-            // Add comment and URL
-            tweetText += `\n\n`;
-            tweetText += window.location.href;
+            // Default template
+            const defaultTemplate = `"{tournament}" {store}
+使用「{deck}」
+戦績: {wins}-{losses}${draws > 0 ? `-${draws}` : ''}
+
+{rounds}
+
+{url}`;
             
-            // Open Twitter with pre-filled text
-            const tweetUrl = `https://twitter.com/intent/tweet?text=${encodeURIComponent(tweetText)}`;
-            window.open(tweetUrl, '_blank');
+            // Store data for template replacement
+            window.tweetData = {
+                tournament: group.tournament,
+                store: group.store || '',
+                deck: group.myDeck,
+                date: group.date,
+                wins: wins,
+                losses: losses,
+                draws: draws,
+                rounds: roundsText.trim(),
+                url: window.location.href
+            };
+            
+            // Set template and update preview
+            const templateField = document.getElementById('tweet-template');
+            templateField.value = localStorage.getItem('tweetTemplate') || defaultTemplate;
+            
+            // Update preview function
+            window.updateTweetPreview = function() {
+                let text = templateField.value;
+                Object.keys(window.tweetData).forEach(key => {
+                    const regex = new RegExp(`\\{${key}\\}`, 'g');
+                    text = text.replace(regex, window.tweetData[key]);
+                });
+                document.getElementById('tweet-preview').textContent = text;
+            };
+            
+            // Add event listener
+            templateField.addEventListener('input', updateTweetPreview);
+            updateTweetPreview();
+            
+            // Show modal
+            const tweetModal = new bootstrap.Modal(document.getElementById('tweet-modal'));
+            tweetModal.show();
         }
         
+        window.sendTweet = function() {
+            const templateField = document.getElementById('tweet-template');
+            // Save template for next time
+            localStorage.setItem('tweetTemplate', templateField.value);
+            
+            // Get final text
+            let text = templateField.value;
+            Object.keys(window.tweetData).forEach(key => {
+                const regex = new RegExp(`\\{${key}\\}`, 'g');
+                text = text.replace(regex, window.tweetData[key]);
+            });
+            
+            // Open Twitter
+            const tweetUrl = `https://twitter.com/intent/tweet?text=${encodeURIComponent(text)}`;
+            window.open(tweetUrl, '_blank');
+            
+            // Close modal
+            bootstrap.Modal.getInstance(document.getElementById('tweet-modal')).hide();
+        };
+        
         window.tweetTournamentResult = tweetTournamentResult;
+        
+        window.deleteTournament = async function(tournamentName, date, deck) {
+            if (!confirm(`「${tournamentName}」の全ての記録を削除しますか？`)) return;
+            
+            showLoading(true);
+            try {
+                // Find all records for this tournament
+                const toDelete = battleRecords.filter(r => 
+                    r.tournament === tournamentName && 
+                    r.date === date && 
+                    r.myDeck === deck
+                );
+                
+                if (isLocalMode) {
+                    let records = JSON.parse(localStorage.getItem('battleRecords') || '[]');
+                    records = records.filter(r => 
+                        !(r.tournament === tournamentName && r.date === date && r.myDeck === deck)
+                    );
+                    localStorage.setItem('battleRecords', JSON.stringify(records));
+                } else {
+                    // Delete all records for this tournament
+                    for (const record of toDelete) {
+                        await deleteDoc(doc(db, 'battleRecords', record.id));
+                    }
+                }
+                
+                await loadRecords();
+                alert('大会の記録を削除しました');
+            } catch (error) {
+                console.error('Error deleting tournament:', error);
+                alert('削除中にエラーが発生しました');
+            } finally {
+                showLoading(false);
+            }
+        };
+        
+        window.deleteTournamentProgress = function() {
+            if (!confirm('進行中の大会を削除しますか？')) return;
+            
+            localStorage.removeItem('tournamentProgress');
+            document.getElementById('resume-tournament-btn').style.display = 'none';
+            loadRecords();
+            alert('進行中の大会を削除しました');
+        };
         
         async function deleteRecord(recordId) {
             if (!confirm('この戦績を削除しますか？')) return;
