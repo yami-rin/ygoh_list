@@ -792,8 +792,10 @@
                 return;
             }
             
-            // ラウンド保存状態をリセット
-            savedRounds = {};
+            // Only reset saved rounds if this is a new tournament (not resuming)
+            if (!currentTournament || currentTournament.name !== name || currentTournament.date !== date) {
+                savedRounds = {};
+            }
             
             const rounds = calculateRounds(participants);
             currentTournament = {
@@ -1103,11 +1105,28 @@
             const record = battleRecords.find(r => r.id === recordId);
             if (!record || !record.tournament) return;
             
+            // Find all records for this tournament to get participant count
+            const tournamentRecords = battleRecords.filter(r => 
+                r.tournament === record.tournament && 
+                r.date === record.date
+            );
+            
+            // Calculate participant count from number of rounds
+            const maxRound = Math.max(...tournamentRecords.map(r => {
+                const roundNum = parseInt(r.round?.replace('R', '') || '0');
+                return roundNum;
+            }));
+            
+            // Estimate participants from rounds (2^rounds gives max participants)
+            const estimatedParticipants = maxRound > 0 ? Math.pow(2, maxRound) : 8;
+            
             // 大会モーダルを編集モードで開く
             document.getElementById('tournament-date').value = record.date;
+            document.getElementById('tournament-participants').value = estimatedParticipants;
             document.getElementById('new-tournament-name').value = record.tournament;
             document.getElementById('tournament-store').value = record.store || '';
             document.getElementById('tournament-deck').value = record.myDeck || '';
+            document.getElementById('tournament-format').value = record.matchFormat || 'single';
             
             // 編集モードフラグを設定
             currentEditingId = recordId;
@@ -1371,7 +1390,7 @@
             
             filteredRecords.forEach(record => {
                 if (record.tournament) {
-                    const key = `${record.tournament}_${record.date}`;
+                    const key = `${record.tournament}_${record.date}_${record.myDeck}`;
                     if (!tournamentGroups[key]) {
                         tournamentGroups[key] = {
                             tournament: record.tournament,
@@ -1381,7 +1400,12 @@
                             rounds: []
                         };
                     }
-                    tournamentGroups[key].rounds.push(record);
+                    // Only add if it's the same tournament, date, and deck
+                    if (tournamentGroups[key].tournament === record.tournament && 
+                        tournamentGroups[key].date === record.date &&
+                        tournamentGroups[key].myDeck === record.myDeck) {
+                        tournamentGroups[key].rounds.push(record);
+                    }
                 } else {
                     singleRecords.push(record);
                 }
@@ -1529,7 +1553,13 @@
             const group = groups[index];
             if (!group) return;
             
-            let tweetText = `${group.tournament} 使用${group.myDeck}\n`;
+            let tweetText = `${group.tournament}`;
+            if (group.store) {
+                tweetText += `${group.store} `;
+            } else {
+                tweetText += ` `;
+            }
+            tweetText += `使用${group.myDeck}\n`;
             
             // Add each round result
             group.rounds.forEach(round => {
