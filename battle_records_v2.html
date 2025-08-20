@@ -939,11 +939,13 @@
                                     <label class="btn btn-outline-warning" for="round${currentMatchRound}-game1-draw">△ 引分</label>
                                 </div>
                                 <div class="mt-2">
-                                    <select class="form-select" id="round${currentMatchRound}-game1-first">
-                                        <option value="">先攻/後攻</option>
-                                        <option value="先">先攻</option>
-                                        <option value="後">後攻</option>
-                                    </select>
+                                    <label class="form-label d-block" style="font-size: 0.9rem;">先攻/後攻</label>
+                                    <div class="btn-group" role="group">
+                                        <input type="radio" class="btn-check" name="round${currentMatchRound}-game1-first" id="round${currentMatchRound}-game1-first-first" value="先">
+                                        <label class="btn btn-outline-primary btn-sm" for="round${currentMatchRound}-game1-first-first">先攻</label>
+                                        <input type="radio" class="btn-check" name="round${currentMatchRound}-game1-first" id="round${currentMatchRound}-game1-first-second" value="後">
+                                        <label class="btn btn-outline-info btn-sm" for="round${currentMatchRound}-game1-first-second">後攻</label>
+                                    </div>
                                 </div>
                             </div>
                             <div class="col-md-4 mb-3">
@@ -957,11 +959,13 @@
                                     <label class="btn btn-outline-warning" for="round${currentMatchRound}-game2-draw">△ 引分</label>
                                 </div>
                                 <div class="mt-2">
-                                    <select class="form-select" id="round${currentMatchRound}-game2-first">
-                                        <option value="">先攻/後攻</option>
-                                        <option value="先">先攻</option>
-                                        <option value="後">後攻</option>
-                                    </select>
+                                    <label class="form-label d-block" style="font-size: 0.9rem;">先攻/後攻</label>
+                                    <div class="btn-group" role="group">
+                                        <input type="radio" class="btn-check" name="round${currentMatchRound}-game2-first" id="round${currentMatchRound}-game2-first-first" value="先">
+                                        <label class="btn btn-outline-primary btn-sm" for="round${currentMatchRound}-game2-first-first">先攻</label>
+                                        <input type="radio" class="btn-check" name="round${currentMatchRound}-game2-first" id="round${currentMatchRound}-game2-first-second" value="後">
+                                        <label class="btn btn-outline-info btn-sm" for="round${currentMatchRound}-game2-first-second">後攻</label>
+                                    </div>
                                 </div>
                             </div>
                             <div class="col-md-4 mb-3">
@@ -975,11 +979,13 @@
                                     <label class="btn btn-outline-warning" for="round${currentMatchRound}-game3-draw">△ 引分</label>
                                 </div>
                                 <div class="mt-2">
-                                    <select class="form-select" id="round${currentMatchRound}-game3-first">
-                                        <option value="">先攻/後攻</option>
-                                        <option value="先">先攻</option>
-                                        <option value="後">後攻</option>
-                                    </select>
+                                    <label class="form-label d-block" style="font-size: 0.9rem;">先攻/後攻</label>
+                                    <div class="btn-group" role="group">
+                                        <input type="radio" class="btn-check" name="round${currentMatchRound}-game3-first" id="round${currentMatchRound}-game3-first-first" value="先">
+                                        <label class="btn btn-outline-primary btn-sm" for="round${currentMatchRound}-game3-first-first">先攻</label>
+                                        <input type="radio" class="btn-check" name="round${currentMatchRound}-game3-first" id="round${currentMatchRound}-game3-first-second" value="後">
+                                        <label class="btn btn-outline-info btn-sm" for="round${currentMatchRound}-game3-first-second">後攻</label>
+                                    </div>
                                 </div>
                             </div>
                         </div>
@@ -1053,13 +1059,16 @@
                         
                         // Load first/second choices for each game
                         if (inputs.game1First) {
-                            document.getElementById(`round${currentMatchRound}-game1-first`).value = inputs.game1First;
+                            const game1FirstRadio = document.querySelector(`input[name="round${currentMatchRound}-game1-first"][value="${inputs.game1First}"]`);
+                            if (game1FirstRadio) game1FirstRadio.checked = true;
                         }
                         if (inputs.game2First) {
-                            document.getElementById(`round${currentMatchRound}-game2-first`).value = inputs.game2First;
+                            const game2FirstRadio = document.querySelector(`input[name="round${currentMatchRound}-game2-first"][value="${inputs.game2First}"]`);
+                            if (game2FirstRadio) game2FirstRadio.checked = true;
                         }
                         if (inputs.game3First) {
-                            document.getElementById(`round${currentMatchRound}-game3-first`).value = inputs.game3First;
+                            const game3FirstRadio = document.querySelector(`input[name="round${currentMatchRound}-game3-first"][value="${inputs.game3First}"]`);
+                            if (game3FirstRadio) game3FirstRadio.checked = true;
                         }
                     }
                 }
@@ -1091,9 +1100,9 @@
                 game1: document.querySelector(`input[name="round${roundNum}-game1"]:checked`)?.value || '',
                 game2: document.querySelector(`input[name="round${roundNum}-game2"]:checked`)?.value || '',
                 game3: document.querySelector(`input[name="round${roundNum}-game3"]:checked`)?.value || '',
-                game1First: document.getElementById(`round${roundNum}-game1-first`)?.value || '',
-                game2First: document.getElementById(`round${roundNum}-game2-first`)?.value || '',
-                game3First: document.getElementById(`round${roundNum}-game3-first`)?.value || ''
+                game1First: document.querySelector(`input[name="round${roundNum}-game1-first"]:checked`)?.value || '',
+                game2First: document.querySelector(`input[name="round${roundNum}-game2-first"]:checked`)?.value || '',
+                game3First: document.querySelector(`input[name="round${roundNum}-game3-first"]:checked`)?.value || ''
             };
         }
         
@@ -1104,16 +1113,24 @@
                 return;
             }
             
-            // Save to memory first
-            saveMatchRoundToMemory(roundNum);
-            
-            // Save to database
-            await saveRoundData(roundNum);
-            
-            alert(`第${roundNum}回戦を保存しました`);
-            
-            // Refresh the interface to show saved status
-            showMatchRoundInterface();
+            try {
+                // Save to memory first
+                saveMatchRoundToMemory(roundNum);
+                
+                // Save to database
+                await saveRoundData(roundNum);
+                
+                alert(`第${roundNum}回戦を保存しました`);
+                
+                // Update saved rounds tracking
+                savedRounds[roundNum] = true;
+                
+                // Refresh the interface to show saved status
+                showMatchRoundInterface();
+            } catch (error) {
+                console.error('Error saving round:', error);
+                alert('保存中にエラーが発生しました');
+            }
         };
         
         window.autoCalculateMatchResult = function(roundNum) {
@@ -1222,9 +1239,9 @@
                 
                 // Get first/second choices for each game
                 gameFirstChoices = {
-                    game1First: document.getElementById(`round${roundNum}-game1-first`)?.value || '',
-                    game2First: document.getElementById(`round${roundNum}-game2-first`)?.value || '',
-                    game3First: document.getElementById(`round${roundNum}-game3-first`)?.value || ''
+                    game1First: document.querySelector(`input[name="round${roundNum}-game1-first"]:checked`)?.value || '',
+                    game2First: document.querySelector(`input[name="round${roundNum}-game2-first"]:checked`)?.value || '',
+                    game3First: document.querySelector(`input[name="round${roundNum}-game3-first"]:checked`)?.value || ''
                 };
             }
             
@@ -1272,15 +1289,12 @@
             // For match format, save current round data first
             if (currentTournament.format === 'match' && currentMatchRound) {
                 saveMatchRoundToMemory(currentMatchRound);
-                // Copy from temporary storage
-                if (tournamentProgress.inputs) {
-                    Object.assign(tournamentProgress.inputs, tournamentProgress.inputs);
-                }
             }
             
             // Save all input values for each round
             if (currentTournament.format === 'match') {
-                // For match format, inputs are already saved in saveMatchRoundToMemory
+                // For match format, use the already saved inputs from saveMatchRoundToMemory
+                // No need to re-collect them
             } else {
                 // For single format, collect all inputs
                 for (let i = 1; i <= currentTournament.rounds; i++) {
@@ -1309,6 +1323,7 @@
                 tournamentProgress = JSON.parse(saved);
                 currentTournament = tournamentProgress.tournament;
                 savedRounds = tournamentProgress.savedRounds || {};
+                currentMatchRound = tournamentProgress.currentMatchRound || 1;
                 
                 // Restore input values after modal is shown
                 setTimeout(() => {
