@@ -2167,9 +2167,15 @@
             
             // Handle match format differently
             if (currentTournament.format === 'match') {
-                // Save current round data to memory
+                // Save current round data to memory first
                 if (currentMatchRound) {
                     saveMatchRoundToMemory(currentMatchRound);
+                    
+                    // Also save to database if there's a result
+                    const result = document.querySelector(`input[name="round${currentMatchRound}-result"]:checked`)?.value;
+                    if (result && !savedRounds[currentMatchRound]) {
+                        await saveRoundData(currentMatchRound);
+                    }
                 }
             } else {
                 // For single format, save any current round that has data
@@ -2183,7 +2189,7 @@
             }
             
             // Then save progress for continuing later
-            saveTournamentProgress();
+            await saveTournamentProgress();
         }
         
         async function saveRoundData(roundNum) {
@@ -2320,7 +2326,14 @@
             localStorage.setItem('tournamentProgress', JSON.stringify(tournamentProgress));
             
             roundsModal.hide();
-            alert('大会の進行状況を保存しました。後で続けることができます。');
+            
+            // Count how many rounds were saved in this session
+            const savedCount = Object.keys(savedRounds).filter(key => savedRounds[key]).length;
+            if (savedCount > 0) {
+                alert(`${savedCount}ラウンドの結果と大会の進行状況を保存しました。後で続けることができます。`);
+            } else {
+                alert('大会の進行状況を保存しました。後で続けることができます。');
+            }
             
             // Reload records to show in-progress tournament
             await loadRecords();
