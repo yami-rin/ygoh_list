@@ -3,7 +3,7 @@
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>カード管理 (テスト版)</title>
+    <title>カード管理</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css">
     <style>
@@ -362,8 +362,7 @@
     <div id="main-app">
         <nav class="navbar navbar-expand-lg navbar-light bg-light mb-4" data-bs-theme="light">
             <div class="container-fluid">
-                <span class="navbar-brand"><i class="bi bi-layers-fill"></i> カード管理 (テスト版)</span>
-                <span id="firebase-status" class="badge bg-warning text-dark ms-2">接続中...</span>
+                <span class="navbar-brand"><i class="bi bi-layers-fill"></i> カード管理</span>
                 <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarContent">
                     <span class="navbar-toggler-icon"></span>
                 </button>
@@ -557,9 +556,9 @@
             authDomain: "ygoh-9bcf6.firebaseapp.com",
             projectId: "ygoh-9bcf6",
             storageBucket: "ygoh-9bcf6.firebasestorage.app",
-            messagingSenderId: "1058357616781",
-            appId: "1:1058357616781:web:f25db127e2824226d942c4",
-            measurementId: "G-S4CCJC3HW9"
+            messagingSenderId: "515041224138",
+            appId: "1:515041224138:web:8de47b38ed9cc1bb8afd37",
+            measurementId: "G-ZGSRE8MHZ2"
         };
 
         const app = initializeApp(firebaseConfig);
@@ -983,23 +982,6 @@
             showLoading(false);
         };
 
-        // Firebase接続テスト関数
-        const testFirebaseConnection = async () => {
-            const statusBadge = document.getElementById('firebase-status');
-            try {
-                // Firestoreへの読み取りテスト
-                const testQuery = query(collection(db, 'cards'), where('userId', '==', currentUser.uid));
-                await getDocs(testQuery);
-                console.log('Firebase Firestore: 接続成功');
-                statusBadge.textContent = 'Firebase接続OK';
-                statusBadge.className = 'badge bg-success ms-2';
-            } catch (error) {
-                console.error('Firebase接続エラー:', error);
-                statusBadge.textContent = `Firebase エラー: ${error.code}`;
-                statusBadge.className = 'badge bg-danger ms-2';
-            }
-        };
-
         const handleUserLogin = (user) => {
             currentUser = user;
             const hideEmail = localStorage.getItem('hideEmail') === 'true';
@@ -1007,19 +989,10 @@
             mainApp.style.display = 'block';
             appLoader.style.display = 'none';
             authModal.hide();
-            const statusBadge = document.getElementById('firebase-status');
             if (user.uid !== 'local_user') {
-                // Firebase接続成功を表示
-                statusBadge.textContent = 'Firebase接続済み';
-                statusBadge.className = 'badge bg-success ms-2';
                 loadCollectionFromFirestore();
                 loadAllTags();
-                // Firebase接続テスト
-                testFirebaseConnection();
             } else {
-                // ローカルモードを表示
-                statusBadge.textContent = 'ローカルモード';
-                statusBadge.className = 'badge bg-info ms-2';
                 cardCollection = [];
                 wishlistCollection = [];
                 applySearchAndFilter();
@@ -1045,13 +1018,6 @@
                 handleUserLogin(user);
             } else {
                 handleUserLogout();
-            }
-        }, (error) => {
-            console.error('認証状態の確認エラー:', error);
-            const statusBadge = document.getElementById('firebase-status');
-            if (statusBadge) {
-                statusBadge.textContent = `認証エラー: ${error.code}`;
-                statusBadge.className = 'badge bg-danger ms-2';
             }
         });
 

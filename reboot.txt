@@ -1,0 +1,4 @@
+First, check the task list and TMP folder.
+Next, check Usertask.txt and execute its contents.
+Then, use debugging to check for any inconsistencies or problems between the executed contents and the previous work. If there are any problems, correct them.
+Once everything is complete, finish the work and wait for instructions.

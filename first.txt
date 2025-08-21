@@ -1,0 +1,12 @@
+First, organize the situation.
+Next, create a task list.
+Write the task list in detail in the task list folder using MD.
+The reason for writing the task list in detail is that your memory will periodically disappear.
+So, write it in detail so that you can continue from where you left off even if your memory disappears.
+Also, when you complete a task, update the MD file with “completed.”
+Also, create a TMP folder.  
+In this TMP folder, write down everything you want to remember, such as notes, errors that occurred, and solutions.  
+You can write and read freely. Think of it as your second brain.  
+I think it will be useful when your memory fades.  
+ultra think
+

@@ -1,0 +1,5 @@
+index.htmlに存在するシステムを全てcard_list.htmlに移行し、githubへアップロードしてください。
+index.htmlには新たにcard_list.htmlへのリンクとbattle_recordsへのリンクがあるポータルサイトを作成してください。
+この変更に伴い、battle_records_v2.htmlはbattle_records.htmlへと名称を変更してください。
+battle_records.htmlに存在する、カード管理への遷移ボタンを削除してください。
+index.htmlはおしゃれな感じにしてください
