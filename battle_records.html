@@ -2208,19 +2208,24 @@
             }
             
             let bo3Result = '';
-            let gameFirstChoices = {};
+            let gameFirstChoices = [];
+            let choice = null;
+            
             if (currentTournament.format === 'match') {
                 const game1 = document.querySelector(`input[name="round${roundNum}-game1"]:checked`)?.value || '';
                 const game2 = document.querySelector(`input[name="round${roundNum}-game2"]:checked`)?.value || '';
                 const game3 = document.querySelector(`input[name="round${roundNum}-game3"]:checked`)?.value || '';
                 bo3Result = `${game1}${game2}${game3}`;
                 
-                // Get first/second for each game
-                gameFirstChoices = {
-                    game1First: document.querySelector(`input[name="round${roundNum}-game1-first"]:checked`)?.value || '',
-                    game2First: document.querySelector(`input[name="round${roundNum}-game2-first"]:checked`)?.value || '',
-                    game3First: document.querySelector(`input[name="round${roundNum}-game3-first"]:checked`)?.value || ''
-                };
+                // Get first/second for each game as array
+                gameFirstChoices = [
+                    document.querySelector(`input[name="round${roundNum}-game1-first"]:checked`)?.value || '',
+                    document.querySelector(`input[name="round${roundNum}-game2-first"]:checked`)?.value || '',
+                    document.querySelector(`input[name="round${roundNum}-game3-first"]:checked`)?.value || ''
+                ];
+                
+                // Get choice (who had the choice)
+                choice = document.querySelector(`input[name="round${roundNum}-choice"]:checked`)?.value || null;
             }
             
             const recordData = {
@@ -2235,8 +2240,9 @@
                 opponent: document.getElementById(`round${roundNum}-opponent`)?.value || null,
                 opponentDeck: document.getElementById(`round${roundNum}-deck`)?.value || null,
                 firstTurnChoice: document.getElementById(`round${roundNum}-first`)?.value || document.querySelector(`input[name="round${roundNum}-choice"]:checked`)?.value || null,
+                choice: choice,
                 bo3Result: bo3Result || null,
-                gameFirstChoices: currentTournament.format === 'match' ? gameFirstChoices : null,
+                gameFirstChoices: currentTournament.format === 'match' && gameFirstChoices.some(x => x) ? gameFirstChoices : null,
                 notes: document.getElementById(`round${roundNum}-notes`)?.value || null,
                 createdAt: new Date().toISOString(),
                 updatedAt: new Date().toISOString()
@@ -2536,6 +2542,34 @@
                         if (results[0]) document.querySelector(`input[name="round${roundNum}-game1"][value="${results[0]}"]`)?.click();
                         if (results[1]) document.querySelector(`input[name="round${roundNum}-game2"][value="${results[1]}"]`)?.click();
                         if (results[2]) document.querySelector(`input[name="round${roundNum}-game3"][value="${results[2]}"]`)?.click();
+                        
+                        // Restore game first turn choices if available
+                        if (record.gameFirstChoices && record.gameFirstChoices.length > 0) {
+                            record.gameFirstChoices.forEach((choice, index) => {
+                                const gameNum = index + 1;
+                                const selector = `input[name="round${roundNum}-game${gameNum}-first"][value="${choice}"]`;
+                                const radio = document.querySelector(selector);
+                                if (radio) {
+                                    radio.checked = true;
+                                }
+                            });
+                        }
+                        
+                        // Restore choice (who had the choice)
+                        if (record.choice) {
+                            const choiceRadio = document.querySelector(`input[name="round${roundNum}-choice"][value="${record.choice}"]`);
+                            if (choiceRadio) {
+                                choiceRadio.checked = true;
+                            }
+                        }
+                        
+                        // Restore match result for match format
+                        if (record.result) {
+                            const resultRadio = document.querySelector(`input[name="round${roundNum}-result"][value="${record.result}"]`);
+                            if (resultRadio) {
+                                resultRadio.checked = true;
+                            }
+                        }
                     }
                     
                     // Re-enable fields for editing this specific round
@@ -3713,13 +3747,20 @@
                     
                     <h6 class="mb-3 mt-4">試合詳細</h6>
                     <table class="table table-sm">
-                        <tr><td style="width: 40%;"><strong>選択権:</strong></td><td>${
+                        <tr><td style="width: 40%;"><strong>形式:</strong></td><td>${
+                            record.matchFormat === 'match' ? 'マッチ (BO3)' : 
+                            record.matchFormat === 'single' ? 'シングル' : 
+                            record.isMasterDuel ? 'マスターデュエル' : '-'
+                        }</td></tr>
+                        <tr><td><strong>選択権:</strong></td><td>${
                             record.choice === 'self' ? '自分' : 
                             record.choice === 'opponent' ? '相手' : '-'
                         }</td></tr>
                         <tr><td><strong>先攻/後攻:</strong></td><td>${
                             record.first === 'first' ? '先攻' : 
                             record.first === 'second' ? '後攻' :
+                            record.firstTurnChoice === '先' ? '先攻' :
+                            record.firstTurnChoice === '後' ? '後攻' :
                             record.firstTurnChoice === '先攻' ? '先攻' :
                             record.firstTurnChoice === '後攻' ? '後攻' : '-'
                         }</td></tr>
@@ -3728,8 +3769,29 @@
                             record.result === 'lose' ? '<span class="badge bg-danger">敗北</span>' :
                             record.result === 'draw' ? '<span class="badge bg-secondary">引き分け</span>' : '-'
                         }</td></tr>
-                        ${record.bo3Result ? `<tr><td><strong>マッチ結果:</strong></td><td>${record.bo3Result}</td></tr>` : ''}
-                        ${record.gameFirstChoices ? `<tr><td><strong>各ゲーム先攻:</strong></td><td>${record.gameFirstChoices.join(', ')}</td></tr>` : ''}
+                        ${record.bo3Result ? `
+                            <tr><td><strong>各ゲーム結果:</strong></td><td>
+                                ${record.bo3Result.split('').map((result, i) => {
+                                    if (!result || result === '-') return '';
+                                    return `第${i+1}ゲーム: ${
+                                        result === '○' ? '<span class="badge bg-success">勝利</span>' :
+                                        result === '×' ? '<span class="badge bg-danger">敗北</span>' :
+                                        result === '△' ? '<span class="badge bg-secondary">引分</span>' : '-'
+                                    }`;
+                                }).filter(x => x).join('<br>')}
+                            </td></tr>
+                        ` : ''}
+                        ${record.gameFirstChoices && record.gameFirstChoices.length > 0 ? `
+                            <tr><td><strong>各ゲーム先攻/後攻:</strong></td><td>
+                                ${record.gameFirstChoices.map((choice, i) => {
+                                    if (!choice) return '';
+                                    return `第${i+1}ゲーム: ${
+                                        choice === '先' || choice === '先攻' ? '先攻' :
+                                        choice === '後' || choice === '後攻' ? '後攻' : choice
+                                    }`;
+                                }).filter(x => x).join('<br>')}
+                            </td></tr>
+                        ` : ''}
                     </table>
                     
                     ${record.notes ? `
