@@ -992,8 +992,10 @@
             startBtn.classList.remove('btn-success');
             startBtn.classList.add('btn-primary');
             
-            // Clear editing flag
+            // Clear editing flag and reset for new tournament
             currentEditingId = null;
+            // Don't reset currentTournament here - it's needed for editing
+            // Only reset when actually starting a new tournament
             
             // Show all normal mode fields
             const dateDiv = document.getElementById('tournament-date').closest('.col-md-6');
@@ -1330,14 +1332,23 @@
                 preservedProgress = tournamentProgress;
             }
             
-            // Only reset saved rounds if this is a new tournament (not resuming or editing)
-            if (!currentTournament || currentTournament.name !== name || currentTournament.date !== date) {
-                if (currentEditingId) {
-                    // When editing, use preserved rounds
-                    savedRounds = preservedRounds;
-                } else {
-                    savedRounds = {};
-                }
+            // Determine if this is the same tournament being edited
+            const isSameTournament = currentTournament && 
+                currentTournament.name === name && 
+                currentTournament.date === date &&
+                currentTournament.deck === deck;
+            
+            // Only reset saved rounds if this is a completely new tournament
+            if (currentEditingId) {
+                // When editing, always preserve existing rounds
+                savedRounds = preservedRounds;
+            } else if (isSameTournament) {
+                // Same tournament, keep existing savedRounds
+                // This happens when resuming or continuing
+            } else {
+                // New tournament, reset everything
+                savedRounds = {};
+                tournamentProgress = {inputs: {}};
             }
             
             const rounds = isMasterDuelMode ? 1 : calculateRounds(participants);
@@ -2283,10 +2294,11 @@
             if (currentEditingId) {
                 // Find and delete the old record for this round
                 const oldRecord = battleRecords.find(r => 
-                    r.tournament === currentTournament.name && 
+                    r.id === currentEditingId ||
+                    (r.tournament === currentTournament.name && 
                     r.date === currentTournament.date &&
                     r.myDeck === currentTournament.deck &&
-                    r.round === `R${roundNum}`
+                    r.round === `R${roundNum}`)
                 );
                 
                 if (oldRecord) {
@@ -2299,6 +2311,9 @@
                         await deleteDoc(doc(db, 'battleRecords', oldRecord.id));
                     }
                 }
+                
+                // Clear editing ID after handling
+                currentEditingId = null;
             }
             
             let bo3Result = '';
@@ -2563,8 +2578,13 @@
                 if (Object.keys(savedRounds).length === currentTournament.rounds) {
                     if (confirm('全ラウンドの結果を保存しました。大会を終了しますか？')) {
                         roundsModal.hide();
-                        currentTournament = null;
+                        // currentTournamentは保持（編集のために必要）
                         savedRounds = {};
+                        // tournamentProgressは最小限の情報を保持
+                        tournamentProgress = {
+                            tournament: currentTournament,
+                            inputs: {}
+                        };
                         localStorage.removeItem('tournamentProgress');
                         document.getElementById('resume-tournament-btn').style.display = 'none';
                     }
@@ -2636,6 +2656,16 @@
                 return roundNum;
             }));
             
+            // Preserve existing tournament data if editing the same tournament
+            const isEditingSameTournament = currentTournament && 
+                currentTournament.name === record.tournament &&
+                currentTournament.date === record.date &&
+                currentTournament.deck === record.myDeck;
+            
+            // Preserve existing savedRounds and tournamentProgress if same tournament
+            const preservedSavedRounds = isEditingSameTournament ? {...savedRounds} : {};
+            const preservedProgress = isEditingSameTournament ? tournamentProgress : {inputs: {}};
+            
             currentTournament = {
                 date: record.date,
                 name: record.tournament,
@@ -2646,14 +2676,25 @@
                 participants: Math.pow(2, maxRound)
             };
             
-            // Mark already saved rounds
-            savedRounds = {};
+            // Restore or rebuild savedRounds
+            if (isEditingSameTournament) {
+                savedRounds = preservedSavedRounds;
+            } else {
+                savedRounds = {};
+            }
+            
+            // Mark already saved rounds from database
             tournamentRecords.forEach(r => {
                 const roundNum = parseInt(r.round?.replace('R', '') || '0');
                 if (roundNum > 0) {
                     savedRounds[roundNum] = true;
                 }
             });
+            
+            // Restore tournament progress if same tournament
+            if (isEditingSameTournament) {
+                tournamentProgress = preservedProgress;
+            }
             
             // Show the rounds modal
             showRoundsModal();
@@ -2773,11 +2814,15 @@
                 console.log(`${savedCount}ラウンドの結果を保存しました`);
             }
             
-            // 大会を終了
-            currentTournament = null;
-            savedRounds = {};
+            // 大会を終了（大会情報は保持して、進行状態のみクリア）
+            // currentTournamentは保持（編集のために必要）
+            savedRounds = {}; // 新規大会開始時にリセット
             currentMatchRound = 1;
-            tournamentProgress = {};
+            // tournamentProgressは最小限の情報を保持
+            tournamentProgress = {
+                tournament: currentTournament,
+                inputs: {}
+            };
             localStorage.removeItem('tournamentProgress'); // Clear saved progress
             document.getElementById('resume-tournament-btn').style.display = 'none';
             
