@@ -275,6 +275,63 @@
         </div>
     </div>
 
+    <!-- Tournament Management Modal -->
+    <div class="modal fade" id="tournament-management-modal" tabindex="-1">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">大会データ管理</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <ul class="nav nav-tabs mb-3" id="tournament-tabs" role="tablist">
+                        <li class="nav-item" role="presentation">
+                            <button class="nav-link active" id="saved-tournaments-tab" data-bs-toggle="tab" data-bs-target="#saved-tournaments" type="button">
+                                保存済み大会
+                            </button>
+                        </li>
+                        <li class="nav-item" role="presentation">
+                            <button class="nav-link" id="import-export-tab" data-bs-toggle="tab" data-bs-target="#import-export" type="button">
+                                インポート/エクスポート
+                            </button>
+                        </li>
+                    </ul>
+                    <div class="tab-content" id="tournament-tab-content">
+                        <div class="tab-pane fade show active" id="saved-tournaments" role="tabpanel">
+                            <div class="mb-3">
+                                <input type="text" class="form-control" id="tournament-search" placeholder="大会名で検索...">
+                            </div>
+                            <div id="tournament-list" class="list-group" style="max-height: 400px; overflow-y: auto;">
+                                <!-- Tournament list will be populated here -->
+                            </div>
+                        </div>
+                        <div class="tab-pane fade" id="import-export" role="tabpanel">
+                            <div class="mb-4">
+                                <h6>大会データをエクスポート</h6>
+                                <p class="text-muted small">選択した大会のデータをJSON形式でダウンロードします。</p>
+                                <select class="form-select mb-2" id="export-tournament-select">
+                                    <option value="">大会を選択...</option>
+                                </select>
+                                <button class="btn btn-primary" id="export-tournament-btn">
+                                    <i class="bi bi-download"></i> エクスポート
+                                </button>
+                            </div>
+                            <hr>
+                            <div>
+                                <h6>大会データをインポート</h6>
+                                <p class="text-muted small">JSON形式の大会データファイルを選択してインポートします。</p>
+                                <input type="file" class="form-control mb-2" id="import-file" accept=".json">
+                                <button class="btn btn-success" id="import-tournament-btn">
+                                    <i class="bi bi-upload"></i> インポート
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <!-- Tournament Preset Modal -->
     <div class="modal fade" id="preset-modal" tabindex="-1">
         <div class="modal-dialog">
@@ -309,6 +366,9 @@
                 </button>
                 <div class="collapse navbar-collapse" id="navbarContent">
                     <div class="navbar-nav ms-auto d-flex align-items-center">
+                        <button id="tournament-mgmt-btn" class="btn btn-outline-primary btn-sm me-2">
+                            <i class="bi bi-folder"></i> 大会管理
+                        </button>
                         <button id="settings-btn" class="btn btn-outline-secondary btn-sm me-2">
                             <i class="bi bi-gear"></i> 設定
                         </button>
@@ -597,6 +657,7 @@
                 }
             });
             document.getElementById('add-tournament-btn').addEventListener('click', () => showTournamentModal());
+            document.getElementById('tournament-mgmt-btn').addEventListener('click', () => showTournamentManagementModal());
             document.getElementById('resume-tournament-btn').addEventListener('click', resumeTournament);
             document.getElementById('start-tournament-btn').addEventListener('click', startTournament);
             document.getElementById('save-tournament-btn').addEventListener('click', saveTournamentResults);
@@ -2431,6 +2492,267 @@
             } else {
                 alert('保存された大会データの読み込みに失敗しました');
             }
+        }
+        
+        // New Tournament Management System
+        function showTournamentManagementModal() {
+            loadSavedTournaments();
+            const modal = new bootstrap.Modal(document.getElementById('tournament-management-modal'));
+            modal.show();
+        }
+        
+        function loadSavedTournaments() {
+            const tournaments = getTournamentList();
+            const listDiv = document.getElementById('tournament-list');
+            const exportSelect = document.getElementById('export-tournament-select');
+            
+            listDiv.innerHTML = '';
+            exportSelect.innerHTML = '<option value="">大会を選択...</option>';
+            
+            if (tournaments.length === 0) {
+                listDiv.innerHTML = '<div class="alert alert-info">保存された大会データがありません</div>';
+                return;
+            }
+            
+            tournaments.forEach(tournament => {
+                // Add to list
+                const item = document.createElement('div');
+                item.className = 'list-group-item d-flex justify-content-between align-items-center';
+                item.innerHTML = `
+                    <div>
+                        <h6 class="mb-1">${tournament.name}</h6>
+                        <small class="text-muted">
+                            ${tournament.date} | ${tournament.store} | ${tournament.rounds.length}戦
+                        </small>
+                    </div>
+                    <div class="btn-group btn-group-sm">
+                        <button class="btn btn-outline-primary" onclick="viewTournament('${tournament.id}')">
+                            <i class="bi bi-eye"></i>
+                        </button>
+                        <button class="btn btn-outline-danger" onclick="deleteTournament('${tournament.id}')">
+                            <i class="bi bi-trash"></i>
+                        </button>
+                    </div>
+                `;
+                listDiv.appendChild(item);
+                
+                // Add to export select
+                const option = document.createElement('option');
+                option.value = tournament.id;
+                option.textContent = `${tournament.name} (${tournament.date})`;
+                exportSelect.appendChild(option);
+            });
+        }
+        
+        function getTournamentList() {
+            if (isLocalMode) {
+                return JSON.parse(localStorage.getItem('tournaments') || '[]');
+            } else {
+                // For Firebase mode, we'll group records by tournament
+                const grouped = {};
+                battleRecords.forEach(record => {
+                    if (record.tournament) {
+                        const key = `${record.tournament}_${record.date}`;
+                        if (!grouped[key]) {
+                            grouped[key] = {
+                                id: key,
+                                name: record.tournament,
+                                date: record.date,
+                                store: record.store || '',
+                                deck: record.myDeck,
+                                rounds: []
+                            };
+                        }
+                        grouped[key].rounds.push(record);
+                    }
+                });
+                return Object.values(grouped);
+            }
+        }
+        
+        window.viewTournament = function(tournamentId) {
+            const tournaments = getTournamentList();
+            const tournament = tournaments.find(t => t.id === tournamentId);
+            
+            if (!tournament) {
+                alert('大会データが見つかりません');
+                return;
+            }
+            
+            // Filter records to show only this tournament
+            const key = tournament.name + '_' + tournament.date;
+            filteredRecords = battleRecords.filter(record => 
+                record.tournament === tournament.name && record.date === tournament.date
+            );
+            
+            displayRecords();
+            
+            // Close modal
+            bootstrap.Modal.getInstance(document.getElementById('tournament-management-modal')).hide();
+        }
+        
+        window.deleteTournament = function(tournamentId) {
+            if (!confirm('この大会データを削除してもよろしいですか？')) {
+                return;
+            }
+            
+            const tournaments = getTournamentList();
+            const tournament = tournaments.find(t => t.id === tournamentId);
+            
+            if (!tournament) {
+                return;
+            }
+            
+            if (isLocalMode) {
+                // Remove from tournaments list
+                const updated = tournaments.filter(t => t.id !== tournamentId);
+                localStorage.setItem('tournaments', JSON.stringify(updated));
+                
+                // Remove related battle records
+                const records = JSON.parse(localStorage.getItem('battleRecords') || '[]');
+                const filtered = records.filter(r => 
+                    !(r.tournament === tournament.name && r.date === tournament.date)
+                );
+                localStorage.setItem('battleRecords', JSON.stringify(filtered));
+            } else {
+                // For Firebase, delete all related records
+                battleRecords.filter(record => 
+                    record.tournament === tournament.name && record.date === tournament.date
+                ).forEach(async record => {
+                    await deleteDoc(doc(db, 'battleRecords', record.id));
+                });
+            }
+            
+            loadRecords();
+            loadSavedTournaments();
+        }
+        
+        // Export/Import functions
+        document.addEventListener('DOMContentLoaded', () => {
+            document.getElementById('export-tournament-btn').addEventListener('click', exportTournament);
+            document.getElementById('import-tournament-btn').addEventListener('click', importTournament);
+            document.getElementById('tournament-search').addEventListener('input', filterTournamentList);
+        });
+        
+        function exportTournament() {
+            const select = document.getElementById('export-tournament-select');
+            const tournamentId = select.value;
+            
+            if (!tournamentId) {
+                alert('エクスポートする大会を選択してください');
+                return;
+            }
+            
+            const tournaments = getTournamentList();
+            const tournament = tournaments.find(t => t.id === tournamentId);
+            
+            if (!tournament) {
+                alert('大会データが見つかりません');
+                return;
+            }
+            
+            // Get all records for this tournament
+            const records = battleRecords.filter(record => 
+                record.tournament === tournament.name && record.date === tournament.date
+            );
+            
+            const exportData = {
+                tournament: {
+                    name: tournament.name,
+                    date: tournament.date,
+                    store: tournament.store,
+                    deck: tournament.deck
+                },
+                records: records
+            };
+            
+            // Download as JSON
+            const blob = new Blob([JSON.stringify(exportData, null, 2)], {type: 'application/json'});
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `${tournament.name}_${tournament.date}.json`;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+        }
+        
+        function importTournament() {
+            const fileInput = document.getElementById('import-file');
+            const file = fileInput.files[0];
+            
+            if (!file) {
+                alert('インポートするファイルを選択してください');
+                return;
+            }
+            
+            const reader = new FileReader();
+            reader.onload = async function(e) {
+                try {
+                    const data = JSON.parse(e.target.result);
+                    
+                    if (!data.tournament || !data.records) {
+                        alert('無効なファイル形式です');
+                        return;
+                    }
+                    
+                    // Add records to storage
+                    if (isLocalMode) {
+                        const existingRecords = JSON.parse(localStorage.getItem('battleRecords') || '[]');
+                        
+                        // Check for duplicates
+                        const isDuplicate = existingRecords.some(r => 
+                            r.tournament === data.tournament.name && r.date === data.tournament.date
+                        );
+                        
+                        if (isDuplicate) {
+                            if (!confirm('同じ大会のデータが既に存在します。上書きしますか？')) {
+                                return;
+                            }
+                            // Remove existing records
+                            const filtered = existingRecords.filter(r => 
+                                !(r.tournament === data.tournament.name && r.date === data.tournament.date)
+                            );
+                            existingRecords.length = 0;
+                            existingRecords.push(...filtered);
+                        }
+                        
+                        // Add new records with new IDs
+                        data.records.forEach(record => {
+                            record.id = Date.now().toString() + Math.random().toString(36).substr(2, 9);
+                            existingRecords.push(record);
+                        });
+                        
+                        localStorage.setItem('battleRecords', JSON.stringify(existingRecords));
+                    } else {
+                        // For Firebase
+                        for (const record of data.records) {
+                            record.userId = currentUser.uid;
+                            await addDoc(collection(db, 'battleRecords'), record);
+                        }
+                    }
+                    
+                    alert('大会データをインポートしました');
+                    await loadRecords();
+                    loadSavedTournaments();
+                    fileInput.value = '';
+                } catch (error) {
+                    console.error('Import error:', error);
+                    alert('ファイルの読み込みに失敗しました');
+                }
+            };
+            reader.readAsText(file);
+        }
+        
+        function filterTournamentList() {
+            const searchValue = document.getElementById('tournament-search').value.toLowerCase();
+            const items = document.querySelectorAll('#tournament-list .list-group-item');
+            
+            items.forEach(item => {
+                const text = item.textContent.toLowerCase();
+                item.style.display = text.includes(searchValue) ? '' : 'none';
+            });
         }
 
         async function loadRecords() {
