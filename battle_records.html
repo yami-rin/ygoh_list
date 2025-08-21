@@ -1375,15 +1375,23 @@
                             </div>
                         </div>
                         <div class="row">
-                            <div class="col-md-6 mb-3">
-                                <label class="form-label">先攻選択権</label>
+                            <div class="col-md-4 mb-3">
+                                <label class="form-label">選択権</label>
+                                <select class="form-select" id="round${i}-choice">
+                                    <option value="">選択してください</option>
+                                    <option value="self">自分</option>
+                                    <option value="opponent">相手</option>
+                                </select>
+                            </div>
+                            <div class="col-md-4 mb-3">
+                                <label class="form-label">先攻/後攻</label>
                                 <select class="form-select" id="round${i}-first">
                                     <option value="">選択してください</option>
                                     <option value="先">先攻</option>
                                     <option value="後">後攻</option>
                                 </select>
                             </div>
-                            <div class="col-md-6 mb-3">
+                            <div class="col-md-4 mb-3">
                                 <label class="form-label">結果 <span class="text-danger">*</span></label>
                                 <select class="form-select" id="round${i}-result" required>
                                     <option value="">選択してください</option>
@@ -1416,6 +1424,7 @@
             // Auto-save on input change
             const opponentInput = document.getElementById(`round${roundNum}-opponent`);
             const deckInput = document.getElementById(`round${roundNum}-deck`);
+            const choiceSelect = document.getElementById(`round${roundNum}-choice`);
             const firstSelect = document.getElementById(`round${roundNum}-first`);
             const resultSelect = document.getElementById(`round${roundNum}-result`);
             const notesInput = document.getElementById(`round${roundNum}-notes`);
@@ -1425,6 +1434,9 @@
             }
             if (deckInput) {
                 deckInput.addEventListener('change', () => autoSaveRound(roundNum));
+            }
+            if (choiceSelect) {
+                choiceSelect.addEventListener('change', () => autoSaveRound(roundNum));
             }
             if (firstSelect) {
                 firstSelect.addEventListener('change', () => autoSaveRound(roundNum));
@@ -2211,6 +2223,11 @@
             let gameFirstChoices = [];
             let choice = null;
             
+            // Get choice for both formats
+            if (currentTournament.format === 'single') {
+                choice = document.getElementById(`round${roundNum}-choice`)?.value || null;
+            }
+            
             if (currentTournament.format === 'match') {
                 const game1 = document.querySelector(`input[name="round${roundNum}-game1"]:checked`)?.value || '';
                 const game2 = document.querySelector(`input[name="round${roundNum}-game2"]:checked`)?.value || '';
@@ -2239,7 +2256,7 @@
                 result: result,
                 opponent: document.getElementById(`round${roundNum}-opponent`)?.value || null,
                 opponentDeck: document.getElementById(`round${roundNum}-deck`)?.value || null,
-                firstTurnChoice: document.getElementById(`round${roundNum}-first`)?.value || document.querySelector(`input[name="round${roundNum}-choice"]:checked`)?.value || null,
+                firstTurnChoice: document.getElementById(`round${roundNum}-first`)?.value || null,
                 choice: choice,
                 bo3Result: bo3Result || null,
                 gameFirstChoices: currentTournament.format === 'match' && gameFirstChoices.some(x => x) ? gameFirstChoices : null,
@@ -2535,6 +2552,11 @@
                     document.getElementById(`round${roundNum}-first`).value = record.firstTurnChoice || '';
                     document.getElementById(`round${roundNum}-result`).value = record.result || '';
                     document.getElementById(`round${roundNum}-notes`).value = record.notes || '';
+                    
+                    // Restore choice for single format
+                    if (record.choice && document.getElementById(`round${roundNum}-choice`)) {
+                        document.getElementById(`round${roundNum}-choice`).value = record.choice;
+                    }
                     
                     // If match format and has BO3 results
                     if (record.matchFormat === 'match' && record.bo3Result) {
@@ -3770,25 +3792,16 @@
                             record.result === 'draw' ? '<span class="badge bg-secondary">引き分け</span>' : '-'
                         }</td></tr>
                         ${record.bo3Result ? `
-                            <tr><td><strong>各ゲーム結果:</strong></td><td>
+                            <tr><td><strong>各ゲーム詳細:</strong></td><td>
                                 ${record.bo3Result.split('').map((result, i) => {
                                     if (!result || result === '-') return '';
-                                    return `第${i+1}ゲーム: ${
-                                        result === '○' ? '<span class="badge bg-success">勝利</span>' :
-                                        result === '×' ? '<span class="badge bg-danger">敗北</span>' :
-                                        result === '△' ? '<span class="badge bg-secondary">引分</span>' : '-'
-                                    }`;
-                                }).filter(x => x).join('<br>')}
-                            </td></tr>
-                        ` : ''}
-                        ${record.gameFirstChoices && record.gameFirstChoices.length > 0 ? `
-                            <tr><td><strong>各ゲーム先攻/後攻:</strong></td><td>
-                                ${record.gameFirstChoices.map((choice, i) => {
-                                    if (!choice) return '';
-                                    return `第${i+1}ゲーム: ${
-                                        choice === '先' || choice === '先攻' ? '先攻' :
-                                        choice === '後' || choice === '後攻' ? '後攻' : choice
-                                    }`;
+                                    const firstChoice = record.gameFirstChoices && record.gameFirstChoices[i] ? 
+                                        (record.gameFirstChoices[i] === '先' || record.gameFirstChoices[i] === '先攻' ? '先攻' :
+                                         record.gameFirstChoices[i] === '後' || record.gameFirstChoices[i] === '後攻' ? '後攻' : '') : '';
+                                    const resultBadge = result === '○' ? '<span class="badge bg-success">勝利</span>' :
+                                                       result === '×' ? '<span class="badge bg-danger">敗北</span>' :
+                                                       result === '△' ? '<span class="badge bg-secondary">引分</span>' : '-';
+                                    return `第${i+1}ゲーム: ${resultBadge} ${firstChoice ? `<span class="badge bg-info">${firstChoice}</span>` : ''}`;
                                 }).filter(x => x).join('<br>')}
                             </td></tr>
                         ` : ''}
