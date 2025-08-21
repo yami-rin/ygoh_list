@@ -2058,7 +2058,7 @@
         }
 
         let savedRounds = {};
-        let tournamentProgress = {};
+        let tournamentProgress = {inputs: {}}; // Initialize with inputs object
         
         async function saveMasterDuelMatch(silent = false) {
             const regulation = document.getElementById('master-duel-regulation')?.value;
@@ -2279,12 +2279,15 @@
         }
         
         async function saveTournamentProgress() {
+            // Preserve existing inputs if they exist
+            const existingInputs = tournamentProgress.inputs || {};
+            
             // Save current input values
             tournamentProgress = {
                 tournament: currentTournament,
                 savedRounds: savedRounds,
                 currentMatchRound: currentMatchRound || 1,
-                inputs: {}
+                inputs: existingInputs  // Preserve existing inputs
             };
             
             // For match format, save current round data first
@@ -2294,18 +2297,22 @@
             
             // Save all input values for each round
             if (currentTournament.format === 'match') {
-                // For match format, use the already saved inputs from saveMatchRoundToMemory
-                // No need to re-collect them
+                // For match format, the inputs are already saved in tournamentProgress.inputs
+                // by saveMatchRoundToMemory, so we don't need to re-collect them
             } else {
-                // For single format, collect all inputs
+                // For single format, collect all inputs (updating existing ones)
                 for (let i = 1; i <= currentTournament.rounds; i++) {
-                    tournamentProgress.inputs[`round${i}`] = {
-                        opponent: document.getElementById(`round${i}-opponent`)?.value || '',
-                        deck: document.getElementById(`round${i}-deck`)?.value || '',
-                        first: document.getElementById(`round${i}-first`)?.value || '',
-                        result: document.getElementById(`round${i}-result`)?.value || '',
-                        notes: document.getElementById(`round${i}-notes`)?.value || ''
-                    };
+                    // Only update if the elements exist (preserve data for rounds not currently displayed)
+                    if (document.getElementById(`round${i}-opponent`)) {
+                        tournamentProgress.inputs[`round${i}`] = {
+                            opponent: document.getElementById(`round${i}-opponent`)?.value || '',
+                            deck: document.getElementById(`round${i}-deck`)?.value || '',
+                            choice: document.getElementById(`round${i}-choice`)?.value || '',
+                            first: document.getElementById(`round${i}-first`)?.value || '',
+                            result: document.getElementById(`round${i}-result`)?.value || '',
+                            notes: document.getElementById(`round${i}-notes`)?.value || ''
+                        };
+                    }
                 }
             }
             
@@ -2337,6 +2344,9 @@
                             if (document.getElementById(`round${i}-opponent`)) {
                                 document.getElementById(`round${i}-opponent`).value = inputs.opponent || '';
                                 document.getElementById(`round${i}-deck`).value = inputs.deck || '';
+                                if (document.getElementById(`round${i}-choice`)) {
+                                    document.getElementById(`round${i}-choice`).value = inputs.choice || '';
+                                }
                                 document.getElementById(`round${i}-first`).value = inputs.first || '';
                                 document.getElementById(`round${i}-result`).value = inputs.result || '';
                                 document.getElementById(`round${i}-notes`).value = inputs.notes || '';
