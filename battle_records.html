@@ -989,6 +989,11 @@
             
             modal.textContent = '大会を登録';
             startBtn.textContent = '大会を開始';
+            startBtn.classList.remove('btn-success');
+            startBtn.classList.add('btn-primary');
+            
+            // Clear editing flag
+            currentEditingId = null;
             
             // Show all normal mode fields
             const dateDiv = document.getElementById('tournament-date').closest('.col-md-6');
@@ -1302,9 +1307,37 @@
                 }
             }
             
-            // Only reset saved rounds if this is a new tournament (not resuming)
+            // If editing an existing tournament, preserve round data
+            let preservedRounds = {};
+            let preservedProgress = null;
+            if (currentEditingId) {
+                // Find all existing records for this tournament
+                const existingRecords = battleRecords.filter(r => 
+                    r.tournament === name && 
+                    r.date === date &&
+                    r.myDeck === deck
+                );
+                
+                // Mark which rounds already have data
+                existingRecords.forEach(r => {
+                    const roundNum = parseInt(r.round?.replace('R', '') || '0');
+                    if (roundNum > 0) {
+                        preservedRounds[roundNum] = true;
+                    }
+                });
+                
+                // Also preserve any in-progress tournament data
+                preservedProgress = tournamentProgress;
+            }
+            
+            // Only reset saved rounds if this is a new tournament (not resuming or editing)
             if (!currentTournament || currentTournament.name !== name || currentTournament.date !== date) {
-                savedRounds = {};
+                if (currentEditingId) {
+                    // When editing, use preserved rounds
+                    savedRounds = preservedRounds;
+                } else {
+                    savedRounds = {};
+                }
             }
             
             const rounds = isMasterDuelMode ? 1 : calculateRounds(participants);
@@ -1321,10 +1354,22 @@
                 isMasterDuel: isMasterDuelMode
             };
             
+            // If editing, restore preserved progress
+            if (currentEditingId && preservedProgress) {
+                tournamentProgress = preservedProgress;
+            }
+            
             // 店舗名を記憶
             if (!stores.includes(store)) {
                 stores.push(store);
                 saveStores();
+            }
+            
+            // Clear editing flag after processing
+            if (currentEditingId) {
+                currentEditingId = null;
+                // Show success message for editing
+                showAlert('大会情報を更新しました', 'success');
             }
             
             tournamentModal.hide();
@@ -2561,6 +2606,13 @@
             
             // 編集モードフラグを設定
             currentEditingId = recordId;
+            
+            // Change button text for edit mode
+            const startBtn = document.getElementById('start-tournament-btn');
+            startBtn.textContent = '大会情報を更新';
+            startBtn.classList.remove('btn-primary');
+            startBtn.classList.add('btn-success');
+            
             tournamentModal.show();
         }
 
