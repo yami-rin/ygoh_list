@@ -275,6 +275,24 @@
         </div>
     </div>
 
+    <!-- View Record Modal -->
+    <div class="modal fade" id="view-record-modal" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">対戦記録詳細</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body" id="view-record-content">
+                    <!-- Content will be populated dynamically -->
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">閉じる</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <!-- Tournament Management Modal -->
     <div class="modal fade" id="tournament-management-modal" tabindex="-1">
         <div class="modal-dialog modal-lg">
@@ -1382,6 +1400,9 @@
                         <hr>
                     `;
                     container.appendChild(roundDiv);
+                    
+                    // Add auto-save event listeners for tournament rounds
+                    setupAutoSaveForRound(i);
                 }
                 
                 roundsModal.show();
@@ -1389,6 +1410,130 @@
         }
         
         let currentMatchRound = 1;
+        
+        // Auto-save functions
+        function setupAutoSaveForRound(roundNum) {
+            // Auto-save on input change
+            const opponentInput = document.getElementById(`round${roundNum}-opponent`);
+            const deckInput = document.getElementById(`round${roundNum}-deck`);
+            const firstSelect = document.getElementById(`round${roundNum}-first`);
+            const resultSelect = document.getElementById(`round${roundNum}-result`);
+            const notesInput = document.getElementById(`round${roundNum}-notes`);
+            
+            if (opponentInput) {
+                opponentInput.addEventListener('change', () => autoSaveRound(roundNum));
+            }
+            if (deckInput) {
+                deckInput.addEventListener('change', () => autoSaveRound(roundNum));
+            }
+            if (firstSelect) {
+                firstSelect.addEventListener('change', () => autoSaveRound(roundNum));
+            }
+            if (resultSelect) {
+                resultSelect.addEventListener('change', () => autoSaveRound(roundNum));
+            }
+            if (notesInput) {
+                notesInput.addEventListener('change', () => autoSaveRound(roundNum));
+            }
+        }
+        
+        async function autoSaveRound(roundNum) {
+            // Check if we have minimal data to save
+            const result = document.getElementById(`round${roundNum}-result`)?.value;
+            if (!result) {
+                return; // Don't save if no result selected
+            }
+            
+            try {
+                await saveRoundData(roundNum);
+                // Show subtle save indicator
+                showAutoSaveIndicator();
+            } catch (error) {
+                console.error('Auto-save error:', error);
+            }
+        }
+        
+        function showAutoSaveIndicator() {
+            // Create or update save indicator
+            let indicator = document.getElementById('auto-save-indicator');
+            if (!indicator) {
+                indicator = document.createElement('div');
+                indicator.id = 'auto-save-indicator';
+                indicator.style.cssText = `
+                    position: fixed;
+                    bottom: 20px;
+                    right: 20px;
+                    background: #28a745;
+                    color: white;
+                    padding: 8px 12px;
+                    border-radius: 4px;
+                    z-index: 9999;
+                    display: none;
+                `;
+                indicator.innerHTML = '<i class="bi bi-check-circle"></i> 自動保存しました';
+                document.body.appendChild(indicator);
+            }
+            
+            indicator.style.display = 'block';
+            setTimeout(() => {
+                indicator.style.display = 'none';
+            }, 2000);
+        }
+        
+        function setupAutoSaveForMasterDuel() {
+            const inputs = [
+                'master-duel-regulation',
+                'master-duel-deck',
+                'master-duel-opponent-name',
+                'master-duel-opponent-deck',
+                'master-duel-notes'
+            ];
+            
+            inputs.forEach(id => {
+                const element = document.getElementById(id);
+                if (element) {
+                    element.addEventListener('change', autoSaveMasterDuel);
+                }
+            });
+            
+            // Radio buttons
+            document.querySelectorAll('input[name="master-duel-choice"]').forEach(radio => {
+                radio.addEventListener('change', autoSaveMasterDuel);
+            });
+            document.querySelectorAll('input[name="master-duel-first"]').forEach(radio => {
+                radio.addEventListener('change', autoSaveMasterDuel);
+            });
+            document.querySelectorAll('input[name="master-duel-result"]').forEach(radio => {
+                radio.addEventListener('change', autoSaveMasterDuel);
+            });
+        }
+        
+        let autoSaveTimeout = null;
+        
+        async function autoSaveMasterDuel() {
+            // Clear previous timeout to debounce
+            if (autoSaveTimeout) {
+                clearTimeout(autoSaveTimeout);
+            }
+            
+            autoSaveTimeout = setTimeout(async () => {
+                // Check if we have minimal data to save
+                const result = document.querySelector('input[name="master-duel-result"]:checked')?.value;
+                const deck = document.getElementById('master-duel-deck')?.value;
+                const opponentDeck = document.getElementById('master-duel-opponent-deck')?.value;
+                
+                if (!result || !deck || !opponentDeck) {
+                    return; // Don't save incomplete data
+                }
+                
+                try {
+                    await saveMasterDuelMatch(true); // Pass true for silent save
+                    showAutoSaveIndicator();
+                } catch (error) {
+                    console.error('Auto-save error:', error);
+                }
+            }, 1000); // Wait 1 second after last change
+        }
         
         function showMasterDuelInterface() {
             const container = document.getElementById('rounds-container');
@@ -1489,6 +1634,9 @@
                 opponentDeckInput.addEventListener('input', showOpponentDeckSuggestions);
                 opponentDeckInput.addEventListener('focus', showOpponentDeckSuggestions);
             }
+            
+            // Setup auto-save for Master Duel
+            setupAutoSaveForMasterDuel();
             
             roundsModal.show();
         }
@@ -1900,7 +2048,7 @@
         let savedRounds = {};
         let tournamentProgress = {};
         
-        async function saveMasterDuelMatch() {
+        async function saveMasterDuelMatch(silent = false) {
             const regulation = document.getElementById('master-duel-regulation')?.value;
             const myDeck = document.getElementById('master-duel-deck')?.value;
             const opponentName = document.getElementById('master-duel-opponent-name')?.value;
@@ -1971,20 +2119,24 @@
             // Clear editing flag
             currentEditingRecord = null;
             
-            // Clear form for next match without any dialogs
-            // Keep regulation and own deck for convenience
-            document.getElementById('master-duel-opponent-name').value = '';
-            document.getElementById('master-duel-opponent-deck').value = '';
-            const checkedChoice = document.querySelector('input[name="master-duel-choice"]:checked');
-            if (checkedChoice) checkedChoice.checked = false;
-            const checkedFirst = document.querySelector('input[name="master-duel-first"]:checked');
-            if (checkedFirst) checkedFirst.checked = false;
-            const checkedResult = document.querySelector('input[name="master-duel-result"]:checked');
-            if (checkedResult) checkedResult.checked = false;
-            document.getElementById('master-duel-notes').value = '';
+            // Only clear form and close modal for manual saves
+            if (!silent) {
+                // Clear form for next match without any dialogs
+                // Keep regulation and own deck for convenience
+                document.getElementById('master-duel-opponent-name').value = '';
+                document.getElementById('master-duel-opponent-deck').value = '';
+                const checkedChoice = document.querySelector('input[name="master-duel-choice"]:checked');
+                if (checkedChoice) checkedChoice.checked = false;
+                const checkedFirst = document.querySelector('input[name="master-duel-first"]:checked');
+                if (checkedFirst) checkedFirst.checked = false;
+                const checkedResult = document.querySelector('input[name="master-duel-result"]:checked');
+                if (checkedResult) checkedResult.checked = false;
+                document.getElementById('master-duel-notes').value = '';
+                
+                // Close modal and reload records
+                roundsModal.hide();
+            }
             
-            // Close modal and reload records silently
-            roundsModal.hide();
             await loadRecords();
         }
         
@@ -3133,6 +3285,9 @@
                                 <td>${record.opponentDeck || '-'}</td>
                                 <td>${resultBadge[record.result] || ''}</td>
                                 <td>
+                                    <button class="btn btn-sm btn-info me-1" onclick="viewRecord('${record.id}')" title="詳細">
+                                        <i class="bi bi-eye"></i>
+                                    </button>
                                     <button class="btn btn-sm btn-warning me-1" onclick="editRound('${record.id}')" title="編集">
                                         <i class="bi bi-pencil-square"></i>
                                     </button>
@@ -3152,6 +3307,9 @@
                                 <td>${record.opponentDeck || '-'}</td>
                                 <td>${resultBadge[record.result] || ''}</td>
                                 <td>
+                                    <button class="btn btn-sm btn-info me-1" onclick="viewRecord('${record.id}')" title="詳細">
+                                        <i class="bi bi-eye"></i>
+                                    </button>
                                     <button class="btn btn-sm btn-warning me-1" onclick="editRound('${record.id}')" title="編集">
                                         <i class="bi bi-pencil-square"></i>
                                     </button>
@@ -3187,6 +3345,9 @@
                 
                 if (record.isMasterDuel) {
                     actionButtons = `
+                        <button class="btn btn-sm btn-info me-1" onclick="viewRecord('${id}')" title="詳細">
+                            <i class="bi bi-eye"></i>
+                        </button>
                         <button class="btn btn-sm btn-warning me-1" onclick="editMasterDuelRecord('${id}')" title="編集">
                             <i class="bi bi-pencil-square"></i>
                         </button>
@@ -3524,6 +3685,66 @@
 
         // Make functions globally accessible
         window.deleteRecord = deleteRecord;
+        
+        // View record function
+        window.viewRecord = function(recordId) {
+            const record = battleRecords.find(r => r.id === recordId);
+            
+            if (!record) {
+                alert('記録が見つかりません');
+                return;
+            }
+            
+            let content = `
+                <div class="record-details">
+                    <h6 class="mb-3">基本情報</h6>
+                    <table class="table table-sm">
+                        <tr><td style="width: 40%;"><strong>日付:</strong></td><td>${record.date || '-'}</td></tr>
+                        <tr><td><strong>大会/場所:</strong></td><td>${record.tournament || record.store || '-'}</td></tr>
+                        <tr><td><strong>ラウンド:</strong></td><td>${record.round || '-'}</td></tr>
+                    </table>
+                    
+                    <h6 class="mb-3 mt-4">対戦情報</h6>
+                    <table class="table table-sm">
+                        <tr><td style="width: 40%;"><strong>自分のデッキ:</strong></td><td>${record.myDeck || '-'}</td></tr>
+                        <tr><td><strong>相手の名前:</strong></td><td>${record.opponent || record.tournament || '-'}</td></tr>
+                        <tr><td><strong>相手のデッキ:</strong></td><td>${record.opponentDeck || '-'}</td></tr>
+                    </table>
+                    
+                    <h6 class="mb-3 mt-4">試合詳細</h6>
+                    <table class="table table-sm">
+                        <tr><td style="width: 40%;"><strong>選択権:</strong></td><td>${
+                            record.choice === 'self' ? '自分' : 
+                            record.choice === 'opponent' ? '相手' : '-'
+                        }</td></tr>
+                        <tr><td><strong>先攻/後攻:</strong></td><td>${
+                            record.first === 'first' ? '先攻' : 
+                            record.first === 'second' ? '後攻' :
+                            record.firstTurnChoice === '先攻' ? '先攻' :
+                            record.firstTurnChoice === '後攻' ? '後攻' : '-'
+                        }</td></tr>
+                        <tr><td><strong>試合結果:</strong></td><td>${
+                            record.result === 'win' ? '<span class="badge bg-success">勝利</span>' :
+                            record.result === 'lose' ? '<span class="badge bg-danger">敗北</span>' :
+                            record.result === 'draw' ? '<span class="badge bg-secondary">引き分け</span>' : '-'
+                        }</td></tr>
+                        ${record.bo3Result ? `<tr><td><strong>マッチ結果:</strong></td><td>${record.bo3Result}</td></tr>` : ''}
+                        ${record.gameFirstChoices ? `<tr><td><strong>各ゲーム先攻:</strong></td><td>${record.gameFirstChoices.join(', ')}</td></tr>` : ''}
+                    </table>
+                    
+                    ${record.notes ? `
+                        <h6 class="mb-3 mt-4">メモ</h6>
+                        <div class="alert alert-light">
+                            ${record.notes}
+                        </div>
+                    ` : ''}
+                </div>
+            `;
+            
+            document.getElementById('view-record-content').innerHTML = content;
+            const modal = new bootstrap.Modal(document.getElementById('view-record-modal'));
+            modal.show();
+        }
         window.editMasterDuelRecord = editMasterDuelRecord;
         window.deletePreset = deletePreset;
         window.selectStore = selectStore;
