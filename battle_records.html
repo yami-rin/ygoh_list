@@ -2266,21 +2266,27 @@
             }
             
             if (currentTournament.format === 'match') {
-                const game1 = document.querySelector(`input[name="round${roundNum}-game1"]:checked`)?.value || '';
-                const game2 = document.querySelector(`input[name="round${roundNum}-game2"]:checked`)?.value || '';
-                const game3 = document.querySelector(`input[name="round${roundNum}-game3"]:checked`)?.value || '';
+                // Check if elements exist in DOM, otherwise use saved inputs
+                const inputs = tournamentProgress.inputs?.[`round${roundNum}`];
+                
+                const game1 = document.querySelector(`input[name="round${roundNum}-game1"]:checked`)?.value || inputs?.game1 || '';
+                const game2 = document.querySelector(`input[name="round${roundNum}-game2"]:checked`)?.value || inputs?.game2 || '';
+                const game3 = document.querySelector(`input[name="round${roundNum}-game3"]:checked`)?.value || inputs?.game3 || '';
                 bo3Result = `${game1}${game2}${game3}`;
                 
                 // Get first/second for each game as array
                 gameFirstChoices = [
-                    document.querySelector(`input[name="round${roundNum}-game1-first"]:checked`)?.value || '',
-                    document.querySelector(`input[name="round${roundNum}-game2-first"]:checked`)?.value || '',
-                    document.querySelector(`input[name="round${roundNum}-game3-first"]:checked`)?.value || ''
+                    document.querySelector(`input[name="round${roundNum}-game1-first"]:checked`)?.value || inputs?.game1First || '',
+                    document.querySelector(`input[name="round${roundNum}-game2-first"]:checked`)?.value || inputs?.game2First || '',
+                    document.querySelector(`input[name="round${roundNum}-game3-first"]:checked`)?.value || inputs?.game3First || ''
                 ];
                 
                 // Get choice (who had the choice)
-                choice = document.querySelector(`input[name="round${roundNum}-choice"]:checked`)?.value || null;
+                choice = document.querySelector(`input[name="round${roundNum}-choice"]:checked`)?.value || inputs?.choice || null;
             }
+            
+            // Get inputs from DOM or saved data
+            const inputs = tournamentProgress.inputs?.[`round${roundNum}`] || {};
             
             const recordData = {
                 date: currentTournament.date,
@@ -2291,13 +2297,13 @@
                 format: 'トーナメント',
                 matchFormat: currentTournament.format,
                 result: result,
-                opponent: document.getElementById(`round${roundNum}-opponent`)?.value || null,
-                opponentDeck: document.getElementById(`round${roundNum}-deck`)?.value || null,
-                firstTurnChoice: document.getElementById(`round${roundNum}-first`)?.value || null,
+                opponent: document.getElementById(`round${roundNum}-opponent`)?.value || inputs.opponent || null,
+                opponentDeck: document.getElementById(`round${roundNum}-deck`)?.value || inputs.deck || null,
+                firstTurnChoice: document.getElementById(`round${roundNum}-first`)?.value || inputs.first || null,
                 choice: choice,
                 bo3Result: bo3Result || null,
                 gameFirstChoices: currentTournament.format === 'match' && gameFirstChoices.some(x => x) ? gameFirstChoices : null,
-                notes: document.getElementById(`round${roundNum}-notes`)?.value || null,
+                notes: document.getElementById(`round${roundNum}-notes`)?.value || inputs.notes || null,
                 createdAt: new Date().toISOString(),
                 updatedAt: new Date().toISOString()
             };
@@ -2679,32 +2685,40 @@
                 return;
             }
             
-            let unsavedRounds = [];
+            // First, save all unsaved rounds automatically
+            let savedCount = 0;
             
-            // Handle match format differently
             if (currentTournament.format === 'match') {
-                // For match format, check for unsaved rounds
+                // Save current round data to memory first
+                if (currentMatchRound) {
+                    saveMatchRoundToMemory(currentMatchRound);
+                }
+                
+                // Save all rounds that have results
                 for (let i = 1; i <= currentTournament.rounds; i++) {
                     if (!savedRounds[i]) {
-                        unsavedRounds.push(i);
+                        const inputs = tournamentProgress.inputs?.[`round${i}`];
+                        if (inputs?.result) {
+                            await saveRoundData(i);
+                            savedCount++;
+                        }
                     }
                 }
             } else {
-                // For single format, check for result inputs
+                // For single format, save all rounds with results
                 for (let i = 1; i <= currentTournament.rounds; i++) {
                     if (!savedRounds[i]) {
                         const result = document.getElementById(`round${i}-result`)?.value;
                         if (result) {
-                            unsavedRounds.push(i);
+                            await saveRoundData(i);
+                            savedCount++;
                         }
                     }
                 }
             }
             
-            if (unsavedRounds.length > 0) {
-                if (!confirm(`未保存のラウンド（第${unsavedRounds.join(', ')}回戦）があります。保存せずに大会を終了しますか？`)) {
-                    return;
-                }
+            if (savedCount > 0) {
+                console.log(`${savedCount}ラウンドの結果を保存しました`);
             }
             
             // 大会を終了
@@ -3836,14 +3850,6 @@
                             record.choice === 'opponent' ? '相手' :
                             record.choice === '自分' ? '自分' :
                             record.choice === '相手' ? '相手' : '-'
-                        }</td></tr>
-                        <tr><td><strong>先攻/後攻:</strong></td><td>${
-                            record.first === 'first' ? '先攻' : 
-                            record.first === 'second' ? '後攻' :
-                            record.firstTurnChoice === '先' ? '先攻' :
-                            record.firstTurnChoice === '後' ? '後攻' :
-                            record.firstTurnChoice === '先攻' ? '先攻' :
-                            record.firstTurnChoice === '後攻' ? '後攻' : '-'
                         }</td></tr>
                         <tr><td><strong>試合結果:</strong></td><td>${
                             record.result === 'win' ? '<span class="badge bg-success">勝利</span>' :
