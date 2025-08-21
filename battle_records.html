@@ -1340,6 +1340,9 @@
                 document.getElementById('tournament-title').textContent = currentTournament.name;
                 document.getElementById('current-round').style.display = '';
                 document.getElementById('current-round').textContent = `${currentTournament.rounds}回戦制`;
+                
+                // Check if all rounds are completed
+                updateTournamentButtons();
             }
             
             // Always reset to round 1 for new tournaments
@@ -1418,6 +1421,31 @@
         }
         
         let currentMatchRound = 1;
+        
+        // Update button visibility based on tournament progress
+        function updateTournamentButtons() {
+            if (!currentTournament || isMasterDuelMode) return;
+            
+            const continueLaterBtn = document.getElementById('continue-later-btn');
+            const saveTournamentBtn = document.getElementById('save-tournament-btn');
+            
+            if (!continueLaterBtn || !saveTournamentBtn) return;
+            
+            // Check if all rounds have been saved
+            const allRoundsSaved = Object.keys(savedRounds).filter(key => savedRounds[key]).length >= currentTournament.rounds;
+            
+            if (allRoundsSaved) {
+                // Hide continue later button, only show finish tournament button
+                continueLaterBtn.style.display = 'none';
+                saveTournamentBtn.style.display = '';
+                saveTournamentBtn.className = 'btn btn-success btn-lg';
+                saveTournamentBtn.innerHTML = '<i class="bi bi-check-circle"></i> 大会を終了';
+            } else {
+                // Show both buttons
+                continueLaterBtn.style.display = '';
+                saveTournamentBtn.style.display = '';
+            }
+        }
         
         // Auto-save functions
         function setupAutoSaveForRound(roundNum) {
@@ -1966,6 +1994,9 @@
             }
             
             roundsModal.show();
+            
+            // Update button visibility
+            updateTournamentButtons();
         }
         
         window.navigateMatchRound = function(roundNum) {
@@ -2282,6 +2313,9 @@
             }
             
             savedRounds[roundNum] = true;
+            
+            // Update button visibility
+            updateTournamentButtons();
         }
         
         async function saveTournamentProgress() {
@@ -3786,7 +3820,7 @@
                     <h6 class="mb-3 mt-4">対戦情報</h6>
                     <table class="table table-sm">
                         <tr><td style="width: 40%;"><strong>自分のデッキ:</strong></td><td>${record.myDeck || '-'}</td></tr>
-                        <tr><td><strong>相手の名前:</strong></td><td>${record.opponent || record.tournament || '-'}</td></tr>
+                        <tr><td><strong>相手の名前:</strong></td><td>${record.opponent || '-'}</td></tr>
                         <tr><td><strong>相手のデッキ:</strong></td><td>${record.opponentDeck || '-'}</td></tr>
                     </table>
                     
@@ -3799,7 +3833,9 @@
                         }</td></tr>
                         <tr><td><strong>選択権:</strong></td><td>${
                             record.choice === 'self' ? '自分' : 
-                            record.choice === 'opponent' ? '相手' : '-'
+                            record.choice === 'opponent' ? '相手' :
+                            record.choice === '自分' ? '自分' :
+                            record.choice === '相手' ? '相手' : '-'
                         }</td></tr>
                         <tr><td><strong>先攻/後攻:</strong></td><td>${
                             record.first === 'first' ? '先攻' : 
@@ -3824,7 +3860,8 @@
                                     const resultBadge = result === '○' ? '<span class="badge bg-success">勝利</span>' :
                                                        result === '×' ? '<span class="badge bg-danger">敗北</span>' :
                                                        result === '△' ? '<span class="badge bg-secondary">引分</span>' : '-';
-                                    return `第${i+1}ゲーム: ${resultBadge} ${firstChoice ? `<span class="badge bg-info">${firstChoice}</span>` : ''}`;
+                                    const firstBadgeColor = firstChoice === '先攻' ? 'bg-primary' : firstChoice === '後攻' ? 'bg-warning' : 'bg-info';
+                                    return `第${i+1}ゲーム: ${resultBadge} ${firstChoice ? `<span class="badge ${firstBadgeColor}">${firstChoice}</span>` : ''}`;
                                 }).filter(x => x).join('<br>')}
                             </td></tr>
                         ` : ''}
