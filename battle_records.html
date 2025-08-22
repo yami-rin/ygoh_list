@@ -146,6 +146,7 @@
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">キャンセル</button>
+                    <button type="button" id="update-tournament-info-btn" class="btn btn-success" style="display: none;">大会情報を更新して閉じる</button>
                     <button type="button" id="start-tournament-btn" class="btn btn-primary">大会を開始</button>
                 </div>
             </div>
@@ -678,6 +679,7 @@
             document.getElementById('tournament-mgmt-btn').addEventListener('click', () => showTournamentManagementModal());
             document.getElementById('resume-tournament-btn').addEventListener('click', resumeTournament);
             document.getElementById('start-tournament-btn').addEventListener('click', startTournament);
+            document.getElementById('update-tournament-info-btn').addEventListener('click', updateTournamentInfo);
             document.getElementById('save-tournament-btn').addEventListener('click', saveTournamentResults);
             document.getElementById('continue-later-btn').addEventListener('click', saveAndContinueLater);
             document.getElementById('manage-presets-btn').addEventListener('click', () => showPresetModal());
@@ -986,11 +988,14 @@
             
             const modal = document.querySelector('#tournament-modal .modal-title');
             const startBtn = document.getElementById('start-tournament-btn');
+            const updateBtn = document.getElementById('update-tournament-info-btn');
             
             modal.textContent = '大会を登録';
             startBtn.textContent = '大会を開始';
             startBtn.classList.remove('btn-success');
             startBtn.classList.add('btn-primary');
+            startBtn.style.display = '';
+            updateBtn.style.display = 'none';
             
             // Clear editing flag and reset for new tournament
             currentEditingId = null;
@@ -1276,6 +1281,85 @@
                 dateTo
             }));
             
+            applyFilters();
+        }
+
+        async function updateTournamentInfo() {
+            if (!currentEditingId) return;
+            
+            const date = document.getElementById('tournament-date').value;
+            const participants = parseInt(document.getElementById('tournament-participants').value);
+            const name = document.getElementById('new-tournament-name').value;
+            const store = document.getElementById('tournament-store').value;
+            const deck = document.getElementById('tournament-deck').value;
+            const format = document.getElementById('tournament-format').value;
+            
+            if (!date || !participants || !name || !deck) {
+                alert('必須項目を入力してください');
+                return;
+            }
+            
+            // Find all existing records for this tournament
+            const existingRecords = battleRecords.filter(r => r.id === currentEditingId || 
+                (r.tournament === name && r.date === date && r.myDeck === deck));
+            
+            // Update each record with new tournament info
+            for (const record of existingRecords) {
+                const updatedRecord = {
+                    ...record,
+                    date: date,
+                    tournament: name,
+                    store: store,
+                    myDeck: deck,
+                    matchFormat: format
+                };
+                
+                if (isLocalMode) {
+                    // Update in localStorage
+                    let records = JSON.parse(localStorage.getItem('battleRecords') || '[]');
+                    const index = records.findIndex(r => r.id === record.id);
+                    if (index !== -1) {
+                        records[index] = updatedRecord;
+                        localStorage.setItem('battleRecords', JSON.stringify(records));
+                    }
+                    
+                    // Update in memory
+                    const memIndex = battleRecords.findIndex(r => r.id === record.id);
+                    if (memIndex !== -1) {
+                        battleRecords[memIndex] = updatedRecord;
+                    }
+                } else {
+                    // Update in database
+                    try {
+                        await updateDoc(doc(db, 'battleRecords', record.id), updatedRecord);
+                        // Update in memory
+                        const memIndex = battleRecords.findIndex(r => r.id === record.id);
+                        if (memIndex !== -1) {
+                            battleRecords[memIndex] = updatedRecord;
+                        }
+                    } catch (error) {
+                        console.error('Error updating record:', error);
+                        showAlert('更新中にエラーが発生しました', 'danger');
+                        return;
+                    }
+                }
+            }
+            
+            // 店舗名を記憶
+            if (store && !stores.includes(store)) {
+                stores.push(store);
+                saveStores();
+            }
+            
+            // Clear editing flag
+            currentEditingId = null;
+            
+            // Hide modal and show success message
+            tournamentModal.hide();
+            showAlert('大会情報を更新しました', 'success');
+            
+            // Refresh the display
+            displayBattleRecords();
             applyFilters();
         }
 
@@ -2627,11 +2711,14 @@
             // 編集モードフラグを設定
             currentEditingId = recordId;
             
-            // Change button text for edit mode
+            // Change buttons for edit mode
             const startBtn = document.getElementById('start-tournament-btn');
-            startBtn.textContent = '大会情報を更新';
-            startBtn.classList.remove('btn-primary');
-            startBtn.classList.add('btn-success');
+            const updateBtn = document.getElementById('update-tournament-info-btn');
+            const modal = document.querySelector('#tournament-modal .modal-title');
+            
+            modal.textContent = '大会情報を編集';
+            startBtn.style.display = 'none';
+            updateBtn.style.display = '';
             
             tournamentModal.show();
         }
@@ -2905,7 +2992,7 @@
                         <button class="btn btn-outline-primary" onclick="viewTournament('${tournament.id}')">
                             <i class="bi bi-eye"></i>
                         </button>
-                        <button class="btn btn-outline-danger" onclick="deleteTournament('${tournament.id}')">
+                        <button class="btn btn-outline-danger" onclick="deleteImportedTournament('${tournament.id}')">
                             <i class="bi bi-trash"></i>
                         </button>
                     </div>
@@ -2967,7 +3054,7 @@
             bootstrap.Modal.getInstance(document.getElementById('tournament-management-modal')).hide();
         }
         
-        window.deleteTournament = function(tournamentId) {
+        window.deleteImportedTournament = function(tournamentId) {
             if (!confirm('この大会データを削除してもよろしいですか？')) {
                 return;
             }
