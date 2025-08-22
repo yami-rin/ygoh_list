@@ -42,6 +42,8 @@
             .mobile-full{display:inline}
         }
     </style>
+    <script src="data-storage-optimization.js"></script>
+    <script src="storage-integration.js"></script>
 </head>
 <body>
     <!-- App Loader -->
@@ -604,6 +606,15 @@
         let usedDecks = [];
         let regulationPresets = ['ランク', 'レート', 'DC'];
         let opponentDecks = [];
+        
+        // Initialize Data Storage Manager
+        const storageManager = new DataStorageManager();
+        storageManager.initialize().then(initialized => {
+            if (!initialized) {
+                console.error('Failed to initialize storage manager');
+                showAlert('データの初期化に失敗しました', 'danger');
+            }
+        });
 
         const authModal = new bootstrap.Modal(document.getElementById('auth-modal'));
         const tournamentModal = new bootstrap.Modal(document.getElementById('tournament-modal'));
