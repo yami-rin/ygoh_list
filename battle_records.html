@@ -3008,29 +3008,25 @@
         }
         
         function getTournamentList() {
-            if (isLocalMode) {
-                return JSON.parse(localStorage.getItem('tournaments') || '[]');
-            } else {
-                // For Firebase mode, we'll group records by tournament
-                const grouped = {};
-                battleRecords.forEach(record => {
-                    if (record.tournament) {
-                        const key = `${record.tournament}_${record.date}`;
-                        if (!grouped[key]) {
-                            grouped[key] = {
-                                id: key,
-                                name: record.tournament,
-                                date: record.date,
-                                store: record.store || '',
-                                deck: record.myDeck,
-                                rounds: []
-                            };
-                        }
-                        grouped[key].rounds.push(record);
+            // Always extract tournaments from battleRecords for consistency
+            const grouped = {};
+            battleRecords.forEach(record => {
+                if (record.tournament && record.tournament !== '通常対戦') {
+                    const key = `${record.tournament}_${record.date}_${record.myDeck}`;
+                    if (!grouped[key]) {
+                        grouped[key] = {
+                            id: key,
+                            name: record.tournament,
+                            date: record.date,
+                            store: record.store || '',
+                            deck: record.myDeck,
+                            rounds: []
+                        };
                     }
-                });
-                return Object.values(grouped);
-            }
+                    grouped[key].rounds.push(record);
+                }
+            });
+            return Object.values(grouped);
         }
         
         window.viewTournament = function(tournamentId) {
@@ -3054,40 +3050,62 @@
             bootstrap.Modal.getInstance(document.getElementById('tournament-management-modal')).hide();
         }
         
-        window.deleteImportedTournament = function(tournamentId) {
+        window.deleteImportedTournament = async function(tournamentId) {
             if (!confirm('この大会データを削除してもよろしいですか？')) {
                 return;
             }
             
-            const tournaments = getTournamentList();
-            const tournament = tournaments.find(t => t.id === tournamentId);
+            showLoading(true);
             
-            if (!tournament) {
-                return;
-            }
-            
-            if (isLocalMode) {
-                // Remove from tournaments list
-                const updated = tournaments.filter(t => t.id !== tournamentId);
-                localStorage.setItem('tournaments', JSON.stringify(updated));
+            try {
+                const tournaments = getTournamentList();
+                const tournament = tournaments.find(t => t.id === tournamentId);
                 
-                // Remove related battle records
-                const records = JSON.parse(localStorage.getItem('battleRecords') || '[]');
-                const filtered = records.filter(r => 
-                    !(r.tournament === tournament.name && r.date === tournament.date)
-                );
-                localStorage.setItem('battleRecords', JSON.stringify(filtered));
-            } else {
-                // For Firebase, delete all related records
-                battleRecords.filter(record => 
-                    record.tournament === tournament.name && record.date === tournament.date
-                ).forEach(async record => {
-                    await deleteDoc(doc(db, 'battleRecords', record.id));
-                });
+                if (!tournament) {
+                    console.error('Tournament not found:', tournamentId);
+                    alert('大会データが見つかりません');
+                    return;
+                }
+                
+                console.log('Deleting tournament:', tournament);
+                
+                if (isLocalMode) {
+                    // Remove related battle records
+                    const records = JSON.parse(localStorage.getItem('battleRecords') || '[]');
+                    const filtered = records.filter(r => 
+                        !(r.tournament === tournament.name && r.date === tournament.date && r.myDeck === tournament.deck)
+                    );
+                    localStorage.setItem('battleRecords', JSON.stringify(filtered));
+                    
+                    // Update in-memory battleRecords
+                    battleRecords = battleRecords.filter(r => 
+                        !(r.tournament === tournament.name && r.date === tournament.date && r.myDeck === tournament.deck)
+                    );
+                } else {
+                    // For Firebase, delete all related records
+                    const recordsToDelete = battleRecords.filter(record => 
+                        record.tournament === tournament.name && 
+                        record.date === tournament.date && 
+                        record.myDeck === tournament.deck
+                    );
+                    
+                    for (const record of recordsToDelete) {
+                        await deleteDoc(doc(db, 'battleRecords', record.id));
+                    }
+                }
+                
+                alert('大会データを削除しました');
+                
+                // Reload everything
+                await loadRecords();
+                loadSavedTournaments();
+                
+            } catch (error) {
+                console.error('Error deleting tournament:', error);
+                alert('削除中にエラーが発生しました: ' + error.message);
+            } finally {
+                showLoading(false);
             }
-            
-            loadRecords();
-            loadSavedTournaments();
         }
         
         // Export/Import functions
