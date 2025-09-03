@@ -1817,10 +1817,10 @@
                                         (isActive ? 
                                             '<div class="btn-group btn-group-sm">' +
                                             '<button class="btn btn-primary" disabled>適用中</button>' +
-                                            '<button class="btn btn-outline-secondary" onclick="applyTheme(\\'default\\')" title="外す"><i class="bi bi-x"></i></button>' +
+                                            '<button class="btn btn-outline-secondary" onclick="applyTheme(\'default\')" title="外す"><i class="bi bi-x"></i></button>' +
                                             '</div>' : 
-                                            `<button class="btn btn-sm btn-success" onclick="applyTheme('${theme.class}')"適用</button>`) :
-                                        `<button class="btn btn-sm btn-warning" onclick="purchaseItem('${theme.id}', ${theme.cost}, 'theme')"購入</button>`
+                                            `<button class="btn btn-sm btn-success" onclick="applyTheme('${theme.class}')">適用</button>`) :
+                                        `<button class="btn btn-sm btn-warning" onclick="purchaseItem('${theme.id}', ${theme.cost}, 'theme')">購入</button>`
                                     }
                                 </div>
                             </div>
@@ -1851,7 +1851,7 @@
                                         (isActive ? 
                                             '<div class="btn-group btn-group-sm">' +
                                             '<button class="btn btn-primary" disabled>適用中</button>' +
-                                            '<button class="btn btn-outline-secondary" onclick="applyFrame(\\'\\')" title="外す"><i class="bi bi-x"></i></button>' +
+                                            '<button class="btn btn-outline-secondary" onclick="applyFrame(\'\')" title="外す"><i class="bi bi-x"></i></button>' +
                                             '</div>' : 
                                             `<button class="btn btn-sm btn-success" onclick="applyFrame('${frame.class}')">適用</button>`) :
                                         `<button class="btn btn-sm btn-warning" onclick="purchaseItem('${frame.id}', ${frame.cost}, 'frame')">購入</button>`
@@ -1885,7 +1885,7 @@
                                         (isActive ? 
                                             '<div class="btn-group btn-group-sm">' +
                                             '<button class="btn btn-primary" disabled>適用中</button>' +
-                                            '<button class="btn btn-outline-secondary" onclick="applyBackground(\\'\\')" title="外す"><i class="bi bi-x"></i></button>' +
+                                            '<button class="btn btn-outline-secondary" onclick="applyBackground(\'\')" title="外す"><i class="bi bi-x"></i></button>' +
                                             '</div>' : 
                                             `<button class="btn btn-sm btn-success" onclick="applyBackground('${bg.class}')">適用</button>`) :
                                         `<button class="btn btn-sm btn-warning" onclick="purchaseItem('${bg.id}', ${bg.cost}, 'background')">購入</button>`
@@ -1916,7 +1916,7 @@
                                     <span class="badge bg-warning">${effect.cost} pt</span>
                                     ${isPurchased ? 
                                         '<span class="badge bg-success">購入済み</span>' :
-                                        `<button class="btn btn-sm btn-warning" onclick="purchaseItem('${effect.id}', ${effect.cost}, 'effect')"購入</button>`
+                                        `<button class="btn btn-sm btn-warning" onclick="purchaseItem('${effect.id}', ${effect.cost}, 'effect')">購入</button>`
                                     }
                                 </div>
                             </div>
@@ -1947,7 +1947,7 @@
                                         (isActive ? 
                                             '<div class="btn-group btn-group-sm">' +
                                             '<button class="btn btn-primary" disabled>適用中</button>' +
-                                            '<button class="btn btn-outline-secondary" onclick="applyIcon(\\'\\')" title="外す"><i class="bi bi-x"></i></button>' +
+                                            '<button class="btn btn-outline-secondary" onclick="applyIcon(\'\')" title="外す"><i class="bi bi-x"></i></button>' +
                                             '</div>' : 
                                             `<button class="btn btn-sm btn-success" onclick="applyIcon('${icon.class}')">適用</button>`) :
                                         `<button class="btn btn-sm btn-warning" onclick="purchaseItem('${icon.id}', ${icon.cost}, 'icon')">購入</button>`
@@ -1974,7 +1974,7 @@
                                 <p class="small text-muted">${bonus.description}</p>
                                 <div class="d-flex justify-content-between align-items-center">
                                     <span class="badge bg-warning">${bonus.cost} pt</span>
-                                    <button class="btn btn-sm btn-warning" onclick="purchaseItem('${bonus.id}', ${bonus.cost}, 'bonus')"購入</button>
+                                    <button class="btn btn-sm btn-warning" onclick="purchaseItem('${bonus.id}', ${bonus.cost}, 'bonus')">購入</button>
                                 </div>
                             </div>
                         </div>
