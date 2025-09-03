@@ -1702,22 +1702,37 @@
         // Update today's stats
         const updateTodayStats = () => {
             const today = new Date().toDateString();
-            let todayCount = 0;
             
-            Object.entries(cardAdditionDates).forEach(([cardId, dateStr]) => {
-                const addedDate = new Date(dateStr).toDateString();
-                if (addedDate === today) {
-                    const card = cardCollection.find(c => c.id === cardId);
-                    if (card) todayCount += card.data['枚数'] || 0;
-                }
-            });
+            // Load today's additions from localStorage
+            let todayAdditions = JSON.parse(localStorage.getItem('todayAdditions') || '{}');
+            
+            // Reset if it's a new day
+            if (todayAdditions.date !== today) {
+                todayAdditions = {
+                    date: today,
+                    count: 0
+                };
+                localStorage.setItem('todayAdditions', JSON.stringify(todayAdditions));
+            }
             
             const todayAddedEl = document.getElementById('today-added');
-            if (todayAddedEl) todayAddedEl.textContent = todayCount;
+            if (todayAddedEl) todayAddedEl.textContent = todayAdditions.count;
             
-            // Update week goal (假设週間目標は50枚)
-            const weekGoal = 50;
-            const weekProgress = Math.min(100, Math.round((todayCount / weekGoal) * 100));
+            // Load and update weekly goal
+            let weeklyGoalData = JSON.parse(localStorage.getItem('weeklyGoalData') || '{}');
+            const weekStart = getWeekStart();
+            
+            // Reset if it's a new week
+            if (weeklyGoalData.weekStart !== weekStart) {
+                weeklyGoalData = {
+                    weekStart: weekStart,
+                    count: 0,
+                    goal: 50
+                };
+                localStorage.setItem('weeklyGoalData', JSON.stringify(weeklyGoalData));
+            }
+            
+            const weekProgress = Math.min(100, Math.round((weeklyGoalData.count / weeklyGoalData.goal) * 100));
             const weekGoalEl = document.getElementById('week-goal-progress');
             if (weekGoalEl) weekGoalEl.textContent = `${weekProgress}%`;
             
@@ -1726,6 +1741,15 @@
             const luckyNumber = ((date.getDate() + date.getMonth() + 1) % 9) + 1;
             const luckyEl = document.getElementById('lucky-number');
             if (luckyEl) luckyEl.textContent = luckyNumber;
+        };
+        
+        // Get start of current week (Monday)
+        const getWeekStart = () => {
+            const date = new Date();
+            const day = date.getDay();
+            const diff = date.getDate() - day + (day === 0 ? -6 : 1);
+            date.setDate(diff);
+            return date.toDateString();
         };
         
         // Update points display
@@ -1790,8 +1814,12 @@
                                 <div class="d-flex justify-content-between align-items-center">
                                     <span class="badge bg-warning">${theme.cost} pt</span>
                                     ${isPurchased ? 
-                                        (isActive ? '<button class="btn btn-sm btn-primary" disabled>適用中</button>' : 
-                                                   `<button class="btn btn-sm btn-success" onclick="applyTheme('${theme.class}')"適用</button>`) :
+                                        (isActive ? 
+                                            '<div class="btn-group btn-group-sm">' +
+                                            '<button class="btn btn-primary" disabled>適用中</button>' +
+                                            '<button class="btn btn-outline-secondary" onclick="applyTheme(\\'default\\')" title="外す"><i class="bi bi-x"></i></button>' +
+                                            '</div>' : 
+                                            `<button class="btn btn-sm btn-success" onclick="applyTheme('${theme.class}')"適用</button>`) :
                                         `<button class="btn btn-sm btn-warning" onclick="purchaseItem('${theme.id}', ${theme.cost}, 'theme')"購入</button>`
                                     }
                                 </div>
@@ -1820,8 +1848,12 @@
                                 <div class="d-flex justify-content-between align-items-center">
                                     <span class="badge bg-warning">${frame.cost} pt</span>
                                     ${isPurchased ? 
-                                        (isActive ? '<button class="btn btn-sm btn-primary" disabled>適用中</button>' : 
-                                                   `<button class="btn btn-sm btn-success" onclick="applyFrame('${frame.class}')"">適用</button>`) :
+                                        (isActive ? 
+                                            '<div class="btn-group btn-group-sm">' +
+                                            '<button class="btn btn-primary" disabled>適用中</button>' +
+                                            '<button class="btn btn-outline-secondary" onclick="applyFrame(\\'\\')" title="外す"><i class="bi bi-x"></i></button>' +
+                                            '</div>' : 
+                                            `<button class="btn btn-sm btn-success" onclick="applyFrame('${frame.class}')">適用</button>`) :
                                         `<button class="btn btn-sm btn-warning" onclick="purchaseItem('${frame.id}', ${frame.cost}, 'frame')">購入</button>`
                                     }
                                 </div>
@@ -1850,8 +1882,12 @@
                                 <div class="d-flex justify-content-between align-items-center">
                                     <span class="badge bg-warning">${bg.cost} pt</span>
                                     ${isPurchased ? 
-                                        (isActive ? '<button class="btn btn-sm btn-primary" disabled>適用中</button>' : 
-                                                   `<button class="btn btn-sm btn-success" onclick="applyBackground('${bg.class}')">適用</button>`) :
+                                        (isActive ? 
+                                            '<div class="btn-group btn-group-sm">' +
+                                            '<button class="btn btn-primary" disabled>適用中</button>' +
+                                            '<button class="btn btn-outline-secondary" onclick="applyBackground(\\'\\')" title="外す"><i class="bi bi-x"></i></button>' +
+                                            '</div>' : 
+                                            `<button class="btn btn-sm btn-success" onclick="applyBackground('${bg.class}')">適用</button>`) :
                                         `<button class="btn btn-sm btn-warning" onclick="purchaseItem('${bg.id}', ${bg.cost}, 'background')">購入</button>`
                                     }
                                 </div>
@@ -1908,8 +1944,12 @@
                                 <div class="d-flex justify-content-between align-items-center">
                                     <span class="badge bg-warning">${icon.cost} pt</span>
                                     ${isPurchased ? 
-                                        (isActive ? '<button class="btn btn-sm btn-primary" disabled>適用中</button>' : 
-                                                   `<button class="btn btn-sm btn-success" onclick="applyIcon('${icon.class}')">適用</button>`) :
+                                        (isActive ? 
+                                            '<div class="btn-group btn-group-sm">' +
+                                            '<button class="btn btn-primary" disabled>適用中</button>' +
+                                            '<button class="btn btn-outline-secondary" onclick="applyIcon(\\'\\')" title="外す"><i class="bi bi-x"></i></button>' +
+                                            '</div>' : 
+                                            `<button class="btn btn-sm btn-success" onclick="applyIcon('${icon.class}')">適用</button>`) :
                                         `<button class="btn btn-sm btn-warning" onclick="purchaseItem('${icon.id}', ${icon.cost}, 'icon')">購入</button>`
                                     }
                                 </div>
@@ -2049,6 +2089,7 @@
         // Track when card is added
         const trackCardAddition = (cardData, hasTag, isRare) => {
             const today = new Date().toDateString();
+            const cardCount = cardData.枚数 || 1;
             
             // Update daily mission progress
             dailyMissionProgress.addedCards.push({ name: cardData.名前, time: Date.now() });
@@ -2056,6 +2097,23 @@
             if (isRare) dailyMissionProgress.addedRare++;
             
             localStorage.setItem('dailyMissionProgress', JSON.stringify(dailyMissionProgress));
+            
+            // Update today's additions
+            let todayAdditions = JSON.parse(localStorage.getItem('todayAdditions') || '{}');
+            if (todayAdditions.date !== today) {
+                todayAdditions = { date: today, count: 0 };
+            }
+            todayAdditions.count += cardCount;
+            localStorage.setItem('todayAdditions', JSON.stringify(todayAdditions));
+            
+            // Update weekly goal
+            let weeklyGoalData = JSON.parse(localStorage.getItem('weeklyGoalData') || '{}');
+            const weekStart = getWeekStart();
+            if (weeklyGoalData.weekStart !== weekStart) {
+                weeklyGoalData = { weekStart: weekStart, count: 0, goal: 50 };
+            }
+            weeklyGoalData.count += cardCount;
+            localStorage.setItem('weeklyGoalData', JSON.stringify(weeklyGoalData));
             
             // Update registration streak
             const streakData = JSON.parse(localStorage.getItem('registrationStreak') || '{"count": 0, "lastDate": null}');
