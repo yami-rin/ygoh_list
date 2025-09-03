@@ -52,13 +52,59 @@
         }
         
         /* Achievement badge styles */
+        .achievement-summary {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            padding: 0.5rem;
+            background: rgba(0, 0, 0, 0.05);
+            border-radius: 10px;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        .achievement-summary:hover {
+            background: rgba(0, 123, 255, 0.1);
+            transform: translateX(5px);
+        }
+        .achievement-progress {
+            display: flex;
+            gap: 0.25rem;
+            align-items: center;
+        }
+        .achievement-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: #dee2e6;
+            transition: all 0.3s;
+        }
+        .achievement-dot.unlocked {
+            background: #28a745;
+            box-shadow: 0 0 4px rgba(40, 167, 69, 0.5);
+        }
+        .achievement-details {
+            display: none;
+            margin-top: 1rem;
+            padding: 1rem;
+            background: rgba(255, 255, 255, 0.5);
+            border-radius: 10px;
+        }
+        .achievement-details.show {
+            display: block;
+            animation: slideDown 0.3s;
+        }
+        @keyframes slideDown {
+            from { opacity: 0; transform: translateY(-10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
         .achievement-badge {
             position: relative;
             display: inline-block;
-            padding: 0.5rem 1rem;
-            border-radius: 20px;
-            font-size: 0.875rem;
+            padding: 0.4rem 0.8rem;
+            border-radius: 15px;
+            font-size: 0.75rem;
             font-weight: 500;
+            margin: 0.25rem;
             cursor: help;
             transition: transform 0.2s, box-shadow 0.2s;
         }
@@ -88,6 +134,24 @@
             background: linear-gradient(135deg, #e5e4e2 0%, #bbb 100%);
             color: #333;
             animation: shine 2s infinite;
+        }
+        .achievement-badge.diamond {
+            background: linear-gradient(135deg, #b9f2ff 0%, #00d4ff 100%);
+            color: white;
+            animation: sparkle 2s infinite;
+        }
+        .achievement-badge.mythic {
+            background: linear-gradient(135deg, #ff00ff 0%, #00ffff 50%, #ffff00 100%);
+            color: white;
+            animation: rainbow 3s infinite;
+        }
+        @keyframes rainbow {
+            0% { filter: hue-rotate(0deg); }
+            100% { filter: hue-rotate(360deg); }
+        }
+        @keyframes sparkle {
+            0%, 100% { box-shadow: 0 0 10px rgba(185, 242, 255, 0.8); }
+            50% { box-shadow: 0 0 20px rgba(0, 212, 255, 1); }
         }
         @keyframes shine {
             0% { box-shadow: 0 0 5px rgba(255, 215, 0, 0.5); }
@@ -387,17 +451,25 @@
                         <li><span class="badge bg-success">上級</span> 100-299枚</li>
                         <li><span class="badge bg-info">エキスパート</span> 300-499枚</li>
                         <li><span class="badge bg-warning">マスター</span> 500-999枚</li>
-                        <li><span class="badge bg-danger">伝説</span> 1000枚以上</li>
+                        <li><span class="badge bg-danger">伝説</span> 1000-2499枚</li>
+                        <li><span class="badge" style="background: linear-gradient(45deg, #51cf66, #12b886); color: white;">賢者</span> 2500-4999枚</li>
+                        <li><span class="badge" style="background: linear-gradient(45deg, #ff6b6b, #ffd43b); color: white;">英雄</span> 5000-9999枚</li>
+                        <li><span class="badge" style="background: linear-gradient(45deg, #845ef7, #5c7cfa); color: white;">覇王</span> 10000-24999枚</li>
+                        <li><span class="badge" style="background: linear-gradient(45deg, #b9f2ff, #00d4ff); color: white;">天帝</span> 25000-49999枚</li>
+                        <li><span class="badge" style="background: linear-gradient(45deg, #ffd700, #ff6b6b); color: white;">神話</span> 50000-99999枚</li>
+                        <li><span class="badge" style="background: linear-gradient(45deg, #ff00ff, #00ffff, #ffff00); color: white;">創世神</span> 100000枚以上</li>
                     </ul>
                     
                     <h6><i class="bi bi-award"></i> 実績バッジ</h6>
                     <p>カードの収集状況に応じて様々な実績が解除されます：</p>
                     <ul>
-                        <li>枚数実績（10, 50, 100, 300枚）</li>
-                        <li>種類実績（5, 20, 50種類）</li>
-                        <li>レアカード収集実績</li>
-                        <li>継続日数実績（7, 30日）</li>
+                        <li><strong>枚数実績</strong>: 10枚～100,000枚まで13段階</li>
+                        <li><strong>種類実績</strong>: 5種類～1,000種類まで8段階</li>
+                        <li><strong>レアリティ実績</strong>: R、SR、UR、SE、プレミアム、UL、QCSE別</li>
+                        <li><strong>継続実績</strong>: 3日～730日まで7段階</li>
+                        <li><strong>特殊実績</strong>: 一日の追加枚数、週間追加、タグ管理など</li>
                     </ul>
+                    <p class="text-muted small">カテゴリをクリックすると詳細な実績リストが表示されます。</p>
                     
                     <h6><i class="bi bi-bar-chart"></i> 統計項目</h6>
                     <ul>
@@ -653,8 +725,9 @@
                             </div>
                             
                             <!-- Achievement Badges -->
-                            <div class="mt-3" id="achievement-badges">
-                                <div class="d-flex flex-wrap gap-2" id="badges-container"></div>
+                            <div class="mt-3" id="achievement-section">
+                                <div id="achievement-summary-container"></div>
+                                <div id="achievement-details" class="achievement-details"></div>
                             </div>
                             
                             <!-- Rarity Distribution Chart -->
@@ -925,20 +998,64 @@
         let firstCollectionDate = localStorage.getItem('firstCollectionDate');
         let lastMilestoneReached = parseInt(localStorage.getItem('lastMilestoneReached') || '0');
         
-        const ACHIEVEMENTS = [
-            { id: 'beginner', name: '初心者コレクター', desc: '10枚達成', threshold: 10, class: 'bronze' },
-            { id: 'intermediate', name: '中級コレクター', desc: '50枚達成', threshold: 50, class: 'silver' },
-            { id: 'advanced', name: '上級コレクター', desc: '100枚達成', threshold: 100, class: 'gold' },
-            { id: 'master', name: 'マスターコレクター', desc: '300枚達成', threshold: 300, class: 'platinum' },
-            { id: 'variety5', name: 'バラエティ', desc: '5種類収集', threshold: 5, class: 'bronze', type: 'unique' },
-            { id: 'variety20', name: 'バラエティマスター', desc: '20種類収集', threshold: 20, class: 'silver', type: 'unique' },
-            { id: 'variety50', name: 'バラエティキング', desc: '50種類収集', threshold: 50, class: 'gold', type: 'unique' },
-            { id: 'rare_collector', name: 'レアハンター', desc: 'レア10枚以上', threshold: 10, class: 'gold', type: 'rarity' },
-            { id: 'week_veteran', name: '週間コレクター', desc: '7日間継続', threshold: 7, class: 'bronze', type: 'days' },
-            { id: 'month_veteran', name: '月間コレクター', desc: '30日間継続', threshold: 30, class: 'silver', type: 'days' },
-        ];
+        // Achievement categories with expanded variety
+        const ACHIEVEMENT_CATEGORIES = {
+            '枚数': [
+                { id: 'cards10', name: 'ファーストステップ', desc: '10枚', threshold: 10, class: 'bronze' },
+                { id: 'cards25', name: 'コレクター', desc: '25枚', threshold: 25, class: 'bronze' },
+                { id: 'cards50', name: '熟練者', desc: '50枚', threshold: 50, class: 'silver' },
+                { id: 'cards100', name: 'エキスパート', desc: '100枚', threshold: 100, class: 'silver' },
+                { id: 'cards250', name: 'ベテラン', desc: '250枚', threshold: 250, class: 'gold' },
+                { id: 'cards500', name: 'マスター', desc: '500枚', threshold: 500, class: 'gold' },
+                { id: 'cards1000', name: 'グランドマスター', desc: '1000枚', threshold: 1000, class: 'platinum' },
+                { id: 'cards2500', name: 'チャンピオン', desc: '2500枚', threshold: 2500, class: 'platinum' },
+                { id: 'cards5000', name: 'レジェンド', desc: '5000枚', threshold: 5000, class: 'diamond' },
+                { id: 'cards10000', name: 'ミシック', desc: '10000枚', threshold: 10000, class: 'diamond' },
+                { id: 'cards25000', name: 'イモータル', desc: '25000枚', threshold: 25000, class: 'mythic' },
+                { id: 'cards50000', name: 'エターナル', desc: '50000枚', threshold: 50000, class: 'mythic' },
+                { id: 'cards100000', name: 'オムニ', desc: '100000枚', threshold: 100000, class: 'mythic' }
+            ],
+            '種類': [
+                { id: 'unique5', name: 'バラエティ', desc: '5種類', threshold: 5, class: 'bronze', type: 'unique' },
+                { id: 'unique10', name: 'コレクター', desc: '10種類', threshold: 10, class: 'bronze', type: 'unique' },
+                { id: 'unique25', name: '探求者', desc: '25種類', threshold: 25, class: 'silver', type: 'unique' },
+                { id: 'unique50', name: '研究者', desc: '50種類', threshold: 50, class: 'silver', type: 'unique' },
+                { id: 'unique100', name: '学者', desc: '100種類', threshold: 100, class: 'gold', type: 'unique' },
+                { id: 'unique200', name: '博士', desc: '200種類', threshold: 200, class: 'gold', type: 'unique' },
+                { id: 'unique500', name: '百科事典', desc: '500種類', threshold: 500, class: 'platinum', type: 'unique' },
+                { id: 'unique1000', name: 'アーカイブ', desc: '1000種類', threshold: 1000, class: 'diamond', type: 'unique' }
+            ],
+            'レアリティ': [
+                { id: 'rare5', name: 'Rハンター', desc: 'R以上5枚', threshold: 5, class: 'bronze', type: 'rarity' },
+                { id: 'rare25', name: 'SRハンター', desc: 'SR以上25枚', threshold: 25, class: 'silver', type: 'sr' },
+                { id: 'rare50', name: 'URハンター', desc: 'UR以上50枚', threshold: 50, class: 'gold', type: 'ur' },
+                { id: 'rare100', name: 'SEハンター', desc: 'SE系100枚', threshold: 100, class: 'platinum', type: 'se' },
+                { id: 'premium10', name: 'プレミアム', desc: 'P系10枚', threshold: 10, class: 'gold', type: 'premium' },
+                { id: 'ul5', name: 'ULコレクター', desc: 'UL5枚', threshold: 5, class: 'platinum', type: 'ul' },
+                { id: 'qcse1', name: 'QCSE所持者', desc: 'QCSE1枚', threshold: 1, class: 'mythic', type: 'qcse' }
+            ],
+            '継続': [
+                { id: 'days3', name: 'ビギナー', desc: '3日間', threshold: 3, class: 'bronze', type: 'days' },
+                { id: 'days7', name: '週間プレイヤー', desc: '7日間', threshold: 7, class: 'bronze', type: 'days' },
+                { id: 'days30', name: '月間プレイヤー', desc: '30日間', threshold: 30, class: 'silver', type: 'days' },
+                { id: 'days90', name: 'シーズンプレイヤー', desc: '90日間', threshold: 90, class: 'gold', type: 'days' },
+                { id: 'days180', name: '半年プレイヤー', desc: '180日間', threshold: 180, class: 'platinum', type: 'days' },
+                { id: 'days365', name: '年間プレイヤー', desc: '365日間', threshold: 365, class: 'diamond', type: 'days' },
+                { id: 'days730', name: 'ベテラン', desc: '730日間', threshold: 730, class: 'mythic', type: 'days' }
+            ],
+            '特殊': [
+                { id: 'speed10', name: 'スピードラン', desc: '一日で10枚追加', threshold: 10, class: 'silver', type: 'daily' },
+                { id: 'speed50', name: 'マラソンランナー', desc: '一日で50枚追加', threshold: 50, class: 'gold', type: 'daily' },
+                { id: 'weekend100', name: '週末ハンター', desc: '一週間で100枚', threshold: 100, class: 'gold', type: 'weekly' },
+                { id: 'completionist', name: 'コンプリート', desc: 'タグ10個以上使用', threshold: 10, class: 'platinum', type: 'tags' },
+                { id: 'organizer', name: '整理達人', desc: 'タグ20個以上作成', threshold: 20, class: 'diamond', type: 'tags' }
+            ]
+        };
         
-        const MILESTONES = [10, 25, 50, 75, 100, 150, 200, 300, 500, 1000];
+        // Flatten achievements for backward compatibility
+        const ACHIEVEMENTS = Object.values(ACHIEVEMENT_CATEGORIES).flat();
+        
+        const MILESTONES = [10, 25, 50, 75, 100, 150, 200, 300, 500, 1000, 1500, 2000, 3000, 5000, 7500, 10000, 15000, 20000, 30000, 50000, 75000, 100000];
         
         const getRarityScore = (rarity) => {
             if (!rarity) return 1;
@@ -1030,8 +1147,33 @@
             const rankEl = document.getElementById('collector-rank');
             let rank = '';
             let rankClass = '';
+            let rankStyle = '';
             
-            if (totalCards >= 1000) {
+            if (totalCards >= 100000) {
+                rank = '創世神';
+                rankClass = 'badge ms-2';
+                rankStyle = 'background: linear-gradient(45deg, #ff00ff, #00ffff, #ffff00, #ff00ff); background-size: 400% 400%; animation: rainbow 3s ease infinite; color: white; font-weight: bold;';
+            } else if (totalCards >= 50000) {
+                rank = '神話';
+                rankClass = 'badge ms-2';
+                rankStyle = 'background: linear-gradient(45deg, #ffd700, #ff6b6b, #ffd700); animation: shine 2s infinite; color: white;';
+            } else if (totalCards >= 25000) {
+                rank = '天帝';
+                rankClass = 'badge ms-2';
+                rankStyle = 'background: linear-gradient(45deg, #b9f2ff, #00d4ff); animation: sparkle 2s infinite; color: white;';
+            } else if (totalCards >= 10000) {
+                rank = '覇王';
+                rankClass = 'badge ms-2';
+                rankStyle = 'background: linear-gradient(45deg, #845ef7, #5c7cfa); color: white;';
+            } else if (totalCards >= 5000) {
+                rank = '英雄';
+                rankClass = 'badge ms-2';
+                rankStyle = 'background: linear-gradient(45deg, #ff6b6b, #ffd43b); color: white;';
+            } else if (totalCards >= 2500) {
+                rank = '賢者';
+                rankClass = 'badge ms-2';
+                rankStyle = 'background: linear-gradient(45deg, #51cf66, #12b886); color: white;';
+            } else if (totalCards >= 1000) {
                 rank = '伝説';
                 rankClass = 'bg-danger';
             } else if (totalCards >= 500) {
@@ -1056,6 +1198,11 @@
             
             rankEl.textContent = rank;
             rankEl.className = `badge ${rankClass} ms-2`;
+            if (rankStyle) {
+                rankEl.style = rankStyle;
+            } else {
+                rankEl.style = '';
+            }
         };
         
         const updateMilestoneProgress = (totalCards) => {
@@ -1076,38 +1223,180 @@
         };
         
         const updateAchievements = (totalCards, uniqueCards, collectionDays, rarityDistribution) => {
-            const container = document.getElementById('badges-container');
-            container.innerHTML = '';
+            const summaryContainer = document.getElementById('achievement-summary-container');
+            const detailsContainer = document.getElementById('achievement-details');
             
+            summaryContainer.innerHTML = '';
+            detailsContainer.innerHTML = '';
+            
+            // Calculate special counts
             const rareCount = Object.entries(rarityDistribution)
-                .filter(([rarity]) => rarity.toLowerCase().includes('レア'))
+                .filter(([rarity]) => rarity.toLowerCase().includes('レア') || rarity.toLowerCase().includes('r'))
                 .reduce((sum, [, count]) => sum + count, 0);
             
-            ACHIEVEMENTS.forEach(achievement => {
-                let unlocked = false;
-                let progress = 0;
-                
-                if (achievement.type === 'unique') {
-                    unlocked = uniqueCards >= achievement.threshold;
-                    progress = uniqueCards;
-                } else if (achievement.type === 'days') {
-                    unlocked = collectionDays >= achievement.threshold;
-                    progress = collectionDays;
-                } else if (achievement.type === 'rarity') {
-                    unlocked = rareCount >= achievement.threshold;
-                    progress = rareCount;
-                } else {
-                    unlocked = totalCards >= achievement.threshold;
-                    progress = totalCards;
+            const srCount = Object.entries(rarityDistribution)
+                .filter(([rarity]) => rarity.toUpperCase().includes('SR'))
+                .reduce((sum, [, count]) => sum + count, 0);
+            
+            const urCount = Object.entries(rarityDistribution)
+                .filter(([rarity]) => rarity.toUpperCase().includes('UR'))
+                .reduce((sum, [, count]) => sum + count, 0);
+            
+            const seCount = Object.entries(rarityDistribution)
+                .filter(([rarity]) => rarity.toUpperCase().includes('SE'))
+                .reduce((sum, [, count]) => sum + count, 0);
+            
+            const premiumCount = Object.entries(rarityDistribution)
+                .filter(([rarity]) => rarity.toUpperCase().includes('P'))
+                .reduce((sum, [, count]) => sum + count, 0);
+            
+            const ulCount = Object.entries(rarityDistribution)
+                .filter(([rarity]) => rarity.toUpperCase().includes('UL'))
+                .reduce((sum, [, count]) => sum + count, 0);
+            
+            const qcseCount = Object.entries(rarityDistribution)
+                .filter(([rarity]) => rarity.toUpperCase().includes('QCSE'))
+                .reduce((sum, [, count]) => sum + count, 0);
+            
+            // Track daily/weekly additions
+            const today = new Date();
+            const todayStr = today.toISOString().split('T')[0];
+            const weekAgo = new Date(today - 7 * 24 * 60 * 60 * 1000);
+            
+            let dailyAdditions = 0;
+            let weeklyAdditions = 0;
+            Object.entries(cardAdditionDates).forEach(([cardId, dateStr]) => {
+                const date = new Date(dateStr);
+                const dateOnly = dateStr.split('T')[0];
+                if (dateOnly === todayStr) {
+                    const card = cardCollection.find(c => c.id === cardId);
+                    if (card) dailyAdditions += card.data['枚数'] || 0;
                 }
+                if (date >= weekAgo) {
+                    const card = cardCollection.find(c => c.id === cardId);
+                    if (card) weeklyAdditions += card.data['枚数'] || 0;
+                }
+            });
+            
+            // Count tags
+            const allTags = new Set();
+            cardCollection.forEach(card => {
+                if (card.data.tags) {
+                    card.data.tags.forEach(tag => allTags.add(tag));
+                }
+            });
+            const tagCount = allTags.size;
+            
+            // Create summary for each category
+            Object.entries(ACHIEVEMENT_CATEGORIES).forEach(([category, achievements]) => {
+                const summary = document.createElement('div');
+                summary.className = 'achievement-summary';
                 
-                const badge = document.createElement('div');
-                badge.className = `achievement-badge ${unlocked ? achievement.class : 'locked'}`;
-                badge.title = `${achievement.desc}${unlocked ? ' ✓' : ` (${progress}/${achievement.threshold})`}`;
-                badge.innerHTML = `
-                    ${unlocked ? '🏆' : '🔒'} ${achievement.name}
+                // Calculate progress for this category
+                let unlockedCount = 0;
+                achievements.forEach(ach => {
+                    let progress = 0;
+                    if (ach.type === 'unique') progress = uniqueCards;
+                    else if (ach.type === 'days') progress = collectionDays;
+                    else if (ach.type === 'rarity') progress = rareCount;
+                    else if (ach.type === 'sr') progress = srCount;
+                    else if (ach.type === 'ur') progress = urCount;
+                    else if (ach.type === 'se') progress = seCount;
+                    else if (ach.type === 'premium') progress = premiumCount;
+                    else if (ach.type === 'ul') progress = ulCount;
+                    else if (ach.type === 'qcse') progress = qcseCount;
+                    else if (ach.type === 'daily') progress = dailyAdditions;
+                    else if (ach.type === 'weekly') progress = weeklyAdditions;
+                    else if (ach.type === 'tags') progress = tagCount;
+                    else progress = totalCards;
+                    
+                    if (progress >= ach.threshold) unlockedCount++;
+                });
+                
+                const totalInCategory = achievements.length;
+                const percentage = Math.round((unlockedCount / totalInCategory) * 100);
+                
+                summary.innerHTML = `
+                    <div style="flex: 1;">
+                        <strong>${category}</strong>
+                        <small class="text-muted ms-2">${unlockedCount}/${totalInCategory} (${percentage}%)</small>
+                    </div>
+                    <div class="achievement-progress">
+                        ${achievements.slice(0, 8).map(ach => {
+                            let progress = 0;
+                            if (ach.type === 'unique') progress = uniqueCards;
+                            else if (ach.type === 'days') progress = collectionDays;
+                            else if (ach.type === 'rarity') progress = rareCount;
+                            else if (ach.type === 'sr') progress = srCount;
+                            else if (ach.type === 'ur') progress = urCount;
+                            else if (ach.type === 'se') progress = seCount;
+                            else if (ach.type === 'premium') progress = premiumCount;
+                            else if (ach.type === 'ul') progress = ulCount;
+                            else if (ach.type === 'qcse') progress = qcseCount;
+                            else if (ach.type === 'daily') progress = dailyAdditions;
+                            else if (ach.type === 'weekly') progress = weeklyAdditions;
+                            else if (ach.type === 'tags') progress = tagCount;
+                            else progress = totalCards;
+                            
+                            const unlocked = progress >= ach.threshold;
+                            return `<div class="achievement-dot ${unlocked ? 'unlocked' : ''}" title="${ach.desc}"></div>`;
+                        }).join('')}
+                        ${achievements.length > 8 ? `<small class="text-muted">+${achievements.length - 8}</small>` : ''}
+                    </div>
+                    <i class="bi bi-chevron-down"></i>
                 `;
-                container.appendChild(badge);
+                
+                // Add click handler
+                summary.addEventListener('click', () => {
+                    const isOpen = detailsContainer.classList.contains('show');
+                    
+                    if (isOpen && detailsContainer.dataset.category === category) {
+                        detailsContainer.classList.remove('show');
+                        detailsContainer.innerHTML = '';
+                        summary.querySelector('i').className = 'bi bi-chevron-down';
+                    } else {
+                        // Close other categories
+                        document.querySelectorAll('.achievement-summary i').forEach(icon => {
+                            icon.className = 'bi bi-chevron-down';
+                        });
+                        
+                        // Show details for this category
+                        detailsContainer.innerHTML = `
+                            <h6>${category} 実績詳細</h6>
+                            <div class="d-flex flex-wrap gap-1">
+                                ${achievements.map(ach => {
+                                    let progress = 0;
+                                    if (ach.type === 'unique') progress = uniqueCards;
+                                    else if (ach.type === 'days') progress = collectionDays;
+                                    else if (ach.type === 'rarity') progress = rareCount;
+                                    else if (ach.type === 'sr') progress = srCount;
+                                    else if (ach.type === 'ur') progress = urCount;
+                                    else if (ach.type === 'se') progress = seCount;
+                                    else if (ach.type === 'premium') progress = premiumCount;
+                                    else if (ach.type === 'ul') progress = ulCount;
+                                    else if (ach.type === 'qcse') progress = qcseCount;
+                                    else if (ach.type === 'daily') progress = dailyAdditions;
+                                    else if (ach.type === 'weekly') progress = weeklyAdditions;
+                                    else if (ach.type === 'tags') progress = tagCount;
+                                    else progress = totalCards;
+                                    
+                                    const unlocked = progress >= ach.threshold;
+                                    return `
+                                        <div class="achievement-badge ${unlocked ? ach.class : 'locked'}" 
+                                             title="${ach.desc}${unlocked ? ' ✓' : ` (${progress}/${ach.threshold})`}">
+                                            ${unlocked ? '🏆' : '🔒'} ${ach.name}
+                                        </div>
+                                    `;
+                                }).join('')}
+                            </div>
+                        `;
+                        detailsContainer.classList.add('show');
+                        detailsContainer.dataset.category = category;
+                        summary.querySelector('i').className = 'bi bi-chevron-up';
+                    }
+                });
+                
+                summaryContainer.appendChild(summary);
             });
         };
         
