@@ -221,6 +221,66 @@
             cursor: pointer;
         }
         
+        /* Custom theme styles */
+        body.theme-ocean {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        }
+        body.theme-forest {
+            background: linear-gradient(135deg, #0ba360 0%, #3cba92 100%);
+        }
+        body.theme-sunset {
+            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+        }
+        body.theme-galaxy {
+            background: linear-gradient(135deg, #4776E6 0%, #8E54E9 100%);
+        }
+        body.theme-cherry {
+            background: linear-gradient(135deg, #ffecd2 0%, #fcb69f 100%);
+        }
+        
+        /* Shop modal styles */
+        .shop-item {
+            border: 2px solid transparent;
+            transition: all 0.3s;
+            cursor: pointer;
+        }
+        .shop-item:hover {
+            border-color: #ffc107;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+        }
+        .shop-item.purchased {
+            background: #e8f5e9;
+            border-color: #4caf50;
+        }
+        .shop-item.active {
+            border-color: #007bff;
+            background: #e3f2fd;
+        }
+        .shop-item.locked {
+            opacity: 0.6;
+            cursor: not-allowed;
+        }
+        .shop-item.locked:hover {
+            transform: none;
+            border-color: transparent;
+        }
+        
+        /* Point animation */
+        @keyframes pointGain {
+            0% { transform: translateY(0) scale(1); opacity: 1; }
+            100% { transform: translateY(-30px) scale(1.5); opacity: 0; }
+        }
+        .point-animation {
+            position: fixed;
+            color: #ffc107;
+            font-weight: bold;
+            font-size: 1.5rem;
+            z-index: 9999;
+            pointer-events: none;
+            animation: pointGain 1s ease-out;
+        }
+        
         /* Table header responsive styles */
         .table th {
             white-space: nowrap;
@@ -452,6 +512,69 @@
         </div></div>
     </div>
 
+    <!-- Point Shop Modal -->
+    <div class="modal fade" id="point-shop-modal" tabindex="-1">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header bg-warning text-dark">
+                    <h5 class="modal-title"><i class="bi bi-shop"></i> ポイントショップ</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="alert alert-info">
+                        <i class="bi bi-coin"></i> 現在のポイント: <strong id="shop-current-points">0</strong> pt
+                    </div>
+                    
+                    <!-- Shop Tabs -->
+                    <ul class="nav nav-tabs mb-3" role="tablist">
+                        <li class="nav-item" role="presentation">
+                            <button class="nav-link active" data-bs-toggle="tab" data-bs-target="#themes-tab" type="button">
+                                テーマ
+                            </button>
+                        </li>
+                        <li class="nav-item" role="presentation">
+                            <button class="nav-link" data-bs-toggle="tab" data-bs-target="#effects-tab" type="button">
+                                エフェクト
+                            </button>
+                        </li>
+                        <li class="nav-item" role="presentation">
+                            <button class="nav-link" data-bs-toggle="tab" data-bs-target="#bonuses-tab" type="button">
+                                ボーナス
+                            </button>
+                        </li>
+                    </ul>
+                    
+                    <!-- Shop Tab Content -->
+                    <div class="tab-content">
+                        <!-- Themes Tab -->
+                        <div class="tab-pane fade show active" id="themes-tab" role="tabpanel">
+                            <div class="row g-3" id="theme-shop-items">
+                                <!-- Theme items will be populated here -->
+                            </div>
+                        </div>
+                        
+                        <!-- Effects Tab -->
+                        <div class="tab-pane fade" id="effects-tab" role="tabpanel">
+                            <div class="row g-3" id="effect-shop-items">
+                                <!-- Effect items will be populated here -->
+                            </div>
+                        </div>
+                        
+                        <!-- Bonuses Tab -->
+                        <div class="tab-pane fade" id="bonuses-tab" role="tabpanel">
+                            <div class="row g-3" id="bonus-shop-items">
+                                <!-- Bonus items will be populated here -->
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">閉じる</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    
     <!-- Stats Info Modal -->
     <div class="modal fade" id="stats-info-modal" tabindex="-1">
         <div class="modal-dialog">
@@ -731,14 +854,22 @@
                                 </div>
                             </div>
                             
-                            <!-- Motivational Message -->
-                            <div class="alert alert-light border-start border-5 border-info" role="alert">
-                                <div class="d-flex align-items-center">
-                                    <i class="bi bi-lightbulb-fill text-info me-2" style="font-size: 1.5rem;"></i>
-                                    <div>
-                                        <strong id="motivation-title">今日のヒント</strong>
-                                        <p class="mb-0 small" id="motivation-message"></p>
+                            <!-- Points System -->
+                            <div class="alert alert-light border-start border-5 border-warning" role="alert">
+                                <div class="d-flex align-items-center justify-content-between">
+                                    <div class="d-flex align-items-center">
+                                        <i class="bi bi-coin text-warning me-2" style="font-size: 1.5rem;"></i>
+                                        <div>
+                                            <strong>ポイント</strong>
+                                            <div class="d-flex align-items-baseline">
+                                                <span class="fs-3 fw-bold text-warning" id="user-points">0</span>
+                                                <span class="ms-2 text-muted">pt</span>
+                                            </div>
+                                        </div>
                                     </div>
+                                    <button class="btn btn-warning btn-sm" id="point-shop-btn">
+                                        <i class="bi bi-shop"></i> ショップ
+                                    </button>
                                 </div>
                             </div>
                             
@@ -1183,15 +1314,38 @@
             { id: 'unique2', text: '2種類の異なるカードを追加', target: 2, type: 'unique' }
         ];
         
-        const MOTIVATIONAL_MESSAGES = [
-            { title: '今日のヒント', message: 'レアリティの高いカードは大切に保管しましょう！' },
-            { title: 'コレクター豆知識', message: '毎日少しずつでも継続することが大切です。' },
-            { title: '収集のコツ', message: 'タグを活用すると、後で探しやすくなります。' },
-            { title: 'プロのアドバイス', message: '型番を記録しておくと、価値の判別に役立ちます。' },
-            { title: '今日の格言', message: '千里の道も一歩から。コレクションも一枚から。' },
-            { title: 'ワンポイント', message: 'ウィッシュリストを活用して、欲しいカードを管理しましょう。' },
-            { title: 'おすすめ機能', message: '一括編集機能で、複数カードのタグをまとめて管理できます。' }
-        ];
+        // Point System
+        let userPoints = parseInt(localStorage.getItem('userPoints') || '0');
+        let purchasedItems = JSON.parse(localStorage.getItem('purchasedItems') || '{}');
+        let activeTheme = localStorage.getItem('activeTheme') || 'default';
+        
+        const POINT_REWARDS = {
+            addCard: 5,          // カード追加
+            addRareCard: 10,     // レアカード追加
+            completeMission: 20, // ミッション完了
+            dailyLogin: 10,      // デイリーログイン
+            weekStreak: 50,      // 週間ストリーク
+        };
+        
+        const SHOP_ITEMS = {
+            themes: [
+                { id: 'theme-ocean', name: 'オーシャン', class: 'theme-ocean', cost: 100, preview: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)' },
+                { id: 'theme-forest', name: 'フォレスト', class: 'theme-forest', cost: 100, preview: 'linear-gradient(135deg, #0ba360 0%, #3cba92 100%)' },
+                { id: 'theme-sunset', name: 'サンセット', class: 'theme-sunset', cost: 150, preview: 'linear-gradient(135deg, #f093fb 0%, #f5576c 100%)' },
+                { id: 'theme-galaxy', name: 'ギャラクシー', class: 'theme-galaxy', cost: 200, preview: 'linear-gradient(135deg, #4776E6 0%, #8E54E9 100%)' },
+                { id: 'theme-cherry', name: 'チェリー', class: 'theme-cherry', cost: 150, preview: 'linear-gradient(135deg, #ffecd2 0%, #fcb69f 100%)' },
+            ],
+            effects: [
+                { id: 'effect-confetti', name: '紙吹雪エフェクト', cost: 200, description: 'カード追加時に紙吹雪' },
+                { id: 'effect-sound', name: 'サウンドエフェクト', cost: 150, description: '操作音を追加' },
+                { id: 'effect-animation', name: 'アニメーション', cost: 300, description: 'カードに動きを追加' },
+            ],
+            bonuses: [
+                { id: 'bonus-double', name: '2倍ポイント (1日)', cost: 500, description: '1日間ポイント獲得量2倍' },
+                { id: 'bonus-lucky', name: 'ラッキーモード', cost: 300, description: 'レアカード獲得ポイントUP' },
+                { id: 'bonus-mission', name: 'ミッションリセット', cost: 100, description: 'デイリーミッションを再取得' },
+            ]
+        };
         
         // Initialize daily mission progress
         let dailyMissionProgress = JSON.parse(localStorage.getItem('dailyMissionProgress') || '{}');
@@ -1266,6 +1420,7 @@
                     dailyMissionProgress.missions[mission.id] = true;
                     localStorage.setItem('dailyMissionProgress', JSON.stringify(dailyMissionProgress));
                     showMissionCompleteNotification(mission.text);
+                    addPoints(POINT_REWARDS.completeMission, 'ミッション完了');
                 }
             });
         };
@@ -1359,17 +1514,174 @@
             if (luckyEl) luckyEl.textContent = luckyNumber;
         };
         
-        // Update motivational message
-        const updateMotivationalMessage = () => {
-            const titleEl = document.getElementById('motivation-title');
-            const messageEl = document.getElementById('motivation-message');
+        // Update points display
+        const updatePointsDisplay = () => {
+            const pointsEl = document.getElementById('user-points');
+            const shopPointsEl = document.getElementById('shop-current-points');
+            if (pointsEl) pointsEl.textContent = userPoints.toLocaleString();
+            if (shopPointsEl) shopPointsEl.textContent = userPoints.toLocaleString();
+        };
+        
+        // Add points with animation
+        const addPoints = (amount, reason) => {
+            userPoints += amount;
+            localStorage.setItem('userPoints', userPoints.toString());
+            updatePointsDisplay();
             
-            if (titleEl && messageEl) {
-                const todayIndex = new Date().getDay();
-                const message = MOTIVATIONAL_MESSAGES[todayIndex % MOTIVATIONAL_MESSAGES.length];
-                titleEl.textContent = message.title;
-                messageEl.textContent = message.message;
+            // Show point animation
+            const animation = document.createElement('div');
+            animation.className = 'point-animation';
+            animation.textContent = `+${amount} pt`;
+            animation.style.left = '50%';
+            animation.style.top = '50%';
+            document.body.appendChild(animation);
+            
+            setTimeout(() => animation.remove(), 1000);
+            
+            // Show notification
+            if (reason) {
+                const notification = document.createElement('div');
+                notification.className = 'position-fixed bottom-0 end-0 p-3';
+                notification.style.zIndex = '9999';
+                notification.innerHTML = `
+                    <div class="toast show" role="alert">
+                        <div class="toast-body">
+                            <i class="bi bi-coin text-warning me-2"></i>
+                            <strong>+${amount} pt</strong> ${reason}
+                        </div>
+                    </div>
+                `;
+                document.body.appendChild(notification);
+                setTimeout(() => notification.remove(), 3000);
             }
+        };
+        
+        // Initialize shop
+        const initializeShop = () => {
+            // Populate themes
+            const themeContainer = document.getElementById('theme-shop-items');
+            if (themeContainer) {
+                themeContainer.innerHTML = '';
+                SHOP_ITEMS.themes.forEach(theme => {
+                    const isPurchased = purchasedItems[theme.id];
+                    const isActive = activeTheme === theme.class;
+                    
+                    const itemEl = document.createElement('div');
+                    itemEl.className = 'col-md-6';
+                    itemEl.innerHTML = `
+                        <div class="card shop-item ${isPurchased ? 'purchased' : ''} ${isActive ? 'active' : ''} ${!isPurchased && userPoints < theme.cost ? 'locked' : ''}">
+                            <div class="card-body">
+                                <div style="height: 60px; background: ${theme.preview}; border-radius: 5px; margin-bottom: 10px;"></div>
+                                <h6>${theme.name}</h6>
+                                <div class="d-flex justify-content-between align-items-center">
+                                    <span class="badge bg-warning">${theme.cost} pt</span>
+                                    ${isPurchased ? 
+                                        (isActive ? '<button class="btn btn-sm btn-primary" disabled>適用中</button>' : 
+                                                   `<button class="btn btn-sm btn-success" onclick="applyTheme('${theme.class}')"適用</button>`) :
+                                        `<button class="btn btn-sm btn-warning" onclick="purchaseItem('${theme.id}', ${theme.cost}, 'theme')"購入</button>`
+                                    }
+                                </div>
+                            </div>
+                        </div>
+                    `;
+                    themeContainer.appendChild(itemEl);
+                });
+            }
+            
+            // Populate effects
+            const effectContainer = document.getElementById('effect-shop-items');
+            if (effectContainer) {
+                effectContainer.innerHTML = '';
+                SHOP_ITEMS.effects.forEach(effect => {
+                    const isPurchased = purchasedItems[effect.id];
+                    
+                    const itemEl = document.createElement('div');
+                    itemEl.className = 'col-md-6';
+                    itemEl.innerHTML = `
+                        <div class="card shop-item ${isPurchased ? 'purchased' : ''} ${!isPurchased && userPoints < effect.cost ? 'locked' : ''}">
+                            <div class="card-body">
+                                <h6><i class="bi bi-stars"></i> ${effect.name}</h6>
+                                <p class="small text-muted">${effect.description}</p>
+                                <div class="d-flex justify-content-between align-items-center">
+                                    <span class="badge bg-warning">${effect.cost} pt</span>
+                                    ${isPurchased ? 
+                                        '<span class="badge bg-success">購入済み</span>' :
+                                        `<button class="btn btn-sm btn-warning" onclick="purchaseItem('${effect.id}', ${effect.cost}, 'effect')"購入</button>`
+                                    }
+                                </div>
+                            </div>
+                        </div>
+                    `;
+                    effectContainer.appendChild(itemEl);
+                });
+            }
+            
+            // Populate bonuses
+            const bonusContainer = document.getElementById('bonus-shop-items');
+            if (bonusContainer) {
+                bonusContainer.innerHTML = '';
+                SHOP_ITEMS.bonuses.forEach(bonus => {
+                    const itemEl = document.createElement('div');
+                    itemEl.className = 'col-md-6';
+                    itemEl.innerHTML = `
+                        <div class="card shop-item ${userPoints < bonus.cost ? 'locked' : ''}">
+                            <div class="card-body">
+                                <h6><i class="bi bi-gift"></i> ${bonus.name}</h6>
+                                <p class="small text-muted">${bonus.description}</p>
+                                <div class="d-flex justify-content-between align-items-center">
+                                    <span class="badge bg-warning">${bonus.cost} pt</span>
+                                    <button class="btn btn-sm btn-warning" onclick="purchaseItem('${bonus.id}', ${bonus.cost}, 'bonus')"購入</button>
+                                </div>
+                            </div>
+                        </div>
+                    `;
+                    bonusContainer.appendChild(itemEl);
+                });
+            }
+        };
+        
+        // Purchase item
+        window.purchaseItem = (itemId, cost, type) => {
+            if (userPoints < cost) {
+                alert('ポイントが足りません！');
+                return;
+            }
+            
+            if (confirm(`${cost}ptを使って購入しますか？`)) {
+                userPoints -= cost;
+                localStorage.setItem('userPoints', userPoints.toString());
+                
+                if (type === 'theme') {
+                    purchasedItems[itemId] = true;
+                    localStorage.setItem('purchasedItems', JSON.stringify(purchasedItems));
+                } else if (type === 'bonus') {
+                    // Handle bonus effects
+                    if (itemId === 'bonus-mission') {
+                        // Reset missions
+                        dailyMissionProgress.missions = {};
+                        localStorage.setItem('dailyMissionProgress', JSON.stringify(dailyMissionProgress));
+                        updateDailyMissions();
+                    }
+                }
+                
+                updatePointsDisplay();
+                initializeShop();
+                alert('購入しました！');
+            }
+        };
+        
+        // Apply theme
+        window.applyTheme = (themeClass) => {
+            // Remove all theme classes
+            document.body.classList.remove('theme-ocean', 'theme-forest', 'theme-sunset', 'theme-galaxy', 'theme-cherry');
+            
+            if (themeClass !== 'default') {
+                document.body.classList.add(themeClass);
+            }
+            
+            activeTheme = themeClass;
+            localStorage.setItem('activeTheme', activeTheme);
+            initializeShop();
         };
         
         // Initialize fun dashboard
@@ -1378,7 +1690,7 @@
             updateDailyMissions();
             updateRegistrationStreak();
             updateTodayStats();
-            updateMotivationalMessage();
+            updatePointsDisplay();
             
             // Update time every minute
             setInterval(updateTimeDisplay, 60000);
@@ -2172,6 +2484,19 @@
             }
             applyTheme();
             initializeFunDashboard(); // Initialize fun features
+            initializeShop(); // Initialize shop
+            
+            // Apply saved theme
+            const savedTheme = localStorage.getItem('activeTheme');
+            if (savedTheme) {
+                applyTheme(savedTheme);
+            }
+            
+            // Add shop button event listener
+            document.getElementById('point-shop-btn').addEventListener('click', () => {
+                const shopModal = new bootstrap.Modal(document.getElementById('shopModal'));
+                shopModal.show();
+            });
         };
 
         const handleUserLogout = () => {
@@ -2516,6 +2841,13 @@
                     newCard['レアリティ'].toUpperCase().includes('UR')
                 );
                 trackCardAddition(newCard, hasTag, isRare);
+                
+                // Add points for card addition
+                if (isRare) {
+                    addPoints(POINT_REWARDS.addRareCard, 'レアカード追加');
+                } else {
+                    addPoints(POINT_REWARDS.addCard, 'カード追加');
+                }
             
                 updateTotalCounts(); // Update stats after adding card
                 applySearchAndFilter();
