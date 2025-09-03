@@ -722,14 +722,38 @@
             totalWishlistSpan.textContent = totalWishlist;
         };
         
+        // Helper function to normalize text for search
+        const normalizeForSearch = (text) => {
+            if (!text) return '';
+            
+            // Convert to lowercase
+            text = text.toLowerCase();
+            
+            // Convert katakana to hiragana
+            text = text.replace(/[ァ-ヶ]/g, (match) => {
+                const code = match.charCodeAt(0) - 0x60;
+                return String.fromCharCode(code);
+            });
+            
+            // Convert full-width alphanumeric to half-width
+            text = text.replace(/[Ａ-Ｚａ-ｚ０-９]/g, (match) => {
+                return String.fromCharCode(match.charCodeAt(0) - 0xFEE0);
+            });
+            
+            // Convert full-width space to half-width
+            text = text.replace(/　/g, ' ');
+            
+            return text;
+        };
+        
         const applySearchAndFilter = () => {
-            const [sN,sC,sR,sT] = ['search_name','search_set_code','search_rarity','search_tags'].map(n=>document.querySelector(`[name="${n}"]`).value.toLowerCase());
+            const [sN,sC,sR,sT] = ['search_name','search_set_code','search_rarity','search_tags'].map(n=>normalizeForSearch(document.querySelector(`[name="${n}"]`).value));
             filteredCardCollection = getCurrentCollection().filter(c => {
                 const d = c.data;
-                return (!sN || (d['名前']||'').toLowerCase().includes(sN)) && 
-                       (!sC || (d['型番']||'').toLowerCase().includes(sC)) && 
-                       (!sR || (d['レアリティ']||'').toLowerCase().includes(sR)) && 
-                       (!sT || (d.tags||[]).join(',').toLowerCase().includes(sT));
+                return (!sN || normalizeForSearch(d['名前']||'').includes(sN)) && 
+                       (!sC || normalizeForSearch(d['型番']||'').includes(sC)) && 
+                       (!sR || normalizeForSearch(d['レアリティ']||'').includes(sR)) && 
+                       (!sT || normalizeForSearch((d.tags||[]).join(',')).includes(sT));
             });
             currentPage = 1;
             renderTable();
