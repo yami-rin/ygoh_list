@@ -2146,6 +2146,79 @@
             updateDailyMissions();
         };
         
+        // Check and grant first login bonus
+        const checkFirstLoginBonus = (user) => {
+            const userId = user.uid || 'local_user';
+            const firstLoginKey = `firstLoginBonus_${userId}`;
+            const hasReceivedBonus = localStorage.getItem(firstLoginKey);
+            
+            if (!hasReceivedBonus) {
+                // First time login - grant 50 points
+                addPoints(50, '初回ログインボーナス！');
+                
+                // Check if user already has cards and grant retroactive points
+                setTimeout(() => {
+                    let totalCards = 0;
+                    cardCollection.forEach(card => {
+                        totalCards += card.data.枚数 || 0;
+                    });
+                    
+                    if (totalCards > 0) {
+                        const retroactivePoints = totalCards * 5;
+                        addPoints(retroactivePoints, `既存カード ${totalCards}枚分のポイント`);
+                        
+                        // Show special notification
+                        const notification = document.createElement('div');
+                        notification.className = 'position-fixed top-50 start-50 translate-middle';
+                        notification.style.zIndex = '10000';
+                        notification.innerHTML = `
+                            <div class="card shadow-lg border-warning" style="min-width: 300px;">
+                                <div class="card-body text-center">
+                                    <h5 class="card-title text-warning">
+                                        <i class="bi bi-gift-fill"></i> 特別ボーナス！
+                                    </h5>
+                                    <p class="card-text">
+                                        初回ログインボーナス: 50pt<br>
+                                        既存カードボーナス: ${retroactivePoints}pt<br>
+                                        <strong>合計: ${50 + retroactivePoints}pt 獲得！</strong>
+                                    </p>
+                                    <button class="btn btn-warning" onclick="this.closest('.position-fixed').remove()">
+                                        ありがとう！
+                                    </button>
+                                </div>
+                            </div>
+                        `;
+                        document.body.appendChild(notification);
+                    } else {
+                        // Show welcome notification for new users
+                        const notification = document.createElement('div');
+                        notification.className = 'position-fixed top-50 start-50 translate-middle';
+                        notification.style.zIndex = '10000';
+                        notification.innerHTML = `
+                            <div class="card shadow-lg border-success" style="min-width: 300px;">
+                                <div class="card-body text-center">
+                                    <h5 class="card-title text-success">
+                                        <i class="bi bi-star-fill"></i> ようこそ！
+                                    </h5>
+                                    <p class="card-text">
+                                        初回ログインボーナスとして<br>
+                                        <strong>50ポイント</strong>をプレゼント！
+                                    </p>
+                                    <button class="btn btn-success" onclick="this.closest('.position-fixed').remove()">
+                                        始める！
+                                    </button>
+                                </div>
+                            </div>
+                        `;
+                        document.body.appendChild(notification);
+                    }
+                }, 1000); // Wait for cards to load
+                
+                // Mark as received
+                localStorage.setItem(firstLoginKey, 'true');
+            }
+        };
+        
         const updateCollectionStats = () => {
             // Check if stats should be hidden
             const hideStats = localStorage.getItem('hideStats') === 'true';
@@ -2915,6 +2988,9 @@
                 applyIcon(savedIcon);
             }
             
+            // Check for first login bonus
+            checkFirstLoginBonus(user);
+            
             // Add shop button event listener
             document.getElementById('point-shop-btn').addEventListener('click', () => {
                 const shopModal = new bootstrap.Modal(document.getElementById('point-shop-modal'));
@@ -3265,11 +3341,13 @@
                 );
                 trackCardAddition(newCard, hasTag, isRare);
                 
-                // Add points for card addition
+                // Add points for card addition (5 points per card)
+                const cardQuantity = newCard.枚数 || 1;
+                const pointsToAdd = cardQuantity * 5;
                 if (isRare) {
-                    addPoints(POINT_REWARDS.addRareCard, 'レアカード追加');
+                    addPoints(pointsToAdd + (cardQuantity * 5), `レアカード ${cardQuantity}枚追加`); // Bonus for rare
                 } else {
-                    addPoints(POINT_REWARDS.addCard, 'カード追加');
+                    addPoints(pointsToAdd, `カード ${cardQuantity}枚追加`);
                 }
             
                 updateTotalCounts(); // Update stats after adding card
@@ -3367,6 +3445,20 @@
                         cardAdditionDates[newId] = new Date().toISOString();
                         localStorage.setItem('cardAdditionDates', JSON.stringify(cardAdditionDates));
                     }
+                    
+                    // Add points for moving card from wishlist to collection
+                    const cardQuantity = card.data.枚数 || 1;
+                    const pointsToAdd = cardQuantity * 5;
+                    addPoints(pointsToAdd, `ウィッシュリストから ${cardQuantity}枚追加`);
+                    
+                    // Track for daily missions
+                    const isRare = card.data.レアリティ && (
+                        card.data.レアリティ.toLowerCase().includes('レア') ||
+                        card.data.レアリティ.toLowerCase().includes('rare') ||
+                        card.data.レアリティ.toUpperCase().includes('SR') ||
+                        card.data.レアリティ.toUpperCase().includes('UR')
+                    );
+                    trackCardAddition(card.data, false, isRare);
                     
                     updateTotalCounts(); // Update stats after moving card
                     applySearchAndFilter();
