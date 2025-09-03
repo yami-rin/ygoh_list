@@ -370,6 +370,49 @@
         </div></div>
     </div>
 
+    <!-- Stats Info Modal -->
+    <div class="modal fade" id="stats-info-modal" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">コレクション統計の説明</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <h6><i class="bi bi-trophy"></i> コレクターランク</h6>
+                    <ul>
+                        <li><span class="badge bg-secondary">見習い</span> 0-9枚</li>
+                        <li><span class="badge bg-secondary">初級</span> 10-49枚</li>
+                        <li><span class="badge bg-primary">中級</span> 50-99枚</li>
+                        <li><span class="badge bg-success">上級</span> 100-299枚</li>
+                        <li><span class="badge bg-info">エキスパート</span> 300-499枚</li>
+                        <li><span class="badge bg-warning">マスター</span> 500-999枚</li>
+                        <li><span class="badge bg-danger">伝説</span> 1000枚以上</li>
+                    </ul>
+                    
+                    <h6><i class="bi bi-award"></i> 実績バッジ</h6>
+                    <p>カードの収集状況に応じて様々な実績が解除されます：</p>
+                    <ul>
+                        <li>枚数実績（10, 50, 100, 300枚）</li>
+                        <li>種類実績（5, 20, 50種類）</li>
+                        <li>レアカード収集実績</li>
+                        <li>継続日数実績（7, 30日）</li>
+                    </ul>
+                    
+                    <h6><i class="bi bi-bar-chart"></i> 統計項目</h6>
+                    <ul>
+                        <li><strong>総カード枚数</strong>: 所持している全カードの合計枚数</li>
+                        <li><strong>種類数</strong>: ユニークなカードの種類数</li>
+                        <li><strong>収集日数</strong>: 最初のカード登録からの経過日数</li>
+                        <li><strong>今週追加</strong>: 過去7日間に追加したカード枚数</li>
+                    </ul>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">閉じる</button>
+                </div>
+            </div>
+        </div>
+    </div>
     <!-- Settings Modal -->
     <div class="modal fade" id="settings-modal" tabindex="-1">
         <div class="modal-dialog"><div class="modal-content">
@@ -382,6 +425,10 @@
                 <div class="form-check form-switch mb-3">
                     <input class="form-check-input" type="checkbox" role="switch" id="hide-email-toggle">
                     <label class="form-check-label" for="hide-email-toggle">メールアドレスを非表示</label>
+                </div>
+                <div class="form-check form-switch mb-3">
+                    <input class="form-check-input" type="checkbox" role="switch" id="hide-stats-toggle">
+                    <label class="form-check-label" for="hide-stats-toggle">コレクション統計を非表示</label>
                 </div>
                 <div class="form-check form-switch mb-3">
                     <input class="form-check-input" type="checkbox" role="switch" id="show-search-history-toggle">
@@ -556,8 +603,13 @@
                 <div class="col-lg-7">
                     <!-- Collection Stats Dashboard -->
                     <div class="card mb-3" id="stats-dashboard">
-                        <div class="card-header bg-primary text-white">
-                            <i class="bi bi-graph-up"></i> コレクション統計 <span id="collector-rank" class="badge bg-warning ms-2"></span>
+                        <div class="card-header bg-primary text-white d-flex justify-content-between align-items-center">
+                            <div>
+                                <i class="bi bi-graph-up"></i> コレクション統計 <span id="collector-rank" class="badge bg-warning ms-2"></span>
+                            </div>
+                            <button class="btn btn-sm btn-light" id="stats-info-btn" title="統計の説明">
+                                <i class="bi bi-info-circle"></i>
+                            </button>
                         </div>
                         <div class="card-body">
                             <div class="row g-3">
@@ -581,8 +633,8 @@
                                 </div>
                                 <div class="col-6 col-md-3">
                                     <div class="text-center">
-                                        <div class="fs-2 fw-bold text-info" id="avg-rarity">-</div>
-                                        <small class="text-muted">平均レア度</small>
+                                        <div class="fs-2 fw-bold text-info" id="recent-cards">0</div>
+                                        <small class="text-muted">今週追加</small>
                                     </div>
                                 </div>
                             </div>
@@ -898,7 +950,20 @@
             return 1;
         };
         
+        // Track card addition dates
+        let cardAdditionDates = JSON.parse(localStorage.getItem('cardAdditionDates') || '{}');
+        
         const updateCollectionStats = () => {
+            // Check if stats should be hidden
+            const hideStats = localStorage.getItem('hideStats') === 'true';
+            const statsDiv = document.getElementById('stats-dashboard');
+            if (hideStats) {
+                statsDiv.style.display = 'none';
+                return;
+            } else {
+                statsDiv.style.display = 'block';
+            }
+            
             const totalCards = cardCollection.reduce((sum, card) => sum + (card.data['枚数'] || 0), 0);
             const uniqueCards = cardCollection.length;
             
@@ -912,15 +977,26 @@
             const collectionDays = firstCollectionDate ? 
                 Math.floor((new Date() - new Date(firstCollectionDate)) / (1000 * 60 * 60 * 24)) + 1 : 0;
             
-            // Calculate average rarity
-            let totalRarityScore = 0;
+            // Calculate cards added this week
+            const oneWeekAgo = new Date();
+            oneWeekAgo.setDate(oneWeekAgo.getDate() - 7);
+            let recentCards = 0;
+            
+            Object.entries(cardAdditionDates).forEach(([cardId, dateAdded]) => {
+                if (new Date(dateAdded) >= oneWeekAgo) {
+                    const card = cardCollection.find(c => c.id === cardId);
+                    if (card) {
+                        recentCards += card.data['枚数'] || 0;
+                    }
+                }
+            });
+            
+            // Build rarity distribution
             let rarityDistribution = {};
             
             cardCollection.forEach(card => {
-                const rarity = card.data['レアリティ'] || 'ノーマル';
+                const rarity = card.data['レアリティ'] || 'N';
                 const quantity = card.data['枚数'] || 0;
-                const score = getRarityScore(rarity);
-                totalRarityScore += score * quantity;
                 
                 if (!rarityDistribution[rarity]) {
                     rarityDistribution[rarity] = 0;
@@ -928,13 +1004,11 @@
                 rarityDistribution[rarity] += quantity;
             });
             
-            const avgRarity = totalCards > 0 ? (totalRarityScore / totalCards).toFixed(1) : '-';
-            
             // Update display
             document.getElementById('total-cards').textContent = totalCards.toLocaleString();
             document.getElementById('unique-cards').textContent = uniqueCards.toLocaleString();
             document.getElementById('collection-days').textContent = collectionDays.toLocaleString();
-            document.getElementById('avg-rarity').textContent = avgRarity;
+            document.getElementById('recent-cards').textContent = recentCards.toLocaleString();
             
             // Update collector rank
             updateCollectorRank(totalCards);
@@ -1049,34 +1123,75 @@
             container.style.display = 'block';
             barsContainer.innerHTML = '';
             
-            const maxCount = Math.max(...Object.values(distribution));
+            // Define rarity order and colors
+            const rarityOrder = ['N', 'P', 'R', 'SR', 'P+SR', 'UR', 'P+UR', 'UL', 'GR', 'CR', 'HR', 'SE', 'EXSE', 'GSE', 'PSE', 'QCSE'];
             const rarityColors = {
-                'ウルトラ': '#ff6b6b',
-                'スーパー': '#ffd43b',
-                'レア': '#51cf66',
-                'ノーマル': '#339af0',
+                'N': '#868e96',
+                'P': '#339af0',
+                'R': '#51cf66',
+                'SR': '#ffd43b',
+                'P+SR': '#ff922b',
+                'UR': '#ff6b6b',
+                'P+UR': '#f06595',
+                'UL': '#cc5de8',
+                'GR': '#845ef7',
+                'CR': '#5c7cfa',
+                'HR': '#4c6ef5',
+                'SE': '#748ffc',
+                'EXSE': '#91a7ff',
+                'GSE': '#dbe4ff',
+                'PSE': '#e7f5ff',
+                'QCSE': '#a5d8ff',
                 'default': '#868e96'
             };
             
-            Object.entries(distribution).forEach(([rarity, count]) => {
-                const percentage = (count / maxCount) * 100;
-                let color = rarityColors.default;
-                
-                Object.keys(rarityColors).forEach(key => {
-                    if (rarity.includes(key)) {
-                        color = rarityColors[key];
+            // Get max count for percentage calculation
+            const maxCount = Math.max(...Object.values(distribution));
+            
+            // Display in defined order
+            rarityOrder.forEach(rarityKey => {
+                // Check if this rarity exists in distribution
+                let count = 0;
+                Object.entries(distribution).forEach(([rarity, cardCount]) => {
+                    if (rarity === rarityKey || rarity.toUpperCase().includes(rarityKey)) {
+                        count += cardCount;
                     }
                 });
                 
-                const bar = document.createElement('div');
-                bar.className = 'rarity-bar';
-                bar.style.setProperty('--bar-height', `${percentage}%`);
-                bar.style.setProperty('--bar-color', color);
-                bar.innerHTML = `
-                    <span class="rarity-bar-count">${count}</span>
-                    <span class="rarity-bar-label">${rarity.substring(0, 4)}</span>
-                `;
-                barsContainer.appendChild(bar);
+                if (count > 0) {
+                    const percentage = (count / maxCount) * 100;
+                    const color = rarityColors[rarityKey] || rarityColors.default;
+                    
+                    const bar = document.createElement('div');
+                    bar.className = 'rarity-bar';
+                    bar.style.setProperty('--bar-height', `${percentage}%`);
+                    bar.style.setProperty('--bar-color', color);
+                    bar.innerHTML = `
+                        <span class="rarity-bar-count">${count}</span>
+                        <span class="rarity-bar-label">${rarityKey}</span>
+                    `;
+                    barsContainer.appendChild(bar);
+                }
+            });
+            
+            // Add any rarities not in the defined order
+            Object.entries(distribution).forEach(([rarity, count]) => {
+                const isInOrder = rarityOrder.some(key => 
+                    rarity === key || rarity.toUpperCase().includes(key)
+                );
+                
+                if (!isInOrder && count > 0) {
+                    const percentage = (count / maxCount) * 100;
+                    const bar = document.createElement('div');
+                    bar.className = 'rarity-bar';
+                    bar.style.setProperty('--bar-height', `${percentage}%`);
+                    bar.style.setProperty('--bar-color', rarityColors.default);
+                    bar.innerHTML = `
+                        <span class="rarity-bar-count">${count}</span>
+                        <span class="rarity-bar-label">${rarity.substring(0, 4)}</span>
+                    `;
+                    barsContainer.appendChild(bar);
+                }
             });
         };
         
@@ -1711,6 +1826,11 @@
                         if (existingDocs.empty) {
                             const docRef = await addDoc(collRef, newCard);
                             targetCollection.push({ id: docRef.id, data: newCard });
+                            // Track card addition date
+                            if (currentListType === 'collection') {
+                                cardAdditionDates[docRef.id] = new Date().toISOString();
+                                localStorage.setItem('cardAdditionDates', JSON.stringify(cardAdditionDates));
+                            }
                         } else {
                             const existingDoc = existingDocs.docs[0];
                             await updateDoc(existingDoc.ref, { 枚数: increment(newCard.枚数) });
@@ -1727,7 +1847,13 @@
                         if (existingCard) {
                             existingCard.data.枚数 += newCard.枚数;
                         } else {
-                            targetCollection.push({ id: `local_${Date.now()}`, data: newCard });
+                            const localId = `local_${Date.now()}`;
+                            targetCollection.push({ id: localId, data: newCard });
+                            // Track card addition date for local mode
+                            if (currentListType === 'collection') {
+                                cardAdditionDates[localId] = new Date().toISOString();
+                                localStorage.setItem('cardAdditionDates', JSON.stringify(cardAdditionDates));
+                            }
                         }
                     }
                 };
@@ -1814,14 +1940,21 @@
                         // Add to collection
                         const docRef = await addDoc(collectionRef, card.data);
                         cardCollection.push({ id: docRef.id, data: card.data });
+                        // Track card addition date
+                        cardAdditionDates[docRef.id] = new Date().toISOString();
+                        localStorage.setItem('cardAdditionDates', JSON.stringify(cardAdditionDates));
                         
                         // Remove from wishlist
                         await deleteDoc(doc(wishlistRef, cardId));
                         wishlistCollection = wishlistCollection.filter(c => c.id !== cardId);
                     } else {
                         // Local mode
-                        cardCollection.push({ id: `local_${Date.now()}`, data: card.data });
+                        const newId = `local_${Date.now()}`;
+                        cardCollection.push({ id: newId, data: card.data });
                         wishlistCollection = wishlistCollection.filter(c => c.id !== cardId);
+                        // Track card addition date
+                        cardAdditionDates[newId] = new Date().toISOString();
+                        localStorage.setItem('cardAdditionDates', JSON.stringify(cardAdditionDates));
                     }
                     
                     updateTotalCounts(); // Update stats after moving card
@@ -2098,8 +2231,23 @@
             }
         });
         
-        // Initialize hide email setting
+        // Hide stats toggle
+        const hideStatsToggle = document.getElementById('hide-stats-toggle');
+        hideStatsToggle.addEventListener('change', (e) => {
+            const hideStats = e.target.checked;
+            localStorage.setItem('hideStats', hideStats);
+            updateCollectionStats(); // Update immediately
+        });
+        
+        // Initialize settings
         hideEmailToggle.checked = localStorage.getItem('hideEmail') === 'true';
+        hideStatsToggle.checked = localStorage.getItem('hideStats') === 'true';
+        
+        // Stats info button
+        document.getElementById('stats-info-btn').addEventListener('click', () => {
+            const statsInfoModal = new bootstrap.Modal(document.getElementById('stats-info-modal'));
+            statsInfoModal.show();
+        });
         
         // Initialize history settings
         showSearchHistoryToggle.checked = localStorage.getItem('showSearchHistory') === 'true';
