@@ -1906,8 +1906,9 @@
             updateSearchHistoryButton();
             
             // First check if we have matching cards in our collection
+            const normalizedSearchKeyword = normalizeForSearch(searchKeyword);
             const matchingCards = cardCollection.filter(card => 
-                card.data['名前'] && card.data['名前'].toLowerCase().includes(searchKeyword.toLowerCase())
+                card.data['名前'] && normalizeForSearch(card.data['名前']).includes(normalizedSearchKeyword)
             );
             
             if (matchingCards.length > 0) {
