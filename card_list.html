@@ -51,6 +51,94 @@
             border-top: 2px solid #007bff;
         }
         
+        /* Achievement badge styles */
+        .achievement-badge {
+            position: relative;
+            display: inline-block;
+            padding: 0.5rem 1rem;
+            border-radius: 20px;
+            font-size: 0.875rem;
+            font-weight: 500;
+            cursor: help;
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+        .achievement-badge:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+        }
+        .achievement-badge.locked {
+            background: linear-gradient(135deg, #6c757d 0%, #495057 100%);
+            color: #adb5bd;
+            opacity: 0.6;
+        }
+        .achievement-badge.bronze {
+            background: linear-gradient(135deg, #cd7f32 0%, #a0522d 100%);
+            color: white;
+        }
+        .achievement-badge.silver {
+            background: linear-gradient(135deg, #c0c0c0 0%, #808080 100%);
+            color: white;
+        }
+        .achievement-badge.gold {
+            background: linear-gradient(135deg, #ffd700 0%, #ffb300 100%);
+            color: #333;
+            animation: shine 3s infinite;
+        }
+        .achievement-badge.platinum {
+            background: linear-gradient(135deg, #e5e4e2 0%, #bbb 100%);
+            color: #333;
+            animation: shine 2s infinite;
+        }
+        @keyframes shine {
+            0% { box-shadow: 0 0 5px rgba(255, 215, 0, 0.5); }
+            50% { box-shadow: 0 0 20px rgba(255, 215, 0, 0.8); }
+            100% { box-shadow: 0 0 5px rgba(255, 215, 0, 0.5); }
+        }
+        
+        /* Rarity bar styles */
+        .rarity-bar {
+            height: 100px;
+            flex: 1;
+            min-width: 40px;
+            background: linear-gradient(to top, var(--bar-color) 0%, var(--bar-color) var(--bar-height), transparent var(--bar-height));
+            position: relative;
+            border-radius: 4px 4px 0 0;
+            display: flex;
+            flex-direction: column;
+            justify-content: flex-end;
+            align-items: center;
+            padding: 4px;
+        }
+        .rarity-bar-label {
+            font-size: 0.7rem;
+            margin-top: 4px;
+            text-align: center;
+        }
+        .rarity-bar-count {
+            font-weight: bold;
+            font-size: 0.9rem;
+            color: white;
+            text-shadow: 1px 1px 2px rgba(0,0,0,0.5);
+        }
+        
+        /* Milestone notification styles */
+        .milestone-notification {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            z-index: 1070;
+            animation: slideIn 0.5s, slideOut 0.5s 4.5s;
+            animation-fill-mode: forwards;
+        }
+        @keyframes slideIn {
+            from { transform: translateX(400px); }
+            to { transform: translateX(0); }
+        }
+        @keyframes slideOut {
+            from { transform: translateX(0); }
+            to { transform: translateX(400px); }
+        }
+        
         /* Table header responsive styles */
         .table th {
             white-space: nowrap;
@@ -466,6 +554,64 @@
 
                 <!-- Right Column: Search and List -->
                 <div class="col-lg-7">
+                    <!-- Collection Stats Dashboard -->
+                    <div class="card mb-3" id="stats-dashboard">
+                        <div class="card-header bg-primary text-white">
+                            <i class="bi bi-graph-up"></i> コレクション統計 <span id="collector-rank" class="badge bg-warning ms-2"></span>
+                        </div>
+                        <div class="card-body">
+                            <div class="row g-3">
+                                <div class="col-6 col-md-3">
+                                    <div class="text-center">
+                                        <div class="fs-2 fw-bold text-primary" id="total-cards">0</div>
+                                        <small class="text-muted">総カード枚数</small>
+                                    </div>
+                                </div>
+                                <div class="col-6 col-md-3">
+                                    <div class="text-center">
+                                        <div class="fs-2 fw-bold text-success" id="unique-cards">0</div>
+                                        <small class="text-muted">種類数</small>
+                                    </div>
+                                </div>
+                                <div class="col-6 col-md-3">
+                                    <div class="text-center">
+                                        <div class="fs-2 fw-bold text-warning" id="collection-days">0</div>
+                                        <small class="text-muted">収集日数</small>
+                                    </div>
+                                </div>
+                                <div class="col-6 col-md-3">
+                                    <div class="text-center">
+                                        <div class="fs-2 fw-bold text-info" id="avg-rarity">-</div>
+                                        <small class="text-muted">平均レア度</small>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <!-- Progress to next milestone -->
+                            <div class="mt-3" id="milestone-progress" style="display: none;">
+                                <div class="d-flex justify-content-between align-items-center mb-1">
+                                    <small class="text-muted">次のマイルストーンまで</small>
+                                    <small class="text-primary fw-bold" id="milestone-text"></small>
+                                </div>
+                                <div class="progress" style="height: 25px;">
+                                    <div class="progress-bar progress-bar-striped progress-bar-animated" id="milestone-bar" role="progressbar" style="width: 0%">
+                                        <span id="milestone-percent">0%</span>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <!-- Achievement Badges -->
+                            <div class="mt-3" id="achievement-badges">
+                                <div class="d-flex flex-wrap gap-2" id="badges-container"></div>
+                            </div>
+                            
+                            <!-- Rarity Distribution Chart -->
+                            <div class="mt-3" id="rarity-chart-container" style="display: none;">
+                                <small class="text-muted d-block mb-2">レアリティ分布</small>
+                                <div class="d-flex gap-1" id="rarity-bars"></div>
+                            </div>
+                        </div>
+                    </div>
                     <div class="card">
                         <div class="card-header">
                             <ul class="nav nav-tabs card-header-tabs">
@@ -720,6 +866,245 @@
             const totalWishlist = wishlistCollection.reduce((sum, card) => sum + (card.data['枚数'] || 0), 0);
             totalCollectionSpan.textContent = totalCollection;
             totalWishlistSpan.textContent = totalWishlist;
+            updateCollectionStats(); // Update gamification stats
+        };
+        
+        // Gamification features
+        let firstCollectionDate = localStorage.getItem('firstCollectionDate');
+        let lastMilestoneReached = parseInt(localStorage.getItem('lastMilestoneReached') || '0');
+        
+        const ACHIEVEMENTS = [
+            { id: 'beginner', name: '初心者コレクター', desc: '10枚達成', threshold: 10, class: 'bronze' },
+            { id: 'intermediate', name: '中級コレクター', desc: '50枚達成', threshold: 50, class: 'silver' },
+            { id: 'advanced', name: '上級コレクター', desc: '100枚達成', threshold: 100, class: 'gold' },
+            { id: 'master', name: 'マスターコレクター', desc: '300枚達成', threshold: 300, class: 'platinum' },
+            { id: 'variety5', name: 'バラエティ', desc: '5種類収集', threshold: 5, class: 'bronze', type: 'unique' },
+            { id: 'variety20', name: 'バラエティマスター', desc: '20種類収集', threshold: 20, class: 'silver', type: 'unique' },
+            { id: 'variety50', name: 'バラエティキング', desc: '50種類収集', threshold: 50, class: 'gold', type: 'unique' },
+            { id: 'rare_collector', name: 'レアハンター', desc: 'レア10枚以上', threshold: 10, class: 'gold', type: 'rarity' },
+            { id: 'week_veteran', name: '週間コレクター', desc: '7日間継続', threshold: 7, class: 'bronze', type: 'days' },
+            { id: 'month_veteran', name: '月間コレクター', desc: '30日間継続', threshold: 30, class: 'silver', type: 'days' },
+        ];
+        
+        const MILESTONES = [10, 25, 50, 75, 100, 150, 200, 300, 500, 1000];
+        
+        const getRarityScore = (rarity) => {
+            if (!rarity) return 1;
+            const rarityLower = rarity.toLowerCase();
+            if (rarityLower.includes('ウルトラ') || rarityLower.includes('ultra')) return 5;
+            if (rarityLower.includes('スーパー') || rarityLower.includes('super')) return 4;
+            if (rarityLower.includes('レア') || rarityLower.includes('rare')) return 3;
+            if (rarityLower.includes('ノーマル') || rarityLower.includes('normal')) return 2;
+            return 1;
+        };
+        
+        const updateCollectionStats = () => {
+            const totalCards = cardCollection.reduce((sum, card) => sum + (card.data['枚数'] || 0), 0);
+            const uniqueCards = cardCollection.length;
+            
+            // Set first collection date if not set
+            if (totalCards > 0 && !firstCollectionDate) {
+                firstCollectionDate = new Date().toISOString();
+                localStorage.setItem('firstCollectionDate', firstCollectionDate);
+            }
+            
+            // Calculate collection days
+            const collectionDays = firstCollectionDate ? 
+                Math.floor((new Date() - new Date(firstCollectionDate)) / (1000 * 60 * 60 * 24)) + 1 : 0;
+            
+            // Calculate average rarity
+            let totalRarityScore = 0;
+            let rarityDistribution = {};
+            
+            cardCollection.forEach(card => {
+                const rarity = card.data['レアリティ'] || 'ノーマル';
+                const quantity = card.data['枚数'] || 0;
+                const score = getRarityScore(rarity);
+                totalRarityScore += score * quantity;
+                
+                if (!rarityDistribution[rarity]) {
+                    rarityDistribution[rarity] = 0;
+                }
+                rarityDistribution[rarity] += quantity;
+            });
+            
+            const avgRarity = totalCards > 0 ? (totalRarityScore / totalCards).toFixed(1) : '-';
+            
+            // Update display
+            document.getElementById('total-cards').textContent = totalCards.toLocaleString();
+            document.getElementById('unique-cards').textContent = uniqueCards.toLocaleString();
+            document.getElementById('collection-days').textContent = collectionDays.toLocaleString();
+            document.getElementById('avg-rarity').textContent = avgRarity;
+            
+            // Update collector rank
+            updateCollectorRank(totalCards);
+            
+            // Update milestone progress
+            updateMilestoneProgress(totalCards);
+            
+            // Update achievements
+            updateAchievements(totalCards, uniqueCards, collectionDays, rarityDistribution);
+            
+            // Update rarity chart
+            updateRarityChart(rarityDistribution, totalCards);
+            
+            // Check for new milestones
+            checkMilestone(totalCards);
+        };
+        
+        const updateCollectorRank = (totalCards) => {
+            const rankEl = document.getElementById('collector-rank');
+            let rank = '';
+            let rankClass = '';
+            
+            if (totalCards >= 1000) {
+                rank = '伝説';
+                rankClass = 'bg-danger';
+            } else if (totalCards >= 500) {
+                rank = 'マスター';
+                rankClass = 'bg-warning';
+            } else if (totalCards >= 300) {
+                rank = 'エキスパート';
+                rankClass = 'bg-info';
+            } else if (totalCards >= 100) {
+                rank = '上級';
+                rankClass = 'bg-success';
+            } else if (totalCards >= 50) {
+                rank = '中級';
+                rankClass = 'bg-primary';
+            } else if (totalCards >= 10) {
+                rank = '初級';
+                rankClass = 'bg-secondary';
+            } else {
+                rank = '見習い';
+                rankClass = 'bg-secondary';
+            }
+            
+            rankEl.textContent = rank;
+            rankEl.className = `badge ${rankClass} ms-2`;
+        };
+        
+        const updateMilestoneProgress = (totalCards) => {
+            const progressContainer = document.getElementById('milestone-progress');
+            const nextMilestone = MILESTONES.find(m => m > totalCards);
+            
+            if (nextMilestone) {
+                const prevMilestone = MILESTONES[MILESTONES.indexOf(nextMilestone) - 1] || 0;
+                const progress = ((totalCards - prevMilestone) / (nextMilestone - prevMilestone)) * 100;
+                
+                document.getElementById('milestone-text').textContent = `${nextMilestone}枚 (残り${nextMilestone - totalCards}枚)`;
+                document.getElementById('milestone-bar').style.width = `${progress}%`;
+                document.getElementById('milestone-percent').textContent = `${Math.floor(progress)}%`;
+                progressContainer.style.display = 'block';
+            } else {
+                progressContainer.style.display = 'none';
+            }
+        };
+        
+        const updateAchievements = (totalCards, uniqueCards, collectionDays, rarityDistribution) => {
+            const container = document.getElementById('badges-container');
+            container.innerHTML = '';
+            
+            const rareCount = Object.entries(rarityDistribution)
+                .filter(([rarity]) => rarity.toLowerCase().includes('レア'))
+                .reduce((sum, [, count]) => sum + count, 0);
+            
+            ACHIEVEMENTS.forEach(achievement => {
+                let unlocked = false;
+                let progress = 0;
+                
+                if (achievement.type === 'unique') {
+                    unlocked = uniqueCards >= achievement.threshold;
+                    progress = uniqueCards;
+                } else if (achievement.type === 'days') {
+                    unlocked = collectionDays >= achievement.threshold;
+                    progress = collectionDays;
+                } else if (achievement.type === 'rarity') {
+                    unlocked = rareCount >= achievement.threshold;
+                    progress = rareCount;
+                } else {
+                    unlocked = totalCards >= achievement.threshold;
+                    progress = totalCards;
+                }
+                
+                const badge = document.createElement('div');
+                badge.className = `achievement-badge ${unlocked ? achievement.class : 'locked'}`;
+                badge.title = `${achievement.desc}${unlocked ? ' ✓' : ` (${progress}/${achievement.threshold})`}`;
+                badge.innerHTML = `
+                    ${unlocked ? '🏆' : '🔒'} ${achievement.name}
+                `;
+                container.appendChild(badge);
+            });
+        };
+        
+        const updateRarityChart = (distribution, total) => {
+            const container = document.getElementById('rarity-chart-container');
+            const barsContainer = document.getElementById('rarity-bars');
+            
+            if (Object.keys(distribution).length === 0) {
+                container.style.display = 'none';
+                return;
+            }
+            
+            container.style.display = 'block';
+            barsContainer.innerHTML = '';
+            
+            const maxCount = Math.max(...Object.values(distribution));
+            const rarityColors = {
+                'ウルトラ': '#ff6b6b',
+                'スーパー': '#ffd43b',
+                'レア': '#51cf66',
+                'ノーマル': '#339af0',
+                'default': '#868e96'
+            };
+            
+            Object.entries(distribution).forEach(([rarity, count]) => {
+                const percentage = (count / maxCount) * 100;
+                let color = rarityColors.default;
+                
+                Object.keys(rarityColors).forEach(key => {
+                    if (rarity.includes(key)) {
+                        color = rarityColors[key];
+                    }
+                });
+                
+                const bar = document.createElement('div');
+                bar.className = 'rarity-bar';
+                bar.style.setProperty('--bar-height', `${percentage}%`);
+                bar.style.setProperty('--bar-color', color);
+                bar.innerHTML = `
+                    <span class="rarity-bar-count">${count}</span>
+                    <span class="rarity-bar-label">${rarity.substring(0, 4)}</span>
+                `;
+                barsContainer.appendChild(bar);
+            });
+        };
+        
+        const checkMilestone = (totalCards) => {
+            const milestone = MILESTONES.find(m => m === totalCards);
+            if (milestone && milestone > lastMilestoneReached) {
+                lastMilestoneReached = milestone;
+                localStorage.setItem('lastMilestoneReached', milestone.toString());
+                showMilestoneNotification(milestone);
+            }
+        };
+        
+        const showMilestoneNotification = (milestone) => {
+            const notification = document.createElement('div');
+            notification.className = 'milestone-notification';
+            notification.innerHTML = `
+                <div class="alert alert-success shadow-lg">
+                    <h5 class="alert-heading">🎉 マイルストーン達成！</h5>
+                    <p class="mb-0"><strong>${milestone}枚</strong>のカードを収集しました！</p>
+                    <hr>
+                    <p class="mb-0 small">素晴らしい成果です！次の目標に向かって頑張りましょう！</p>
+                </div>
+            `;
+            document.body.appendChild(notification);
+            
+            setTimeout(() => {
+                notification.remove();
+            }, 5000);
         };
         
         // Helper function to normalize text for search
@@ -1002,6 +1387,7 @@
             const wishlistSnapshot = await getDocs(query(getCollectionRef('wishlist')));
             wishlistCollection = wishlistSnapshot.docs.map(doc => ({ id: doc.id, data: doc.data() }));
             
+            updateTotalCounts(); // Update stats
             applySearchAndFilter();
             showLoading(false);
         };
@@ -1019,6 +1405,7 @@
             } else {
                 cardCollection = [];
                 wishlistCollection = [];
+                updateTotalCounts(); // Update stats for local mode
                 applySearchAndFilter();
                 loadAllTags(); // ローカルモードでもタグをロード・初期化
                 document.getElementById('delete-account-btn').style.display = 'none';
@@ -1203,6 +1590,7 @@
                 
                 selectedCardIds.clear();
                 updateBulkEditControls();
+                updateTotalCounts(); // Update stats after bulk deletion
                 applySearchAndFilter();
                 alert(`${selectedCardIds.size}枚のカードを削除しました。`);
             } catch (error) {
@@ -1347,6 +1735,7 @@
                 // Execute with timeout
                 await Promise.race([dbOperation(), timeoutPromise]);
             
+                updateTotalCounts(); // Update stats after adding card
                 applySearchAndFilter();
                 addForm.reset();
                 currentCardTags = [];
@@ -1393,6 +1782,7 @@
                     } else {
                         wishlistCollection = wishlistCollection.filter(c => c.id !== cardId);
                     }
+                    updateTotalCounts(); // Update stats after deletion
                     applySearchAndFilter();
                 }
             } else if (target.classList.contains('edit-btn')) {
@@ -1434,6 +1824,7 @@
                         wishlistCollection = wishlistCollection.filter(c => c.id !== cardId);
                     }
                     
+                    updateTotalCounts(); // Update stats after moving card
                     applySearchAndFilter();
                 }
             }
@@ -1457,6 +1848,7 @@
                 localCard.data.枚数 = updatedData.枚数;
                 localCard.data.tags = updatedData.tags;
             }
+            updateTotalCounts(); // Update stats after editing
             applySearchAndFilter();
             editCardModal.hide();
         });
