@@ -237,6 +237,148 @@
         body.theme-cherry {
             background: linear-gradient(135deg, #ffecd2 0%, #fcb69f 100%);
         }
+        body.theme-midnight {
+            background: linear-gradient(135deg, #0f0c29 0%, #302b63 50%, #24243e 100%);
+            color: #e0e0e0;
+        }
+        body.theme-sakura {
+            background: linear-gradient(135deg, #fbc2eb 0%, #a6c1ee 100%);
+        }
+        body.theme-fire {
+            background: linear-gradient(135deg, #ff9a56 0%, #ff6a88 50%, #ff2d55 100%);
+        }
+        body.theme-aurora {
+            background: linear-gradient(135deg, #00d2ff 0%, #3a7bd5 50%, #00d2ff 100%);
+        }
+        body.theme-neon {
+            background: linear-gradient(135deg, #f953c6 0%, #b91d73 100%);
+            color: #fff;
+        }
+        
+        /* Frame Effects */
+        body.frame-gold .card {
+            border: 3px solid gold !important;
+            box-shadow: 0 0 15px rgba(255, 215, 0, 0.5);
+        }
+        body.frame-rainbow .card {
+            border: 3px solid transparent !important;
+            background: linear-gradient(white, white) padding-box,
+                       linear-gradient(45deg, red, orange, yellow, green, blue, indigo, violet) border-box;
+            animation: rainbow-border 3s linear infinite;
+        }
+        body.frame-diamond .card {
+            border: 3px solid silver !important;
+            box-shadow: 0 0 20px rgba(192, 192, 192, 0.8);
+            position: relative;
+        }
+        body.frame-fire .card {
+            border: 3px solid #ff4500 !important;
+            box-shadow: 0 0 20px rgba(255, 69, 0, 0.6);
+            animation: fire-glow 2s ease-in-out infinite;
+        }
+        body.frame-ice .card {
+            border: 3px solid #00bfff !important;
+            box-shadow: 0 0 20px rgba(0, 191, 255, 0.6);
+        }
+        body.frame-electric .card {
+            border: 3px solid #ffff00 !important;
+            box-shadow: 0 0 15px rgba(255, 255, 0, 0.8);
+            animation: electric-pulse 1s linear infinite;
+        }
+        
+        /* Background Patterns */
+        body.bg-stars::before {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-image: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><circle cx="10" cy="10" r="1" fill="white" opacity="0.5"/><circle cx="30" cy="20" r="1" fill="white" opacity="0.7"/><circle cx="50" cy="15" r="1.5" fill="white" opacity="0.6"/><circle cx="70" cy="25" r="1" fill="white" opacity="0.8"/><circle cx="90" cy="10" r="1" fill="white" opacity="0.5"/></svg>');
+            background-repeat: repeat;
+            pointer-events: none;
+            z-index: -1;
+            opacity: 0.3;
+        }
+        body.bg-clouds {
+            background-image: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 100"><ellipse cx="50" cy="50" rx="40" ry="20" fill="white" opacity="0.2"/><ellipse cx="150" cy="30" rx="50" ry="25" fill="white" opacity="0.15"/></svg>');
+            background-size: 200px 100px;
+            background-repeat: repeat;
+        }
+        body.bg-geometric::after {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-image: repeating-linear-gradient(45deg, transparent, transparent 35px, rgba(255,255,255,.1) 35px, rgba(255,255,255,.1) 70px);
+            pointer-events: none;
+            z-index: -1;
+        }
+        body.bg-gradient {
+            background: linear-gradient(270deg, #a8edea, #fed6e3, #ffd3b6, #ffaaa5);
+            background-size: 800% 800%;
+            animation: gradient-shift 15s ease infinite;
+        }
+        body.bg-particles {
+            position: relative;
+            overflow: hidden;
+        }
+        body.bg-waves::before {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-image: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1440 320"><path fill="%230099ff" fill-opacity="0.1" d="M0,32L48,53.3C96,75,192,117,288,122.7C384,128,480,96,576,90.7C672,85,768,107,864,128C960,149,1056,171,1152,165.3C1248,160,1344,128,1392,112L1440,96L1440,320L1392,320C1344,320,1248,320,1152,320C1056,320,960,320,864,320C768,320,672,320,576,320C480,320,384,320,288,320C192,320,96,320,48,320L0,320Z"></path></svg>');
+            background-repeat: repeat-x;
+            background-position: bottom;
+            pointer-events: none;
+            z-index: -1;
+        }
+        
+        /* Animations */
+        @keyframes rainbow-border {
+            0% { filter: hue-rotate(0deg); }
+            100% { filter: hue-rotate(360deg); }
+        }
+        @keyframes fire-glow {
+            0%, 100% { box-shadow: 0 0 20px rgba(255, 69, 0, 0.6); }
+            50% { box-shadow: 0 0 30px rgba(255, 140, 0, 0.8); }
+        }
+        @keyframes electric-pulse {
+            0%, 100% { box-shadow: 0 0 15px rgba(255, 255, 0, 0.8); }
+            50% { box-shadow: 0 0 25px rgba(255, 255, 0, 1); }
+        }
+        @keyframes gradient-shift {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
+        }
+        
+        /* Icon Styles */
+        body.icon-crown .collector-rank::after {
+            content: '👑';
+            margin-left: 5px;
+        }
+        body.icon-star .collector-rank::after {
+            content: '⭐';
+            margin-left: 5px;
+        }
+        body.icon-dragon .collector-rank::after {
+            content: '🐉';
+            margin-left: 5px;
+        }
+        body.icon-phoenix .collector-rank::after {
+            content: '🔥🦅';
+            margin-left: 5px;
+        }
+        body.icon-sword .collector-rank::after {
+            content: '⚔️';
+            margin-left: 5px;
+        }
         
         /* Shop modal styles */
         .shop-item {
@@ -529,17 +671,32 @@
                     <ul class="nav nav-tabs mb-3" role="tablist">
                         <li class="nav-item" role="presentation">
                             <button class="nav-link active" data-bs-toggle="tab" data-bs-target="#themes-tab" type="button">
-                                テーマ
+                                <i class="bi bi-palette"></i> テーマ
+                            </button>
+                        </li>
+                        <li class="nav-item" role="presentation">
+                            <button class="nav-link" data-bs-toggle="tab" data-bs-target="#frames-tab" type="button">
+                                <i class="bi bi-border-all"></i> フレーム
+                            </button>
+                        </li>
+                        <li class="nav-item" role="presentation">
+                            <button class="nav-link" data-bs-toggle="tab" data-bs-target="#backgrounds-tab" type="button">
+                                <i class="bi bi-image"></i> 背景
                             </button>
                         </li>
                         <li class="nav-item" role="presentation">
                             <button class="nav-link" data-bs-toggle="tab" data-bs-target="#effects-tab" type="button">
-                                エフェクト
+                                <i class="bi bi-stars"></i> エフェクト
+                            </button>
+                        </li>
+                        <li class="nav-item" role="presentation">
+                            <button class="nav-link" data-bs-toggle="tab" data-bs-target="#icons-tab" type="button">
+                                <i class="bi bi-award"></i> アイコン
                             </button>
                         </li>
                         <li class="nav-item" role="presentation">
                             <button class="nav-link" data-bs-toggle="tab" data-bs-target="#bonuses-tab" type="button">
-                                ボーナス
+                                <i class="bi bi-gift"></i> ボーナス
                             </button>
                         </li>
                     </ul>
@@ -553,10 +710,31 @@
                             </div>
                         </div>
                         
+                        <!-- Frames Tab -->
+                        <div class="tab-pane fade" id="frames-tab" role="tabpanel">
+                            <div class="row g-3" id="frame-shop-items">
+                                <!-- Frame items will be populated here -->
+                            </div>
+                        </div>
+                        
+                        <!-- Backgrounds Tab -->
+                        <div class="tab-pane fade" id="backgrounds-tab" role="tabpanel">
+                            <div class="row g-3" id="background-shop-items">
+                                <!-- Background items will be populated here -->
+                            </div>
+                        </div>
+                        
                         <!-- Effects Tab -->
                         <div class="tab-pane fade" id="effects-tab" role="tabpanel">
                             <div class="row g-3" id="effect-shop-items">
                                 <!-- Effect items will be populated here -->
+                            </div>
+                        </div>
+                        
+                        <!-- Icons Tab -->
+                        <div class="tab-pane fade" id="icons-tab" role="tabpanel">
+                            <div class="row g-3" id="icon-shop-items">
+                                <!-- Icon items will be populated here -->
                             </div>
                         </div>
                         
@@ -1318,6 +1496,9 @@
         let userPoints = parseInt(localStorage.getItem('userPoints') || '0');
         let purchasedItems = JSON.parse(localStorage.getItem('purchasedItems') || '{}');
         let activeTheme = localStorage.getItem('activeTheme') || 'default';
+        let activeFrame = localStorage.getItem('activeFrame') || '';
+        let activeBackground = localStorage.getItem('activeBackground') || '';
+        let activeIcon = localStorage.getItem('activeIcon') || '';
         
         const POINT_REWARDS = {
             addCard: 5,          // カード追加
@@ -1334,16 +1515,49 @@
                 { id: 'theme-sunset', name: 'サンセット', class: 'theme-sunset', cost: 150, preview: 'linear-gradient(135deg, #f093fb 0%, #f5576c 100%)' },
                 { id: 'theme-galaxy', name: 'ギャラクシー', class: 'theme-galaxy', cost: 200, preview: 'linear-gradient(135deg, #4776E6 0%, #8E54E9 100%)' },
                 { id: 'theme-cherry', name: 'チェリー', class: 'theme-cherry', cost: 150, preview: 'linear-gradient(135deg, #ffecd2 0%, #fcb69f 100%)' },
+                { id: 'theme-midnight', name: 'ミッドナイト', class: 'theme-midnight', cost: 180, preview: 'linear-gradient(135deg, #0f0c29 0%, #302b63 50%, #24243e 100%)' },
+                { id: 'theme-sakura', name: '桜', class: 'theme-sakura', cost: 200, preview: 'linear-gradient(135deg, #fbc2eb 0%, #a6c1ee 100%)' },
+                { id: 'theme-fire', name: 'ファイア', class: 'theme-fire', cost: 250, preview: 'linear-gradient(135deg, #ff9a56 0%, #ff6a88 50%, #ff2d55 100%)' },
+                { id: 'theme-aurora', name: 'オーロラ', class: 'theme-aurora', cost: 300, preview: 'linear-gradient(135deg, #00d2ff 0%, #3a7bd5 50%, #00d2ff 100%)' },
+                { id: 'theme-neon', name: 'ネオン', class: 'theme-neon', cost: 350, preview: 'linear-gradient(135deg, #f953c6 0%, #b91d73 100%)' },
+            ],
+            frames: [
+                { id: 'frame-gold', name: 'ゴールドフレーム', cost: 150, description: 'カードに金色の枠線', class: 'frame-gold' },
+                { id: 'frame-rainbow', name: 'レインボーフレーム', cost: 200, description: '虹色に輝く枠線', class: 'frame-rainbow' },
+                { id: 'frame-diamond', name: 'ダイヤモンドフレーム', cost: 250, description: 'キラキラ光る高級フレーム', class: 'frame-diamond' },
+                { id: 'frame-fire', name: '炎のフレーム', cost: 180, description: '燃え上がるフレーム', class: 'frame-fire' },
+                { id: 'frame-ice', name: '氷のフレーム', cost: 180, description: '冷たく輝くフレーム', class: 'frame-ice' },
+                { id: 'frame-electric', name: '電気フレーム', cost: 220, description: '電撃が走るフレーム', class: 'frame-electric' },
+            ],
+            backgrounds: [
+                { id: 'bg-stars', name: '星空背景', cost: 120, description: 'きらめく星空', class: 'bg-stars' },
+                { id: 'bg-clouds', name: '雲の背景', cost: 100, description: 'ふわふわ雲', class: 'bg-clouds' },
+                { id: 'bg-geometric', name: '幾何学模様', cost: 150, description: 'モダンな幾何学パターン', class: 'bg-geometric' },
+                { id: 'bg-gradient', name: 'グラデーション', cost: 80, description: '美しい色の変化', class: 'bg-gradient' },
+                { id: 'bg-particles', name: 'パーティクル', cost: 200, description: '動く粒子エフェクト', class: 'bg-particles' },
+                { id: 'bg-waves', name: '波模様', cost: 130, description: '優雅な波のパターン', class: 'bg-waves' },
             ],
             effects: [
                 { id: 'effect-confetti', name: '紙吹雪エフェクト', cost: 200, description: 'カード追加時に紙吹雪' },
                 { id: 'effect-sound', name: 'サウンドエフェクト', cost: 150, description: '操作音を追加' },
                 { id: 'effect-animation', name: 'アニメーション', cost: 300, description: 'カードに動きを追加' },
+                { id: 'effect-sparkle', name: 'キラキラエフェクト', cost: 180, description: 'カードがキラキラ光る' },
+                { id: 'effect-shake', name: '振動エフェクト', cost: 120, description: 'アクション時に振動' },
+                { id: 'effect-glow', name: '発光エフェクト', cost: 250, description: 'カードが柔らかく光る' },
+            ],
+            icons: [
+                { id: 'icon-crown', name: '王冠アイコン', cost: 100, description: 'プロフィールに王冠', class: 'icon-crown' },
+                { id: 'icon-star', name: 'スターアイコン', cost: 80, description: 'プロフィールに星', class: 'icon-star' },
+                { id: 'icon-dragon', name: 'ドラゴンアイコン', cost: 200, description: '特別なドラゴンマーク', class: 'icon-dragon' },
+                { id: 'icon-phoenix', name: '不死鳥アイコン', cost: 250, description: '伝説の不死鳥マーク', class: 'icon-phoenix' },
+                { id: 'icon-sword', name: '剣アイコン', cost: 150, description: '戦士の証', class: 'icon-sword' },
             ],
             bonuses: [
                 { id: 'bonus-double', name: '2倍ポイント (1日)', cost: 500, description: '1日間ポイント獲得量2倍' },
                 { id: 'bonus-lucky', name: 'ラッキーモード', cost: 300, description: 'レアカード獲得ポイントUP' },
                 { id: 'bonus-mission', name: 'ミッションリセット', cost: 100, description: 'デイリーミッションを再取得' },
+                { id: 'bonus-instant', name: '即座に100pt', cost: 50, description: '50ptで100pt獲得(限定)' },
+                { id: 'bonus-streak', name: 'ストリークブースト', cost: 200, description: '連続記録ボーナス増加' },
             ]
         };
         
@@ -1588,6 +1802,66 @@
                 });
             }
             
+            // Populate frames
+            const frameContainer = document.getElementById('frame-shop-items');
+            if (frameContainer) {
+                frameContainer.innerHTML = '';
+                SHOP_ITEMS.frames.forEach(frame => {
+                    const isPurchased = purchasedItems[frame.id];
+                    const isActive = activeFrame === frame.class;
+                    
+                    const itemEl = document.createElement('div');
+                    itemEl.className = 'col-md-6';
+                    itemEl.innerHTML = `
+                        <div class="card shop-item ${isPurchased ? 'purchased' : ''} ${isActive ? 'active' : ''} ${!isPurchased && userPoints < frame.cost ? 'locked' : ''}">
+                            <div class="card-body">
+                                <h6><i class="bi bi-border-all"></i> ${frame.name}</h6>
+                                <p class="small text-muted">${frame.description}</p>
+                                <div class="d-flex justify-content-between align-items-center">
+                                    <span class="badge bg-warning">${frame.cost} pt</span>
+                                    ${isPurchased ? 
+                                        (isActive ? '<button class="btn btn-sm btn-primary" disabled>適用中</button>' : 
+                                                   `<button class="btn btn-sm btn-success" onclick="applyFrame('${frame.class}')"">適用</button>`) :
+                                        `<button class="btn btn-sm btn-warning" onclick="purchaseItem('${frame.id}', ${frame.cost}, 'frame')">購入</button>`
+                                    }
+                                </div>
+                            </div>
+                        </div>
+                    `;
+                    frameContainer.appendChild(itemEl);
+                });
+            }
+            
+            // Populate backgrounds
+            const bgContainer = document.getElementById('background-shop-items');
+            if (bgContainer) {
+                bgContainer.innerHTML = '';
+                SHOP_ITEMS.backgrounds.forEach(bg => {
+                    const isPurchased = purchasedItems[bg.id];
+                    const isActive = activeBackground === bg.class;
+                    
+                    const itemEl = document.createElement('div');
+                    itemEl.className = 'col-md-6';
+                    itemEl.innerHTML = `
+                        <div class="card shop-item ${isPurchased ? 'purchased' : ''} ${isActive ? 'active' : ''} ${!isPurchased && userPoints < bg.cost ? 'locked' : ''}">
+                            <div class="card-body">
+                                <h6><i class="bi bi-image"></i> ${bg.name}</h6>
+                                <p class="small text-muted">${bg.description}</p>
+                                <div class="d-flex justify-content-between align-items-center">
+                                    <span class="badge bg-warning">${bg.cost} pt</span>
+                                    ${isPurchased ? 
+                                        (isActive ? '<button class="btn btn-sm btn-primary" disabled>適用中</button>' : 
+                                                   `<button class="btn btn-sm btn-success" onclick="applyBackground('${bg.class}')">適用</button>`) :
+                                        `<button class="btn btn-sm btn-warning" onclick="purchaseItem('${bg.id}', ${bg.cost}, 'background')">購入</button>`
+                                    }
+                                </div>
+                            </div>
+                        </div>
+                    `;
+                    bgContainer.appendChild(itemEl);
+                });
+            }
+            
             // Populate effects
             const effectContainer = document.getElementById('effect-shop-items');
             if (effectContainer) {
@@ -1613,6 +1887,36 @@
                         </div>
                     `;
                     effectContainer.appendChild(itemEl);
+                });
+            }
+            
+            // Populate icons
+            const iconContainer = document.getElementById('icon-shop-items');
+            if (iconContainer) {
+                iconContainer.innerHTML = '';
+                SHOP_ITEMS.icons.forEach(icon => {
+                    const isPurchased = purchasedItems[icon.id];
+                    const isActive = activeIcon === icon.class;
+                    
+                    const itemEl = document.createElement('div');
+                    itemEl.className = 'col-md-6';
+                    itemEl.innerHTML = `
+                        <div class="card shop-item ${isPurchased ? 'purchased' : ''} ${isActive ? 'active' : ''} ${!isPurchased && userPoints < icon.cost ? 'locked' : ''}">
+                            <div class="card-body">
+                                <h6><i class="bi bi-award"></i> ${icon.name}</h6>
+                                <p class="small text-muted">${icon.description}</p>
+                                <div class="d-flex justify-content-between align-items-center">
+                                    <span class="badge bg-warning">${icon.cost} pt</span>
+                                    ${isPurchased ? 
+                                        (isActive ? '<button class="btn btn-sm btn-primary" disabled>適用中</button>' : 
+                                                   `<button class="btn btn-sm btn-success" onclick="applyIcon('${icon.class}')">適用</button>`) :
+                                        `<button class="btn btn-sm btn-warning" onclick="purchaseItem('${icon.id}', ${icon.cost}, 'icon')">購入</button>`
+                                    }
+                                </div>
+                            </div>
+                        </div>
+                    `;
+                    iconContainer.appendChild(itemEl);
                 });
             }
             
@@ -1651,7 +1955,7 @@
                 userPoints -= cost;
                 localStorage.setItem('userPoints', userPoints.toString());
                 
-                if (type === 'theme') {
+                if (type === 'theme' || type === 'frame' || type === 'background' || type === 'icon' || type === 'effect') {
                     purchasedItems[itemId] = true;
                     localStorage.setItem('purchasedItems', JSON.stringify(purchasedItems));
                 } else if (type === 'bonus') {
@@ -1673,7 +1977,8 @@
         // Apply theme
         window.applyTheme = (themeClass) => {
             // Remove all theme classes
-            document.body.classList.remove('theme-ocean', 'theme-forest', 'theme-sunset', 'theme-galaxy', 'theme-cherry');
+            const allThemeClasses = SHOP_ITEMS.themes.map(t => t.class);
+            document.body.classList.remove(...allThemeClasses);
             
             if (themeClass !== 'default') {
                 document.body.classList.add(themeClass);
@@ -1681,6 +1986,51 @@
             
             activeTheme = themeClass;
             localStorage.setItem('activeTheme', activeTheme);
+            initializeShop();
+        };
+        
+        // Apply frame
+        window.applyFrame = (frameClass) => {
+            // Remove all frame classes
+            const allFrameClasses = SHOP_ITEMS.frames.map(f => f.class);
+            document.body.classList.remove(...allFrameClasses);
+            
+            if (frameClass && frameClass !== 'none') {
+                document.body.classList.add(frameClass);
+            }
+            
+            activeFrame = frameClass;
+            localStorage.setItem('activeFrame', activeFrame);
+            initializeShop();
+        };
+        
+        // Apply background
+        window.applyBackground = (bgClass) => {
+            // Remove all background classes
+            const allBgClasses = SHOP_ITEMS.backgrounds.map(b => b.class);
+            document.body.classList.remove(...allBgClasses);
+            
+            if (bgClass && bgClass !== 'none') {
+                document.body.classList.add(bgClass);
+            }
+            
+            activeBackground = bgClass;
+            localStorage.setItem('activeBackground', activeBackground);
+            initializeShop();
+        };
+        
+        // Apply icon
+        window.applyIcon = (iconClass) => {
+            // Remove all icon classes
+            const allIconClasses = SHOP_ITEMS.icons.map(i => i.class);
+            document.body.classList.remove(...allIconClasses);
+            
+            if (iconClass && iconClass !== 'none') {
+                document.body.classList.add(iconClass);
+            }
+            
+            activeIcon = iconClass;
+            localStorage.setItem('activeIcon', activeIcon);
             initializeShop();
         };
         
@@ -2486,15 +2836,30 @@
             initializeFunDashboard(); // Initialize fun features
             initializeShop(); // Initialize shop
             
-            // Apply saved theme
+            // Apply saved customizations
             const savedTheme = localStorage.getItem('activeTheme');
             if (savedTheme) {
                 applyTheme(savedTheme);
             }
             
+            const savedFrame = localStorage.getItem('activeFrame');
+            if (savedFrame) {
+                applyFrame(savedFrame);
+            }
+            
+            const savedBackground = localStorage.getItem('activeBackground');
+            if (savedBackground) {
+                applyBackground(savedBackground);
+            }
+            
+            const savedIcon = localStorage.getItem('activeIcon');
+            if (savedIcon) {
+                applyIcon(savedIcon);
+            }
+            
             // Add shop button event listener
             document.getElementById('point-shop-btn').addEventListener('click', () => {
-                const shopModal = new bootstrap.Modal(document.getElementById('shopModal'));
+                const shopModal = new bootstrap.Modal(document.getElementById('point-shop-modal'));
                 shopModal.show();
             });
         };
