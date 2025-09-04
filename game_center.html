@@ -2244,7 +2244,7 @@
             return sum;
         }
         
-        function displayCard(card, container) {
+        function displayBlackjackCard(card, container) {
             const cardEl = document.createElement('div');
             cardEl.style.cssText = 'width: 60px; height: 90px; background: white; border: 2px solid #333; border-radius: 5px; display: flex; flex-direction: column; align-items: center; justify-content: center; font-size: 24px;';
             const color = ['♥', '♦'].includes(card.suit) ? 'red' : 'black';
@@ -2280,9 +2280,9 @@
             dealerCards.push(blackjackDeck.pop());
             
             // Display cards
-            displayCard(playerCards[0], document.getElementById('player-cards'));
-            displayCard(playerCards[1], document.getElementById('player-cards'));
-            displayCard(dealerCards[0], document.getElementById('dealer-cards'));
+            displayBlackjackCard(playerCards[0], document.getElementById('player-cards'));
+            displayBlackjackCard(playerCards[1], document.getElementById('player-cards'));
+            displayBlackjackCard(dealerCards[0], document.getElementById('dealer-cards'));
             
             // Show back of dealer's second card
             const hiddenCard = document.createElement('div');
@@ -2309,7 +2309,7 @@
             if (!blackjackActive) return;
             
             playerCards.push(blackjackDeck.pop());
-            displayCard(playerCards[playerCards.length - 1], document.getElementById('player-cards'));
+            displayBlackjackCard(playerCards[playerCards.length - 1], document.getElementById('player-cards'));
             
             const playerScore = calculateHand(playerCards);
             document.getElementById('player-score').textContent = playerScore;
@@ -2327,13 +2327,13 @@
             
             // Reveal dealer's hidden card
             document.getElementById('hidden-card').remove();
-            displayCard(dealerCards[1], document.getElementById('dealer-cards'));
+            displayBlackjackCard(dealerCards[1], document.getElementById('dealer-cards'));
             
             // Dealer draws until 17 or higher
             while (calculateHand(dealerCards) < 17) {
                 await new Promise(r => setTimeout(r, 1000));
                 dealerCards.push(blackjackDeck.pop());
-                displayCard(dealerCards[dealerCards.length - 1], document.getElementById('dealer-cards'));
+                displayBlackjackCard(dealerCards[dealerCards.length - 1], document.getElementById('dealer-cards'));
             }
             
             const playerScore = calculateHand(playerCards);
@@ -2674,7 +2674,7 @@
                 
                 // Deal first card
                 currentCardValue = Math.floor(Math.random() * 13) + 1;
-                displayCard('current-card', currentCardValue);
+                displayHighLowCard('current-card', currentCardValue);
                 
                 isHighLowPlaying = true;
                 document.getElementById('highlow-cashout-button').style.display = 'inline-block';
@@ -2687,7 +2687,7 @@
             
             // Deal next card
             const nextCardValue = Math.floor(Math.random() * 13) + 1;
-            displayCard('next-card', nextCardValue);
+            displayHighLowCard('next-card', nextCardValue);
             
             let isWin = false;
             if (highlowChoice === 'high' && nextCardValue > currentCardValue) isWin = true;
@@ -2710,8 +2710,8 @@
                 // Move card
                 currentCardValue = nextCardValue;
                 setTimeout(() => {
-                    displayCard('current-card', currentCardValue);
-                    displayCard('next-card', 0);
+                    displayHighLowCard('current-card', currentCardValue);
+                    displayHighLowCard('next-card', 0);
                 }, 1000);
             } else {
                 resultEl.textContent = `残念！ストリーク: ${streak}回`;
@@ -2744,13 +2744,13 @@
             document.getElementById('highlow-cashout-button').style.display = 'none';
             document.querySelectorAll('.highlow-bet').forEach(b => b.classList.remove('selected'));
             
-            displayCard('current-card', 0);
-            displayCard('next-card', 0);
+            displayHighLowCard('current-card', 0);
+            displayHighLowCard('next-card', 0);
             
             await saveUserPoints();
         }
         
-        function displayCard(elementId, value) {
+        function displayHighLowCard(elementId, value) {
             const cardEl = document.getElementById(elementId);
             if (value === 0) {
                 cardEl.textContent = '?';
