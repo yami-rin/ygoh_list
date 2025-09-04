@@ -47,7 +47,7 @@
             display: flex;
             justify-content: space-between;
             align-items: center;
-            background: linear-gradient(135deg, #ffd700 0%, #ffed4e 100%);
+            background: linear-gradient(135deg, #d4af37 0%, #b8941f 100%);
             padding: 15px 25px;
             border-radius: 15px;
             margin-bottom: 30px;
@@ -84,7 +84,7 @@
             background: linear-gradient(145deg, #ffffff, #f0f0f0);
             border: 4px solid transparent;
             background-clip: padding-box;
-            border-image: linear-gradient(45deg, gold, #ffed4e) 1;
+            border-image: linear-gradient(45deg, #d4af37, #b8941f) 1;
             border-radius: 15px;
             display: flex;
             align-items: center;
@@ -186,7 +186,7 @@
 
         .bet-selector input:focus {
             outline: none;
-            border-color: gold;
+            border-color: #d4af37;
             box-shadow: 0 0 5px rgba(255, 215, 0, 0.3);
         }
 
@@ -447,7 +447,7 @@
 
         .game-card:hover {
             transform: translateY(-5px);
-            border-color: gold;
+            border-color: #d4af37;
             box-shadow: 0 10px 30px rgba(255, 215, 0, 0.3);
         }
 
@@ -569,7 +569,7 @@
             height: 0;
             border-left: 15px solid transparent;
             border-right: 15px solid transparent;
-            border-top: 30px solid gold;
+            border-top: 30px solid #d4af37;
             z-index: 11;
             filter: drop-shadow(0 2px 5px rgba(0,0,0,0.3));
         }
@@ -611,13 +611,13 @@
         }
 
         .bet-option:hover {
-            border-color: gold;
+            border-color: #d4af37;
             transform: translateY(-2px);
         }
 
         .bet-option.selected {
-            background: gold;
-            border-color: #ffed4e;
+            background: linear-gradient(135deg, #d4af37, #b8941f);
+            border-color: #b8941f;
             font-weight: bold;
         }
 
@@ -1061,7 +1061,7 @@
             </div>
             
             <div class="coin-container" style="text-align: center; margin: 30px auto;">
-                <div id="coin" style="width: 200px; height: 200px; margin: 30px auto; background: gold; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 100px; transition: all 0.5s;">
+                <div id="coin" style="width: 200px; height: 200px; margin: 30px auto; background: linear-gradient(135deg, #d4af37 0%, #b8941f 100%); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 100px; transition: all 0.5s; box-shadow: 0 4px 8px rgba(0,0,0,0.2);">
                     🪙
                 </div>
                 
@@ -1106,9 +1106,9 @@
             <div class="number-container" style="text-align: center; margin: 30px auto; max-width: 500px;">
                 <div style="background: rgba(255,255,255,0.1); padding: 30px; border-radius: 15px;">
                     <h3 style="color: #333;">1〜100の数字を当ててください</h3>
-                    <p style="color: #ccc;">ヒントを参考に数字を絞り込もう！</p>
+                    <p style="color: #666;">ヒントを参考に数字を絞り込もう！</p>
                     
-                    <div id="number-hints" style="margin: 20px 0; color: yellow; font-size: 1.2rem; min-height: 30px;">
+                    <div id="number-hints" style="margin: 20px 0; color: #d4af37; font-size: 1.2rem; font-weight: bold; min-height: 30px;">
                         <!-- Hints will appear here -->
                     </div>
                     
@@ -1762,7 +1762,7 @@
                 
                 // Color the numbers
                 if (num === 0) {
-                    numberDiv.style.color = '#0f0';
+                    numberDiv.style.color = '#2d7d2d';  // Darker green for better visibility
                 } else if (redNumbers.includes(num)) {
                     numberDiv.style.color = '#fff';
                     numberDiv.style.textShadow = '0 0 3px #000';
@@ -1892,7 +1892,7 @@
             // Display result with color coding
             let numberColor = '';
             if (finalNumber === 0) {
-                numberColor = 'style="color: #0f0; font-weight: bold;"';
+                numberColor = 'style="color: #2d7d2d; font-weight: bold;"';  // Darker green
             } else if (isRed) {
                 numberColor = 'style="color: #f00; font-weight: bold;"';
             } else {
