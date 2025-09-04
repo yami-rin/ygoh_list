@@ -556,6 +556,17 @@
                     const data = pricesSnap.data();
                     const lastUpdate = data.lastUpdate?.toMillis() || 0;
                     
+                    // Load saved game state
+                    if (data.gameDate) {
+                        gameDate = new Date(data.gameDate);
+                    }
+                    if (data.globalMarketState !== undefined) {
+                        globalMarketState = data.globalMarketState;
+                    }
+                    if (data.lastRegulationDate) {
+                        lastRegulationDate = new Date(data.lastRegulationDate);
+                    }
+                    
                     // Update prices if 10 seconds have passed
                     if (now - lastUpdate >= tenSeconds) {
                         await updateCardPrices();
@@ -619,9 +630,7 @@
                     if (pricesSnap.exists()) {
                         const data = pricesSnap.data();
                         cardPrices = data.prices || {};
-                        gameDate = data.gameDate ? new Date(data.gameDate) : new Date(2024, 0, 1);
-                        globalMarketState = data.globalMarketState || null;
-                        lastRegulationDate = data.lastRegulationDate ? new Date(data.lastRegulationDate) : null;
+                        // Don't reset date here - it's already loaded in loadCardPrices
                     }
                 } catch (error) {
                     console.error('Error loading existing prices:', error);
@@ -746,29 +755,33 @@
                     price.continuationCount++;
                 }
                 
+                // Check if card is immune to price decreases
+                const isImmune = (card.rarity === 'PSE' || card.rarity === 'QCSE' || 
+                    (card.name === '青眼の白龍' && card.rarity === 'SE'));
+                
                 // Apply price changes based on pattern
                 let multiplier = 1;
                 
                 switch (price.pattern) {
                     case PRICE_PATTERNS.SUPPLY:
-                        // Gradual decrease
-                        multiplier = 0.94 + Math.random() * 0.03; // 0.94-0.97
+                        // Gradual decrease (immune cards unaffected)
+                        multiplier = isImmune ? 1 : (0.94 + Math.random() * 0.03); // 0.94-0.97
                         break;
                     
                     case PRICE_PATTERNS.REPRINT:
-                        // Sharp decrease (not for PSE/QCSE)
-                        if (card.rarity !== 'PSE' && card.rarity !== 'QCSE') {
-                            multiplier = 0.5 + Math.random() * 0.2; // 0.5-0.7
-                        } else {
-                            multiplier = 1; // No change for PSE/QCSE
-                        }
+                        // Sharp decrease (PSE/QCSE/青眼SE immune)
+                        multiplier = isImmune ? 1 : (0.5 + Math.random() * 0.2); // 0.5-0.7
                         break;
                     
                     case PRICE_PATTERNS.META:
                         // Up or down randomly
-                        multiplier = Math.random() < 0.5 ? 
-                            (1.05 + Math.random() * 0.1) : // 1.05-1.15 up
-                            (0.85 + Math.random() * 0.1);  // 0.85-0.95 down
+                        const isUp = Math.random() < 0.5;
+                        if (isUp) {
+                            multiplier = 1.05 + Math.random() * 0.1; // 1.05-1.15 up
+                        } else {
+                            // Immune cards don't go down
+                            multiplier = isImmune ? 1 : (0.85 + Math.random() * 0.1); // 0.85-0.95 down
+                        }
                         break;
                     
                     case PRICE_PATTERNS.TOURNAMENT:
@@ -786,12 +799,12 @@
                         break;
                     
                     case PRICE_PATTERNS.DECLINE:
-                        // Gradual decrease
-                        multiplier = 0.92 + Math.random() * 0.04; // 0.92-0.96
+                        // Gradual decrease (immune cards unaffected)
+                        multiplier = isImmune ? 1 : (0.92 + Math.random() * 0.04); // 0.92-0.96
                         break;
                     
                     case PRICE_PATTERNS.REGULATION:
-                        // Sharp change up or down
+                        // Sharp change up or down (regulation affects all cards)
                         multiplier = Math.random() < 0.5 ? 
                             (0.4 + Math.random() * 0.2) :  // 0.4-0.6 (banned/limited)
                             (1.5 + Math.random() * 0.5);   // 1.5-2.0 (unbanned)
@@ -833,11 +846,11 @@
                 // Check for bubble start (1% chance)
                 if (rand < 0.01) {
                     globalMarketState = 'bubble';
-                    // All prices increase by 30%
+                    // All prices increase by 40% + 350
                     Object.keys(cardPrices).forEach(cardId => {
-                        cardPrices[cardId].current = Math.floor(cardPrices[cardId].current * 1.3);
+                        cardPrices[cardId].current = Math.floor(cardPrices[cardId].current * 1.4 + 350);
                     });
-                    showMarketAlert('バブル発生', 'カード市場にバブルが発生！全カードの価格が30%上昇！');
+                    showMarketAlert('バブル発生', 'カード市場にバブルが発生！全カードの価格が40%+350pt上昇！');
                 }
             } else if (globalMarketState === 'bubble') {
                 // Check for bubble burst (30% chance) or continue
