@@ -1089,11 +1089,6 @@
                             </button>
                         </li>
                         <li class="nav-item" role="presentation">
-                            <button class="nav-link" data-bs-toggle="tab" data-bs-target="#effects-tab" type="button">
-                                <i class="bi bi-stars"></i> エフェクト
-                            </button>
-                        </li>
-                        <li class="nav-item" role="presentation">
                             <button class="nav-link" data-bs-toggle="tab" data-bs-target="#icons-tab" type="button">
                                 <i class="bi bi-award"></i> アイコン
                             </button>
@@ -1120,13 +1115,6 @@
                         <div class="tab-pane fade" id="backgrounds-tab" role="tabpanel">
                             <div class="row g-3" id="background-shop-items">
                                 <!-- Background items will be populated here -->
-                            </div>
-                        </div>
-                        
-                        <!-- Effects Tab -->
-                        <div class="tab-pane fade" id="effects-tab" role="tabpanel">
-                            <div class="row g-3" id="effect-shop-items">
-                                <!-- Effect items will be populated here -->
                             </div>
                         </div>
                         
@@ -1984,52 +1972,113 @@
         
         const SHOP_ITEMS = {
             themes: [
-                { id: 'theme-ocean', name: 'オーシャン', class: 'theme-ocean', cost: 100, preview: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)' },
-                { id: 'theme-forest', name: 'フォレスト', class: 'theme-forest', cost: 100, preview: 'linear-gradient(135deg, #0ba360 0%, #3cba92 100%)' },
-                { id: 'theme-sunset', name: 'サンセット', class: 'theme-sunset', cost: 150, preview: 'linear-gradient(135deg, #f093fb 0%, #f5576c 100%)' },
-                { id: 'theme-galaxy', name: 'ギャラクシー', class: 'theme-galaxy', cost: 200, preview: 'linear-gradient(135deg, #4776E6 0%, #8E54E9 100%)' },
+                // Basic themes (50-100pt)
+                { id: 'theme-light-blue', name: 'ライトブルー', class: 'theme-light-blue', cost: 50, preview: 'linear-gradient(135deg, #e3f2fd 0%, #bbdefb 100%)' },
+                { id: 'theme-mint', name: 'ミント', class: 'theme-mint', cost: 80, preview: 'linear-gradient(135deg, #c8e6c9 0%, #81c784 100%)' },
+                { id: 'theme-peach', name: 'ピーチ', class: 'theme-peach', cost: 80, preview: 'linear-gradient(135deg, #ffccbc 0%, #ffab91 100%)' },
+                
+                // Mid-tier themes (100-200pt)
+                { id: 'theme-ocean', name: 'オーシャン', class: 'theme-ocean', cost: 150, preview: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)' },
+                { id: 'theme-forest', name: 'フォレスト', class: 'theme-forest', cost: 120, preview: 'linear-gradient(135deg, #0ba360 0%, #3cba92 100%)' },
+                { id: 'theme-sunset', name: 'サンセット', class: 'theme-sunset', cost: 180, preview: 'linear-gradient(135deg, #f093fb 0%, #f5576c 100%)' },
                 { id: 'theme-cherry', name: 'チェリー', class: 'theme-cherry', cost: 150, preview: 'linear-gradient(135deg, #ffecd2 0%, #fcb69f 100%)' },
-                { id: 'theme-midnight', name: 'ミッドナイト', class: 'theme-midnight', cost: 180, preview: 'linear-gradient(135deg, #0f0c29 0%, #302b63 50%, #24243e 100%)' },
                 { id: 'theme-sakura', name: '桜', class: 'theme-sakura', cost: 200, preview: 'linear-gradient(135deg, #fbc2eb 0%, #a6c1ee 100%)' },
-                { id: 'theme-fire', name: 'ファイア', class: 'theme-fire', cost: 250, preview: 'linear-gradient(135deg, #ff9a56 0%, #ff6a88 50%, #ff2d55 100%)' },
-                { id: 'theme-aurora', name: 'オーロラ', class: 'theme-aurora', cost: 300, preview: 'linear-gradient(135deg, #00d2ff 0%, #3a7bd5 50%, #00d2ff 100%)' },
-                { id: 'theme-neon', name: 'ネオン', class: 'theme-neon', cost: 350, preview: 'linear-gradient(135deg, #f953c6 0%, #b91d73 100%)' },
+                
+                // Premium themes (250-500pt)
+                { id: 'theme-galaxy', name: 'ギャラクシー', class: 'theme-galaxy', cost: 300, preview: 'linear-gradient(135deg, #4776E6 0%, #8E54E9 100%)' },
+                { id: 'theme-midnight', name: 'ミッドナイト', class: 'theme-midnight', cost: 350, preview: 'linear-gradient(135deg, #0f0c29 0%, #302b63 50%, #24243e 100%)' },
+                { id: 'theme-fire', name: 'ファイア', class: 'theme-fire', cost: 400, preview: 'linear-gradient(135deg, #ff9a56 0%, #ff6a88 50%, #ff2d55 100%)' },
+                { id: 'theme-aurora', name: 'オーロラ', class: 'theme-aurora', cost: 450, preview: 'linear-gradient(135deg, #00d2ff 0%, #3a7bd5 50%, #00d2ff 100%)' },
+                { id: 'theme-neon', name: 'ネオン', class: 'theme-neon', cost: 500, preview: 'linear-gradient(135deg, #f953c6 0%, #b91d73 100%)' },
+                
+                // Ultra premium themes (600-1000pt)
+                { id: 'theme-cosmic', name: 'コズミック', class: 'theme-cosmic', cost: 600, preview: 'linear-gradient(135deg, #667eea 0%, #764ba2 50%, #f953c6 100%)' },
+                { id: 'theme-rainbow', name: 'レインボー', class: 'theme-rainbow', cost: 800, preview: 'linear-gradient(135deg, #ff0000 0%, #ff7f00 17%, #ffff00 33%, #00ff00 50%, #0000ff 67%, #4b0082 83%, #9400d3 100%)' },
+                { id: 'theme-holographic', name: 'ホログラフィック', class: 'theme-holographic', cost: 900, preview: 'linear-gradient(135deg, #a8edea 0%, #fed6e3 25%, #ffeaa7 50%, #dfe6e9 75%, #a8edea 100%)' },
+                { id: 'theme-dragon-soul', name: 'ドラゴンソウル', class: 'theme-dragon-soul', cost: 1200, preview: 'linear-gradient(135deg, #f83600 0%, #f9d423 50%, #f83600 100%)' },
+                { id: 'theme-legendary', name: 'レジェンダリー', class: 'theme-legendary', cost: 1500, preview: 'linear-gradient(135deg, #ffd700 0%, #ff6347 25%, #ff1493 50%, #00ced1 75%, #ffd700 100%)' },
             ],
             frames: [
-                { id: 'frame-gold', name: 'ゴールドフレーム', cost: 150, description: 'カードに金色の枠線', class: 'frame-gold' },
-                { id: 'frame-rainbow', name: 'レインボーフレーム', cost: 200, description: '虹色に輝く枠線', class: 'frame-rainbow' },
-                { id: 'frame-diamond', name: 'ダイヤモンドフレーム', cost: 250, description: 'キラキラ光る高級フレーム', class: 'frame-diamond' },
-                { id: 'frame-fire', name: '炎のフレーム', cost: 180, description: '燃え上がるフレーム', class: 'frame-fire' },
-                { id: 'frame-ice', name: '氷のフレーム', cost: 180, description: '冷たく輝くフレーム', class: 'frame-ice' },
-                { id: 'frame-electric', name: '電気フレーム', cost: 220, description: '電撃が走るフレーム', class: 'frame-electric' },
+                // Basic frames (50-100pt)
+                { id: 'frame-simple', name: 'シンプル', cost: 50, description: 'シンプルな枠線', class: 'frame-simple' },
+                { id: 'frame-bold', name: 'ボールド', cost: 80, description: '太い枠線', class: 'frame-bold' },
+                { id: 'frame-dotted', name: 'ドット', cost: 60, description: '点線の枠', class: 'frame-dotted' },
+                
+                // Mid-tier frames (120-250pt)
+                { id: 'frame-silver', name: 'シルバー', cost: 120, description: '銀色の枠線', class: 'frame-silver' },
+                { id: 'frame-gold', name: 'ゴールド', cost: 200, description: 'カードに金色の枠線', class: 'frame-gold' },
+                { id: 'frame-fire', name: '炎', cost: 250, description: '燃え上がるフレーム', class: 'frame-fire' },
+                { id: 'frame-ice', name: '氷', cost: 250, description: '冷たく輝くフレーム', class: 'frame-ice' },
+                { id: 'frame-nature', name: '自然', cost: 180, description: '葉っぱで飾られた枠', class: 'frame-nature' },
+                
+                // Premium frames (300-500pt)
+                { id: 'frame-rainbow', name: 'レインボー', cost: 350, description: '虹色に輝く枠線', class: 'frame-rainbow' },
+                { id: 'frame-electric', name: '電気', cost: 320, description: '電撃が走るフレーム', class: 'frame-electric' },
+                { id: 'frame-diamond', name: 'ダイヤモンド', cost: 400, description: 'キラキラ光る高級フレーム', class: 'frame-diamond' },
+                { id: 'frame-plasma', name: 'プラズマ', cost: 450, description: 'プラズマが流れる枠', class: 'frame-plasma' },
+                { id: 'frame-crystal', name: 'クリスタル', cost: 500, description: '水晶のような透明感', class: 'frame-crystal' },
+                
+                // Ultra premium frames (600-1500pt)
+                { id: 'frame-legendary', name: 'レジェンダリー', cost: 700, description: '伝説級の豪華な枠', class: 'frame-legendary' },
+                { id: 'frame-mythic', name: 'ミシック', cost: 900, description: '神話級の神秘的な枠', class: 'frame-mythic' },
+                { id: 'frame-ultimate', name: 'アルティメット', cost: 1100, description: '究極の装飾枠', class: 'frame-ultimate' },
+                { id: 'frame-god', name: 'ゴッド', cost: 1500, description: '神々しい光の枠', class: 'frame-god' },
             ],
             backgrounds: [
-                { id: 'bg-stars', name: '星空背景', cost: 120, description: 'きらめく星空', class: 'bg-stars' },
-                { id: 'bg-clouds', name: '雲の背景', cost: 100, description: 'ふわふわ雲', class: 'bg-clouds' },
-                { id: 'bg-geometric', name: '幾何学模様', cost: 150, description: 'モダンな幾何学パターン', class: 'bg-geometric' },
-                { id: 'bg-gradient', name: 'グラデーション', cost: 80, description: '美しい色の変化', class: 'bg-gradient' },
-                { id: 'bg-particles', name: 'パーティクル', cost: 200, description: '動く粒子エフェクト', class: 'bg-particles' },
-                { id: 'bg-waves', name: '波模様', cost: 130, description: '優雅な波のパターン', class: 'bg-waves' },
-            ],
-            effects: [
-                { id: 'effect-confetti', name: '紙吹雪エフェクト', cost: 200, description: 'カード追加時に紙吹雪' },
-                { id: 'effect-sound', name: 'サウンドエフェクト', cost: 150, description: '操作音を追加' },
-                { id: 'effect-animation', name: 'アニメーション', cost: 300, description: 'カードに動きを追加' },
-                { id: 'effect-sparkle', name: 'キラキラエフェクト', cost: 180, description: 'カードがキラキラ光る' },
-                { id: 'effect-shake', name: '振動エフェクト', cost: 120, description: 'アクション時に振動' },
-                { id: 'effect-glow', name: '発光エフェクト', cost: 250, description: 'カードが柔らかく光る' },
+                // Basic backgrounds (50-100pt)
+                { id: 'bg-gradient', name: 'グラデーション', cost: 50, description: '美しい色の変化', class: 'bg-gradient' },
+                { id: 'bg-dots', name: 'ドット', cost: 60, description: 'かわいいドットパターン', class: 'bg-dots' },
+                { id: 'bg-stripes', name: 'ストライプ', cost: 60, description: '縞模様の背景', class: 'bg-stripes' },
+                { id: 'bg-checker', name: 'チェッカー', cost: 80, description: '市松模様', class: 'bg-checker' },
+                
+                // Mid-tier backgrounds (120-250pt)
+                { id: 'bg-clouds', name: '雲', cost: 120, description: 'ふわふわ雲', class: 'bg-clouds' },
+                { id: 'bg-waves', name: '波', cost: 150, description: '優雅な波のパターン', class: 'bg-waves' },
+                { id: 'bg-geometric', name: '幾何学', cost: 180, description: 'モダンな幾何学パターン', class: 'bg-geometric' },
+                { id: 'bg-hexagon', name: 'ヘキサゴン', cost: 200, description: '六角形パターン', class: 'bg-hexagon' },
+                { id: 'bg-circuit', name: '回路', cost: 220, description: 'サイバー回路パターン', class: 'bg-circuit' },
+                
+                // Premium backgrounds (250-500pt)
+                { id: 'bg-stars', name: '星空', cost: 300, description: 'きらめく星空', class: 'bg-stars' },
+                { id: 'bg-particles', name: 'パーティクル', cost: 350, description: '動く粒子エフェクト', class: 'bg-particles' },
+                { id: 'bg-galaxy', name: '銀河', cost: 400, description: '壮大な銀河の背景', class: 'bg-galaxy' },
+                { id: 'bg-aurora', name: 'オーロラ', cost: 450, description: '美しいオーロラの背景', class: 'bg-aurora' },
+                { id: 'bg-crystal', name: 'クリスタル', cost: 500, description: 'クリスタルの輝き', class: 'bg-crystal' },
+                
+                // Ultra premium backgrounds (600-1500pt)
+                { id: 'bg-matrix', name: 'マトリックス', cost: 600, description: 'デジタルマトリックス', class: 'bg-matrix' },
+                { id: 'bg-nebula', name: 'ネビュラ', cost: 800, description: '宇宙の星雲', class: 'bg-nebula' },
+                { id: 'bg-dimension', name: '次元', cost: 1000, description: '多次元空間の背景', class: 'bg-dimension' },
+                { id: 'bg-void', name: 'ヴォイド', cost: 1200, description: '虚空の深淵', class: 'bg-void' },
+                { id: 'bg-infinity', name: 'インフィニティ', cost: 1500, description: '無限の彼方', class: 'bg-infinity' },
             ],
             icons: [
-                { id: 'icon-crown', name: '王冠アイコン', cost: 100, description: 'プロフィールに王冠', class: 'icon-crown', emoji: '👑' },
-                { id: 'icon-star', name: 'スターアイコン', cost: 80, description: 'プロフィールに星', class: 'icon-star', emoji: '✨' },
-                { id: 'icon-dragon', name: 'ドラゴンアイコン', cost: 200, description: '特別なドラゴンマーク', class: 'icon-dragon', emoji: '🐉' },
-                { id: 'icon-phoenix', name: '不死鳥アイコン', cost: 250, description: '伝説の不死鳥マーク', class: 'icon-phoenix', emoji: '🦅' },
-                { id: 'icon-sword', name: '剣アイコン', cost: 150, description: '戦士の証', class: 'icon-sword', emoji: '⚔️' },
-                { id: 'icon-wizard', name: '魔法使いアイコン', cost: 180, description: '神秘的な魔法使い', class: 'icon-wizard', emoji: '🧙' },
-                { id: 'icon-robot', name: 'ロボットアイコン', cost: 120, description: 'クールなロボット', class: 'icon-robot', emoji: '🤖' },
-                { id: 'icon-alien', name: 'エイリアンアイコン', cost: 150, description: '宇宙から来た訪問者', class: 'icon-alien', emoji: '👽' },
-                { id: 'icon-ghost', name: 'ゴーストアイコン', cost: 100, description: 'ミステリアスな幽霊', class: 'icon-ghost', emoji: '👻' },
-                { id: 'icon-devil', name: 'デビルアイコン', cost: 140, description: '小悪魔的な存在', class: 'icon-devil', emoji: '😈' },
+                // Basic icons (50-150pt)
+                { id: 'icon-star', name: 'スター', cost: 50, description: 'きらめく星', class: 'icon-star', emoji: '✨' },
+                { id: 'icon-heart', name: 'ハート', cost: 60, description: 'かわいいハート', class: 'icon-heart', emoji: '❤️' },
+                { id: 'icon-ghost', name: 'ゴースト', cost: 80, description: 'ミステリアスな幽霊', class: 'icon-ghost', emoji: '👻' },
+                { id: 'icon-crown', name: '王冠', cost: 100, description: '王者の証', class: 'icon-crown', emoji: '👑' },
+                { id: 'icon-robot', name: 'ロボット', cost: 120, description: 'クールなロボット', class: 'icon-robot', emoji: '🤖' },
+                { id: 'icon-alien', name: 'エイリアン', cost: 150, description: '宇宙から来た訪問者', class: 'icon-alien', emoji: '👽' },
+                
+                // Mid-tier icons (180-300pt)
+                { id: 'icon-devil', name: 'デビル', cost: 180, description: '小悪魔的な存在', class: 'icon-devil', emoji: '😈' },
+                { id: 'icon-sword', name: '剣', cost: 200, description: '戦士の証', class: 'icon-sword', emoji: '⚔️' },
+                { id: 'icon-wizard', name: '魔法使い', cost: 250, description: '神秘的な魔法使い', class: 'icon-wizard', emoji: '🧙' },
+                { id: 'icon-dragon', name: 'ドラゴン', cost: 300, description: '特別なドラゴンマーク', class: 'icon-dragon', emoji: '🐉' },
+                
+                // Premium icons (350-600pt)
+                { id: 'icon-phoenix', name: '不死鳥', cost: 350, description: '伝説の不死鳥マーク', class: 'icon-phoenix', emoji: '🦅' },
+                { id: 'icon-unicorn', name: 'ユニコーン', cost: 400, description: '幻の一角獣', class: 'icon-unicorn', emoji: '🦄' },
+                { id: 'icon-ninja', name: '忍者', cost: 450, description: '影の戦士', class: 'icon-ninja', emoji: '🥷' },
+                { id: 'icon-samurai', name: '侍', cost: 500, description: '武士道の心', class: 'icon-samurai', emoji: '⛩️' },
+                { id: 'icon-monster', name: 'モンスター', cost: 600, description: '恐ろしい怪物', class: 'icon-monster', emoji: '👹' },
+                
+                // Ultra premium icons (700-1500pt)
+                { id: 'icon-god', name: '神', cost: 800, description: '神々しい存在', class: 'icon-god', emoji: '🌟' },
+                { id: 'icon-demon-king', name: '魔王', cost: 1000, description: '闇の支配者', class: 'icon-demon-king', emoji: '👺' },
+                { id: 'icon-legendary', name: 'レジェンダリー', cost: 1200, description: '伝説の証', class: 'icon-legendary', emoji: '💫' },
+                { id: 'icon-infinity', name: 'インフィニティ', cost: 1500, description: '無限の力', class: 'icon-infinity', emoji: '♾️' },
             ]
         };
         
@@ -2380,34 +2429,6 @@
                         </div>
                     `;
                     bgContainer.appendChild(itemEl);
-                });
-            }
-            
-            // Populate effects
-            const effectContainer = document.getElementById('effect-shop-items');
-            if (effectContainer) {
-                effectContainer.innerHTML = '';
-                SHOP_ITEMS.effects.forEach(effect => {
-                    const isPurchased = gamificationData.purchasedItems[effect.id];
-                    
-                    const itemEl = document.createElement('div');
-                    itemEl.className = 'col-md-6';
-                    itemEl.innerHTML = `
-                        <div class="card shop-item ${isPurchased ? 'purchased' : ''} ${!isPurchased && gamificationData.userPoints < effect.cost ? 'locked' : ''}">
-                            <div class="card-body">
-                                <h6><i class="bi bi-stars"></i> ${effect.name}</h6>
-                                <p class="small text-muted">${effect.description}</p>
-                                <div class="d-flex justify-content-between align-items-center">
-                                    <span class="badge bg-warning">${effect.cost} pt</span>
-                                    ${isPurchased ? 
-                                        '<span class="badge bg-success">購入済み</span>' :
-                                        `<button class="btn btn-sm btn-warning" onclick="purchaseItem('${effect.id}', ${effect.cost}, 'effect')">購入</button>`
-                                    }
-                                </div>
-                            </div>
-                        </div>
-                    `;
-                    effectContainer.appendChild(itemEl);
                 });
             }
             
