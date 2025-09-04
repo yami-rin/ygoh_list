@@ -450,7 +450,8 @@
                 
                 if (gamificationSnap.exists()) {
                     const data = gamificationSnap.data();
-                    userPoints = data.points || 0;
+                    // card_list.html uses 'userPoints' field
+                    userPoints = data.userPoints || data.points || 0;
                     document.getElementById('current-points').textContent = userPoints.toLocaleString();
                 }
             } catch (error) {
@@ -462,7 +463,8 @@
         async function saveUserPoints() {
             try {
                 const gamificationRef = doc(db, 'userGamification', currentUser.uid);
-                await updateDoc(gamificationRef, { points: userPoints });
+                // Use 'userPoints' field to match card_list.html
+                await updateDoc(gamificationRef, { userPoints: userPoints });
                 document.getElementById('current-points').textContent = userPoints.toLocaleString();
             } catch (error) {
                 console.error('Error saving points:', error);
@@ -915,7 +917,7 @@
                     const userCredential = await createUserWithEmailAndPassword(auth, email, password);
                     const gamificationRef = doc(db, 'userGamification', userCredential.user.uid);
                     await setDoc(gamificationRef, {
-                        points: 100,
+                        userPoints: 100,  // Use 'userPoints' to match card_list.html
                         totalEarned: 100,
                         totalSpent: 0,
                         lastLogin: serverTimestamp(),
