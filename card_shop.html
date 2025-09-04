@@ -114,6 +114,9 @@
         .rarity-SR { background: #e67e22; color: white; }
         .rarity-UR { background: #e74c3c; color: white; }
         .rarity-Secret { background: linear-gradient(45deg, #f39c12, #f1c40f); color: white; }
+        .rarity-SE { background: linear-gradient(45deg, #c0c0c0, #e8e8e8); color: #333; }
+        .rarity-PSE { background: linear-gradient(45deg, #8b4789, #9b59b6); color: white; }
+        .rarity-QCSE { background: linear-gradient(45deg, #ffd700, #ffed4e); color: #333; }
         
         .card-price {
             font-size: 1.1rem;
@@ -320,8 +323,10 @@
                     <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
                 </div>
                 <div class="modal-body">
-                    <h6 id="chartCardName" class="mb-3"></h6>
-                    <canvas id="priceChart" width="400" height="200"></canvas>
+                    <h6 id="chartCardName" class="mb-3 text-center fw-bold"></h6>
+                    <div style="height: 350px; position: relative;">
+                        <canvas id="priceChart"></canvas>
+                    </div>
                     <div class="mt-3">
                         <div class="row">
                             <div class="col-6">
@@ -1248,28 +1253,54 @@
                 data: {
                     labels: labels,
                     datasets: [{
-                        label: '価格',
+                        label: '価格推移',
                         data: data,
-                        borderColor: 'rgb(75, 192, 192)',
-                        backgroundColor: 'rgba(75, 192, 192, 0.2)',
-                        tension: 0.1
+                        borderColor: '#2563eb',
+                        backgroundColor: 'rgba(37, 99, 235, 0.1)',
+                        borderWidth: 3,
+                        tension: 0.3,
+                        pointBackgroundColor: '#2563eb',
+                        pointBorderColor: '#fff',
+                        pointBorderWidth: 2,
+                        pointRadius: 5,
+                        pointHoverRadius: 7
                     }, {
                         label: '基本価格',
                         data: new Array(data.length).fill(card.basePrice),
-                        borderColor: 'rgba(255, 99, 132, 0.5)',
+                        borderColor: 'rgba(239, 68, 68, 0.3)',
                         backgroundColor: 'transparent',
-                        borderDash: [5, 5],
-                        pointRadius: 0
+                        borderDash: [10, 5],
+                        borderWidth: 2,
+                        pointRadius: 0,
+                        pointHoverRadius: 0
                     }]
                 },
                 options: {
                     responsive: true,
                     maintainAspectRatio: false,
+                    interaction: {
+                        mode: 'index',
+                        intersect: false
+                    },
                     plugins: {
                         legend: {
-                            display: true
+                            display: true,
+                            labels: {
+                                font: {
+                                    size: 14
+                                },
+                                padding: 15
+                            }
                         },
                         tooltip: {
+                            backgroundColor: 'rgba(0, 0, 0, 0.8)',
+                            titleFont: {
+                                size: 14
+                            },
+                            bodyFont: {
+                                size: 13
+                            },
+                            padding: 12,
                             callbacks: {
                                 label: function(context) {
                                     return context.dataset.label + ': ' + context.parsed.y.toLocaleString() + ' pt';
@@ -1280,10 +1311,31 @@
                     scales: {
                         y: {
                             beginAtZero: false,
+                            grid: {
+                                color: 'rgba(0, 0, 0, 0.05)',
+                                drawBorder: false
+                            },
                             ticks: {
+                                font: {
+                                    size: 12
+                                },
+                                padding: 8,
                                 callback: function(value) {
                                     return value.toLocaleString() + ' pt';
                                 }
+                            }
+                        },
+                        x: {
+                            grid: {
+                                display: false,
+                                drawBorder: false
+                            },
+                            ticks: {
+                                font: {
+                                    size: 11
+                                },
+                                maxRotation: 45,
+                                minRotation: 45
                             }
                         }
                     }
