@@ -184,6 +184,7 @@
         .status-meta { background: #9b59b6; color: white; }
         .status-tournament { background: #e74c3c; color: white; }
         .status-demand { background: #f39c12; color: white; }
+        .status-decline { background: #95a5a6; color: white; }
         
         .loading-overlay {
             position: fixed;
@@ -363,37 +364,25 @@
 
         // Virtual card database
         const CARDS_DATABASE = [
-            // Normal
-            { id: 'card-001', name: '火の精霊', rarity: 'N', basePrice: 50 },
-            { id: 'card-002', name: '水の精霊', rarity: 'N', basePrice: 50 },
-            { id: 'card-003', name: '風の精霊', rarity: 'N', basePrice: 50 },
-            { id: 'card-004', name: '土の精霊', rarity: 'N', basePrice: 50 },
-            { id: 'card-005', name: '光の戦士', rarity: 'N', basePrice: 80 },
-            
-            // Rare
-            { id: 'card-006', name: '青眼の白龍', rarity: 'R', basePrice: 300 },
-            { id: 'card-007', name: '真紅眼の黒竜', rarity: 'R', basePrice: 280 },
-            { id: 'card-008', name: 'ブラック・マジシャン', rarity: 'R', basePrice: 320 },
-            { id: 'card-009', name: 'エルフの剣士', rarity: 'R', basePrice: 200 },
-            { id: 'card-010', name: '暗黒騎士ガイア', rarity: 'R', basePrice: 250 },
-            
-            // Super Rare
-            { id: 'card-011', name: '混沌の黒魔術師', rarity: 'SR', basePrice: 800 },
-            { id: 'card-012', name: '青眼の究極竜', rarity: 'SR', basePrice: 1000 },
-            { id: 'card-013', name: '封印されしエクゾディア', rarity: 'SR', basePrice: 1200 },
-            { id: 'card-014', name: '天空竜', rarity: 'SR', basePrice: 900 },
-            { id: 'card-015', name: 'カオス・ソルジャー', rarity: 'SR', basePrice: 1100 },
-            
-            // Ultra Rare
-            { id: 'card-016', name: '光の創造神 ホルアクティ', rarity: 'UR', basePrice: 3000 },
-            { id: 'card-017', name: '混沌帝龍', rarity: 'UR', basePrice: 2500 },
-            { id: 'card-018', name: '究極完全態グレート・モス', rarity: 'UR', basePrice: 2000 },
-            { id: 'card-019', name: 'マスター・オブ・ドラゴンナイト', rarity: 'UR', basePrice: 2800 },
-            
-            // Secret Rare
-            { id: 'card-020', name: '千年の盾', rarity: 'Secret', basePrice: 5000 },
-            { id: 'card-021', name: '時の魔術師', rarity: 'Secret', basePrice: 4500 },
-            { id: 'card-022', name: '運命のドロー', rarity: 'Secret', basePrice: 6000 }
+            { id: 'card-001', name: '黒魔女ディアベルスター', rarity: 'QCSE', basePrice: 9000 },
+            { id: 'card-002', name: 'ユベル', rarity: 'SR', basePrice: 300 },
+            { id: 'card-003', name: '反逆の罪宝－スネークアイ', rarity: 'SE', basePrice: 1500 },
+            { id: 'card-004', name: '青眼の白龍', rarity: 'SE', basePrice: 30000 },
+            { id: 'card-005', name: 'ブラック・マジシャン', rarity: 'SE', basePrice: 2500 },
+            { id: 'card-006', name: '真紅眼の黒竜', rarity: 'UR', basePrice: 1500 },
+            { id: 'card-007', name: '封印されしエクゾディア', rarity: 'UR', basePrice: 800 },
+            { id: 'card-008', name: '黄金卿エルドリッチ', rarity: 'UR', basePrice: 600 },
+            { id: 'card-009', name: 'カオス・ソルジャー－開闢の使者－', rarity: 'UR', basePrice: 800 },
+            { id: 'card-010', name: '青眼の亜白龍', rarity: 'SE', basePrice: 400 },
+            { id: 'card-011', name: 'I:Pマスカレーナ', rarity: 'PSE', basePrice: 25000 },
+            { id: 'card-012', name: 'アクセスコード・トーカー', rarity: 'SE', basePrice: 800 },
+            { id: 'card-013', name: '灰流うらら', rarity: 'SR', basePrice: 400 },
+            { id: 'card-014', name: '増殖するG', rarity: 'SR', basePrice: 400 },
+            { id: 'card-015', name: '神の宣告', rarity: 'UR', basePrice: 200 },
+            { id: 'card-016', name: 'ブラック・マジシャン・ガール', rarity: 'UR', basePrice: 700 },
+            { id: 'card-017', name: '無限泡影', rarity: 'UR', basePrice: 800 },
+            { id: 'card-018', name: '月女神の鏃', rarity: 'UR', basePrice: 500 },
+            { id: 'card-019', name: 'マルチャミー・フワロス', rarity: 'R', basePrice: 1300 }
         ];
 
         // Price fluctuation patterns
@@ -402,7 +391,8 @@
             REPRINT: 'reprint',    // 再録
             META: 'meta',          // 環境の変化
             TOURNAMENT: 'tournament', // 大会での結果
-            DEMAND: 'demand'       // 需要増加
+            DEMAND: 'demand',      // 需要増加
+            DECLINE: 'decline'     // 需要低下
         };
 
         // Initialize
@@ -545,70 +535,118 @@
                     price.history.shift();
                 }
                 
-                // Check if pattern should change (random chance)
-                if (Math.random() < 0.3 || now - price.patternStart > 2 * 60 * 60 * 1000) { // 30% chance or after 2 hours
-                    const patterns = Object.values(PRICE_PATTERNS);
-                    price.pattern = patterns[Math.floor(Math.random() * patterns.length)];
+                // Determine next pattern based on current pattern
+                let nextPattern = price.pattern;
+                const rand = Math.random();
+                
+                switch (price.pattern) {
+                    case PRICE_PATTERNS.SUPPLY:
+                        // 60% chance to continue supply pattern
+                        if (rand > 0.6) {
+                            const patterns = [PRICE_PATTERNS.META, PRICE_PATTERNS.TOURNAMENT, PRICE_PATTERNS.DEMAND];
+                            nextPattern = patterns[Math.floor(Math.random() * patterns.length)];
+                        }
+                        break;
+                    
+                    case PRICE_PATTERNS.REPRINT:
+                        // 80% chance to continue reprint pattern
+                        if (rand > 0.8) {
+                            nextPattern = PRICE_PATTERNS.SUPPLY;
+                        }
+                        break;
+                    
+                    case PRICE_PATTERNS.TOURNAMENT:
+                        // 30% chance to continue tournament, else decline
+                        nextPattern = rand < 0.3 ? PRICE_PATTERNS.TOURNAMENT : PRICE_PATTERNS.DECLINE;
+                        break;
+                    
+                    case PRICE_PATTERNS.DEMAND:
+                        // 40% chance to continue demand, else decline
+                        nextPattern = rand < 0.4 ? PRICE_PATTERNS.DEMAND : PRICE_PATTERNS.DECLINE;
+                        break;
+                    
+                    case PRICE_PATTERNS.DECLINE:
+                        // 60% chance to continue decline
+                        if (rand > 0.6) {
+                            const patterns = [PRICE_PATTERNS.META, PRICE_PATTERNS.SUPPLY];
+                            nextPattern = patterns[Math.floor(Math.random() * patterns.length)];
+                        }
+                        break;
+                    
+                    case PRICE_PATTERNS.META:
+                        // Random next pattern
+                        if (rand < 0.3) {
+                            const patterns = Object.values(PRICE_PATTERNS);
+                            nextPattern = patterns[Math.floor(Math.random() * patterns.length)];
+                        }
+                        break;
+                    
+                    default:
+                        // Initialize with random pattern
+                        const patterns = Object.values(PRICE_PATTERNS);
+                        nextPattern = patterns[Math.floor(Math.random() * patterns.length)];
+                        break;
+                }
+                
+                // Change pattern if different
+                if (nextPattern !== price.pattern) {
+                    price.pattern = nextPattern;
                     price.patternStart = now;
                 }
                 
                 // Apply price changes based on pattern
                 let multiplier = 1;
                 const rarityMultiplier = {
-                    'N': 1,
-                    'R': 0.9,
-                    'SR': 0.8,
-                    'UR': 0.7,
-                    'Secret': 0.6
+                    'R': 1.0,
+                    'SR': 0.9,
+                    'UR': 0.85,
+                    'SE': 0.8,
+                    'PSE': 0.75,
+                    'QCSE': 0.7
                 };
                 
                 switch (price.pattern) {
                     case PRICE_PATTERNS.SUPPLY:
                         // Gradual decrease
-                        multiplier = 0.95 + Math.random() * 0.03;
+                        multiplier = 0.93 + Math.random() * 0.04; // 0.93-0.97
                         break;
                     
                     case PRICE_PATTERNS.REPRINT:
                         // Sharp decrease, less for higher rarity
-                        multiplier = 0.7 + (0.2 * rarityMultiplier[card.rarity]);
+                        const rarityMod = rarityMultiplier[card.rarity] || 1;
+                        multiplier = 0.5 + (0.3 * rarityMod); // 0.5-0.8 depending on rarity
                         break;
                     
                     case PRICE_PATTERNS.META:
-                        // Random fluctuation
-                        multiplier = 0.85 + Math.random() * 0.3;
+                        // Random fluctuation up or down
+                        multiplier = 0.85 + Math.random() * 0.3; // 0.85-1.15
                         break;
                     
                     case PRICE_PATTERNS.TOURNAMENT:
-                        // Sharp increase then gradual decrease
-                        const timeSinceStart = now - price.patternStart;
-                        if (timeSinceStart < 30 * 60 * 1000) { // First 30 minutes
-                            multiplier = 1.3 + Math.random() * 0.2;
-                        } else {
-                            multiplier = 0.92 + Math.random() * 0.05;
-                        }
+                        // Sharp increase
+                        multiplier = 1.35 + Math.random() * 0.25; // 1.35-1.60
                         break;
                     
                     case PRICE_PATTERNS.DEMAND:
-                        // Sharp increase then stable
+                        // Gradual increase then stable
                         const timeSinceDemand = now - price.patternStart;
                         if (timeSinceDemand < 60 * 60 * 1000) { // First hour
-                            multiplier = 1.2 + Math.random() * 0.1;
+                            multiplier = 1.08 + Math.random() * 0.07; // 1.08-1.15
                         } else {
-                            multiplier = 0.98 + Math.random() * 0.04;
+                            multiplier = 0.98 + Math.random() * 0.04; // 0.98-1.02 (stable)
                         }
+                        break;
+                    
+                    case PRICE_PATTERNS.DECLINE:
+                        // Gradual decrease
+                        multiplier = 0.92 + Math.random() * 0.04; // 0.92-0.96
                         break;
                 }
                 
-                // Apply multiplier and ensure minimum price
+                // Apply multiplier with minimum price (10% of base) and no maximum cap
                 price.current = Math.max(
-                    Math.floor(card.basePrice * 0.3), // Minimum 30% of base price
+                    Math.floor(card.basePrice * 0.1), // Minimum 10% of base price
                     Math.floor(price.current * multiplier)
-                );
-                
-                // Cap maximum price
-                price.current = Math.min(
-                    card.basePrice * 5, // Maximum 500% of base price
-                    price.current
                 );
                 
                 cardPrices[card.id] = price;
@@ -1077,7 +1115,8 @@
                 [PRICE_PATTERNS.REPRINT]: '<span class="market-status status-reprint">再録</span>',
                 [PRICE_PATTERNS.META]: '<span class="market-status status-meta">環境</span>',
                 [PRICE_PATTERNS.TOURNAMENT]: '<span class="market-status status-tournament">大会</span>',
-                [PRICE_PATTERNS.DEMAND]: '<span class="market-status status-demand">需要</span>'
+                [PRICE_PATTERNS.DEMAND]: '<span class="market-status status-demand">需要↑</span>',
+                [PRICE_PATTERNS.DECLINE]: '<span class="market-status status-decline">需要↓</span>'
             };
             return badges[pattern] || '';
         }
