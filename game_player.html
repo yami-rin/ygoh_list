@@ -1,0 +1,630 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ゲームセンター - スロットマシン</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            min-height: 100vh;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            padding: 20px;
+        }
+
+        .game-container {
+            max-width: 800px;
+            margin: 0 auto;
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 20px;
+            padding: 40px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+        }
+
+        .game-header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        .game-title {
+            font-size: 2.5rem;
+            font-weight: bold;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin-bottom: 10px;
+        }
+
+        .points-display {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: linear-gradient(135deg, #ffd700 0%, #ffed4e 100%);
+            padding: 15px 25px;
+            border-radius: 15px;
+            margin-bottom: 30px;
+            box-shadow: 0 5px 15px rgba(255, 215, 0, 0.3);
+        }
+
+        .points-display .points-value {
+            font-size: 1.8rem;
+            font-weight: bold;
+            color: #333;
+        }
+
+        .slot-machine {
+            background: #222;
+            border-radius: 20px;
+            padding: 30px;
+            margin-bottom: 30px;
+            box-shadow: inset 0 5px 20px rgba(0,0,0,0.5);
+        }
+
+        .slot-window {
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+            background: #111;
+            padding: 20px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+        }
+
+        .reel {
+            width: 120px;
+            height: 120px;
+            background: white;
+            border: 3px solid gold;
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 4rem;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .reel-content {
+            position: absolute;
+            width: 100%;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            transition: transform 0.5s cubic-bezier(0.17, 0.67, 0.83, 0.67);
+        }
+
+        .reel-symbol {
+            width: 120px;
+            height: 120px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .reel.spinning .reel-content {
+            animation: spin 0.1s linear infinite;
+        }
+
+        @keyframes spin {
+            0% { transform: translateY(0); }
+            100% { transform: translateY(-120px); }
+        }
+
+        .controls {
+            display: flex;
+            justify-content: center;
+            gap: 20px;
+            flex-wrap: wrap;
+        }
+
+        .bet-selector {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            background: rgba(255, 255, 255, 0.1);
+            padding: 10px 20px;
+            border-radius: 10px;
+        }
+
+        .bet-selector label {
+            color: white;
+            margin: 0;
+        }
+
+        .bet-selector select {
+            padding: 5px 10px;
+            border-radius: 5px;
+            border: none;
+        }
+
+        .spin-button {
+            padding: 15px 40px;
+            font-size: 1.2rem;
+            font-weight: bold;
+            background: linear-gradient(135deg, #ff6b6b, #ff3838);
+            color: white;
+            border: none;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: all 0.3s;
+            box-shadow: 0 5px 15px rgba(255, 107, 107, 0.3);
+        }
+
+        .spin-button:hover:not(:disabled) {
+            transform: translateY(-2px);
+            box-shadow: 0 7px 20px rgba(255, 107, 107, 0.4);
+        }
+
+        .spin-button:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        .payout-table {
+            background: #f8f9fa;
+            border-radius: 10px;
+            padding: 20px;
+            margin-bottom: 20px;
+        }
+
+        .payout-table h3 {
+            text-align: center;
+            margin-bottom: 15px;
+            color: #333;
+        }
+
+        .payout-row {
+            display: flex;
+            justify-content: space-between;
+            padding: 8px;
+            border-bottom: 1px solid #dee2e6;
+        }
+
+        .payout-row:last-child {
+            border-bottom: none;
+        }
+
+        .symbols {
+            font-size: 1.5rem;
+        }
+
+        .multiplier {
+            font-weight: bold;
+            color: #28a745;
+        }
+
+        .result-message {
+            text-align: center;
+            font-size: 1.5rem;
+            font-weight: bold;
+            margin-top: 20px;
+            padding: 15px;
+            border-radius: 10px;
+            display: none;
+        }
+
+        .result-message.win {
+            background: linear-gradient(135deg, #28a745, #20c997);
+            color: white;
+            display: block;
+            animation: pulse 0.5s ease-in-out;
+        }
+
+        .result-message.lose {
+            background: linear-gradient(135deg, #dc3545, #c82333);
+            color: white;
+            display: block;
+        }
+
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+            100% { transform: scale(1); }
+        }
+
+        .back-button {
+            position: fixed;
+            top: 20px;
+            left: 20px;
+            padding: 10px 20px;
+            background: rgba(255, 255, 255, 0.9);
+            border: none;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .back-button:hover {
+            background: white;
+            transform: translateX(-2px);
+        }
+
+        .loading-overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0,0,0,0.7);
+            justify-content: center;
+            align-items: center;
+            z-index: 9999;
+        }
+
+        .loading-overlay.active {
+            display: flex;
+        }
+
+        .spinner {
+            width: 50px;
+            height: 50px;
+            border: 5px solid #f3f3f3;
+            border-top: 5px solid #667eea;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+    </style>
+</head>
+<body>
+    <button class="back-button" onclick="window.location.href='card_list.html'">
+        <i class="bi bi-arrow-left"></i> カード管理に戻る
+    </button>
+
+    <div class="game-container">
+        <div class="game-header">
+            <h1 class="game-title">🎰 スロットマシン 🎰</h1>
+            <p class="text-muted">ポイントを使って運試し！</p>
+        </div>
+
+        <div class="points-display">
+            <div>
+                <i class="bi bi-coin" style="font-size: 1.5rem;"></i>
+                <span>現在のポイント</span>
+            </div>
+            <div class="points-value">
+                <span id="current-points">0</span> pt
+            </div>
+        </div>
+
+        <div class="slot-machine">
+            <div class="slot-window">
+                <div class="reel" id="reel1">
+                    <div class="reel-content">
+                        <div class="reel-symbol">🍒</div>
+                        <div class="reel-symbol">🍋</div>
+                        <div class="reel-symbol">🍊</div>
+                        <div class="reel-symbol">🍇</div>
+                        <div class="reel-symbol">🔔</div>
+                        <div class="reel-symbol">💎</div>
+                        <div class="reel-symbol">7️⃣</div>
+                        <div class="reel-symbol">🌟</div>
+                    </div>
+                </div>
+                <div class="reel" id="reel2">
+                    <div class="reel-content">
+                        <div class="reel-symbol">🍒</div>
+                        <div class="reel-symbol">🍋</div>
+                        <div class="reel-symbol">🍊</div>
+                        <div class="reel-symbol">🍇</div>
+                        <div class="reel-symbol">🔔</div>
+                        <div class="reel-symbol">💎</div>
+                        <div class="reel-symbol">7️⃣</div>
+                        <div class="reel-symbol">🌟</div>
+                    </div>
+                </div>
+                <div class="reel" id="reel3">
+                    <div class="reel-content">
+                        <div class="reel-symbol">🍒</div>
+                        <div class="reel-symbol">🍋</div>
+                        <div class="reel-symbol">🍊</div>
+                        <div class="reel-symbol">🍇</div>
+                        <div class="reel-symbol">🔔</div>
+                        <div class="reel-symbol">💎</div>
+                        <div class="reel-symbol">7️⃣</div>
+                        <div class="reel-symbol">🌟</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="controls">
+                <div class="bet-selector">
+                    <label for="bet-amount">ベット額:</label>
+                    <select id="bet-amount">
+                        <option value="10">10 pt</option>
+                        <option value="20">20 pt</option>
+                        <option value="50" selected>50 pt</option>
+                        <option value="100">100 pt</option>
+                        <option value="200">200 pt</option>
+                    </select>
+                </div>
+                <button class="spin-button" id="spin-button">
+                    <i class="bi bi-play-circle"></i> スピン！
+                </button>
+            </div>
+        </div>
+
+        <div class="result-message" id="result-message"></div>
+
+        <div class="payout-table">
+            <h3>配当表</h3>
+            <div class="payout-row">
+                <span class="symbols">7️⃣ 7️⃣ 7️⃣</span>
+                <span class="multiplier">×50</span>
+            </div>
+            <div class="payout-row">
+                <span class="symbols">🌟 🌟 🌟</span>
+                <span class="multiplier">×30</span>
+            </div>
+            <div class="payout-row">
+                <span class="symbols">💎 💎 💎</span>
+                <span class="multiplier">×20</span>
+            </div>
+            <div class="payout-row">
+                <span class="symbols">🔔 🔔 🔔</span>
+                <span class="multiplier">×15</span>
+            </div>
+            <div class="payout-row">
+                <span class="symbols">🍇 🍇 🍇</span>
+                <span class="multiplier">×10</span>
+            </div>
+            <div class="payout-row">
+                <span class="symbols">🍊 🍊 🍊</span>
+                <span class="multiplier">×8</span>
+            </div>
+            <div class="payout-row">
+                <span class="symbols">🍋 🍋 🍋</span>
+                <span class="multiplier">×5</span>
+            </div>
+            <div class="payout-row">
+                <span class="symbols">🍒 🍒 🍒</span>
+                <span class="multiplier">×3</span>
+            </div>
+            <div class="payout-row">
+                <span class="symbols">🍒 🍒 ー</span>
+                <span class="multiplier">×1.5</span>
+            </div>
+        </div>
+    </div>
+
+    <div class="loading-overlay" id="loading">
+        <div class="spinner"></div>
+    </div>
+
+    <!-- Firebase SDK -->
+    <script type="module">
+        import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.8.1/firebase-app.js';
+        import { 
+            getAuth, 
+            onAuthStateChanged 
+        } from 'https://www.gstatic.com/firebasejs/10.8.1/firebase-auth.js';
+        import { 
+            getFirestore, 
+            doc, 
+            getDoc,
+            setDoc,
+            updateDoc
+        } from 'https://www.gstatic.com/firebasejs/10.8.1/firebase-firestore.js';
+
+        // Firebase configuration (same as card_list.html)
+        const firebaseConfig = {
+            apiKey: "AIzaSyDu4w2CAIJxr00q5wKMx7z66MQJwsej_t4",
+            authDomain: "card-f8328.firebaseapp.com",
+            projectId: "card-f8328",
+            storageBucket: "card-f8328.firebasestorage.app",
+            messagingSenderId: "999924774190",
+            appId: "1:999924774190:web:f1c956de31798e31d00c48",
+            measurementId: "G-P80VFP97Y7"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth();
+        const db = getFirestore();
+
+        let currentUser = null;
+        let userPoints = 0;
+        let isSpinning = false;
+
+        const symbols = ['🍒', '🍋', '🍊', '🍇', '🔔', '💎', '7️⃣', '🌟'];
+        const symbolWeights = [30, 25, 20, 15, 10, 8, 5, 3]; // Higher number = more common
+
+        const payouts = {
+            '7️⃣7️⃣7️⃣': 50,
+            '🌟🌟🌟': 30,
+            '💎💎💎': 20,
+            '🔔🔔🔔': 15,
+            '🍇🍇🍇': 10,
+            '🍊🍊🍊': 8,
+            '🍋🍋🍋': 5,
+            '🍒🍒🍒': 3,
+            '🍒🍒': 1.5
+        };
+
+        // Get weighted random symbol
+        function getRandomSymbol() {
+            const totalWeight = symbolWeights.reduce((a, b) => a + b, 0);
+            let random = Math.random() * totalWeight;
+            
+            for (let i = 0; i < symbols.length; i++) {
+                random -= symbolWeights[i];
+                if (random <= 0) {
+                    return symbols[i];
+                }
+            }
+            return symbols[0];
+        }
+
+        // Load user points from Firebase
+        async function loadUserPoints() {
+            if (!currentUser) return;
+            
+            const loading = document.getElementById('loading');
+            loading.classList.add('active');
+            
+            try {
+                const gamificationRef = doc(db, 'users', currentUser.uid, 'gamification', 'data');
+                const gamificationSnap = await getDoc(gamificationRef);
+                
+                if (gamificationSnap.exists()) {
+                    const data = gamificationSnap.data();
+                    userPoints = data.userPoints || 0;
+                    updatePointsDisplay();
+                } else {
+                    // Initialize with 100 points if no data exists
+                    userPoints = 100;
+                    await saveUserPoints();
+                    updatePointsDisplay();
+                }
+            } catch (error) {
+                console.error('Error loading points:', error);
+                alert('ポイントの読み込みに失敗しました');
+            } finally {
+                loading.classList.remove('active');
+            }
+        }
+
+        // Save user points to Firebase
+        async function saveUserPoints() {
+            if (!currentUser) return;
+            
+            try {
+                const gamificationRef = doc(db, 'users', currentUser.uid, 'gamification', 'data');
+                await updateDoc(gamificationRef, {
+                    userPoints: userPoints
+                });
+            } catch (error) {
+                // If document doesn't exist, create it
+                const gamificationRef = doc(db, 'users', currentUser.uid, 'gamification', 'data');
+                await setDoc(gamificationRef, {
+                    userPoints: userPoints
+                }, { merge: true });
+            }
+        }
+
+        // Update points display
+        function updatePointsDisplay() {
+            document.getElementById('current-points').textContent = userPoints;
+        }
+
+        // Spin the reels
+        async function spin() {
+            if (isSpinning) return;
+            
+            const betAmount = parseInt(document.getElementById('bet-amount').value);
+            
+            if (userPoints < betAmount) {
+                alert('ポイントが不足しています！');
+                return;
+            }
+            
+            isSpinning = true;
+            document.getElementById('spin-button').disabled = true;
+            document.getElementById('result-message').style.display = 'none';
+            
+            // Deduct bet amount
+            userPoints -= betAmount;
+            updatePointsDisplay();
+            
+            // Start spinning animation
+            const reels = document.querySelectorAll('.reel');
+            reels.forEach(reel => reel.classList.add('spinning'));
+            
+            // Determine results
+            const results = [];
+            for (let i = 0; i < 3; i++) {
+                results.push(getRandomSymbol());
+            }
+            
+            // Stop reels one by one
+            for (let i = 0; i < 3; i++) {
+                await new Promise(resolve => setTimeout(resolve, 500 + i * 300));
+                const reel = document.getElementById(`reel${i + 1}`);
+                const reelContent = reel.querySelector('.reel-content');
+                
+                reel.classList.remove('spinning');
+                
+                // Find the symbol index
+                const symbolIndex = symbols.indexOf(results[i]);
+                reelContent.style.transform = `translateY(${-symbolIndex * 120}px)`;
+            }
+            
+            // Check for wins
+            await new Promise(resolve => setTimeout(resolve, 500));
+            checkWin(results, betAmount);
+            
+            // Save points to Firebase
+            await saveUserPoints();
+            
+            isSpinning = false;
+            document.getElementById('spin-button').disabled = false;
+        }
+
+        // Check for winning combinations
+        function checkWin(results, betAmount) {
+            const resultMessage = document.getElementById('result-message');
+            let winAmount = 0;
+            
+            // Check for three of a kind
+            const resultString = results.join('');
+            for (const [pattern, multiplier] of Object.entries(payouts)) {
+                if (pattern.length === 6) { // Three symbols
+                    const symbolPattern = pattern.substring(0, 2);
+                    if (results.every(r => r === symbolPattern)) {
+                        winAmount = betAmount * multiplier;
+                        break;
+                    }
+                } else if (pattern === '🍒🍒' && results[0] === '🍒' && results[1] === '🍒') {
+                    // Two cherries
+                    winAmount = Math.floor(betAmount * 1.5);
+                }
+            }
+            
+            if (winAmount > 0) {
+                userPoints += winAmount;
+                updatePointsDisplay();
+                resultMessage.textContent = `🎉 大当たり！ ${winAmount} ポイント獲得！`;
+                resultMessage.className = 'result-message win';
+            } else {
+                resultMessage.textContent = 'はずれ... もう一度挑戦！';
+                resultMessage.className = 'result-message lose';
+            }
+        }
+
+        // Initialize game
+        onAuthStateChanged(auth, async (user) => {
+            if (user) {
+                currentUser = user;
+                await loadUserPoints();
+                
+                // Set up spin button
+                document.getElementById('spin-button').addEventListener('click', spin);
+            } else {
+                alert('ログインが必要です');
+                window.location.href = 'card_list.html';
+            }
+        });
+
+        // Initialize reels with random positions
+        window.addEventListener('load', () => {
+            const reels = document.querySelectorAll('.reel-content');
+            reels.forEach(reel => {
+                const randomOffset = Math.floor(Math.random() * symbols.length);
+                reel.style.transform = `translateY(${-randomOffset * 120}px)`;
+            });
+        });
+    </script>
+</body>
+</html>
