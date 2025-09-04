@@ -346,6 +346,10 @@
         const auth = getAuth(app);
         const db = getFirestore(app);
         
+        // Make auth and db available globally for debugging
+        window.firebaseAuth = auth;
+        window.firebaseDb = db;
+        
         setPersistence(auth, browserLocalPersistence).catch((error) => {
             console.error("Error setting persistence:", error);
         });
@@ -900,9 +904,12 @@
                 
                 try {
                     errorDiv.style.display = 'none';
+                    console.log('Auth object:', auth);
+                    console.log('Auth config:', auth.config);
+                    console.log('Type of signInWithEmailAndPassword:', typeof signInWithEmailAndPassword);
                     console.log('Calling signInWithEmailAndPassword...');
-                    await signInWithEmailAndPassword(auth, email, password);
-                    console.log('Login successful');
+                    const result = await signInWithEmailAndPassword(auth, email, password);
+                    console.log('Login successful', result);
                 } catch (error) {
                     console.error('Login failed:', error);
                     errorDiv.textContent = 'ログインに失敗しました: ' + error.message;
