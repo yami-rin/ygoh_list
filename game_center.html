@@ -100,6 +100,8 @@
         .reel-content {
             position: absolute;
             width: 100%;
+            top: 50%;
+            transform: translateY(-50%);
             display: flex;
             flex-direction: column;
             align-items: center;
@@ -489,11 +491,19 @@
             text-align: center;
         }
 
+        .roulette-wheel-container {
+            width: 340px;
+            height: 340px;
+            margin: 0 auto 30px;
+            position: relative;
+        }
+
         .roulette-wheel {
             width: 300px;
             height: 300px;
-            margin: 0 auto 30px;
-            position: relative;
+            position: absolute;
+            top: 20px;
+            left: 20px;
             border-radius: 50%;
             background: conic-gradient(
                 from 0deg,
@@ -553,7 +563,7 @@
 
         .roulette-pointer {
             position: absolute;
-            top: -20px;
+            top: 0;
             left: 50%;
             transform: translateX(-50%);
             width: 0;
@@ -562,6 +572,7 @@
             border-right: 15px solid transparent;
             border-top: 30px solid gold;
             z-index: 11;
+            filter: drop-shadow(0 2px 5px rgba(0,0,0,0.3));
         }
 
         .roulette-numbers {
@@ -847,10 +858,12 @@
                 </div>
             </div>
 
-            <div class="roulette-wheel" id="roulette-wheel">
+            <div class="roulette-wheel-container">
                 <div class="roulette-pointer"></div>
-                <div class="roulette-center"></div>
-                <div class="roulette-numbers" id="roulette-numbers"></div>
+                <div class="roulette-wheel" id="roulette-wheel">
+                    <div class="roulette-center"></div>
+                    <div class="roulette-numbers" id="roulette-numbers"></div>
+                </div>
             </div>
 
             <div class="betting-grid">
@@ -864,6 +877,17 @@
                 <div class="bet-option" data-bet="1-12">1-12<br>×3</div>
                 <div class="bet-option" data-bet="13-24">13-24<br>×3</div>
                 <div class="bet-option" data-bet="25-36">25-36<br>×3</div>
+            </div>
+            
+            <div class="mt-3">
+                <label for="single-number-bet">単一数字ベット (0-36):</label>
+                <div class="d-flex align-items-center justify-content-center gap-2">
+                    <input type="number" id="single-number-bet" class="form-control" 
+                           min="0" max="36" style="width: 100px;" placeholder="数字">
+                    <button class="btn btn-primary btn-sm" onclick="selectSingleNumber()">
+                        この数字に賭ける (×35)
+                    </button>
+                </div>
             </div>
 
             <div class="controls">
@@ -1125,12 +1149,13 @@
                 
                 // Find the symbol index
                 const symbolIndex = symbols.indexOf(results[i]);
-                const targetPosition = -symbolIndex * 140;
+                // Center the selected symbol (accounting for initial translateY(-50%))
+                const targetPosition = (-symbolIndex * 140) + 70 - 50;
                 
                 reel.classList.remove('spinning');
                 reel.classList.add('stopping');
                 reelContent.style.setProperty('--target-position', `${targetPosition}px`);
-                reelContent.style.transform = `translateY(${targetPosition}px)`;
+                reelContent.style.transform = `translateY(calc(-50% + ${targetPosition}px))`;
                 
                 // Play sound effect (optional)
                 playSlotSound();
@@ -1368,11 +1393,60 @@
         
         // Roulette Game Logic
         let selectedBet = null;
+        let selectedNumber = null;
         let isRouletteSpinning = false;
         const rouletteNumbers = [0, 32, 15, 19, 4, 21, 2, 25, 17, 34, 6, 27, 13, 36, 11, 30, 8, 23, 10, 5, 24, 16, 33, 1, 20, 14, 31, 9, 22, 18, 29, 7, 28, 12, 35, 3, 26];
         const redNumbers = [1, 3, 5, 7, 9, 12, 14, 16, 18, 19, 21, 23, 25, 27, 30, 32, 34, 36];
         
+        window.selectSingleNumber = () => {
+            const numberInput = document.getElementById('single-number-bet');
+            const number = parseInt(numberInput.value);
+            
+            if (isNaN(number) || number < 0 || number > 36) {
+                alert('0から36の数字を入力してください');
+                return;
+            }
+            
+            document.querySelectorAll('.bet-option').forEach(opt => opt.classList.remove('selected'));
+            selectedBet = 'single';
+            selectedNumber = number;
+            alert(`${number}番に賭けました`);
+        };
+        
         function initializeRoulette() {
+            // Add numbers to the wheel
+            const numbersContainer = document.getElementById('roulette-numbers');
+            const wheelNumbers = [0, 32, 15, 19, 4, 21, 2, 25, 17, 34, 6, 27, 13, 36, 11, 30, 8, 23, 10, 5, 24, 16, 33, 1, 20, 14, 31, 9, 22, 18, 29, 7, 28, 12, 35, 3, 26];
+            
+            wheelNumbers.forEach((num, index) => {
+                const numberDiv = document.createElement('div');
+                numberDiv.className = 'roulette-number';
+                numberDiv.textContent = num;
+                
+                // Position numbers around the wheel
+                const angle = (index * (360 / 37)) - 90; // Start from top
+                const radius = 130; // Distance from center
+                const x = Math.cos(angle * Math.PI / 180) * radius + 150;
+                const y = Math.sin(angle * Math.PI / 180) * radius + 150;
+                
+                numberDiv.style.left = `${x - 10}px`;
+                numberDiv.style.top = `${y - 10}px`;
+                numberDiv.style.transform = `rotate(${angle + 90}deg)`;
+                
+                // Color the numbers
+                if (num === 0) {
+                    numberDiv.style.color = '#0f0';
+                } else if (redNumbers.includes(num)) {
+                    numberDiv.style.color = '#fff';
+                    numberDiv.style.textShadow = '0 0 3px #000';
+                } else {
+                    numberDiv.style.color = '#fff';
+                    numberDiv.style.textShadow = '0 0 3px #000';
+                }
+                
+                numbersContainer.appendChild(numberDiv);
+            });
+            
             // Add bet selection handlers
             document.querySelectorAll('.bet-option').forEach(option => {
                 option.addEventListener('click', function() {
@@ -1464,6 +1538,9 @@
                 case '25-36':
                     if (finalNumber >= 25 && finalNumber <= 36) winAmount = betAmount * 3;
                     break;
+                case 'single':
+                    if (finalNumber === selectedNumber) winAmount = betAmount * 35;
+                    break;
             }
             
             const resultMessage = document.getElementById('roulette-result');
@@ -1487,7 +1564,8 @@
             const reels = document.querySelectorAll('.reel-content');
             reels.forEach(reel => {
                 const randomOffset = Math.floor(Math.random() * symbols.length);
-                reel.style.transform = `translateY(${-randomOffset * 140}px)`;
+                const position = (-randomOffset * 140) + 70 - 50;
+                reel.style.transform = `translateY(calc(-50% + ${position}px))`;
             });
         });
     </script>
