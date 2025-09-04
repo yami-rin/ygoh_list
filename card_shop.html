@@ -728,107 +728,128 @@
 
         // Generate market prediction comments
         function generateMarketPrediction() {
-            // Analyze current market patterns
-            const patterns = {};
-            let totalCards = 0;
+            // Select a random card to predict about
+            const targetCard = CARDS_DATABASE[Math.floor(Math.random() * CARDS_DATABASE.length)];
+            const targetPrice = cardPrices[targetCard.id];
             
-            CARDS_DATABASE.forEach(card => {
-                const pattern = cardPrices[card.id]?.pattern;
-                if (pattern) {
-                    patterns[pattern] = (patterns[pattern] || 0) + 1;
-                    totalCards++;
-                }
-            });
+            if (!targetPrice) return;
             
-            // Determine dominant pattern
-            let dominantPattern = null;
-            let maxCount = 0;
-            for (const [pattern, count] of Object.entries(patterns)) {
-                if (count > maxCount) {
-                    maxCount = count;
-                    dominantPattern = pattern;
-                }
-            }
-            
-            // 60% chance to be wrong (40% accuracy)
+            // 40% chance to be accurate
             const isAccurate = Math.random() < 0.4;
             
-            // Generate prediction based on analysis
-            const predictions = {
-                [PRICE_PATTERNS.TOURNAMENT]: [
-                    "🔥 次は大会需要で高騰の予感！？",
-                    "📈 トーナメントシーズン到来か！？買い時かも！",
-                    "🏆 大会メタが動く！？注目カードをチェック！",
-                    "⚡ 競技シーンが熱い！価格上昇の兆し！？"
-                ],
-                [PRICE_PATTERNS.DEMAND]: [
-                    "💎 需要急増の気配！？今が仕込み時かも！",
-                    "🚀 人気爆発の予感！？早めの購入がオススメ！",
-                    "✨ 次のトレンドはこれだ！？要チェック！",
-                    "📊 市場が動き出す！？価格上昇に備えよ！"
-                ],
-                [PRICE_PATTERNS.DECLINE]: [
-                    "📉 価格調整期到来か！？待つのも戦略！",
-                    "💤 市場は一時休憩！？次の波を待とう！",
-                    "🌊 下げトレンド突入！？買い時を見極めよ！",
-                    "⏰ しばらく様子見が吉！？慎重に行こう！"
-                ],
-                [PRICE_PATTERNS.SUPPLY]: [
-                    "📦 供給過多の予感！？価格は安定傾向か！",
-                    "🎯 買いやすい相場継続！？じっくり選ぼう！",
-                    "🌱 市場は落ち着きモード！掘り出し物を探せ！",
-                    "💰 お買い得相場！？欲しいカードは今のうち！"
-                ],
-                [PRICE_PATTERNS.REPRINT]: [
-                    "🔄 再録の影響大！？価格変動に注意！",
-                    "📰 リプリント情報に注目！市場が動くかも！",
-                    "🎲 価格リセットの可能性！？様子見推奨！",
-                    "⚠️ 再録ショック警戒！慎重な投資を！"
-                ],
-                [PRICE_PATTERNS.META]: [
-                    "🎮 メタゲーム激変！？環境カードに注目！",
-                    "🔮 次の環境トップは！？先読みが鍵！",
-                    "🎯 メタ読みで大儲け！？情報収集が重要！",
-                    "🌟 環境激動の予感！？チャンスを掴め！"
-                ]
-            };
+            // Determine actual next pattern for the card
+            const actualPattern = targetPrice.pattern;
+            let predictedDirection = null;
+            let actualDirection = null;
             
-            // Misleading predictions for wrong guesses
-            const misleadingPredictions = [
-                "🎰 市場は予測不能！？ギャンブル相場到来！",
-                "🌀 カオス相場突入！？何が起きるか分からない！",
-                "🎪 サプライズ相場！？予想外の展開に備えよ！",
-                "🎨 市場は芸術的！？感性で勝負の時！",
-                "🎸 ロックな相場！？常識を疑え！",
-                "🍀 運試しの時！？直感を信じて行動！",
-                "🌈 虹の向こうに宝が！？夢を追いかけろ！",
-                "🚁 急展開の予感！？準備はできているか！？"
-            ];
+            // Determine actual price direction based on pattern
+            switch (actualPattern) {
+                case PRICE_PATTERNS.TOURNAMENT:
+                case PRICE_PATTERNS.DEMAND:
+                    actualDirection = 'up';
+                    break;
+                case PRICE_PATTERNS.DECLINE:
+                case PRICE_PATTERNS.REPRINT:
+                    actualDirection = 'down';
+                    break;
+                case PRICE_PATTERNS.SUPPLY:
+                case PRICE_PATTERNS.META:
+                    actualDirection = Math.random() < 0.5 ? 'stable' : (Math.random() < 0.5 ? 'up' : 'down');
+                    break;
+            }
             
-            let selectedPrediction;
-            
-            if (isAccurate && dominantPattern && predictions[dominantPattern]) {
-                // Accurate prediction based on dominant pattern
-                const patternPredictions = predictions[dominantPattern];
-                selectedPrediction = patternPredictions[Math.floor(Math.random() * patternPredictions.length)];
+            // Decide prediction (40% accurate)
+            if (isAccurate) {
+                predictedDirection = actualDirection;
             } else {
-                // Misleading or random prediction
-                if (Math.random() < 0.5 && dominantPattern) {
-                    // Pick wrong pattern prediction
-                    const wrongPatterns = Object.keys(predictions).filter(p => p !== dominantPattern);
-                    const wrongPattern = wrongPatterns[Math.floor(Math.random() * wrongPatterns.length)];
-                    const wrongPredictions = predictions[wrongPattern];
-                    selectedPrediction = wrongPredictions[Math.floor(Math.random() * wrongPredictions.length)];
-                } else {
-                    // Pick misleading prediction
-                    selectedPrediction = misleadingPredictions[Math.floor(Math.random() * misleadingPredictions.length)];
-                }
+                // Wrong prediction
+                const directions = ['up', 'down', 'stable'];
+                const wrongDirections = directions.filter(d => d !== actualDirection);
+                predictedDirection = wrongDirections[Math.floor(Math.random() * wrongDirections.length)];
+            }
+            
+            // Generate prediction message based on direction and pattern
+            let prediction = '';
+            
+            if (predictedDirection === 'up') {
+                const reasons = [
+                    {
+                        text: `🔥「${targetCard.name}」が急騰の予感！大会での採用率上昇により、次の更新で20-30%上昇か！？`,
+                        detail: "トーナメントシーンでの活躍が目立ち始めた"
+                    },
+                    {
+                        text: `💎「${targetCard.name}」に注目！新カードとのシナジーが発見され、需要急増で価格上昇必至！？`,
+                        detail: "コンボデッキのキーパーツとして再評価"
+                    },
+                    {
+                        text: `📈「${targetCard.name}」買い時到来！環境トップデッキの必須カードに。早めの確保を推奨！`,
+                        detail: "メタゲームの中心に躍り出る可能性大"
+                    },
+                    {
+                        text: `🚀「${targetCard.name}」爆上げ警報！海外での人気急騰により、国内価格も追従する見込み！`,
+                        detail: "グローバル市場での需要が影響"
+                    },
+                    {
+                        text: `⚡「${targetCard.name}」仕込み時！制限改訂の緩和候補として、事前買いが殺到か！？`,
+                        detail: "規制緩和の噂が価格に影響"
+                    }
+                ];
+                const selected = reasons[Math.floor(Math.random() * reasons.length)];
+                prediction = `${selected.text} 理由：${selected.detail}`;
+                
+            } else if (predictedDirection === 'down') {
+                const reasons = [
+                    {
+                        text: `📉「${targetCard.name}」暴落注意！再録決定の情報により、現在価格から50%下落の可能性！`,
+                        detail: "新パックでの再録がほぼ確定"
+                    },
+                    {
+                        text: `💔「${targetCard.name}」売り時！環境から外れ、需要激減で価格下落は避けられない！`,
+                        detail: "メタ環境の変化で採用率が激減"
+                    },
+                    {
+                        text: `⚠️「${targetCard.name}」要注意！上位互換の新カード登場で、価値が大幅に下がる見込み！`,
+                        detail: "より強力な代替カードの登場"
+                    },
+                    {
+                        text: `🌊「${targetCard.name}」下落トレンド！供給過多により、しばらく価格回復は期待できない！`,
+                        detail: "市場に在庫が溢れている状態"
+                    },
+                    {
+                        text: `😱「${targetCard.name}」規制リスク！次回制限で規制強化の可能性、今のうちに売却推奨！`,
+                        detail: "パワーレベルが問題視されている"
+                    }
+                ];
+                const selected = reasons[Math.floor(Math.random() * reasons.length)];
+                prediction = `${selected.text} 理由：${selected.detail}`;
+                
+            } else {
+                const reasons = [
+                    {
+                        text: `⏸️「${targetCard.name}」は様子見！価格は横ばい予想、急な変動は期待薄！`,
+                        detail: "市場が安定期に入り大きな動きなし"
+                    },
+                    {
+                        text: `🎯「${targetCard.name}」現状維持！需給バランスが取れており、価格変動は限定的！`,
+                        detail: "適正価格に落ち着いている"
+                    },
+                    {
+                        text: `💭「${targetCard.name}」判断保留！情報不足により、投資判断は次の更新まで待つべき！`,
+                        detail: "決定的な材料が不足している"
+                    },
+                    {
+                        text: `🔄「${targetCard.name}」小幅変動！上下10%程度の範囲で推移、大きな利益は期待できない！`,
+                        detail: "ボラティリティが低い状態が継続"
+                    }
+                ];
+                const selected = reasons[Math.floor(Math.random() * reasons.length)];
+                prediction = `${selected.text} 理由：${selected.detail}`;
             }
             
             // Update the prediction display
             const predictionElement = document.getElementById('market-prediction');
             if (predictionElement) {
-                predictionElement.textContent = selectedPrediction;
+                predictionElement.innerHTML = prediction;
             }
         }
 
