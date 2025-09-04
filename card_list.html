@@ -3626,6 +3626,18 @@
                 const currentStreak = gamificationData.registrationStreak?.count || 0;
                 const totalPoints = gamificationData.profile?.totalPointsEarned || 0;
                 
+                // If user has no cards and no meaningful data, don't save to rankings
+                if (totalCards === 0 && uniqueCards === 0 && currentStreak === 0 && totalPoints === 0) {
+                    // Optionally delete existing ranking data if all values are 0
+                    try {
+                        const rankingRef = doc(db, 'rankings', currentUser.uid);
+                        await deleteDoc(rankingRef);
+                    } catch (error) {
+                        // Ignore error if document doesn't exist
+                    }
+                    return;
+                }
+                
                 // Prepare ranking data
                 const rankingData = {
                     uid: currentUser.uid,
@@ -3656,11 +3668,23 @@
                     rankings.push(doc.data());
                 });
                 
-                // Sort rankings for each category
-                const totalCardsRanking = [...rankings].sort((a, b) => b.totalCards - a.totalCards).slice(0, 50);
-                const uniqueCardsRanking = [...rankings].sort((a, b) => b.uniqueCards - a.uniqueCards).slice(0, 50);
-                const streakRanking = [...rankings].sort((a, b) => b.currentStreak - a.currentStreak).slice(0, 50);
-                const pointsRanking = [...rankings].sort((a, b) => b.totalPoints - a.totalPoints).slice(0, 50);
+                // Sort rankings for each category (filter out users with 0 for relevant categories)
+                const totalCardsRanking = [...rankings]
+                    .filter(user => user.totalCards > 0)
+                    .sort((a, b) => b.totalCards - a.totalCards)
+                    .slice(0, 50);
+                const uniqueCardsRanking = [...rankings]
+                    .filter(user => user.uniqueCards > 0)
+                    .sort((a, b) => b.uniqueCards - a.uniqueCards)
+                    .slice(0, 50);
+                const streakRanking = [...rankings]
+                    .filter(user => user.currentStreak > 0)
+                    .sort((a, b) => b.currentStreak - a.currentStreak)
+                    .slice(0, 50);
+                const pointsRanking = [...rankings]
+                    .filter(user => user.totalPoints > 0)
+                    .sort((a, b) => b.totalPoints - a.totalPoints)
+                    .slice(0, 50);
                 
                 // Display rankings
                 displayRanking('total-cards-ranking-list', totalCardsRanking, 'totalCards', '枚');
