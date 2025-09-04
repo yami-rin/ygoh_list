@@ -578,21 +578,23 @@
 
         // Firebase configuration (same as card_list.html)
         const firebaseConfig = {
-            apiKey: "AIzaSyDu4w2CAIJxr00q5wKMx7z66MQJwsej_t4",
-            authDomain: "card-f8328.firebaseapp.com",
-            projectId: "card-f8328",
-            storageBucket: "card-f8328.firebasestorage.app",
-            messagingSenderId: "999924774190",
-            appId: "1:999924774190:web:f1c956de31798e31d00c48",
-            measurementId: "G-P80VFP97Y7"
+            apiKey: "AIzaSyAOYKalLUb2hbghrjQUS8AWzxpLExBT7aU",
+            authDomain: "ygoh-9bcf6.firebaseapp.com",
+            projectId: "ygoh-9bcf6",
+            storageBucket: "ygoh-9bcf6.firebasestorage.app",
+            messagingSenderId: "515041224138",
+            appId: "1:515041224138:web:8de47b38ed9cc1bb8afd37",
+            measurementId: "G-ZGSRE8MHZ2"
         };
 
         const app = initializeApp(firebaseConfig);
-        const auth = getAuth();
-        const db = getFirestore();
+        const auth = getAuth(app);
+        const db = getFirestore(app);
 
         // Set persistence to LOCAL (keeps user logged in)
-        setPersistence(auth, browserLocalPersistence);
+        setPersistence(auth, browserLocalPersistence).catch((error) => {
+            console.error('Error setting persistence:', error);
+        });
 
         let currentUser = null;
         let userPoints = 0;
@@ -884,10 +886,8 @@
 
         // Initialize game
         onAuthStateChanged(auth, async (user) => {
-            // Only process once (onAuthStateChanged can fire multiple times)
-            if (authChecked) return;
-            authChecked = true;
-
+            console.log('Auth state changed, user:', user ? user.email : 'null');
+            
             if (user) {
                 currentUser = user;
                 console.log('User is already logged in:', user.email);
@@ -906,11 +906,11 @@
                 }
             } else {
                 console.log('No user logged in, showing login screen');
+                currentUser = null;
                 // Show login container and hide game
                 document.getElementById('login-container').style.display = 'block';
                 document.getElementById('game-container').style.display = 'none';
                 document.getElementById('logout-button').style.display = 'none';
-                authChecked = false; // Reset to allow login/logout flow
             }
             
             // Hide loading overlay after auth check
