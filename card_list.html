@@ -607,6 +607,63 @@
                 padding: 0.4rem 0.2rem;
                 font-size: 0.8rem;
             }
+            
+            /* Mobile card list improvements */
+            /* Card name column - allow wrapping */
+            .table tbody td:nth-child(2) {
+                max-width: 100px;
+                word-wrap: break-word;
+                word-break: break-word;
+                white-space: normal;
+                line-height: 1.3;
+                font-size: 0.75rem;
+            }
+            
+            /* Set code column */
+            .table tbody td:nth-child(3) {
+                font-size: 0.7rem;
+                max-width: 70px;
+                word-break: break-all;
+            }
+            
+            /* Show rarity on mobile */
+            .table thead th:nth-child(4),
+            .table tbody td:nth-child(4) {
+                display: table-cell !important;
+                font-size: 0.65rem;
+                max-width: 50px;
+            }
+            
+            /* Quantity column */
+            .table tbody td:nth-child(5) {
+                font-size: 0.8rem;
+                font-weight: bold;
+                text-align: center;
+                min-width: 30px;
+            }
+            
+            /* Hide tags column on mobile */
+            .table thead th:nth-child(6),
+            .table tbody td:nth-child(6) {
+                display: none !important;
+            }
+            
+            /* Action buttons column */
+            .table tbody td:last-child {
+                min-width: 60px;
+            }
+            
+            /* Make action buttons smaller */
+            .table .btn-sm {
+                font-size: 0.6rem;
+                padding: 0.2rem 0.25rem;
+                margin: 0 1px;
+            }
+            
+            .table .btn-sm i {
+                font-size: 0.7rem;
+            }
+            
             .navbar-toggler { padding: 0.25rem 0.5rem; }
             
             /* Pagination controls on small screens */
@@ -1179,22 +1236,16 @@
                             
                             <!-- Quick Stats -->
                             <div class="row g-2 text-center">
-                                <div class="col-4">
+                                <div class="col-6">
                                     <div class="p-2 bg-light rounded">
                                         <div class="fs-4 fw-bold text-primary" id="today-added">0</div>
                                         <small class="text-muted">今日追加</small>
                                     </div>
                                 </div>
-                                <div class="col-4">
+                                <div class="col-6">
                                     <div class="p-2 bg-light rounded">
                                         <div class="fs-4 fw-bold text-success" id="week-goal-progress">0%</div>
                                         <small class="text-muted">週間目標</small>
-                                    </div>
-                                </div>
-                                <div class="col-4">
-                                    <div class="p-2 bg-light rounded">
-                                        <div class="fs-4 fw-bold text-info" id="lucky-number">7</div>
-                                        <small class="text-muted">ラッキーナンバー</small>
                                     </div>
                                 </div>
                             </div>
@@ -1265,7 +1316,7 @@
                                             </th>
                                             <th scope="col" data-sort="名前" class="sortable">名前<i class="bi bi-arrow-down-up ms-1"></i></th>
                                             <th scope="col" data-sort="型番" class="sortable">型番<i class="bi bi-arrow-down-up ms-1"></i></th>
-                                            <th scope="col" data-sort="レアリティ" class="sortable d-none d-md-table-cell">レアリティ<i class="bi bi-arrow-down-up ms-1"></i></th>
+                                            <th scope="col" data-sort="レアリティ" class="sortable">レア<i class="bi bi-arrow-down-up ms-1"></i></th>
                                             <th scope="col" data-sort="枚数" class="sortable" style="min-width: 50px;">枚数<i class="bi bi-arrow-down-up ms-1"></i></th>
                                             <th scope="col" data-sort="tags" class="d-none d-sm-table-cell">タグ</th>
                                             <th scope="col" style="min-width: 80px;">操作</th>
@@ -1458,7 +1509,7 @@
                         </td>
                         <td>${escapeHtml(card.data['名前'])}</td>
                         <td>${escapeHtml(card.data['型番'])}</td>
-                        <td class="d-none d-md-table-cell">${escapeHtml(card.data['レアリティ'])}</td>
+                        <td>${escapeHtml(card.data['レアリティ'])}</td>
                         <td>${escapeHtml(card.data['枚数'])}</td>
                         <td class="tag-cell d-none d-sm-table-cell" title="${escapeHtml(tags)}">${tags}</td>
                         <td>
@@ -1862,11 +1913,6 @@
             const weekGoalEl = document.getElementById('week-goal-progress');
             if (weekGoalEl) weekGoalEl.textContent = `${weekProgress}%`;
             
-            // Update lucky number (今日の日付から生成)
-            const date = new Date();
-            const luckyNumber = ((date.getDate() + date.getMonth() + 1) % 9) + 1;
-            const luckyEl = document.getElementById('lucky-number');
-            if (luckyEl) luckyEl.textContent = luckyNumber;
         };
         
         // Get start of current week (Monday)
