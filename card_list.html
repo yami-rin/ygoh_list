@@ -1453,7 +1453,8 @@
             dailyMissionProgress: {},
             firstCollectionDate: null,
             lastMilestoneReached: 0,
-            cardAdditionDates: {}
+            cardAdditionDates: {},
+            hasReceivedFirstLoginBonus: false // Track first login bonus in Firebase
         };
         
         // Save gamification data to Firebase
@@ -2359,15 +2360,23 @@
             updateDailyMissions();
         };
         
+        // Reset first login bonus (for testing or special cases)
+        window.resetFirstLoginBonus = async () => {
+            gamificationData.hasReceivedFirstLoginBonus = false;
+            await saveGamificationData();
+            console.log('初回ログインボーナスをリセットしました。次回ログイン時に再度受け取れます。');
+        };
+        
         // Check and grant first login bonus
         const checkFirstLoginBonus = (user) => {
-            const userId = user.uid || 'local_user';
-            const firstLoginKey = `firstLoginBonus_${userId}`;
-            const hasReceivedBonus = localStorage.getItem(firstLoginKey);
-            
-            if (!hasReceivedBonus) {
+            // Check if user has already received the bonus (using Firebase data)
+            if (!gamificationData.hasReceivedFirstLoginBonus) {
                 // First time login - grant 50 points
                 addPoints(50, '初回ログインボーナス！');
+                
+                // Mark as received in Firebase
+                gamificationData.hasReceivedFirstLoginBonus = true;
+                saveGamificationData();
                 
                 // Check if user already has cards and grant retroactive points
                 setTimeout(() => {
@@ -2426,9 +2435,6 @@
                         document.body.appendChild(notification);
                     }
                 }, 1000); // Wait for cards to load
-                
-                // Mark as received
-                localStorage.setItem(firstLoginKey, 'true');
             }
         };
         
