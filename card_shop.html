@@ -1,0 +1,842 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>カードショップ - Card Manager</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css">
+    <style>
+        body {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+        
+        .shop-container {
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+        
+        .header-section {
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 15px;
+            padding: 20px;
+            margin-bottom: 20px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+        }
+        
+        .shop-title {
+            font-size: 2rem;
+            font-weight: bold;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin-bottom: 10px;
+        }
+        
+        .points-display {
+            display: flex;
+            align-items: center;
+            background: linear-gradient(135deg, #d4af37 0%, #b8941f 100%);
+            padding: 10px 20px;
+            border-radius: 10px;
+            color: white;
+            font-size: 1.2rem;
+            font-weight: bold;
+        }
+        
+        .main-content {
+            display: grid;
+            grid-template-columns: 1fr 350px;
+            gap: 20px;
+        }
+        
+        @media (max-width: 992px) {
+            .main-content {
+                grid-template-columns: 1fr;
+            }
+        }
+        
+        .cards-section, .inventory-section {
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 15px;
+            padding: 20px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+        }
+        
+        .section-title {
+            font-size: 1.5rem;
+            font-weight: bold;
+            margin-bottom: 15px;
+            color: #333;
+        }
+        
+        .card-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+            gap: 15px;
+        }
+        
+        .shop-card {
+            background: white;
+            border: 2px solid #ddd;
+            border-radius: 10px;
+            padding: 15px;
+            transition: all 0.3s;
+            cursor: pointer;
+        }
+        
+        .shop-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 5px 20px rgba(0,0,0,0.2);
+            border-color: #667eea;
+        }
+        
+        .card-name {
+            font-weight: bold;
+            color: #333;
+            margin-bottom: 5px;
+        }
+        
+        .card-rarity {
+            display: inline-block;
+            padding: 2px 8px;
+            border-radius: 5px;
+            font-size: 0.8rem;
+            margin-bottom: 10px;
+        }
+        
+        .rarity-N { background: #e0e0e0; color: #333; }
+        .rarity-R { background: #3498db; color: white; }
+        .rarity-SR { background: #e67e22; color: white; }
+        .rarity-UR { background: #e74c3c; color: white; }
+        .rarity-Secret { background: linear-gradient(45deg, #f39c12, #f1c40f); color: white; }
+        
+        .card-price {
+            font-size: 1.1rem;
+            font-weight: bold;
+            color: #2ecc71;
+            margin-bottom: 5px;
+        }
+        
+        .price-change {
+            font-size: 0.9rem;
+            margin-left: 5px;
+        }
+        
+        .price-up { color: #e74c3c; }
+        .price-down { color: #3498db; }
+        .price-stable { color: #95a5a6; }
+        
+        .buy-button {
+            width: 100%;
+            margin-top: 10px;
+        }
+        
+        .inventory-item {
+            background: white;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            padding: 10px;
+            margin-bottom: 10px;
+        }
+        
+        .inventory-item-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 5px;
+        }
+        
+        .profit { color: #2ecc71; }
+        .loss { color: #e74c3c; }
+        
+        .back-button {
+            position: fixed;
+            top: 20px;
+            left: 20px;
+            z-index: 1000;
+            background: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 25px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+            transition: all 0.3s;
+        }
+        
+        .back-button:hover {
+            transform: scale(1.05);
+            box-shadow: 0 6px 20px rgba(0,0,0,0.3);
+        }
+        
+        .market-status {
+            display: inline-block;
+            padding: 5px 15px;
+            border-radius: 20px;
+            font-size: 0.9rem;
+            margin-left: 10px;
+        }
+        
+        .status-supply { background: #ecf0f1; color: #7f8c8d; }
+        .status-reprint { background: #3498db; color: white; }
+        .status-meta { background: #9b59b6; color: white; }
+        .status-tournament { background: #e74c3c; color: white; }
+        .status-demand { background: #f39c12; color: white; }
+        
+        .loading-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.7);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 9999;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.3s;
+        }
+        
+        .loading-overlay.active {
+            opacity: 1;
+            pointer-events: all;
+        }
+        
+        .spinner {
+            width: 50px;
+            height: 50px;
+            border: 5px solid rgba(255, 255, 255, 0.3);
+            border-top: 5px solid white;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+        
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+    </style>
+</head>
+<body>
+    <button class="back-button" onclick="window.location.href='card_list.html'">
+        <i class="bi bi-arrow-left"></i> カード管理に戻る
+    </button>
+
+    <div class="shop-container">
+        <div class="header-section">
+            <h1 class="shop-title">
+                <i class="bi bi-shop"></i> カードショップ
+            </h1>
+            <div class="d-flex justify-content-between align-items-center flex-wrap gap-3">
+                <div class="points-display">
+                    <i class="bi bi-coin" style="font-size: 1.5rem; margin-right: 10px;"></i>
+                    <span id="current-points">0</span> ポイント
+                </div>
+                <div>
+                    <span class="badge bg-info">次の価格更新まで: <span id="next-update">30:00</span></span>
+                    <button class="btn btn-outline-primary btn-sm ms-2" onclick="refreshPrices()">
+                        <i class="bi bi-arrow-clockwise"></i> 価格更新
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <div class="main-content">
+            <div class="cards-section">
+                <div class="d-flex justify-content-between align-items-center mb-3">
+                    <h2 class="section-title">
+                        <i class="bi bi-cart3"></i> 販売中のカード
+                    </h2>
+                    <div>
+                        <select class="form-select form-select-sm" id="sort-select">
+                            <option value="name">名前順</option>
+                            <option value="price-asc">価格: 安い順</option>
+                            <option value="price-desc">価格: 高い順</option>
+                            <option value="rarity">レアリティ順</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="card-grid" id="cards-container">
+                    <!-- Cards will be dynamically loaded here -->
+                </div>
+            </div>
+
+            <div class="inventory-section">
+                <h2 class="section-title">
+                    <i class="bi bi-box-seam"></i> インベントリ
+                </h2>
+                <div class="mb-3">
+                    <div class="alert alert-info mb-2">
+                        <small>保有カード: <span id="inventory-count">0</span>枚</small><br>
+                        <small>総投資額: <span id="total-invested">0</span>pt</small><br>
+                        <small>現在価値: <span id="current-value">0</span>pt</small><br>
+                        <small>損益: <span id="profit-loss" class="fw-bold">0</span>pt</small>
+                    </div>
+                </div>
+                <div id="inventory-container">
+                    <!-- Inventory items will be dynamically loaded here -->
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="loading-overlay active" id="loading">
+        <div class="spinner"></div>
+    </div>
+
+    <!-- Firebase SDK -->
+    <script type="module">
+        import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.8.1/firebase-app.js';
+        import { 
+            getAuth, 
+            onAuthStateChanged
+        } from 'https://www.gstatic.com/firebasejs/10.8.1/firebase-auth.js';
+        import { 
+            getFirestore, 
+            doc, 
+            getDoc,
+            setDoc,
+            updateDoc,
+            collection,
+            query,
+            where,
+            getDocs,
+            addDoc,
+            deleteDoc,
+            serverTimestamp
+        } from 'https://www.gstatic.com/firebasejs/10.8.1/firebase-firestore.js';
+
+        // Firebase configuration (same as card_list.html)
+        const firebaseConfig = {
+            apiKey: "AIzaSyAOYKalLUb2hbghrQUS8AWzxpLExBT7aU",
+            authDomain: "ygoh-9bcf6.firebaseapp.com",
+            projectId: "ygoh-9bcf6",
+            storageBucket: "ygoh-9bcf6.firebasestorage.app",
+            messagingSenderId: "515041224138",
+            appId: "1:515041224138:web:8de47b38ed9cc1bb8afd37",
+            measurementId: "G-ZGSRE8MHZ2"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+        const db = getFirestore(app);
+
+        let currentUser = null;
+        let userPoints = 0;
+        let inventory = [];
+        let cardPrices = {};
+        let updateInterval = null;
+
+        // Virtual card database
+        const CARDS_DATABASE = [
+            // Normal
+            { id: 'card-001', name: '火の精霊', rarity: 'N', basePrice: 50 },
+            { id: 'card-002', name: '水の精霊', rarity: 'N', basePrice: 50 },
+            { id: 'card-003', name: '風の精霊', rarity: 'N', basePrice: 50 },
+            { id: 'card-004', name: '土の精霊', rarity: 'N', basePrice: 50 },
+            { id: 'card-005', name: '光の戦士', rarity: 'N', basePrice: 80 },
+            
+            // Rare
+            { id: 'card-006', name: '青眼の白龍', rarity: 'R', basePrice: 300 },
+            { id: 'card-007', name: '真紅眼の黒竜', rarity: 'R', basePrice: 280 },
+            { id: 'card-008', name: 'ブラック・マジシャン', rarity: 'R', basePrice: 320 },
+            { id: 'card-009', name: 'エルフの剣士', rarity: 'R', basePrice: 200 },
+            { id: 'card-010', name: '暗黒騎士ガイア', rarity: 'R', basePrice: 250 },
+            
+            // Super Rare
+            { id: 'card-011', name: '混沌の黒魔術師', rarity: 'SR', basePrice: 800 },
+            { id: 'card-012', name: '青眼の究極竜', rarity: 'SR', basePrice: 1000 },
+            { id: 'card-013', name: '封印されしエクゾディア', rarity: 'SR', basePrice: 1200 },
+            { id: 'card-014', name: '天空竜', rarity: 'SR', basePrice: 900 },
+            { id: 'card-015', name: 'カオス・ソルジャー', rarity: 'SR', basePrice: 1100 },
+            
+            // Ultra Rare
+            { id: 'card-016', name: '光の創造神 ホルアクティ', rarity: 'UR', basePrice: 3000 },
+            { id: 'card-017', name: '混沌帝龍', rarity: 'UR', basePrice: 2500 },
+            { id: 'card-018', name: '究極完全態グレート・モス', rarity: 'UR', basePrice: 2000 },
+            { id: 'card-019', name: 'マスター・オブ・ドラゴンナイト', rarity: 'UR', basePrice: 2800 },
+            
+            // Secret Rare
+            { id: 'card-020', name: '千年の盾', rarity: 'Secret', basePrice: 5000 },
+            { id: 'card-021', name: '時の魔術師', rarity: 'Secret', basePrice: 4500 },
+            { id: 'card-022', name: '運命のドロー', rarity: 'Secret', basePrice: 6000 }
+        ];
+
+        // Price fluctuation patterns
+        const PRICE_PATTERNS = {
+            SUPPLY: 'supply',      // 市場供給量の変化
+            REPRINT: 'reprint',    // 再録
+            META: 'meta',          // 環境の変化
+            TOURNAMENT: 'tournament', // 大会での結果
+            DEMAND: 'demand'       // 需要増加
+        };
+
+        // Initialize
+        onAuthStateChanged(auth, async (user) => {
+            if (user) {
+                currentUser = user;
+                await loadUserData();
+                await loadCardPrices();
+                await loadInventory();
+                displayCards();
+                displayInventory();
+                startPriceUpdateTimer();
+                document.getElementById('loading').classList.remove('active');
+            } else {
+                window.location.href = 'card_list.html';
+            }
+        });
+
+        // Load user points
+        async function loadUserData() {
+            try {
+                const gamificationRef = doc(db, 'userGamification', currentUser.uid);
+                const gamificationSnap = await getDoc(gamificationRef);
+                
+                if (gamificationSnap.exists()) {
+                    const data = gamificationSnap.data();
+                    userPoints = data.points || 0;
+                    document.getElementById('current-points').textContent = userPoints.toLocaleString();
+                }
+            } catch (error) {
+                console.error('Error loading user data:', error);
+            }
+        }
+
+        // Save user points
+        async function saveUserPoints() {
+            try {
+                const gamificationRef = doc(db, 'userGamification', currentUser.uid);
+                await updateDoc(gamificationRef, { points: userPoints });
+                document.getElementById('current-points').textContent = userPoints.toLocaleString();
+            } catch (error) {
+                console.error('Error saving points:', error);
+            }
+        }
+
+        // Load or initialize card prices
+        async function loadCardPrices() {
+            try {
+                const pricesRef = doc(db, 'cardShopPrices', 'current');
+                const pricesSnap = await getDoc(pricesRef);
+                
+                const now = Date.now();
+                const thirtyMinutes = 30 * 60 * 1000;
+                
+                if (pricesSnap.exists()) {
+                    const data = pricesSnap.data();
+                    const lastUpdate = data.lastUpdate?.toMillis() || 0;
+                    
+                    // Update prices if 30 minutes have passed
+                    if (now - lastUpdate >= thirtyMinutes) {
+                        await updateCardPrices();
+                    } else {
+                        cardPrices = data.prices || {};
+                        // Initialize missing prices
+                        CARDS_DATABASE.forEach(card => {
+                            if (!cardPrices[card.id]) {
+                                cardPrices[card.id] = {
+                                    current: card.basePrice,
+                                    previous: card.basePrice,
+                                    pattern: PRICE_PATTERNS.SUPPLY,
+                                    patternStart: now,
+                                    history: []
+                                };
+                            }
+                        });
+                    }
+                } else {
+                    // Initialize all prices
+                    CARDS_DATABASE.forEach(card => {
+                        cardPrices[card.id] = {
+                            current: card.basePrice,
+                            previous: card.basePrice,
+                            pattern: PRICE_PATTERNS.SUPPLY,
+                            patternStart: now,
+                            history: []
+                        };
+                    });
+                    await savePrices();
+                }
+            } catch (error) {
+                console.error('Error loading prices:', error);
+            }
+        }
+
+        // Update card prices based on patterns
+        async function updateCardPrices() {
+            const now = Date.now();
+            
+            CARDS_DATABASE.forEach(card => {
+                const price = cardPrices[card.id] || {
+                    current: card.basePrice,
+                    previous: card.basePrice,
+                    pattern: PRICE_PATTERNS.SUPPLY,
+                    patternStart: now,
+                    history: []
+                };
+                
+                // Save previous price
+                price.previous = price.current;
+                price.history.push({
+                    price: price.current,
+                    timestamp: now
+                });
+                
+                // Keep only last 10 history entries
+                if (price.history.length > 10) {
+                    price.history.shift();
+                }
+                
+                // Check if pattern should change (random chance)
+                if (Math.random() < 0.3 || now - price.patternStart > 2 * 60 * 60 * 1000) { // 30% chance or after 2 hours
+                    const patterns = Object.values(PRICE_PATTERNS);
+                    price.pattern = patterns[Math.floor(Math.random() * patterns.length)];
+                    price.patternStart = now;
+                }
+                
+                // Apply price changes based on pattern
+                let multiplier = 1;
+                const rarityMultiplier = {
+                    'N': 1,
+                    'R': 0.9,
+                    'SR': 0.8,
+                    'UR': 0.7,
+                    'Secret': 0.6
+                };
+                
+                switch (price.pattern) {
+                    case PRICE_PATTERNS.SUPPLY:
+                        // Gradual decrease
+                        multiplier = 0.95 + Math.random() * 0.03;
+                        break;
+                    
+                    case PRICE_PATTERNS.REPRINT:
+                        // Sharp decrease, less for higher rarity
+                        multiplier = 0.7 + (0.2 * rarityMultiplier[card.rarity]);
+                        break;
+                    
+                    case PRICE_PATTERNS.META:
+                        // Random fluctuation
+                        multiplier = 0.85 + Math.random() * 0.3;
+                        break;
+                    
+                    case PRICE_PATTERNS.TOURNAMENT:
+                        // Sharp increase then gradual decrease
+                        const timeSinceStart = now - price.patternStart;
+                        if (timeSinceStart < 30 * 60 * 1000) { // First 30 minutes
+                            multiplier = 1.3 + Math.random() * 0.2;
+                        } else {
+                            multiplier = 0.92 + Math.random() * 0.05;
+                        }
+                        break;
+                    
+                    case PRICE_PATTERNS.DEMAND:
+                        // Sharp increase then stable
+                        const timeSinceDemand = now - price.patternStart;
+                        if (timeSinceDemand < 60 * 60 * 1000) { // First hour
+                            multiplier = 1.2 + Math.random() * 0.1;
+                        } else {
+                            multiplier = 0.98 + Math.random() * 0.04;
+                        }
+                        break;
+                }
+                
+                // Apply multiplier and ensure minimum price
+                price.current = Math.max(
+                    Math.floor(card.basePrice * 0.3), // Minimum 30% of base price
+                    Math.floor(price.current * multiplier)
+                );
+                
+                // Cap maximum price
+                price.current = Math.min(
+                    card.basePrice * 5, // Maximum 500% of base price
+                    price.current
+                );
+                
+                cardPrices[card.id] = price;
+            });
+            
+            await savePrices();
+            displayCards();
+            updateInventoryDisplay();
+        }
+
+        // Save prices to Firestore
+        async function savePrices() {
+            try {
+                await setDoc(doc(db, 'cardShopPrices', 'current'), {
+                    prices: cardPrices,
+                    lastUpdate: serverTimestamp()
+                });
+            } catch (error) {
+                console.error('Error saving prices:', error);
+            }
+        }
+
+        // Load user inventory
+        async function loadInventory() {
+            try {
+                const inventoryRef = collection(db, 'userInventory', currentUser.uid, 'cards');
+                const inventorySnap = await getDocs(inventoryRef);
+                
+                inventory = [];
+                inventorySnap.forEach(doc => {
+                    inventory.push({
+                        docId: doc.id,
+                        ...doc.data()
+                    });
+                });
+            } catch (error) {
+                console.error('Error loading inventory:', error);
+            }
+        }
+
+        // Buy card
+        window.buyCard = async (cardId) => {
+            const card = CARDS_DATABASE.find(c => c.id === cardId);
+            const price = cardPrices[cardId];
+            
+            if (!card || !price) return;
+            
+            if (userPoints < price.current) {
+                alert('ポイントが不足しています！');
+                return;
+            }
+            
+            if (confirm(`${card.name}を${price.current}ポイントで購入しますか？`)) {
+                userPoints -= price.current;
+                await saveUserPoints();
+                
+                // Add to inventory
+                const inventoryRef = collection(db, 'userInventory', currentUser.uid, 'cards');
+                await addDoc(inventoryRef, {
+                    cardId: cardId,
+                    purchasePrice: price.current,
+                    purchaseTime: serverTimestamp()
+                });
+                
+                await loadInventory();
+                displayInventory();
+                
+                alert(`${card.name}を購入しました！`);
+            }
+        };
+
+        // Sell card
+        window.sellCard = async (docId, cardId) => {
+            const card = CARDS_DATABASE.find(c => c.id === cardId);
+            const price = cardPrices[cardId];
+            const inventoryItem = inventory.find(item => item.docId === docId);
+            
+            if (!card || !price || !inventoryItem) return;
+            
+            const profit = price.current - inventoryItem.purchasePrice;
+            const profitText = profit >= 0 ? `+${profit}` : profit;
+            
+            if (confirm(`${card.name}を${price.current}ポイントで売却しますか？\n購入価格: ${inventoryItem.purchasePrice}pt\n損益: ${profitText}pt`)) {
+                userPoints += price.current;
+                await saveUserPoints();
+                
+                // Remove from inventory
+                await deleteDoc(doc(db, 'userInventory', currentUser.uid, 'cards', docId));
+                
+                await loadInventory();
+                displayInventory();
+                
+                alert(`${card.name}を売却しました！\n獲得: ${price.current}ポイント`);
+            }
+        };
+
+        // Display cards in shop
+        function displayCards() {
+            const container = document.getElementById('cards-container');
+            const sortSelect = document.getElementById('sort-select');
+            
+            let sortedCards = [...CARDS_DATABASE];
+            
+            // Apply sorting
+            switch (sortSelect.value) {
+                case 'price-asc':
+                    sortedCards.sort((a, b) => cardPrices[a.id].current - cardPrices[b.id].current);
+                    break;
+                case 'price-desc':
+                    sortedCards.sort((a, b) => cardPrices[b.id].current - cardPrices[a.id].current);
+                    break;
+                case 'rarity':
+                    const rarityOrder = { 'N': 0, 'R': 1, 'SR': 2, 'UR': 3, 'Secret': 4 };
+                    sortedCards.sort((a, b) => rarityOrder[b.rarity] - rarityOrder[a.rarity]);
+                    break;
+                default:
+                    sortedCards.sort((a, b) => a.name.localeCompare(b.name));
+            }
+            
+            container.innerHTML = sortedCards.map(card => {
+                const price = cardPrices[card.id];
+                const priceChange = price.current - price.previous;
+                const priceChangeClass = priceChange > 0 ? 'price-up' : priceChange < 0 ? 'price-down' : 'price-stable';
+                const priceChangeIcon = priceChange > 0 ? '↑' : priceChange < 0 ? '↓' : '→';
+                const priceChangeText = priceChange !== 0 ? Math.abs(priceChange) : '';
+                
+                const patternBadge = getPatternBadge(price.pattern);
+                
+                return `
+                    <div class="shop-card">
+                        <div class="card-name">${card.name}</div>
+                        <span class="card-rarity rarity-${card.rarity}">${card.rarity}</span>
+                        ${patternBadge}
+                        <div class="card-price">
+                            ${price.current.toLocaleString()} pt
+                            <span class="price-change ${priceChangeClass}">
+                                ${priceChangeIcon} ${priceChangeText}
+                            </span>
+                        </div>
+                        <button class="btn btn-primary buy-button" onclick="buyCard('${card.id}')">
+                            <i class="bi bi-cart-plus"></i> 購入
+                        </button>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        // Display inventory
+        function displayInventory() {
+            const container = document.getElementById('inventory-container');
+            
+            if (inventory.length === 0) {
+                container.innerHTML = '<p class="text-muted text-center">カードを所有していません</p>';
+                updateInventoryStats();
+                return;
+            }
+            
+            container.innerHTML = inventory.map(item => {
+                const card = CARDS_DATABASE.find(c => c.id === item.cardId);
+                const price = cardPrices[item.cardId];
+                
+                if (!card || !price) return '';
+                
+                const profit = price.current - item.purchasePrice;
+                const profitClass = profit >= 0 ? 'profit' : 'loss';
+                const profitText = profit >= 0 ? `+${profit}` : profit;
+                
+                const purchaseDate = item.purchaseTime?.toDate ? 
+                    new Date(item.purchaseTime.toDate()).toLocaleDateString('ja-JP') : 
+                    '不明';
+                
+                return `
+                    <div class="inventory-item">
+                        <div class="inventory-item-header">
+                            <strong>${card.name}</strong>
+                            <span class="card-rarity rarity-${card.rarity}">${card.rarity}</span>
+                        </div>
+                        <div class="small text-muted">購入日: ${purchaseDate}</div>
+                        <div class="small">購入価格: ${item.purchasePrice.toLocaleString()}pt</div>
+                        <div class="small">現在価格: ${price.current.toLocaleString()}pt</div>
+                        <div class="small ${profitClass} fw-bold">損益: ${profitText}pt</div>
+                        <button class="btn btn-danger btn-sm w-100 mt-2" onclick="sellCard('${item.docId}', '${item.cardId}')">
+                            <i class="bi bi-cash"></i> 売却
+                        </button>
+                    </div>
+                `;
+            }).join('');
+            
+            updateInventoryStats();
+        }
+
+        // Update inventory statistics
+        function updateInventoryStats() {
+            let totalInvested = 0;
+            let currentValue = 0;
+            
+            inventory.forEach(item => {
+                totalInvested += item.purchasePrice;
+                const price = cardPrices[item.cardId];
+                if (price) {
+                    currentValue += price.current;
+                }
+            });
+            
+            const profitLoss = currentValue - totalInvested;
+            const profitLossClass = profitLoss >= 0 ? 'profit' : 'loss';
+            
+            document.getElementById('inventory-count').textContent = inventory.length;
+            document.getElementById('total-invested').textContent = totalInvested.toLocaleString();
+            document.getElementById('current-value').textContent = currentValue.toLocaleString();
+            
+            const profitLossElement = document.getElementById('profit-loss');
+            profitLossElement.textContent = (profitLoss >= 0 ? '+' : '') + profitLoss.toLocaleString();
+            profitLossElement.className = `fw-bold ${profitLossClass}`;
+        }
+
+        // Update inventory display only
+        function updateInventoryDisplay() {
+            const container = document.getElementById('inventory-container');
+            if (inventory.length > 0) {
+                displayInventory();
+            }
+        }
+
+        // Get pattern badge HTML
+        function getPatternBadge(pattern) {
+            const badges = {
+                [PRICE_PATTERNS.SUPPLY]: '<span class="market-status status-supply">供給</span>',
+                [PRICE_PATTERNS.REPRINT]: '<span class="market-status status-reprint">再録</span>',
+                [PRICE_PATTERNS.META]: '<span class="market-status status-meta">環境</span>',
+                [PRICE_PATTERNS.TOURNAMENT]: '<span class="market-status status-tournament">大会</span>',
+                [PRICE_PATTERNS.DEMAND]: '<span class="market-status status-demand">需要</span>'
+            };
+            return badges[pattern] || '';
+        }
+
+        // Start price update timer
+        function startPriceUpdateTimer() {
+            const updateDisplay = () => {
+                const now = Date.now();
+                const pricesRef = doc(db, 'cardShopPrices', 'current');
+                
+                getDoc(pricesRef).then(snap => {
+                    if (snap.exists()) {
+                        const lastUpdate = snap.data().lastUpdate?.toMillis() || now;
+                        const thirtyMinutes = 30 * 60 * 1000;
+                        const nextUpdate = lastUpdate + thirtyMinutes;
+                        const remaining = Math.max(0, nextUpdate - now);
+                        
+                        const minutes = Math.floor(remaining / 60000);
+                        const seconds = Math.floor((remaining % 60000) / 1000);
+                        
+                        document.getElementById('next-update').textContent = 
+                            `${minutes}:${seconds.toString().padStart(2, '0')}`;
+                        
+                        if (remaining === 0) {
+                            refreshPrices();
+                        }
+                    }
+                });
+            };
+            
+            updateDisplay();
+            updateInterval = setInterval(updateDisplay, 1000);
+        }
+
+        // Refresh prices manually
+        window.refreshPrices = async () => {
+            document.getElementById('loading').classList.add('active');
+            await updateCardPrices();
+            document.getElementById('loading').classList.remove('active');
+        };
+
+        // Sort change handler
+        document.getElementById('sort-select').addEventListener('change', displayCards);
+        
+        // Cleanup on page unload
+        window.addEventListener('beforeunload', () => {
+            if (updateInterval) {
+                clearInterval(updateInterval);
+            }
+        });
+    </script>
+</body>
+</html>
