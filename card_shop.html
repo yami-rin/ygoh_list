@@ -347,9 +347,11 @@
         const auth = getAuth(app);
         const db = getFirestore(app);
         
-        // Set persistence to local
-        setPersistence(auth, browserLocalPersistence);
-
+        // Set persistence 
+        setPersistence(auth, browserLocalPersistence).catch((error) => {
+            console.error("Error setting persistence:", error);
+        });
+        
         let currentUser = null;
         let userPoints = 0;
         let inventory = [];
@@ -400,14 +402,19 @@
             DEMAND: 'demand'       // 需要増加
         };
 
-        // Initialize Bootstrap modal
-        const authModal = new bootstrap.Modal(document.getElementById('auth-modal'));
+        // Wait for DOM to be ready
+        let authModal;
+        
+        // Initialize on DOM ready
+        window.addEventListener('DOMContentLoaded', () => {
+            authModal = new bootstrap.Modal(document.getElementById('auth-modal'));
+        });
         
         // Initialize
         onAuthStateChanged(auth, async (user) => {
             if (user) {
                 currentUser = user;
-                authModal.hide();
+                if (authModal) authModal.hide();
                 await loadUserData();
                 await loadCardPrices();
                 await loadInventory();
@@ -418,7 +425,13 @@
             } else {
                 // Show login modal instead of redirecting
                 document.getElementById('loading').classList.remove('active');
-                authModal.show();
+                // Wait for modal to be initialized
+                setTimeout(() => {
+                    if (!authModal) {
+                        authModal = new bootstrap.Modal(document.getElementById('auth-modal'));
+                    }
+                    authModal.show();
+                }, 100);
             }
         });
 
@@ -860,46 +873,49 @@
             document.getElementById('loading').classList.remove('active');
         };
 
-        // Sort change handler
-        document.getElementById('sort-select').addEventListener('change', displayCards);
-        
-        // Login functionality
-        document.getElementById('login-btn').addEventListener('click', async () => {
-            const email = document.getElementById('email').value;
-            const password = document.getElementById('password').value;
-            const errorDiv = document.getElementById('auth-error');
+        // Initialize event listeners when DOM is ready
+        document.addEventListener('DOMContentLoaded', () => {
+            // Sort change handler
+            document.getElementById('sort-select').addEventListener('change', displayCards);
             
-            try {
-                errorDiv.style.display = 'none';
-                await signInWithEmailAndPassword(auth, email, password);
-            } catch (error) {
-                errorDiv.textContent = 'ログインに失敗しました: ' + error.message;
-                errorDiv.style.display = 'block';
-            }
-        });
-        
-        // Signup functionality
-        document.getElementById('signup-btn').addEventListener('click', async () => {
-            const email = document.getElementById('email').value;
-            const password = document.getElementById('password').value;
-            const errorDiv = document.getElementById('auth-error');
+            // Login functionality
+            document.getElementById('login-btn').addEventListener('click', async () => {
+                const email = document.getElementById('email').value;
+                const password = document.getElementById('password').value;
+                const errorDiv = document.getElementById('auth-error');
+                
+                try {
+                    errorDiv.style.display = 'none';
+                    await signInWithEmailAndPassword(auth, email, password);
+                } catch (error) {
+                    errorDiv.textContent = 'ログインに失敗しました: ' + error.message;
+                    errorDiv.style.display = 'block';
+                }
+            });
             
-            try {
-                errorDiv.style.display = 'none';
-                const userCredential = await createUserWithEmailAndPassword(auth, email, password);
-                // Initialize user gamification data
-                const gamificationRef = doc(db, 'userGamification', userCredential.user.uid);
-                await setDoc(gamificationRef, {
-                    points: 100, // Initial points
-                    totalEarned: 100,
-                    totalSpent: 0,
-                    lastLogin: serverTimestamp(),
-                    createdAt: serverTimestamp()
-                });
-            } catch (error) {
-                errorDiv.textContent = '新規登録に失敗しました: ' + error.message;
-                errorDiv.style.display = 'block';
-            }
+            // Signup functionality
+            document.getElementById('signup-btn').addEventListener('click', async () => {
+                const email = document.getElementById('email').value;
+                const password = document.getElementById('password').value;
+                const errorDiv = document.getElementById('auth-error');
+                
+                try {
+                    errorDiv.style.display = 'none';
+                    const userCredential = await createUserWithEmailAndPassword(auth, email, password);
+                    // Initialize user gamification data
+                    const gamificationRef = doc(db, 'userGamification', userCredential.user.uid);
+                    await setDoc(gamificationRef, {
+                        points: 100, // Initial points
+                        totalEarned: 100,
+                        totalSpent: 0,
+                        lastLogin: serverTimestamp(),
+                        createdAt: serverTimestamp()
+                    });
+                } catch (error) {
+                    errorDiv.textContent = '新規登録に失敗しました: ' + error.message;
+                    errorDiv.style.display = 'block';
+                }
+            });
         });
         
         // Cleanup on page unload
