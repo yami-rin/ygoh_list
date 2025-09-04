@@ -241,15 +241,30 @@
                     <i class="bi bi-coin" style="font-size: 1.5rem; margin-right: 10px;"></i>
                     <span id="current-points">0</span> ポイント
                 </div>
-                <div>
+                <div class="d-flex align-items-center gap-3">
+                    <span class="badge bg-primary"><i class="bi bi-calendar3"></i> <span id="game-date">2024年1月1日(月)</span></span>
                     <span class="badge bg-info">次の価格更新まで: <span id="next-update">10</span>秒</span>
+                </div>
+            </div>
+            <div class="mt-2 d-flex justify-content-between align-items-center flex-wrap gap-2">
+                <div class="d-flex align-items-center gap-2">
+                    <label class="small">情報源:</label>
+                    <select class="form-select form-select-sm" id="news-source" style="width: auto;">
+                        <option value="none">なし</option>
+                        <option value="trecaNews">トレカ日報</option>
+                        <option value="trecaSpeed">トレカ速報</option>
+                        <option value="marketWatch">市場ウォッチ</option>
+                        <option value="paidNote">有料note (100pt/日)</option>
+                    </select>
+                </div>
+                <div id="market-state" class="badge bg-danger" style="display: none;">
+                    <i class="bi bi-graph-up-arrow"></i> <span id="market-state-text">バブル発生中</span>
                 </div>
             </div>
             <div class="mt-3 text-center">
                 <div class="alert alert-warning d-inline-block" style="background: linear-gradient(135deg, #fff3cd 0%, #ffe4a1 100%); border: 2px solid #ffc107;">
                     <i class="bi bi-lightbulb-fill text-warning me-2"></i>
                     <span id="market-prediction" class="fw-bold"></span>
-                    <small class="text-muted ms-2">(予測精度: 40%)</small>
                 </div>
             </div>
         </div>
@@ -409,6 +424,13 @@
         let inventory = [];
         let cardPrices = {};
         let updateInterval = null;
+        
+        // Game date system (starts from January 1st, Monday)
+        let gameDate = new Date(2024, 0, 1); // January 1, 2024 (Monday)
+        let selectedNewsSource = 'none';
+        let isSubscribedToPaidNote = false;
+        let globalMarketState = null; // null, 'bubble', 'bubble_continuing'
+        let lastRegulationDate = null;
 
         // Virtual card database
         const CARDS_DATABASE = [
@@ -440,7 +462,17 @@
             META: 'meta',          // 環境の変化
             TOURNAMENT: 'tournament', // 大会での結果
             DEMAND: 'demand',      // 需要増加
-            DECLINE: 'decline'     // 需要低下
+            DECLINE: 'decline',    // 需要低下
+            REGULATION: 'regulation' // 規制
+        };
+        
+        // News sources with hidden accuracy rates
+        const NEWS_SOURCES = {
+            none: { name: 'なし', accuracy: 0.1, cost: 0 },
+            trecaNews: { name: 'トレカ日報', accuracy: 0.35, cost: 0 }, // Hidden: 35%
+            trecaSpeed: { name: 'トレカ速報', accuracy: 0.45, cost: 0 }, // Hidden: 45%
+            marketWatch: { name: '市場ウォッチ', accuracy: 0.55, cost: 0 }, // Hidden: 55%
+            paidNote: { name: '有料note (100pt/日)', accuracy: 0.85, cost: 100 } // Hidden: 85%
         };
 
         // Initialize
@@ -468,6 +500,7 @@
                     await loadInventory();
                     displayCards();
                     displayInventory();
+                    updateDateDisplay();
                     generateMarketPrediction();
                     startPriceUpdateTimer();
                     document.getElementById('loading').classList.remove('active');
@@ -568,18 +601,44 @@
         async function updateCardPrices() {
             const now = Date.now();
             
+            // Advance game date
+            gameDate.setDate(gameDate.getDate() + 1);
+            updateDateDisplay();
+            
+            // Check for paid note subscription
+            if (isSubscribedToPaidNote) {
+                userPoints = Math.max(0, userPoints - NEWS_SOURCES.paidNote.cost);
+                await saveUserPoints();
+            }
+            
             // First, ensure we have the latest prices from Firebase
             if (Object.keys(cardPrices).length === 0) {
                 try {
                     const pricesRef = doc(db, 'cardShopPrices', 'current');
                     const pricesSnap = await getDoc(pricesRef);
                     if (pricesSnap.exists()) {
-                        cardPrices = pricesSnap.data().prices || {};
+                        const data = pricesSnap.data();
+                        cardPrices = data.prices || {};
+                        gameDate = data.gameDate ? new Date(data.gameDate) : new Date(2024, 0, 1);
+                        globalMarketState = data.globalMarketState || null;
+                        lastRegulationDate = data.lastRegulationDate ? new Date(data.lastRegulationDate) : null;
                     }
                 } catch (error) {
                     console.error('Error loading existing prices:', error);
                 }
             }
+            
+            // Check for global market events
+            handleGlobalMarketEvents();
+            
+            // Check for regulation (once per month on the 1st)
+            const isRegulationDay = gameDate.getDate() === 1 && 
+                (!lastRegulationDate || lastRegulationDate.getMonth() !== gameDate.getMonth());
+            
+            // Check if weekend for tournament
+            const dayOfWeek = gameDate.getDay();
+            const isWeekend = dayOfWeek === 0 || dayOfWeek === 6;
+            let tournamentCardSelected = false;
             
             CARDS_DATABASE.forEach(card => {
                 const price = cardPrices[card.id] || {
@@ -595,110 +654,131 @@
                 price.previous = price.current;
                 price.history.push({
                     price: price.current,
-                    timestamp: now
+                    timestamp: now,
+                    date: gameDate.toISOString()
                 });
                 
-                // Keep only last 10 history entries
-                if (price.history.length > 10) {
+                // Keep only last 20 history entries
+                if (price.history.length > 20) {
                     price.history.shift();
                 }
                 
-                // Determine next pattern based on current pattern
+                // Determine next pattern
                 let nextPattern = price.pattern;
                 const rand = Math.random();
                 
-                switch (price.pattern) {
-                    case PRICE_PATTERNS.SUPPLY:
-                        // 60% chance to continue supply pattern
-                        if (rand > 0.6) {
-                            const patterns = [PRICE_PATTERNS.META, PRICE_PATTERNS.TOURNAMENT, PRICE_PATTERNS.DEMAND];
-                            nextPattern = patterns[Math.floor(Math.random() * patterns.length)];
-                        }
-                        break;
-                    
-                    case PRICE_PATTERNS.REPRINT:
-                        // 80% chance to continue reprint pattern
-                        if (rand > 0.8) {
+                // Special events override normal patterns
+                if (isRegulationDay) {
+                    // Regulation affects random cards
+                    if (Math.random() < 0.2) { // 20% chance per card
+                        nextPattern = PRICE_PATTERNS.REGULATION;
+                    }
+                } else if (isWeekend && !tournamentCardSelected && Math.random() < 0.1) {
+                    // Tournament on weekend (one card per day)
+                    nextPattern = PRICE_PATTERNS.TOURNAMENT;
+                    tournamentCardSelected = true;
+                } else {
+                    // Normal pattern transitions
+                    switch (price.pattern) {
+                        case PRICE_PATTERNS.SUPPLY:
+                            // 60% continue, else change
+                            if (rand > 0.6) {
+                                const patterns = [PRICE_PATTERNS.META, PRICE_PATTERNS.DEMAND, PRICE_PATTERNS.REPRINT];
+                                nextPattern = patterns[Math.floor(Math.random() * patterns.length)];
+                            }
+                            break;
+                        
+                        case PRICE_PATTERNS.REPRINT:
+                            // PSE and QCSE cannot be reprinted
+                            if (card.rarity === 'PSE' || card.rarity === 'QCSE') {
+                                nextPattern = PRICE_PATTERNS.SUPPLY;
+                            } else {
+                                // 80% continue reprint
+                                if (rand > 0.8) {
+                                    nextPattern = PRICE_PATTERNS.SUPPLY;
+                                }
+                            }
+                            break;
+                        
+                        case PRICE_PATTERNS.META:
+                            // Random change
+                            if (rand < 0.3) {
+                                const patterns = [PRICE_PATTERNS.SUPPLY, PRICE_PATTERNS.DEMAND, PRICE_PATTERNS.DECLINE];
+                                nextPattern = patterns[Math.floor(Math.random() * patterns.length)];
+                            }
+                            break;
+                        
+                        case PRICE_PATTERNS.TOURNAMENT:
+                            // 30% continue, else decline
+                            nextPattern = rand < 0.3 ? PRICE_PATTERNS.TOURNAMENT : PRICE_PATTERNS.DECLINE;
+                            break;
+                        
+                        case PRICE_PATTERNS.DEMAND:
+                            // 40% continue, else decline
+                            nextPattern = rand < 0.4 ? PRICE_PATTERNS.DEMAND : PRICE_PATTERNS.DECLINE;
+                            break;
+                        
+                        case PRICE_PATTERNS.DECLINE:
+                            // 60% continue
+                            if (rand > 0.6) {
+                                const patterns = [PRICE_PATTERNS.SUPPLY, PRICE_PATTERNS.META];
+                                nextPattern = patterns[Math.floor(Math.random() * patterns.length)];
+                            }
+                            break;
+                        
+                        case PRICE_PATTERNS.REGULATION:
+                            // Return to supply after regulation
                             nextPattern = PRICE_PATTERNS.SUPPLY;
-                        }
-                        break;
-                    
-                    case PRICE_PATTERNS.TOURNAMENT:
-                        // 30% chance to continue tournament, else decline
-                        nextPattern = rand < 0.3 ? PRICE_PATTERNS.TOURNAMENT : PRICE_PATTERNS.DECLINE;
-                        break;
-                    
-                    case PRICE_PATTERNS.DEMAND:
-                        // 40% chance to continue demand, else decline
-                        nextPattern = rand < 0.4 ? PRICE_PATTERNS.DEMAND : PRICE_PATTERNS.DECLINE;
-                        break;
-                    
-                    case PRICE_PATTERNS.DECLINE:
-                        // 60% chance to continue decline
-                        if (rand > 0.6) {
-                            const patterns = [PRICE_PATTERNS.META, PRICE_PATTERNS.SUPPLY];
-                            nextPattern = patterns[Math.floor(Math.random() * patterns.length)];
-                        }
-                        break;
-                    
-                    case PRICE_PATTERNS.META:
-                        // Random next pattern
-                        if (rand < 0.3) {
-                            const patterns = Object.values(PRICE_PATTERNS);
-                            nextPattern = patterns[Math.floor(Math.random() * patterns.length)];
-                        }
-                        break;
-                    
-                    default:
-                        // Initialize with random pattern
-                        const patterns = Object.values(PRICE_PATTERNS);
-                        nextPattern = patterns[Math.floor(Math.random() * patterns.length)];
-                        break;
+                            break;
+                        
+                        default:
+                            nextPattern = PRICE_PATTERNS.SUPPLY;
+                            break;
+                    }
                 }
                 
                 // Change pattern if different
                 if (nextPattern !== price.pattern) {
                     price.pattern = nextPattern;
                     price.patternStart = now;
+                    price.continuationCount = 0;
+                } else {
+                    price.continuationCount++;
                 }
                 
                 // Apply price changes based on pattern
                 let multiplier = 1;
-                const rarityMultiplier = {
-                    'R': 1.0,
-                    'SR': 0.9,
-                    'UR': 0.85,
-                    'SE': 0.8,
-                    'PSE': 0.75,
-                    'QCSE': 0.7
-                };
                 
                 switch (price.pattern) {
                     case PRICE_PATTERNS.SUPPLY:
                         // Gradual decrease
-                        multiplier = 0.93 + Math.random() * 0.04; // 0.93-0.97
+                        multiplier = 0.94 + Math.random() * 0.03; // 0.94-0.97
                         break;
                     
                     case PRICE_PATTERNS.REPRINT:
-                        // Sharp decrease, less for higher rarity
-                        const rarityMod = rarityMultiplier[card.rarity] || 1;
-                        multiplier = 0.5 + (0.3 * rarityMod); // 0.5-0.8 depending on rarity
+                        // Sharp decrease (not for PSE/QCSE)
+                        if (card.rarity !== 'PSE' && card.rarity !== 'QCSE') {
+                            multiplier = 0.5 + Math.random() * 0.2; // 0.5-0.7
+                        } else {
+                            multiplier = 1; // No change for PSE/QCSE
+                        }
                         break;
                     
                     case PRICE_PATTERNS.META:
-                        // Random fluctuation up or down
-                        multiplier = 0.85 + Math.random() * 0.3; // 0.85-1.15
+                        // Up or down randomly
+                        multiplier = Math.random() < 0.5 ? 
+                            (1.05 + Math.random() * 0.1) : // 1.05-1.15 up
+                            (0.85 + Math.random() * 0.1);  // 0.85-0.95 down
                         break;
                     
                     case PRICE_PATTERNS.TOURNAMENT:
                         // Sharp increase
-                        multiplier = 1.35 + Math.random() * 0.25; // 1.35-1.60
+                        multiplier = 1.3 + Math.random() * 0.3; // 1.3-1.6
                         break;
                     
                     case PRICE_PATTERNS.DEMAND:
                         // Gradual increase then stable
-                        const timeSinceDemand = now - price.patternStart;
-                        if (timeSinceDemand < 60 * 60 * 1000) { // First hour
+                        if (price.continuationCount < 3) {
                             multiplier = 1.08 + Math.random() * 0.07; // 1.08-1.15
                         } else {
                             multiplier = 0.98 + Math.random() * 0.04; // 0.98-1.02 (stable)
@@ -709,21 +789,107 @@
                         // Gradual decrease
                         multiplier = 0.92 + Math.random() * 0.04; // 0.92-0.96
                         break;
+                    
+                    case PRICE_PATTERNS.REGULATION:
+                        // Sharp change up or down
+                        multiplier = Math.random() < 0.5 ? 
+                            (0.4 + Math.random() * 0.2) :  // 0.4-0.6 (banned/limited)
+                            (1.5 + Math.random() * 0.5);   // 1.5-2.0 (unbanned)
+                        break;
+                }
+                
+                // Apply global market effects
+                if (globalMarketState === 'bubble' || globalMarketState === 'bubble_continuing') {
+                    multiplier *= 1.05; // Additional 5% for bubble
+                } else if (globalMarketState === 'crash') {
+                    multiplier *= 0.4; // 60% decrease for crash
                 }
                 
                 // Apply multiplier with minimum price (10% of base) and no maximum cap
                 price.current = Math.max(
-                    Math.floor(card.basePrice * 0.1), // Minimum 10% of base price
+                    Math.floor(card.basePrice * 0.1),
                     Math.floor(price.current * multiplier)
                 );
                 
                 cardPrices[card.id] = price;
             });
             
+            // Update regulation date if needed
+            if (isRegulationDay) {
+                lastRegulationDate = new Date(gameDate);
+            }
+            
             await savePrices();
             displayCards();
             updateInventoryDisplay();
             generateMarketPrediction();
+        }
+        
+        // Handle global market events (bubble/crash)
+        function handleGlobalMarketEvents() {
+            const rand = Math.random();
+            
+            if (globalMarketState === null) {
+                // Check for bubble start (1% chance)
+                if (rand < 0.01) {
+                    globalMarketState = 'bubble';
+                    // All prices increase by 30%
+                    Object.keys(cardPrices).forEach(cardId => {
+                        cardPrices[cardId].current = Math.floor(cardPrices[cardId].current * 1.3);
+                    });
+                    showMarketAlert('バブル発生', 'カード市場にバブルが発生！全カードの価格が30%上昇！');
+                }
+            } else if (globalMarketState === 'bubble') {
+                // Check for bubble burst (30% chance) or continue
+                if (rand < 0.3) {
+                    globalMarketState = 'crash';
+                    showMarketAlert('バブル崩壊', '市場が崩壊！全カードの価格が60%暴落！');
+                } else {
+                    globalMarketState = 'bubble_continuing';
+                    showMarketAlert('バブル継続', 'バブルが継続中！価格がさらに5%上昇！');
+                }
+            } else if (globalMarketState === 'bubble_continuing') {
+                // Check for bubble burst (30% chance)
+                if (rand < 0.3) {
+                    globalMarketState = 'crash';
+                    showMarketAlert('バブル崩壊', '市場が崩壊！全カードの価格が60%暴落！');
+                }
+            } else if (globalMarketState === 'crash') {
+                // Recovery from crash
+                globalMarketState = null;
+            }
+            
+            // Update market state display
+            const marketStateEl = document.getElementById('market-state');
+            if (globalMarketState && globalMarketState !== 'crash') {
+                marketStateEl.style.display = 'inline-block';
+                document.getElementById('market-state-text').textContent = 
+                    globalMarketState.includes('bubble') ? 'バブル発生中' : '';
+            } else {
+                marketStateEl.style.display = 'none';
+            }
+        }
+        
+        // Show market alert
+        function showMarketAlert(title, message) {
+            const alertDiv = document.createElement('div');
+            alertDiv.className = 'alert alert-danger position-fixed top-50 start-50 translate-middle';
+            alertDiv.style.zIndex = '9999';
+            alertDiv.style.minWidth = '300px';
+            alertDiv.innerHTML = `
+                <h5 class="alert-heading">${title}</h5>
+                <p>${message}</p>
+            `;
+            document.body.appendChild(alertDiv);
+            setTimeout(() => alertDiv.remove(), 5000);
+        }
+        
+        // Update date display
+        function updateDateDisplay() {
+            const days = ['日', '月', '火', '水', '木', '金', '土'];
+            const dateStr = `${gameDate.getFullYear()}年${gameDate.getMonth() + 1}月${gameDate.getDate()}日(${days[gameDate.getDay()]})`;
+            const dateEl = document.getElementById('game-date');
+            if (dateEl) dateEl.textContent = dateStr;
         }
 
         // Generate market prediction comments
@@ -734,8 +900,9 @@
             
             if (!targetPrice) return;
             
-            // 40% chance to be accurate
-            const isAccurate = Math.random() < 0.4;
+            // Use selected news source accuracy
+            const accuracy = NEWS_SOURCES[selectedNewsSource]?.accuracy || 0.1;
+            const isAccurate = Math.random() < accuracy;
             
             // Determine actual next pattern for the card
             const actualPattern = targetPrice.pattern;
@@ -858,7 +1025,10 @@
             try {
                 await setDoc(doc(db, 'cardShopPrices', 'current'), {
                     prices: cardPrices,
-                    lastUpdate: serverTimestamp()
+                    lastUpdate: serverTimestamp(),
+                    gameDate: gameDate.toISOString(),
+                    globalMarketState: globalMarketState,
+                    lastRegulationDate: lastRegulationDate ? lastRegulationDate.toISOString() : null
                 });
             } catch (error) {
                 console.error('Error saving prices:', error);
@@ -1558,6 +1728,26 @@
         window.addEventListener('DOMContentLoaded', () => {
             // Sort change handler
             document.getElementById('sort-select').addEventListener('change', displayCards);
+            
+            // News source change handler
+            document.getElementById('news-source').addEventListener('change', async (e) => {
+                const newSource = e.target.value;
+                const oldSource = selectedNewsSource;
+                
+                // Check if switching to paid note
+                if (newSource === 'paidNote') {
+                    if (!confirm(`有料noteを購読しますか？\n毎日${NEWS_SOURCES.paidNote.cost}ポイントが自動で消費されます。`)) {
+                        e.target.value = oldSource;
+                        return;
+                    }
+                    isSubscribedToPaidNote = true;
+                } else {
+                    isSubscribedToPaidNote = false;
+                }
+                
+                selectedNewsSource = newSource;
+                generateMarketPrediction(); // Regenerate prediction with new accuracy
+            });
             
             // Login functionality  
             document.getElementById('login-btn').addEventListener('click', async () => {
