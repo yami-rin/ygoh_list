@@ -424,6 +424,12 @@
         let inventory = [];
         let cardPrices = {};
         let updateInterval = null;
+        let specialCardOwnership = {};
+        const SPECIAL_CARD_LIMITS = {
+            PSE: 30,
+            QCSE: 50,
+            '青眼の白龍_SE': 4
+        };
         
         // Game date system (starts from January 1st, Monday)
         let gameDate = new Date(2024, 0, 1); // January 1, 2024 (Monday)
@@ -498,6 +504,7 @@
                     await loadUserData();
                     await loadCardPrices();
                     await loadInventory();
+                    await loadSpecialCardOwnership();
                     displayCards();
                     displayInventory();
                     updateDateDisplay();
@@ -513,6 +520,86 @@
                 }
             });
         });
+
+        // Get special card key for tracking ownership
+        function getSpecialCardKey(card) {
+            if (card.rarity === 'PSE') return `PSE_${card.id}`;
+            if (card.rarity === 'QCSE') return `QCSE_${card.id}`;
+            if (card.name === '青眼の白龍' && card.rarity === 'SE') return '青眼の白龍_SE';
+            return null;
+        }
+
+        // Load special card ownership from Firebase
+        async function loadSpecialCardOwnership() {
+            try {
+                const ownershipRef = doc(db, 'specialCardOwnership', 'global');
+                const snap = await getDoc(ownershipRef);
+                if (snap.exists()) {
+                    specialCardOwnership = snap.data() || {};
+                }
+            } catch (error) {
+                console.error('Error loading special card ownership:', error);
+            }
+        }
+
+        // Save special card ownership to Firebase
+        async function saveSpecialCardOwnership() {
+            if (!currentUser) return;
+            
+            try {
+                const ownershipRef = doc(db, 'specialCardOwnership', 'global');
+                await setDoc(ownershipRef, specialCardOwnership);
+            } catch (error) {
+                console.error('Error saving special card ownership:', error);
+            }
+        }
+
+        // Check if user has monopoly on a special card
+        async function checkMonopoly(cardKey) {
+            if (!specialCardOwnership[cardKey]) return false;
+            
+            const limit = SPECIAL_CARD_LIMITS[cardKey] || 
+                         SPECIAL_CARD_LIMITS[cardKey.split('_')[0]];
+            if (!limit) return false;
+            
+            const ownership = specialCardOwnership[cardKey];
+            return ownership.owners && 
+                   ownership.owners[currentUser.uid] >= limit;
+        }
+
+        // Buy maximum cards function
+        window.buyMaxCards = async (cardId) => {
+            const card = CARDS_DATABASE.find(c => c.id === cardId);
+            const price = cardPrices[cardId];
+            
+            if (!card || !price) return;
+            
+            const maxQty = Math.floor(userPoints / price.current);
+            if (maxQty === 0) {
+                alert('ポイントが不足しています！');
+                return;
+            }
+            
+            // Check special card limits
+            const specialKey = getSpecialCardKey(card);
+            if (specialKey) {
+                const limit = SPECIAL_CARD_LIMITS[specialKey] || 
+                            SPECIAL_CARD_LIMITS[specialKey.split('_')[0]];
+                if (!specialCardOwnership[specialKey]) {
+                    specialCardOwnership[specialKey] = { owners: {} };
+                }
+                const currentOwned = specialCardOwnership[specialKey].owners[currentUser.uid] || 0;
+                const totalOwned = Object.values(specialCardOwnership[specialKey].owners).reduce((a, b) => a + b, 0);
+                const available = Math.min(limit - totalOwned, maxQty);
+                if (available <= 0) {
+                    alert('このカードは全て購入済みです！');
+                    return;
+                }
+                await buyCard(cardId, available);
+            } else {
+                await buyCard(cardId, maxQty);
+            }
+        };
 
         // Load user points
         async function loadUserData() {
@@ -659,6 +746,10 @@
                     history: []
                 };
                 
+                // Check if card is immune to price decreases
+                const isImmune = (card.rarity === 'PSE' || card.rarity === 'QCSE' || 
+                    (card.name === '青眼の白龍' && card.rarity === 'SE'));
+                
                 // Save previous price
                 price.previous = price.current;
                 price.history.push({
@@ -676,9 +767,9 @@
                 let nextPattern = price.pattern;
                 const rand = Math.random();
                 
-                // Special events override normal patterns
-                if (isRegulationDay) {
-                    // Regulation affects random cards
+                // Special events override normal patterns (but respect immunity)
+                if (isRegulationDay && !isImmune) {
+                    // Regulation affects random cards (immune cards skip)
                     if (Math.random() < 0.2) { // 20% chance per card
                         nextPattern = PRICE_PATTERNS.REGULATION;
                     }
@@ -692,14 +783,16 @@
                         case PRICE_PATTERNS.SUPPLY:
                             // 60% continue, else change
                             if (rand > 0.6) {
-                                const patterns = [PRICE_PATTERNS.META, PRICE_PATTERNS.DEMAND, PRICE_PATTERNS.REPRINT];
+                                const patterns = isImmune ? 
+                                    [PRICE_PATTERNS.META, PRICE_PATTERNS.DEMAND] : // Immune cards can't get REPRINT
+                                    [PRICE_PATTERNS.META, PRICE_PATTERNS.DEMAND, PRICE_PATTERNS.REPRINT];
                                 nextPattern = patterns[Math.floor(Math.random() * patterns.length)];
                             }
                             break;
                         
                         case PRICE_PATTERNS.REPRINT:
-                            // PSE and QCSE cannot be reprinted
-                            if (card.rarity === 'PSE' || card.rarity === 'QCSE') {
+                            // Immune cards never get reprint
+                            if (isImmune) {
                                 nextPattern = PRICE_PATTERNS.SUPPLY;
                             } else {
                                 // 80% continue reprint
@@ -723,15 +816,24 @@
                             break;
                         
                         case PRICE_PATTERNS.DEMAND:
-                            // 40% continue, else decline
-                            nextPattern = rand < 0.4 ? PRICE_PATTERNS.DEMAND : PRICE_PATTERNS.DECLINE;
+                            // 40% continue, else decline (immune cards don't decline)
+                            if (isImmune) {
+                                nextPattern = rand < 0.4 ? PRICE_PATTERNS.DEMAND : PRICE_PATTERNS.SUPPLY;
+                            } else {
+                                nextPattern = rand < 0.4 ? PRICE_PATTERNS.DEMAND : PRICE_PATTERNS.DECLINE;
+                            }
                             break;
                         
                         case PRICE_PATTERNS.DECLINE:
-                            // 60% continue
-                            if (rand > 0.6) {
-                                const patterns = [PRICE_PATTERNS.SUPPLY, PRICE_PATTERNS.META];
-                                nextPattern = patterns[Math.floor(Math.random() * patterns.length)];
+                            if (isImmune) {
+                                // Immune cards immediately exit decline
+                                nextPattern = PRICE_PATTERNS.SUPPLY;
+                            } else {
+                                // 60% continue
+                                if (rand > 0.6) {
+                                    const patterns = [PRICE_PATTERNS.SUPPLY, PRICE_PATTERNS.META];
+                                    nextPattern = patterns[Math.floor(Math.random() * patterns.length)];
+                                }
                             }
                             break;
                         
@@ -811,18 +913,43 @@
                         break;
                 }
                 
-                // Apply global market effects
+                // Apply global market effects  
+                let baseChange = 0;
                 if (globalMarketState === 'bubble' || globalMarketState === 'bubble_continuing') {
-                    multiplier *= 1.05; // Additional 5% for bubble
+                    if (isImmune) {
+                        // Immune cards get 2x bubble effect
+                        multiplier *= 1.8; // 80% boost for immune cards
+                        baseChange += 700; // Additional 700pt boost
+                    } else {
+                        multiplier *= 1.4; // 40% boost for normal cards
+                        baseChange += 350; // Additional 350pt boost
+                    }
                 } else if (globalMarketState === 'crash') {
-                    multiplier *= 0.4; // 60% decrease for crash
+                    if (isImmune) {
+                        // Immune cards lose 80% on crash
+                        multiplier *= 0.2; // 80% decrease for immune cards
+                    } else {
+                        multiplier *= 0.4; // 60% decrease for normal cards
+                    }
                 }
                 
-                // Apply multiplier with minimum price (10% of base) and no maximum cap
-                price.current = Math.max(
-                    Math.floor(card.basePrice * 0.1),
-                    Math.floor(price.current * multiplier)
-                );
+                // Check if monopoly pricing applies
+                const monopolyKey = getSpecialCardKey(card);
+                if (monopolyKey && specialCardOwnership[monopolyKey]?.monopolyPrice) {
+                    // Use monopoly price instead of calculated price
+                    price.current = specialCardOwnership[monopolyKey].monopolyPrice;
+                } else {
+                    // Apply multiplier and base change with minimum price of 30
+                    const newPrice = Math.floor(price.current * multiplier) + baseChange;
+                    price.current = Math.max(30, newPrice);
+                }
+                
+                // Check if this is the lowest priced card at 30 and in reprint
+                if (price.pattern === PRICE_PATTERNS.REPRINT && price.current === 30) {
+                    // Remove reprint state from lowest priced cards
+                    price.pattern = PRICE_PATTERNS.SUPPLY;
+                    price.continuationCount = 0;
+                }
                 
                 cardPrices[card.id] = price;
             });
@@ -1136,6 +1263,41 @@
             }
             await Promise.all(promises);
             
+            // Update special card ownership tracking
+            const specialKey = getSpecialCardKey(card);
+            if (specialKey) {
+                if (!specialCardOwnership[specialKey]) {
+                    specialCardOwnership[specialKey] = { owners: {} };
+                }
+                if (!specialCardOwnership[specialKey].owners[currentUser.uid]) {
+                    specialCardOwnership[specialKey].owners[currentUser.uid] = 0;
+                }
+                specialCardOwnership[specialKey].owners[currentUser.uid] += quantity;
+                
+                // Check if user now has monopoly
+                const limit = SPECIAL_CARD_LIMITS[specialKey] || 
+                            SPECIAL_CARD_LIMITS[specialKey.split('_')[0]];
+                const totalOwned = Object.values(specialCardOwnership[specialKey].owners).reduce((a, b) => a + b, 0);
+                
+                if (specialCardOwnership[specialKey].owners[currentUser.uid] >= limit && totalOwned >= limit) {
+                    // User has monopoly - can set price
+                    alert(`おめでとうございます！${card.name}の独占に成功しました！\n価格を自由に設定できます。`);
+                    const newPrice = prompt(`${card.name}の新しい価格を設定してください (現在: ${price.current}pt, 最大: ${price.current * 2}pt):`);
+                    if (newPrice && !isNaN(newPrice)) {
+                        const parsedPrice = parseInt(newPrice);
+                        if (parsedPrice >= price.current && parsedPrice <= price.current * 2) {
+                            specialCardOwnership[specialKey].monopolyPrice = parsedPrice;
+                            specialCardOwnership[specialKey].monopolyOwner = currentUser.uid;
+                            cardPrices[card.id].current = parsedPrice;
+                            await savePrices();
+                            displayCards();
+                        }
+                    }
+                }
+                
+                await saveSpecialCardOwnership();
+            }
+            
             await loadInventory();
             displayInventory();
             
@@ -1159,6 +1321,9 @@
             
             if (!card || !price) return;
             
+            // Calculate sell price (1/3 of current, or 10 if current is 30)
+            const sellPrice = price.current === 30 ? 10 : Math.round(price.current / 3);
+            
             // Get all cards with same ID and purchase price
             let itemsToSell = inventory.filter(item => item.cardId === cardId);
             
@@ -1168,7 +1333,7 @@
             
             if (itemsToSell.length === 0) return;
             
-            const profit = price.current - (purchasePrice || itemsToSell[0].purchasePrice);
+            const profit = sellPrice - (purchasePrice || itemsToSell[0].purchasePrice);
             const profitText = profit >= 0 ? `+${profit}` : profit;
             const profitClass = profit >= 0 ? 'text-success' : 'text-danger';
             
@@ -1182,10 +1347,10 @@
                 const quantityButtons = [];
                 for (let i = 1; i <= Math.min(itemsToSell.length, 9); i++) {
                     const totalProfit = profit * i;
-                    const totalRevenue = price.current * i;
+                    const totalRevenue = sellPrice * i;
                     quantityButtons.push(`
                         <button class="btn btn-sm btn-outline-danger mx-1 mb-2" 
-                                onclick="sellMultiple('${cardId}', ${purchasePrice || itemsToSell[0].purchasePrice}, ${i})">
+                                onclick="sellMultiple('${cardId}', ${purchasePrice || itemsToSell[0].purchasePrice}, ${i}, ${sellPrice})">
                             ${i}枚 (${totalRevenue.toLocaleString()}pt)
                         </button>
                     `);
@@ -1200,6 +1365,7 @@
                             </div>
                             <div class="modal-body">
                                 <p>現在価格: ${price.current.toLocaleString()} pt/枚</p>
+                                <p>売却価格: ${sellPrice.toLocaleString()} pt/枚</p>
                                 <p>購入価格: ${(purchasePrice || itemsToSell[0].purchasePrice).toLocaleString()} pt/枚</p>
                                 <p class="${profitClass}">損益: ${profitText} pt/枚</p>
                                 <p>所持数: ${itemsToSell.length}枚</p>
@@ -1217,14 +1383,18 @@
                 document.body.appendChild(modal);
             } else {
                 // Single item, sell directly
-                await sellMultiple(cardId, purchasePrice || itemsToSell[0].purchasePrice, 1);
+                await sellMultiple(cardId, purchasePrice || itemsToSell[0].purchasePrice, 1, sellPrice);
             }
         };
         
         // Sell multiple cards
-        window.sellMultiple = async (cardId, purchasePrice, quantity) => {
+        window.sellMultiple = async (cardId, purchasePrice, quantity, sellPriceOverride = null) => {
             const card = CARDS_DATABASE.find(c => c.id === cardId);
             const price = cardPrices[cardId];
+            
+            // Calculate sell price if not provided
+            const sellPrice = sellPriceOverride !== null ? sellPriceOverride : 
+                (price.current === 30 ? 10 : Math.round(price.current / 3));
             
             const itemsToSell = inventory
                 .filter(item => item.cardId === cardId && item.purchasePrice === purchasePrice)
@@ -1232,7 +1402,7 @@
             
             if (itemsToSell.length === 0) return;
             
-            const totalRevenue = price.current * itemsToSell.length;
+            const totalRevenue = sellPrice * itemsToSell.length;
             userPoints += totalRevenue;
             await saveUserPoints();
             
@@ -1242,6 +1412,29 @@
             );
             await Promise.all(deletePromises);
             
+            // Update special card ownership when selling
+            const specialKey = getSpecialCardKey(card);
+            if (specialKey && specialCardOwnership[specialKey]?.owners?.[currentUser.uid]) {
+                specialCardOwnership[specialKey].owners[currentUser.uid] -= itemsToSell.length;
+                if (specialCardOwnership[specialKey].owners[currentUser.uid] <= 0) {
+                    delete specialCardOwnership[specialKey].owners[currentUser.uid];
+                }
+                
+                // Check if monopoly is lost
+                const limit = SPECIAL_CARD_LIMITS[specialKey] || 
+                            SPECIAL_CARD_LIMITS[specialKey.split('_')[0]];
+                const userOwns = specialCardOwnership[specialKey].owners[currentUser.uid] || 0;
+                
+                if (userOwns < limit && specialCardOwnership[specialKey].monopolyOwner === currentUser.uid) {
+                    // Lost monopoly
+                    delete specialCardOwnership[specialKey].monopolyPrice;
+                    delete specialCardOwnership[specialKey].monopolyOwner;
+                    alert(`${card.name}の独占を失いました。価格が通常に戻ります。`);
+                }
+                
+                await saveSpecialCardOwnership();
+            }
+            
             await loadInventory();
             displayInventory();
             
@@ -1250,7 +1443,7 @@
             if (modal) modal.remove();
             
             // Show success message
-            const profit = (price.current - purchasePrice) * itemsToSell.length;
+            const profit = (sellPrice - purchasePrice) * itemsToSell.length;
             const toast = document.createElement('div');
             toast.className = `alert alert-${profit >= 0 ? 'success' : 'warning'} position-fixed top-50 start-50 translate-middle`;
             toast.style.zIndex = '9999';
@@ -1307,8 +1500,11 @@
                             </span>
                         </div>
                         <div class="d-flex gap-2">
-                            <button class="btn btn-primary buy-button flex-grow-1" onclick="buyCard('${card.id}')">
+                            <button class="btn btn-primary buy-button" onclick="buyCard('${card.id}')">
                                 <i class="bi bi-cart-plus"></i> 購入
+                            </button>
+                            <button class="btn btn-success" onclick="buyMaxCards('${card.id}')" title="買えるだけ買う">
+                                <i class="bi bi-cart-fill"></i> MAX
                             </button>
                             <button class="btn btn-outline-secondary" onclick="showPriceHistory('${card.id}')" title="価格推移">
                                 <i class="bi bi-graph-up"></i>
