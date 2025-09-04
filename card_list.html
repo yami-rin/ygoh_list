@@ -412,6 +412,48 @@
             animation: electric-pulse 1s linear infinite;
         }
         
+        /* Additional Frame Styles */
+        body.frame-simple .card {
+            border: 2px solid #333 !important;
+        }
+        body.frame-bold .card {
+            border: 4px solid #000 !important;
+        }
+        body.frame-dotted .card {
+            border: 3px dotted #666 !important;
+        }
+        body.frame-silver .card {
+            border: 3px solid #C0C0C0 !important;
+            box-shadow: 0 0 10px rgba(192, 192, 192, 0.5);
+        }
+        body.frame-nature .card {
+            border: 3px solid #228B22 !important;
+            box-shadow: 0 0 15px rgba(34, 139, 34, 0.4);
+        }
+        body.frame-plasma .card {
+            border: 3px solid #8A2BE2 !important;
+            box-shadow: 0 0 20px rgba(138, 43, 226, 0.6);
+            animation: plasma-glow 2s ease-in-out infinite;
+        }
+        body.frame-crystal .card {
+            border: 3px solid #87CEEB !important;
+            box-shadow: 0 0 25px rgba(135, 206, 235, 0.7), inset 0 0 10px rgba(255, 255, 255, 0.3);
+        }
+        body.frame-legendary .card {
+            border: 4px solid transparent !important;
+            background: linear-gradient(white, white) padding-box,
+                       linear-gradient(45deg, gold, #ff6347, #ff1493, gold) border-box;
+            box-shadow: 0 0 30px rgba(255, 215, 0, 0.8);
+            animation: legendary-shimmer 3s linear infinite;
+        }
+        body.frame-mythic .card {
+            border: 4px solid transparent !important;
+            background: linear-gradient(white, white) padding-box,
+                       linear-gradient(90deg, #9400D3, #4B0082, #0000FF, #00FFFF, #0000FF, #4B0082, #9400D3) border-box;
+            box-shadow: 0 0 35px rgba(148, 0, 211, 0.8);
+            animation: mythic-pulse 4s ease-in-out infinite;
+        }
+        
         /* Background Patterns */
         body.bg-stars::before {
             content: '';
@@ -482,6 +524,115 @@
             0% { background-position: 0% 50%; }
             50% { background-position: 100% 50%; }
             100% { background-position: 0% 50%; }
+        }
+        
+        /* Additional Background Styles */
+        body.bg-dots {
+            background-image: radial-gradient(circle, #333 1px, transparent 1px);
+            background-size: 20px 20px;
+        }
+        body.bg-stripes {
+            background-image: repeating-linear-gradient(
+                45deg,
+                transparent,
+                transparent 10px,
+                rgba(255, 255, 255, 0.1) 10px,
+                rgba(255, 255, 255, 0.1) 20px
+            );
+        }
+        body.bg-checker {
+            background-image: 
+                linear-gradient(45deg, #ccc 25%, transparent 25%), 
+                linear-gradient(-45deg, #ccc 25%, transparent 25%), 
+                linear-gradient(45deg, transparent 75%, #ccc 75%), 
+                linear-gradient(-45deg, transparent 75%, #ccc 75%);
+            background-size: 20px 20px;
+            background-position: 0 0, 0 10px, 10px -10px, -10px 0px;
+        }
+        body.bg-hexagon {
+            background-image: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><polygon points="50,10 90,30 90,70 50,90 10,70 10,30" fill="none" stroke="rgba(255,255,255,0.1)" stroke-width="1"/></svg>');
+            background-size: 100px 100px;
+        }
+        body.bg-circuit {
+            background-image: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><path d="M10,10 L30,10 L30,30 L50,30 M70,30 L90,30 L90,50 M10,70 L30,70 L30,90 L50,90" fill="none" stroke="rgba(255,255,255,0.1)" stroke-width="1"/><circle cx="50" cy="30" r="3" fill="rgba(255,255,255,0.2)"/><circle cx="50" cy="90" r="3" fill="rgba(255,255,255,0.2)"/></svg>');
+            background-size: 100px 100px;
+        }
+        body.bg-galaxy {
+            background: radial-gradient(ellipse at center, #1e3c72 0%, #2a5298 50%, #0e1538 100%);
+        }
+        body.bg-aurora {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 25%, #f093fb 50%, #667eea 75%, #764ba2 100%);
+            background-size: 400% 400%;
+            animation: aurora-shift 10s ease infinite;
+        }
+        body.bg-crystal {
+            background: linear-gradient(135deg, #667eea 0%, rgba(118, 75, 162, 0.5) 50%, #667eea 100%),
+                        repeating-linear-gradient(45deg, transparent, transparent 35px, rgba(255,255,255,.05) 35px, rgba(255,255,255,.05) 70px);
+        }
+        body.bg-matrix {
+            background: #000;
+            background-image: repeating-linear-gradient(
+                0deg,
+                transparent,
+                transparent 2px,
+                #0F0 2px,
+                #0F0 3px
+            );
+            background-size: 100% 20px;
+            animation: matrix-rain 5s linear infinite;
+        }
+        body.bg-nebula {
+            background: radial-gradient(ellipse at top left, #ff00ff 0%, transparent 50%),
+                        radial-gradient(ellipse at bottom right, #00ffff 0%, transparent 50%),
+                        radial-gradient(ellipse at center, #1e3c72 0%, #0e1538 100%);
+        }
+        body.bg-dimension {
+            background: linear-gradient(45deg, #1e3c72, #2a5298, #7e8aa2, #2a5298, #1e3c72);
+            background-size: 500% 500%;
+            animation: dimension-shift 20s ease infinite;
+        }
+        body.bg-void {
+            background: radial-gradient(circle at center, #0a0a0a 0%, #000 50%, #000 100%);
+        }
+        body.bg-infinity {
+            background: conic-gradient(from 0deg at 50% 50%, #667eea, #764ba2, #f093fb, #f5576c, #667eea);
+            animation: infinity-rotate 10s linear infinite;
+        }
+        
+        /* Additional animations for backgrounds and frames */
+        @keyframes aurora-shift {
+            0% { background-position: 0% 0%; }
+            50% { background-position: 100% 100%; }
+            100% { background-position: 0% 0%; }
+        }
+        @keyframes matrix-rain {
+            0% { background-position: 0 0; }
+            100% { background-position: 0 20px; }
+        }
+        @keyframes dimension-shift {
+            0% { background-position: 0% 50%; }
+            25% { background-position: 100% 50%; }
+            50% { background-position: 100% 100%; }
+            75% { background-position: 0% 100%; }
+            100% { background-position: 0% 50%; }
+        }
+        @keyframes infinity-rotate {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        @keyframes plasma-glow {
+            0% { box-shadow: 0 0 20px rgba(138, 43, 226, 0.6); }
+            50% { box-shadow: 0 0 30px rgba(138, 43, 226, 0.9), 0 0 50px rgba(138, 43, 226, 0.4); }
+            100% { box-shadow: 0 0 20px rgba(138, 43, 226, 0.6); }
+        }
+        @keyframes legendary-shimmer {
+            0% { background-position: 0% 50%; }
+            100% { background-position: 200% 50%; }
+        }
+        @keyframes mythic-pulse {
+            0% { box-shadow: 0 0 35px rgba(148, 0, 211, 0.8); }
+            50% { box-shadow: 0 0 50px rgba(148, 0, 211, 1), 0 0 70px rgba(0, 255, 255, 0.5); }
+            100% { box-shadow: 0 0 35px rgba(148, 0, 211, 0.8); }
         }
         
         /* Icon Styles */
@@ -2616,6 +2767,24 @@
             if (gamificationData.purchasedItems[effectId]) {
                 document.body.classList.add(effectId);
             }
+        };
+        
+        // Show notification function
+        const showNotification = (message, type = 'info') => {
+            // Create notification element
+            const notification = document.createElement('div');
+            notification.className = `alert alert-${type} position-fixed top-0 start-50 translate-middle-x mt-3`;
+            notification.style.zIndex = '9999';
+            notification.style.minWidth = '300px';
+            notification.textContent = message;
+            
+            // Add to body
+            document.body.appendChild(notification);
+            
+            // Remove after 3 seconds
+            setTimeout(() => {
+                notification.remove();
+            }, 3000);
         };
         
         // Preview frame (temporary application)
