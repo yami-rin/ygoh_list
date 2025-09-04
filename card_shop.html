@@ -403,11 +403,6 @@
         // Wait for DOM to be ready
         let authModal;
         
-        // Initialize on DOM ready
-        window.addEventListener('DOMContentLoaded', () => {
-            authModal = new bootstrap.Modal(document.getElementById('auth-modal'));
-        });
-        
         // Initialize
         onAuthStateChanged(auth, async (user) => {
             if (user) {
@@ -871,35 +866,65 @@
             document.getElementById('loading').classList.remove('active');
         };
 
-        // Initialize event listeners when DOM is ready
-        document.addEventListener('DOMContentLoaded', () => {
+        // Setup event listeners immediately or wait for DOM
+        function setupEventListeners() {
+            // Prevent form submission
+            const authForm = document.getElementById('auth-form');
+            if (authForm) {
+                authForm.addEventListener('submit', (e) => {
+                    e.preventDefault();
+                    return false;
+                });
+            }
+            
             // Sort change handler
             document.getElementById('sort-select').addEventListener('change', displayCards);
             
             // Login functionality
-            document.getElementById('login-btn').addEventListener('click', async () => {
+            document.getElementById('login-btn').addEventListener('click', async (e) => {
+                e.preventDefault();
                 const email = document.getElementById('email').value;
                 const password = document.getElementById('password').value;
                 const errorDiv = document.getElementById('auth-error');
                 
+                console.log('Login attempt - Email:', email);
+                console.log('Login attempt - Password length:', password.length);
+                
+                // Support local mode
+                if (email === 'local') {
+                    currentUser = { uid: 'local_user', email: 'local@example.com' };
+                    if (authModal) authModal.hide();
+                    document.getElementById('loading').classList.remove('active');
+                    return;
+                }
+                
                 try {
-                            errorDiv.style.display = 'none';
+                    errorDiv.style.display = 'none';
+                    console.log('Calling signInWithEmailAndPassword...');
                     await signInWithEmailAndPassword(auth, email, password);
+                    console.log('Login successful');
                 } catch (error) {
+                    console.error('Login failed:', error);
                     errorDiv.textContent = 'ログインに失敗しました: ' + error.message;
                     errorDiv.style.display = 'block';
                 }
             });
             
             // Signup functionality
-            document.getElementById('signup-btn').addEventListener('click', async () => {
+            document.getElementById('signup-btn').addEventListener('click', async (e) => {
+                e.preventDefault();
                 const email = document.getElementById('email').value;
                 const password = document.getElementById('password').value;
                 const errorDiv = document.getElementById('auth-error');
                 
+                console.log('Signup attempt - Email:', email);
+                console.log('Signup attempt - Password length:', password.length);
+                
                 try {
                     errorDiv.style.display = 'none';
+                    console.log('Calling createUserWithEmailAndPassword...');
                     const userCredential = await createUserWithEmailAndPassword(auth, email, password);
+                    console.log('Signup successful');
                     // Initialize user gamification data
                     const gamificationRef = doc(db, 'userGamification', userCredential.user.uid);
                     await setDoc(gamificationRef, {
@@ -910,11 +935,24 @@
                         createdAt: serverTimestamp()
                     });
                 } catch (error) {
+                    console.error('Signup failed:', error);
                     errorDiv.textContent = '新規登録に失敗しました: ' + error.message;
                     errorDiv.style.display = 'block';
                 }
             });
-        });
+        }
+        
+        // Initialize event listeners
+        if (document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', () => {
+                setupEventListeners();
+                authModal = new bootstrap.Modal(document.getElementById('auth-modal'));
+            });
+        } else {
+            // DOM is already loaded
+            setupEventListeners();
+            authModal = new bootstrap.Modal(document.getElementById('auth-modal'));
+        }
         
         // Cleanup on page unload
         window.addEventListener('beforeunload', () => {
