@@ -1410,7 +1410,7 @@
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-app.js";
         import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, onAuthStateChanged, signOut, deleteUser, setPersistence, browserLocalPersistence } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-auth.js";
-        import { getFirestore, collection, getDocs, addDoc, deleteDoc, doc, query, where, updateDoc, increment, writeBatch } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore.js";
+        import { getFirestore, collection, getDocs, addDoc, deleteDoc, doc, query, where, updateDoc, increment, writeBatch, getDoc, setDoc } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore.js";
 
         const firebaseConfig = {
             apiKey: "AIzaSyAOYKalLUb2hbghrjQUS8AWzxpLExBT7aU",
@@ -1438,6 +1438,59 @@
         let itemsPerPage = 50;
         let filteredCardCollection = [];
         let allTags = [];
+        
+        // Gamification data - will be synced with Firebase
+        let gamificationData = {
+            userPoints: 0,
+            purchasedItems: {},
+            activeTheme: 'default',
+            activeFrame: '',
+            activeBackground: '',
+            activeIcon: '',
+            registrationStreak: { count: 0, lastDate: null },
+            weeklyGoalData: { weekStart: null, count: 0, goal: 50 },
+            todayAdditions: { date: null, count: 0 },
+            dailyMissionProgress: {},
+            firstCollectionDate: null,
+            lastMilestoneReached: 0,
+            cardAdditionDates: {}
+        };
+        
+        // Save gamification data to Firebase
+        const saveGamificationData = async () => {
+            if (!currentUser) return;
+            
+            try {
+                const userDocRef = doc(db, 'userGamification', currentUser.uid);
+                await setDoc(userDocRef, gamificationData, { merge: true });
+            } catch (error) {
+                console.error('Error saving gamification data:', error);
+            }
+        };
+        
+        // Load gamification data from Firebase
+        const loadGamificationData = async () => {
+            if (!currentUser) return;
+            
+            try {
+                const userDocRef = doc(db, 'userGamification', currentUser.uid);
+                const docSnap = await getDoc(userDocRef);
+                
+                if (docSnap.exists()) {
+                    const data = docSnap.data();
+                    // Merge with default values to ensure all properties exist
+                    gamificationData = {
+                        ...gamificationData,
+                        ...data
+                    };
+                } else {
+                    // Initialize new user data
+                    await saveGamificationData();
+                }
+            } catch (error) {
+                console.error('Error loading gamification data:', error);
+            }
+        };
         let currentCardTags = [];
         let selectedCardIds = new Set();
 
@@ -1584,9 +1637,7 @@
             updateCollectionStats(); // Update gamification stats
         };
         
-        // Gamification features
-        let firstCollectionDate = localStorage.getItem('firstCollectionDate');
-        let lastMilestoneReached = parseInt(localStorage.getItem('lastMilestoneReached') || '0');
+        // Gamification features - now loaded from Firebase
         
         // Achievement categories with expanded variety
         const ACHIEVEMENT_CATEGORIES = {
@@ -1657,8 +1708,7 @@
             return 1;
         };
         
-        // Track card addition dates
-        let cardAdditionDates = JSON.parse(localStorage.getItem('cardAdditionDates') || '{}');
+        // Track card addition dates - now in gamificationData
         
         // Fun Dashboard Features
         const DAILY_MISSIONS = [
@@ -1669,13 +1719,7 @@
             { id: 'unique2', text: '2種類の異なるカードを追加', target: 2, type: 'unique' }
         ];
         
-        // Point System
-        let userPoints = parseInt(localStorage.getItem('userPoints') || '0');
-        let purchasedItems = JSON.parse(localStorage.getItem('purchasedItems') || '{}');
-        let activeTheme = localStorage.getItem('activeTheme') || 'default';
-        let activeFrame = localStorage.getItem('activeFrame') || '';
-        let activeBackground = localStorage.getItem('activeBackground') || '';
-        let activeIcon = localStorage.getItem('activeIcon') || '';
+        // Point System - now in gamificationData
         
         const POINT_REWARDS = {
             addCard: 5,          // カード追加
@@ -1739,21 +1783,22 @@
         };
         
         // Initialize daily mission progress
-        let dailyMissionProgress = JSON.parse(localStorage.getItem('dailyMissionProgress') || '{}');
-        const today = new Date().toDateString();
-        
-        // Reset missions if it's a new day
-        if (dailyMissionProgress.date !== today) {
-            dailyMissionProgress = {
-                date: today,
-                missions: {},
-                searchCount: 0,
-                addedCards: [],
-                addedRare: 0,
-                addedWithTag: 0
-            };
-            localStorage.setItem('dailyMissionProgress', JSON.stringify(dailyMissionProgress));
-        }
+        const initializeDailyMissions = () => {
+            const today = new Date().toDateString();
+            
+            // Reset missions if it's a new day
+            if (!gamificationData.dailyMissionProgress || gamificationData.dailyMissionProgress.date !== today) {
+                gamificationData.dailyMissionProgress = {
+                    date: today,
+                    missions: {},
+                    searchCount: 0,
+                    addedCards: [],
+                    addedRare: 0,
+                    addedWithTag: 0
+                };
+                saveGamificationData();
+            }
+        };
         
         // Update time display
         const updateTimeDisplay = () => {
@@ -1773,24 +1818,24 @@
             
             container.innerHTML = '';
             DAILY_MISSIONS.forEach(mission => {
-                const completed = dailyMissionProgress.missions[mission.id] || false;
+                const completed = gamificationData.dailyMissionProgress.missions[mission.id] || false;
                 let progress = 0;
                 
                 switch (mission.type) {
                     case 'add':
-                        progress = dailyMissionProgress.addedCards.length;
+                        progress = gamificationData.dailyMissionProgress.addedCards.length;
                         break;
                     case 'rare':
-                        progress = dailyMissionProgress.addedRare;
+                        progress = gamificationData.dailyMissionProgress.addedRare;
                         break;
                     case 'tag':
-                        progress = dailyMissionProgress.addedWithTag;
+                        progress = gamificationData.dailyMissionProgress.addedWithTag;
                         break;
                     case 'search':
-                        progress = dailyMissionProgress.searchCount;
+                        progress = gamificationData.dailyMissionProgress.searchCount;
                         break;
                     case 'unique':
-                        progress = new Set(dailyMissionProgress.addedCards.map(c => c.name)).size;
+                        progress = new Set(gamificationData.dailyMissionProgress.addedCards.map(c => c.name)).size;
                         break;
                 }
                 
@@ -1836,7 +1881,7 @@
         
         // Update registration streak
         const updateRegistrationStreak = () => {
-            const streakData = JSON.parse(localStorage.getItem('registrationStreak') || '{"count": 0, "lastDate": null}');
+            const streakData = gamificationData.registrationStreak;
             const today = new Date().toDateString();
             const yesterday = new Date(Date.now() - 86400000).toDateString();
             
@@ -1880,8 +1925,8 @@
         const updateTodayStats = () => {
             const today = new Date().toDateString();
             
-            // Load today's additions from localStorage
-            let todayAdditions = JSON.parse(localStorage.getItem('todayAdditions') || '{}');
+            // Load today's additions from gamificationData
+            let todayAdditions = gamificationData.todayAdditions;
             
             // Reset if it's a new day
             if (todayAdditions.date !== today) {
@@ -1889,14 +1934,15 @@
                     date: today,
                     count: 0
                 };
-                localStorage.setItem('todayAdditions', JSON.stringify(todayAdditions));
+                gamificationData.todayAdditions = todayAdditions;
+                saveGamificationData();
             }
             
             const todayAddedEl = document.getElementById('today-added');
             if (todayAddedEl) todayAddedEl.textContent = todayAdditions.count;
             
             // Load and update weekly goal
-            let weeklyGoalData = JSON.parse(localStorage.getItem('weeklyGoalData') || '{}');
+            let weeklyGoalData = gamificationData.weeklyGoalData;
             const weekStart = getWeekStart();
             
             // Reset if it's a new week
@@ -1906,7 +1952,8 @@
                     count: 0,
                     goal: 50
                 };
-                localStorage.setItem('weeklyGoalData', JSON.stringify(weeklyGoalData));
+                gamificationData.weeklyGoalData = weeklyGoalData;
+                saveGamificationData();
             }
             
             const weekProgress = Math.min(100, Math.round((weeklyGoalData.count / weeklyGoalData.goal) * 100));
@@ -1928,14 +1975,14 @@
         const updatePointsDisplay = () => {
             const pointsEl = document.getElementById('user-points');
             const shopPointsEl = document.getElementById('shop-current-points');
-            if (pointsEl) pointsEl.textContent = userPoints.toLocaleString();
-            if (shopPointsEl) shopPointsEl.textContent = userPoints.toLocaleString();
+            if (pointsEl) pointsEl.textContent = gamificationData.userPoints.toLocaleString();
+            if (shopPointsEl) shopPointsEl.textContent = gamificationData.userPoints.toLocaleString();
         };
         
         // Add points with animation
         const addPoints = (amount, reason) => {
-            userPoints += amount;
-            localStorage.setItem('userPoints', userPoints.toString());
+            gamificationData.userPoints += amount;
+            saveGamificationData();
             updatePointsDisplay();
             
             // Show point animation
@@ -1973,13 +2020,13 @@
             if (themeContainer) {
                 themeContainer.innerHTML = '';
                 SHOP_ITEMS.themes.forEach(theme => {
-                    const isPurchased = purchasedItems[theme.id];
-                    const isActive = activeTheme === theme.class;
+                    const isPurchased = gamificationData.purchasedItems[theme.id];
+                    const isActive = gamificationData.activeTheme === theme.class;
                     
                     const itemEl = document.createElement('div');
                     itemEl.className = 'col-md-6';
                     itemEl.innerHTML = `
-                        <div class="card shop-item ${isPurchased ? 'purchased' : ''} ${isActive ? 'active' : ''} ${!isPurchased && userPoints < theme.cost ? 'locked' : ''}">
+                        <div class="card shop-item ${isPurchased ? 'purchased' : ''} ${isActive ? 'active' : ''} ${!isPurchased && gamificationData.userPoints < theme.cost ? 'locked' : ''}">
                             <div class="card-body">
                                 <div style="height: 60px; background: ${theme.preview}; border-radius: 5px; margin-bottom: 10px;"></div>
                                 <h6>${theme.name}</h6>
@@ -2007,13 +2054,13 @@
             if (frameContainer) {
                 frameContainer.innerHTML = '';
                 SHOP_ITEMS.frames.forEach(frame => {
-                    const isPurchased = purchasedItems[frame.id];
-                    const isActive = activeFrame === frame.class;
+                    const isPurchased = gamificationData.purchasedItems[frame.id];
+                    const isActive = gamificationData.activeFrame === frame.class;
                     
                     const itemEl = document.createElement('div');
                     itemEl.className = 'col-md-6';
                     itemEl.innerHTML = `
-                        <div class="card shop-item ${isPurchased ? 'purchased' : ''} ${isActive ? 'active' : ''} ${!isPurchased && userPoints < frame.cost ? 'locked' : ''}">
+                        <div class="card shop-item ${isPurchased ? 'purchased' : ''} ${isActive ? 'active' : ''} ${!isPurchased && gamificationData.userPoints < frame.cost ? 'locked' : ''}">
                             <div class="card-body">
                                 <h6><i class="bi bi-border-all"></i> ${frame.name}</h6>
                                 <p class="small text-muted">${frame.description}</p>
@@ -2041,13 +2088,13 @@
             if (bgContainer) {
                 bgContainer.innerHTML = '';
                 SHOP_ITEMS.backgrounds.forEach(bg => {
-                    const isPurchased = purchasedItems[bg.id];
-                    const isActive = activeBackground === bg.class;
+                    const isPurchased = gamificationData.purchasedItems[bg.id];
+                    const isActive = gamificationData.activeBackground === bg.class;
                     
                     const itemEl = document.createElement('div');
                     itemEl.className = 'col-md-6';
                     itemEl.innerHTML = `
-                        <div class="card shop-item ${isPurchased ? 'purchased' : ''} ${isActive ? 'active' : ''} ${!isPurchased && userPoints < bg.cost ? 'locked' : ''}">
+                        <div class="card shop-item ${isPurchased ? 'purchased' : ''} ${isActive ? 'active' : ''} ${!isPurchased && gamificationData.userPoints < bg.cost ? 'locked' : ''}">
                             <div class="card-body">
                                 <h6><i class="bi bi-image"></i> ${bg.name}</h6>
                                 <p class="small text-muted">${bg.description}</p>
@@ -2075,12 +2122,12 @@
             if (effectContainer) {
                 effectContainer.innerHTML = '';
                 SHOP_ITEMS.effects.forEach(effect => {
-                    const isPurchased = purchasedItems[effect.id];
+                    const isPurchased = gamificationData.purchasedItems[effect.id];
                     
                     const itemEl = document.createElement('div');
                     itemEl.className = 'col-md-6';
                     itemEl.innerHTML = `
-                        <div class="card shop-item ${isPurchased ? 'purchased' : ''} ${!isPurchased && userPoints < effect.cost ? 'locked' : ''}">
+                        <div class="card shop-item ${isPurchased ? 'purchased' : ''} ${!isPurchased && gamificationData.userPoints < effect.cost ? 'locked' : ''}">
                             <div class="card-body">
                                 <h6><i class="bi bi-stars"></i> ${effect.name}</h6>
                                 <p class="small text-muted">${effect.description}</p>
@@ -2103,13 +2150,13 @@
             if (iconContainer) {
                 iconContainer.innerHTML = '';
                 SHOP_ITEMS.icons.forEach(icon => {
-                    const isPurchased = purchasedItems[icon.id];
-                    const isActive = activeIcon === icon.class;
+                    const isPurchased = gamificationData.purchasedItems[icon.id];
+                    const isActive = gamificationData.activeIcon === icon.class;
                     
                     const itemEl = document.createElement('div');
                     itemEl.className = 'col-md-6';
                     itemEl.innerHTML = `
-                        <div class="card shop-item ${isPurchased ? 'purchased' : ''} ${isActive ? 'active' : ''} ${!isPurchased && userPoints < icon.cost ? 'locked' : ''}">
+                        <div class="card shop-item ${isPurchased ? 'purchased' : ''} ${isActive ? 'active' : ''} ${!isPurchased && gamificationData.userPoints < icon.cost ? 'locked' : ''}">
                             <div class="card-body">
                                 <h6><i class="bi bi-award"></i> ${icon.name}</h6>
                                 <p class="small text-muted">${icon.description}</p>
@@ -2140,7 +2187,7 @@
                     const itemEl = document.createElement('div');
                     itemEl.className = 'col-md-6';
                     itemEl.innerHTML = `
-                        <div class="card shop-item ${userPoints < bonus.cost ? 'locked' : ''}">
+                        <div class="card shop-item ${gamificationData.userPoints < bonus.cost ? 'locked' : ''}">
                             <div class="card-body">
                                 <h6><i class="bi bi-gift"></i> ${bonus.name}</h6>
                                 <p class="small text-muted">${bonus.description}</p>
@@ -2158,24 +2205,23 @@
         
         // Purchase item
         window.purchaseItem = (itemId, cost, type) => {
-            if (userPoints < cost) {
+            if (gamificationData.userPoints < cost) {
                 alert('ポイントが足りません！');
                 return;
             }
             
             if (confirm(`${cost}ptを使って購入しますか？`)) {
-                userPoints -= cost;
-                localStorage.setItem('userPoints', userPoints.toString());
+                gamificationData.userPoints -= cost;
                 
                 if (type === 'theme' || type === 'frame' || type === 'background' || type === 'icon' || type === 'effect') {
-                    purchasedItems[itemId] = true;
-                    localStorage.setItem('purchasedItems', JSON.stringify(purchasedItems));
+                    gamificationData.purchasedItems[itemId] = true;
+                    saveGamificationData();
                 } else if (type === 'bonus') {
                     // Handle bonus effects
                     if (itemId === 'bonus-mission') {
                         // Reset missions
-                        dailyMissionProgress.missions = {};
-                        localStorage.setItem('dailyMissionProgress', JSON.stringify(dailyMissionProgress));
+                        gamificationData.dailyMissionProgress.missions = {};
+                        saveGamificationData();
                         updateDailyMissions();
                     }
                 }
@@ -2196,8 +2242,8 @@
                 document.body.classList.add(themeClass);
             }
             
-            activeTheme = themeClass;
-            localStorage.setItem('activeTheme', activeTheme);
+            gamificationData.activeTheme = themeClass;
+            saveGamificationData();
             initializeShop();
         };
         
@@ -2211,8 +2257,8 @@
                 document.body.classList.add(frameClass);
             }
             
-            activeFrame = frameClass;
-            localStorage.setItem('activeFrame', activeFrame);
+            gamificationData.activeFrame = frameClass;
+            saveGamificationData();
             initializeShop();
         };
         
@@ -2226,8 +2272,8 @@
                 document.body.classList.add(bgClass);
             }
             
-            activeBackground = bgClass;
-            localStorage.setItem('activeBackground', activeBackground);
+            gamificationData.activeBackground = bgClass;
+            saveGamificationData();
             initializeShop();
         };
         
@@ -2241,8 +2287,8 @@
                 document.body.classList.add(iconClass);
             }
             
-            activeIcon = iconClass;
-            localStorage.setItem('activeIcon', activeIcon);
+            gamificationData.activeIcon = iconClass;
+            saveGamificationData();
             initializeShop();
         };
         
@@ -2264,46 +2310,41 @@
             const cardCount = cardData.枚数 || 1;
             
             // Update daily mission progress
-            dailyMissionProgress.addedCards.push({ name: cardData.名前, time: Date.now() });
-            if (hasTag) dailyMissionProgress.addedWithTag++;
-            if (isRare) dailyMissionProgress.addedRare++;
+            gamificationData.dailyMissionProgress.addedCards.push({ name: cardData.名前, time: Date.now() });
+            if (hasTag) gamificationData.dailyMissionProgress.addedWithTag++;
+            if (isRare) gamificationData.dailyMissionProgress.addedRare++;
             
-            localStorage.setItem('dailyMissionProgress', JSON.stringify(dailyMissionProgress));
+            saveGamificationData();
             
             // Update today's additions
-            let todayAdditions = JSON.parse(localStorage.getItem('todayAdditions') || '{}');
-            if (todayAdditions.date !== today) {
-                todayAdditions = { date: today, count: 0 };
+            if (gamificationData.todayAdditions.date !== today) {
+                gamificationData.todayAdditions = { date: today, count: 0 };
             }
-            todayAdditions.count += cardCount;
-            localStorage.setItem('todayAdditions', JSON.stringify(todayAdditions));
+            gamificationData.todayAdditions.count += cardCount;
             
             // Update weekly goal
-            let weeklyGoalData = JSON.parse(localStorage.getItem('weeklyGoalData') || '{}');
             const weekStart = getWeekStart();
-            if (weeklyGoalData.weekStart !== weekStart) {
-                weeklyGoalData = { weekStart: weekStart, count: 0, goal: 50 };
+            if (gamificationData.weeklyGoalData.weekStart !== weekStart) {
+                gamificationData.weeklyGoalData = { weekStart: weekStart, count: 0, goal: 50 };
             }
-            weeklyGoalData.count += cardCount;
-            localStorage.setItem('weeklyGoalData', JSON.stringify(weeklyGoalData));
+            gamificationData.weeklyGoalData.count += cardCount;
             
             // Update registration streak
-            const streakData = JSON.parse(localStorage.getItem('registrationStreak') || '{"count": 0, "lastDate": null}');
             const yesterday = new Date(Date.now() - 86400000).toDateString();
             
-            if (streakData.lastDate === today) {
+            if (gamificationData.registrationStreak.lastDate === today) {
                 // Already added today, no change
-            } else if (streakData.lastDate === yesterday) {
+            } else if (gamificationData.registrationStreak.lastDate === yesterday) {
                 // Continue streak
-                streakData.count++;
-                streakData.lastDate = today;
+                gamificationData.registrationStreak.count++;
+                gamificationData.registrationStreak.lastDate = today;
             } else {
                 // Start new streak
-                streakData.count = 1;
-                streakData.lastDate = today;
+                gamificationData.registrationStreak.count = 1;
+                gamificationData.registrationStreak.lastDate = today;
             }
             
-            localStorage.setItem('registrationStreak', JSON.stringify(streakData));
+            saveGamificationData();
             
             // Update displays
             updateDailyMissions();
@@ -2313,8 +2354,8 @@
         
         // Track search action
         const trackSearchAction = () => {
-            dailyMissionProgress.searchCount++;
-            localStorage.setItem('dailyMissionProgress', JSON.stringify(dailyMissionProgress));
+            gamificationData.dailyMissionProgress.searchCount++;
+            saveGamificationData();
             updateDailyMissions();
         };
         
@@ -2406,21 +2447,21 @@
             const uniqueCards = cardCollection.length;
             
             // Set first collection date if not set
-            if (totalCards > 0 && !firstCollectionDate) {
-                firstCollectionDate = new Date().toISOString();
-                localStorage.setItem('firstCollectionDate', firstCollectionDate);
+            if (totalCards > 0 && !gamificationData.firstCollectionDate) {
+                gamificationData.firstCollectionDate = new Date().toISOString();
+                saveGamificationData();
             }
             
             // Calculate collection days
-            const collectionDays = firstCollectionDate ? 
-                Math.floor((new Date() - new Date(firstCollectionDate)) / (1000 * 60 * 60 * 24)) + 1 : 0;
+            const collectionDays = gamificationData.firstCollectionDate ? 
+                Math.floor((new Date() - new Date(gamificationData.firstCollectionDate)) / (1000 * 60 * 60 * 24)) + 1 : 0;
             
             // Calculate cards added this week
             const oneWeekAgo = new Date();
             oneWeekAgo.setDate(oneWeekAgo.getDate() - 7);
             let recentCards = 0;
             
-            Object.entries(cardAdditionDates).forEach(([cardId, dateAdded]) => {
+            Object.entries(gamificationData.cardAdditionDates).forEach(([cardId, dateAdded]) => {
                 if (new Date(dateAdded) >= oneWeekAgo) {
                     const card = cardCollection.find(c => c.id === cardId);
                     if (card) {
@@ -2586,7 +2627,7 @@
             
             let dailyAdditions = 0;
             let weeklyAdditions = 0;
-            Object.entries(cardAdditionDates).forEach(([cardId, dateStr]) => {
+            Object.entries(gamificationData.cardAdditionDates).forEach(([cardId, dateStr]) => {
                 const date = new Date(dateStr);
                 const dateOnly = dateStr.split('T')[0];
                 if (dateOnly === todayStr) {
@@ -2807,9 +2848,9 @@
         
         const checkMilestone = (totalCards) => {
             const milestone = MILESTONES.find(m => m === totalCards);
-            if (milestone && milestone > lastMilestoneReached) {
-                lastMilestoneReached = milestone;
-                localStorage.setItem('lastMilestoneReached', milestone.toString());
+            if (milestone && milestone > gamificationData.lastMilestoneReached) {
+                gamificationData.lastMilestoneReached = milestone;
+                saveGamificationData();
                 showMilestoneNotification(milestone);
             }
         };
@@ -3117,13 +3158,17 @@
             showLoading(false);
         };
 
-        const handleUserLogin = (user) => {
+        const handleUserLogin = async (user) => {
             currentUser = user;
             const hideEmail = localStorage.getItem('hideEmail') === 'true';
             userEmailSpan.textContent = hideEmail ? '' : escapeHtml(user.email);
             mainApp.style.display = 'block';
             appLoader.style.display = 'none';
             authModal.hide();
+            
+            // Load gamification data from Firebase
+            await loadGamificationData();
+            
             if (user.uid !== 'local_user') {
                 loadCollectionFromFirestore();
                 loadAllTags();
@@ -3136,28 +3181,31 @@
                 document.getElementById('delete-account-btn').style.display = 'none';
             }
             applyTheme();
+            
+            // Initialize gamification features with loaded data
+            initializeDailyMissions();
             initializeFunDashboard(); // Initialize fun features
             initializeShop(); // Initialize shop
+            updatePointsDisplay();
+            updateRegistrationStreak();
+            updateTodayStats();
+            updateDailyMissions();
             
-            // Apply saved customizations
-            const savedTheme = localStorage.getItem('activeTheme');
-            if (savedTheme) {
-                applyTheme(savedTheme);
+            // Apply saved customizations from Firebase data
+            if (gamificationData.activeTheme && gamificationData.activeTheme !== 'default') {
+                applyTheme(gamificationData.activeTheme);
             }
             
-            const savedFrame = localStorage.getItem('activeFrame');
-            if (savedFrame) {
-                applyFrame(savedFrame);
+            if (gamificationData.activeFrame) {
+                applyFrame(gamificationData.activeFrame);
             }
             
-            const savedBackground = localStorage.getItem('activeBackground');
-            if (savedBackground) {
-                applyBackground(savedBackground);
+            if (gamificationData.activeBackground) {
+                applyBackground(gamificationData.activeBackground);
             }
             
-            const savedIcon = localStorage.getItem('activeIcon');
-            if (savedIcon) {
-                applyIcon(savedIcon);
+            if (gamificationData.activeIcon) {
+                applyIcon(gamificationData.activeIcon);
             }
             
             // Check for first login bonus
@@ -3470,8 +3518,8 @@
                             targetCollection.push({ id: docRef.id, data: newCard });
                             // Track card addition date
                             if (currentListType === 'collection') {
-                                cardAdditionDates[docRef.id] = new Date().toISOString();
-                                localStorage.setItem('cardAdditionDates', JSON.stringify(cardAdditionDates));
+                                gamificationData.cardAdditionDates[docRef.id] = new Date().toISOString();
+                                saveGamificationData();
                             }
                         } else {
                             const existingDoc = existingDocs.docs[0];
@@ -3493,8 +3541,8 @@
                             targetCollection.push({ id: localId, data: newCard });
                             // Track card addition date for local mode
                             if (currentListType === 'collection') {
-                                cardAdditionDates[localId] = new Date().toISOString();
-                                localStorage.setItem('cardAdditionDates', JSON.stringify(cardAdditionDates));
+                                gamificationData.cardAdditionDates[localId] = new Date().toISOString();
+                                saveGamificationData();
                             }
                         }
                     }
@@ -3602,8 +3650,8 @@
                         const docRef = await addDoc(collectionRef, card.data);
                         cardCollection.push({ id: docRef.id, data: card.data });
                         // Track card addition date
-                        cardAdditionDates[docRef.id] = new Date().toISOString();
-                        localStorage.setItem('cardAdditionDates', JSON.stringify(cardAdditionDates));
+                        gamificationData.cardAdditionDates[docRef.id] = new Date().toISOString();
+                        saveGamificationData();
                         
                         // Remove from wishlist
                         await deleteDoc(doc(wishlistRef, cardId));
@@ -3614,8 +3662,8 @@
                         cardCollection.push({ id: newId, data: card.data });
                         wishlistCollection = wishlistCollection.filter(c => c.id !== cardId);
                         // Track card addition date
-                        cardAdditionDates[newId] = new Date().toISOString();
-                        localStorage.setItem('cardAdditionDates', JSON.stringify(cardAdditionDates));
+                        gamificationData.cardAdditionDates[newId] = new Date().toISOString();
+                        saveGamificationData();
                     }
                     
                     // Add points for moving card from wishlist to collection
