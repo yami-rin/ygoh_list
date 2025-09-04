@@ -713,16 +713,41 @@
                 </div>
             </div>
             
-            <div class="game-selection">
+            <div class="game-selection" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 20px;">
                 <div class="game-card" onclick="selectGame('slot')">
                     <div class="game-icon">🎰</div>
                     <h3>スロットマシン</h3>
                     <p>シンボルを揃えて高配当を狙おう！<br>最大50倍の配当</p>
                 </div>
                 <div class="game-card" onclick="selectGame('roulette')">
-                    <div class="game-icon">🎲</div>
+                    <div class="game-icon">🎡</div>
                     <h3>ルーレット</h3>
-                    <p>数字や色を予想して賭けよう！<br>最大35倍の配当</p>
+                    <p>数字や色を予想して賭けよう！<br>最大36倍の配当</p>
+                </div>
+                <div class="game-card" onclick="selectGame('dice')">
+                    <div class="game-icon">🎲</div>
+                    <h3>サイコロゲーム</h3>
+                    <p>2つのサイコロの合計を予想！<br>最大30倍の配当</p>
+                </div>
+                <div class="game-card" onclick="selectGame('blackjack')">
+                    <div class="game-icon">♠️</div>
+                    <h3>ブラックジャック</h3>
+                    <p>21を目指してカードを引こう！<br>最大2.5倍の配当</p>
+                </div>
+                <div class="game-card" onclick="selectGame('coin')">
+                    <div class="game-icon">🪙</div>
+                    <h3>コインフリップ</h3>
+                    <p>表か裏か？シンプルな勝負！<br>2倍の配当</p>
+                </div>
+                <div class="game-card" onclick="selectGame('number')">
+                    <div class="game-icon">🔢</div>
+                    <h3>数字当てゲーム</h3>
+                    <p>1〜100の数字を当てよう！<br>最大10倍の配当</p>
+                </div>
+                <div class="game-card" onclick="selectGame('rps')">
+                    <div class="game-icon">✊</div>
+                    <h3>じゃんけん</h3>
+                    <p>コンピューターと勝負！<br>2倍の配当</p>
                 </div>
             </div>
         </div>
@@ -905,6 +930,267 @@
 
             <div class="result-message" id="roulette-result"></div>
         </div>
+        
+        <!-- Dice Game -->
+        <div id="dice-game" style="display: none;">
+            <div class="game-header">
+                <h1 class="game-title">🎲 サイコロゲーム 🎲</h1>
+                <p class="text-muted">2つのサイコロの合計を予想しよう！</p>
+            </div>
+            
+            <div class="points-display">
+                <div>
+                    <i class="bi bi-coin" style="font-size: 1.5rem;"></i>
+                    <span>現在のポイント</span>
+                </div>
+                <div class="points-value">
+                    <span id="dice-points">0</span> pt
+                </div>
+            </div>
+            
+            <div class="dice-container" style="text-align: center; margin: 30px auto;">
+                <div style="display: flex; justify-content: center; gap: 30px; margin: 30px 0;">
+                    <div id="dice1" style="width: 100px; height: 100px; background: white; border: 2px solid #333; border-radius: 10px; display: flex; align-items: center; justify-content: center; font-size: 60px;">
+                        ？
+                    </div>
+                    <div id="dice2" style="width: 100px; height: 100px; background: white; border: 2px solid #333; border-radius: 10px; display: flex; align-items: center; justify-content: center; font-size: 60px;">
+                        ？
+                    </div>
+                </div>
+                
+                <div class="betting-area" style="margin: 30px auto; max-width: 500px;">
+                    <h3 style="color: white;">合計値を予想</h3>
+                    <div style="display: grid; grid-template-columns: repeat(6, 1fr); gap: 10px; margin: 20px 0;">
+                        <button class="bet-option dice-bet" data-sum="2">2</button>
+                        <button class="bet-option dice-bet" data-sum="3">3</button>
+                        <button class="bet-option dice-bet" data-sum="4">4</button>
+                        <button class="bet-option dice-bet" data-sum="5">5</button>
+                        <button class="bet-option dice-bet" data-sum="6">6</button>
+                        <button class="bet-option dice-bet" data-sum="7">7</button>
+                        <button class="bet-option dice-bet" data-sum="8">8</button>
+                        <button class="bet-option dice-bet" data-sum="9">9</button>
+                        <button class="bet-option dice-bet" data-sum="10">10</button>
+                        <button class="bet-option dice-bet" data-sum="11">11</button>
+                        <button class="bet-option dice-bet" data-sum="12">12</button>
+                    </div>
+                    <div style="display: flex; gap: 10px; margin: 20px 0;">
+                        <button class="bet-option dice-bet" data-sum="odd" style="flex: 1;">奇数</button>
+                        <button class="bet-option dice-bet" data-sum="even" style="flex: 1;">偶数</button>
+                        <button class="bet-option dice-bet" data-sum="low" style="flex: 1;">2-6</button>
+                        <button class="bet-option dice-bet" data-sum="high" style="flex: 1;">8-12</button>
+                    </div>
+                </div>
+                
+                <div class="controls">
+                    <input type="number" id="dice-bet-amount" class="form-control" min="1" max="9999" value="50" style="width: 120px; display: inline-block;">
+                    <span class="text-white">pt</span>
+                    <button class="spin-button" id="dice-roll-button">
+                        <i class="bi bi-play-circle"></i> サイコロを振る！
+                    </button>
+                </div>
+            </div>
+            
+            <div class="result-message" id="dice-result"></div>
+        </div>
+        
+        <!-- Blackjack Game -->
+        <div id="blackjack-game" style="display: none;">
+            <div class="game-header">
+                <h1 class="game-title">♠️ ブラックジャック ♥️</h1>
+                <p class="text-muted">21を目指してカードを引こう！</p>
+            </div>
+            
+            <div class="points-display">
+                <div>
+                    <i class="bi bi-coin" style="font-size: 1.5rem;"></i>
+                    <span>現在のポイント</span>
+                </div>
+                <div class="points-value">
+                    <span id="blackjack-points">0</span> pt
+                </div>
+            </div>
+            
+            <div class="blackjack-table" style="text-align: center; margin: 30px auto;">
+                <div class="dealer-area" style="margin-bottom: 30px;">
+                    <h3 style="color: white;">ディーラー: <span id="dealer-score">0</span></h3>
+                    <div id="dealer-cards" style="display: flex; justify-content: center; gap: 10px; margin: 20px;">
+                        <!-- Cards will be added here -->
+                    </div>
+                </div>
+                
+                <div class="player-area">
+                    <h3 style="color: white;">プレイヤー: <span id="player-score">0</span></h3>
+                    <div id="player-cards" style="display: flex; justify-content: center; gap: 10px; margin: 20px;">
+                        <!-- Cards will be added here -->
+                    </div>
+                </div>
+                
+                <div class="controls" id="blackjack-controls">
+                    <input type="number" id="blackjack-bet-amount" class="form-control" min="1" max="9999" value="100" style="width: 120px; display: inline-block;">
+                    <span class="text-white">pt</span>
+                    <button class="spin-button" id="blackjack-deal-button">
+                        <i class="bi bi-play-circle"></i> ディール
+                    </button>
+                </div>
+                
+                <div class="controls" id="blackjack-actions" style="display: none;">
+                    <button class="spin-button" id="blackjack-hit-button">ヒット</button>
+                    <button class="spin-button" id="blackjack-stand-button">スタンド</button>
+                </div>
+            </div>
+            
+            <div class="result-message" id="blackjack-result"></div>
+        </div>
+        
+        <!-- Coin Flip Game -->
+        <div id="coin-game" style="display: none;">
+            <div class="game-header">
+                <h1 class="game-title">🪙 コインフリップ 🪙</h1>
+                <p class="text-muted">表か裏か？シンプルな運試し！</p>
+            </div>
+            
+            <div class="points-display">
+                <div>
+                    <i class="bi bi-coin" style="font-size: 1.5rem;"></i>
+                    <span>現在のポイント</span>
+                </div>
+                <div class="points-value">
+                    <span id="coin-points">0</span> pt
+                </div>
+            </div>
+            
+            <div class="coin-container" style="text-align: center; margin: 30px auto;">
+                <div id="coin" style="width: 200px; height: 200px; margin: 30px auto; background: gold; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 100px; transition: all 0.5s;">
+                    🪙
+                </div>
+                
+                <div class="betting-area" style="margin: 30px auto; max-width: 400px;">
+                    <h3 style="color: white;">表か裏を選択</h3>
+                    <div style="display: flex; gap: 20px; justify-content: center; margin: 20px 0;">
+                        <button class="bet-option coin-bet" data-side="heads" style="padding: 20px 40px; font-size: 1.2rem;">表</button>
+                        <button class="bet-option coin-bet" data-side="tails" style="padding: 20px 40px; font-size: 1.2rem;">裏</button>
+                    </div>
+                </div>
+                
+                <div class="controls">
+                    <input type="number" id="coin-bet-amount" class="form-control" min="1" max="9999" value="50" style="width: 120px; display: inline-block;">
+                    <span class="text-white">pt</span>
+                    <button class="spin-button" id="coin-flip-button">
+                        <i class="bi bi-play-circle"></i> コインを投げる！
+                    </button>
+                </div>
+            </div>
+            
+            <div class="result-message" id="coin-result"></div>
+        </div>
+        
+        <!-- Number Guess Game -->
+        <div id="number-game" style="display: none;">
+            <div class="game-header">
+                <h1 class="game-title">🔢 数字当てゲーム 🔢</h1>
+                <p class="text-muted">1〜100の数字を当てよう！</p>
+            </div>
+            
+            <div class="points-display">
+                <div>
+                    <i class="bi bi-coin" style="font-size: 1.5rem;"></i>
+                    <span>現在のポイント</span>
+                </div>
+                <div class="points-value">
+                    <span id="number-points">0</span> pt
+                </div>
+            </div>
+            
+            <div class="number-container" style="text-align: center; margin: 30px auto; max-width: 500px;">
+                <div style="background: rgba(255,255,255,0.1); padding: 30px; border-radius: 15px;">
+                    <h3 style="color: white;">1〜100の数字を当ててください</h3>
+                    <p style="color: #ccc;">ヒントを参考に数字を絞り込もう！</p>
+                    
+                    <div id="number-hints" style="margin: 20px 0; color: yellow; font-size: 1.2rem; min-height: 30px;">
+                        <!-- Hints will appear here -->
+                    </div>
+                    
+                    <div id="number-attempts" style="color: white; margin: 10px 0;">
+                        残り試行回数: <span id="attempts-left">7</span>
+                    </div>
+                    
+                    <div class="controls" style="margin: 20px 0;">
+                        <input type="number" id="guess-input" class="form-control" min="1" max="100" placeholder="1-100" style="width: 120px; display: inline-block;">
+                        <button class="spin-button" id="guess-button" style="padding: 10px 20px;">
+                            予想する
+                        </button>
+                    </div>
+                    
+                    <div class="controls">
+                        <label style="color: white;">ベット額:</label>
+                        <input type="number" id="number-bet-amount" class="form-control" min="1" max="9999" value="100" style="width: 120px; display: inline-block;">
+                        <span class="text-white">pt</span>
+                        <button class="spin-button" id="number-start-button">
+                            <i class="bi bi-play-circle"></i> ゲーム開始
+                        </button>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="result-message" id="number-result"></div>
+        </div>
+        
+        <!-- Rock Paper Scissors Game -->
+        <div id="rps-game" style="display: none;">
+            <div class="game-header">
+                <h1 class="game-title">✂️ じゃんけん ✊</h1>
+                <p class="text-muted">コンピューターと勝負！</p>
+            </div>
+            
+            <div class="points-display">
+                <div>
+                    <i class="bi bi-coin" style="font-size: 1.5rem;"></i>
+                    <span>現在のポイント</span>
+                </div>
+                <div class="points-value">
+                    <span id="rps-points">0</span> pt
+                </div>
+            </div>
+            
+            <div class="rps-container" style="text-align: center; margin: 30px auto;">
+                <div style="display: flex; justify-content: center; gap: 50px; margin: 30px 0;">
+                    <div>
+                        <h3 style="color: white;">あなた</h3>
+                        <div id="player-choice" style="width: 150px; height: 150px; background: rgba(255,255,255,0.1); border-radius: 10px; display: flex; align-items: center; justify-content: center; font-size: 80px;">
+                            ？
+                        </div>
+                    </div>
+                    <div style="display: flex; align-items: center; font-size: 40px; color: white;">
+                        VS
+                    </div>
+                    <div>
+                        <h3 style="color: white;">コンピューター</h3>
+                        <div id="computer-choice" style="width: 150px; height: 150px; background: rgba(255,255,255,0.1); border-radius: 10px; display: flex; align-items: center; justify-content: center; font-size: 80px;">
+                            ？
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="betting-area" style="margin: 30px auto; max-width: 500px;">
+                    <h3 style="color: white;">手を選択</h3>
+                    <div style="display: flex; gap: 20px; justify-content: center; margin: 20px 0;">
+                        <button class="bet-option rps-choice" data-choice="rock" style="padding: 20px; font-size: 60px;">✊</button>
+                        <button class="bet-option rps-choice" data-choice="paper" style="padding: 20px; font-size: 60px;">✋</button>
+                        <button class="bet-option rps-choice" data-choice="scissors" style="padding: 20px; font-size: 60px;">✌️</button>
+                    </div>
+                </div>
+                
+                <div class="controls">
+                    <input type="number" id="rps-bet-amount" class="form-control" min="1" max="9999" value="50" style="width: 120px; display: inline-block;">
+                    <span class="text-white">pt</span>
+                    <button class="spin-button" id="rps-play-button">
+                        <i class="bi bi-play-circle"></i> じゃんけんぽん！
+                    </button>
+                </div>
+            </div>
+            
+            <div class="result-message" id="rps-result"></div>
+        </div>
     </div>
 
     <div class="loading-overlay active" id="loading">
@@ -1047,7 +1333,11 @@
         // Update points display
         function updatePointsDisplay() {
             // Update all points displays
-            const pointsElements = ['current-points', 'menu-points', 'roulette-points'];
+            const pointsElements = [
+                'current-points', 'menu-points', 'roulette-points',
+                'dice-points', 'blackjack-points', 'coin-points',
+                'number-points', 'rps-points'
+            ];
             pointsElements.forEach(id => {
                 const el = document.getElementById(id);
                 if (el) el.textContent = userPoints;
@@ -1080,13 +1370,36 @@
             document.getElementById('game-menu').style.display = 'none';
             document.getElementById('back-to-menu-btn').style.display = 'block';
             
+            // Hide all games first
+            document.getElementById('slot-game').style.display = 'none';
+            document.getElementById('roulette-game').style.display = 'none';
+            document.getElementById('dice-game').style.display = 'none';
+            document.getElementById('blackjack-game').style.display = 'none';
+            document.getElementById('coin-game').style.display = 'none';
+            document.getElementById('number-game').style.display = 'none';
+            document.getElementById('rps-game').style.display = 'none';
+            
+            // Show selected game
             if (game === 'slot') {
                 document.getElementById('slot-game').style.display = 'block';
-                document.getElementById('roulette-game').style.display = 'none';
             } else if (game === 'roulette') {
-                document.getElementById('slot-game').style.display = 'none';
                 document.getElementById('roulette-game').style.display = 'block';
                 initializeRoulette();
+            } else if (game === 'dice') {
+                document.getElementById('dice-game').style.display = 'block';
+                initializeDiceGame();
+            } else if (game === 'blackjack') {
+                document.getElementById('blackjack-game').style.display = 'block';
+                initializeBlackjack();
+            } else if (game === 'coin') {
+                document.getElementById('coin-game').style.display = 'block';
+                initializeCoinFlip();
+            } else if (game === 'number') {
+                document.getElementById('number-game').style.display = 'block';
+                initializeNumberGuess();
+            } else if (game === 'rps') {
+                document.getElementById('rps-game').style.display = 'block';
+                initializeRPS();
             }
         };
         
@@ -1095,6 +1408,11 @@
             document.getElementById('game-menu').style.display = 'block';
             document.getElementById('slot-game').style.display = 'none';
             document.getElementById('roulette-game').style.display = 'none';
+            document.getElementById('dice-game').style.display = 'none';
+            document.getElementById('blackjack-game').style.display = 'none';
+            document.getElementById('coin-game').style.display = 'none';
+            document.getElementById('number-game').style.display = 'none';
+            document.getElementById('rps-game').style.display = 'none';
             document.getElementById('back-to-menu-btn').style.display = 'none';
             currentGame = null;
         });
@@ -1416,6 +1734,7 @@
         function initializeRoulette() {
             // Add numbers to the wheel
             const numbersContainer = document.getElementById('roulette-numbers');
+            // European roulette wheel order (clockwise from 0)
             const wheelNumbers = [0, 32, 15, 19, 4, 21, 2, 25, 17, 34, 6, 27, 13, 36, 11, 30, 8, 23, 10, 5, 24, 16, 33, 1, 20, 14, 31, 9, 22, 18, 29, 7, 28, 12, 35, 3, 26];
             
             wheelNumbers.forEach((num, index) => {
@@ -1424,14 +1743,16 @@
                 numberDiv.textContent = num;
                 
                 // Position numbers around the wheel
-                const angle = (index * (360 / 37)) - 90; // Start from top
+                const angle = (index * (360 / 37)); // Start from top (0 degrees)
                 const radius = 130; // Distance from center
-                const x = Math.cos(angle * Math.PI / 180) * radius + 150;
-                const y = Math.sin(angle * Math.PI / 180) * radius + 150;
+                // Use angle directly for positioning (0 degrees is at top)
+                const radians = (angle - 90) * Math.PI / 180; // -90 to start from top
+                const x = Math.cos(radians) * radius + 150;
+                const y = Math.sin(radians) * radius + 150;
                 
                 numberDiv.style.left = `${x - 10}px`;
                 numberDiv.style.top = `${y - 10}px`;
-                numberDiv.style.transform = `rotate(${angle + 90}deg)`;
+                numberDiv.style.transform = `rotate(${angle}deg)`;
                 
                 // Color the numbers
                 if (num === 0) {
@@ -1489,16 +1810,32 @@
             
             // Spin the wheel
             const wheel = document.getElementById('roulette-wheel');
-            const randomRotation = 720 + Math.random() * 720; // At least 2 full rotations
+            
+            // European roulette wheel order (clockwise from 0)
+            const wheelOrder = [0, 32, 15, 19, 4, 21, 2, 25, 17, 34, 6, 27, 13, 36, 11, 30, 8, 23, 10, 5, 24, 16, 33, 1, 20, 14, 31, 9, 22, 18, 29, 7, 28, 12, 35, 3, 26];
+            
+            // Select random number from rouletteNumbers array
             const finalNumber = rouletteNumbers[Math.floor(Math.random() * rouletteNumbers.length)];
-            const numberIndex = rouletteNumbers.indexOf(finalNumber);
-            const degreePerNumber = 360 / 37;
-            const finalRotation = randomRotation + (numberIndex * degreePerNumber);
+            
+            // Find position on the wheel
+            const wheelIndex = wheelOrder.indexOf(finalNumber);
+            const degreePerSlot = 360 / 37;
+            
+            // Calculate final rotation (pointer is at top, so we rotate to align the number with top)
+            // Add multiple full rotations for effect, then position the selected number at top
+            const baseRotation = 720 + Math.random() * 720; // 2-4 full rotations
+            // Negative rotation because we want the number to end up at the top (where pointer is)
+            const targetRotation = -wheelIndex * degreePerSlot;
+            const finalRotation = baseRotation + targetRotation;
             
             wheel.style.transform = `rotate(${finalRotation}deg)`;
             
             // Wait for animation
             await new Promise(resolve => setTimeout(resolve, 4000));
+            
+            // Show the result with visual emphasis
+            const resultMessage = document.getElementById('roulette-result');
+            resultMessage.style.display = 'block';
             
             // Check win
             let winAmount = 0;
@@ -1506,6 +1843,9 @@
             const isBlack = !isRed && finalNumber !== 0;
             const isOdd = finalNumber % 2 === 1 && finalNumber !== 0;
             const isEven = finalNumber % 2 === 0 && finalNumber !== 0;
+            
+            // Debug information
+            console.log(`Result: ${finalNumber}, Bet: ${selectedBet}, Is Red: ${isRed}, Is Black: ${isBlack}`);
             
             switch(selectedBet) {
                 case 'red':
@@ -1527,7 +1867,7 @@
                     if (finalNumber >= 19 && finalNumber <= 36) winAmount = betAmount * 2;
                     break;
                 case '0':
-                    if (finalNumber === 0) winAmount = betAmount * 35;
+                    if (finalNumber === 0) winAmount = betAmount * 36;
                     break;
                 case '1-12':
                     if (finalNumber >= 1 && finalNumber <= 12) winAmount = betAmount * 3;
@@ -1539,24 +1879,569 @@
                     if (finalNumber >= 25 && finalNumber <= 36) winAmount = betAmount * 3;
                     break;
                 case 'single':
-                    if (finalNumber === selectedNumber) winAmount = betAmount * 35;
+                    if (finalNumber === selectedNumber) winAmount = betAmount * 36;
                     break;
             }
             
-            const resultMessage = document.getElementById('roulette-result');
+            // Display result with color coding
+            let numberColor = '';
+            if (finalNumber === 0) {
+                numberColor = 'style="color: #0f0; font-weight: bold;"';
+            } else if (isRed) {
+                numberColor = 'style="color: #f00; font-weight: bold;"';
+            } else {
+                numberColor = 'style="color: #000; font-weight: bold;"';
+            }
+            
             if (winAmount > 0) {
                 userPoints += winAmount;
                 updatePointsDisplay();
-                resultMessage.textContent = `🎉 ${finalNumber}! ${winAmount} ポイント獲得！`;
+                resultMessage.innerHTML = `🎉 <span ${numberColor}>${finalNumber}</span>番！ ${winAmount} ポイント獲得！`;
                 resultMessage.className = 'result-message win';
             } else {
-                resultMessage.textContent = `${finalNumber} - はずれ`;
+                resultMessage.innerHTML = `<span ${numberColor}>${finalNumber}</span>番 - はずれ`;
                 resultMessage.className = 'result-message lose';
             }
             
             await saveUserPoints();
             isRouletteSpinning = false;
             document.getElementById('roulette-spin-button').disabled = false;
+        }
+        
+        // ========== DICE GAME FUNCTIONS ==========
+        let diceSelected = null;
+        let isDiceRolling = false;
+        
+        function initializeDiceGame() {
+            document.getElementById('dice-points').textContent = userPoints;
+            
+            // Add dice bet selection
+            document.querySelectorAll('.dice-bet').forEach(btn => {
+                btn.addEventListener('click', function() {
+                    document.querySelectorAll('.dice-bet').forEach(b => b.classList.remove('selected'));
+                    this.classList.add('selected');
+                    diceSelected = this.dataset.sum;
+                });
+            });
+            
+            // Dice roll button
+            document.getElementById('dice-roll-button').addEventListener('click', rollDice);
+        }
+        
+        async function rollDice() {
+            if (isDiceRolling) return;
+            if (!diceSelected) {
+                alert('予想を選択してください');
+                return;
+            }
+            
+            const betAmount = parseInt(document.getElementById('dice-bet-amount').value) || 0;
+            if (betAmount < 1 || betAmount > userPoints) {
+                alert('ベット額が無効です');
+                return;
+            }
+            
+            isDiceRolling = true;
+            document.getElementById('dice-roll-button').disabled = true;
+            
+            // Deduct bet
+            userPoints -= betAmount;
+            updatePointsDisplay();
+            
+            // Animate dice
+            const dice1El = document.getElementById('dice1');
+            const dice2El = document.getElementById('dice2');
+            const diceSymbols = ['⚀', '⚁', '⚂', '⚃', '⚄', '⚅'];
+            
+            // Roll animation
+            for (let i = 0; i < 20; i++) {
+                dice1El.textContent = diceSymbols[Math.floor(Math.random() * 6)];
+                dice2El.textContent = diceSymbols[Math.floor(Math.random() * 6)];
+                await new Promise(r => setTimeout(r, 100));
+            }
+            
+            // Final result
+            const dice1 = Math.floor(Math.random() * 6) + 1;
+            const dice2 = Math.floor(Math.random() * 6) + 1;
+            const sum = dice1 + dice2;
+            
+            dice1El.textContent = diceSymbols[dice1 - 1];
+            dice2El.textContent = diceSymbols[dice2 - 1];
+            
+            // Check win
+            let winAmount = 0;
+            const isOdd = sum % 2 === 1;
+            const isEven = sum % 2 === 0;
+            
+            if (diceSelected === sum.toString()) {
+                // Exact number - higher payout based on probability
+                const payouts = {2: 36, 3: 18, 4: 12, 5: 9, 6: 7.2, 7: 6, 8: 7.2, 9: 9, 10: 12, 11: 18, 12: 36};
+                winAmount = Math.floor(betAmount * payouts[sum]);
+            } else if (diceSelected === 'odd' && isOdd) {
+                winAmount = betAmount * 2;
+            } else if (diceSelected === 'even' && isEven) {
+                winAmount = betAmount * 2;
+            } else if (diceSelected === 'low' && sum >= 2 && sum <= 6) {
+                winAmount = betAmount * 2;
+            } else if (diceSelected === 'high' && sum >= 8 && sum <= 12) {
+                winAmount = betAmount * 2;
+            }
+            
+            const resultEl = document.getElementById('dice-result');
+            if (winAmount > 0) {
+                userPoints += winAmount;
+                updatePointsDisplay();
+                resultEl.textContent = `🎉 合計${sum}! ${winAmount}ポイント獲得！`;
+                resultEl.className = 'result-message win';
+            } else {
+                resultEl.textContent = `合計${sum} - はずれ`;
+                resultEl.className = 'result-message lose';
+            }
+            
+            await saveUserPoints();
+            isDiceRolling = false;
+            document.getElementById('dice-roll-button').disabled = false;
+        }
+        
+        // ========== BLACKJACK FUNCTIONS ==========
+        let blackjackDeck = [];
+        let dealerCards = [];
+        let playerCards = [];
+        let blackjackBet = 0;
+        let blackjackActive = false;
+        
+        function initializeBlackjack() {
+            document.getElementById('blackjack-points').textContent = userPoints;
+            document.getElementById('blackjack-deal-button').addEventListener('click', dealBlackjack);
+            document.getElementById('blackjack-hit-button').addEventListener('click', blackjackHit);
+            document.getElementById('blackjack-stand-button').addEventListener('click', blackjackStand);
+        }
+        
+        function createDeck() {
+            const suits = ['♠', '♥', '♦', '♣'];
+            const ranks = ['A', '2', '3', '4', '5', '6', '7', '8', '9', '10', 'J', 'Q', 'K'];
+            const deck = [];
+            
+            for (const suit of suits) {
+                for (const rank of ranks) {
+                    deck.push({suit, rank});
+                }
+            }
+            
+            // Shuffle
+            for (let i = deck.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [deck[i], deck[j]] = [deck[j], deck[i]];
+            }
+            
+            return deck;
+        }
+        
+        function getCardValue(card) {
+            if (['J', 'Q', 'K'].includes(card.rank)) return 10;
+            if (card.rank === 'A') return 11;
+            return parseInt(card.rank);
+        }
+        
+        function calculateHand(cards) {
+            let sum = 0;
+            let aces = 0;
+            
+            for (const card of cards) {
+                if (card.rank === 'A') aces++;
+                sum += getCardValue(card);
+            }
+            
+            while (sum > 21 && aces > 0) {
+                sum -= 10;
+                aces--;
+            }
+            
+            return sum;
+        }
+        
+        function displayCard(card, container) {
+            const cardEl = document.createElement('div');
+            cardEl.style.cssText = 'width: 60px; height: 90px; background: white; border: 2px solid #333; border-radius: 5px; display: flex; flex-direction: column; align-items: center; justify-content: center; font-size: 24px;';
+            const color = ['♥', '♦'].includes(card.suit) ? 'red' : 'black';
+            cardEl.innerHTML = `<div style="color: ${color}">${card.rank}</div><div style="color: ${color}">${card.suit}</div>`;
+            container.appendChild(cardEl);
+        }
+        
+        async function dealBlackjack() {
+            if (blackjackActive) return;
+            
+            blackjackBet = parseInt(document.getElementById('blackjack-bet-amount').value) || 0;
+            if (blackjackBet < 1 || blackjackBet > userPoints) {
+                alert('ベット額が無効です');
+                return;
+            }
+            
+            blackjackActive = true;
+            userPoints -= blackjackBet;
+            updatePointsDisplay();
+            
+            // Reset
+            blackjackDeck = createDeck();
+            dealerCards = [];
+            playerCards = [];
+            document.getElementById('dealer-cards').innerHTML = '';
+            document.getElementById('player-cards').innerHTML = '';
+            document.getElementById('blackjack-result').textContent = '';
+            
+            // Deal initial cards
+            playerCards.push(blackjackDeck.pop());
+            dealerCards.push(blackjackDeck.pop());
+            playerCards.push(blackjackDeck.pop());
+            dealerCards.push(blackjackDeck.pop());
+            
+            // Display cards
+            displayCard(playerCards[0], document.getElementById('player-cards'));
+            displayCard(playerCards[1], document.getElementById('player-cards'));
+            displayCard(dealerCards[0], document.getElementById('dealer-cards'));
+            
+            // Show back of dealer's second card
+            const hiddenCard = document.createElement('div');
+            hiddenCard.id = 'hidden-card';
+            hiddenCard.style.cssText = 'width: 60px; height: 90px; background: linear-gradient(45deg, #333, #666); border: 2px solid #333; border-radius: 5px;';
+            document.getElementById('dealer-cards').appendChild(hiddenCard);
+            
+            // Update scores
+            document.getElementById('player-score').textContent = calculateHand(playerCards);
+            document.getElementById('dealer-score').textContent = getCardValue(dealerCards[0]);
+            
+            // Check for blackjack
+            if (calculateHand(playerCards) === 21) {
+                await blackjackStand();
+                return;
+            }
+            
+            // Show action buttons
+            document.getElementById('blackjack-controls').style.display = 'none';
+            document.getElementById('blackjack-actions').style.display = 'block';
+        }
+        
+        async function blackjackHit() {
+            if (!blackjackActive) return;
+            
+            playerCards.push(blackjackDeck.pop());
+            displayCard(playerCards[playerCards.length - 1], document.getElementById('player-cards'));
+            
+            const playerScore = calculateHand(playerCards);
+            document.getElementById('player-score').textContent = playerScore;
+            
+            if (playerScore > 21) {
+                // Bust
+                document.getElementById('blackjack-result').textContent = 'バスト！負けました';
+                document.getElementById('blackjack-result').className = 'result-message lose';
+                await endBlackjack();
+            }
+        }
+        
+        async function blackjackStand() {
+            if (!blackjackActive) return;
+            
+            // Reveal dealer's hidden card
+            document.getElementById('hidden-card').remove();
+            displayCard(dealerCards[1], document.getElementById('dealer-cards'));
+            
+            // Dealer draws until 17 or higher
+            while (calculateHand(dealerCards) < 17) {
+                await new Promise(r => setTimeout(r, 1000));
+                dealerCards.push(blackjackDeck.pop());
+                displayCard(dealerCards[dealerCards.length - 1], document.getElementById('dealer-cards'));
+            }
+            
+            const playerScore = calculateHand(playerCards);
+            const dealerScore = calculateHand(dealerCards);
+            
+            document.getElementById('dealer-score').textContent = dealerScore;
+            
+            let winAmount = 0;
+            const resultEl = document.getElementById('blackjack-result');
+            
+            if (dealerScore > 21 || playerScore > dealerScore) {
+                // Player wins
+                winAmount = playerScore === 21 && playerCards.length === 2 ? Math.floor(blackjackBet * 2.5) : blackjackBet * 2;
+                userPoints += winAmount;
+                resultEl.textContent = `🎉 勝利！ ${winAmount}ポイント獲得！`;
+                resultEl.className = 'result-message win';
+            } else if (playerScore === dealerScore) {
+                // Push
+                userPoints += blackjackBet;
+                resultEl.textContent = '引き分け';
+                resultEl.className = 'result-message';
+            } else {
+                // Dealer wins
+                resultEl.textContent = '負けました';
+                resultEl.className = 'result-message lose';
+            }
+            
+            await endBlackjack();
+        }
+        
+        async function endBlackjack() {
+            blackjackActive = false;
+            updatePointsDisplay();
+            await saveUserPoints();
+            
+            document.getElementById('blackjack-actions').style.display = 'none';
+            document.getElementById('blackjack-controls').style.display = 'block';
+        }
+        
+        // ========== COIN FLIP FUNCTIONS ==========
+        let coinSelected = null;
+        let isCoinFlipping = false;
+        
+        function initializeCoinFlip() {
+            document.getElementById('coin-points').textContent = userPoints;
+            
+            document.querySelectorAll('.coin-bet').forEach(btn => {
+                btn.addEventListener('click', function() {
+                    document.querySelectorAll('.coin-bet').forEach(b => b.classList.remove('selected'));
+                    this.classList.add('selected');
+                    coinSelected = this.dataset.side;
+                });
+            });
+            
+            document.getElementById('coin-flip-button').addEventListener('click', flipCoin);
+        }
+        
+        async function flipCoin() {
+            if (isCoinFlipping) return;
+            if (!coinSelected) {
+                alert('表か裏を選択してください');
+                return;
+            }
+            
+            const betAmount = parseInt(document.getElementById('coin-bet-amount').value) || 0;
+            if (betAmount < 1 || betAmount > userPoints) {
+                alert('ベット額が無効です');
+                return;
+            }
+            
+            isCoinFlipping = true;
+            document.getElementById('coin-flip-button').disabled = true;
+            
+            userPoints -= betAmount;
+            updatePointsDisplay();
+            
+            // Flip animation
+            const coinEl = document.getElementById('coin');
+            for (let i = 0; i < 10; i++) {
+                coinEl.style.transform = `rotateY(${i * 180}deg)`;
+                await new Promise(r => setTimeout(r, 200));
+            }
+            
+            // Result
+            const result = Math.random() < 0.5 ? 'heads' : 'tails';
+            coinEl.textContent = result === 'heads' ? '表' : '裏';
+            
+            const resultEl = document.getElementById('coin-result');
+            if (result === coinSelected) {
+                const winAmount = betAmount * 2;
+                userPoints += winAmount;
+                updatePointsDisplay();
+                resultEl.textContent = `🎉 ${result === 'heads' ? '表' : '裏'}! ${winAmount}ポイント獲得！`;
+                resultEl.className = 'result-message win';
+            } else {
+                resultEl.textContent = `${result === 'heads' ? '表' : '裏'} - はずれ`;
+                resultEl.className = 'result-message lose';
+            }
+            
+            await saveUserPoints();
+            isCoinFlipping = false;
+            document.getElementById('coin-flip-button').disabled = false;
+        }
+        
+        // ========== NUMBER GUESS FUNCTIONS ==========
+        let targetNumber = 0;
+        let attempts = 0;
+        let numberBet = 0;
+        let isNumberGameActive = false;
+        
+        function initializeNumberGuess() {
+            document.getElementById('number-points').textContent = userPoints;
+            document.getElementById('number-start-button').addEventListener('click', startNumberGuess);
+            document.getElementById('guess-button').addEventListener('click', makeGuess);
+        }
+        
+        async function startNumberGuess() {
+            if (isNumberGameActive) return;
+            
+            numberBet = parseInt(document.getElementById('number-bet-amount').value) || 0;
+            if (numberBet < 1 || numberBet > userPoints) {
+                alert('ベット額が無効です');
+                return;
+            }
+            
+            isNumberGameActive = true;
+            userPoints -= numberBet;
+            updatePointsDisplay();
+            
+            targetNumber = Math.floor(Math.random() * 100) + 1;
+            attempts = 7;
+            
+            document.getElementById('attempts-left').textContent = attempts;
+            document.getElementById('number-hints').textContent = 'ゲーム開始！1〜100の数字を入力してください';
+            document.getElementById('number-result').textContent = '';
+            document.getElementById('guess-input').value = '';
+            document.getElementById('number-start-button').disabled = true;
+            document.getElementById('guess-button').disabled = false;
+        }
+        
+        async function makeGuess() {
+            if (!isNumberGameActive) return;
+            
+            const guess = parseInt(document.getElementById('guess-input').value);
+            if (isNaN(guess) || guess < 1 || guess > 100) {
+                alert('1〜100の数字を入力してください');
+                return;
+            }
+            
+            attempts--;
+            document.getElementById('attempts-left').textContent = attempts;
+            
+            const hintsEl = document.getElementById('number-hints');
+            const resultEl = document.getElementById('number-result');
+            
+            if (guess === targetNumber) {
+                // Win!
+                const multiplier = Math.max(2, 11 - (7 - attempts));
+                const winAmount = numberBet * multiplier;
+                userPoints += winAmount;
+                updatePointsDisplay();
+                
+                hintsEl.textContent = `🎉 正解！数字は${targetNumber}でした！`;
+                resultEl.textContent = `${winAmount}ポイント獲得！（${multiplier}倍）`;
+                resultEl.className = 'result-message win';
+                
+                await endNumberGuess();
+            } else if (attempts === 0) {
+                // Game over
+                hintsEl.textContent = `残念！正解は${targetNumber}でした`;
+                resultEl.textContent = 'ゲームオーバー';
+                resultEl.className = 'result-message lose';
+                
+                await endNumberGuess();
+            } else {
+                // Give hint
+                const diff = Math.abs(guess - targetNumber);
+                let hint = '';
+                
+                if (guess < targetNumber) {
+                    hint = 'もっと大きい数字です';
+                } else {
+                    hint = 'もっと小さい数字です';
+                }
+                
+                if (diff <= 5) {
+                    hint += '（とても近い！）';
+                } else if (diff <= 10) {
+                    hint += '（近い）';
+                } else if (diff <= 20) {
+                    hint += '（まあまあ近い）';
+                }
+                
+                hintsEl.textContent = hint;
+            }
+            
+            document.getElementById('guess-input').value = '';
+        }
+        
+        async function endNumberGuess() {
+            isNumberGameActive = false;
+            await saveUserPoints();
+            
+            document.getElementById('number-start-button').disabled = false;
+            document.getElementById('guess-button').disabled = true;
+        }
+        
+        // ========== ROCK PAPER SCISSORS FUNCTIONS ==========
+        let rpsSelected = null;
+        let isRPSPlaying = false;
+        
+        function initializeRPS() {
+            document.getElementById('rps-points').textContent = userPoints;
+            
+            document.querySelectorAll('.rps-choice').forEach(btn => {
+                btn.addEventListener('click', function() {
+                    document.querySelectorAll('.rps-choice').forEach(b => b.classList.remove('selected'));
+                    this.classList.add('selected');
+                    rpsSelected = this.dataset.choice;
+                });
+            });
+            
+            document.getElementById('rps-play-button').addEventListener('click', playRPS);
+        }
+        
+        async function playRPS() {
+            if (isRPSPlaying) return;
+            if (!rpsSelected) {
+                alert('手を選択してください');
+                return;
+            }
+            
+            const betAmount = parseInt(document.getElementById('rps-bet-amount').value) || 0;
+            if (betAmount < 1 || betAmount > userPoints) {
+                alert('ベット額が無効です');
+                return;
+            }
+            
+            isRPSPlaying = true;
+            document.getElementById('rps-play-button').disabled = true;
+            
+            userPoints -= betAmount;
+            updatePointsDisplay();
+            
+            const choices = ['rock', 'paper', 'scissors'];
+            const choiceEmojis = {rock: '✊', paper: '✋', scissors: '✌️'};
+            const computerChoice = choices[Math.floor(Math.random() * 3)];
+            
+            // Show choices
+            document.getElementById('player-choice').textContent = choiceEmojis[rpsSelected];
+            
+            // Animate computer choice
+            for (let i = 0; i < 10; i++) {
+                document.getElementById('computer-choice').textContent = choiceEmojis[choices[i % 3]];
+                await new Promise(r => setTimeout(r, 100));
+            }
+            
+            document.getElementById('computer-choice').textContent = choiceEmojis[computerChoice];
+            
+            // Determine winner
+            let result = 'draw';
+            if (
+                (rpsSelected === 'rock' && computerChoice === 'scissors') ||
+                (rpsSelected === 'paper' && computerChoice === 'rock') ||
+                (rpsSelected === 'scissors' && computerChoice === 'paper')
+            ) {
+                result = 'win';
+            } else if (rpsSelected !== computerChoice) {
+                result = 'lose';
+            }
+            
+            const resultEl = document.getElementById('rps-result');
+            
+            if (result === 'win') {
+                const winAmount = betAmount * 2;
+                userPoints += winAmount;
+                updatePointsDisplay();
+                resultEl.textContent = `🎉 勝利！ ${winAmount}ポイント獲得！`;
+                resultEl.className = 'result-message win';
+            } else if (result === 'draw') {
+                userPoints += betAmount;
+                updatePointsDisplay();
+                resultEl.textContent = 'あいこ！ベット額が返還されました';
+                resultEl.className = 'result-message';
+            } else {
+                resultEl.textContent = '負けました';
+                resultEl.className = 'result-message lose';
+            }
+            
+            await saveUserPoints();
+            isRPSPlaying = false;
+            document.getElementById('rps-play-button').disabled = false;
         }
         
         // Initialize reels with random positions
