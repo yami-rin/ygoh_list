@@ -348,6 +348,15 @@
         }
         
         /* Custom theme styles */
+        body.theme-light-blue {
+            background: linear-gradient(135deg, #e3f2fd 0%, #bbdefb 100%);
+        }
+        body.theme-mint {
+            background: linear-gradient(135deg, #c8e6c9 0%, #81c784 100%);
+        }
+        body.theme-peach {
+            background: linear-gradient(135deg, #ffccbc 0%, #ffab91 100%);
+        }
         body.theme-ocean {
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
         }
@@ -379,6 +388,44 @@
         body.theme-neon {
             background: linear-gradient(135deg, #f953c6 0%, #b91d73 100%);
             color: #fff;
+        }
+        body.theme-cosmic {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 50%, #f953c6 100%);
+        }
+        body.theme-rainbow {
+            background: linear-gradient(135deg, #ff0000 0%, #ff7f00 17%, #ffff00 33%, #00ff00 50%, #0000ff 67%, #4b0082 83%, #9400d3 100%);
+        }
+        body.theme-holographic {
+            background: linear-gradient(135deg, #a8edea 0%, #fed6e3 25%, #ffeaa7 50%, #dfe6e9 75%, #a8edea 100%);
+            background-size: 400% 400%;
+            animation: holographic-shift 8s ease infinite;
+        }
+        body.theme-dragon-soul {
+            background: linear-gradient(135deg, #f83600 0%, #f9d423 50%, #f83600 100%);
+            background-size: 200% 200%;
+            animation: dragon-pulse 5s ease infinite;
+        }
+        body.theme-legendary {
+            background: linear-gradient(135deg, #ffd700 0%, #ff6347 25%, #ff1493 50%, #00ced1 75%, #ffd700 100%);
+            background-size: 300% 300%;
+            animation: legendary-shift 10s ease infinite;
+        }
+        
+        @keyframes holographic-shift {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
+        }
+        @keyframes dragon-pulse {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
+        }
+        @keyframes legendary-shift {
+            0% { background-position: 0% 50%; }
+            33% { background-position: 100% 50%; }
+            66% { background-position: 50% 100%; }
+            100% { background-position: 0% 50%; }
         }
         
         /* Frame Effects */
@@ -1530,16 +1577,21 @@
                     </div>
                     
                     <!-- Fun Dashboard -->
-                    <div class="card mt-3">
+                    <div class="card mt-3" id="daily-challenges-card">
                         <div class="card-header bg-gradient" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white;">
                             <div class="d-flex justify-content-between align-items-center">
                                 <div>
                                     <i class="bi bi-stars"></i> 今日のチャレンジ
                                 </div>
-                                <div id="current-time" class="small"></div>
+                                <div class="d-flex align-items-center gap-2">
+                                    <button class="btn btn-sm btn-light" onclick="toggleDailyChallenges()" title="表示/非表示">
+                                        <i class="bi bi-eye-slash" id="daily-challenges-toggle-icon"></i>
+                                    </button>
+                                    <div id="current-time" class="small"></div>
+                                </div>
                             </div>
                         </div>
-                        <div class="card-body">
+                        <div class="card-body" id="daily-challenges-body">
                             <!-- Daily Missions -->
                             <div class="mb-3">
                                 <h6 class="d-flex align-items-center mb-2">
@@ -1569,25 +1621,6 @@
                                         <small class="text-muted" id="streak-message"></small>
                                     </div>
                                     <div class="ms-3" id="streak-badge" style="font-size: 3rem;"></div>
-                                </div>
-                            </div>
-                            
-                            <!-- Points System -->
-                            <div class="alert alert-light border-start border-5 border-warning" role="alert">
-                                <div class="d-flex align-items-center justify-content-between">
-                                    <div class="d-flex align-items-center">
-                                        <i class="bi bi-coin text-warning me-2" style="font-size: 1.5rem;"></i>
-                                        <div>
-                                            <strong>ポイント</strong>
-                                            <div class="d-flex align-items-baseline">
-                                                <span class="fs-3 fw-bold text-warning" id="user-points">0</span>
-                                                <span class="ms-2 text-muted">pt</span>
-                                            </div>
-                                        </div>
-                                    </div>
-                                    <button class="btn btn-warning btn-sm" id="point-shop-btn">
-                                        <i class="bi bi-shop"></i> ショップ
-                                    </button>
                                 </div>
                             </div>
                             
@@ -1684,6 +1717,29 @@
                             </div>
                             <div class="d-flex justify-content-center mt-2">
                                 <div id="pagination-controls-bottom"></div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Points System -->
+                    <div class="card mt-3">
+                        <div class="card-body">
+                            <div class="alert alert-light border-start border-5 border-warning mb-0" role="alert">
+                                <div class="d-flex align-items-center justify-content-between">
+                                    <div class="d-flex align-items-center">
+                                        <i class="bi bi-coin text-warning me-2" style="font-size: 1.5rem;"></i>
+                                        <div>
+                                            <strong>ポイント</strong>
+                                            <div class="d-flex align-items-baseline">
+                                                <span class="fs-3 fw-bold text-warning" id="user-points">0</span>
+                                                <span class="ms-2 text-muted">pt</span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <button class="btn btn-warning btn-sm" id="point-shop-btn">
+                                        <i class="bi bi-shop"></i> ショップ
+                                    </button>
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -2677,6 +2733,23 @@
         };
         
         // Purchase item
+        // Toggle daily challenges visibility
+        window.toggleDailyChallenges = () => {
+            const body = document.getElementById('daily-challenges-body');
+            const icon = document.getElementById('daily-challenges-toggle-icon');
+            const isHidden = body.style.display === 'none';
+            
+            if (isHidden) {
+                body.style.display = '';
+                icon.className = 'bi bi-eye-slash';
+                localStorage.setItem('hideDailyChallenges', 'false');
+            } else {
+                body.style.display = 'none';
+                icon.className = 'bi bi-eye';
+                localStorage.setItem('hideDailyChallenges', 'true');
+            }
+        };
+        
         window.purchaseItem = (itemId, cost, type) => {
             if (gamificationData.userPoints < cost) {
                 alert('ポイントが足りません！');
@@ -3742,6 +3815,13 @@
             updateRegistrationStreak();
             updateTodayStats();
             updateDailyMissions();
+            
+            // Apply saved daily challenges visibility preference
+            const hideDailyChallenges = localStorage.getItem('hideDailyChallenges') === 'true';
+            if (hideDailyChallenges) {
+                document.getElementById('daily-challenges-body').style.display = 'none';
+                document.getElementById('daily-challenges-toggle-icon').className = 'bi bi-eye';
+            }
             
             // Apply saved customizations from Firebase data
             if (gamificationData.activeTheme && gamificationData.activeTheme !== 'default') {
