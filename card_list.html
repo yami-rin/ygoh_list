@@ -2054,31 +2054,78 @@
             ],
             icons: [
                 // Basic icons (50-150pt)
-                { id: 'icon-star', name: 'スター', cost: 50, description: 'きらめく星', class: 'icon-star', emoji: '✨' },
-                { id: 'icon-heart', name: 'ハート', cost: 60, description: 'かわいいハート', class: 'icon-heart', emoji: '❤️' },
-                { id: 'icon-ghost', name: 'ゴースト', cost: 80, description: 'ミステリアスな幽霊', class: 'icon-ghost', emoji: '👻' },
-                { id: 'icon-crown', name: '王冠', cost: 100, description: '王者の証', class: 'icon-crown', emoji: '👑' },
-                { id: 'icon-robot', name: 'ロボット', cost: 120, description: 'クールなロボット', class: 'icon-robot', emoji: '🤖' },
-                { id: 'icon-alien', name: 'エイリアン', cost: 150, description: '宇宙から来た訪問者', class: 'icon-alien', emoji: '👽' },
+                { id: 'icon-star', name: 'スター', cost: 50, class: 'icon-star', emoji: '✨' },
+                { id: 'icon-heart', name: 'ハート', cost: 60, class: 'icon-heart', emoji: '❤️' },
+                { id: 'icon-ghost', name: 'ゴースト', cost: 80, class: 'icon-ghost', emoji: '👻' },
+                { id: 'icon-crown', name: '王冠', cost: 100, class: 'icon-crown', emoji: '👑' },
+                { id: 'icon-robot', name: 'ロボット', cost: 120, class: 'icon-robot', emoji: '🤖' },
+                { id: 'icon-alien', name: 'エイリアン', cost: 150, class: 'icon-alien', emoji: '👽' },
+                { id: 'icon-devil', name: 'デビル', cost: 180, class: 'icon-devil', emoji: '😈' },
+                { id: 'icon-sword', name: '剣', cost: 200, class: 'icon-sword', emoji: '⚔️' },
+                { id: 'icon-wizard', name: '魔法使い', cost: 250, class: 'icon-wizard', emoji: '🧙' },
+                { id: 'icon-dragon', name: 'ドラゴン', cost: 300, class: 'icon-dragon', emoji: '🐉' },
+                { id: 'icon-phoenix', name: '不死鳥', cost: 350, class: 'icon-phoenix', emoji: '🦅' },
+                { id: 'icon-unicorn', name: 'ユニコーン', cost: 400, class: 'icon-unicorn', emoji: '🦄' },
+                { id: 'icon-ninja', name: '忍者', cost: 450, class: 'icon-ninja', emoji: '🥷' },
+                { id: 'icon-monster', name: 'モンスター', cost: 600, class: 'icon-monster', emoji: '👹' },
+                { id: 'icon-legendary', name: 'レジェンダリー', cost: 700, class: 'icon-legendary', emoji: '💫' },
+                { id: 'icon-infinity', name: 'インフィニティ', cost: 800, class: 'icon-infinity', emoji: '♾️' },
                 
-                // Mid-tier icons (180-300pt)
-                { id: 'icon-devil', name: 'デビル', cost: 180, description: '小悪魔的な存在', class: 'icon-devil', emoji: '😈' },
-                { id: 'icon-sword', name: '剣', cost: 200, description: '戦士の証', class: 'icon-sword', emoji: '⚔️' },
-                { id: 'icon-wizard', name: '魔法使い', cost: 250, description: '神秘的な魔法使い', class: 'icon-wizard', emoji: '🧙' },
-                { id: 'icon-dragon', name: 'ドラゴン', cost: 300, description: '特別なドラゴンマーク', class: 'icon-dragon', emoji: '🐉' },
+                // New emoji icons (300-800pt)
+                { id: 'icon-fire', name: '炎', cost: 350, class: 'icon-fire', emoji: '🔥' },
+                { id: 'icon-skull', name: 'ドクロ', cost: 450, class: 'icon-skull', emoji: '💀' },
+                { id: 'icon-newmoon', name: '新月', cost: 300, class: 'icon-newmoon', emoji: '🌑' },
+                { id: 'icon-moon', name: '月', cost: 350, class: 'icon-moon', emoji: '🌙' },
+                { id: 'icon-tornado', name: '竜巻', cost: 500, class: 'icon-tornado', emoji: '🌪️' },
+                { id: 'icon-star2', name: '星', cost: 300, class: 'icon-star2', emoji: '🌟' },
+                { id: 'icon-swords', name: '交差剣', cost: 400, class: 'icon-swords', emoji: '⚔️' },
+                { id: 'icon-dagger', name: '短剣', cost: 350, class: 'icon-dagger', emoji: '🗡️' },
+                { id: 'icon-bat', name: 'コウモリ', cost: 400, class: 'icon-bat', emoji: '🦇' },
+                { id: 'icon-bone', name: '骨', cost: 300, class: 'icon-bone', emoji: '🦴' },
+                { id: 'icon-fox', name: '狐', cost: 550, class: 'icon-fox', emoji: '🦊' },
                 
-                // Premium icons (350-600pt)
-                { id: 'icon-phoenix', name: '不死鳥', cost: 350, description: '伝説の不死鳥マーク', class: 'icon-phoenix', emoji: '🦅' },
-                { id: 'icon-unicorn', name: 'ユニコーン', cost: 400, description: '幻の一角獣', class: 'icon-unicorn', emoji: '🦄' },
-                { id: 'icon-ninja', name: '忍者', cost: 450, description: '影の戦士', class: 'icon-ninja', emoji: '🥷' },
-                { id: 'icon-samurai', name: '侍', cost: 500, description: '武士道の心', class: 'icon-samurai', emoji: '⛩️' },
-                { id: 'icon-monster', name: 'モンスター', cost: 600, description: '恐ろしい怪物', class: 'icon-monster', emoji: '👹' },
+                // Special symbols (300-800pt)
+                { id: 'icon-cross', name: 'クロス', cost: 450, class: 'icon-cross', emoji: '†' },
+                { id: 'icon-star3', name: 'スター✪', cost: 350, class: 'icon-star3', emoji: '✪' },
+                { id: 'icon-star4', name: 'スター✧', cost: 400, class: 'icon-star4', emoji: '✧' },
+                { id: 'icon-star5', name: 'スター✵', cost: 450, class: 'icon-star5', emoji: '✵' },
+                { id: 'icon-star6', name: 'スター✯', cost: 500, class: 'icon-star6', emoji: '✯' },
+                { id: 'icon-star7', name: 'スター✹', cost: 550, class: 'icon-star7', emoji: '✹' },
+                { id: 'icon-star8', name: 'スター❂', cost: 600, class: 'icon-star8', emoji: '❂' },
+                { id: 'icon-star9', name: 'スター❉', cost: 650, class: 'icon-star9', emoji: '❉' },
+                { id: 'icon-cross2', name: '十字架', cost: 700, class: 'icon-cross2', emoji: '☩' },
+                { id: 'icon-star10', name: 'スター✦', cost: 350, class: 'icon-star10', emoji: '✦' },
+                { id: 'icon-star11', name: 'スター✶', cost: 400, class: 'icon-star11', emoji: '✶' },
+                { id: 'icon-star12', name: 'スター✸', cost: 450, class: 'icon-star12', emoji: '✸' },
+                { id: 'icon-star13', name: 'スター✺', cost: 500, class: 'icon-star13', emoji: '✺' },
+                { id: 'icon-star14', name: 'スター✮', cost: 550, class: 'icon-star14', emoji: '✮' },
                 
-                // Ultra premium icons (700-1500pt)
-                { id: 'icon-god', name: '神', cost: 800, description: '神々しい存在', class: 'icon-god', emoji: '🌟' },
-                { id: 'icon-demon-king', name: '魔王', cost: 1000, description: '闇の支配者', class: 'icon-demon-king', emoji: '👺' },
-                { id: 'icon-legendary', name: 'レジェンダリー', cost: 1200, description: '伝説の証', class: 'icon-legendary', emoji: '💫' },
-                { id: 'icon-infinity', name: 'インフィニティ', cost: 1500, description: '無限の力', class: 'icon-infinity', emoji: '♾️' },
+                // Chess pieces (400-700pt)
+                { id: 'icon-queen', name: 'クイーン', cost: 700, class: 'icon-queen', emoji: '♛' },
+                { id: 'icon-knight', name: 'ナイト', cost: 550, class: 'icon-knight', emoji: '♞' },
+                { id: 'icon-pawn', name: 'ポーン', cost: 400, class: 'icon-pawn', emoji: '♟' },
+                { id: 'icon-spade', name: 'スペード', cost: 450, class: 'icon-spade', emoji: '♤' },
+                { id: 'icon-club', name: 'クラブ', cost: 450, class: 'icon-club', emoji: '♧' },
+                { id: 'icon-king', name: 'キング', cost: 750, class: 'icon-king', emoji: '♚' },
+                { id: 'icon-queen2', name: 'クイーン♕', cost: 700, class: 'icon-queen2', emoji: '♕' },
+                { id: 'icon-rook', name: 'ルーク', cost: 600, class: 'icon-rook', emoji: '♖' },
+                { id: 'icon-rookb', name: 'ルーク♜', cost: 600, class: 'icon-rookb', emoji: '♜' },
+                { id: 'icon-bishop', name: 'ビショップ', cost: 550, class: 'icon-bishop', emoji: '♗' },
+                { id: 'icon-bishopb', name: 'ビショップ♝', cost: 550, class: 'icon-bishopb', emoji: '♝' },
+                
+                // Mystical symbols (500-800pt)
+                { id: 'icon-ankh', name: 'アンク', cost: 650, class: 'icon-ankh', emoji: '☥' },
+                { id: 'icon-mercury', name: '水星', cost: 500, class: 'icon-mercury', emoji: '☿' },
+                { id: 'icon-jupiter', name: '木星', cost: 550, class: 'icon-jupiter', emoji: '♃' },
+                { id: 'icon-saturn', name: '土星', cost: 600, class: 'icon-saturn', emoji: '♄' },
+                { id: 'icon-uranus', name: '天王星', cost: 650, class: 'icon-uranus', emoji: '♅' },
+                { id: 'icon-neptune', name: '海王星', cost: 700, class: 'icon-neptune', emoji: '♆' },
+                { id: 'icon-pluto', name: '冥王星', cost: 750, class: 'icon-pluto', emoji: '♇' },
+                { id: 'icon-sun', name: '太陽', cost: 800, class: 'icon-sun', emoji: '☼' },
+                { id: 'icon-moon2', name: '月☽', cost: 400, class: 'icon-moon2', emoji: '☽' },
+                { id: 'icon-constellation', name: '星座', cost: 450, class: 'icon-constellation', emoji: '☾' },
+                { id: 'icon-cross3', name: '十字✞', cost: 500, class: 'icon-cross3', emoji: '✞' },
+                { id: 'icon-cross4', name: '十字✟', cost: 550, class: 'icon-cross4', emoji: '✟' },
             ]
         };
         
@@ -2379,17 +2426,24 @@
                             <div class="card-body">
                                 <h6><i class="bi bi-border-all"></i> ${frame.name}</h6>
                                 <p class="small text-muted">${frame.description}</p>
-                                <div class="d-flex justify-content-between align-items-center">
+                                <div class="d-flex justify-content-between align-items-center mt-2">
                                     <span class="badge bg-warning">${frame.cost} pt</span>
-                                    ${isPurchased ? 
-                                        (isActive ? 
-                                            '<div class="btn-group btn-group-sm">' +
-                                            '<button class="btn btn-primary" disabled>適用中</button>' +
-                                            '<button class="btn btn-outline-secondary" onclick="applyFrame(\'\')" title="外す"><i class="bi bi-x"></i></button>' +
-                                            '</div>' : 
-                                            `<button class="btn btn-sm btn-success" onclick="applyFrame('${frame.class}')">適用</button>`) :
-                                        `<button class="btn btn-sm btn-warning" onclick="purchaseItem('${frame.id}', ${frame.cost}, 'frame')">購入</button>`
-                                    }
+                                    <div>
+                                        ${!isPurchased && !isActive ? 
+                                            `<button class="btn btn-sm btn-outline-info me-1" onclick="previewFrame('${frame.class}')" title="プレビュー">
+                                                <i class="bi bi-eye"></i> 試す
+                                            </button>` : ''
+                                        }
+                                        ${isPurchased ? 
+                                            (isActive ? 
+                                                '<div class="btn-group btn-group-sm">' +
+                                                '<button class="btn btn-primary" disabled>適用中</button>' +
+                                                '<button class="btn btn-outline-secondary" onclick="applyFrame(\'\')" title="外す"><i class="bi bi-x"></i></button>' +
+                                                '</div>' : 
+                                                `<button class="btn btn-sm btn-success" onclick="applyFrame('${frame.class}')">適用</button>`) :
+                                            `<button class="btn btn-sm btn-warning" onclick="purchaseItem('${frame.id}', ${frame.cost}, 'frame')">購入</button>`
+                                        }
+                                    </div>
                                 </div>
                             </div>
                         </div>
@@ -2413,17 +2467,24 @@
                             <div class="card-body">
                                 <h6><i class="bi bi-image"></i> ${bg.name}</h6>
                                 <p class="small text-muted">${bg.description}</p>
-                                <div class="d-flex justify-content-between align-items-center">
+                                <div class="d-flex justify-content-between align-items-center mt-2">
                                     <span class="badge bg-warning">${bg.cost} pt</span>
-                                    ${isPurchased ? 
-                                        (isActive ? 
-                                            '<div class="btn-group btn-group-sm">' +
-                                            '<button class="btn btn-primary" disabled>適用中</button>' +
-                                            '<button class="btn btn-outline-secondary" onclick="applyBackground(\'\')" title="外す"><i class="bi bi-x"></i></button>' +
-                                            '</div>' : 
-                                            `<button class="btn btn-sm btn-success" onclick="applyBackground('${bg.class}')">適用</button>`) :
-                                        `<button class="btn btn-sm btn-warning" onclick="purchaseItem('${bg.id}', ${bg.cost}, 'background')">購入</button>`
-                                    }
+                                    <div>
+                                        ${!isPurchased && !isActive ? 
+                                            `<button class="btn btn-sm btn-outline-info me-1" onclick="previewBackground('${bg.class}')" title="プレビュー">
+                                                <i class="bi bi-eye"></i> 試す
+                                            </button>` : ''
+                                        }
+                                        ${isPurchased ? 
+                                            (isActive ? 
+                                                '<div class="btn-group btn-group-sm">' +
+                                                '<button class="btn btn-primary" disabled>適用中</button>' +
+                                                '<button class="btn btn-outline-secondary" onclick="applyBackground(\'\')" title="外す"><i class="bi bi-x"></i></button>' +
+                                                '</div>' : 
+                                                `<button class="btn btn-sm btn-success" onclick="applyBackground('${bg.class}')">適用</button>`) :
+                                            `<button class="btn btn-sm btn-warning" onclick="purchaseItem('${bg.id}', ${bg.cost}, 'background')">購入</button>`
+                                        }
+                                    </div>
                                 </div>
                             </div>
                         </div>
@@ -2448,7 +2509,6 @@
                                     <span class="fs-2 me-2">${icon.emoji}</span>
                                     <h6 class="mb-0">${icon.name}</h6>
                                 </div>
-                                <p class="small text-muted">${icon.description}</p>
                                 <div class="d-flex justify-content-between align-items-center">
                                     <span class="badge bg-warning">${icon.cost} pt</span>
                                     ${isPurchased ? 
@@ -2556,6 +2616,58 @@
             if (gamificationData.purchasedItems[effectId]) {
                 document.body.classList.add(effectId);
             }
+        };
+        
+        // Preview frame (temporary application)
+        window.previewFrame = (frameClass) => {
+            // First store the current frame
+            const currentFrame = gamificationData.activeFrame;
+            
+            // Apply the preview frame
+            const allFrameClasses = SHOP_ITEMS.frames.map(f => f.class);
+            document.body.classList.remove(...allFrameClasses);
+            
+            if (frameClass && frameClass !== 'none') {
+                document.body.classList.add(frameClass);
+            }
+            
+            // Show a notification
+            showNotification('プレビュー中... 5秒後に元に戻ります', 'info');
+            
+            // Revert after 5 seconds
+            setTimeout(() => {
+                document.body.classList.remove(...allFrameClasses);
+                if (currentFrame && currentFrame !== 'none') {
+                    document.body.classList.add(currentFrame);
+                }
+                showNotification('プレビュー終了', 'secondary');
+            }, 5000);
+        };
+        
+        // Preview background (temporary application)
+        window.previewBackground = (bgClass) => {
+            // First store the current background
+            const currentBg = gamificationData.activeBackground;
+            
+            // Apply the preview background
+            const allBgClasses = SHOP_ITEMS.backgrounds.map(b => b.class);
+            document.body.classList.remove(...allBgClasses);
+            
+            if (bgClass && bgClass !== 'none') {
+                document.body.classList.add(bgClass);
+            }
+            
+            // Show a notification
+            showNotification('プレビュー中... 5秒後に元に戻ります', 'info');
+            
+            // Revert after 5 seconds
+            setTimeout(() => {
+                document.body.classList.remove(...allBgClasses);
+                if (currentBg && currentBg !== 'none') {
+                    document.body.classList.add(currentBg);
+                }
+                showNotification('プレビュー終了', 'secondary');
+            }, 5000);
         };
         
         // Initialize fun dashboard
