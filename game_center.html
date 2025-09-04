@@ -139,10 +139,19 @@
             margin: 0;
         }
 
-        .bet-selector select {
-            padding: 5px 10px;
+        .bet-selector input {
+            padding: 8px 12px;
             border-radius: 5px;
-            border: none;
+            border: 1px solid #ddd;
+            font-size: 1.1rem;
+            font-weight: bold;
+            text-align: center;
+        }
+
+        .bet-selector input:focus {
+            outline: none;
+            border-color: gold;
+            box-shadow: 0 0 5px rgba(255, 215, 0, 0.3);
         }
 
         .spin-button {
@@ -495,13 +504,10 @@
             <div class="controls">
                 <div class="bet-selector">
                     <label for="bet-amount">ベット額:</label>
-                    <select id="bet-amount">
-                        <option value="10">10 pt</option>
-                        <option value="20">20 pt</option>
-                        <option value="50" selected>50 pt</option>
-                        <option value="100">100 pt</option>
-                        <option value="200">200 pt</option>
-                    </select>
+                    <input type="number" id="bet-amount" class="form-control" 
+                           min="1" max="9999" value="50" 
+                           style="width: 120px; display: inline-block;">
+                    <span class="text-white ms-1">pt</span>
                 </div>
                 <button class="spin-button" id="spin-button">
                     <i class="bi bi-play-circle"></i> スピン！
@@ -646,10 +652,10 @@
                     userPoints = data.userPoints || 0;
                     updatePointsDisplay();
                 } else {
-                    // Initialize with 100 points if no data exists
-                    userPoints = 100;
-                    await saveUserPoints();
+                    // Initialize with 0 points if no data exists (same as card_list.html)
+                    userPoints = 0;
                     updatePointsDisplay();
+                    alert('ポイントがありません。カード管理画面でポイントを獲得してください。');
                 }
             } catch (error) {
                 console.error('Error loading points:', error);
@@ -680,16 +686,35 @@
         // Update points display
         function updatePointsDisplay() {
             document.getElementById('current-points').textContent = userPoints;
+            // Update max bet amount
+            const betInput = document.getElementById('bet-amount');
+            if (betInput) {
+                betInput.max = userPoints;
+                // If current bet is higher than available points, adjust it
+                if (parseInt(betInput.value) > userPoints) {
+                    betInput.value = Math.min(50, userPoints);
+                }
+            }
         }
 
         // Spin the reels
         async function spin() {
             if (isSpinning) return;
             
-            const betAmount = parseInt(document.getElementById('bet-amount').value);
+            const betAmountInput = document.getElementById('bet-amount');
+            const betAmount = parseInt(betAmountInput.value) || 0;
             
-            if (userPoints < betAmount) {
-                alert('ポイントが不足しています！');
+            // Validate bet amount
+            if (betAmount < 1) {
+                alert('ベット額は1ポイント以上にしてください');
+                betAmountInput.focus();
+                return;
+            }
+            
+            if (betAmount > userPoints) {
+                alert(`ポイントが不足しています！\n現在のポイント: ${userPoints} pt`);
+                betAmountInput.value = userPoints;
+                betAmountInput.focus();
                 return;
             }
             
@@ -842,9 +867,8 @@
             
             try {
                 await createUserWithEmailAndPassword(auth, email, password);
-                // Initialize with 100 points for new users
-                userPoints = 100;
-                await saveUserPoints();
+                // New users start with 0 points (same as card_list.html)
+                // Points are earned through card management activities
             } catch (error) {
                 console.error('Registration error:', error);
                 let errorMessage = 'アカウント作成に失敗しました';
