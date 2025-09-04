@@ -79,17 +79,22 @@
         }
 
         .reel {
-            width: 120px;
-            height: 120px;
-            background: white;
-            border: 3px solid gold;
-            border-radius: 10px;
+            width: 140px;
+            height: 140px;
+            background: linear-gradient(145deg, #ffffff, #f0f0f0);
+            border: 4px solid transparent;
+            background-clip: padding-box;
+            border-image: linear-gradient(45deg, gold, #ffed4e) 1;
+            border-radius: 15px;
             display: flex;
             align-items: center;
             justify-content: center;
-            font-size: 4rem;
+            font-size: 4.5rem;
             position: relative;
             overflow: hidden;
+            box-shadow: 
+                inset 0 2px 5px rgba(0,0,0,0.1),
+                0 5px 15px rgba(255, 215, 0, 0.3);
         }
 
         .reel-content {
@@ -98,24 +103,54 @@
             display: flex;
             flex-direction: column;
             align-items: center;
-            transition: transform 0.5s cubic-bezier(0.17, 0.67, 0.83, 0.67);
+            transition: none;
         }
 
         .reel-symbol {
-            width: 120px;
-            height: 120px;
+            width: 140px;
+            height: 140px;
             display: flex;
             align-items: center;
             justify-content: center;
+            filter: drop-shadow(2px 2px 4px rgba(0,0,0,0.2));
         }
 
         .reel.spinning .reel-content {
-            animation: spin 0.1s linear infinite;
+            animation: slotSpin 0.15s linear infinite;
         }
 
-        @keyframes spin {
+        .reel.stopping .reel-content {
+            animation: slotBounce 0.5s cubic-bezier(0.36, 0.07, 0.19, 0.97) forwards;
+        }
+
+        @keyframes slotSpin {
             0% { transform: translateY(0); }
-            100% { transform: translateY(-120px); }
+            100% { transform: translateY(-140px); }
+        }
+
+        @keyframes slotBounce {
+            0% { transform: translateY(var(--target-position)); }
+            50% { transform: translateY(calc(var(--target-position) - 20px)); }
+            75% { transform: translateY(calc(var(--target-position) + 10px)); }
+            100% { transform: translateY(var(--target-position)); }
+        }
+
+        .reel.winner {
+            animation: winnerGlow 0.5s ease-in-out 3;
+        }
+
+        @keyframes winnerGlow {
+            0%, 100% { 
+                box-shadow: 
+                    inset 0 2px 5px rgba(0,0,0,0.1),
+                    0 5px 15px rgba(255, 215, 0, 0.3);
+            }
+            50% { 
+                box-shadow: 
+                    inset 0 2px 5px rgba(0,0,0,0.1),
+                    0 10px 30px rgba(255, 215, 0, 0.8),
+                    0 0 50px rgba(255, 215, 0, 0.5);
+            }
         }
 
         .controls {
@@ -390,6 +425,206 @@
         .alert-auth.show {
             display: block;
         }
+
+        /* Game selection menu */
+        .game-selection {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+
+        .game-card {
+            background: linear-gradient(145deg, #f0f0f0, #ffffff);
+            border-radius: 15px;
+            padding: 30px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s;
+            border: 2px solid transparent;
+        }
+
+        .game-card:hover {
+            transform: translateY(-5px);
+            border-color: gold;
+            box-shadow: 0 10px 30px rgba(255, 215, 0, 0.3);
+        }
+
+        .game-card .game-icon {
+            font-size: 4rem;
+            margin-bottom: 15px;
+        }
+
+        .game-card h3 {
+            color: #333;
+            margin-bottom: 10px;
+        }
+
+        .game-card p {
+            color: #666;
+            font-size: 0.9rem;
+        }
+
+        .back-to-menu {
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            padding: 10px 20px;
+            background: rgba(255, 255, 255, 0.9);
+            border: none;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: all 0.3s;
+            display: none;
+        }
+
+        .back-to-menu:hover {
+            background: white;
+            transform: translateX(-2px);
+        }
+
+        /* Roulette styles */
+        .roulette-container {
+            display: none;
+            text-align: center;
+        }
+
+        .roulette-wheel {
+            width: 300px;
+            height: 300px;
+            margin: 0 auto 30px;
+            position: relative;
+            border-radius: 50%;
+            background: conic-gradient(
+                from 0deg,
+                #ff0000 0deg 10deg,
+                #000000 10deg 20deg,
+                #ff0000 20deg 30deg,
+                #000000 30deg 40deg,
+                #ff0000 40deg 50deg,
+                #000000 50deg 60deg,
+                #ff0000 60deg 70deg,
+                #000000 70deg 80deg,
+                #ff0000 80deg 90deg,
+                #000000 90deg 100deg,
+                #ff0000 100deg 110deg,
+                #000000 110deg 120deg,
+                #ff0000 120deg 130deg,
+                #000000 130deg 140deg,
+                #ff0000 140deg 150deg,
+                #000000 150deg 160deg,
+                #ff0000 160deg 170deg,
+                #000000 170deg 180deg,
+                #00ff00 180deg 190deg,
+                #000000 190deg 200deg,
+                #ff0000 200deg 210deg,
+                #000000 210deg 220deg,
+                #ff0000 220deg 230deg,
+                #000000 230deg 240deg,
+                #ff0000 240deg 250deg,
+                #000000 250deg 260deg,
+                #ff0000 260deg 270deg,
+                #000000 270deg 280deg,
+                #ff0000 280deg 290deg,
+                #000000 290deg 300deg,
+                #ff0000 300deg 310deg,
+                #000000 310deg 320deg,
+                #ff0000 320deg 330deg,
+                #000000 330deg 340deg,
+                #ff0000 340deg 350deg,
+                #000000 350deg 360deg
+            );
+            box-shadow: 0 0 30px rgba(0,0,0,0.5), inset 0 0 30px rgba(0,0,0,0.3);
+            transition: transform 4s cubic-bezier(0.17, 0.67, 0.83, 0.67);
+        }
+
+        .roulette-center {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 60px;
+            height: 60px;
+            background: gold;
+            border-radius: 50%;
+            box-shadow: 0 0 20px rgba(255, 215, 0, 0.5);
+            z-index: 10;
+        }
+
+        .roulette-pointer {
+            position: absolute;
+            top: -20px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 0;
+            height: 0;
+            border-left: 15px solid transparent;
+            border-right: 15px solid transparent;
+            border-top: 30px solid gold;
+            z-index: 11;
+        }
+
+        .roulette-numbers {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+        }
+
+        .roulette-number {
+            position: absolute;
+            color: white;
+            font-weight: bold;
+            font-size: 12px;
+            width: 20px;
+            height: 20px;
+            text-align: center;
+            line-height: 20px;
+        }
+
+        .betting-grid {
+            display: grid;
+            grid-template-columns: repeat(6, 1fr);
+            gap: 10px;
+            margin-bottom: 20px;
+            max-width: 600px;
+            margin: 0 auto 20px;
+        }
+
+        .bet-option {
+            padding: 10px;
+            background: white;
+            border: 2px solid #ddd;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .bet-option:hover {
+            border-color: gold;
+            transform: translateY(-2px);
+        }
+
+        .bet-option.selected {
+            background: gold;
+            border-color: #ffed4e;
+            font-weight: bold;
+        }
+
+        .bet-option.red {
+            background: linear-gradient(145deg, #ff6b6b, #ff3838);
+            color: white;
+        }
+
+        .bet-option.black {
+            background: linear-gradient(145deg, #333, #000);
+            color: white;
+        }
+
+        .bet-option.green {
+            background: linear-gradient(145deg, #4caf50, #2e7d32);
+            color: white;
+        }
     </style>
 </head>
 <body>
@@ -399,6 +634,10 @@
     
     <button class="logout-button" id="logout-button">
         <i class="bi bi-box-arrow-right"></i> ログアウト
+    </button>
+    
+    <button class="back-to-menu" id="back-to-menu-btn">
+        <i class="bi bi-grid-3x3-gap"></i> ゲーム選択に戻る
     </button>
 
     <!-- Login Container -->
@@ -446,10 +685,43 @@
     </div>
 
     <div class="game-container" id="game-container" style="display: none;">
-        <div class="game-header">
-            <h1 class="game-title">🎰 スロットマシン 🎰</h1>
-            <p class="text-muted">ポイントを使って運試し！</p>
+        <!-- Game Selection Menu -->
+        <div id="game-menu" style="display: block;">
+            <div class="game-header">
+                <h1 class="game-title">🎮 ゲームセンター 🎮</h1>
+                <p class="text-muted">遊びたいゲームを選択してください</p>
+            </div>
+            
+            <div class="points-display">
+                <div>
+                    <i class="bi bi-coin" style="font-size: 1.5rem;"></i>
+                    <span>現在のポイント</span>
+                </div>
+                <div class="points-value">
+                    <span id="menu-points">0</span> pt
+                </div>
+            </div>
+            
+            <div class="game-selection">
+                <div class="game-card" onclick="selectGame('slot')">
+                    <div class="game-icon">🎰</div>
+                    <h3>スロットマシン</h3>
+                    <p>シンボルを揃えて高配当を狙おう！<br>最大50倍の配当</p>
+                </div>
+                <div class="game-card" onclick="selectGame('roulette')">
+                    <div class="game-icon">🎲</div>
+                    <h3>ルーレット</h3>
+                    <p>数字や色を予想して賭けよう！<br>最大35倍の配当</p>
+                </div>
+            </div>
         </div>
+        
+        <!-- Slot Machine Game -->
+        <div id="slot-game" style="display: none;">
+            <div class="game-header">
+                <h1 class="game-title">🎰 スロットマシン 🎰</h1>
+                <p class="text-muted">ポイントを使って運試し！</p>
+            </div>
 
         <div class="points-display">
             <div>
@@ -464,7 +736,7 @@
         <div class="slot-machine">
             <div class="slot-window">
                 <div class="reel" id="reel1">
-                    <div class="reel-content">
+                    <div class="reel-content" id="reel-content-1">
                         <div class="reel-symbol">🍒</div>
                         <div class="reel-symbol">🍋</div>
                         <div class="reel-symbol">🍊</div>
@@ -476,7 +748,7 @@
                     </div>
                 </div>
                 <div class="reel" id="reel2">
-                    <div class="reel-content">
+                    <div class="reel-content" id="reel-content-2">
                         <div class="reel-symbol">🍒</div>
                         <div class="reel-symbol">🍋</div>
                         <div class="reel-symbol">🍊</div>
@@ -488,7 +760,7 @@
                     </div>
                 </div>
                 <div class="reel" id="reel3">
-                    <div class="reel-content">
+                    <div class="reel-content" id="reel-content-3">
                         <div class="reel-symbol">🍒</div>
                         <div class="reel-symbol">🍋</div>
                         <div class="reel-symbol">🍊</div>
@@ -555,6 +827,59 @@
                 <span class="symbols">🍒 🍒 ー</span>
                 <span class="multiplier">×1.5</span>
             </div>
+        </div>
+        </div>
+        
+        <!-- Roulette Game -->
+        <div id="roulette-game" class="roulette-container">
+            <div class="game-header">
+                <h1 class="game-title">🎲 ルーレット 🎲</h1>
+                <p class="text-muted">運命の数字に賭けよう！</p>
+            </div>
+
+            <div class="points-display">
+                <div>
+                    <i class="bi bi-coin" style="font-size: 1.5rem;"></i>
+                    <span>現在のポイント</span>
+                </div>
+                <div class="points-value">
+                    <span id="roulette-points">0</span> pt
+                </div>
+            </div>
+
+            <div class="roulette-wheel" id="roulette-wheel">
+                <div class="roulette-pointer"></div>
+                <div class="roulette-center"></div>
+                <div class="roulette-numbers" id="roulette-numbers"></div>
+            </div>
+
+            <div class="betting-grid">
+                <div class="bet-option red" data-bet="red">赤<br>×2</div>
+                <div class="bet-option black" data-bet="black">黒<br>×2</div>
+                <div class="bet-option" data-bet="odd">奇数<br>×2</div>
+                <div class="bet-option" data-bet="even">偶数<br>×2</div>
+                <div class="bet-option" data-bet="1-18">1-18<br>×2</div>
+                <div class="bet-option" data-bet="19-36">19-36<br>×2</div>
+                <div class="bet-option green" data-bet="0">0<br>×35</div>
+                <div class="bet-option" data-bet="1-12">1-12<br>×3</div>
+                <div class="bet-option" data-bet="13-24">13-24<br>×3</div>
+                <div class="bet-option" data-bet="25-36">25-36<br>×3</div>
+            </div>
+
+            <div class="controls">
+                <div class="bet-selector">
+                    <label for="roulette-bet-amount">ベット額:</label>
+                    <input type="number" id="roulette-bet-amount" class="form-control" 
+                           min="1" max="9999" value="50" 
+                           style="width: 120px; display: inline-block;">
+                    <span class="text-white ms-1">pt</span>
+                </div>
+                <button class="spin-button" id="roulette-spin-button">
+                    <i class="bi bi-play-circle"></i> スピン！
+                </button>
+            </div>
+
+            <div class="result-message" id="roulette-result"></div>
         </div>
     </div>
 
@@ -697,17 +1022,58 @@
 
         // Update points display
         function updatePointsDisplay() {
-            document.getElementById('current-points').textContent = userPoints;
-            // Update max bet amount
+            // Update all points displays
+            const pointsElements = ['current-points', 'menu-points', 'roulette-points'];
+            pointsElements.forEach(id => {
+                const el = document.getElementById(id);
+                if (el) el.textContent = userPoints;
+            });
+            
+            // Update max bet amount for slot
             const betInput = document.getElementById('bet-amount');
             if (betInput) {
                 betInput.max = userPoints;
-                // If current bet is higher than available points, adjust it
                 if (parseInt(betInput.value) > userPoints) {
                     betInput.value = Math.min(50, userPoints);
                 }
             }
+            
+            // Update max bet amount for roulette
+            const rouletteBetInput = document.getElementById('roulette-bet-amount');
+            if (rouletteBetInput) {
+                rouletteBetInput.max = userPoints;
+                if (parseInt(rouletteBetInput.value) > userPoints) {
+                    rouletteBetInput.value = Math.min(50, userPoints);
+                }
+            }
         }
+        
+        // Game selection
+        let currentGame = null;
+        
+        window.selectGame = (game) => {
+            currentGame = game;
+            document.getElementById('game-menu').style.display = 'none';
+            document.getElementById('back-to-menu-btn').style.display = 'block';
+            
+            if (game === 'slot') {
+                document.getElementById('slot-game').style.display = 'block';
+                document.getElementById('roulette-game').style.display = 'none';
+            } else if (game === 'roulette') {
+                document.getElementById('slot-game').style.display = 'none';
+                document.getElementById('roulette-game').style.display = 'block';
+                initializeRoulette();
+            }
+        };
+        
+        // Back to game menu
+        document.getElementById('back-to-menu-btn').addEventListener('click', () => {
+            document.getElementById('game-menu').style.display = 'block';
+            document.getElementById('slot-game').style.display = 'none';
+            document.getElementById('roulette-game').style.display = 'none';
+            document.getElementById('back-to-menu-btn').style.display = 'none';
+            currentGame = null;
+        });
 
         // Spin the reels
         async function spin() {
@@ -740,7 +1106,10 @@
             
             // Start spinning animation
             const reels = document.querySelectorAll('.reel');
-            reels.forEach(reel => reel.classList.add('spinning'));
+            reels.forEach(reel => {
+                reel.classList.remove('stopping', 'winner');
+                reel.classList.add('spinning');
+            });
             
             // Determine results
             const results = [];
@@ -748,17 +1117,23 @@
                 results.push(getRandomSymbol());
             }
             
-            // Stop reels one by one
+            // Stop reels one by one with improved animation
             for (let i = 0; i < 3; i++) {
-                await new Promise(resolve => setTimeout(resolve, 500 + i * 300));
+                await new Promise(resolve => setTimeout(resolve, 1000 + i * 400));
                 const reel = document.getElementById(`reel${i + 1}`);
-                const reelContent = reel.querySelector('.reel-content');
-                
-                reel.classList.remove('spinning');
+                const reelContent = document.getElementById(`reel-content-${i + 1}`);
                 
                 // Find the symbol index
                 const symbolIndex = symbols.indexOf(results[i]);
-                reelContent.style.transform = `translateY(${-symbolIndex * 120}px)`;
+                const targetPosition = -symbolIndex * 140;
+                
+                reel.classList.remove('spinning');
+                reel.classList.add('stopping');
+                reelContent.style.setProperty('--target-position', `${targetPosition}px`);
+                reelContent.style.transform = `translateY(${targetPosition}px)`;
+                
+                // Play sound effect (optional)
+                playSlotSound();
             }
             
             // Check for wins
@@ -953,12 +1328,166 @@
             showLoading(false);
         });
 
+        // Sound effect (optional)
+        function playSlotSound() {
+            // Sound implementation can be added later
+        }
+        
+        // Improved checkWin with animation
+        function checkWinImproved(results, betAmount) {
+            const resultMessage = document.getElementById('result-message');
+            let winAmount = 0;
+            
+            // Check for three of a kind
+            for (const [pattern, multiplier] of Object.entries(payouts)) {
+                if (pattern.length === 6) { // Three symbols
+                    const symbolPattern = pattern.substring(0, 2);
+                    if (results.every(r => r === symbolPattern)) {
+                        winAmount = betAmount * multiplier;
+                        // Add winner animation to reels
+                        document.querySelectorAll('.reel').forEach(reel => {
+                            reel.classList.add('winner');
+                        });
+                        break;
+                    }
+                } else if (pattern === '🍒🍒' && results[0] === '🍒' && results[1] === '🍒') {
+                    winAmount = Math.floor(betAmount * 1.5);
+                }
+            }
+            
+            if (winAmount > 0) {
+                userPoints += winAmount;
+                updatePointsDisplay();
+                resultMessage.textContent = `🎉 大当たり！ ${winAmount} ポイント獲得！`;
+                resultMessage.className = 'result-message win';
+            } else {
+                resultMessage.textContent = 'はずれ... もう一度挑戦！';
+                resultMessage.className = 'result-message lose';
+            }
+        }
+        
+        // Roulette Game Logic
+        let selectedBet = null;
+        let isRouletteSpinning = false;
+        const rouletteNumbers = [0, 32, 15, 19, 4, 21, 2, 25, 17, 34, 6, 27, 13, 36, 11, 30, 8, 23, 10, 5, 24, 16, 33, 1, 20, 14, 31, 9, 22, 18, 29, 7, 28, 12, 35, 3, 26];
+        const redNumbers = [1, 3, 5, 7, 9, 12, 14, 16, 18, 19, 21, 23, 25, 27, 30, 32, 34, 36];
+        
+        function initializeRoulette() {
+            // Add bet selection handlers
+            document.querySelectorAll('.bet-option').forEach(option => {
+                option.addEventListener('click', function() {
+                    document.querySelectorAll('.bet-option').forEach(opt => opt.classList.remove('selected'));
+                    this.classList.add('selected');
+                    selectedBet = this.dataset.bet;
+                });
+            });
+            
+            // Roulette spin button
+            document.getElementById('roulette-spin-button').addEventListener('click', spinRoulette);
+        }
+        
+        async function spinRoulette() {
+            if (isRouletteSpinning) return;
+            if (!selectedBet) {
+                alert('ベットを選択してください');
+                return;
+            }
+            
+            const betAmount = parseInt(document.getElementById('roulette-bet-amount').value) || 0;
+            
+            if (betAmount < 1) {
+                alert('ベット額は1ポイント以上にしてください');
+                return;
+            }
+            
+            if (betAmount > userPoints) {
+                alert(`ポイントが不足しています！\n現在のポイント: ${userPoints} pt`);
+                return;
+            }
+            
+            isRouletteSpinning = true;
+            document.getElementById('roulette-spin-button').disabled = true;
+            document.getElementById('roulette-result').style.display = 'none';
+            
+            // Deduct bet
+            userPoints -= betAmount;
+            updatePointsDisplay();
+            
+            // Spin the wheel
+            const wheel = document.getElementById('roulette-wheel');
+            const randomRotation = 720 + Math.random() * 720; // At least 2 full rotations
+            const finalNumber = rouletteNumbers[Math.floor(Math.random() * rouletteNumbers.length)];
+            const numberIndex = rouletteNumbers.indexOf(finalNumber);
+            const degreePerNumber = 360 / 37;
+            const finalRotation = randomRotation + (numberIndex * degreePerNumber);
+            
+            wheel.style.transform = `rotate(${finalRotation}deg)`;
+            
+            // Wait for animation
+            await new Promise(resolve => setTimeout(resolve, 4000));
+            
+            // Check win
+            let winAmount = 0;
+            const isRed = redNumbers.includes(finalNumber);
+            const isBlack = !isRed && finalNumber !== 0;
+            const isOdd = finalNumber % 2 === 1 && finalNumber !== 0;
+            const isEven = finalNumber % 2 === 0 && finalNumber !== 0;
+            
+            switch(selectedBet) {
+                case 'red':
+                    if (isRed) winAmount = betAmount * 2;
+                    break;
+                case 'black':
+                    if (isBlack) winAmount = betAmount * 2;
+                    break;
+                case 'odd':
+                    if (isOdd) winAmount = betAmount * 2;
+                    break;
+                case 'even':
+                    if (isEven) winAmount = betAmount * 2;
+                    break;
+                case '1-18':
+                    if (finalNumber >= 1 && finalNumber <= 18) winAmount = betAmount * 2;
+                    break;
+                case '19-36':
+                    if (finalNumber >= 19 && finalNumber <= 36) winAmount = betAmount * 2;
+                    break;
+                case '0':
+                    if (finalNumber === 0) winAmount = betAmount * 35;
+                    break;
+                case '1-12':
+                    if (finalNumber >= 1 && finalNumber <= 12) winAmount = betAmount * 3;
+                    break;
+                case '13-24':
+                    if (finalNumber >= 13 && finalNumber <= 24) winAmount = betAmount * 3;
+                    break;
+                case '25-36':
+                    if (finalNumber >= 25 && finalNumber <= 36) winAmount = betAmount * 3;
+                    break;
+            }
+            
+            const resultMessage = document.getElementById('roulette-result');
+            if (winAmount > 0) {
+                userPoints += winAmount;
+                updatePointsDisplay();
+                resultMessage.textContent = `🎉 ${finalNumber}! ${winAmount} ポイント獲得！`;
+                resultMessage.className = 'result-message win';
+            } else {
+                resultMessage.textContent = `${finalNumber} - はずれ`;
+                resultMessage.className = 'result-message lose';
+            }
+            
+            await saveUserPoints();
+            isRouletteSpinning = false;
+            document.getElementById('roulette-spin-button').disabled = false;
+        }
+        
         // Initialize reels with random positions
         window.addEventListener('load', () => {
             const reels = document.querySelectorAll('.reel-content');
             reels.forEach(reel => {
                 const randomOffset = Math.floor(Math.random() * symbols.length);
-                reel.style.transform = `translateY(${-randomOffset * 120}px)`;
+                reel.style.transform = `translateY(${-randomOffset * 140}px)`;
             });
         });
     </script>
