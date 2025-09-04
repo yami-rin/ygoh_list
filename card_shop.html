@@ -245,6 +245,13 @@
                     <span class="badge bg-info">次の価格更新まで: <span id="next-update">10</span>秒</span>
                 </div>
             </div>
+            <div class="mt-3 text-center">
+                <div class="alert alert-warning d-inline-block" style="background: linear-gradient(135deg, #fff3cd 0%, #ffe4a1 100%); border: 2px solid #ffc107;">
+                    <i class="bi bi-lightbulb-fill text-warning me-2"></i>
+                    <span id="market-prediction" class="fw-bold"></span>
+                    <small class="text-muted ms-2">(予測精度: 40%)</small>
+                </div>
+            </div>
         </div>
 
         <div class="main-content">
@@ -461,6 +468,7 @@
                     await loadInventory();
                     displayCards();
                     displayInventory();
+                    generateMarketPrediction();
                     startPriceUpdateTimer();
                     document.getElementById('loading').classList.remove('active');
                 } else {
@@ -715,6 +723,113 @@
             await savePrices();
             displayCards();
             updateInventoryDisplay();
+            generateMarketPrediction();
+        }
+
+        // Generate market prediction comments
+        function generateMarketPrediction() {
+            // Analyze current market patterns
+            const patterns = {};
+            let totalCards = 0;
+            
+            CARDS_DATABASE.forEach(card => {
+                const pattern = cardPrices[card.id]?.pattern;
+                if (pattern) {
+                    patterns[pattern] = (patterns[pattern] || 0) + 1;
+                    totalCards++;
+                }
+            });
+            
+            // Determine dominant pattern
+            let dominantPattern = null;
+            let maxCount = 0;
+            for (const [pattern, count] of Object.entries(patterns)) {
+                if (count > maxCount) {
+                    maxCount = count;
+                    dominantPattern = pattern;
+                }
+            }
+            
+            // 60% chance to be wrong (40% accuracy)
+            const isAccurate = Math.random() < 0.4;
+            
+            // Generate prediction based on analysis
+            const predictions = {
+                [PRICE_PATTERNS.TOURNAMENT]: [
+                    "🔥 次は大会需要で高騰の予感！？",
+                    "📈 トーナメントシーズン到来か！？買い時かも！",
+                    "🏆 大会メタが動く！？注目カードをチェック！",
+                    "⚡ 競技シーンが熱い！価格上昇の兆し！？"
+                ],
+                [PRICE_PATTERNS.DEMAND]: [
+                    "💎 需要急増の気配！？今が仕込み時かも！",
+                    "🚀 人気爆発の予感！？早めの購入がオススメ！",
+                    "✨ 次のトレンドはこれだ！？要チェック！",
+                    "📊 市場が動き出す！？価格上昇に備えよ！"
+                ],
+                [PRICE_PATTERNS.DECLINE]: [
+                    "📉 価格調整期到来か！？待つのも戦略！",
+                    "💤 市場は一時休憩！？次の波を待とう！",
+                    "🌊 下げトレンド突入！？買い時を見極めよ！",
+                    "⏰ しばらく様子見が吉！？慎重に行こう！"
+                ],
+                [PRICE_PATTERNS.SUPPLY]: [
+                    "📦 供給過多の予感！？価格は安定傾向か！",
+                    "🎯 買いやすい相場継続！？じっくり選ぼう！",
+                    "🌱 市場は落ち着きモード！掘り出し物を探せ！",
+                    "💰 お買い得相場！？欲しいカードは今のうち！"
+                ],
+                [PRICE_PATTERNS.REPRINT]: [
+                    "🔄 再録の影響大！？価格変動に注意！",
+                    "📰 リプリント情報に注目！市場が動くかも！",
+                    "🎲 価格リセットの可能性！？様子見推奨！",
+                    "⚠️ 再録ショック警戒！慎重な投資を！"
+                ],
+                [PRICE_PATTERNS.META]: [
+                    "🎮 メタゲーム激変！？環境カードに注目！",
+                    "🔮 次の環境トップは！？先読みが鍵！",
+                    "🎯 メタ読みで大儲け！？情報収集が重要！",
+                    "🌟 環境激動の予感！？チャンスを掴め！"
+                ]
+            };
+            
+            // Misleading predictions for wrong guesses
+            const misleadingPredictions = [
+                "🎰 市場は予測不能！？ギャンブル相場到来！",
+                "🌀 カオス相場突入！？何が起きるか分からない！",
+                "🎪 サプライズ相場！？予想外の展開に備えよ！",
+                "🎨 市場は芸術的！？感性で勝負の時！",
+                "🎸 ロックな相場！？常識を疑え！",
+                "🍀 運試しの時！？直感を信じて行動！",
+                "🌈 虹の向こうに宝が！？夢を追いかけろ！",
+                "🚁 急展開の予感！？準備はできているか！？"
+            ];
+            
+            let selectedPrediction;
+            
+            if (isAccurate && dominantPattern && predictions[dominantPattern]) {
+                // Accurate prediction based on dominant pattern
+                const patternPredictions = predictions[dominantPattern];
+                selectedPrediction = patternPredictions[Math.floor(Math.random() * patternPredictions.length)];
+            } else {
+                // Misleading or random prediction
+                if (Math.random() < 0.5 && dominantPattern) {
+                    // Pick wrong pattern prediction
+                    const wrongPatterns = Object.keys(predictions).filter(p => p !== dominantPattern);
+                    const wrongPattern = wrongPatterns[Math.floor(Math.random() * wrongPatterns.length)];
+                    const wrongPredictions = predictions[wrongPattern];
+                    selectedPrediction = wrongPredictions[Math.floor(Math.random() * wrongPredictions.length)];
+                } else {
+                    // Pick misleading prediction
+                    selectedPrediction = misleadingPredictions[Math.floor(Math.random() * misleadingPredictions.length)];
+                }
+            }
+            
+            // Update the prediction display
+            const predictionElement = document.getElementById('market-prediction');
+            if (predictionElement) {
+                predictionElement.textContent = selectedPrediction;
+            }
         }
 
         // Save prices to Firestore
@@ -1215,6 +1330,7 @@
                                 cardPrices = snap.data().prices || {};
                                 displayCards();
                                 displayInventory();
+                                generateMarketPrediction();
                             }
                         } else {
                             // No prices exist yet, create them
