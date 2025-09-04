@@ -163,7 +163,7 @@
         /* Rarity bar styles */
         .rarity-bar {
             height: 100px;
-            flex: 1;
+            flex: 0 0 auto;
             min-width: 40px;
             background: linear-gradient(to top, var(--bar-color) 0%, var(--bar-color) var(--bar-height), transparent var(--bar-height));
             position: relative;
@@ -191,10 +191,39 @@
             display: flex;
             gap: 0.25rem;
             align-items: flex-end;
-            justify-content: space-between;
+            justify-content: flex-start;
             min-height: 120px;
             overflow-x: auto;
+            overflow-y: hidden;
             padding-bottom: 5px;
+            width: 100%;
+            max-width: 100%;
+        }
+        
+        /* Rarity chart container */
+        #rarity-chart-container {
+            width: 100%;
+            overflow: hidden;
+            position: relative;
+        }
+        
+        /* Custom scrollbar for rarity bars */
+        #rarity-bars::-webkit-scrollbar {
+            height: 6px;
+        }
+        
+        #rarity-bars::-webkit-scrollbar-track {
+            background: rgba(0, 0, 0, 0.1);
+            border-radius: 3px;
+        }
+        
+        #rarity-bars::-webkit-scrollbar-thumb {
+            background: rgba(0, 0, 0, 0.3);
+            border-radius: 3px;
+        }
+        
+        #rarity-bars::-webkit-scrollbar-thumb:hover {
+            background: rgba(0, 0, 0, 0.5);
         }
         
         /* Mobile responsive for rarity bars */
@@ -202,6 +231,8 @@
             #rarity-bars {
                 gap: 0.15rem;
                 -webkit-overflow-scrolling: touch;
+                justify-content: flex-start;
+                flex-wrap: nowrap;
             }
             
             .rarity-bar {
@@ -223,12 +254,16 @@
         @media (max-width: 576px) {
             #rarity-chart-container {
                 margin-top: 0.5rem !important;
+                padding: 0 5px;
+                max-width: 100%;
             }
             
             #rarity-bars {
                 gap: 0.1rem;
                 min-height: 100px;
                 padding: 0 2px 5px 2px;
+                max-width: calc(100vw - 40px);
+                margin: 0 auto;
             }
             
             .rarity-bar {
@@ -251,9 +286,14 @@
         }
         
         @media (max-width: 400px) {
+            #rarity-chart-container {
+                padding: 0 3px;
+            }
+            
             #rarity-bars {
                 gap: 2px;
                 min-height: 90px;
+                max-width: calc(100vw - 30px);
             }
             
             .rarity-bar {
