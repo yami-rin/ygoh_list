@@ -308,12 +308,34 @@
 
     <!-- Firebase SDK -->
     <script type="module">
-        import { initializeApp } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-app.js";
-        import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, onAuthStateChanged, setPersistence, browserLocalPersistence } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-auth.js";
-        import { getFirestore, collection, getDocs, addDoc, deleteDoc, doc, query, where, updateDoc, getDoc, setDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore.js";
+        import { initializeApp } from 'https://www.gstatic.com/firebasejs/9.23.0/firebase-app.js';
+        import { 
+            getAuth, 
+            onAuthStateChanged,
+            signInWithEmailAndPassword,
+            createUserWithEmailAndPassword,
+            signOut,
+            setPersistence,
+            browserLocalPersistence
+        } from 'https://www.gstatic.com/firebasejs/9.23.0/firebase-auth.js';
+        import { 
+            getFirestore, 
+            doc, 
+            getDoc,
+            setDoc,
+            updateDoc,
+            collection,
+            query,
+            where,
+            getDocs,
+            addDoc,
+            deleteDoc,
+            serverTimestamp
+        } from 'https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore.js';
 
+        // Firebase configuration (same as card_list.html)
         const firebaseConfig = {
-            apiKey: "AIzaSyAOYKalLUb2hbghrQUS8AWzxpLExBT7aU",
+            apiKey: "AIzaSyAOYKalLUb2hbghrjQUS8AWzxpLExBT7aU",
             authDomain: "ygoh-9bcf6.firebaseapp.com",
             projectId: "ygoh-9bcf6",
             storageBucket: "ygoh-9bcf6.firebasestorage.app",
@@ -325,12 +347,16 @@
         const app = initializeApp(firebaseConfig);
         const auth = getAuth(app);
         const db = getFirestore(app);
-        
+
+        // Set persistence to LOCAL (keeps user logged in)
         setPersistence(auth, browserLocalPersistence).catch((error) => {
+            console.error('Error setting persistence:', error);
         });
-        
+
         let currentUser = null;
         let userPoints = 0;
+        let isSpinning = false;
+        let authChecked = false;
         let inventory = [];
         let cardPrices = {};
         let updateInterval = null;
