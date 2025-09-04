@@ -1516,32 +1516,12 @@
                 if (countdown <= 0) {
                     countdown = 10;
                     
-                    // Check for server-side updates first
-                    const now = Date.now();
-                    const pricesRef = doc(db, 'cardShopPrices', 'current');
-                    
+                    // Always update prices when countdown reaches 0
+                    // The updateCardPrices function will handle the date advancement
                     try {
-                        const snap = await getDoc(pricesRef);
-                        if (snap.exists()) {
-                            const lastUpdate = snap.data().lastUpdate?.toMillis() || 0;
-                            const tenSeconds = 10 * 1000;
-                            
-                            // If last update was more than 10 seconds ago, update prices
-                            if (now - lastUpdate >= tenSeconds) {
-                                await updateCardPrices();
-                            } else {
-                                // Just load the existing prices from server
-                                cardPrices = snap.data().prices || {};
-                                displayCards();
-                                displayInventory();
-                                generateMarketPrediction();
-                            }
-                        } else {
-                            // No prices exist yet, create them
-                            await updateCardPrices();
-                        }
+                        await updateCardPrices();
                     } catch (error) {
-                        console.error('Error checking prices:', error);
+                        console.error('Error updating prices:', error);
                     }
                 }
             };
