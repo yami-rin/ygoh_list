@@ -857,10 +857,6 @@
                     price.continuationCount++;
                 }
                 
-                // Check if card is immune to price decreases
-                const isImmune = (card.rarity === 'PSE' || card.rarity === 'QCSE' || 
-                    (card.name === '青眼の白龍' && card.rarity === 'SE'));
-                
                 // Apply price changes based on pattern
                 let multiplier = 1;
                 
