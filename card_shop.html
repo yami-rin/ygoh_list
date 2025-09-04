@@ -308,7 +308,7 @@
 
     <!-- Firebase SDK -->
     <script type="module">
-        import { initializeApp } from 'https://www.gstatic.com/firebasejs/9.23.0/firebase-app.js';
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-app.js";
         import { 
             getAuth, 
             onAuthStateChanged,
@@ -316,7 +316,7 @@
             browserLocalPersistence,
             createUserWithEmailAndPassword,
             signInWithEmailAndPassword
-        } from 'https://www.gstatic.com/firebasejs/9.23.0/firebase-auth.js';
+        } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-auth.js";
         import { 
             getFirestore, 
             doc, 
@@ -330,9 +330,8 @@
             addDoc,
             deleteDoc,
             serverTimestamp
-        } from 'https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore.js';
+        } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore.js";
 
-        // Firebase configuration (same as card_list.html)
         const firebaseConfig = {
             apiKey: "AIzaSyAOYKalLUb2hbghrQUS8AWzxpLExBT7aU",
             authDomain: "ygoh-9bcf6.firebaseapp.com",
@@ -347,7 +346,6 @@
         const auth = getAuth(app);
         const db = getFirestore(app);
         
-        // Set persistence 
         setPersistence(auth, browserLocalPersistence).catch((error) => {
             console.error("Error setting persistence:", error);
         });
@@ -885,7 +883,7 @@
                 const errorDiv = document.getElementById('auth-error');
                 
                 try {
-                    errorDiv.style.display = 'none';
+                            errorDiv.style.display = 'none';
                     await signInWithEmailAndPassword(auth, email, password);
                 } catch (error) {
                     errorDiv.textContent = 'ログインに失敗しました: ' + error.message;
