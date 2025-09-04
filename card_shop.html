@@ -309,28 +309,8 @@
     <!-- Firebase SDK -->
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-app.js";
-        import { 
-            getAuth, 
-            onAuthStateChanged,
-            setPersistence,
-            browserLocalPersistence,
-            createUserWithEmailAndPassword,
-            signInWithEmailAndPassword
-        } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-auth.js";
-        import { 
-            getFirestore, 
-            doc, 
-            getDoc,
-            setDoc,
-            updateDoc,
-            collection,
-            query,
-            where,
-            getDocs,
-            addDoc,
-            deleteDoc,
-            serverTimestamp
-        } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore.js";
+        import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, onAuthStateChanged, setPersistence, browserLocalPersistence } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-auth.js";
+        import { getFirestore, collection, getDocs, addDoc, deleteDoc, doc, query, where, updateDoc, getDoc, setDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore.js";
 
         const firebaseConfig = {
             apiKey: "AIzaSyAOYKalLUb2hbghrQUS8AWzxpLExBT7aU",
@@ -346,12 +326,7 @@
         const auth = getAuth(app);
         const db = getFirestore(app);
         
-        // Make auth and db available globally for debugging
-        window.firebaseAuth = auth;
-        window.firebaseDb = db;
-        
         setPersistence(auth, browserLocalPersistence).catch((error) => {
-            console.error("Error setting persistence:", error);
         });
         
         let currentUser = null;
@@ -404,32 +379,41 @@
             DEMAND: 'demand'       // 需要増加
         };
 
-        // Wait for DOM to be ready
-        let authModal;
-        
         // Initialize
-        onAuthStateChanged(auth, async (user) => {
-            if (user) {
-                currentUser = user;
-                if (authModal) authModal.hide();
-                await loadUserData();
-                await loadCardPrices();
-                await loadInventory();
-                displayCards();
-                displayInventory();
-                startPriceUpdateTimer();
-                document.getElementById('loading').classList.remove('active');
-            } else {
-                // Show login modal instead of redirecting
-                document.getElementById('loading').classList.remove('active');
-                // Wait for modal to be initialized
-                setTimeout(() => {
-                    if (!authModal) {
-                        authModal = new bootstrap.Modal(document.getElementById('auth-modal'));
-                    }
-                    authModal.show();
-                }, 100);
+        let authModal = null;
+        
+        // Wait for DOM to be ready before setting up auth
+        window.addEventListener('DOMContentLoaded', () => {
+            const authModalElement = document.getElementById('auth-modal');
+            
+            if (authModalElement) {
+                authModal = new bootstrap.Modal(authModalElement);
             }
+            
+            // Setup auth state listener
+            onAuthStateChanged(auth, async (user) => {
+                console.log('Auth state changed:', user ? 'User logged in' : 'No user');
+                if (user) {
+                    currentUser = user;
+                    // Hide modal if it exists
+                    if (authModal) {
+                        authModal.hide();
+                    }
+                    await loadUserData();
+                    await loadCardPrices();
+                    await loadInventory();
+                    displayCards();
+                    displayInventory();
+                    startPriceUpdateTimer();
+                    document.getElementById('loading').classList.remove('active');
+                } else {
+                    // User not logged in - show login modal
+                    document.getElementById('loading').classList.remove('active');
+                    if (authModal) {
+                        authModal.show();
+                    }
+                }
+            });
         });
 
         // Load user points
@@ -870,96 +854,54 @@
             document.getElementById('loading').classList.remove('active');
         };
 
-        // Setup event listeners immediately or wait for DOM
-        function setupEventListeners() {
-            // Prevent form submission
-            const authForm = document.getElementById('auth-form');
-            if (authForm) {
-                authForm.addEventListener('submit', (e) => {
-                    e.preventDefault();
-                    return false;
-                });
-            }
-            
+        // Wait for DOM ready to add all event listeners
+        window.addEventListener('DOMContentLoaded', () => {
             // Sort change handler
             document.getElementById('sort-select').addEventListener('change', displayCards);
             
-            // Login functionality
-            document.getElementById('login-btn').addEventListener('click', async (e) => {
-                e.preventDefault();
+            // Login functionality  
+            document.getElementById('login-btn').addEventListener('click', async () => {
                 const email = document.getElementById('email').value;
                 const password = document.getElementById('password').value;
-                const errorDiv = document.getElementById('auth-error');
+                const authError = document.getElementById('auth-error');
                 
-                console.log('Login attempt - Email:', email);
-                console.log('Login attempt - Password length:', password.length);
-                
-                // Support local mode
                 if (email === 'local') {
                     currentUser = { uid: 'local_user', email: 'local@example.com' };
                     if (authModal) authModal.hide();
-                    document.getElementById('loading').classList.remove('active');
                     return;
                 }
                 
                 try {
-                    errorDiv.style.display = 'none';
-                    console.log('Auth object:', auth);
-                    console.log('Auth config:', auth.config);
-                    console.log('Type of signInWithEmailAndPassword:', typeof signInWithEmailAndPassword);
-                    console.log('Calling signInWithEmailAndPassword...');
-                    const result = await signInWithEmailAndPassword(auth, email, password);
-                    console.log('Login successful', result);
-                } catch (error) {
-                    console.error('Login failed:', error);
-                    errorDiv.textContent = 'ログインに失敗しました: ' + error.message;
-                    errorDiv.style.display = 'block';
+                    await signInWithEmailAndPassword(auth, email, password);
+                    authError.style.display = 'none';
+                } catch (error) { 
+                    authError.textContent = `ログインエラー: ${error.message}`; 
+                    authError.style.display = 'block';
                 }
             });
             
             // Signup functionality
-            document.getElementById('signup-btn').addEventListener('click', async (e) => {
-                e.preventDefault();
+            document.getElementById('signup-btn').addEventListener('click', async () => {
                 const email = document.getElementById('email').value;
                 const password = document.getElementById('password').value;
-                const errorDiv = document.getElementById('auth-error');
-                
-                console.log('Signup attempt - Email:', email);
-                console.log('Signup attempt - Password length:', password.length);
-                
+                const authError = document.getElementById('auth-error');
                 try {
-                    errorDiv.style.display = 'none';
-                    console.log('Calling createUserWithEmailAndPassword...');
                     const userCredential = await createUserWithEmailAndPassword(auth, email, password);
-                    console.log('Signup successful');
-                    // Initialize user gamification data
                     const gamificationRef = doc(db, 'userGamification', userCredential.user.uid);
                     await setDoc(gamificationRef, {
-                        points: 100, // Initial points
+                        points: 100,
                         totalEarned: 100,
                         totalSpent: 0,
                         lastLogin: serverTimestamp(),
                         createdAt: serverTimestamp()
                     });
+                    authError.style.display = 'none';
                 } catch (error) {
-                    console.error('Signup failed:', error);
-                    errorDiv.textContent = '新規登録に失敗しました: ' + error.message;
-                    errorDiv.style.display = 'block';
+                    authError.textContent = `新規登録エラー: ${error.message}`;
+                    authError.style.display = 'block';
                 }
             });
-        }
-        
-        // Initialize event listeners
-        if (document.readyState === 'loading') {
-            document.addEventListener('DOMContentLoaded', () => {
-                setupEventListeners();
-                authModal = new bootstrap.Modal(document.getElementById('auth-modal'));
-            });
-        } else {
-            // DOM is already loaded
-            setupEventListeners();
-            authModal = new bootstrap.Modal(document.getElementById('auth-modal'));
-        }
+        });
         
         // Cleanup on page unload
         window.addEventListener('beforeunload', () => {
