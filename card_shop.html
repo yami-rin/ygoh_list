@@ -394,7 +394,8 @@
             getDocs,
             addDoc,
             deleteDoc,
-            serverTimestamp
+            serverTimestamp,
+            writeBatch
         } from 'https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore.js';
 
         // Firebase configuration (same as card_list.html)
@@ -1178,23 +1179,56 @@
                 return;
             }
             
-            userPoints -= totalCost;
-            await saveUserPoints();
-            
-            // Add multiple cards to inventory
-            const inventoryRef = collection(db, 'userInventory', currentUser.uid, 'cards');
-            const promises = [];
-            for (let i = 0; i < quantity; i++) {
-                promises.push(addDoc(inventoryRef, {
-                    cardId: cardId,
-                    purchasePrice: price.current,
-                    purchaseTime: serverTimestamp()
-                }));
+            // Start transaction
+            try {
+                // Show loading indicator for large quantities
+                if (quantity > 100) {
+                    document.getElementById('loading').classList.add('active');
+                }
+                
+                // Deduct points first
+                userPoints -= totalCost;
+                await saveUserPoints();
+                
+                // Add cards to inventory in batches (max 500 per batch due to Firestore limit)
+                const inventoryRef = collection(db, 'userInventory', currentUser.uid, 'cards');
+                const batchSize = 500;
+                let successCount = 0;
+                
+                for (let batchStart = 0; batchStart < quantity; batchStart += batchSize) {
+                    const batchEnd = Math.min(batchStart + batchSize, quantity);
+                    const batch = writeBatch(db);
+                    
+                    for (let i = batchStart; i < batchEnd; i++) {
+                        const docRef = doc(inventoryRef);
+                        batch.set(docRef, {
+                            cardId: cardId,
+                            purchasePrice: price.current,
+                            purchaseTime: serverTimestamp()
+                        });
+                    }
+                    
+                    await batch.commit();
+                    successCount += (batchEnd - batchStart);
+                }
+                
+                if (successCount !== quantity) {
+                    throw new Error(`Only ${successCount} of ${quantity} cards were added`);
+                }
+                
+                await loadInventory();
+                displayInventory();
+            } catch (error) {
+                console.error('Purchase failed:', error);
+                // Refund points on failure
+                userPoints += totalCost;
+                await saveUserPoints();
+                alert(`購入に失敗しました: ${error.message}\nポイントは返金されました。`);
+                return;
+            } finally {
+                // Hide loading indicator
+                document.getElementById('loading').classList.remove('active');
             }
-            await Promise.all(promises);
-            
-            await loadInventory();
-            displayInventory();
             
             // Remove modal if exists
             const modal = document.querySelector('.modal.show');
@@ -1298,17 +1332,52 @@
             if (itemsToSell.length === 0) return;
             
             const totalRevenue = sellPrice * itemsToSell.length;
-            userPoints += totalRevenue;
-            await saveUserPoints();
             
-            // Delete items from inventory
-            const deletePromises = itemsToSell.map(item => 
-                deleteDoc(doc(db, 'userInventory', currentUser.uid, 'cards', item.docId))
-            );
-            await Promise.all(deletePromises);
-            
-            await loadInventory();
-            displayInventory();
+            // Start transaction
+            try {
+                // Show loading indicator for large quantities
+                if (itemsToSell.length > 100) {
+                    document.getElementById('loading').classList.add('active');
+                }
+                
+                // Add points first
+                userPoints += totalRevenue;
+                await saveUserPoints();
+                
+                // Delete items from inventory in batches (max 500 per batch)
+                const batchSize = 500;
+                let deleteCount = 0;
+                
+                for (let batchStart = 0; batchStart < itemsToSell.length; batchStart += batchSize) {
+                    const batchEnd = Math.min(batchStart + batchSize, itemsToSell.length);
+                    const batch = writeBatch(db);
+                    
+                    for (let i = batchStart; i < batchEnd; i++) {
+                        const docRef = doc(db, 'userInventory', currentUser.uid, 'cards', itemsToSell[i].docId);
+                        batch.delete(docRef);
+                    }
+                    
+                    await batch.commit();
+                    deleteCount += (batchEnd - batchStart);
+                }
+                
+                if (deleteCount !== itemsToSell.length) {
+                    throw new Error(`Only ${deleteCount} of ${itemsToSell.length} cards were deleted`);
+                }
+                
+                await loadInventory();
+                displayInventory();
+            } catch (error) {
+                console.error('Sale failed:', error);
+                // Refund points on failure
+                userPoints -= totalRevenue;
+                await saveUserPoints();
+                alert(`売却に失敗しました: ${error.message}\nポイントは元に戻されました。`);
+                return;
+            } finally {
+                // Hide loading indicator
+                document.getElementById('loading').classList.remove('active');
+            }
             
             // Remove modal
             const modal = document.querySelector('.modal.show');
