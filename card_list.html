@@ -4628,7 +4628,7 @@
         document.getElementById('delete-account-btn').addEventListener('click', async () => {
             if (!currentUser) return;
             if (!confirm('本当にアカウントを削除しますか？この操作は元に戻せません。')) return;
-            if (!confirm('最終確認です。アカウントに紐づく全てのカードデータが永久に削除されます。よろしいですか？')) return;
+            if (!confirm('最終確認です。アカウントに紐づく全てのカードデータ、ランキング、プロフィール情報が永久に削除されます。よろしいですか？')) return;
             
             showLoading(true);
             try {
@@ -4639,10 +4639,48 @@
                 snapshot.docs.forEach(doc => batch.delete(doc.ref));
                 await batch.commit();
 
-                // 2. Delete the user account
+                // 2. Delete ranking data
+                try {
+                    const rankingRef = doc(db, 'rankings', currentUser.uid);
+                    await deleteDoc(rankingRef);
+                } catch (rankingError) {
+                    console.error('Error deleting ranking data:', rankingError);
+                }
+
+                // 3. Delete gamification data (including profile)
+                try {
+                    const gamificationRef = doc(db, 'userGamification', currentUser.uid);
+                    await deleteDoc(gamificationRef);
+                } catch (gamificationError) {
+                    console.error('Error deleting gamification data:', gamificationError);
+                }
+
+                // 4. Delete wishlist data if exists
+                try {
+                    const wishlistRef = collection(db, 'users', currentUser.uid, 'wishlist');
+                    const wishlistSnapshot = await getDocs(wishlistRef);
+                    const wishlistBatch = writeBatch(db);
+                    wishlistSnapshot.docs.forEach(doc => wishlistBatch.delete(doc.ref));
+                    await wishlistBatch.commit();
+                } catch (wishlistError) {
+                    console.error('Error deleting wishlist data:', wishlistError);
+                }
+
+                // 5. Delete tags data if exists
+                try {
+                    const tagsRef = collection(db, 'users', currentUser.uid, 'tags');
+                    const tagsSnapshot = await getDocs(tagsRef);
+                    const tagsBatch = writeBatch(db);
+                    tagsSnapshot.docs.forEach(doc => tagsBatch.delete(doc.ref));
+                    await tagsBatch.commit();
+                } catch (tagsError) {
+                    console.error('Error deleting tags data:', tagsError);
+                }
+
+                // 6. Delete the user account
                 await deleteUser(currentUser);
                 await signOut(auth);
-                alert('正常に削除されました。');
+                alert('アカウントと全ての関連データが正常に削除されました。');
                 settingsModal.hide();
             } catch (error) {
                 showLoading(false);
