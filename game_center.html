@@ -826,9 +826,15 @@
             <div class="controls">
                 <div class="bet-selector">
                     <label for="bet-amount">ベット額:</label>
-                    <input type="number" id="bet-amount" class="form-control" 
-                           min="1" max="9999" value="50" 
-                           style="width: 120px; display: inline-block;">
+                    <select id="bet-amount" class="form-control" style="width: 120px; display: inline-block;">
+                        <option value="10">10</option>
+                        <option value="50" selected>50</option>
+                        <option value="100">100</option>
+                        <option value="300">300</option>
+                        <option value="500">500</option>
+                        <option value="1000">1000</option>
+                        <option value="1500">1500</option>
+                    </select>
                     <span class="text-white ms-1">pt</span>
                 </div>
                 <button class="spin-button" id="spin-button">
@@ -932,9 +938,15 @@
             <div class="controls">
                 <div class="bet-selector">
                     <label for="roulette-bet-amount">ベット額:</label>
-                    <input type="number" id="roulette-bet-amount" class="form-control" 
-                           min="1" max="9999" value="50" 
-                           style="width: 120px; display: inline-block;">
+                    <select id="roulette-bet-amount" class="form-control" style="width: 120px; display: inline-block;">
+                        <option value="10">10</option>
+                        <option value="50" selected>50</option>
+                        <option value="100">100</option>
+                        <option value="300">300</option>
+                        <option value="500">500</option>
+                        <option value="1000">1000</option>
+                        <option value="1500">1500</option>
+                    </select>
                     <span class="text-white ms-1">pt</span>
                 </div>
                 <button class="spin-button" id="roulette-spin-button">
@@ -997,7 +1009,15 @@
                 </div>
                 
                 <div class="controls">
-                    <input type="number" id="dice-bet-amount" class="form-control" min="1" max="9999" value="50" style="width: 120px; display: inline-block;">
+                    <select id="dice-bet-amount" class="form-control" style="width: 120px; display: inline-block;">
+                        <option value="10">10</option>
+                        <option value="50" selected>50</option>
+                        <option value="100">100</option>
+                        <option value="300">300</option>
+                        <option value="500">500</option>
+                        <option value="1000">1000</option>
+                        <option value="1500">1500</option>
+                    </select>
                     <span class="text-white">pt</span>
                     <button class="spin-button" id="dice-roll-button">
                         <i class="bi bi-play-circle"></i> サイコロを振る！
@@ -1042,7 +1062,15 @@
                 </div>
                 
                 <div class="controls" id="blackjack-controls">
-                    <input type="number" id="blackjack-bet-amount" class="form-control" min="1" max="9999" value="100" style="width: 120px; display: inline-block;">
+                    <select id="blackjack-bet-amount" class="form-control" style="width: 120px; display: inline-block;">
+                        <option value="10">10</option>
+                        <option value="50">50</option>
+                        <option value="100" selected>100</option>
+                        <option value="300">300</option>
+                        <option value="500">500</option>
+                        <option value="1000">1000</option>
+                        <option value="1500">1500</option>
+                    </select>
                     <span class="text-white">pt</span>
                     <button class="spin-button" id="blackjack-deal-button">
                         <i class="bi bi-play-circle"></i> ディール
@@ -1090,7 +1118,15 @@
                 </div>
                 
                 <div class="controls">
-                    <input type="number" id="coin-bet-amount" class="form-control" min="1" max="9999" value="50" style="width: 120px; display: inline-block;">
+                    <select id="coin-bet-amount" class="form-control" style="width: 120px; display: inline-block;">
+                        <option value="10">10</option>
+                        <option value="50" selected>50</option>
+                        <option value="100">100</option>
+                        <option value="300">300</option>
+                        <option value="500">500</option>
+                        <option value="1000">1000</option>
+                        <option value="1500">1500</option>
+                    </select>
                     <span class="text-white">pt</span>
                     <button class="spin-button" id="coin-flip-button">
                         <i class="bi bi-play-circle"></i> コインを投げる！
@@ -1141,7 +1177,15 @@
                     
                     <div class="controls">
                         <label style="color: #333;">ベット額:</label>
-                        <input type="number" id="number-bet-amount" class="form-control" min="1" max="9999" value="100" style="width: 120px; display: inline-block;">
+                        <select id="number-bet-amount" class="form-control" style="width: 120px; display: inline-block;">
+                            <option value="10">10</option>
+                            <option value="50">50</option>
+                            <option value="100" selected>100</option>
+                            <option value="300">300</option>
+                            <option value="500">500</option>
+                            <option value="1000">1000</option>
+                            <option value="1500">1500</option>
+                        </select>
                         <span class="text-white">pt</span>
                         <button class="spin-button" id="number-start-button">
                             <i class="bi bi-play-circle"></i> ゲーム開始
@@ -1200,7 +1244,15 @@
                 </div>
                 
                 <div class="controls">
-                    <input type="number" id="rps-bet-amount" class="form-control" min="1" max="9999" value="50" style="width: 120px; display: inline-block;">
+                    <select id="rps-bet-amount" class="form-control" style="width: 120px; display: inline-block;">
+                        <option value="10">10</option>
+                        <option value="50" selected>50</option>
+                        <option value="100">100</option>
+                        <option value="300">300</option>
+                        <option value="500">500</option>
+                        <option value="1000">1000</option>
+                        <option value="1500">1500</option>
+                    </select>
                     <span class="text-white">pt</span>
                     <button class="spin-button" id="rps-play-button">
                         <i class="bi bi-play-circle"></i> じゃんけんぽん！
@@ -1265,7 +1317,15 @@
                 </div>
                 
                 <div class="controls">
-                    <input type="number" id="highlow-bet-amount" class="form-control" min="1" max="9999" value="50" style="width: 120px; display: inline-block;">
+                    <select id="highlow-bet-amount" class="form-control" style="width: 120px; display: inline-block;">
+                        <option value="10">10</option>
+                        <option value="50" selected>50</option>
+                        <option value="100">100</option>
+                        <option value="300">300</option>
+                        <option value="500">500</option>
+                        <option value="1000">1000</option>
+                        <option value="1500">1500</option>
+                    </select>
                     <span class="text-white">pt</span>
                     <button class="spin-button" id="highlow-play-button">
                         <i class="bi bi-play-circle"></i> 予想する！
@@ -1305,7 +1365,15 @@
                 </div>
                 
                 <div class="controls">
-                    <input type="number" id="wheel-bet-amount" class="form-control" min="1" max="9999" value="100" style="width: 120px; display: inline-block;">
+                    <select id="wheel-bet-amount" class="form-control" style="width: 120px; display: inline-block;">
+                        <option value="10">10</option>
+                        <option value="50">50</option>
+                        <option value="100" selected>100</option>
+                        <option value="300">300</option>
+                        <option value="500">500</option>
+                        <option value="1000">1000</option>
+                        <option value="1500">1500</option>
+                    </select>
                     <span class="text-white">pt</span>
                     <button class="spin-button" id="wheel-spin-button">
                         <i class="bi bi-play-circle"></i> ホイールを回す！
@@ -1347,7 +1415,15 @@
                 </div>
                 
                 <div class="controls">
-                    <input type="number" id="memory-bet-amount" class="form-control" min="1" max="9999" value="100" style="width: 120px; display: inline-block;">
+                    <select id="memory-bet-amount" class="form-control" style="width: 120px; display: inline-block;">
+                        <option value="10">10</option>
+                        <option value="50">50</option>
+                        <option value="100" selected>100</option>
+                        <option value="300">300</option>
+                        <option value="500">500</option>
+                        <option value="1000">1000</option>
+                        <option value="1500">1500</option>
+                    </select>
                     <span class="text-white">pt</span>
                     <button class="spin-button" id="memory-start-button">
                         <i class="bi bi-play-circle"></i> ゲーム開始
@@ -1509,24 +1585,6 @@
                 const el = document.getElementById(id);
                 if (el) el.textContent = userPoints;
             });
-            
-            // Update max bet amount for slot
-            const betInput = document.getElementById('bet-amount');
-            if (betInput) {
-                betInput.max = userPoints;
-                if (parseInt(betInput.value) > userPoints) {
-                    betInput.value = Math.min(50, userPoints);
-                }
-            }
-            
-            // Update max bet amount for roulette
-            const rouletteBetInput = document.getElementById('roulette-bet-amount');
-            if (rouletteBetInput) {
-                rouletteBetInput.max = userPoints;
-                if (parseInt(rouletteBetInput.value) > userPoints) {
-                    rouletteBetInput.value = Math.min(50, userPoints);
-                }
-            }
         }
         
         // Game selection
@@ -1607,16 +1665,8 @@
             const betAmount = parseInt(betAmountInput.value) || 0;
             
             // Validate bet amount
-            if (betAmount < 1) {
-                alert('ベット額は1ポイント以上にしてください');
-                betAmountInput.focus();
-                return;
-            }
-            
             if (betAmount > userPoints) {
-                alert(`ポイントが不足しています！\n現在のポイント: ${userPoints} pt`);
-                betAmountInput.value = userPoints;
-                betAmountInput.focus();
+                alert(`ポイントが不足しています！\n現在のポイント: ${userPoints} pt\nベット額を下げてください`);
                 return;
             }
             
