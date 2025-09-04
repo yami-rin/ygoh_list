@@ -636,7 +636,7 @@
             return symbols[0];
         }
 
-        // Load user points from Firebase
+        // Load user points from Firebase (same location as card_list.html)
         async function loadUserPoints() {
             if (!currentUser) return;
             
@@ -644,13 +644,15 @@
             loading.classList.add('active');
             
             try {
-                const gamificationRef = doc(db, 'users', currentUser.uid, 'gamification', 'data');
+                // Use same collection as card_list.html: userGamification
+                const gamificationRef = doc(db, 'userGamification', currentUser.uid);
                 const gamificationSnap = await getDoc(gamificationRef);
                 
                 if (gamificationSnap.exists()) {
                     const data = gamificationSnap.data();
                     userPoints = data.userPoints || 0;
                     updatePointsDisplay();
+                    console.log('Loaded points from userGamification:', userPoints);
                 } else {
                     // Initialize with 0 points if no data exists (same as card_list.html)
                     userPoints = 0;
@@ -665,21 +667,31 @@
             }
         }
 
-        // Save user points to Firebase
+        // Save user points to Firebase (same location as card_list.html)
         async function saveUserPoints() {
             if (!currentUser) return;
             
             try {
-                const gamificationRef = doc(db, 'users', currentUser.uid, 'gamification', 'data');
-                await updateDoc(gamificationRef, {
-                    userPoints: userPoints
-                });
-            } catch (error) {
-                // If document doesn't exist, create it
-                const gamificationRef = doc(db, 'users', currentUser.uid, 'gamification', 'data');
+                // Use same collection as card_list.html: userGamification
+                const gamificationRef = doc(db, 'userGamification', currentUser.uid);
+                
+                // First get the existing data to preserve other fields
+                const gamificationSnap = await getDoc(gamificationRef);
+                let existingData = {};
+                
+                if (gamificationSnap.exists()) {
+                    existingData = gamificationSnap.data();
+                }
+                
+                // Update only userPoints while preserving other data
                 await setDoc(gamificationRef, {
+                    ...existingData,
                     userPoints: userPoints
                 }, { merge: true });
+                
+                console.log('Saved points to userGamification:', userPoints);
+            } catch (error) {
+                console.error('Error saving points:', error);
             }
         }
 
