@@ -6,6 +6,7 @@
     <title>カード管理</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css">
+    <link rel="stylesheet" href="mobile-responsive.css">
     <style>
         body { background-color: #f8f9fa; }
         [data-bs-theme="dark"] body { background-color: #212529; }
@@ -183,6 +184,91 @@
             font-size: 0.9rem;
             color: white;
             text-shadow: 1px 1px 2px rgba(0,0,0,0.5);
+        }
+        
+        /* Rarity bars container */
+        #rarity-bars {
+            display: flex;
+            gap: 0.25rem;
+            align-items: flex-end;
+            justify-content: space-between;
+            min-height: 120px;
+            overflow-x: auto;
+            padding-bottom: 5px;
+        }
+        
+        /* Mobile responsive for rarity bars */
+        @media (max-width: 768px) {
+            #rarity-bars {
+                gap: 0.15rem;
+                -webkit-overflow-scrolling: touch;
+            }
+            
+            .rarity-bar {
+                min-width: 35px;
+                height: 80px;
+                padding: 2px;
+            }
+            
+            .rarity-bar-label {
+                font-size: 0.6rem;
+                margin-top: 2px;
+            }
+            
+            .rarity-bar-count {
+                font-size: 0.75rem;
+            }
+        }
+        
+        @media (max-width: 576px) {
+            #rarity-chart-container {
+                margin-top: 0.5rem !important;
+            }
+            
+            #rarity-bars {
+                gap: 0.1rem;
+                min-height: 100px;
+                padding: 0 2px 5px 2px;
+            }
+            
+            .rarity-bar {
+                min-width: 30px;
+                height: 70px;
+                padding: 1px;
+                border-radius: 3px 3px 0 0;
+            }
+            
+            .rarity-bar-label {
+                font-size: 0.55rem;
+                margin-top: 1px;
+                line-height: 1;
+            }
+            
+            .rarity-bar-count {
+                font-size: 0.65rem;
+                line-height: 1;
+            }
+        }
+        
+        @media (max-width: 400px) {
+            #rarity-bars {
+                gap: 2px;
+                min-height: 90px;
+            }
+            
+            .rarity-bar {
+                min-width: 25px;
+                height: 60px;
+            }
+            
+            .rarity-bar-label {
+                font-size: 0.5rem;
+                word-break: break-all;
+            }
+            
+            .rarity-bar-count {
+                font-size: 0.6rem;
+            }
         }
         
         /* Milestone notification styles */

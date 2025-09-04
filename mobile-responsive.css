@@ -1,0 +1,499 @@
+/* Mobile Responsive Styles for Card Manager Web */
+
+/* Base responsive settings */
+* {
+    box-sizing: border-box;
+}
+
+/* Prevent horizontal scroll on mobile */
+html, body {
+    overflow-x: hidden;
+    width: 100%;
+}
+
+/* Container adjustments for mobile */
+@media (max-width: 576px) {
+    .container,
+    .container-fluid {
+        padding-left: 10px;
+        padding-right: 10px;
+    }
+}
+
+/* Typography responsive */
+@media (max-width: 768px) {
+    h1 { font-size: 1.75rem !important; }
+    h2 { font-size: 1.5rem !important; }
+    h3 { font-size: 1.25rem !important; }
+    h4 { font-size: 1.1rem !important; }
+    h5 { font-size: 1rem !important; }
+    p, .btn, label { font-size: 0.9rem !important; }
+}
+
+@media (max-width: 480px) {
+    h1 { font-size: 1.5rem !important; }
+    h2 { font-size: 1.25rem !important; }
+    h3 { font-size: 1.1rem !important; }
+    h4 { font-size: 1rem !important; }
+    h5 { font-size: 0.95rem !important; }
+    p, .btn, label { font-size: 0.85rem !important; }
+}
+
+/* Card responsive adjustments */
+@media (max-width: 768px) {
+    .card {
+        margin-bottom: 1rem;
+    }
+    
+    .card-body {
+        padding: 1rem;
+    }
+    
+    .card-header {
+        padding: 0.75rem 1rem;
+        font-size: 1rem;
+    }
+}
+
+@media (max-width: 480px) {
+    .card-body {
+        padding: 0.75rem;
+    }
+    
+    .card-header {
+        padding: 0.5rem 0.75rem;
+        font-size: 0.9rem;
+    }
+}
+
+/* Table responsive improvements */
+@media (max-width: 768px) {
+    .table-responsive {
+        font-size: 0.8rem;
+        -webkit-overflow-scrolling: touch;
+    }
+    
+    .table {
+        font-size: 0.8rem;
+        margin-bottom: 0;
+    }
+    
+    .table thead th {
+        padding: 0.5rem 0.25rem;
+        font-size: 0.75rem;
+        white-space: nowrap;
+        position: sticky;
+        top: 0;
+        background-color: var(--bs-body-bg);
+        z-index: 10;
+    }
+    
+    .table tbody td {
+        padding: 0.4rem 0.25rem;
+        word-break: break-word;
+    }
+    
+    /* Make tables horizontally scrollable */
+    .table-responsive {
+        display: block;
+        width: 100%;
+        overflow-x: auto;
+        -webkit-overflow-scrolling: touch;
+    }
+    
+    /* Minimum table width to ensure readability */
+    .table {
+        min-width: 500px;
+    }
+}
+
+@media (max-width: 480px) {
+    .table thead th {
+        padding: 0.4rem 0.2rem;
+        font-size: 0.7rem;
+    }
+    
+    .table tbody td {
+        padding: 0.3rem 0.2rem;
+        font-size: 0.75rem;
+    }
+}
+
+/* Form responsive adjustments */
+@media (max-width: 768px) {
+    .form-label {
+        font-size: 0.85rem;
+        margin-bottom: 0.25rem;
+    }
+    
+    .form-control,
+    .form-select {
+        font-size: 0.9rem;
+        padding: 0.5rem 0.75rem;
+    }
+    
+    .form-control:focus,
+    .form-select:focus {
+        box-shadow: 0 0 0 0.15rem rgba(13, 110, 253, 0.25);
+    }
+    
+    /* Stack form columns on mobile */
+    .row.g-3 > [class*="col-"] {
+        padding-left: 0.5rem;
+        padding-right: 0.5rem;
+    }
+}
+
+@media (max-width: 480px) {
+    .form-control,
+    .form-select {
+        font-size: 16px; /* Prevents zoom on iOS */
+        padding: 0.4rem 0.6rem;
+    }
+    
+    .form-label {
+        font-size: 0.8rem;
+    }
+}
+
+/* Button responsive adjustments */
+@media (max-width: 768px) {
+    .btn {
+        padding: 0.5rem 1rem;
+        font-size: 0.875rem;
+    }
+    
+    .btn-sm {
+        padding: 0.35rem 0.75rem;
+        font-size: 0.8rem;
+    }
+    
+    .btn-lg {
+        padding: 0.6rem 1.25rem;
+        font-size: 1rem;
+    }
+    
+    /* Full width buttons on very small screens */
+    .btn-group {
+        display: flex;
+        flex-direction: column;
+        width: 100%;
+    }
+    
+    .btn-group > .btn {
+        width: 100%;
+        border-radius: 0.25rem !important;
+        margin-bottom: 0.25rem;
+    }
+}
+
+@media (max-width: 480px) {
+    .btn {
+        padding: 0.45rem 0.9rem;
+        font-size: 0.85rem;
+    }
+    
+    .btn-sm {
+        padding: 0.3rem 0.6rem;
+        font-size: 0.75rem;
+    }
+}
+
+/* Navigation responsive */
+@media (max-width: 768px) {
+    .navbar {
+        padding: 0.5rem;
+    }
+    
+    .navbar-brand {
+        font-size: 1rem;
+        margin-right: 0.5rem;
+    }
+    
+    .navbar-nav {
+        flex-direction: column;
+        align-items: stretch;
+    }
+    
+    .navbar-nav .nav-link {
+        padding: 0.5rem;
+    }
+    
+    /* Hide non-essential navbar items */
+    .navbar-text {
+        display: none !important;
+    }
+}
+
+/* Modal responsive adjustments */
+@media (max-width: 768px) {
+    .modal-dialog {
+        margin: 0.5rem;
+        max-width: calc(100% - 1rem);
+    }
+    
+    .modal-content {
+        border-radius: 0.5rem;
+    }
+    
+    .modal-header {
+        padding: 0.75rem;
+    }
+    
+    .modal-body {
+        padding: 1rem;
+    }
+    
+    .modal-footer {
+        padding: 0.75rem;
+    }
+    
+    .modal-title {
+        font-size: 1.1rem;
+    }
+}
+
+@media (max-width: 480px) {
+    .modal-dialog {
+        margin: 0.25rem;
+        max-width: calc(100% - 0.5rem);
+    }
+    
+    .modal-header {
+        padding: 0.5rem;
+    }
+    
+    .modal-body {
+        padding: 0.75rem;
+        max-height: 70vh;
+        overflow-y: auto;
+    }
+    
+    .modal-footer {
+        padding: 0.5rem;
+        flex-direction: column;
+    }
+    
+    .modal-footer > * {
+        width: 100%;
+        margin-bottom: 0.25rem;
+    }
+}
+
+/* Grid system improvements for mobile */
+@media (max-width: 576px) {
+    /* Force single column on very small screens */
+    .col-sm-6,
+    .col-md-3,
+    .col-md-4,
+    .col-md-6,
+    .col-lg-3,
+    .col-lg-4,
+    .col-lg-5,
+    .col-lg-6,
+    .col-lg-7,
+    .col-xl-3,
+    .col-xl-4,
+    .col-xl-6 {
+        width: 100% !important;
+        max-width: 100% !important;
+        flex: 0 0 100% !important;
+    }
+    
+    /* Reduce gap between columns */
+    .row {
+        --bs-gutter-x: 0.5rem;
+        --bs-gutter-y: 0.5rem;
+    }
+}
+
+/* Pagination responsive */
+@media (max-width: 768px) {
+    .pagination {
+        font-size: 0.85rem;
+        flex-wrap: wrap;
+        justify-content: center;
+    }
+    
+    .pagination .page-link {
+        padding: 0.35rem 0.6rem;
+    }
+    
+    /* Hide some pagination items on small screens */
+    .pagination .page-item:not(.active):not(:first-child):not(:last-child):nth-child(n+4):nth-last-child(n+4) {
+        display: none;
+    }
+}
+
+/* Stats cards responsive */
+@media (max-width: 768px) {
+    .stat-card {
+        padding: 1rem;
+        margin-bottom: 0.75rem;
+        font-size: 0.9rem;
+    }
+    
+    .stat-card h3 {
+        font-size: 1.1rem;
+    }
+    
+    .stat-card .fs-2 {
+        font-size: 1.5rem !important;
+    }
+}
+
+/* Badge responsive adjustments */
+@media (max-width: 768px) {
+    .badge {
+        font-size: 0.7rem;
+        padding: 0.25rem 0.5rem;
+    }
+    
+    .tournament-badge {
+        font-size: 0.7rem;
+        padding: 0.25rem 0.5rem;
+    }
+}
+
+/* Dropdown responsive */
+@media (max-width: 768px) {
+    .dropdown-menu {
+        font-size: 0.9rem;
+    }
+    
+    .dropdown-item {
+        padding: 0.5rem 1rem;
+    }
+}
+
+/* Utility classes for mobile */
+@media (max-width: 768px) {
+    /* Hide on mobile */
+    .hide-mobile {
+        display: none !important;
+    }
+    
+    /* Show only on mobile */
+    .show-mobile {
+        display: block !important;
+    }
+    
+    /* Text truncation */
+    .text-truncate-mobile {
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+        max-width: 150px;
+    }
+    
+    /* Spacing adjustments */
+    .p-mobile-2 { padding: 0.5rem !important; }
+    .m-mobile-2 { margin: 0.5rem !important; }
+    .mt-mobile-2 { margin-top: 0.5rem !important; }
+    .mb-mobile-2 { margin-bottom: 0.5rem !important; }
+}
+
+/* Touch-friendly adjustments */
+@media (pointer: coarse) {
+    /* Larger touch targets */
+    .btn,
+    .form-control,
+    .form-select,
+    .page-link,
+    .nav-link,
+    .dropdown-item {
+        min-height: 44px;
+        line-height: 1.5;
+    }
+    
+    /* Better spacing for touch */
+    .btn + .btn,
+    .form-control + .form-control {
+        margin-top: 0.5rem;
+    }
+}
+
+/* Portrait orientation specific */
+@media (orientation: portrait) and (max-width: 768px) {
+    .container-fluid {
+        max-width: 100%;
+    }
+}
+
+/* Landscape orientation specific */
+@media (orientation: landscape) and (max-height: 500px) {
+    .navbar {
+        padding: 0.25rem;
+    }
+    
+    .modal-body {
+        max-height: 60vh;
+        overflow-y: auto;
+    }
+    
+    .card-body {
+        padding: 0.75rem;
+    }
+}
+
+/* iOS specific fixes */
+@supports (-webkit-touch-callout: none) {
+    /* Prevent zoom on form focus */
+    input[type="text"],
+    input[type="email"],
+    input[type="number"],
+    input[type="password"],
+    input[type="date"],
+    input[type="datetime-local"],
+    select,
+    textarea {
+        font-size: 16px !important;
+    }
+    
+    /* Fix position fixed issues */
+    .fixed-top,
+    .fixed-bottom {
+        position: -webkit-sticky;
+        position: sticky;
+    }
+}
+
+/* Android specific fixes */
+@media screen and (-webkit-min-device-pixel-ratio: 0) {
+    /* Improve tap responsiveness */
+    * {
+        -webkit-tap-highlight-color: transparent;
+    }
+    
+    /* Better scrolling */
+    .table-responsive,
+    .modal-body {
+        -webkit-overflow-scrolling: touch;
+    }
+}
+
+/* High DPI displays */
+@media (-webkit-min-device-pixel-ratio: 2), (min-resolution: 192dpi) {
+    /* Ensure crisp borders */
+    .card,
+    .btn,
+    .form-control,
+    .table {
+        border-width: 0.5px;
+    }
+}
+
+/* Print media query (bonus for mobile printing) */
+@media print {
+    .no-print,
+    .navbar,
+    .btn,
+    .modal {
+        display: none !important;
+    }
+    
+    .container-fluid {
+        width: 100%;
+        max-width: none;
+    }
+}
