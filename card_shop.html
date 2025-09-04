@@ -7,6 +7,7 @@
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css">
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
         body {
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
@@ -242,6 +243,9 @@
                     <button class="btn btn-outline-primary btn-sm ms-2" onclick="refreshPrices()">
                         <i class="bi bi-arrow-clockwise"></i> 価格更新
                     </button>
+                    <button class="btn btn-outline-danger btn-sm ms-2" onclick="resetPrices()">
+                        <i class="bi bi-arrow-counterclockwise"></i> 価格リセット
+                    </button>
                 </div>
             </div>
         </div>
@@ -305,6 +309,44 @@
                 </form>
             </div>
         </div></div>
+    </div>
+
+    <!-- Price History Modal -->
+    <div class="modal fade" id="priceHistoryModal" tabindex="-1">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">価格推移グラフ</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <h6 id="chartCardName" class="mb-3"></h6>
+                    <canvas id="priceChart" width="400" height="200"></canvas>
+                    <div class="mt-3">
+                        <div class="row">
+                            <div class="col-6">
+                                <small class="text-muted">現在価格:</small>
+                                <h5 id="chartCurrentPrice" class="text-primary"></h5>
+                            </div>
+                            <div class="col-6">
+                                <small class="text-muted">基本価格:</small>
+                                <h5 id="chartBasePrice" class="text-secondary"></h5>
+                            </div>
+                        </div>
+                        <div class="row mt-2">
+                            <div class="col-6">
+                                <small class="text-muted">最高価格:</small>
+                                <h5 id="chartMaxPrice" class="text-success"></h5>
+                            </div>
+                            <div class="col-6">
+                                <small class="text-muted">最低価格:</small>
+                                <h5 id="chartMinPrice" class="text-danger"></h5>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
     </div>
 
     <!-- Firebase SDK -->
@@ -927,9 +969,14 @@
                                 ${priceChangeIcon} ${priceChangeText}
                             </span>
                         </div>
-                        <button class="btn btn-primary buy-button" onclick="buyCard('${card.id}')">
-                            <i class="bi bi-cart-plus"></i> 購入
-                        </button>
+                        <div class="d-flex gap-2">
+                            <button class="btn btn-primary buy-button flex-grow-1" onclick="buyCard('${card.id}')">
+                                <i class="bi bi-cart-plus"></i> 購入
+                            </button>
+                            <button class="btn btn-outline-secondary" onclick="showPriceHistory('${card.id}')" title="価格推移">
+                                <i class="bi bi-graph-up"></i>
+                            </button>
+                        </div>
                     </div>
                 `;
             }).join('');
@@ -1156,6 +1203,145 @@
             document.getElementById('loading').classList.add('active');
             await updateCardPrices();
             document.getElementById('loading').classList.remove('active');
+        };
+
+        // Show price history chart for a card
+        window.showPriceHistory = (cardId) => {
+            const card = CARDS_DATABASE.find(c => c.id === cardId);
+            const price = cardPrices[cardId];
+            
+            if (!card || !price) return;
+            
+            // Update modal header
+            document.getElementById('chartCardName').textContent = card.name;
+            document.getElementById('chartCurrentPrice').textContent = price.current.toLocaleString() + ' pt';
+            document.getElementById('chartBasePrice').textContent = card.basePrice.toLocaleString() + ' pt';
+            
+            // Calculate min/max from history
+            const allPrices = price.history.map(h => h.price).concat(price.current);
+            const maxPrice = Math.max(...allPrices);
+            const minPrice = Math.min(...allPrices);
+            
+            document.getElementById('chartMaxPrice').textContent = maxPrice.toLocaleString() + ' pt';
+            document.getElementById('chartMinPrice').textContent = minPrice.toLocaleString() + ' pt';
+            
+            // Prepare chart data
+            const labels = price.history.map(h => {
+                const date = new Date(h.timestamp);
+                return `${date.getMonth()+1}/${date.getDate()} ${date.getHours()}:${date.getMinutes().toString().padStart(2, '0')}`;
+            });
+            labels.push('現在');
+            
+            const data = price.history.map(h => h.price);
+            data.push(price.current);
+            
+            // Create or update chart
+            const ctx = document.getElementById('priceChart').getContext('2d');
+            
+            // Destroy existing chart if any
+            if (window.priceChartInstance) {
+                window.priceChartInstance.destroy();
+            }
+            
+            window.priceChartInstance = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: labels,
+                    datasets: [{
+                        label: '価格',
+                        data: data,
+                        borderColor: 'rgb(75, 192, 192)',
+                        backgroundColor: 'rgba(75, 192, 192, 0.2)',
+                        tension: 0.1
+                    }, {
+                        label: '基本価格',
+                        data: new Array(data.length).fill(card.basePrice),
+                        borderColor: 'rgba(255, 99, 132, 0.5)',
+                        backgroundColor: 'transparent',
+                        borderDash: [5, 5],
+                        pointRadius: 0
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            display: true
+                        },
+                        tooltip: {
+                            callbacks: {
+                                label: function(context) {
+                                    return context.dataset.label + ': ' + context.parsed.y.toLocaleString() + ' pt';
+                                }
+                            }
+                        }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: false,
+                            ticks: {
+                                callback: function(value) {
+                                    return value.toLocaleString() + ' pt';
+                                }
+                            }
+                        }
+                    }
+                }
+            });
+            
+            // Show modal
+            const modal = new bootstrap.Modal(document.getElementById('priceHistoryModal'));
+            modal.show();
+        };
+
+        // Reset all prices to base prices
+        window.resetPrices = async () => {
+            if (!confirm('本当に全てのカード価格を基本価格にリセットしますか？\nこの操作は取り消せません。')) {
+                return;
+            }
+
+            document.getElementById('loading').classList.add('active');
+            
+            try {
+                // Reset all prices to base prices
+                CARDS_DATABASE.forEach(card => {
+                    cardPrices[card.id] = {
+                        current: card.basePrice,
+                        previous: card.basePrice,
+                        pattern: PRICE_PATTERNS.SUPPLY,
+                        patternStart: Date.now(),
+                        continuationCount: 0,
+                        history: []
+                    };
+                });
+                
+                // Save to Firebase
+                await savePrices();
+                
+                // Update display
+                displayCards();
+                displayInventory();
+                
+                // Show success message
+                const toast = document.createElement('div');
+                toast.className = 'alert alert-success position-fixed top-50 start-50 translate-middle';
+                toast.style.zIndex = '9999';
+                toast.innerHTML = '<i class="bi bi-check-circle-fill me-2"></i>価格を基本価格にリセットしました！';
+                document.body.appendChild(toast);
+                setTimeout(() => toast.remove(), 3000);
+                
+            } catch (error) {
+                console.error('Price reset failed:', error);
+                const toast = document.createElement('div');
+                toast.className = 'alert alert-danger position-fixed top-50 start-50 translate-middle';
+                toast.style.zIndex = '9999';
+                toast.innerHTML = '<i class="bi bi-x-circle-fill me-2"></i>価格リセットに失敗しました';
+                document.body.appendChild(toast);
+                setTimeout(() => toast.remove(), 3000);
+            } finally {
+                document.getElementById('loading').classList.remove('active');
+            }
         };
 
         // Wait for DOM ready to add all event listeners
