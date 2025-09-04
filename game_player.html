@@ -277,6 +277,91 @@
             0% { transform: rotate(0deg); }
             100% { transform: rotate(360deg); }
         }
+
+        /* Login form styles */
+        .login-container {
+            max-width: 400px;
+            margin: 50px auto;
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 20px;
+            padding: 40px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+        }
+
+        .login-title {
+            text-align: center;
+            font-size: 2rem;
+            font-weight: bold;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin-bottom: 30px;
+        }
+
+        .form-floating {
+            margin-bottom: 15px;
+        }
+
+        .btn-login {
+            width: 100%;
+            padding: 12px;
+            font-size: 1.1rem;
+            font-weight: bold;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            border-radius: 10px;
+            transition: all 0.3s;
+        }
+
+        .btn-login:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.3);
+        }
+
+        .auth-divider {
+            text-align: center;
+            margin: 20px 0;
+            color: #999;
+            position: relative;
+        }
+
+        .auth-divider::before,
+        .auth-divider::after {
+            content: '';
+            position: absolute;
+            top: 50%;
+            width: 45%;
+            height: 1px;
+            background: #ddd;
+        }
+
+        .auth-divider::before {
+            left: 0;
+        }
+
+        .auth-divider::after {
+            right: 0;
+        }
+
+        .btn-toggle-auth {
+            background: none;
+            border: none;
+            color: #667eea;
+            cursor: pointer;
+            text-decoration: underline;
+            margin-top: 15px;
+            width: 100%;
+        }
+
+        .alert-auth {
+            margin-top: 15px;
+            display: none;
+        }
+
+        .alert-auth.show {
+            display: block;
+        }
     </style>
 </head>
 <body>
@@ -284,7 +369,51 @@
         <i class="bi bi-arrow-left"></i> カード管理に戻る
     </button>
 
-    <div class="game-container">
+    <!-- Login Container -->
+    <div class="login-container" id="login-container">
+        <h2 class="login-title">ゲームセンター</h2>
+        <div id="auth-alert" class="alert alert-danger alert-auth" role="alert"></div>
+        
+        <form id="login-form">
+            <div class="form-floating">
+                <input type="email" class="form-control" id="email-input" placeholder="name@example.com" required>
+                <label for="email-input">メールアドレス</label>
+            </div>
+            <div class="form-floating">
+                <input type="password" class="form-control" id="password-input" placeholder="パスワード" required>
+                <label for="password-input">パスワード</label>
+            </div>
+            <button type="submit" class="btn btn-login" id="login-btn">
+                <i class="bi bi-box-arrow-in-right"></i> ログイン
+            </button>
+        </form>
+        
+        <div class="auth-divider">または</div>
+        
+        <form id="register-form" style="display: none;">
+            <div class="form-floating">
+                <input type="email" class="form-control" id="register-email" placeholder="name@example.com" required>
+                <label for="register-email">メールアドレス</label>
+            </div>
+            <div class="form-floating">
+                <input type="password" class="form-control" id="register-password" placeholder="パスワード" required>
+                <label for="register-password">パスワード（6文字以上）</label>
+            </div>
+            <div class="form-floating">
+                <input type="password" class="form-control" id="register-password-confirm" placeholder="パスワード確認" required>
+                <label for="register-password-confirm">パスワード（確認）</label>
+            </div>
+            <button type="submit" class="btn btn-login" id="register-btn">
+                <i class="bi bi-person-plus"></i> アカウント作成
+            </button>
+        </form>
+        
+        <button class="btn-toggle-auth" id="toggle-auth-btn">
+            アカウントをお持ちでない方はこちら
+        </button>
+    </div>
+
+    <div class="game-container" id="game-container" style="display: none;">
         <div class="game-header">
             <h1 class="game-title">🎰 スロットマシン 🎰</h1>
             <p class="text-muted">ポイントを使って運試し！</p>
@@ -409,7 +538,10 @@
         import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.8.1/firebase-app.js';
         import { 
             getAuth, 
-            onAuthStateChanged 
+            onAuthStateChanged,
+            signInWithEmailAndPassword,
+            createUserWithEmailAndPassword,
+            signOut
         } from 'https://www.gstatic.com/firebasejs/10.8.1/firebase-auth.js';
         import { 
             getFirestore, 
@@ -603,17 +735,117 @@
             }
         }
 
+        // Show/hide authentication forms
+        function showLogin() {
+            document.getElementById('login-form').style.display = 'block';
+            document.getElementById('register-form').style.display = 'none';
+            document.getElementById('toggle-auth-btn').textContent = 'アカウントをお持ちでない方はこちら';
+        }
+
+        function showRegister() {
+            document.getElementById('login-form').style.display = 'none';
+            document.getElementById('register-form').style.display = 'block';
+            document.getElementById('toggle-auth-btn').textContent = 'すでにアカウントをお持ちの方はこちら';
+        }
+
+        // Show error message
+        function showAuthError(message) {
+            const alertEl = document.getElementById('auth-alert');
+            alertEl.textContent = message;
+            alertEl.classList.add('show');
+            setTimeout(() => alertEl.classList.remove('show'), 5000);
+        }
+
+        // Toggle between login and register
+        document.getElementById('toggle-auth-btn').addEventListener('click', () => {
+            if (document.getElementById('login-form').style.display !== 'none') {
+                showRegister();
+            } else {
+                showLogin();
+            }
+        });
+
+        // Handle login
+        document.getElementById('login-form').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const email = document.getElementById('email-input').value;
+            const password = document.getElementById('password-input').value;
+            
+            document.getElementById('login-btn').disabled = true;
+            
+            try {
+                await signInWithEmailAndPassword(auth, email, password);
+            } catch (error) {
+                console.error('Login error:', error);
+                let errorMessage = 'ログインに失敗しました';
+                if (error.code === 'auth/wrong-password') {
+                    errorMessage = 'パスワードが間違っています';
+                } else if (error.code === 'auth/user-not-found') {
+                    errorMessage = 'ユーザーが見つかりません';
+                } else if (error.code === 'auth/invalid-email') {
+                    errorMessage = 'メールアドレスの形式が正しくありません';
+                }
+                showAuthError(errorMessage);
+                document.getElementById('login-btn').disabled = false;
+            }
+        });
+
+        // Handle registration
+        document.getElementById('register-form').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const email = document.getElementById('register-email').value;
+            const password = document.getElementById('register-password').value;
+            const confirmPassword = document.getElementById('register-password-confirm').value;
+            
+            if (password !== confirmPassword) {
+                showAuthError('パスワードが一致しません');
+                return;
+            }
+            
+            if (password.length < 6) {
+                showAuthError('パスワードは6文字以上である必要があります');
+                return;
+            }
+            
+            document.getElementById('register-btn').disabled = true;
+            
+            try {
+                await createUserWithEmailAndPassword(auth, email, password);
+                // Initialize with 100 points for new users
+                userPoints = 100;
+                await saveUserPoints();
+            } catch (error) {
+                console.error('Registration error:', error);
+                let errorMessage = 'アカウント作成に失敗しました';
+                if (error.code === 'auth/email-already-in-use') {
+                    errorMessage = 'このメールアドレスは既に使用されています';
+                } else if (error.code === 'auth/invalid-email') {
+                    errorMessage = 'メールアドレスの形式が正しくありません';
+                } else if (error.code === 'auth/weak-password') {
+                    errorMessage = 'パスワードが弱すぎます';
+                }
+                showAuthError(errorMessage);
+                document.getElementById('register-btn').disabled = false;
+            }
+        });
+
         // Initialize game
         onAuthStateChanged(auth, async (user) => {
             if (user) {
                 currentUser = user;
+                
+                // Hide login container and show game
+                document.getElementById('login-container').style.display = 'none';
+                document.getElementById('game-container').style.display = 'block';
+                
                 await loadUserPoints();
                 
                 // Set up spin button
                 document.getElementById('spin-button').addEventListener('click', spin);
             } else {
-                alert('ログインが必要です');
-                window.location.href = 'card_list.html';
+                // Show login container and hide game
+                document.getElementById('login-container').style.display = 'block';
+                document.getElementById('game-container').style.display = 'none';
             }
         });
 
