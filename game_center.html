@@ -247,6 +247,25 @@
             transform: translateX(-2px);
         }
 
+        .logout-button {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            padding: 10px 20px;
+            background: rgba(255, 107, 107, 0.9);
+            color: white;
+            border: none;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: all 0.3s;
+            display: none;
+        }
+
+        .logout-button:hover {
+            background: rgba(255, 56, 56, 0.95);
+            transform: translateY(-2px);
+        }
+
         .loading-overlay {
             display: none;
             position: fixed;
@@ -368,9 +387,13 @@
     <button class="back-button" onclick="window.location.href='card_list.html'">
         <i class="bi bi-arrow-left"></i> カード管理に戻る
     </button>
+    
+    <button class="logout-button" id="logout-button">
+        <i class="bi bi-box-arrow-right"></i> ログアウト
+    </button>
 
     <!-- Login Container -->
-    <div class="login-container" id="login-container">
+    <div class="login-container" id="login-container" style="display: none;">
         <h2 class="login-title">ゲームセンター</h2>
         <div id="auth-alert" class="alert alert-danger alert-auth" role="alert"></div>
         
@@ -529,7 +552,7 @@
         </div>
     </div>
 
-    <div class="loading-overlay" id="loading">
+    <div class="loading-overlay active" id="loading">
         <div class="spinner"></div>
     </div>
 
@@ -541,7 +564,9 @@
             onAuthStateChanged,
             signInWithEmailAndPassword,
             createUserWithEmailAndPassword,
-            signOut
+            signOut,
+            setPersistence,
+            browserLocalPersistence
         } from 'https://www.gstatic.com/firebasejs/10.8.1/firebase-auth.js';
         import { 
             getFirestore, 
@@ -566,9 +591,13 @@
         const auth = getAuth();
         const db = getFirestore();
 
+        // Set persistence to LOCAL (keeps user logged in)
+        setPersistence(auth, browserLocalPersistence);
+
         let currentUser = null;
         let userPoints = 0;
         let isSpinning = false;
+        let authChecked = false;
 
         const symbols = ['🍒', '🍋', '🍊', '🍇', '🔔', '💎', '7️⃣', '🌟'];
         const symbolWeights = [30, 25, 20, 15, 10, 8, 5, 3]; // Higher number = more common
@@ -829,24 +858,63 @@
             }
         });
 
+        // Show loading initially
+        function showLoading(show) {
+            const loading = document.getElementById('loading');
+            if (show) {
+                loading.classList.add('active');
+            } else {
+                loading.classList.remove('active');
+            }
+        }
+
+        // Handle logout
+        document.getElementById('logout-button').addEventListener('click', async () => {
+            if (confirm('ログアウトしますか？')) {
+                showLoading(true);
+                try {
+                    await signOut(auth);
+                    console.log('User logged out');
+                } catch (error) {
+                    console.error('Logout error:', error);
+                    showLoading(false);
+                }
+            }
+        });
+
         // Initialize game
         onAuthStateChanged(auth, async (user) => {
+            // Only process once (onAuthStateChanged can fire multiple times)
+            if (authChecked) return;
+            authChecked = true;
+
             if (user) {
                 currentUser = user;
+                console.log('User is already logged in:', user.email);
                 
                 // Hide login container and show game
                 document.getElementById('login-container').style.display = 'none';
                 document.getElementById('game-container').style.display = 'block';
+                document.getElementById('logout-button').style.display = 'block';
                 
                 await loadUserPoints();
                 
-                // Set up spin button
-                document.getElementById('spin-button').addEventListener('click', spin);
+                // Set up spin button (only once)
+                if (!document.getElementById('spin-button').hasAttribute('data-initialized')) {
+                    document.getElementById('spin-button').addEventListener('click', spin);
+                    document.getElementById('spin-button').setAttribute('data-initialized', 'true');
+                }
             } else {
+                console.log('No user logged in, showing login screen');
                 // Show login container and hide game
                 document.getElementById('login-container').style.display = 'block';
                 document.getElementById('game-container').style.display = 'none';
+                document.getElementById('logout-button').style.display = 'none';
+                authChecked = false; // Reset to allow login/logout flow
             }
+            
+            // Hide loading overlay after auth check
+            showLoading(false);
         });
 
         // Initialize reels with random positions
