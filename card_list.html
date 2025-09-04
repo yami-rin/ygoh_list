@@ -863,6 +863,106 @@
         </div></div>
     </div>
 
+    <!-- Ranking Modal -->
+    <div class="modal fade" id="ranking-modal" tabindex="-1">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header bg-primary text-white">
+                    <h5 class="modal-title"><i class="bi bi-trophy"></i> ランキング</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <!-- Ranking Tabs -->
+                    <ul class="nav nav-tabs mb-3" role="tablist">
+                        <li class="nav-item" role="presentation">
+                            <button class="nav-link active" data-bs-toggle="tab" data-bs-target="#total-cards-ranking" type="button">
+                                <i class="bi bi-stack"></i> 総カード枚数
+                            </button>
+                        </li>
+                        <li class="nav-item" role="presentation">
+                            <button class="nav-link" data-bs-toggle="tab" data-bs-target="#unique-cards-ranking" type="button">
+                                <i class="bi bi-collection"></i> 種類数
+                            </button>
+                        </li>
+                        <li class="nav-item" role="presentation">
+                            <button class="nav-link" data-bs-toggle="tab" data-bs-target="#streak-ranking" type="button">
+                                <i class="bi bi-fire"></i> ストリーク
+                            </button>
+                        </li>
+                        <li class="nav-item" role="presentation">
+                            <button class="nav-link" data-bs-toggle="tab" data-bs-target="#points-ranking" type="button">
+                                <i class="bi bi-coin"></i> 獲得ポイント
+                            </button>
+                        </li>
+                    </ul>
+                    
+                    <!-- Ranking Tab Content -->
+                    <div class="tab-content">
+                        <!-- Total Cards Ranking -->
+                        <div class="tab-pane fade show active" id="total-cards-ranking" role="tabpanel">
+                            <div class="alert alert-info mb-3">
+                                <i class="bi bi-info-circle"></i> 総カード枚数のランキング
+                            </div>
+                            <div class="list-group" id="total-cards-ranking-list">
+                                <div class="text-center py-3">
+                                    <div class="spinner-border text-primary" role="status">
+                                        <span class="visually-hidden">読み込み中...</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Unique Cards Ranking -->
+                        <div class="tab-pane fade" id="unique-cards-ranking" role="tabpanel">
+                            <div class="alert alert-info mb-3">
+                                <i class="bi bi-info-circle"></i> カード種類数のランキング
+                            </div>
+                            <div class="list-group" id="unique-cards-ranking-list">
+                                <div class="text-center py-3">
+                                    <div class="spinner-border text-primary" role="status">
+                                        <span class="visually-hidden">読み込み中...</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Streak Ranking -->
+                        <div class="tab-pane fade" id="streak-ranking" role="tabpanel">
+                            <div class="alert alert-info mb-3">
+                                <i class="bi bi-info-circle"></i> 連続登録日数のランキング
+                            </div>
+                            <div class="list-group" id="streak-ranking-list">
+                                <div class="text-center py-3">
+                                    <div class="spinner-border text-primary" role="status">
+                                        <span class="visually-hidden">読み込み中...</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Points Ranking -->
+                        <div class="tab-pane fade" id="points-ranking" role="tabpanel">
+                            <div class="alert alert-info mb-3">
+                                <i class="bi bi-info-circle"></i> 累計獲得ポイントのランキング
+                            </div>
+                            <div class="list-group" id="points-ranking-list">
+                                <div class="text-center py-3">
+                                    <div class="spinner-border text-primary" role="status">
+                                        <span class="visually-hidden">読み込み中...</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="mt-3 text-center">
+                        <small class="text-muted">ランキングは1時間ごとに更新されます</small>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
     <!-- Profile Modal -->
     <div class="modal fade" id="profile-modal" tabindex="-1">
         <div class="modal-dialog">
@@ -1208,6 +1308,10 @@
                         <button class="btn btn-outline-secondary btn-sm" id="tag-management-btn">
                             <i class="bi bi-tags"></i>
                             <span class="d-none d-sm-inline"> タグ</span>
+                        </button>
+                        <button class="btn btn-outline-primary btn-sm" id="ranking-btn">
+                            <i class="bi bi-trophy"></i>
+                            <span class="d-none d-sm-inline"> ランキング</span>
                         </button>
                         <button class="btn btn-outline-secondary btn-sm" id="settings-btn">
                             <i class="bi bi-gear"></i>
@@ -1721,6 +1825,11 @@
             updatePaginationControls();
             updateSortIcons();
             updateTotalCounts();
+            
+            // Update ranking data when collection changes
+            if (currentUser) {
+                updateUserRankingData();
+            }
         };
 
         const updatePaginationControls = () => {
@@ -3366,6 +3475,9 @@
             
             // Add profile functionality
             initializeProfile();
+            
+            // Add ranking functionality
+            initializeRanking();
         };
         
         // Track daily usage
@@ -3482,8 +3594,150 @@
                 
                 updateProfileDisplay();
                 
+                // Update ranking data with new profile info
+                await updateUserRankingData();
+                
                 showNotification('プロフィールを更新しました', 'success');
             });
+        };
+        
+        // Initialize ranking functionality
+        const initializeRanking = () => {
+            const rankingBtn = document.getElementById('ranking-btn');
+            const rankingModal = new bootstrap.Modal(document.getElementById('ranking-modal'));
+            
+            rankingBtn.addEventListener('click', async () => {
+                rankingModal.show();
+                await loadRankings();
+            });
+            
+            // Update user's ranking data when cards change
+            updateUserRankingData();
+        };
+        
+        // Update user's ranking data in Firebase
+        const updateUserRankingData = async () => {
+            if (!currentUser) return;
+            
+            try {
+                // Calculate stats
+                const totalCards = cardCollection.reduce((sum, card) => sum + (card.data['枚数'] || 0), 0);
+                const uniqueCards = cardCollection.length;
+                const currentStreak = gamificationData.registrationStreak?.count || 0;
+                const totalPoints = gamificationData.profile?.totalPointsEarned || 0;
+                
+                // Prepare ranking data
+                const rankingData = {
+                    uid: currentUser.uid,
+                    nickname: gamificationData.profile?.nickname || '',
+                    icon: gamificationData.profile?.icon || '👤',
+                    totalCards: totalCards,
+                    uniqueCards: uniqueCards,
+                    currentStreak: currentStreak,
+                    totalPoints: totalPoints,
+                    lastUpdated: new Date().toISOString()
+                };
+                
+                // Save to rankings collection
+                const rankingRef = doc(db, 'rankings', currentUser.uid);
+                await setDoc(rankingRef, rankingData);
+            } catch (error) {
+                console.error('Error updating ranking data:', error);
+            }
+        };
+        
+        // Load and display rankings
+        const loadRankings = async () => {
+            try {
+                const rankingsSnapshot = await getDocs(collection(db, 'rankings'));
+                const rankings = [];
+                
+                rankingsSnapshot.forEach(doc => {
+                    rankings.push(doc.data());
+                });
+                
+                // Sort rankings for each category
+                const totalCardsRanking = [...rankings].sort((a, b) => b.totalCards - a.totalCards).slice(0, 50);
+                const uniqueCardsRanking = [...rankings].sort((a, b) => b.uniqueCards - a.uniqueCards).slice(0, 50);
+                const streakRanking = [...rankings].sort((a, b) => b.currentStreak - a.currentStreak).slice(0, 50);
+                const pointsRanking = [...rankings].sort((a, b) => b.totalPoints - a.totalPoints).slice(0, 50);
+                
+                // Display rankings
+                displayRanking('total-cards-ranking-list', totalCardsRanking, 'totalCards', '枚');
+                displayRanking('unique-cards-ranking-list', uniqueCardsRanking, 'uniqueCards', '種類');
+                displayRanking('streak-ranking-list', streakRanking, 'currentStreak', '日');
+                displayRanking('points-ranking-list', pointsRanking, 'totalPoints', 'pt');
+            } catch (error) {
+                console.error('Error loading rankings:', error);
+                document.querySelectorAll('[id$="-ranking-list"]').forEach(list => {
+                    list.innerHTML = '<div class="alert alert-danger">ランキングの読み込みに失敗しました</div>';
+                });
+            }
+        };
+        
+        // Display ranking list
+        const displayRanking = (listId, rankings, valueKey, unit) => {
+            const listElement = document.getElementById(listId);
+            
+            if (rankings.length === 0) {
+                listElement.innerHTML = '<div class="alert alert-warning">まだランキングデータがありません</div>';
+                return;
+            }
+            
+            listElement.innerHTML = rankings.map((user, index) => {
+                const rank = index + 1;
+                const isCurrentUser = user.uid === currentUser?.uid;
+                const displayName = user.nickname || '匿名ユーザー';
+                const icon = user.icon || '👤';
+                
+                // Determine medal for top 3
+                let medal = '';
+                if (rank === 1) medal = '🥇';
+                else if (rank === 2) medal = '🥈';
+                else if (rank === 3) medal = '🥉';
+                
+                return `
+                    <div class="list-group-item ${isCurrentUser ? 'bg-light border-primary' : ''}">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <div class="d-flex align-items-center">
+                                <span class="me-3 fw-bold ${rank <= 3 ? 'fs-4' : ''}" style="min-width: 40px;">
+                                    ${medal || rank + '.'}
+                                </span>
+                                <span class="fs-4 me-2">${icon}</span>
+                                <div>
+                                    <div class="fw-semibold ${isCurrentUser ? 'text-primary' : ''}">
+                                        ${displayName}
+                                        ${isCurrentUser ? ' (あなた)' : ''}
+                                    </div>
+                                    <small class="text-muted">
+                                        最終更新: ${formatRelativeTime(user.lastUpdated)}
+                                    </small>
+                                </div>
+                            </div>
+                            <div class="text-end">
+                                <div class="fs-5 fw-bold ${rank <= 3 ? 'text-warning' : ''}">
+                                    ${user[valueKey].toLocaleString()} ${unit}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        };
+        
+        // Format relative time
+        const formatRelativeTime = (dateString) => {
+            const date = new Date(dateString);
+            const now = new Date();
+            const diff = now - date;
+            const minutes = Math.floor(diff / 60000);
+            const hours = Math.floor(minutes / 60);
+            const days = Math.floor(hours / 24);
+            
+            if (minutes < 60) return `${minutes}分前`;
+            if (hours < 24) return `${hours}時間前`;
+            if (days < 7) return `${days}日前`;
+            return date.toLocaleDateString('ja-JP');
         };
         
         // Update profile display
