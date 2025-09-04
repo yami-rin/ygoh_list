@@ -1854,8 +1854,8 @@
                 
                 // Auto complete mission when target reached
                 if (!completed && progress >= mission.target) {
-                    dailyMissionProgress.missions[mission.id] = true;
-                    localStorage.setItem('dailyMissionProgress', JSON.stringify(dailyMissionProgress));
+                    gamificationData.dailyMissionProgress.missions[mission.id] = true;
+                    saveGamificationData();
                     showMissionCompleteNotification(mission.text);
                     addPoints(POINT_REWARDS.completeMission, 'ミッション完了');
                 }
