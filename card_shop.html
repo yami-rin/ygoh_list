@@ -6,6 +6,7 @@
     <title>カードショップ - Card Manager</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css">
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     <style>
         body {
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
@@ -287,6 +288,24 @@
         <div class="spinner"></div>
     </div>
 
+    <!-- Login Modal -->
+    <div class="modal fade" id="auth-modal" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1">
+        <div class="modal-dialog"><div class="modal-content">
+            <div class="modal-header"><h5 class="modal-title">ログインまたは新規登録</h5></div>
+            <div class="modal-body">
+                <div id="auth-error" class="alert alert-danger" style="display: none;"></div>
+                <form id="auth-form">
+                    <div class="mb-3"><label for="email" class="form-label">メールアドレス</label><input type="email" class="form-control" id="email" required></div>
+                    <div class="mb-3"><label for="password" class="form-label">パスワード</label><input type="password" class="form-control" id="password" required></div>
+                    <div class="d-grid gap-2">
+                        <button type="button" id="login-btn" class="btn btn-primary">ログイン</button>
+                        <button type="button" id="signup-btn" class="btn btn-secondary">新規登録</button>
+                    </div>
+                </form>
+            </div>
+        </div></div>
+    </div>
+
     <!-- Firebase SDK -->
     <script type="module">
         import { initializeApp } from 'https://www.gstatic.com/firebasejs/9.23.0/firebase-app.js';
@@ -294,7 +313,9 @@
             getAuth, 
             onAuthStateChanged,
             setPersistence,
-            browserLocalPersistence
+            browserLocalPersistence,
+            createUserWithEmailAndPassword,
+            signInWithEmailAndPassword
         } from 'https://www.gstatic.com/firebasejs/9.23.0/firebase-auth.js';
         import { 
             getFirestore, 
@@ -379,10 +400,14 @@
             DEMAND: 'demand'       // 需要増加
         };
 
+        // Initialize Bootstrap modal
+        const authModal = new bootstrap.Modal(document.getElementById('auth-modal'));
+        
         // Initialize
         onAuthStateChanged(auth, async (user) => {
             if (user) {
                 currentUser = user;
+                authModal.hide();
                 await loadUserData();
                 await loadCardPrices();
                 await loadInventory();
@@ -391,7 +416,9 @@
                 startPriceUpdateTimer();
                 document.getElementById('loading').classList.remove('active');
             } else {
-                window.location.href = 'card_list.html';
+                // Show login modal instead of redirecting
+                document.getElementById('loading').classList.remove('active');
+                authModal.show();
             }
         });
 
@@ -835,6 +862,45 @@
 
         // Sort change handler
         document.getElementById('sort-select').addEventListener('change', displayCards);
+        
+        // Login functionality
+        document.getElementById('login-btn').addEventListener('click', async () => {
+            const email = document.getElementById('email').value;
+            const password = document.getElementById('password').value;
+            const errorDiv = document.getElementById('auth-error');
+            
+            try {
+                errorDiv.style.display = 'none';
+                await signInWithEmailAndPassword(auth, email, password);
+            } catch (error) {
+                errorDiv.textContent = 'ログインに失敗しました: ' + error.message;
+                errorDiv.style.display = 'block';
+            }
+        });
+        
+        // Signup functionality
+        document.getElementById('signup-btn').addEventListener('click', async () => {
+            const email = document.getElementById('email').value;
+            const password = document.getElementById('password').value;
+            const errorDiv = document.getElementById('auth-error');
+            
+            try {
+                errorDiv.style.display = 'none';
+                const userCredential = await createUserWithEmailAndPassword(auth, email, password);
+                // Initialize user gamification data
+                const gamificationRef = doc(db, 'userGamification', userCredential.user.uid);
+                await setDoc(gamificationRef, {
+                    points: 100, // Initial points
+                    totalEarned: 100,
+                    totalSpent: 0,
+                    lastLogin: serverTimestamp(),
+                    createdAt: serverTimestamp()
+                });
+            } catch (error) {
+                errorDiv.textContent = '新規登録に失敗しました: ' + error.message;
+                errorDiv.style.display = 'block';
+            }
+        });
         
         // Cleanup on page unload
         window.addEventListener('beforeunload', () => {
