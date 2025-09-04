@@ -424,12 +424,6 @@
         let inventory = [];
         let cardPrices = {};
         let updateInterval = null;
-        let specialCardOwnership = {};
-        const SPECIAL_CARD_LIMITS = {
-            PSE: 30,
-            QCSE: 50,
-            '青眼の白龍_SE': 4
-        };
         
         // Game date system (starts from January 1st, Monday)
         let gameDate = new Date(2024, 0, 1); // January 1, 2024 (Monday)
@@ -504,7 +498,6 @@
                     await loadUserData();
                     await loadCardPrices();
                     await loadInventory();
-                    await loadSpecialCardOwnership();
                     displayCards();
                     displayInventory();
                     updateDateDisplay();
@@ -520,52 +513,6 @@
                 }
             });
         });
-
-        // Get special card key for tracking ownership
-        function getSpecialCardKey(card) {
-            if (card.rarity === 'PSE') return `PSE_${card.id}`;
-            if (card.rarity === 'QCSE') return `QCSE_${card.id}`;
-            if (card.name === '青眼の白龍' && card.rarity === 'SE') return '青眼の白龍_SE';
-            return null;
-        }
-
-        // Load special card ownership from Firebase
-        async function loadSpecialCardOwnership() {
-            try {
-                const ownershipRef = doc(db, 'specialCardOwnership', 'global');
-                const snap = await getDoc(ownershipRef);
-                if (snap.exists()) {
-                    specialCardOwnership = snap.data() || {};
-                }
-            } catch (error) {
-                console.error('Error loading special card ownership:', error);
-            }
-        }
-
-        // Save special card ownership to Firebase
-        async function saveSpecialCardOwnership() {
-            if (!currentUser) return;
-            
-            try {
-                const ownershipRef = doc(db, 'specialCardOwnership', 'global');
-                await setDoc(ownershipRef, specialCardOwnership);
-            } catch (error) {
-                console.error('Error saving special card ownership:', error);
-            }
-        }
-
-        // Check if user has monopoly on a special card
-        async function checkMonopoly(cardKey) {
-            if (!specialCardOwnership[cardKey]) return false;
-            
-            const limit = SPECIAL_CARD_LIMITS[cardKey] || 
-                         SPECIAL_CARD_LIMITS[cardKey.split('_')[0]];
-            if (!limit) return false;
-            
-            const ownership = specialCardOwnership[cardKey];
-            return ownership.owners && 
-                   ownership.owners[currentUser.uid] >= limit;
-        }
 
         // Buy maximum cards function
         window.buyMaxCards = async (cardId) => {
@@ -584,25 +531,7 @@
                 return;
             }
             
-            // Check special card limits
-            const specialKey = getSpecialCardKey(card);
-            if (specialKey) {
-                const limit = SPECIAL_CARD_LIMITS[specialKey] || 
-                            SPECIAL_CARD_LIMITS[specialKey.split('_')[0]];
-                if (!specialCardOwnership[specialKey]) {
-                    specialCardOwnership[specialKey] = { owners: {} };
-                }
-                const currentOwned = specialCardOwnership[specialKey].owners[currentUser.uid] || 0;
-                const totalOwned = Object.values(specialCardOwnership[specialKey].owners).reduce((a, b) => a + b, 0);
-                const available = Math.min(limit - totalOwned, maxQty);
-                if (available <= 0) {
-                    alert('このカードは全て購入済みです！');
-                    return;
-                }
-                await buyCard(cardId, available);
-            } else {
-                await buyCard(cardId, maxQty);
-            }
+            await buyCard(cardId, maxQty);
         };
 
         // Load user points
@@ -933,16 +862,9 @@
                     }
                 }
                 
-                // Check if monopoly pricing applies
-                const monopolyKey = getSpecialCardKey(card);
-                if (monopolyKey && specialCardOwnership[monopolyKey]?.monopolyPrice) {
-                    // Use monopoly price instead of calculated price
-                    price.current = specialCardOwnership[monopolyKey].monopolyPrice;
-                } else {
-                    // Apply multiplier and base change with minimum price of 30
-                    const newPrice = Math.floor(price.current * multiplier) + baseChange;
-                    price.current = Math.max(30, newPrice);
-                }
+                // Apply multiplier and base change with minimum price of 30
+                const newPrice = Math.floor(price.current * multiplier) + baseChange;
+                price.current = Math.max(30, newPrice);
                 
                 // Check if this is the lowest priced card at 30 and in reprint
                 if (price.pattern === PRICE_PATTERNS.REPRINT && price.current === 30) {
@@ -1270,41 +1192,6 @@
             }
             await Promise.all(promises);
             
-            // Update special card ownership tracking
-            const specialKey = getSpecialCardKey(card);
-            if (specialKey) {
-                if (!specialCardOwnership[specialKey]) {
-                    specialCardOwnership[specialKey] = { owners: {} };
-                }
-                if (!specialCardOwnership[specialKey].owners[currentUser.uid]) {
-                    specialCardOwnership[specialKey].owners[currentUser.uid] = 0;
-                }
-                specialCardOwnership[specialKey].owners[currentUser.uid] += quantity;
-                
-                // Check if user now has monopoly
-                const limit = SPECIAL_CARD_LIMITS[specialKey] || 
-                            SPECIAL_CARD_LIMITS[specialKey.split('_')[0]];
-                const totalOwned = Object.values(specialCardOwnership[specialKey].owners).reduce((a, b) => a + b, 0);
-                
-                if (specialCardOwnership[specialKey].owners[currentUser.uid] >= limit && totalOwned >= limit) {
-                    // User has monopoly - can set price
-                    alert(`おめでとうございます！${card.name}の独占に成功しました！\n価格を自由に設定できます。`);
-                    const newPrice = prompt(`${card.name}の新しい価格を設定してください (現在: ${price.current}pt, 最大: ${price.current * 2}pt):`);
-                    if (newPrice && !isNaN(newPrice)) {
-                        const parsedPrice = parseInt(newPrice);
-                        if (parsedPrice >= price.current && parsedPrice <= price.current * 2) {
-                            specialCardOwnership[specialKey].monopolyPrice = parsedPrice;
-                            specialCardOwnership[specialKey].monopolyOwner = currentUser.uid;
-                            cardPrices[card.id].current = parsedPrice;
-                            await savePrices();
-                            displayCards();
-                        }
-                    }
-                }
-                
-                await saveSpecialCardOwnership();
-            }
-            
             await loadInventory();
             displayInventory();
             
@@ -1328,8 +1215,8 @@
             
             if (!card || !price) return;
             
-            // Calculate sell price (1/2 of current, or 10 if current is 30)
-            const sellPrice = price.current === 30 ? 10 : Math.round(price.current / 2);
+            // Calculate sell price (same as current, or 10 if current is 30)
+            const sellPrice = price.current === 30 ? 10 : price.current;
             
             // Get all cards with same ID and purchase price
             let itemsToSell = inventory.filter(item => item.cardId === cardId);
@@ -1401,7 +1288,7 @@
             
             // Calculate sell price if not provided
             const sellPrice = sellPriceOverride !== null ? sellPriceOverride : 
-                (price.current === 30 ? 10 : Math.round(price.current / 2));
+                (price.current === 30 ? 10 : price.current);
             
             const itemsToSell = inventory
                 .filter(item => item.cardId === cardId && item.purchasePrice === purchasePrice)
@@ -1418,29 +1305,6 @@
                 deleteDoc(doc(db, 'userInventory', currentUser.uid, 'cards', item.docId))
             );
             await Promise.all(deletePromises);
-            
-            // Update special card ownership when selling
-            const specialKey = getSpecialCardKey(card);
-            if (specialKey && specialCardOwnership[specialKey]?.owners?.[currentUser.uid]) {
-                specialCardOwnership[specialKey].owners[currentUser.uid] -= itemsToSell.length;
-                if (specialCardOwnership[specialKey].owners[currentUser.uid] <= 0) {
-                    delete specialCardOwnership[specialKey].owners[currentUser.uid];
-                }
-                
-                // Check if monopoly is lost
-                const limit = SPECIAL_CARD_LIMITS[specialKey] || 
-                            SPECIAL_CARD_LIMITS[specialKey.split('_')[0]];
-                const userOwns = specialCardOwnership[specialKey].owners[currentUser.uid] || 0;
-                
-                if (userOwns < limit && specialCardOwnership[specialKey].monopolyOwner === currentUser.uid) {
-                    // Lost monopoly
-                    delete specialCardOwnership[specialKey].monopolyPrice;
-                    delete specialCardOwnership[specialKey].monopolyOwner;
-                    alert(`${card.name}の独占を失いました。価格が通常に戻ります。`);
-                }
-                
-                await saveSpecialCardOwnership();
-            }
             
             await loadInventory();
             displayInventory();
