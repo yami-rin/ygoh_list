@@ -242,10 +242,7 @@
                     <span id="current-points">0</span> ポイント
                 </div>
                 <div>
-                    <span class="badge bg-info">次の価格更新まで: <span id="next-update">30:00</span></span>
-                    <button class="btn btn-outline-primary btn-sm ms-2" onclick="refreshPrices()">
-                        <i class="bi bi-arrow-clockwise"></i> 価格更新
-                    </button>
+                    <span class="badge bg-info">次の価格更新まで: <span id="next-update">10</span>秒</span>
                 </div>
             </div>
         </div>
@@ -512,14 +509,14 @@
                 const pricesSnap = await getDoc(pricesRef);
                 
                 const now = Date.now();
-                const thirtyMinutes = 30 * 60 * 1000;
+                const tenSeconds = 10 * 1000;
                 
                 if (pricesSnap.exists()) {
                     const data = pricesSnap.data();
                     const lastUpdate = data.lastUpdate?.toMillis() || 0;
                     
-                    // Update prices if 30 minutes have passed
-                    if (now - lastUpdate >= thirtyMinutes) {
+                    // Update prices if 10 seconds have passed
+                    if (now - lastUpdate >= tenSeconds) {
                         await updateCardPrices();
                     } else {
                         cardPrices = data.prices || {};
@@ -1172,40 +1169,48 @@
 
         // Start price update timer
         function startPriceUpdateTimer() {
-            const updateDisplay = () => {
-                const now = Date.now();
-                const pricesRef = doc(db, 'cardShopPrices', 'current');
+            let countdown = 10;
+            
+            const updateDisplay = async () => {
+                countdown--;
+                document.getElementById('next-update').textContent = countdown;
                 
-                getDoc(pricesRef).then(snap => {
-                    if (snap.exists()) {
-                        const lastUpdate = snap.data().lastUpdate?.toMillis() || now;
-                        const thirtyMinutes = 30 * 60 * 1000;
-                        const nextUpdate = lastUpdate + thirtyMinutes;
-                        const remaining = Math.max(0, nextUpdate - now);
-                        
-                        const minutes = Math.floor(remaining / 60000);
-                        const seconds = Math.floor((remaining % 60000) / 1000);
-                        
-                        document.getElementById('next-update').textContent = 
-                            `${minutes}:${seconds.toString().padStart(2, '0')}`;
-                        
-                        if (remaining === 0) {
-                            refreshPrices();
+                if (countdown <= 0) {
+                    countdown = 10;
+                    
+                    // Check for server-side updates first
+                    const now = Date.now();
+                    const pricesRef = doc(db, 'cardShopPrices', 'current');
+                    
+                    try {
+                        const snap = await getDoc(pricesRef);
+                        if (snap.exists()) {
+                            const lastUpdate = snap.data().lastUpdate?.toMillis() || 0;
+                            const tenSeconds = 10 * 1000;
+                            
+                            // If last update was more than 10 seconds ago, update prices
+                            if (now - lastUpdate >= tenSeconds) {
+                                await updateCardPrices();
+                            } else {
+                                // Just load the existing prices from server
+                                cardPrices = snap.data().prices || {};
+                                displayCards();
+                                displayInventory();
+                            }
+                        } else {
+                            // No prices exist yet, create them
+                            await updateCardPrices();
                         }
+                    } catch (error) {
+                        console.error('Error checking prices:', error);
                     }
-                });
+                }
             };
             
             updateDisplay();
             updateInterval = setInterval(updateDisplay, 1000);
         }
 
-        // Refresh prices manually
-        window.refreshPrices = async () => {
-            document.getElementById('loading').classList.add('active');
-            await updateCardPrices();
-            document.getElementById('loading').classList.remove('active');
-        };
 
         // Show price history chart for a card
         window.showPriceHistory = (cardId) => {
