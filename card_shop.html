@@ -649,60 +649,201 @@
             }
         }
 
-        // Buy card
-        window.buyCard = async (cardId) => {
+        // Buy card with quantity selection
+        window.buyCard = async (cardId, quantity = null) => {
             const card = CARDS_DATABASE.find(c => c.id === cardId);
             const price = cardPrices[cardId];
             
             if (!card || !price) return;
             
-            if (userPoints < price.current) {
+            // If quantity not specified, show quantity selector
+            if (quantity === null) {
+                const quantities = [1, 2, 3, 4, 5, 6, 7, 8, 9];
+                const maxQty = Math.floor(userPoints / price.current);
+                
+                if (maxQty === 0) {
+                    alert('ポイントが不足しています！');
+                    return;
+                }
+                
+                // Create quantity buttons
+                const quantityHTML = quantities
+                    .filter(q => q <= maxQty)
+                    .map(q => `<button class="btn btn-sm btn-outline-primary mx-1" onclick="buyCard('${cardId}', ${q})">${q}枚</button>`)
+                    .join('');
+                
+                const modal = document.createElement('div');
+                modal.className = 'modal fade show';
+                modal.style.display = 'block';
+                modal.style.backgroundColor = 'rgba(0,0,0,0.5)';
+                modal.innerHTML = `
+                    <div class="modal-dialog">
+                        <div class="modal-content">
+                            <div class="modal-header">
+                                <h5 class="modal-title">${card.name} を購入</h5>
+                                <button type="button" class="btn-close" onclick="this.closest('.modal').remove()"></button>
+                            </div>
+                            <div class="modal-body">
+                                <p>価格: ${price.current.toLocaleString()} pt/枚</p>
+                                <p>最大購入可能: ${maxQty}枚</p>
+                                <div class="d-flex flex-wrap justify-content-center mt-3">
+                                    ${quantityHTML}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                `;
+                document.body.appendChild(modal);
+                return;
+            }
+            
+            // Buy specified quantity
+            const totalCost = price.current * quantity;
+            if (userPoints < totalCost) {
                 alert('ポイントが不足しています！');
                 return;
             }
             
-            if (confirm(`${card.name}を${price.current}ポイントで購入しますか？`)) {
-                userPoints -= price.current;
-                await saveUserPoints();
-                
-                // Add to inventory
-                const inventoryRef = collection(db, 'userInventory', currentUser.uid, 'cards');
-                await addDoc(inventoryRef, {
+            userPoints -= totalCost;
+            await saveUserPoints();
+            
+            // Add multiple cards to inventory
+            const inventoryRef = collection(db, 'userInventory', currentUser.uid, 'cards');
+            const promises = [];
+            for (let i = 0; i < quantity; i++) {
+                promises.push(addDoc(inventoryRef, {
                     cardId: cardId,
                     purchasePrice: price.current,
                     purchaseTime: serverTimestamp()
-                });
-                
-                await loadInventory();
-                displayInventory();
-                
-                alert(`${card.name}を購入しました！`);
+                }));
             }
+            await Promise.all(promises);
+            
+            await loadInventory();
+            displayInventory();
+            
+            // Remove modal if exists
+            const modal = document.querySelector('.modal.show');
+            if (modal) modal.remove();
+            
+            // Show success message briefly
+            const toast = document.createElement('div');
+            toast.className = 'alert alert-success position-fixed top-50 start-50 translate-middle';
+            toast.style.zIndex = '9999';
+            toast.innerHTML = `<strong>${card.name}</strong> を ${quantity}枚 購入しました！`;
+            document.body.appendChild(toast);
+            setTimeout(() => toast.remove(), 2000);
         };
 
-        // Sell card
-        window.sellCard = async (docId, cardId) => {
+        // Sell card with quantity selection for stacked cards
+        window.sellCard = async (cardId, purchasePrice = null) => {
             const card = CARDS_DATABASE.find(c => c.id === cardId);
             const price = cardPrices[cardId];
-            const inventoryItem = inventory.find(item => item.docId === docId);
             
-            if (!card || !price || !inventoryItem) return;
+            if (!card || !price) return;
             
-            const profit = price.current - inventoryItem.purchasePrice;
-            const profitText = profit >= 0 ? `+${profit}` : profit;
+            // Get all cards with same ID and purchase price
+            let itemsToSell = inventory.filter(item => item.cardId === cardId);
             
-            if (confirm(`${card.name}を${price.current}ポイントで売却しますか？\n購入価格: ${inventoryItem.purchasePrice}pt\n損益: ${profitText}pt`)) {
-                userPoints += price.current;
-                await saveUserPoints();
-                
-                // Remove from inventory
-                await deleteDoc(doc(db, 'userInventory', currentUser.uid, 'cards', docId));
-                
-                await loadInventory();
-                displayInventory();
-                
-                alert(`${card.name}を売却しました！\n獲得: ${price.current}ポイント`);
+            if (purchasePrice !== null) {
+                itemsToSell = itemsToSell.filter(item => item.purchasePrice === purchasePrice);
             }
+            
+            if (itemsToSell.length === 0) return;
+            
+            const profit = price.current - (purchasePrice || itemsToSell[0].purchasePrice);
+            const profitText = profit >= 0 ? `+${profit}` : profit;
+            const profitClass = profit >= 0 ? 'text-success' : 'text-danger';
+            
+            // If multiple items with same price, show quantity selector
+            if (itemsToSell.length > 1) {
+                const modal = document.createElement('div');
+                modal.className = 'modal fade show';
+                modal.style.display = 'block';
+                modal.style.backgroundColor = 'rgba(0,0,0,0.5)';
+                
+                const quantityButtons = [];
+                for (let i = 1; i <= Math.min(itemsToSell.length, 9); i++) {
+                    const totalProfit = profit * i;
+                    const totalRevenue = price.current * i;
+                    quantityButtons.push(`
+                        <button class="btn btn-sm btn-outline-danger mx-1 mb-2" 
+                                onclick="sellMultiple('${cardId}', ${purchasePrice || itemsToSell[0].purchasePrice}, ${i})">
+                            ${i}枚 (${totalRevenue.toLocaleString()}pt)
+                        </button>
+                    `);
+                }
+                
+                modal.innerHTML = `
+                    <div class="modal-dialog">
+                        <div class="modal-content">
+                            <div class="modal-header">
+                                <h5 class="modal-title">${card.name} を売却</h5>
+                                <button type="button" class="btn-close" onclick="this.closest('.modal').remove()"></button>
+                            </div>
+                            <div class="modal-body">
+                                <p>現在価格: ${price.current.toLocaleString()} pt/枚</p>
+                                <p>購入価格: ${(purchasePrice || itemsToSell[0].purchasePrice).toLocaleString()} pt/枚</p>
+                                <p class="${profitClass}">損益: ${profitText} pt/枚</p>
+                                <p>所持数: ${itemsToSell.length}枚</p>
+                                <div class="d-flex flex-wrap justify-content-center mt-3">
+                                    ${quantityButtons.join('')}
+                                </div>
+                                <button class="btn btn-danger w-100 mt-2" 
+                                        onclick="sellMultiple('${cardId}', ${purchasePrice || itemsToSell[0].purchasePrice}, ${itemsToSell.length})">
+                                    全て売却 (${itemsToSell.length}枚)
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                `;
+                document.body.appendChild(modal);
+            } else {
+                // Single item, sell directly
+                await sellMultiple(cardId, purchasePrice || itemsToSell[0].purchasePrice, 1);
+            }
+        };
+        
+        // Sell multiple cards
+        window.sellMultiple = async (cardId, purchasePrice, quantity) => {
+            const card = CARDS_DATABASE.find(c => c.id === cardId);
+            const price = cardPrices[cardId];
+            
+            const itemsToSell = inventory
+                .filter(item => item.cardId === cardId && item.purchasePrice === purchasePrice)
+                .slice(0, quantity);
+            
+            if (itemsToSell.length === 0) return;
+            
+            const totalRevenue = price.current * itemsToSell.length;
+            userPoints += totalRevenue;
+            await saveUserPoints();
+            
+            // Delete items from inventory
+            const deletePromises = itemsToSell.map(item => 
+                deleteDoc(doc(db, 'userInventory', currentUser.uid, 'cards', item.docId))
+            );
+            await Promise.all(deletePromises);
+            
+            await loadInventory();
+            displayInventory();
+            
+            // Remove modal
+            const modal = document.querySelector('.modal.show');
+            if (modal) modal.remove();
+            
+            // Show success message
+            const profit = (price.current - purchasePrice) * itemsToSell.length;
+            const toast = document.createElement('div');
+            toast.className = `alert alert-${profit >= 0 ? 'success' : 'warning'} position-fixed top-50 start-50 translate-middle`;
+            toast.style.zIndex = '9999';
+            toast.innerHTML = `
+                <strong>${card.name}</strong> を ${itemsToSell.length}枚 売却しました！<br>
+                獲得: ${totalRevenue.toLocaleString()} pt<br>
+                損益: ${profit >= 0 ? '+' : ''}${profit.toLocaleString()} pt
+            `;
+            document.body.appendChild(toast);
+            setTimeout(() => toast.remove(), 3000);
         };
 
         // Display cards in shop
@@ -756,7 +897,7 @@
             }).join('');
         }
 
-        // Display inventory
+        // Display inventory with stacking
         function displayInventory() {
             const container = document.getElementById('inventory-container');
             
@@ -766,39 +907,135 @@
                 return;
             }
             
-            container.innerHTML = inventory.map(item => {
-                const card = CARDS_DATABASE.find(c => c.id === item.cardId);
-                const price = cardPrices[item.cardId];
+            // Group inventory by cardId and purchasePrice
+            const groupedInventory = {};
+            inventory.forEach(item => {
+                const key = `${item.cardId}_${item.purchasePrice}`;
+                if (!groupedInventory[key]) {
+                    groupedInventory[key] = {
+                        cardId: item.cardId,
+                        purchasePrice: item.purchasePrice,
+                        items: [],
+                        earliestDate: item.purchaseTime
+                    };
+                }
+                groupedInventory[key].items.push(item);
+                if (item.purchaseTime < groupedInventory[key].earliestDate) {
+                    groupedInventory[key].earliestDate = item.purchaseTime;
+                }
+            });
+            
+            // Add "Sell all profitable" button if there are profitable cards
+            const profitableGroups = Object.values(groupedInventory).filter(group => {
+                const price = cardPrices[group.cardId];
+                return price && price.current > group.purchasePrice;
+            });
+            
+            let headerHTML = '';
+            if (profitableGroups.length > 0) {
+                const totalProfit = profitableGroups.reduce((sum, group) => {
+                    const price = cardPrices[group.cardId];
+                    return sum + ((price.current - group.purchasePrice) * group.items.length);
+                }, 0);
+                
+                headerHTML = `
+                    <button class="btn btn-success btn-sm w-100 mb-3" onclick="sellAllProfitable()">
+                        <i class="bi bi-graph-up"></i> 利益カード全売却 (+${totalProfit.toLocaleString()}pt)
+                    </button>
+                `;
+            }
+            
+            // Display grouped inventory
+            const inventoryHTML = Object.values(groupedInventory).map(group => {
+                const card = CARDS_DATABASE.find(c => c.id === group.cardId);
+                const price = cardPrices[group.cardId];
                 
                 if (!card || !price) return '';
                 
-                const profit = price.current - item.purchasePrice;
+                const profit = price.current - group.purchasePrice;
                 const profitClass = profit >= 0 ? 'profit' : 'loss';
                 const profitText = profit >= 0 ? `+${profit}` : profit;
+                const totalProfit = profit * group.items.length;
                 
-                const purchaseDate = item.purchaseTime?.toDate ? 
-                    new Date(item.purchaseTime.toDate()).toLocaleDateString('ja-JP') : 
+                const purchaseDate = group.earliestDate?.toDate ? 
+                    new Date(group.earliestDate.toDate()).toLocaleDateString('ja-JP') : 
                     '不明';
+                
+                const countBadge = group.items.length > 1 ? 
+                    `<span class="badge bg-primary ms-2">${group.items.length}枚</span>` : '';
                 
                 return `
                     <div class="inventory-item">
                         <div class="inventory-item-header">
-                            <strong>${card.name}</strong>
+                            <strong>${card.name}${countBadge}</strong>
                             <span class="card-rarity rarity-${card.rarity}">${card.rarity}</span>
                         </div>
-                        <div class="small text-muted">購入日: ${purchaseDate}</div>
-                        <div class="small">購入価格: ${item.purchasePrice.toLocaleString()}pt</div>
-                        <div class="small">現在価格: ${price.current.toLocaleString()}pt</div>
-                        <div class="small ${profitClass} fw-bold">損益: ${profitText}pt</div>
-                        <button class="btn btn-danger btn-sm w-100 mt-2" onclick="sellCard('${item.docId}', '${item.cardId}')">
+                        <div class="small text-muted">初回購入: ${purchaseDate}</div>
+                        <div class="small">購入価格: ${group.purchasePrice.toLocaleString()}pt/枚</div>
+                        <div class="small">現在価格: ${price.current.toLocaleString()}pt/枚</div>
+                        <div class="small ${profitClass} fw-bold">
+                            損益: ${profitText}pt/枚
+                            ${group.items.length > 1 ? `(計: ${totalProfit >= 0 ? '+' : ''}${totalProfit.toLocaleString()}pt)` : ''}
+                        </div>
+                        <button class="btn btn-danger btn-sm w-100 mt-2" onclick="sellCard('${group.cardId}', ${group.purchasePrice})">
                             <i class="bi bi-cash"></i> 売却
                         </button>
                     </div>
                 `;
             }).join('');
             
+            container.innerHTML = headerHTML + inventoryHTML;
             updateInventoryStats();
         }
+        
+        // Sell all profitable cards
+        window.sellAllProfitable = async () => {
+            const profitableItems = inventory.filter(item => {
+                const price = cardPrices[item.cardId];
+                return price && price.current > item.purchasePrice;
+            });
+            
+            if (profitableItems.length === 0) {
+                alert('利益が出ているカードがありません。');
+                return;
+            }
+            
+            const totalRevenue = profitableItems.reduce((sum, item) => {
+                const price = cardPrices[item.cardId];
+                return sum + price.current;
+            }, 0);
+            
+            const totalProfit = profitableItems.reduce((sum, item) => {
+                const price = cardPrices[item.cardId];
+                return sum + (price.current - item.purchasePrice);
+            }, 0);
+            
+            if (confirm(`利益が出ているカード ${profitableItems.length}枚 を全て売却しますか？\n\n獲得予定: ${totalRevenue.toLocaleString()}pt\n利益予定: +${totalProfit.toLocaleString()}pt`)) {
+                userPoints += totalRevenue;
+                await saveUserPoints();
+                
+                // Delete all profitable items
+                const deletePromises = profitableItems.map(item => 
+                    deleteDoc(doc(db, 'userInventory', currentUser.uid, 'cards', item.docId))
+                );
+                await Promise.all(deletePromises);
+                
+                await loadInventory();
+                displayInventory();
+                
+                // Show success message
+                const toast = document.createElement('div');
+                toast.className = 'alert alert-success position-fixed top-50 start-50 translate-middle';
+                toast.style.zIndex = '9999';
+                toast.innerHTML = `
+                    <strong>利益カード ${profitableItems.length}枚 を売却しました！</strong><br>
+                    獲得: ${totalRevenue.toLocaleString()} pt<br>
+                    利益: +${totalProfit.toLocaleString()} pt
+                `;
+                document.body.appendChild(toast);
+                setTimeout(() => toast.remove(), 3000);
+            }
+        };
 
         // Update inventory statistics
         function updateInventoryStats() {
