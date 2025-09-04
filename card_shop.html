@@ -679,9 +679,10 @@
                     history: []
                 };
                 
-                // Check if card is immune to price decreases
+                // Check if card is immune to price decreases (only if price is under 10x base price)
                 const isImmune = (card.rarity === 'PSE' || card.rarity === 'QCSE' || 
-                    (card.name === '青眼の白龍' && card.rarity === 'SE'));
+                    (card.name === '青眼の白龍' && card.rarity === 'SE')) && 
+                    price.current < (card.basePrice * 10);
                 
                 // Save previous price
                 price.previous = price.current;
@@ -795,12 +796,12 @@
                 
                 switch (price.pattern) {
                     case PRICE_PATTERNS.SUPPLY:
-                        // Gradual decrease (immune cards unaffected)
+                        // Gradual decrease (immune cards unaffected if under 10x base price)
                         multiplier = isImmune ? 1 : (0.94 + Math.random() * 0.03); // 0.94-0.97
                         break;
                     
                     case PRICE_PATTERNS.REPRINT:
-                        // Sharp decrease (PSE/QCSE/青眼SE immune)
+                        // Sharp decrease (PSE/QCSE/青眼SE immune if under 10x base price)
                         multiplier = isImmune ? 1 : (0.5 + Math.random() * 0.2); // 0.5-0.7
                         break;
                     
@@ -846,7 +847,7 @@
                 let baseChange = 0;
                 if (globalMarketState === 'bubble' || globalMarketState === 'bubble_continuing') {
                     if (isImmune) {
-                        // Immune cards get 2x bubble effect
+                        // Immune cards get 2x bubble effect (if under 10x base price)
                         multiplier *= 1.8; // 80% boost for immune cards
                         baseChange += 700; // Additional 700pt boost
                     } else {
@@ -855,7 +856,7 @@
                     }
                 } else if (globalMarketState === 'crash') {
                     if (isImmune) {
-                        // Immune cards lose 80% on crash
+                        // Immune cards lose 80% on crash (if under 10x base price)
                         multiplier *= 0.2; // 80% decrease for immune cards
                     } else {
                         multiplier *= 0.4; // 60% decrease for normal cards
