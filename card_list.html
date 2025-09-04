@@ -877,11 +877,6 @@
                                 <i class="bi bi-award"></i> アイコン
                             </button>
                         </li>
-                        <li class="nav-item" role="presentation">
-                            <button class="nav-link" data-bs-toggle="tab" data-bs-target="#bonuses-tab" type="button">
-                                <i class="bi bi-gift"></i> ボーナス
-                            </button>
-                        </li>
                     </ul>
                     
                     <!-- Shop Tab Content -->
@@ -921,12 +916,6 @@
                             </div>
                         </div>
                         
-                        <!-- Bonuses Tab -->
-                        <div class="tab-pane fade" id="bonuses-tab" role="tabpanel">
-                            <div class="row g-3" id="bonus-shop-items">
-                                <!-- Bonus items will be populated here -->
-                            </div>
-                        </div>
                     </div>
                 </div>
                 <div class="modal-footer">
@@ -1773,13 +1762,6 @@
                 { id: 'icon-dragon', name: 'ドラゴンアイコン', cost: 200, description: '特別なドラゴンマーク', class: 'icon-dragon' },
                 { id: 'icon-phoenix', name: '不死鳥アイコン', cost: 250, description: '伝説の不死鳥マーク', class: 'icon-phoenix' },
                 { id: 'icon-sword', name: '剣アイコン', cost: 150, description: '戦士の証', class: 'icon-sword' },
-            ],
-            bonuses: [
-                { id: 'bonus-double', name: '2倍ポイント (1日)', cost: 500, description: '1日間ポイント獲得量2倍' },
-                { id: 'bonus-lucky', name: 'ラッキーモード', cost: 300, description: 'レアカード獲得ポイントUP' },
-                { id: 'bonus-mission', name: 'ミッションリセット', cost: 100, description: 'デイリーミッションを再取得' },
-                { id: 'bonus-instant', name: '即座に100pt', cost: 50, description: '50ptで100pt獲得(限定)' },
-                { id: 'bonus-streak', name: 'ストリークブースト', cost: 200, description: '連続記録ボーナス増加' },
             ]
         };
         
@@ -2180,28 +2162,6 @@
                 });
             }
             
-            // Populate bonuses
-            const bonusContainer = document.getElementById('bonus-shop-items');
-            if (bonusContainer) {
-                bonusContainer.innerHTML = '';
-                SHOP_ITEMS.bonuses.forEach(bonus => {
-                    const itemEl = document.createElement('div');
-                    itemEl.className = 'col-md-6';
-                    itemEl.innerHTML = `
-                        <div class="card shop-item ${gamificationData.userPoints < bonus.cost ? 'locked' : ''}">
-                            <div class="card-body">
-                                <h6><i class="bi bi-gift"></i> ${bonus.name}</h6>
-                                <p class="small text-muted">${bonus.description}</p>
-                                <div class="d-flex justify-content-between align-items-center">
-                                    <span class="badge bg-warning">${bonus.cost} pt</span>
-                                    <button class="btn btn-sm btn-warning" onclick="purchaseItem('${bonus.id}', ${bonus.cost}, 'bonus')">購入</button>
-                                </div>
-                            </div>
-                        </div>
-                    `;
-                    bonusContainer.appendChild(itemEl);
-                });
-            }
         };
         
         // Purchase item
@@ -2217,13 +2177,10 @@
                 if (type === 'theme' || type === 'frame' || type === 'background' || type === 'icon' || type === 'effect') {
                     gamificationData.purchasedItems[itemId] = true;
                     saveGamificationData();
-                } else if (type === 'bonus') {
-                    // Handle bonus effects
-                    if (itemId === 'bonus-mission') {
-                        // Reset missions
-                        gamificationData.dailyMissionProgress.missions = {};
-                        saveGamificationData();
-                        updateDailyMissions();
+                    
+                    // Apply effect immediately if it's an effect
+                    if (type === 'effect') {
+                        document.body.classList.add(itemId);
                     }
                 }
                 
@@ -2291,6 +2248,13 @@
             gamificationData.activeIcon = iconClass;
             saveGamificationData();
             initializeShop();
+        };
+        
+        // Apply effect (effects are permanent once purchased)
+        window.applyEffect = (effectId) => {
+            if (gamificationData.purchasedItems[effectId]) {
+                document.body.classList.add(effectId);
+            }
         };
         
         // Initialize fun dashboard
@@ -3199,19 +3163,28 @@
             
             // Apply saved customizations from Firebase data
             if (gamificationData.activeTheme && gamificationData.activeTheme !== 'default') {
-                applyTheme(gamificationData.activeTheme);
+                window.applyTheme(gamificationData.activeTheme);
             }
             
             if (gamificationData.activeFrame) {
-                applyFrame(gamificationData.activeFrame);
+                window.applyFrame(gamificationData.activeFrame);
             }
             
             if (gamificationData.activeBackground) {
-                applyBackground(gamificationData.activeBackground);
+                window.applyBackground(gamificationData.activeBackground);
             }
             
             if (gamificationData.activeIcon) {
-                applyIcon(gamificationData.activeIcon);
+                window.applyIcon(gamificationData.activeIcon);
+            }
+            
+            // Apply all purchased effects
+            if (gamificationData.purchasedItems) {
+                Object.keys(gamificationData.purchasedItems).forEach(itemId => {
+                    if (itemId.startsWith('effect-') && gamificationData.purchasedItems[itemId]) {
+                        document.body.classList.add(itemId);
+                    }
+                });
             }
             
             // Check for first login bonus
