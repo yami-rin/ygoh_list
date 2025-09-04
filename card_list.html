@@ -684,6 +684,32 @@
                 justify-content: center;
             }
         }
+        
+        /* Profile modal styles */
+        .icon-select {
+            width: 50px;
+            height: 50px;
+            font-size: 1.5rem;
+            padding: 0;
+            transition: all 0.2s;
+        }
+        
+        .icon-select.active {
+            background-color: var(--bs-primary);
+            color: white;
+            border-color: var(--bs-primary);
+            transform: scale(1.1);
+        }
+        
+        #profile-icon {
+            font-size: 4rem;
+            animation: bounce 2s ease-in-out infinite;
+        }
+        
+        @keyframes bounce {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-10px); }
+        }
     </style>
 </head>
 <body>
@@ -837,6 +863,101 @@
         </div></div>
     </div>
 
+    <!-- Profile Modal -->
+    <div class="modal fade" id="profile-modal" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header bg-info text-white">
+                    <h5 class="modal-title"><i class="bi bi-person-circle"></i> プロフィール</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <div id="profile-view" style="display: block;">
+                        <div class="text-center mb-3">
+                            <div class="display-1 mb-2" id="profile-icon">👤</div>
+                            <h4 id="profile-nickname">未設定</h4>
+                            <p class="text-muted" id="profile-user-id"></p>
+                        </div>
+                        
+                        <div class="list-group">
+                            <div class="list-group-item d-flex justify-content-between">
+                                <span><i class="bi bi-calendar-check"></i> 総利用日数</span>
+                                <strong id="profile-total-days">0日</strong>
+                            </div>
+                            <div class="list-group-item d-flex justify-content-between">
+                                <span><i class="bi bi-clock-history"></i> 初回利用日</span>
+                                <strong id="profile-first-use">-</strong>
+                            </div>
+                            <div class="list-group-item d-flex justify-content-between">
+                                <span><i class="bi bi-clock"></i> 最終利用日</span>
+                                <strong id="profile-last-use">-</strong>
+                            </div>
+                            <div class="list-group-item d-flex justify-content-between">
+                                <span><i class="bi bi-collection"></i> 総カード枚数</span>
+                                <strong id="profile-total-cards">0枚</strong>
+                            </div>
+                            <div class="list-group-item d-flex justify-content-between">
+                                <span><i class="bi bi-fire"></i> 現在のストリーク</span>
+                                <strong id="profile-streak">0日</strong>
+                            </div>
+                            <div class="list-group-item d-flex justify-content-between">
+                                <span><i class="bi bi-trophy"></i> 最長ストリーク</span>
+                                <strong id="profile-max-streak">0日</strong>
+                            </div>
+                            <div class="list-group-item d-flex justify-content-between">
+                                <span><i class="bi bi-coin"></i> 累計獲得ポイント</span>
+                                <strong id="profile-total-points">0pt</strong>
+                            </div>
+                        </div>
+                        
+                        <div class="mt-3 text-center">
+                            <button class="btn btn-primary" id="edit-profile-btn">
+                                <i class="bi bi-pencil"></i> プロフィール編集
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <div id="profile-edit" style="display: none;">
+                        <form id="profile-edit-form">
+                            <div class="mb-3">
+                                <label for="edit-nickname" class="form-label">ニックネーム</label>
+                                <input type="text" class="form-control" id="edit-nickname" maxlength="20" required>
+                                <small class="text-muted">最大20文字まで</small>
+                            </div>
+                            
+                            <div class="mb-3">
+                                <label class="form-label">アイコン選択</label>
+                                <div class="d-flex flex-wrap gap-2" id="profile-icon-selector">
+                                    <button type="button" class="btn btn-outline-secondary icon-select" data-icon="👤">👤</button>
+                                    <button type="button" class="btn btn-outline-secondary icon-select" data-icon="😊">😊</button>
+                                    <button type="button" class="btn btn-outline-secondary icon-select" data-icon="😎">😎</button>
+                                    <button type="button" class="btn btn-outline-secondary icon-select" data-icon="🎮">🎮</button>
+                                    <button type="button" class="btn btn-outline-secondary icon-select" data-icon="🎯">🎯</button>
+                                    <button type="button" class="btn btn-outline-secondary icon-select" data-icon="⭐">⭐</button>
+                                    <button type="button" class="btn btn-outline-secondary icon-select" data-icon="🏆">🏆</button>
+                                    <button type="button" class="btn btn-outline-secondary icon-select" data-icon="💎">💎</button>
+                                    <button type="button" class="btn btn-outline-secondary icon-select" data-icon="🔥">🔥</button>
+                                    <button type="button" class="btn btn-outline-secondary icon-select" data-icon="⚡">⚡</button>
+                                    <button type="button" class="btn btn-outline-secondary icon-select" data-icon="🌟">🌟</button>
+                                    <button type="button" class="btn btn-outline-secondary icon-select" data-icon="🎨">🎨</button>
+                                </div>
+                            </div>
+                            
+                            <div class="d-flex gap-2">
+                                <button type="submit" class="btn btn-success flex-grow-1">
+                                    <i class="bi bi-check-circle"></i> 保存
+                                </button>
+                                <button type="button" class="btn btn-secondary" id="cancel-edit-btn">
+                                    <i class="bi bi-x-circle"></i> キャンセル
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
     <!-- Point Shop Modal -->
     <div class="modal fade" id="point-shop-modal" tabindex="-1">
         <div class="modal-dialog modal-lg">
@@ -1217,6 +1338,9 @@
                                             </div>
                                         </div>
                                     </div>
+                                    <button class="btn btn-info btn-sm me-2" id="profile-btn">
+                                        <i class="bi bi-person-circle"></i> プロフィール
+                                    </button>
                                     <button class="btn btn-warning btn-sm" id="point-shop-btn">
                                         <i class="bi bi-shop"></i> ショップ
                                     </button>
@@ -1443,7 +1567,17 @@
             firstCollectionDate: null,
             lastMilestoneReached: 0,
             cardAdditionDates: {},
-            hasReceivedFirstLoginBonus: false // Track first login bonus in Firebase
+            hasReceivedFirstLoginBonus: false, // Track first login bonus in Firebase
+            // Profile data
+            profile: {
+                nickname: '',
+                icon: '👤',
+                firstUseDate: null,
+                lastUseDate: null,
+                usageDays: new Set(),
+                maxStreak: 0,
+                totalPointsEarned: 0
+            }
         };
         
         // Save gamification data to Firebase
@@ -1452,7 +1586,15 @@
             
             try {
                 const userDocRef = doc(db, 'userGamification', currentUser.uid);
-                await setDoc(userDocRef, gamificationData, { merge: true });
+                // Convert Set to Array for Firebase storage
+                const dataToSave = {
+                    ...gamificationData,
+                    profile: {
+                        ...gamificationData.profile,
+                        usageDays: gamificationData.profile?.usageDays ? Array.from(gamificationData.profile.usageDays) : []
+                    }
+                };
+                await setDoc(userDocRef, dataToSave, { merge: true });
             } catch (error) {
                 console.error('Error saving gamification data:', error);
             }
@@ -1468,15 +1610,26 @@
                 
                 if (docSnap.exists()) {
                     const data = docSnap.data();
+                    // Convert Array back to Set for usageDays
+                    if (data.profile?.usageDays) {
+                        data.profile.usageDays = new Set(data.profile.usageDays);
+                    }
                     // Merge with default values to ensure all properties exist
                     gamificationData = {
                         ...gamificationData,
-                        ...data
+                        ...data,
+                        profile: {
+                            ...gamificationData.profile,
+                            ...data.profile
+                        }
                     };
                 } else {
                     // Initialize new user data
                     await saveGamificationData();
                 }
+                
+                // Track today's usage
+                trackDailyUsage();
             } catch (error) {
                 console.error('Error loading gamification data:', error);
             }
@@ -1965,6 +2118,21 @@
         // Add points with animation
         const addPoints = (amount, reason) => {
             gamificationData.userPoints += amount;
+            
+            // Track total points earned
+            if (!gamificationData.profile) {
+                gamificationData.profile = {
+                    nickname: '',
+                    icon: '👤',
+                    firstUseDate: null,
+                    lastUseDate: null,
+                    usageDays: new Set(),
+                    maxStreak: 0,
+                    totalPointsEarned: 0
+                };
+            }
+            gamificationData.profile.totalPointsEarned = (gamificationData.profile.totalPointsEarned || 0) + amount;
+            
             saveGamificationData();
             updatePointsDisplay();
             
@@ -3195,6 +3363,161 @@
                 const shopModal = new bootstrap.Modal(document.getElementById('point-shop-modal'));
                 shopModal.show();
             });
+            
+            // Add profile functionality
+            initializeProfile();
+        };
+        
+        // Track daily usage
+        const trackDailyUsage = () => {
+            const today = new Date().toISOString().split('T')[0];
+            
+            if (!gamificationData.profile) {
+                gamificationData.profile = {
+                    nickname: '',
+                    icon: '👤',
+                    firstUseDate: null,
+                    lastUseDate: null,
+                    usageDays: new Set(),
+                    maxStreak: 0,
+                    totalPointsEarned: 0
+                };
+            }
+            
+            // Initialize as Set if it's not
+            if (!(gamificationData.profile.usageDays instanceof Set)) {
+                gamificationData.profile.usageDays = new Set(gamificationData.profile.usageDays || []);
+            }
+            
+            // Track first use date
+            if (!gamificationData.profile.firstUseDate) {
+                gamificationData.profile.firstUseDate = today;
+            }
+            
+            // Add today to usage days
+            gamificationData.profile.usageDays.add(today);
+            
+            // Update last use date
+            gamificationData.profile.lastUseDate = today;
+            
+            // Update max streak
+            if (gamificationData.registrationStreak.count > (gamificationData.profile.maxStreak || 0)) {
+                gamificationData.profile.maxStreak = gamificationData.registrationStreak.count;
+            }
+            
+            saveGamificationData();
+        };
+        
+        // Initialize profile functionality
+        const initializeProfile = () => {
+            const profileBtn = document.getElementById('profile-btn');
+            const profileModal = new bootstrap.Modal(document.getElementById('profile-modal'));
+            const editProfileBtn = document.getElementById('edit-profile-btn');
+            const cancelEditBtn = document.getElementById('cancel-edit-btn');
+            const profileEditForm = document.getElementById('profile-edit-form');
+            const profileView = document.getElementById('profile-view');
+            const profileEdit = document.getElementById('profile-edit');
+            
+            // Profile button click
+            profileBtn.addEventListener('click', () => {
+                updateProfileDisplay();
+                profileModal.show();
+            });
+            
+            // Edit profile button
+            editProfileBtn.addEventListener('click', () => {
+                profileView.style.display = 'none';
+                profileEdit.style.display = 'block';
+                
+                // Pre-fill edit form
+                document.getElementById('edit-nickname').value = gamificationData.profile?.nickname || '';
+                
+                // Set active icon
+                document.querySelectorAll('.icon-select').forEach(btn => {
+                    btn.classList.toggle('active', btn.dataset.icon === (gamificationData.profile?.icon || '👤'));
+                });
+            });
+            
+            // Cancel edit button
+            cancelEditBtn.addEventListener('click', () => {
+                profileView.style.display = 'block';
+                profileEdit.style.display = 'none';
+            });
+            
+            // Icon selection
+            let selectedIcon = gamificationData.profile?.icon || '👤';
+            document.querySelectorAll('.icon-select').forEach(btn => {
+                btn.addEventListener('click', () => {
+                    document.querySelectorAll('.icon-select').forEach(b => b.classList.remove('active'));
+                    btn.classList.add('active');
+                    selectedIcon = btn.dataset.icon;
+                });
+            });
+            
+            // Save profile form
+            profileEditForm.addEventListener('submit', async (e) => {
+                e.preventDefault();
+                
+                const nickname = document.getElementById('edit-nickname').value.trim();
+                
+                if (!gamificationData.profile) {
+                    gamificationData.profile = {
+                        nickname: '',
+                        icon: '👤',
+                        firstUseDate: null,
+                        lastUseDate: null,
+                        usageDays: new Set(),
+                        maxStreak: 0,
+                        totalPointsEarned: 0
+                    };
+                }
+                
+                gamificationData.profile.nickname = nickname;
+                gamificationData.profile.icon = selectedIcon;
+                
+                await saveGamificationData();
+                
+                profileView.style.display = 'block';
+                profileEdit.style.display = 'none';
+                
+                updateProfileDisplay();
+                
+                showNotification('プロフィールを更新しました', 'success');
+            });
+        };
+        
+        // Update profile display
+        const updateProfileDisplay = () => {
+            const profile = gamificationData.profile || {};
+            
+            // Basic info
+            document.getElementById('profile-icon').textContent = profile.icon || '👤';
+            document.getElementById('profile-nickname').textContent = profile.nickname || '未設定';
+            document.getElementById('profile-user-id').textContent = currentUser?.email || '';
+            
+            // Usage stats
+            const totalDays = profile.usageDays ? (profile.usageDays instanceof Set ? profile.usageDays.size : profile.usageDays.length) : 0;
+            document.getElementById('profile-total-days').textContent = `${totalDays}日`;
+            
+            // Format dates
+            const formatDate = (dateStr) => {
+                if (!dateStr) return '-';
+                const date = new Date(dateStr);
+                return `${date.getFullYear()}/${(date.getMonth() + 1).toString().padStart(2, '0')}/${date.getDate().toString().padStart(2, '0')}`;
+            };
+            
+            document.getElementById('profile-first-use').textContent = formatDate(profile.firstUseDate);
+            document.getElementById('profile-last-use').textContent = formatDate(profile.lastUseDate);
+            
+            // Collection stats
+            document.getElementById('profile-total-cards').textContent = `${cardCollection.reduce((sum, card) => sum + (card.data['枚数'] || 0), 0)}枚`;
+            
+            // Streak info
+            document.getElementById('profile-streak').textContent = `${gamificationData.registrationStreak?.count || 0}日`;
+            document.getElementById('profile-max-streak').textContent = `${profile.maxStreak || 0}日`;
+            
+            // Points
+            document.getElementById('profile-total-points').textContent = `${profile.totalPointsEarned || 0}pt`;
         };
 
         const handleUserLogout = () => {
