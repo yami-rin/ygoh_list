@@ -1313,6 +1313,10 @@
                             <i class="bi bi-trophy"></i>
                             <span class="d-none d-sm-inline"> ランキング</span>
                         </button>
+                        <button class="btn btn-outline-info btn-sm" id="profile-btn">
+                            <i class="bi bi-person-circle"></i>
+                            <span class="d-none d-sm-inline"> プロフィール</span>
+                        </button>
                         <button class="btn btn-outline-secondary btn-sm" id="settings-btn">
                             <i class="bi bi-gear"></i>
                             <span class="d-none d-sm-inline"> 設定</span>
@@ -1442,9 +1446,6 @@
                                             </div>
                                         </div>
                                     </div>
-                                    <button class="btn btn-info btn-sm me-2" id="profile-btn">
-                                        <i class="bi bi-person-circle"></i> プロフィール
-                                    </button>
                                     <button class="btn btn-warning btn-sm" id="point-shop-btn">
                                         <i class="bi bi-shop"></i> ショップ
                                     </button>
@@ -2019,11 +2020,16 @@
                 { id: 'effect-glow', name: '発光エフェクト', cost: 250, description: 'カードが柔らかく光る' },
             ],
             icons: [
-                { id: 'icon-crown', name: '王冠アイコン', cost: 100, description: 'プロフィールに王冠', class: 'icon-crown' },
-                { id: 'icon-star', name: 'スターアイコン', cost: 80, description: 'プロフィールに星', class: 'icon-star' },
-                { id: 'icon-dragon', name: 'ドラゴンアイコン', cost: 200, description: '特別なドラゴンマーク', class: 'icon-dragon' },
-                { id: 'icon-phoenix', name: '不死鳥アイコン', cost: 250, description: '伝説の不死鳥マーク', class: 'icon-phoenix' },
-                { id: 'icon-sword', name: '剣アイコン', cost: 150, description: '戦士の証', class: 'icon-sword' },
+                { id: 'icon-crown', name: '王冠アイコン', cost: 100, description: 'プロフィールに王冠', class: 'icon-crown', emoji: '👑' },
+                { id: 'icon-star', name: 'スターアイコン', cost: 80, description: 'プロフィールに星', class: 'icon-star', emoji: '✨' },
+                { id: 'icon-dragon', name: 'ドラゴンアイコン', cost: 200, description: '特別なドラゴンマーク', class: 'icon-dragon', emoji: '🐉' },
+                { id: 'icon-phoenix', name: '不死鳥アイコン', cost: 250, description: '伝説の不死鳥マーク', class: 'icon-phoenix', emoji: '🦅' },
+                { id: 'icon-sword', name: '剣アイコン', cost: 150, description: '戦士の証', class: 'icon-sword', emoji: '⚔️' },
+                { id: 'icon-wizard', name: '魔法使いアイコン', cost: 180, description: '神秘的な魔法使い', class: 'icon-wizard', emoji: '🧙' },
+                { id: 'icon-robot', name: 'ロボットアイコン', cost: 120, description: 'クールなロボット', class: 'icon-robot', emoji: '🤖' },
+                { id: 'icon-alien', name: 'エイリアンアイコン', cost: 150, description: '宇宙から来た訪問者', class: 'icon-alien', emoji: '👽' },
+                { id: 'icon-ghost', name: 'ゴーストアイコン', cost: 100, description: 'ミステリアスな幽霊', class: 'icon-ghost', emoji: '👻' },
+                { id: 'icon-devil', name: 'デビルアイコン', cost: 140, description: '小悪魔的な存在', class: 'icon-devil', emoji: '😈' },
             ]
         };
         
@@ -2411,24 +2417,21 @@
                 iconContainer.innerHTML = '';
                 SHOP_ITEMS.icons.forEach(icon => {
                     const isPurchased = gamificationData.purchasedItems[icon.id];
-                    const isActive = gamificationData.activeIcon === icon.class;
                     
                     const itemEl = document.createElement('div');
                     itemEl.className = 'col-md-6';
                     itemEl.innerHTML = `
-                        <div class="card shop-item ${isPurchased ? 'purchased' : ''} ${isActive ? 'active' : ''} ${!isPurchased && gamificationData.userPoints < icon.cost ? 'locked' : ''}">
+                        <div class="card shop-item ${isPurchased ? 'purchased' : ''} ${!isPurchased && gamificationData.userPoints < icon.cost ? 'locked' : ''}">
                             <div class="card-body">
-                                <h6><i class="bi bi-award"></i> ${icon.name}</h6>
+                                <div class="d-flex align-items-center mb-2">
+                                    <span class="fs-2 me-2">${icon.emoji}</span>
+                                    <h6 class="mb-0">${icon.name}</h6>
+                                </div>
                                 <p class="small text-muted">${icon.description}</p>
                                 <div class="d-flex justify-content-between align-items-center">
                                     <span class="badge bg-warning">${icon.cost} pt</span>
                                     ${isPurchased ? 
-                                        (isActive ? 
-                                            '<div class="btn-group btn-group-sm">' +
-                                            '<button class="btn btn-primary" disabled>適用中</button>' +
-                                            '<button class="btn btn-outline-secondary" onclick="applyIcon(\'\')" title="外す"><i class="bi bi-x"></i></button>' +
-                                            '</div>' : 
-                                            `<button class="btn btn-sm btn-success" onclick="applyIcon('${icon.class}')">適用</button>`) :
+                                        '<span class="badge bg-success">購入済み</span>' :
                                         `<button class="btn btn-sm btn-warning" onclick="purchaseItem('${icon.id}', ${icon.cost}, 'icon')">購入</button>`
                                     }
                                 </div>
@@ -3520,6 +3523,53 @@
             saveGamificationData();
         };
         
+        // Variable to store selected icon
+        let selectedIcon = '👤';
+        
+        // Update icon selector with all available icons
+        const updateIconSelector = () => {
+            const selectorContainer = document.getElementById('profile-icon-selector');
+            selectorContainer.innerHTML = '';
+            
+            // Default icons (always available)
+            const defaultIcons = [
+                '👤', '😊', '😎', '🎮', '🎯', '⭐', '🏆', '💎', '🔥', '⚡', '🌟', '🎨'
+            ];
+            
+            // Add default icons
+            defaultIcons.forEach(icon => {
+                const btn = document.createElement('button');
+                btn.type = 'button';
+                btn.className = 'btn btn-outline-secondary icon-select';
+                btn.dataset.icon = icon;
+                btn.textContent = icon;
+                btn.addEventListener('click', () => {
+                    document.querySelectorAll('.icon-select').forEach(b => b.classList.remove('active'));
+                    btn.classList.add('active');
+                    selectedIcon = icon;
+                });
+                selectorContainer.appendChild(btn);
+            });
+            
+            // Add purchased shop icons
+            SHOP_ITEMS.icons.forEach(shopIcon => {
+                if (gamificationData.purchasedItems[shopIcon.id]) {
+                    const btn = document.createElement('button');
+                    btn.type = 'button';
+                    btn.className = 'btn btn-outline-secondary icon-select';
+                    btn.dataset.icon = shopIcon.emoji;
+                    btn.innerHTML = `${shopIcon.emoji} <small class="d-block" style="font-size: 0.6rem;">購入済み</small>`;
+                    btn.style.position = 'relative';
+                    btn.addEventListener('click', () => {
+                        document.querySelectorAll('.icon-select').forEach(b => b.classList.remove('active'));
+                        btn.classList.add('active');
+                        selectedIcon = shopIcon.emoji;
+                    });
+                    selectorContainer.appendChild(btn);
+                }
+            });
+        };
+        
         // Initialize profile functionality
         const initializeProfile = () => {
             const profileBtn = document.getElementById('profile-btn');
@@ -3544,6 +3594,9 @@
                 // Pre-fill edit form
                 document.getElementById('edit-nickname').value = gamificationData.profile?.nickname || '';
                 
+                // Update icon selector with purchased icons
+                updateIconSelector();
+                
                 // Set active icon
                 document.querySelectorAll('.icon-select').forEach(btn => {
                     btn.classList.toggle('active', btn.dataset.icon === (gamificationData.profile?.icon || '👤'));
@@ -3556,15 +3609,8 @@
                 profileEdit.style.display = 'none';
             });
             
-            // Icon selection
-            let selectedIcon = gamificationData.profile?.icon || '👤';
-            document.querySelectorAll('.icon-select').forEach(btn => {
-                btn.addEventListener('click', () => {
-                    document.querySelectorAll('.icon-select').forEach(b => b.classList.remove('active'));
-                    btn.classList.add('active');
-                    selectedIcon = btn.dataset.icon;
-                });
-            });
+            // Initialize selectedIcon with current profile icon
+            selectedIcon = gamificationData.profile?.icon || '👤';
             
             // Save profile form
             profileEditForm.addEventListener('submit', async (e) => {
