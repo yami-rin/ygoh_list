@@ -520,7 +520,7 @@
                         await updateCardPrices();
                     } else {
                         cardPrices = data.prices || {};
-                        // Initialize missing prices
+                        // Initialize missing prices only (for new cards)
                         CARDS_DATABASE.forEach(card => {
                             if (!cardPrices[card.id]) {
                                 cardPrices[card.id] = {
@@ -530,6 +530,11 @@
                                     patternStart: now,
                                     history: []
                                 };
+                            } else {
+                                // Ensure history array exists for existing prices
+                                if (!cardPrices[card.id].history) {
+                                    cardPrices[card.id].history = [];
+                                }
                             }
                         });
                     }
@@ -555,12 +560,26 @@
         async function updateCardPrices() {
             const now = Date.now();
             
+            // First, ensure we have the latest prices from Firebase
+            if (Object.keys(cardPrices).length === 0) {
+                try {
+                    const pricesRef = doc(db, 'cardShopPrices', 'current');
+                    const pricesSnap = await getDoc(pricesRef);
+                    if (pricesSnap.exists()) {
+                        cardPrices = pricesSnap.data().prices || {};
+                    }
+                } catch (error) {
+                    console.error('Error loading existing prices:', error);
+                }
+            }
+            
             CARDS_DATABASE.forEach(card => {
                 const price = cardPrices[card.id] || {
                     current: card.basePrice,
                     previous: card.basePrice,
                     pattern: PRICE_PATTERNS.SUPPLY,
                     patternStart: now,
+                    continuationCount: 0,
                     history: []
                 };
                 
