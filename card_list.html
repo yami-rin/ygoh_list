@@ -31,10 +31,32 @@
             white-space: nowrap;
             overflow: hidden;
             text-overflow: ellipsis;
+            position: relative;
         }
         .tag-cell:hover {
             white-space: normal;
             word-wrap: break-word;
+        }
+        .tag-cell:hover .edit-tags-btn {
+            display: inline-block !important;
+        }
+
+        /* Fix for mobile tag/rarity suggestions */
+        @media (max-width: 768px) {
+            #set-rarity-choices,
+            #tag-choices-container,
+            #edit-tag-choices-container,
+            #bulk-tag-choices-container {
+                display: flex;
+                flex-wrap: wrap;
+                gap: 0.25rem;
+            }
+
+            #set-rarity-choices .btn:first-child,
+            #tag-choices-container .btn:first-child,
+            #edit-tag-choices-container .btn:first-child {
+                margin-left: 0 !important;
+            }
         }
         
         /* Draggable tags styles */
@@ -759,6 +781,21 @@
             height: 38px;
             display: inline-flex;
             align-items: center;
+            white-space: nowrap;
+        }
+
+        .navbar-nav {
+            align-items: center;
+        }
+
+        @media (max-width: 991px) {
+            .navbar-nav {
+                padding: 0.5rem 0;
+            }
+            .navbar-nav .btn {
+                width: auto;
+                margin: 0.25rem;
+            }
         }
         
         /* Pagination controls responsive */
@@ -1472,7 +1509,7 @@
                     <span class="navbar-toggler-icon"></span>
                 </button>
                 <div class="collapse navbar-collapse" id="navbarContent">
-                    <div class="navbar-nav ms-auto d-flex flex-row flex-wrap gap-2 mt-2 mt-lg-0">
+                    <div class="navbar-nav ms-auto d-flex align-items-center flex-wrap gap-2 mt-2 mt-lg-0">
                         <button class="btn btn-outline-info btn-sm" id="how-to-use-btn">
                             <i class="bi bi-question-circle"></i>
                             <span class="d-none d-sm-inline"> 使い方</span>
@@ -1633,9 +1670,9 @@
                                     </div>
                                 </div>
                                 <div class="col-6">
-                                    <div class="p-2 bg-light rounded">
+                                    <div class="p-2 bg-light rounded" style="cursor: pointer;" onclick="showWeeklyGoalSetting()" title="クリックして目標を変更">
                                         <div class="fs-4 fw-bold text-success" id="week-goal-progress">0%</div>
-                                        <small class="text-muted">週間目標</small>
+                                        <small class="text-muted">週間目標 (<span id="week-goal-target">50</span>枚)</small>
                                     </div>
                                 </div>
                             </div>
@@ -2015,7 +2052,10 @@
                         <td>${escapeHtml(card.data['型番'])}</td>
                         <td>${escapeHtml(card.data['レアリティ'])}</td>
                         <td>${escapeHtml(card.data['枚数'])}</td>
-                        <td class="tag-cell d-none d-sm-table-cell" title="${escapeHtml(tags)}">${tags}</td>
+                        <td class="tag-cell d-none d-sm-table-cell" title="${escapeHtml(tags)}">
+                            <span class="tags-display" data-card-id="${escapeHtml(card.id)}">${tags}</span>
+                            <button class="btn btn-sm btn-link edit-tags-btn" data-id="${escapeHtml(card.id)}" style="padding: 0 0.25rem; display: none;" title="タグを編集"><i class="bi bi-pencil-square"></i></button>
+                        </td>
                         <td>
                             <button class="btn btn-primary btn-sm edit-btn" data-id="${escapeHtml(card.id)}"><i class="bi bi-pencil"></i></button>
                             ${currentListType === 'wishlist' ? `<button class="btn btn-success btn-sm move-to-collection-btn" data-id="${escapeHtml(card.id)}" title="所持カードへ移動"><i class="bi bi-check-circle"></i></button>` : ''}
@@ -2073,6 +2113,38 @@
             renderTagChoices(choices, currentCardTags);
             renderSelectedTags(tags, currentCardTags);
         };
+
+        // Quick tag edit functionality
+        document.addEventListener('click', async (e) => {
+            if (e.target.closest('.edit-tags-btn')) {
+                e.preventDefault();
+                e.stopPropagation();
+                const cardId = e.target.closest('.edit-tags-btn').dataset.id;
+                const card = getCurrentCollection().find(c => c.id === cardId);
+                if (!card) return;
+
+                // Show edit modal with tags focused
+                currentCardTags = [...(card.data.tags || [])];
+                document.getElementById('edit-card-id').value = cardId;
+                document.getElementById('edit-name').value = card.data['名前'];
+                document.getElementById('edit-set-code').value = card.data['型番'] || '';
+                document.getElementById('edit-rarity').value = card.data['レアリティ'] || '';
+                document.getElementById('edit-quantity').value = card.data['枚数'];
+
+                renderTagChoices('edit-tag-choices-container', currentCardTags);
+                renderSelectedTags('edit-card-tags-container', currentCardTags);
+
+                editCardModal.show();
+
+                // Focus on tags section
+                setTimeout(() => {
+                    const tagsContainer = document.getElementById('edit-tag-choices-container');
+                    if (tagsContainer) {
+                        tagsContainer.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                    }
+                }, 300);
+            }
+        });
 
         const updateSortIcons = () => {
             document.querySelectorAll('th.sortable').forEach(th => {
@@ -2521,6 +2593,8 @@
             const weekProgress = Math.min(100, Math.round((weeklyGoalData.count / weeklyGoalData.goal) * 100));
             const weekGoalEl = document.getElementById('week-goal-progress');
             if (weekGoalEl) weekGoalEl.textContent = `${weekProgress}%`;
+            const weekGoalTargetEl = document.getElementById('week-goal-target');
+            if (weekGoalTargetEl) weekGoalTargetEl.textContent = weeklyGoalData.goal;
             
         };
         
@@ -2742,6 +2816,24 @@
         
         // Purchase item
         // Toggle daily challenges visibility
+        // Show weekly goal setting dialog
+        window.showWeeklyGoalSetting = () => {
+            const currentGoal = gamificationData.weeklyGoalData.goal || 50;
+            const newGoal = prompt(`週間目標を設定してください (現在: ${currentGoal}枚)\n\n何枚のカードを週に追加したいですか？`, currentGoal);
+
+            if (newGoal !== null) {
+                const goalNumber = parseInt(newGoal, 10);
+                if (!isNaN(goalNumber) && goalNumber > 0 && goalNumber <= 1000) {
+                    gamificationData.weeklyGoalData.goal = goalNumber;
+                    saveGamificationData();
+                    updateTodayStats();
+                    alert(`週間目標を${goalNumber}枚に設定しました！`);
+                } else {
+                    alert('有効な数値を入力してください（1〜1000）');
+                }
+            }
+        };
+
         window.toggleDailyChallenges = () => {
             const body = document.getElementById('daily-challenges-body');
             const icon = document.getElementById('daily-challenges-toggle-icon');
