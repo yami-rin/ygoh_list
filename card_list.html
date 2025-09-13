@@ -772,6 +772,36 @@
         #pagination-controls-bottom {
             font-size: 0.9rem;
         }
+
+        /* Tap quantity input styles */
+        .tap-quantity-container {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        .tap-quantity-display {
+            font-size: 1.5rem;
+            font-weight: bold;
+            min-width: 60px;
+            text-align: center;
+            padding: 0.5rem;
+            border: 2px solid #dee2e6;
+            border-radius: 0.375rem;
+            background: white;
+        }
+        [data-bs-theme="dark"] .tap-quantity-display {
+            background: var(--bs-dark);
+            border-color: var(--bs-gray-700);
+        }
+        .tap-quantity-btn {
+            width: 44px;
+            height: 44px;
+            font-size: 1.25rem;
+            padding: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
         
         /* Mobile responsive styles */
         @media (max-width: 768px) {
@@ -950,7 +980,12 @@
                     <div class="mb-3"><label class="form-label">名前</label><input type="text" id="edit-name" class="form-control" readonly disabled></div>
                     <div class="mb-3"><label class="form-label">型番</label><input type="text" id="edit-set-code" class="form-control" readonly disabled></div>
                     <div class="mb-3"><label class="form-label">レアリティ</label><input type="text" id="edit-rarity" class="form-control" readonly disabled></div>
-                    <div class="mb-3"><label for="edit-quantity" class="form-label">枚数</label><input type="number" id="edit-quantity" class="form-control" min="1" required></div>
+                    <div class="mb-3">
+                        <label for="edit-quantity" class="form-label">枚数</label>
+                        <div id="edit-quantity-input-container">
+                            <input type="number" id="edit-quantity" class="form-control" min="1" required>
+                        </div>
+                    </div>
                     <div class="mb-3">
                         <label class="form-label">タグ</label>
                         <div id="edit-card-tags-container" class="mb-2"></div>
@@ -1414,6 +1449,10 @@
                     <input class="form-check-input" type="checkbox" role="switch" id="show-registration-history-toggle">
                     <label class="form-check-label" for="show-registration-history-toggle">前回の登録履歴ボタンを表示</label>
                 </div>
+                <div class="form-check form-switch mb-3">
+                    <input class="form-check-input" type="checkbox" role="switch" id="use-tap-quantity-toggle">
+                    <label class="form-check-label" for="use-tap-quantity-toggle">枚数入力をタップ式にする（スマホ向け）</label>
+                </div>
                 <hr>
                 <h6>アカウント削除</h6>
                 <p class="text-muted small">この操作は元に戻せません。アカウントに紐づく全てのカードデータが完全に削除されます。</p>
@@ -1559,7 +1598,12 @@
                                     <div id="set-rarity-choices" class="mt-2"></div>
                                 </div>
                                 <div class="mb-3"><label for="rarity" class="form-label">レアリティ</label><input type="text" class="form-control" id="rarity" name="rarity"></div>
-                                <div class="mb-3"><label for="quantity" class="form-label">枚数</label><input type="number" class="form-control" id="quantity" name="quantity" value="1" min="1" required></div>
+                                <div class="mb-3">
+                                    <label for="quantity" class="form-label">枚数</label>
+                                    <div id="quantity-input-container">
+                                        <input type="number" class="form-control" id="quantity" name="quantity" value="1" min="1" required>
+                                    </div>
+                                </div>
                                 <div class="mb-3">
                                     <label class="form-label">登録先</label>
                                     <div class="btn-group w-100" role="group">
@@ -1975,6 +2019,7 @@
         const hideEmailToggle = document.getElementById('hide-email-toggle');
         const showSearchHistoryToggle = document.getElementById('show-search-history-toggle');
         const showRegistrationHistoryToggle = document.getElementById('show-registration-history-toggle');
+        const useTapQuantityToggle = document.getElementById('use-tap-quantity-toggle');
 
         const showLoading = (show) => { loadingOverlay.style.display = show ? 'flex' : 'none'; };
         
@@ -4774,6 +4819,9 @@
                     renderTagChoices('edit-tag-choices-container', currentCardTags);
                     renderSelectedTags('edit-card-tags-container', currentCardTags);
 
+                    // Update quantity input mode for edit modal
+                    updateQuantityInputMode();
+
                     editCardModal.show();
                 }
             } else if (target.classList.contains('move-to-collection-btn')) {
@@ -5125,10 +5173,88 @@
             }
         });
         
+        // Tap quantity input functions
+        const createTapQuantityInput = (containerId, inputId, initialValue = 1) => {
+            const container = document.getElementById(containerId);
+            const input = document.getElementById(inputId);
+
+            const tapContainer = document.createElement('div');
+            tapContainer.className = 'tap-quantity-container';
+            tapContainer.innerHTML = `
+                <button type="button" class="btn btn-outline-secondary tap-quantity-btn" data-action="decrease">
+                    <i class="bi bi-dash-lg"></i>
+                </button>
+                <div class="tap-quantity-display">${initialValue}</div>
+                <button type="button" class="btn btn-outline-secondary tap-quantity-btn" data-action="increase">
+                    <i class="bi bi-plus-lg"></i>
+                </button>
+                <button type="button" class="btn btn-outline-danger tap-quantity-btn" data-action="reset" title="リセット">
+                    <i class="bi bi-arrow-counterclockwise"></i>
+                </button>
+            `;
+
+            const display = tapContainer.querySelector('.tap-quantity-display');
+            let value = initialValue;
+
+            tapContainer.addEventListener('click', (e) => {
+                const btn = e.target.closest('[data-action]');
+                if (!btn) return;
+
+                const action = btn.dataset.action;
+                if (action === 'decrease' && value > 1) {
+                    value--;
+                } else if (action === 'increase' && value < 99) {
+                    value++;
+                } else if (action === 'reset') {
+                    value = 1;
+                }
+
+                display.textContent = value;
+                input.value = value;
+            });
+
+            container.innerHTML = '';
+            container.appendChild(tapContainer);
+
+            // Keep hidden input in sync
+            input.type = 'hidden';
+            container.appendChild(input);
+        };
+
+        const restoreNormalQuantityInput = (containerId, inputId) => {
+            const container = document.getElementById(containerId);
+            const input = document.getElementById(inputId);
+
+            input.type = 'number';
+            input.className = 'form-control';
+
+            container.innerHTML = '';
+            container.appendChild(input);
+        };
+
+        const updateQuantityInputMode = () => {
+            const useTap = localStorage.getItem('useTapQuantity') === 'true';
+
+            if (useTap) {
+                // Check if on mobile or touch device
+                const isTouchDevice = 'ontouchstart' in window || navigator.maxTouchPoints > 0;
+                if (isTouchDevice || window.innerWidth <= 768) {
+                    createTapQuantityInput('quantity-input-container', 'quantity',
+                        parseInt(document.getElementById('quantity').value) || 1);
+                    createTapQuantityInput('edit-quantity-input-container', 'edit-quantity',
+                        parseInt(document.getElementById('edit-quantity').value) || 1);
+                }
+            } else {
+                restoreNormalQuantityInput('quantity-input-container', 'quantity');
+                restoreNormalQuantityInput('edit-quantity-input-container', 'edit-quantity');
+            }
+        };
+
         // Initialize history settings
         showSearchHistoryToggle.checked = localStorage.getItem('showSearchHistory') === 'true';
         showRegistrationHistoryToggle.checked = localStorage.getItem('showRegistrationHistory') === 'true';
-        
+        useTapQuantityToggle.checked = localStorage.getItem('useTapQuantity') === 'true';
+
         showSearchHistoryToggle.addEventListener('change', (e) => {
             localStorage.setItem('showSearchHistory', e.target.checked);
             updateSearchHistoryButton();
@@ -5137,6 +5263,11 @@
         showRegistrationHistoryToggle.addEventListener('change', (e) => {
             localStorage.setItem('showRegistrationHistory', e.target.checked);
             updateRegistrationHistoryButton();
+        });
+
+        useTapQuantityToggle.addEventListener('change', (e) => {
+            localStorage.setItem('useTapQuantity', e.target.checked);
+            updateQuantityInputMode();
         });
         
         // Previous search button
@@ -5184,10 +5315,11 @@
             }
         });
         
-        // Initialize history buttons on page load
+        // Initialize history buttons and quantity input mode on page load
         setTimeout(() => {
             updateSearchHistoryButton();
             updateRegistrationHistoryButton();
+            updateQuantityInputMode();
         }, 100);
 
         const applyTheme = () => {
