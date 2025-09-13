@@ -41,23 +41,7 @@
             display: inline-block !important;
         }
 
-        /* Fix for mobile tag/rarity suggestions */
-        @media (max-width: 768px) {
-            #set-rarity-choices,
-            #tag-choices-container,
-            #edit-tag-choices-container,
-            #bulk-tag-choices-container {
-                display: flex;
-                flex-wrap: wrap;
-                gap: 0.25rem;
-            }
-
-            #set-rarity-choices .btn:first-child,
-            #tag-choices-container .btn:first-child,
-            #edit-tag-choices-container .btn:first-child {
-                margin-left: 0 !important;
-            }
-        }
+        /* Fix for mobile tag/rarity suggestions - Remove problematic CSS */
         
         /* Draggable tags styles */
         .draggable-tag {
@@ -781,21 +765,6 @@
             height: 38px;
             display: inline-flex;
             align-items: center;
-            white-space: nowrap;
-        }
-
-        .navbar-nav {
-            align-items: center;
-        }
-
-        @media (max-width: 991px) {
-            .navbar-nav {
-                padding: 0.5rem 0;
-            }
-            .navbar-nav .btn {
-                width: auto;
-                margin: 0.25rem;
-            }
         }
         
         /* Pagination controls responsive */
@@ -1509,7 +1478,7 @@
                     <span class="navbar-toggler-icon"></span>
                 </button>
                 <div class="collapse navbar-collapse" id="navbarContent">
-                    <div class="navbar-nav ms-auto d-flex align-items-center flex-wrap gap-2 mt-2 mt-lg-0">
+                    <div class="navbar-nav ms-auto d-flex flex-row flex-wrap gap-2 mt-2 mt-lg-0">
                         <button class="btn btn-outline-info btn-sm" id="how-to-use-btn">
                             <i class="bi bi-question-circle"></i>
                             <span class="d-none d-sm-inline"> 使い方</span>
@@ -2099,8 +2068,8 @@
 
         const renderTagChoices = (containerId, selectedTags) => {
             const container = document.getElementById(containerId);
-            container.innerHTML = allTags.map(tag => 
-                `<button type="button" class="btn btn-sm ${selectedTags.includes(tag.name) ? 'btn-primary' : 'btn-outline-secondary'} me-1 mb-1" onclick="toggleTag('${escapeHtml(tag.name)}', ${containerId.startsWith('edit')})">${escapeHtml(tag.name)}</button>`
+            container.innerHTML = allTags.map(tag =>
+                `<button type="button" class="btn btn-sm ${selectedTags.includes(tag.name) ? 'btn-primary' : 'btn-outline-secondary'} m-1" onclick="toggleTag('${escapeHtml(tag.name)}', ${containerId.startsWith('edit')})">${escapeHtml(tag.name)}</button>`
             ).join('');
         };
 
@@ -3694,7 +3663,13 @@
                 div.dataset.tagId = tag.id;
                 div.dataset.tagIndex = index;
                 div.innerHTML = `
-                    <span><i class="bi bi-grip-vertical me-2"></i>${escapeHtml(tag.name)}</span>
+                    <div class="d-flex align-items-center">
+                        <i class="bi bi-grip-vertical me-2"></i>
+                        <span class="tag-name-display" data-tag-id="${escapeHtml(tag.id)}">${escapeHtml(tag.name)}</span>
+                        <button class="btn btn-sm btn-link edit-tag-name-btn ms-2" data-id="${escapeHtml(tag.id)}" data-name="${escapeHtml(tag.name)}" title="タグ名を編集">
+                            <i class="bi bi-pencil-square"></i>
+                        </button>
+                    </div>
                     <button class="btn btn-outline-danger btn-sm delete-tag-btn" data-id="${escapeHtml(tag.id)}" data-name="${escapeHtml(tag.name)}">削除</button>
                 `;
                 
@@ -3836,6 +3811,60 @@
         });
 
         document.getElementById('existing-tags-list').addEventListener('click', async (e) => {
+            // Edit tag name
+            if (e.target.closest('.edit-tag-name-btn')) {
+                const btn = e.target.closest('.edit-tag-name-btn');
+                const tagId = btn.dataset.id;
+                const oldName = btn.dataset.name;
+                const newName = prompt('新しいタグ名を入力してください:', oldName);
+
+                if (newName && newName.trim() && newName !== oldName) {
+                    const trimmedName = newName.trim();
+
+                    // Check for duplicates
+                    if (allTags.some(t => t.name === trimmedName && t.id !== tagId)) {
+                        alert('このタグ名は既に存在します。');
+                        return;
+                    }
+
+                    // Update tag name
+                    const tagIndex = allTags.findIndex(t => t.id === tagId);
+                    if (tagIndex !== -1) {
+                        allTags[tagIndex].name = trimmedName;
+
+                        // Save to Firebase or localStorage
+                        const tagsCollRef = getTagsCollectionRef();
+                        if (tagsCollRef) {
+                            await updateDoc(doc(tagsCollRef, tagId), { name: trimmedName });
+                        } else {
+                            localStorage.setItem('tagsOrder', JSON.stringify(allTags));
+                        }
+
+                        // Update all cards with this tag
+                        const collection = getCurrentCollection();
+                        for (const card of collection) {
+                            if (card.data.tags && card.data.tags.includes(oldName)) {
+                                const tagIndex = card.data.tags.indexOf(oldName);
+                                card.data.tags[tagIndex] = trimmedName;
+
+                                // Save card update
+                                const collRef = getCollectionRef(currentListType);
+                                if (collRef) {
+                                    await updateDoc(doc(collRef, card.id), { tags: card.data.tags });
+                                }
+                            }
+                        }
+
+                        // Refresh UI
+                        renderTagManagementList();
+                        renderTagChoices('tag-choices-container', currentCardTags);
+                        renderTagChoices('edit-tag-choices-container', currentCardTags);
+                        renderTable();
+                    }
+                }
+                return;
+            }
+
             if (e.target.classList.contains('delete-tag-btn')) {
                 const tagId = e.target.dataset.id;
                 const tagName = e.target.dataset.name;
@@ -5143,7 +5172,7 @@
                     lastRegistrationData.setChoices.forEach(choice => {
                         const btn = document.createElement('button');
                         btn.type = 'button';
-                        btn.className = 'btn btn-outline-primary btn-sm me-1 mb-1 set-choice-btn';
+                        btn.className = 'btn btn-outline-primary btn-sm m-1 set-choice-btn';
                         btn.dataset.setCode = choice.setCode;
                         btn.dataset.rarity = choice.rarity;
                         btn.textContent = choice.text;
@@ -5480,7 +5509,7 @@
                     Array.from(uniqueSetRarities.values()).forEach(data => {
                         const btn = document.createElement('button');
                         btn.type = 'button';
-                        btn.className = 'btn btn-outline-primary btn-sm me-1 mb-1 set-choice-btn';
+                        btn.className = 'btn btn-outline-primary btn-sm m-1 set-choice-btn';
                         btn.dataset.setCode = data.set_code;
                         btn.dataset.rarity = data.rarity;
                         btn.textContent = `${data.set_code} (${data.rarity})`;
@@ -5535,7 +5564,7 @@
                     Array.from(uniqueSetRarities.values()).forEach(data => {
                         const btn = document.createElement('button');
                         btn.type = 'button';
-                        btn.className = 'btn btn-outline-primary btn-sm me-1 mb-1 set-choice-btn';
+                        btn.className = 'btn btn-outline-primary btn-sm m-1 set-choice-btn';
                         btn.dataset.setCode = data.set_code; btn.dataset.rarity = data.rarity;
                         btn.textContent = `${data.set_code} (${data.rarity})`;
                         choicesEl.appendChild(btn);
