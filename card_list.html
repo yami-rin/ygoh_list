@@ -1518,10 +1518,12 @@
                 </button>
                 <div class="collapse navbar-collapse" id="navbarContent">
                     <div class="navbar-nav ms-auto d-flex flex-row flex-wrap gap-2 mt-2 mt-lg-0">
-                        <button class="btn btn-outline-info btn-sm" id="how-to-use-btn">
-                            <i class="bi bi-question-circle"></i>
-                            <span class="d-none d-sm-inline"> 使い方</span>
-                        </button>
+                        <div class="d-inline-block">
+                            <button class="btn btn-outline-info btn-sm" id="how-to-use-btn">
+                                <i class="bi bi-question-circle"></i>
+                                <span class="d-none d-sm-inline"> 使い方</span>
+                            </button>
+                        </div>
                         <div class="dropdown d-inline-block">
                             <button class="btn btn-outline-secondary btn-sm dropdown-toggle" type="button" data-bs-toggle="dropdown">
                                 <i class="bi bi-database"></i>
@@ -1536,27 +1538,37 @@
                             </ul>
                         </div>
                         <input type="file" id="import-file-input" accept=".json,.csv" style="display: none;">
-                        <button class="btn btn-outline-secondary btn-sm" id="tag-management-btn">
-                            <i class="bi bi-tags"></i>
-                            <span class="d-none d-sm-inline"> タグ</span>
-                        </button>
-                        <button class="btn btn-outline-primary btn-sm" id="ranking-btn">
-                            <i class="bi bi-trophy"></i>
-                            <span class="d-none d-sm-inline"> ランキング</span>
-                        </button>
-                        <button class="btn btn-outline-info btn-sm" id="profile-btn">
-                            <i class="bi bi-person-circle"></i>
-                            <span class="d-none d-sm-inline"> プロフィール</span>
-                        </button>
-                        <button class="btn btn-outline-secondary btn-sm" id="settings-btn">
-                            <i class="bi bi-gear"></i>
-                            <span class="d-none d-sm-inline"> 設定</span>
-                        </button>
+                        <div class="d-inline-block">
+                            <button class="btn btn-outline-secondary btn-sm" id="tag-management-btn">
+                                <i class="bi bi-tags"></i>
+                                <span class="d-none d-sm-inline"> タグ</span>
+                            </button>
+                        </div>
+                        <div class="d-inline-block">
+                            <button class="btn btn-outline-primary btn-sm" id="ranking-btn">
+                                <i class="bi bi-trophy"></i>
+                                <span class="d-none d-sm-inline"> ランキング</span>
+                            </button>
+                        </div>
+                        <div class="d-inline-block">
+                            <button class="btn btn-outline-info btn-sm" id="profile-btn">
+                                <i class="bi bi-person-circle"></i>
+                                <span class="d-none d-sm-inline"> プロフィール</span>
+                            </button>
+                        </div>
+                        <div class="d-inline-block">
+                            <button class="btn btn-outline-secondary btn-sm" id="settings-btn">
+                                <i class="bi bi-gear"></i>
+                                <span class="d-none d-sm-inline"> 設定</span>
+                            </button>
+                        </div>
                         <span class="navbar-text d-none d-md-inline mx-2" id="user-email"></span>
-                        <button id="logout-btn" class="btn btn-danger btn-sm">
-                            <i class="bi bi-box-arrow-right"></i>
-                            <span class="d-none d-sm-inline"> ログアウト</span>
-                        </button>
+                        <div class="d-inline-block">
+                            <button id="logout-btn" class="btn btn-danger btn-sm">
+                                <i class="bi bi-box-arrow-right"></i>
+                                <span class="d-none d-sm-inline"> ログアウト</span>
+                            </button>
+                        </div>
                     </div>
                 </div>
             </div>
