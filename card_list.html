@@ -1004,15 +1004,30 @@
     <div class="modal fade" id="how-to-use-modal" tabindex="-1">
         <div class="modal-dialog modal-xl"><div class="modal-content">
             <div class="modal-header"><h5 class="modal-title">使い方ガイド</h5><button type="button" class="btn-close" data-bs-dismiss="modal"></button></div>
-            <div class="modal-body">
+            <div class="modal-body" style="max-height: 70vh; overflow-y: auto;">
                 <div class="alert alert-info">
                     <i class="bi bi-info-circle"></i> <strong>公式データベース</strong>：
                     <a href="https://www.db.yugioh-card.com/yugiohdb/card_search.action" target="_blank" class="alert-link">
                         遊戯王オフィシャルカードデータベースを開く <i class="bi bi-box-arrow-up-right"></i>
                     </a>
                 </div>
-                
-                <h5 class="mt-4 mb-3"><i class="bi bi-1-circle-fill text-primary"></i> 初めての方へ</h5>
+
+                <!-- クイックナビゲーション -->
+                <div class="alert alert-light">
+                    <h6 class="alert-heading"><i class="bi bi-compass"></i> クイックナビゲーション</h6>
+                    <div class="d-flex flex-wrap gap-2">
+                        <a href="#guide-start" class="btn btn-sm btn-outline-primary">初めての方へ</a>
+                        <a href="#guide-register" class="btn btn-sm btn-outline-primary">カード登録</a>
+                        <a href="#guide-lists" class="btn btn-sm btn-outline-primary">リスト管理</a>
+                        <a href="#guide-tags" class="btn btn-sm btn-outline-primary">タグ機能</a>
+                        <a href="#guide-gamification" class="btn btn-sm btn-outline-primary">ゲーミフィケーション</a>
+                        <a href="#guide-data" class="btn btn-sm btn-outline-primary">データ管理</a>
+                        <a href="#guide-advanced" class="btn btn-sm btn-outline-primary">便利機能</a>
+                        <a href="#guide-mobile" class="btn btn-sm btn-outline-primary">モバイル</a>
+                    </div>
+                </div>
+
+                <h5 class="mt-4 mb-3" id="guide-start"><i class="bi bi-1-circle-fill text-primary"></i> 初めての方へ</h5>
                 <div class="ms-3">
                     <h6><i class="bi bi-person-plus"></i> アカウント作成</h6>
                     <ol>
@@ -1021,76 +1036,215 @@
                         <li>データはクラウドに保存され、どの端末からでもアクセス可能です</li>
                     </ol>
                     <div class="alert alert-warning">
-                        <small><i class="bi bi-exclamation-triangle"></i> ローカルモード：メールアドレスに「local」と入力すると、データをクラウドに保存せずブラウザ内でのみ管理できます</small>
+                        <small><i class="bi bi-exclamation-triangle"></i> <strong>ローカルモード</strong>：メールアドレスに「local」と入力すると、データをクラウドに保存せずブラウザ内でのみ管理できます</small>
                     </div>
                 </div>
-                
-                <h5 class="mt-4 mb-3"><i class="bi bi-2-circle-fill text-primary"></i> カードの登録方法</h5>
+
+                <h5 class="mt-4 mb-3" id="guide-register"><i class="bi bi-2-circle-fill text-primary"></i> カードの登録方法</h5>
                 <div class="ms-3">
                     <h6><i class="bi bi-search"></i> 方法1：公式DBから検索</h6>
                     <ol>
                         <li>「カード名で検索」欄にカード名を入力（例：「カメリア」）</li>
-                        <li>「検索」ボタンをクリック</li>
+                        <li>「検索」ボタンをクリック（<i class="bi bi-clock-history"></i>ボタンで前回の検索も可能）</li>
                         <li>検索結果から目的のカードを選択</li>
                         <li>カード情報が自動で入力されます</li>
+                        <li>枚数を設定（モバイルではタップ式入力も可能）</li>
+                        <li>タグを選択（任意）</li>
+                        <li>「カードを追加」をクリック</li>
                     </ol>
-                    
+
                     <h6><i class="bi bi-link-45deg"></i> 方法2：URLから読み込み</h6>
                     <ol>
                         <li>公式DBでカードを検索し、カード詳細ページを開く</li>
-                        <li>URLをコピー（例：https://www.db.yugioh-card.com/yugiohdb/card_search.action?ope=2&cid=...)</li>
+                        <li>URLをコピー（例：https://www.db.yugioh-card.com/yugiohdb/...)</li>
                         <li>「公式DB URL」欄に貼り付けて「読込」をクリック</li>
                         <li>複数の型番がある場合は、表示されるボタンから選択</li>
                     </ol>
-                    
+
                     <h6><i class="bi bi-pencil"></i> 方法3：手動入力</h6>
                     <p>カード名、型番、レアリティを直接入力して登録できます</p>
+
+                    <div class="alert alert-success">
+                        <small><i class="bi bi-lightbulb"></i> <strong>ヒント</strong>：「<i class="bi bi-arrow-counterclockwise"></i>」ボタンで前回の登録内容を復元できます</small>
+                    </div>
                 </div>
-                
-                <h5 class="mt-4 mb-3"><i class="bi bi-3-circle-fill text-primary"></i> リストの種類</h5>
+
+                <h5 class="mt-4 mb-3" id="guide-lists"><i class="bi bi-3-circle-fill text-primary"></i> リストの種類</h5>
                 <div class="ms-3">
                     <h6><i class="bi bi-collection"></i> 所持カード</h6>
-                    <p>実際に所持しているカードを管理します。枚数を記録し、コレクション全体を把握できます。</p>
-                    
-                    <h6><i class="bi bi-star"></i> ウィッシュリスト</h6>
-                    <p>今後入手したいカードを管理します。入手したら「所持カードへ移動」ボタン（<i class="bi bi-check-circle"></i>）で簡単に移動できます。</p>
-                </div>
-                
-                <h5 class="mt-4 mb-3"><i class="bi bi-4-circle-fill text-primary"></i> タグ機能</h5>
-                <div class="ms-3">
-                    <p>カードにタグを付けて分類できます。例：「デッキ用」「トレード用」「コレクション」など</p>
                     <ul>
-                        <li>「タグ管理」ボタンからタグを作成（カンマ区切りで複数同時作成可）</li>
+                        <li>実際に所持しているカードを管理</li>
+                        <li>枚数を記録し、コレクション全体を把握</li>
+                        <li>統計情報（合計枚数、種類数、レアリティ分布）を表示</li>
+                    </ul>
+
+                    <h6><i class="bi bi-star"></i> ウィッシュリスト</h6>
+                    <ul>
+                        <li>今後入手したいカードを管理</li>
+                        <li>入手したら「<i class="bi bi-check-circle"></i>」ボタンで所持カードへ移動</li>
+                        <li>欲しいカードリストを作成して共有も可能</li>
+                    </ul>
+
+                    <h6><i class="bi bi-arrow-left-right"></i> リストの切り替え</h6>
+                    <p>画面上部のタブで「所持カード」と「ウィッシュリスト」を簡単に切り替えられます</p>
+                </div>
+
+                <h5 class="mt-4 mb-3" id="guide-tags"><i class="bi bi-4-circle-fill text-primary"></i> タグ機能</h5>
+                <div class="ms-3">
+                    <h6><i class="bi bi-tags"></i> タグの作成・管理</h6>
+                    <ul>
+                        <li>「タグ」ボタンからタグ管理画面を開く</li>
+                        <li>カンマ区切りで複数のタグを同時作成可能</li>
+                        <li>ドラッグ&ドロップでタグの順番を変更可能</li>
+                        <li>ペンアイコンでタグ名を編集可能</li>
+                    </ul>
+
+                    <h6><i class="bi bi-bookmark-plus"></i> タグの使い方</h6>
+                    <ul>
                         <li>カード登録・編集時にタグを選択</li>
-                        <li>タグで検索して絞り込み可能</li>
+                        <li>カード一覧でタグをホバーするとペンアイコンが表示され、クリックで編集</li>
+                        <li>複数カードを選択してタグを一括追加・削除</li>
+                        <li>検索フォームでタグを指定して絞り込み</li>
+                    </ul>
+
+                    <div class="alert alert-info">
+                        <small><i class="bi bi-info-circle"></i> 例：「デッキ用」「トレード用」「保管用」「高額カード」など</small>
+                    </div>
+                </div>
+
+                <h5 class="mt-4 mb-3" id="guide-gamification"><i class="bi bi-5-circle-fill text-primary"></i> ゲーミフィケーション機能</h5>
+                <div class="ms-3">
+                    <h6><i class="bi bi-stars"></i> 今日のチャレンジ</h6>
+                    <ul>
+                        <li><strong>デイリーミッション</strong>：毎日更新されるミッションをクリアしてポイント獲得</li>
+                        <li><strong>連続登録</strong>：毎日カードを登録して連続記録を伸ばそう</li>
+                        <li><strong>週間目標</strong>：目標枚数を設定して達成を目指そう（クリックで変更可）</li>
+                    </ul>
+
+                    <h6><i class="bi bi-trophy"></i> ランキングシステム</h6>
+                    <ul>
+                        <li>所持カード数で他のユーザーと競争</li>
+                        <li>リアルタイムランキング更新</li>
+                        <li>TOP10ユーザーの表示</li>
+                    </ul>
+
+                    <h6><i class="bi bi-award"></i> 実績システム</h6>
+                    <ul>
+                        <li>様々な条件を達成してバッジを獲得</li>
+                        <li>ブロンズからミシックまでのレア度</li>
+                        <li>プロフィールで実績を公開</li>
+                    </ul>
+
+                    <h6><i class="bi bi-shop"></i> ポイントショップ</h6>
+                    <ul>
+                        <li>獲得したポイントでテーマやフレームを購入</li>
+                        <li>画面のカスタマイズが可能</li>
+                        <li>特殊エフェクトや背景を適用</li>
                     </ul>
                 </div>
-                
-                <h5 class="mt-4 mb-3"><i class="bi bi-5-circle-fill text-primary"></i> データ管理</h5>
+
+                <h5 class="mt-4 mb-3" id="guide-data"><i class="bi bi-6-circle-fill text-primary"></i> データ管理</h5>
                 <div class="ms-3">
                     <h6><i class="bi bi-download"></i> エクスポート</h6>
                     <ul>
-                        <li><strong>JSON形式</strong>：全データを完全にバックアップ</li>
+                        <li><strong>JSON形式</strong>：全データを完全にバックアップ（タグ情報も含む）</li>
                         <li><strong>CSV形式</strong>：Excelで編集・閲覧可能</li>
+                        <li>「データ管理」ボタンから実行</li>
                     </ul>
-                    
+
                     <h6><i class="bi bi-upload"></i> インポート</h6>
-                    <p>JSON/CSVファイルからデータを一括登録。重複するカードは枚数が加算されます。</p>
+                    <ul>
+                        <li>JSON/CSVファイルからデータを一括登録</li>
+                        <li>重複するカードは枚数が自動で加算</li>
+                        <li>他のアプリからの移行も簡単</li>
+                    </ul>
+
+                    <h6><i class="bi bi-shield-check"></i> データの安全性</h6>
+                    <ul>
+                        <li>Firebaseによるセキュアなクラウド保存</li>
+                        <li>定期的なバックアップを推奨</li>
+                        <li>アカウント削除時は全データが削除されるので注意</li>
+                    </ul>
                 </div>
-                
-                <h5 class="mt-4 mb-3"><i class="bi bi-6-circle-fill text-primary"></i> その他の機能</h5>
+
+                <h5 class="mt-4 mb-3" id="guide-advanced"><i class="bi bi-7-circle-fill text-primary"></i> 便利な機能</h5>
                 <div class="ms-3">
                     <h6><i class="bi bi-sort-down"></i> 並び替え・検索</h6>
-                    <p>カード一覧のヘッダーをクリックで並び替え、検索フォームで絞り込みができます。</p>
-                    
+                    <ul>
+                        <li>カード一覧のヘッダーをクリックで並び替え</li>
+                        <li>名前、型番、レアリティ、タグで検索</li>
+                        <li>複数条件での絞り込みが可能</li>
+                    </ul>
+
                     <h6><i class="bi bi-check2-square"></i> 一括編集</h6>
-                    <p>複数のカードを選択して、タグの一括追加・削除や一括削除が可能です。カード一覧のチェックボックスで選択してください。</p>
-                    
-                    <h6><i class="bi bi-moon-stars"></i> ダークモード</h6>
-                    <p>「設定」から画面をダークモードに切り替えられます。</p>
-                    
-                    <h6><i class="bi bi-phone"></i> モバイル対応</h6>
-                    <p>スマートフォンやタブレットでも快適に利用できるよう、画面サイズに応じて自動的にレイアウトが調整されます。</p>
+                    <ul>
+                        <li>チェックボックスで複数カードを選択</li>
+                        <li>「全て選択」ボタンで一括選択も可能</li>
+                        <li>タグの一括追加・削除</li>
+                        <li>複数カードの一括削除</li>
+                    </ul>
+
+                    <h6><i class="bi bi-clock-history"></i> 履歴機能</h6>
+                    <ul>
+                        <li>前回の検索キーワードを記憶</li>
+                        <li>前回の登録内容を復元</li>
+                        <li>設定で表示/非表示を切り替え</li>
+                    </ul>
+
+                    <h6><i class="bi bi-bar-chart"></i> 統計情報</h6>
+                    <ul>
+                        <li>コレクションの総枚数と種類数</li>
+                        <li>レアリティ別の分布グラフ</li>
+                        <li>今日の追加枚数</li>
+                        <li>コレクション進捗率</li>
+                    </ul>
+
+                    <h6><i class="bi bi-moon-stars"></i> カスタマイズ</h6>
+                    <ul>
+                        <li>ダークモード対応</li>
+                        <li>メールアドレスの表示/非表示</li>
+                        <li>統計情報の表示/非表示</li>
+                        <li>テーマやフレームのカスタマイズ（ポイントショップ）</li>
+                    </ul>
+                </div>
+
+                <h5 class="mt-4 mb-3" id="guide-mobile"><i class="bi bi-8-circle-fill text-primary"></i> モバイル対応</h5>
+                <div class="ms-3">
+                    <h6><i class="bi bi-phone"></i> スマートフォン最適化</h6>
+                    <ul>
+                        <li>レスポンシブデザインでどの端末でも快適</li>
+                        <li>タッチ操作に最適化されたボタンサイズ</li>
+                        <li>スワイプでスクロール可能なテーブル</li>
+                    </ul>
+
+                    <h6><i class="bi bi-hand-index"></i> タップ式枚数入力</h6>
+                    <ul>
+                        <li>設定で「枚数入力をタップ式にする」をON</li>
+                        <li>キーボードを使わずに枚数を設定</li>
+                        <li>マイナス/プラスボタンで簡単調整</li>
+                        <li>リセットボタンで1枚に戻る</li>
+                    </ul>
+
+                    <h6><i class="bi bi-tablet"></i> タブレット対応</h6>
+                    <ul>
+                        <li>iPadやAndroidタブレットに最適化</li>
+                        <li>画面サイズに応じたレイアウト調整</li>
+                        <li>横向きモードでも快適に利用可能</li>
+                    </ul>
+
+                    <div class="alert alert-success">
+                        <small><i class="bi bi-check-circle"></i> <strong>PWA対応</strong>：ホーム画面に追加してアプリのように使用可能</small>
+                    </div>
+                </div>
+
+                <div class="alert alert-primary mt-4">
+                    <h6 class="alert-heading"><i class="bi bi-question-circle"></i> お困りの場合</h6>
+                    <ul class="mb-0">
+                        <li>ログインできない → パスワードを忘れた場合は再登録してください</li>
+                        <li>データが消えた → 定期的にエクスポートでバックアップを取ることを推奨</li>
+                        <li>カードが検索できない → 公式DBのURLを直接入力してください</li>
+                        <li>エラーが発生する → ページを再読み込みしてください</li>
+                    </ul>
                 </div>
             </div>
             <div class="modal-footer">
