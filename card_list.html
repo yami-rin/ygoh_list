@@ -1689,6 +1689,8 @@
                                 <li><hr class="dropdown-divider"></li>
                                 <li><button class="dropdown-item" id="export-json-btn">JSON形式でエクスポート</button></li>
                                 <li><button class="dropdown-item" id="export-csv-btn">CSV形式でエクスポート</button></li>
+                                <li><hr class="dropdown-divider"></li>
+                                <li><button class="dropdown-item" id="link-master-data-btn"><i class="bi bi-link-45deg"></i> マスターデータと連携</button></li>
                             </ul>
                         </div>
                         <input type="file" id="import-file-input" accept=".json,.csv" style="display: none;">
@@ -1881,6 +1883,69 @@
                                 <div class="col-md-6"><input type="text" name="search_set_code" class="form-control" placeholder="型番..."></div>
                                 <div class="col-md-6"><input type="text" name="search_rarity" class="form-control" placeholder="レアリティ..."></div>
                                 <div class="col-md-6"><input type="text" name="search_tags" class="form-control" placeholder="タグ..."></div>
+
+                                <!-- Advanced Search Section -->
+                                <div class="col-12">
+                                    <button type="button" class="btn btn-sm btn-secondary" data-bs-toggle="collapse" data-bs-target="#advanced-search" aria-expanded="false">
+                                        <i class="bi bi-funnel"></i> 詳細検索
+                                    </button>
+                                </div>
+                                <div class="collapse col-12" id="advanced-search">
+                                    <div class="card card-body bg-light">
+                                        <div class="row g-2">
+                                            <div class="col-md-3">
+                                                <label class="form-label small">レベル</label>
+                                                <input type="text" name="search_level" class="form-control form-control-sm">
+                                            </div>
+                                            <div class="col-md-3">
+                                                <label class="form-label small">属性</label>
+                                                <select name="search_attribute" class="form-select form-select-sm">
+                                                    <option value="">すべて</option>
+                                                    <option value="闇">闇</option>
+                                                    <option value="光">光</option>
+                                                    <option value="地">地</option>
+                                                    <option value="水">水</option>
+                                                    <option value="炎">炎</option>
+                                                    <option value="風">風</option>
+                                                    <option value="神">神</option>
+                                                </select>
+                                            </div>
+                                            <div class="col-md-3">
+                                                <label class="form-label small">種族</label>
+                                                <input type="text" name="search_race" class="form-control form-control-sm">
+                                            </div>
+                                            <div class="col-md-3">
+                                                <label class="form-label small">カードタイプ</label>
+                                                <select name="search_card_type" class="form-select form-select-sm">
+                                                    <option value="">すべて</option>
+                                                    <option value="通常">通常</option>
+                                                    <option value="効果">効果</option>
+                                                    <option value="融合">融合</option>
+                                                    <option value="シンクロ">シンクロ</option>
+                                                    <option value="エクシーズ">エクシーズ</option>
+                                                    <option value="リンク">リンク</option>
+                                                    <option value="ペンデュラム">ペンデュラム</option>
+                                                    <option value="儀式">儀式</option>
+                                                    <option value="魔法">魔法</option>
+                                                    <option value="罠">罠</option>
+                                                </select>
+                                            </div>
+                                            <div class="col-md-3">
+                                                <label class="form-label small">攻撃力</label>
+                                                <input type="text" name="search_attack" class="form-control form-control-sm">
+                                            </div>
+                                            <div class="col-md-3">
+                                                <label class="form-label small">守備力</label>
+                                                <input type="text" name="search_defense" class="form-control form-control-sm">
+                                            </div>
+                                            <div class="col-md-6">
+                                                <label class="form-label small">カードテキスト</label>
+                                                <input type="text" name="search_text" class="form-control form-control-sm">
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
                                 <div class="col-12 d-grid"><button type="submit" class="btn btn-info">検索</button></div>
                             </form>
                             
@@ -2074,6 +2139,8 @@
         let currentUser = null;
         let sortConfig = { key: '名前', direction: 'ascending' };
         let currentPage = 1;
+        let cardReadingMap = new Map(); // Map for hiragana -> card names
+        let cardDetailsMap = new Map(); // Map for card details (level, attribute, etc.)
         let itemsPerPage = 50;
         let filteredCardCollection = [];
         let allTags = [];
@@ -2162,6 +2229,115 @@
         };
         let currentCardTags = [];
         let selectedCardIds = new Set();
+
+        // Load Yu-Gi-Oh card reading data from CSV
+        const loadCardReadingData = async () => {
+            try {
+                const response = await fetch('yugioh_cards_all_20250914_104808.csv');
+                let csvText = await response.text();
+
+                // Remove BOM if present
+                if (csvText.charCodeAt(0) === 0xFEFF) {
+                    csvText = csvText.substring(1);
+                }
+
+                // Parse CSV
+                const lines = csvText.split('\n');
+
+                // CSV columns: 名前,読み方,レベル,属性,種族,カードタイプ,攻撃力,守備力,カードテキスト
+
+                // Process each line (skip header)
+                for (let i = 1; i < lines.length; i++) {
+                    const line = lines[i].trim();
+                    if (!line) continue;
+
+                    // Parse CSV line (handle commas in quotes)
+                    const values = [];
+                    let current = '';
+                    let inQuotes = false;
+
+                    for (let j = 0; j < line.length; j++) {
+                        const char = line[j];
+                        if (char === '"') {
+                            inQuotes = !inQuotes;
+                        } else if (char === ',' && !inQuotes) {
+                            values.push(current);
+                            current = '';
+                        } else {
+                            current += char;
+                        }
+                    }
+                    values.push(current);
+
+                    // Get card data
+                    const cardName = values[0]?.replace(/^"|"$/g, '').trim();
+                    const cardReading = values[1]?.replace(/^"|"$/g, '').trim();
+                    const level = values[2]?.replace(/^"|"$/g, '').trim();
+                    const attribute = values[3]?.replace(/^"|"$/g, '').trim();
+                    const race = values[4]?.replace(/^"|"$/g, '').trim();
+                    const cardType = values[5]?.replace(/^"|"$/g, '').trim();
+                    const attack = values[6]?.replace(/^"|"$/g, '').trim();
+                    const defense = values[7]?.replace(/^"|"$/g, '').trim();
+                    const cardText = values[8]?.replace(/^"|"$/g, '').trim();
+
+                    if (cardName) {
+                        // Store card details
+                        cardDetailsMap.set(cardName, {
+                            reading: cardReading,
+                            level: level,
+                            attribute: attribute,
+                            race: race,
+                            cardType: cardType,
+                            attack: attack,
+                            defense: defense,
+                            cardText: cardText
+                        });
+
+                        // Store reading mappings
+                        if (cardReading) {
+                            // Store the reading in lowercase for case-insensitive search
+                            const readingKey = cardReading.toLowerCase();
+
+                            // Store multiple cards with same reading
+                            if (!cardReadingMap.has(readingKey)) {
+                                cardReadingMap.set(readingKey, []);
+                            }
+                            cardReadingMap.get(readingKey).push(cardName);
+
+                            // Also store hiragana version of the reading if it's in katakana
+                            const hiraganaReading = readingKey.replace(/[\u30A1-\u30F6]/g, function(match) {
+                                const code = match.charCodeAt(0) - 0x60;
+                                return String.fromCharCode(code);
+                            });
+
+                            if (hiraganaReading !== readingKey) {
+                                if (!cardReadingMap.has(hiraganaReading)) {
+                                    cardReadingMap.set(hiraganaReading, []);
+                                }
+                                cardReadingMap.get(hiraganaReading).push(cardName);
+                            }
+                        }
+                    }
+                }
+
+                console.log(`Loaded ${cardReadingMap.size} card readings and ${cardDetailsMap.size} card details from CSV`);
+
+                // Debug: Show first few entries
+                let count = 0;
+                for (const [name, details] of cardDetailsMap) {
+                    if (count++ < 5) {
+                        console.log('Sample card in master data:', name);
+                    } else {
+                        break;
+                    }
+                }
+            } catch (error) {
+                console.error('Failed to load card reading data:', error);
+            }
+        };
+
+        // Load card reading data on page load
+        loadCardReadingData();
 
         const mainApp = document.getElementById('main-app');
         const appLoader = document.getElementById('app-loader');
@@ -3805,13 +3981,133 @@
         };
         
         const applySearchAndFilter = () => {
+            // Get basic search parameters
             const [sN,sC,sR,sT] = ['search_name','search_set_code','search_rarity','search_tags'].map(n=>normalizeForSearch(document.querySelector(`[name="${n}"]`).value));
+
+            // Get advanced search parameters
+            const sLevel = document.querySelector('[name="search_level"]')?.value?.trim();
+            const sAttribute = document.querySelector('[name="search_attribute"]')?.value;
+            const sRace = document.querySelector('[name="search_race"]')?.value?.trim();
+            const sCardType = document.querySelector('[name="search_card_type"]')?.value;
+            const sAttack = document.querySelector('[name="search_attack"]')?.value?.trim();
+            const sDefense = document.querySelector('[name="search_defense"]')?.value?.trim();
+            const sText = normalizeForSearch(document.querySelector('[name="search_text"]')?.value || '');
+
+            // Get possible card names from hiragana reading
+            let possibleCardNames = [];
+            if (sN) {
+                // Check if the search term matches any reading in our map
+                const searchKey = sN.toLowerCase();
+                if (cardReadingMap.has(searchKey)) {
+                    possibleCardNames = cardReadingMap.get(searchKey);
+                }
+
+                // Also check for partial matches
+                for (const [reading, cards] of cardReadingMap) {
+                    if (reading.includes(searchKey)) {
+                        possibleCardNames.push(...cards);
+                    }
+                }
+            }
+
+            // Helper function to check range values (e.g., "2000-3000" or "2500")
+            const checkRange = (value, rangeStr) => {
+                if (!rangeStr || !value) return true;
+
+                // Handle range (e.g., "2000-3000")
+                if (rangeStr.includes('-')) {
+                    const [min, max] = rangeStr.split('-').map(v => parseInt(v.trim()));
+                    const numValue = parseInt(value);
+                    return !isNaN(numValue) && numValue >= min && numValue <= max;
+                }
+
+                // Handle single value
+                return value === rangeStr;
+            };
+
             filteredCardCollection = getCurrentCollection().filter(c => {
                 const d = c.data;
-                return (!sN || normalizeForSearch(d['名前']||'').includes(sN)) && 
-                       (!sC || normalizeForSearch(d['型番']||'').includes(sC)) && 
-                       (!sR || normalizeForSearch(d['レアリティ']||'').includes(sR)) && 
-                       (!sT || normalizeForSearch((d.tags||[]).join(',')).includes(sT));
+                const cardName = d['名前'] || '';
+
+                // Check name with both direct match and reading-based match
+                let nameMatch = false;
+                if (sN) {
+                    // Direct match
+                    nameMatch = normalizeForSearch(cardName).includes(sN);
+
+                    // Reading-based match
+                    if (!nameMatch && possibleCardNames.length > 0) {
+                        const normalizedCardName = normalizeForSearch(cardName);
+                        for (const possibleName of possibleCardNames) {
+                            if (normalizedCardName.includes(normalizeForSearch(possibleName)) ||
+                                normalizeForSearch(possibleName).includes(normalizedCardName)) {
+                                nameMatch = true;
+                                break;
+                            }
+                        }
+                    }
+                } else {
+                    nameMatch = true;
+                }
+
+                // Check against card details from CSV or linked details
+                let advancedMatch = true;
+                let details = null;
+
+                // First check if card has linked details
+                if (d.linkedDetails) {
+                    details = d.linkedDetails;
+                } else if (cardDetailsMap.has(cardName)) {
+                    // Otherwise check master data
+                    details = cardDetailsMap.get(cardName);
+                }
+
+                if (details) {
+
+                    // Check level
+                    if (sLevel) {
+                        advancedMatch = advancedMatch && checkRange(details.level, sLevel);
+                    }
+
+                    // Check attribute
+                    if (sAttribute) {
+                        advancedMatch = advancedMatch && details.attribute === sAttribute;
+                    }
+
+                    // Check race
+                    if (sRace) {
+                        advancedMatch = advancedMatch && (details.race && normalizeForSearch(details.race).includes(normalizeForSearch(sRace)));
+                    }
+
+                    // Check card type
+                    if (sCardType) {
+                        advancedMatch = advancedMatch && (details.cardType && details.cardType.includes(sCardType));
+                    }
+
+                    // Check attack
+                    if (sAttack) {
+                        advancedMatch = advancedMatch && checkRange(details.attack, sAttack);
+                    }
+
+                    // Check defense
+                    if (sDefense) {
+                        advancedMatch = advancedMatch && checkRange(details.defense, sDefense);
+                    }
+
+                    // Check card text
+                    if (sText) {
+                        advancedMatch = advancedMatch && (details.cardText && normalizeForSearch(details.cardText).includes(sText));
+                    }
+                } else if (sLevel || sAttribute || sRace || sCardType || sAttack || sDefense || sText) {
+                    // If advanced search is used but no details available, don't show it
+                    advancedMatch = false;
+                }
+
+                return nameMatch &&
+                       (!sC || normalizeForSearch(d['型番']||'').includes(sC)) &&
+                       (!sR || normalizeForSearch(d['レアリティ']||'').includes(sR)) &&
+                       (!sT || normalizeForSearch((d.tags||[]).join(',')).includes(sT)) &&
+                       advancedMatch;
             });
             currentPage = 1;
             renderTable();
@@ -5264,6 +5560,128 @@
             const blob = new Blob([dataStr], { type: 'application/json' });
             const url = URL.createObjectURL(blob);
             const a = document.createElement('a'); a.href = url; a.download = 'yugioh_collection.json'; a.click(); URL.revokeObjectURL(url);
+        });
+
+        // Link with master data functionality
+        document.getElementById('link-master-data-btn').addEventListener('click', async () => {
+            if (!confirm('現在のコレクションをマスターデータと連携しますか？\nこの処理により、カード詳細情報（レベル、属性、種族など）が自動的に補完されます。')) {
+                return;
+            }
+
+            // Wait for master data to load if not loaded yet
+            if (cardDetailsMap.size === 0) {
+                alert('マスターデータを読み込んでいます。しばらく待ってから再度お試しください。');
+                await loadCardReadingData();
+                return;
+            }
+
+            console.log('Starting link process...');
+            console.log('cardDetailsMap size:', cardDetailsMap.size);
+            console.log('cardCollection length:', cardCollection.length);
+            console.log('wishlistCollection length:', wishlistCollection.length);
+
+            showLoading(true);
+            let linkedCount = 0;
+            let notFoundCards = [];
+
+            try {
+                // Process collection cards
+                for (const card of cardCollection) {
+                    const cardName = card.data['名前'];
+
+                    // Debug: Show first few card names
+                    if (linkedCount < 3 || notFoundCards.length < 3) {
+                        console.log('Checking card:', cardName);
+                        console.log('Has in map:', cardDetailsMap.has(cardName));
+                    }
+
+                    if (cardName && cardDetailsMap.has(cardName)) {
+                        const details = cardDetailsMap.get(cardName);
+
+                        // Store the linked data in a special field
+                        const updatedData = {
+                            ...card.data,
+                            linkedDetails: {
+                                level: details.level,
+                                attribute: details.attribute,
+                                race: details.race,
+                                cardType: details.cardType,
+                                attack: details.attack,
+                                defense: details.defense,
+                                cardText: details.cardText
+                            }
+                        };
+
+                        // Update the card in Firebase or local storage
+                        if (currentUser?.uid !== 'local_user') {
+                            const collRef = getCollectionRef();
+                            await updateDoc(doc(collRef, card.id), updatedData);
+                        } else {
+                            card.data = updatedData;
+                        }
+
+                        linkedCount++;
+                    } else if (cardName) {
+                        notFoundCards.push(cardName);
+                    }
+                }
+
+                // Process wishlist cards
+                for (const card of wishlistCollection) {
+                    const cardName = card.data['名前'];
+                    if (cardName && cardDetailsMap.has(cardName)) {
+                        const details = cardDetailsMap.get(cardName);
+
+                        const updatedData = {
+                            ...card.data,
+                            linkedDetails: {
+                                level: details.level,
+                                attribute: details.attribute,
+                                race: details.race,
+                                cardType: details.cardType,
+                                attack: details.attack,
+                                defense: details.defense,
+                                cardText: details.cardText
+                            }
+                        };
+
+                        if (currentUser?.uid !== 'local_user') {
+                            const wishRef = getWishlistRef();
+                            await updateDoc(doc(wishRef, card.id), updatedData);
+                        } else {
+                            card.data = updatedData;
+                        }
+
+                        linkedCount++;
+                    } else if (cardName) {
+                        notFoundCards.push(cardName);
+                    }
+                }
+
+                // Save to local storage if local user
+                if (currentUser?.uid === 'local_user') {
+                    localStorage.setItem('cardCollection', JSON.stringify(cardCollection.map(c => c.data)));
+                    localStorage.setItem('wishlistCollection', JSON.stringify(wishlistCollection.map(c => c.data)));
+                }
+
+                showLoading(false);
+
+                let message = `${linkedCount}枚のカードをマスターデータと連携しました。`;
+                if (notFoundCards.length > 0) {
+                    message += `\n\nマスターデータに見つからなかったカード（${notFoundCards.length}枚）:\n${notFoundCards.slice(0, 10).join('\n')}`;
+                    if (notFoundCards.length > 10) {
+                        message += `\n... 他${notFoundCards.length - 10}枚`;
+                    }
+                }
+
+                alert(message);
+                renderTable();
+
+            } catch (error) {
+                showLoading(false);
+                alert(`連携中にエラーが発生しました: ${error.message}`);
+                console.error('Error linking with master data:', error);
+            }
         });
 
         document.getElementById('export-csv-btn').addEventListener('click', () => {
