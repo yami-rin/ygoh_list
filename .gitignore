@@ -39,3 +39,23 @@ dist/
 build/
 *.min.js
 *.min.css
+
+# Python files
+__pycache__/
+*.py[cod]
+*$py.class
+*.pyc
+
+# Test files
+test_*.csv
+test_*.py
+debug_*.py
+analyze_*.py
+
+# Data files
+*.csv
+!requirements.txt
+
+# Keep important CSV file names documented but not tracked
+# yugioh_cards_master.csv
+# yugioh_cards_all_*.csv
