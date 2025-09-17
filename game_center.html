@@ -618,6 +618,7 @@
                             defense: parseInt(defense?.replace(/^"|"$/g, '').trim()) || 0,
                             level: parseInt(level?.replace(/^"|"$/g, '').trim()) || 1,
                             attribute: attribute?.replace(/^"|"$/g, '').trim() || '無',
+                            race: race?.replace(/^"|"$/g, '').trim() || '不明',
                             type: race?.replace(/^"|"$/g, '').trim() || '不明'
                         });
                     }
@@ -779,12 +780,12 @@
                 {
                     question: `「${currentQuizCard.name}」の攻撃力は？`,
                     correct: currentQuizCard.attack,
-                    generator: () => currentQuizCard.attack + (Math.floor(Math.random() * 4) - 2) * 100
+                    generator: () => parseInt(currentQuizCard.attack) + (Math.floor(Math.random() * 4) - 2) * 100
                 },
                 {
                     question: `「${currentQuizCard.name}」の守備力は？`,
                     correct: currentQuizCard.defense,
-                    generator: () => currentQuizCard.defense + (Math.floor(Math.random() * 4) - 2) * 100
+                    generator: () => parseInt(currentQuizCard.defense) + (Math.floor(Math.random() * 4) - 2) * 100
                 },
                 {
                     question: `「${currentQuizCard.name}」の属性は？`,
