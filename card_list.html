@@ -1936,7 +1936,35 @@
                                             </div>
                                             <div class="col-md-3">
                                                 <label class="form-label small">種族</label>
-                                                <input type="text" name="search_race" class="form-control form-control-sm">
+                                                <input type="text" name="search_race" class="form-control form-control-sm" list="race-suggestions">
+                                                <datalist id="race-suggestions">
+                                                    <option value="ドラゴン族"></option>
+                                                    <option value="戦士族"></option>
+                                                    <option value="魔法使い族"></option>
+                                                    <option value="天使族"></option>
+                                                    <option value="悪魔族"></option>
+                                                    <option value="機械族"></option>
+                                                    <option value="アンデット族"></option>
+                                                    <option value="獣族"></option>
+                                                    <option value="獣戦士族"></option>
+                                                    <option value="鳥獣族"></option>
+                                                    <option value="植物族"></option>
+                                                    <option value="昆虫族"></option>
+                                                    <option value="水族"></option>
+                                                    <option value="岩石族"></option>
+                                                    <option value="炎族"></option>
+                                                    <option value="雷族"></option>
+                                                    <option value="恐竜族"></option>
+                                                    <option value="魚族"></option>
+                                                    <option value="海竜族"></option>
+                                                    <option value="爬虫類族"></option>
+                                                    <option value="サイキック族"></option>
+                                                    <option value="幻神獣族"></option>
+                                                    <option value="創造神族"></option>
+                                                    <option value="幻竜族"></option>
+                                                    <option value="サイバース族"></option>
+                                                    <option value="幻想魔族"></option>
+                                                </datalist>
                                             </div>
                                             <div class="col-md-3">
                                                 <label class="form-label small">カードタイプ</label>
@@ -4293,14 +4321,32 @@
 
                         if (cardTypeMode === 'or') {
                             // OR mode: Check if card has ANY of the selected types
-                            hasMatchingType = sCardTypes.some(type =>
-                                details.cardType && details.cardType.includes(type)
-                            );
+                            hasMatchingType = sCardTypes.some(type => {
+                                // For spell/trap cards, also check the race field
+                                if (type === '魔法') {
+                                    return (details.cardType && details.cardType.includes(type)) ||
+                                           (details.race && (details.race === '魔法' || details.race.includes('魔法')));
+                                } else if (type === '罠') {
+                                    return (details.cardType && details.cardType.includes(type)) ||
+                                           (details.race && (details.race === '罠' || details.race.includes('罠')));
+                                } else {
+                                    return details.cardType && details.cardType.includes(type);
+                                }
+                            });
                         } else {
                             // AND mode: Check if card has ALL of the selected types
-                            hasMatchingType = sCardTypes.every(type =>
-                                details.cardType && details.cardType.includes(type)
-                            );
+                            hasMatchingType = sCardTypes.every(type => {
+                                // For spell/trap cards, also check the race field
+                                if (type === '魔法') {
+                                    return (details.cardType && details.cardType.includes(type)) ||
+                                           (details.race && (details.race === '魔法' || details.race.includes('魔法')));
+                                } else if (type === '罠') {
+                                    return (details.cardType && details.cardType.includes(type)) ||
+                                           (details.race && (details.race === '罠' || details.race.includes('罠')));
+                                } else {
+                                    return details.cardType && details.cardType.includes(type);
+                                }
+                            });
                         }
 
                         advancedMatch = advancedMatch && hasMatchingType;
