@@ -54,6 +54,7 @@ analyze_*.py
 
 # Data files
 *.csv
+!yugioh_cards_master.csv
 !requirements.txt
 
 # Keep important CSV file names documented but not tracked
