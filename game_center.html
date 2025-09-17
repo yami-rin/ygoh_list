@@ -774,7 +774,7 @@
         }
 
         function nextQuizQuestion() {
-            currentQuizCard = cardDatabase[Math.floor(Math.random() * cardDatabase.length)];
+            currentQuizCard = getRandomCards(1)[0];
             const questionTypes = [
                 {
                     question: `「${currentQuizCard.name}」の攻撃力は？`,
@@ -880,11 +880,11 @@
         }
 
         function drawPlayerCard() {
-            playerCurrentCard = cardDatabase[Math.floor(Math.random() * cardDatabase.length)];
+            playerCurrentCard = getRandomCards(1)[0];
             renderBattleCard('playerCard', playerCurrentCard);
 
             // CPU also draws a card
-            cpuCurrentCard = cardDatabase[Math.floor(Math.random() * cardDatabase.length)];
+            cpuCurrentCard = getRandomCards(1)[0];
             renderBattleCard('cpuCard', cpuCurrentCard);
 
             document.getElementById('attackBtn').disabled = false;
