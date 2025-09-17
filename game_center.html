@@ -702,7 +702,9 @@
                         <div class="card-stats">ATK: ${card.attack}</div>
                     </div>
                 `;
-                cardElement.addEventListener('click', () => flipMemoryCard(index));
+                cardElement.addEventListener('click', (function(idx) {
+                    return function() { flipMemoryCard(idx); };
+                })(index));
                 board.appendChild(cardElement);
             });
         }
@@ -780,12 +782,12 @@
                 {
                     question: `「${currentQuizCard.name}」の攻撃力は？`,
                     correct: currentQuizCard.attack,
-                    generator: () => parseInt(currentQuizCard.attack) + (Math.floor(Math.random() * 4) - 2) * 100
+                    generator: function() { return parseInt(currentQuizCard.attack) + (Math.floor(Math.random() * 4) - 2) * 100; }
                 },
                 {
                     question: `「${currentQuizCard.name}」の守備力は？`,
                     correct: currentQuizCard.defense,
-                    generator: () => parseInt(currentQuizCard.defense) + (Math.floor(Math.random() * 4) - 2) * 100
+                    generator: function() { return parseInt(currentQuizCard.defense) + (Math.floor(Math.random() * 4) - 2) * 100; }
                 },
                 {
                     question: `「${currentQuizCard.name}」の属性は？`,
@@ -823,7 +825,9 @@
                 const btn = document.createElement('div');
                 btn.className = 'quiz-option';
                 btn.textContent = option;
-                btn.onclick = () => checkQuizAnswer(option, questionType.correct);
+                btn.onclick = (function(opt, correct) {
+                    return function() { checkQuizAnswer(opt, correct); };
+                })(option, questionType.correct);
                 optionsContainer.appendChild(btn);
             });
         }
