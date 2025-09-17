@@ -666,7 +666,7 @@
         function resetMemoryGame() {
             // Select 6 random cards and duplicate them for pairs
             const selectedCards = getRandomCards(6);
-            memoryCards = [...selectedCards, ...selectedCards].sort(() => 0.5 - Math.random());
+            memoryCards = [...selectedCards, ...selectedCards].sort(function() { return 0.5 - Math.random(); });
 
             flippedCards = [];
             matchedPairs = 0;
@@ -679,7 +679,7 @@
 
             // Start timer
             clearInterval(memoryTimer);
-            memoryTimer = setInterval(() => {
+            memoryTimer = setInterval(function() {
                 memorySeconds++;
                 document.getElementById('memoryTime').textContent = memorySeconds;
             }, 1000);
@@ -689,7 +689,7 @@
             const board = document.getElementById('memoryBoard');
             board.innerHTML = '';
 
-            memoryCards.forEach((card, index) => {
+            memoryCards.forEach(function(card, index) {
                 const cardElement = document.createElement('div');
                 cardElement.className = 'memory-card';
                 cardElement.dataset.index = index;
@@ -731,7 +731,7 @@
 
             if (firstCard.name === secondCard.name) {
                 // Match found!
-                setTimeout(() => {
+                setTimeout(function() {
                     document.querySelector(`.memory-card[data-index="${first}"]`).classList.add('matched');
                     document.querySelector(`.memory-card[data-index="${second}"]`).classList.add('matched');
                     matchedPairs++;
@@ -749,7 +749,7 @@
                 }, 500);
             } else {
                 // No match
-                setTimeout(() => {
+                setTimeout(function() {
                     document.querySelector(`.memory-card[data-index="${first}"]`).classList.remove('flip');
                     document.querySelector(`.memory-card[data-index="${second}"]`).classList.remove('flip');
                     flippedCards = [];
@@ -817,11 +817,11 @@
                 }
             }
 
-            const optionsArray = Array.from(options).sort(() => 0.5 - Math.random());
+            const optionsArray = Array.from(options).sort(function() { return 0.5 - Math.random(); });
             const optionsContainer = document.getElementById('quizOptions');
             optionsContainer.innerHTML = '';
 
-            optionsArray.forEach(option => {
+            optionsArray.forEach(function(option) {
                 const btn = document.createElement('div');
                 btn.className = 'quiz-option';
                 btn.textContent = option;
@@ -971,11 +971,11 @@
             const results = [];
 
             // Animate spinning
-            slots.forEach((slotId, index) => {
+            slots.forEach(function(slotId, index) {
                 const slot = document.getElementById(slotId);
                 slot.style.animation = 'pulse 0.1s infinite';
 
-                setTimeout(() => {
+                setTimeout(function() {
                     const randomCard = getRandomCards(1)[0];
                     results.push(randomCard);
                     slot.innerHTML = `
@@ -1077,7 +1077,7 @@
 
             updateAttributeScore();
 
-            setTimeout(() => {
+            setTimeout(function() {
                 buttons.forEach(btn => {
                     btn.classList.remove('btn-success', 'btn-danger');
                 });
@@ -1139,7 +1139,7 @@
 
             updateHLScore();
 
-            setTimeout(() => {
+            setTimeout(function() {
                 currentHLCard = nextHLCard;
                 nextHLCard = getRandomCards(1)[0];
 
