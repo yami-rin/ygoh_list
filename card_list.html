@@ -4296,18 +4296,18 @@
 
                         // Check if searching for spell/trap cards
                         if (searchTerm === '魔法' || searchTerm === 'まほう' || searchTerm === 'spell') {
-                            // Check if race contains 魔法 or card is a spell card
+                            // Check if race equals exactly 魔法 (not 魔法使い族)
                             advancedMatch = advancedMatch && (
-                                normalizedRace.includes('魔法') || normalizedRace.includes('まほう') ||
+                                normalizedRace === '魔法' || normalizedRace === 'まほう' ||
                                 normalizedCardType.includes('魔法') || normalizedCardType.includes('まほう') ||
-                                normalizedRace.includes('spell')
+                                normalizedRace === 'spell'
                             );
                         } else if (searchTerm === '罠' || searchTerm === 'わな' || searchTerm === 'trap') {
-                            // Check if race contains 罠 or card is a trap card
+                            // Check if race equals exactly 罠
                             advancedMatch = advancedMatch && (
-                                normalizedRace.includes('罠') || normalizedRace.includes('わな') ||
+                                normalizedRace === '罠' || normalizedRace === 'わな' ||
                                 normalizedCardType.includes('罠') || normalizedCardType.includes('わな') ||
-                                normalizedRace.includes('trap')
+                                normalizedRace === 'trap'
                             );
                         } else {
                             // Normal race search
@@ -4325,10 +4325,10 @@
                                 // For spell/trap cards, also check the race field
                                 if (type === '魔法') {
                                     return (details.cardType && details.cardType.includes(type)) ||
-                                           (details.race && (details.race === '魔法' || details.race.includes('魔法')));
+                                           (details.race && details.race === '魔法');
                                 } else if (type === '罠') {
                                     return (details.cardType && details.cardType.includes(type)) ||
-                                           (details.race && (details.race === '罠' || details.race.includes('罠')));
+                                           (details.race && details.race === '罠');
                                 } else {
                                     return details.cardType && details.cardType.includes(type);
                                 }
@@ -4339,10 +4339,10 @@
                                 // For spell/trap cards, also check the race field
                                 if (type === '魔法') {
                                     return (details.cardType && details.cardType.includes(type)) ||
-                                           (details.race && (details.race === '魔法' || details.race.includes('魔法')));
+                                           (details.race && details.race === '魔法');
                                 } else if (type === '罠') {
                                     return (details.cardType && details.cardType.includes(type)) ||
-                                           (details.race && (details.race === '罠' || details.race.includes('罠')));
+                                           (details.race && details.race === '罠');
                                 } else {
                                     return details.cardType && details.cardType.includes(type);
                                 }
