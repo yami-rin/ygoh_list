@@ -625,7 +625,7 @@
                 }
 
                 if (loadedCards.length > 0) {
-                    cardDatabase = loadedCards.slice(0, 20); // Use first 20 cards for games
+                    cardDatabase = loadedCards; // Use all loaded cards for games
                     console.log(`Loaded ${cardDatabase.length} cards from CSV`);
                 }
             } catch (error) {
