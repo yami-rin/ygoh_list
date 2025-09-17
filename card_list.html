@@ -4166,7 +4166,7 @@
             // Get advanced search parameters
             const sLevel = document.querySelector('[name="search_level"]')?.value?.trim();
             const sAttribute = document.querySelector('[name="search_attribute"]')?.value;
-            const sRace = document.querySelector('[name="search_race"]')?.value?.trim();
+            const sRace = document.querySelector('[name="search_race"]')?.value?.trim()?.toLowerCase();
 
             // Get selected card types from checkboxes
             const sCardTypes = Array.from(document.querySelectorAll('.card-type-checkbox:checked'))
@@ -4260,9 +4260,31 @@
                         advancedMatch = advancedMatch && details.attribute === sAttribute;
                     }
 
-                    // Check race
+                    // Check race - including spell/trap in race field
                     if (sRace) {
-                        advancedMatch = advancedMatch && (details.race && normalizeForSearch(details.race).includes(normalizeForSearch(sRace)));
+                        const normalizedRace = normalizeForSearch(details.race || '');
+                        const normalizedCardType = normalizeForSearch(details.cardType || '');
+                        const searchTerm = sRace;
+
+                        // Check if searching for spell/trap cards
+                        if (searchTerm === '魔法' || searchTerm === 'まほう' || searchTerm === 'spell') {
+                            // Check if race contains 魔法 or card is a spell card
+                            advancedMatch = advancedMatch && (
+                                normalizedRace.includes('魔法') || normalizedRace.includes('まほう') ||
+                                normalizedCardType.includes('魔法') || normalizedCardType.includes('まほう') ||
+                                normalizedRace.includes('spell')
+                            );
+                        } else if (searchTerm === '罠' || searchTerm === 'わな' || searchTerm === 'trap') {
+                            // Check if race contains 罠 or card is a trap card
+                            advancedMatch = advancedMatch && (
+                                normalizedRace.includes('罠') || normalizedRace.includes('わな') ||
+                                normalizedCardType.includes('罠') || normalizedCardType.includes('わな') ||
+                                normalizedRace.includes('trap')
+                            );
+                        } else {
+                            // Normal race search
+                            advancedMatch = advancedMatch && normalizedRace.includes(normalizeForSearch(searchTerm));
+                        }
                     }
 
                     // Check card types (multiple selection with OR/AND mode)
