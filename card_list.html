@@ -6595,9 +6595,40 @@
             
             // First check if we have matching cards in our collection
             const normalizedSearchKeyword = normalizeForSearch(searchKeyword);
-            const matchingCards = cardCollection.filter(card => 
-                card.data['名前'] && normalizeForSearch(card.data['名前']).includes(normalizedSearchKeyword)
-            );
+            const searchKeyLower = searchKeyword.toLowerCase();
+
+            // Get possible card names from hiragana reading
+            let possibleCardNames = [];
+            if (cardReadingMap.has(searchKeyLower)) {
+                possibleCardNames = cardReadingMap.get(searchKeyLower);
+            }
+
+            // Also check for partial matches in readings
+            for (const [reading, cards] of cardReadingMap) {
+                if (reading.includes(searchKeyLower)) {
+                    possibleCardNames.push(...cards);
+                }
+            }
+
+            // Remove duplicates
+            possibleCardNames = [...new Set(possibleCardNames)];
+
+            const matchingCards = cardCollection.filter(card => {
+                const cardName = card.data['名前'];
+                if (!cardName) return false;
+
+                // Check direct name match
+                if (normalizeForSearch(cardName).includes(normalizedSearchKeyword)) {
+                    return true;
+                }
+
+                // Check if card name is in the possible names from hiragana reading
+                if (possibleCardNames.includes(cardName)) {
+                    return true;
+                }
+
+                return false;
+            });
             
             if (matchingCards.length > 0) {
                 // Show local cards first
