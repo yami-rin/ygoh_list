@@ -1760,11 +1760,6 @@
                                 <i class="bi bi-card-text"></i> タイプ
                             </button>
                         </li>
-                        <li class="nav-item" role="presentation">
-                            <button class="nav-link" data-bs-toggle="tab" data-bs-target="#timeline-analysis" type="button">
-                                <i class="bi bi-calendar"></i> 時系列
-                            </button>
-                        </li>
                     </ul>
 
                     <!-- Tab Contents -->
@@ -1875,17 +1870,6 @@
                             </div>
                         </div>
 
-                        <!-- Timeline Tab -->
-                        <div class="tab-pane fade" id="timeline-analysis">
-                            <div class="card">
-                                <div class="card-body">
-                                    <h6><i class="bi bi-calendar"></i> 登録時系列（最近30日）</h6>
-                                    <div id="timeline-data">
-                                        <p class="text-muted">データを読み込み中...</p>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
                     </div>
                 </div>
                 <div class="modal-footer">
@@ -5383,9 +5367,17 @@
 
                 // Get card details for attribute, race, level, type
                 const cardName = card.data['名前'];
-                if (cardDetailsMap.has(cardName)) {
-                    const details = cardDetailsMap.get(cardName);
+                let details = null;
 
+                // First check if card has linkedDetails
+                if (card.data.linkedDetails) {
+                    details = card.data.linkedDetails;
+                } else if (cardDetailsMap.has(cardName)) {
+                    // Otherwise check master data
+                    details = cardDetailsMap.get(cardName);
+                }
+
+                if (details) {
                     // Attribute distribution
                     if (details.attribute) {
                         attributeDistribution[details.attribute] = (attributeDistribution[details.attribute] || 0) + quantity;
@@ -5485,34 +5477,6 @@
                 `).join('');
             document.getElementById('type-distribution').innerHTML = typeHtml || '<p class="text-muted">データがありません</p>';
 
-            // Update timeline (registration dates)
-            const dateGroups = {};
-            const today = new Date();
-            const thirtyDaysAgo = new Date(today.getTime() - 30 * 24 * 60 * 60 * 1000);
-
-            // Group cards by registration date (if available)
-            collection.forEach(card => {
-                const regDate = card.data.registeredAt || card.data.addedAt;
-                if (regDate) {
-                    const date = new Date(regDate);
-                    if (date >= thirtyDaysAgo) {
-                        const dateKey = date.toLocaleDateString('ja-JP');
-                        const quantity = parseInt(card.data['枚数']) || 0;
-                        dateGroups[dateKey] = (dateGroups[dateKey] || 0) + quantity;
-                    }
-                }
-            });
-
-            const timelineHtml = Object.entries(dateGroups)
-                .sort((a, b) => new Date(b[0]) - new Date(a[0]))
-                .slice(0, 10)
-                .map(([date, count]) => `
-                    <div class="d-flex justify-content-between align-items-center mb-2">
-                        <span>${escapeHtml(date)}</span>
-                        <span class="badge bg-secondary">${count}枚</span>
-                    </div>
-                `).join('');
-            document.getElementById('timeline-data').innerHTML = timelineHtml || '<p class="text-muted">最近の登録データがありません</p>';
 
             // Update top cards by quantity
             const topCards = [...collection]
