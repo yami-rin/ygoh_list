@@ -1632,6 +1632,10 @@
                     <label class="form-check-label" for="use-tap-quantity-toggle">枚数入力をタップ式にする</label>
                 </div>
                 <hr>
+                <h6>タグのメンテナンス</h6>
+                <p class="text-muted small">カードに設定されているが存在しないタグを検出して削除します。</p>
+                <button class="btn btn-warning mb-3" id="cleanup-tags-btn">存在しないタグをクリーンアップ</button>
+                <hr>
                 <h6>アカウント削除</h6>
                 <p class="text-muted small">この操作は元に戻せません。アカウントに紐づく全てのカードデータが完全に削除されます。</p>
                 <button class="btn btn-danger" id="delete-account-btn">アカウントを削除する</button>
@@ -4648,21 +4652,69 @@
                 if (!confirm(`タグ「${escapeHtml(tagName)}」を削除しますか？
 このタグは全てのカードからも削除されます。`)) return;
 
-                const tagsCollRef = getTagsCollectionRef();
-                if (tagsCollRef) {
-                    await deleteDoc(doc(tagsCollRef, tagId));
-                } 
-                
-                allTags = allTags.filter(t => t.id !== tagId);
-                allTags.forEach((tag, index) => {
-                    tag.order = index;
-                });
-                
-                await saveTagsOrder();
-                
-                renderTagManagementList();
-                renderTagChoices('tag-choices-container', currentCardTags);
-                renderTagChoices('edit-tag-choices-container', currentCardTags);
+                showLoading(true);
+                try {
+                    // Delete tag from all cards
+                    const collectionRef = getCollectionRef('collection');
+                    const wishlistRef = getCollectionRef('wishlist');
+
+                    // Update collection cards
+                    for (const card of cardCollection) {
+                        if (card.data.tags && card.data.tags.includes(tagName)) {
+                            const updatedTags = card.data.tags.filter(t => t !== tagName);
+                            card.data.tags = updatedTags;
+
+                            if (collectionRef) {
+                                await updateDoc(doc(collectionRef, card.id), { tags: updatedTags });
+                            } else {
+                                localStorage.setItem('cardCollection', JSON.stringify(cardCollection));
+                            }
+                        }
+                    }
+
+                    // Update wishlist cards
+                    for (const card of wishlistCollection) {
+                        if (card.data.tags && card.data.tags.includes(tagName)) {
+                            const updatedTags = card.data.tags.filter(t => t !== tagName);
+                            card.data.tags = updatedTags;
+
+                            if (wishlistRef) {
+                                await updateDoc(doc(wishlistRef, card.id), { tags: updatedTags });
+                            } else {
+                                localStorage.setItem('wishlistCollection', JSON.stringify(wishlistCollection));
+                            }
+                        }
+                    }
+
+                    // Delete tag from tags collection
+                    const tagsCollRef = getTagsCollectionRef();
+                    if (tagsCollRef) {
+                        await deleteDoc(doc(tagsCollRef, tagId));
+                    }
+
+                    allTags = allTags.filter(t => t.id !== tagId);
+                    allTags.forEach((tag, index) => {
+                        tag.order = index;
+                    });
+
+                    await saveTagsOrder();
+
+                    renderTagManagementList();
+                    renderTagChoices('tag-choices-container', currentCardTags);
+                    renderTagChoices('edit-tag-choices-container', currentCardTags);
+
+                    // Re-render the table if tag filter is active
+                    if (document.querySelector('[name="search_tags"]').value) {
+                        applySearchAndFilter();
+                    }
+
+                    alert(`タグ「${tagName}」を削除し、全てのカードから削除しました。`);
+                } catch (error) {
+                    console.error('Error deleting tag:', error);
+                    alert('タグの削除中にエラーが発生しました。');
+                } finally {
+                    showLoading(false);
+                }
             }
         });
 
@@ -6232,6 +6284,76 @@
             }
         };
         applyTheme(); // Apply theme on initial load
+
+        // Tag cleanup functionality
+        document.getElementById('cleanup-tags-btn').addEventListener('click', async () => {
+            if (!currentUser) {
+                alert('ログインが必要です。');
+                return;
+            }
+
+            showLoading(true);
+            try {
+                const existingTagNames = allTags.map(t => t.name);
+                let cleanupCount = 0;
+                let updatedCards = [];
+
+                // Check collection cards
+                for (const card of cardCollection) {
+                    if (card.data.tags && card.data.tags.length > 0) {
+                        const validTags = card.data.tags.filter(tag => existingTagNames.includes(tag));
+                        if (validTags.length !== card.data.tags.length) {
+                            cleanupCount++;
+                            card.data.tags = validTags;
+                            updatedCards.push({ card, listType: 'collection' });
+                        }
+                    }
+                }
+
+                // Check wishlist cards
+                for (const card of wishlistCollection) {
+                    if (card.data.tags && card.data.tags.length > 0) {
+                        const validTags = card.data.tags.filter(tag => existingTagNames.includes(tag));
+                        if (validTags.length !== card.data.tags.length) {
+                            cleanupCount++;
+                            card.data.tags = validTags;
+                            updatedCards.push({ card, listType: 'wishlist' });
+                        }
+                    }
+                }
+
+                if (cleanupCount > 0) {
+                    if (!confirm(`${cleanupCount}枚のカードから存在しないタグを削除します。続行しますか？`)) {
+                        showLoading(false);
+                        return;
+                    }
+
+                    // Update cards in Firebase
+                    for (const { card, listType } of updatedCards) {
+                        const collRef = getCollectionRef(listType);
+                        if (collRef) {
+                            await updateDoc(doc(collRef, card.id), { tags: card.data.tags });
+                        }
+                    }
+
+                    // Save to localStorage if not using Firebase
+                    if (!currentUser || currentUser.uid === 'local_user') {
+                        localStorage.setItem('cardCollection', JSON.stringify(cardCollection));
+                        localStorage.setItem('wishlistCollection', JSON.stringify(wishlistCollection));
+                    }
+
+                    alert(`${cleanupCount}枚のカードから存在しないタグを削除しました。`);
+                    applySearchAndFilter();
+                } else {
+                    alert('クリーンアップが必要なタグは見つかりませんでした。');
+                }
+            } catch (error) {
+                console.error('Error cleaning up tags:', error);
+                alert('タグのクリーンアップ中にエラーが発生しました。');
+            } finally {
+                showLoading(false);
+            }
+        });
 
         document.getElementById('delete-account-btn').addEventListener('click', async () => {
             if (!currentUser) return;
