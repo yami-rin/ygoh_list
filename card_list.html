@@ -1772,27 +1772,55 @@
                         <!-- Overview Tab -->
                         <div class="tab-pane fade show active" id="overview-analysis">
                             <div class="row g-3">
-                                <div class="col-md-6">
-                                    <div class="card">
+                                <div class="col-md-3">
+                                    <div class="card text-center">
                                         <div class="card-body">
-                                            <h6><i class="bi bi-pie-chart"></i> カードタイプ分布</h6>
-                                            <div id="card-type-chart"></div>
+                                            <h5 class="card-title">総カード数</h5>
+                                            <p class="card-text display-6" id="analysis-total-cards">0</p>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-md-3">
+                                    <div class="card text-center">
+                                        <div class="card-body">
+                                            <h5 class="card-title">ユニーク数</h5>
+                                            <p class="card-text display-6" id="analysis-unique-cards">0</p>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-md-3">
+                                    <div class="card text-center">
+                                        <div class="card-body">
+                                            <h5 class="card-title">平均枚数</h5>
+                                            <p class="card-text display-6" id="analysis-avg-cards">0</p>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-md-3">
+                                    <div class="card text-center">
+                                        <div class="card-body">
+                                            <h5 class="card-title">推定価値</h5>
+                                            <p class="card-text display-6" id="analysis-estimated-value">¥0</p>
                                         </div>
                                     </div>
                                 </div>
                                 <div class="col-md-6">
                                     <div class="card">
                                         <div class="card-body">
-                                            <h6><i class="bi bi-bar-chart"></i> トップ10レアリティ</h6>
-                                            <div id="top-rarity-chart"></div>
+                                            <h6><i class="bi bi-trophy"></i> 枚数トップ5</h6>
+                                            <div class="list-group list-group-flush" id="analysis-top-cards">
+                                                <p class="text-muted">データを読み込み中...</p>
+                                            </div>
                                         </div>
                                     </div>
                                 </div>
-                                <div class="col-12">
+                                <div class="col-md-6">
                                     <div class="card">
                                         <div class="card-body">
-                                            <h6><i class="bi bi-info-circle"></i> 基本統計</h6>
-                                            <div id="basic-stats-table"></div>
+                                            <h6><i class="bi bi-gem"></i> レアリティ分布</h6>
+                                            <div class="list-group list-group-flush" id="analysis-rarity-ranking">
+                                                <p class="text-muted">データを読み込み中...</p>
+                                            </div>
                                         </div>
                                     </div>
                                 </div>
@@ -1804,8 +1832,9 @@
                             <div class="card">
                                 <div class="card-body">
                                     <h6><i class="bi bi-circle-half"></i> 属性分布</h6>
-                                    <div id="attribute-chart"></div>
-                                    <div id="attribute-stats" class="mt-3"></div>
+                                    <div id="attribute-distribution">
+                                        <p class="text-muted">データを読み込み中...</p>
+                                    </div>
                                 </div>
                             </div>
                         </div>
@@ -1814,9 +1843,10 @@
                         <div class="tab-pane fade" id="race-analysis">
                             <div class="card">
                                 <div class="card-body">
-                                    <h6><i class="bi bi-people"></i> 種族分布（トップ20）</h6>
-                                    <div id="race-chart"></div>
-                                    <div id="race-stats" class="mt-3"></div>
+                                    <h6><i class="bi bi-people"></i> 種族分布（トップ10）</h6>
+                                    <div id="race-distribution">
+                                        <p class="text-muted">データを読み込み中...</p>
+                                    </div>
                                 </div>
                             </div>
                         </div>
@@ -1826,8 +1856,9 @@
                             <div class="card">
                                 <div class="card-body">
                                     <h6><i class="bi bi-star"></i> レベル/ランク分布</h6>
-                                    <div id="level-chart"></div>
-                                    <div id="level-stats" class="mt-3"></div>
+                                    <div id="level-distribution">
+                                        <p class="text-muted">データを読み込み中...</p>
+                                    </div>
                                 </div>
                             </div>
                         </div>
@@ -1837,8 +1868,9 @@
                             <div class="card">
                                 <div class="card-body">
                                     <h6><i class="bi bi-card-text"></i> カードタイプ詳細</h6>
-                                    <div id="card-type-detail-chart"></div>
-                                    <div id="type-stats" class="mt-3"></div>
+                                    <div id="type-distribution">
+                                        <p class="text-muted">データを読み込み中...</p>
+                                    </div>
                                 </div>
                             </div>
                         </div>
@@ -1847,15 +1879,19 @@
                         <div class="tab-pane fade" id="timeline-analysis">
                             <div class="card">
                                 <div class="card-body">
-                                    <h6><i class="bi bi-calendar"></i> 登録時系列</h6>
-                                    <div id="timeline-chart"></div>
-                                    <div id="timeline-stats" class="mt-3"></div>
+                                    <h6><i class="bi bi-calendar"></i> 登録時系列（最近30日）</h6>
+                                    <div id="timeline-data">
+                                        <p class="text-muted">データを読み込み中...</p>
+                                    </div>
                                 </div>
                             </div>
                         </div>
                     </div>
                 </div>
                 <div class="modal-footer">
+                    <button type="button" class="btn btn-primary" id="refresh-analysis-btn">
+                        <i class="bi bi-arrow-clockwise"></i> データを更新
+                    </button>
                     <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">閉じる</button>
                 </div>
             </div>
@@ -5247,9 +5283,15 @@
         // Initialize analysis functionality
         const initializeAnalysis = () => {
             const analysisBtn = document.getElementById('analysis-btn');
+            const refreshBtn = document.getElementById('refresh-analysis-btn');
 
             analysisBtn.addEventListener('click', () => {
                 analysisModal.show();
+                updateAnalysisData();
+            });
+
+            // Add refresh button handler
+            refreshBtn.addEventListener('click', () => {
                 updateAnalysisData();
             });
         };
