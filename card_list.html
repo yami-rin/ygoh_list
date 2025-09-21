@@ -1629,7 +1629,7 @@
                 </div>
                 <div class="form-check form-switch mb-3">
                     <input class="form-check-input" type="checkbox" role="switch" id="use-tap-quantity-toggle">
-                    <label class="form-check-label" for="use-tap-quantity-toggle">枚数入力をタップ式にする（スマホ向け）</label>
+                    <label class="form-check-label" for="use-tap-quantity-toggle">枚数入力をタップ式にする</label>
                 </div>
                 <hr>
                 <h6>アカウント削除</h6>
@@ -6132,14 +6132,11 @@
             const useTap = localStorage.getItem('useTapQuantity') === 'true';
 
             if (useTap) {
-                // Check if on mobile or touch device
-                const isTouchDevice = 'ontouchstart' in window || navigator.maxTouchPoints > 0;
-                if (isTouchDevice || window.innerWidth <= 768) {
-                    createTapQuantityInput('quantity-input-container', 'quantity',
-                        parseInt(document.getElementById('quantity').value) || 1);
-                    createTapQuantityInput('edit-quantity-input-container', 'edit-quantity',
-                        parseInt(document.getElementById('edit-quantity').value) || 1);
-                }
+                // Enable tap mode for all devices (both mobile and PC)
+                createTapQuantityInput('quantity-input-container', 'quantity',
+                    parseInt(document.getElementById('quantity').value) || 1);
+                createTapQuantityInput('edit-quantity-input-container', 'edit-quantity',
+                    parseInt(document.getElementById('edit-quantity').value) || 1);
             } else {
                 restoreNormalQuantityInput('quantity-input-container', 'quantity');
                 restoreNormalQuantityInput('edit-quantity-input-container', 'edit-quantity');
