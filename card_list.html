@@ -5296,6 +5296,65 @@
             });
         };
 
+        // Get estimated price for rarity
+        const getRarityPrice = (rarity) => {
+            if (!rarity) return 0.1;
+
+            // Define rarity prices based on provided list
+            const rarityPrices = {
+                'N': 0.1,
+                'P': 0.1,
+                'R': 0.5,
+                'SR': 1,
+                'P+SR': 1,
+                'UR': 10,
+                'P+UR': 10,
+                'UL': 10,
+                'GR': 1,
+                'CR': 10,
+                'HR': 100,
+                'SE': 30,
+                'P+SE': 100,
+                'EXSE': 100,
+                'GSE': 100,
+                'PSE': 300,
+                '20th': 500,
+                'QCSE': 500
+            };
+
+            // Check exact match first
+            if (rarityPrices[rarity]) {
+                return rarityPrices[rarity];
+            }
+
+            // Check partial matches
+            const rarityUpper = rarity.toUpperCase();
+            for (const [key, value] of Object.entries(rarityPrices)) {
+                if (rarityUpper.includes(key)) {
+                    return value;
+                }
+            }
+
+            // Default values for common patterns
+            if (rarityUpper.includes('QCSE')) return 500;
+            if (rarityUpper.includes('20TH') || rarityUpper.includes('20シク')) return 500;
+            if (rarityUpper.includes('PSE')) return 300;
+            if (rarityUpper.includes('GSE') || rarityUpper.includes('EXSE')) return 100;
+            if (rarityUpper.includes('P+SE')) return 100;
+            if (rarityUpper.includes('HR')) return 100;
+            if (rarityUpper.includes('SE')) return 30;
+            if (rarityUpper.includes('P+UR')) return 10;
+            if (rarityUpper.includes('UR') || rarityUpper.includes('UL') || rarityUpper.includes('CR')) return 10;
+            if (rarityUpper.includes('P+SR')) return 1;
+            if (rarityUpper.includes('SR') || rarityUpper.includes('GR')) return 1;
+            if (rarityUpper.includes('R')) return 0.5;
+            if (rarityUpper.includes('P')) return 0.1;
+            if (rarityUpper.includes('N')) return 0.1;
+
+            // Default for unknown
+            return 0.1;
+        };
+
         // Update analysis data
         const updateAnalysisData = () => {
             const collection = getCurrentCollection();
@@ -5350,7 +5409,7 @@
                 }
 
                 // Calculate estimated value based on rarity
-                totalValue += quantity * getRarityScore(rarity) * 100;
+                totalValue += quantity * getRarityPrice(rarity);
             });
 
             // Update estimated value
