@@ -1724,6 +1724,144 @@
         </div>
     </div>
 
+    <!-- Analysis Modal -->
+    <div class="modal fade" id="analysis-modal" tabindex="-1">
+        <div class="modal-dialog modal-xl">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title"><i class="bi bi-graph-up"></i> コレクション分析</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <!-- Analysis Tabs -->
+                    <ul class="nav nav-tabs mb-3" role="tablist">
+                        <li class="nav-item" role="presentation">
+                            <button class="nav-link active" data-bs-toggle="tab" data-bs-target="#overview-analysis" type="button">
+                                <i class="bi bi-grid"></i> 概要
+                            </button>
+                        </li>
+                        <li class="nav-item" role="presentation">
+                            <button class="nav-link" data-bs-toggle="tab" data-bs-target="#attribute-analysis" type="button">
+                                <i class="bi bi-circle-half"></i> 属性
+                            </button>
+                        </li>
+                        <li class="nav-item" role="presentation">
+                            <button class="nav-link" data-bs-toggle="tab" data-bs-target="#race-analysis" type="button">
+                                <i class="bi bi-people"></i> 種族
+                            </button>
+                        </li>
+                        <li class="nav-item" role="presentation">
+                            <button class="nav-link" data-bs-toggle="tab" data-bs-target="#level-analysis" type="button">
+                                <i class="bi bi-star"></i> レベル
+                            </button>
+                        </li>
+                        <li class="nav-item" role="presentation">
+                            <button class="nav-link" data-bs-toggle="tab" data-bs-target="#type-analysis" type="button">
+                                <i class="bi bi-card-text"></i> タイプ
+                            </button>
+                        </li>
+                        <li class="nav-item" role="presentation">
+                            <button class="nav-link" data-bs-toggle="tab" data-bs-target="#timeline-analysis" type="button">
+                                <i class="bi bi-calendar"></i> 時系列
+                            </button>
+                        </li>
+                    </ul>
+
+                    <!-- Tab Contents -->
+                    <div class="tab-content">
+                        <!-- Overview Tab -->
+                        <div class="tab-pane fade show active" id="overview-analysis">
+                            <div class="row g-3">
+                                <div class="col-md-6">
+                                    <div class="card">
+                                        <div class="card-body">
+                                            <h6><i class="bi bi-pie-chart"></i> カードタイプ分布</h6>
+                                            <div id="card-type-chart"></div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="card">
+                                        <div class="card-body">
+                                            <h6><i class="bi bi-bar-chart"></i> トップ10レアリティ</h6>
+                                            <div id="top-rarity-chart"></div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-12">
+                                    <div class="card">
+                                        <div class="card-body">
+                                            <h6><i class="bi bi-info-circle"></i> 基本統計</h6>
+                                            <div id="basic-stats-table"></div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Attribute Tab -->
+                        <div class="tab-pane fade" id="attribute-analysis">
+                            <div class="card">
+                                <div class="card-body">
+                                    <h6><i class="bi bi-circle-half"></i> 属性分布</h6>
+                                    <div id="attribute-chart"></div>
+                                    <div id="attribute-stats" class="mt-3"></div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Race Tab -->
+                        <div class="tab-pane fade" id="race-analysis">
+                            <div class="card">
+                                <div class="card-body">
+                                    <h6><i class="bi bi-people"></i> 種族分布（トップ20）</h6>
+                                    <div id="race-chart"></div>
+                                    <div id="race-stats" class="mt-3"></div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Level Tab -->
+                        <div class="tab-pane fade" id="level-analysis">
+                            <div class="card">
+                                <div class="card-body">
+                                    <h6><i class="bi bi-star"></i> レベル/ランク分布</h6>
+                                    <div id="level-chart"></div>
+                                    <div id="level-stats" class="mt-3"></div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Type Tab -->
+                        <div class="tab-pane fade" id="type-analysis">
+                            <div class="card">
+                                <div class="card-body">
+                                    <h6><i class="bi bi-card-text"></i> カードタイプ詳細</h6>
+                                    <div id="card-type-detail-chart"></div>
+                                    <div id="type-stats" class="mt-3"></div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Timeline Tab -->
+                        <div class="tab-pane fade" id="timeline-analysis">
+                            <div class="card">
+                                <div class="card-body">
+                                    <h6><i class="bi bi-calendar"></i> 登録時系列</h6>
+                                    <div id="timeline-chart"></div>
+                                    <div id="timeline-stats" class="mt-3"></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">閉じる</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <!-- Main App -->
     <div id="main-app">
         <nav class="navbar navbar-expand-lg navbar-light bg-light mb-4" data-bs-theme="light">
@@ -1766,6 +1904,12 @@
                             <button class="btn btn-outline-primary btn-sm" id="ranking-btn">
                                 <i class="bi bi-trophy"></i>
                                 <span class="d-none d-sm-inline"> ランキング</span>
+                            </button>
+                        </div>
+                        <div class="d-inline-block">
+                            <button class="btn btn-outline-warning btn-sm" id="analysis-btn">
+                                <i class="bi bi-graph-up"></i>
+                                <span class="d-none d-sm-inline"> 分析</span>
                             </button>
                         </div>
                         <div class="d-inline-block">
@@ -2508,6 +2652,7 @@
         const settingsModal = new bootstrap.Modal(document.getElementById('settings-modal'));
         const tagManagementModal = new bootstrap.Modal(document.getElementById('tag-management-modal'));
         const bulkTagModal = new bootstrap.Modal(document.getElementById('bulk-tag-modal'));
+        const analysisModal = new bootstrap.Modal(document.getElementById('analysis-modal'));
         const authError = document.getElementById('auth-error');
         const logoutBtn = document.getElementById('logout-btn');
         const userEmailSpan = document.getElementById('user-email');
@@ -4913,9 +5058,12 @@
             
             // Add profile functionality
             initializeProfile();
-            
+
             // Add ranking functionality
             initializeRanking();
+
+            // Add analysis functionality
+            initializeAnalysis();
         };
         
         // Track daily usage
@@ -5086,14 +5234,216 @@
         const initializeRanking = () => {
             const rankingBtn = document.getElementById('ranking-btn');
             const rankingModal = new bootstrap.Modal(document.getElementById('ranking-modal'));
-            
+
             rankingBtn.addEventListener('click', async () => {
                 rankingModal.show();
                 await loadRankings();
             });
-            
+
             // Update user's ranking data when cards change
             updateUserRankingData();
+        };
+
+        // Initialize analysis functionality
+        const initializeAnalysis = () => {
+            const analysisBtn = document.getElementById('analysis-btn');
+
+            analysisBtn.addEventListener('click', () => {
+                analysisModal.show();
+                updateAnalysisData();
+            });
+        };
+
+        // Update analysis data
+        const updateAnalysisData = () => {
+            const collection = getCurrentCollection();
+            const totalCards = collection.reduce((sum, card) => sum + (parseInt(card.data['枚数']) || 0), 0);
+            const uniqueCards = collection.length;
+
+            // Update overview
+            document.getElementById('analysis-total-cards').textContent = totalCards.toLocaleString();
+            document.getElementById('analysis-unique-cards').textContent = uniqueCards.toLocaleString();
+            document.getElementById('analysis-avg-cards').textContent = uniqueCards > 0 ? (totalCards / uniqueCards).toFixed(1) : '0';
+
+            // Calculate rarity distribution
+            const rarityDistribution = {};
+            const attributeDistribution = {};
+            const raceDistribution = {};
+            const levelDistribution = {};
+            const typeDistribution = {};
+            let totalValue = 0;
+
+            collection.forEach(card => {
+                const quantity = parseInt(card.data['枚数']) || 0;
+                const rarity = card.data['レアリティ'] || '不明';
+
+                // Rarity distribution
+                rarityDistribution[rarity] = (rarityDistribution[rarity] || 0) + quantity;
+
+                // Get card details for attribute, race, level, type
+                const cardName = card.data['名前'];
+                if (cardDetailsMap.has(cardName)) {
+                    const details = cardDetailsMap.get(cardName);
+
+                    // Attribute distribution
+                    if (details.attribute) {
+                        attributeDistribution[details.attribute] = (attributeDistribution[details.attribute] || 0) + quantity;
+                    }
+
+                    // Race distribution
+                    if (details.race) {
+                        raceDistribution[details.race] = (raceDistribution[details.race] || 0) + quantity;
+                    }
+
+                    // Level distribution
+                    if (details.level) {
+                        const levelKey = `レベル${details.level}`;
+                        levelDistribution[levelKey] = (levelDistribution[levelKey] || 0) + quantity;
+                    }
+
+                    // Type distribution
+                    if (details.cardType) {
+                        typeDistribution[details.cardType] = (typeDistribution[details.cardType] || 0) + quantity;
+                    }
+                }
+
+                // Calculate estimated value based on rarity
+                totalValue += quantity * getRarityScore(rarity) * 100;
+            });
+
+            // Update estimated value
+            document.getElementById('analysis-estimated-value').textContent = `¥${totalValue.toLocaleString()}`;
+
+            // Update attribute distribution
+            const attributeHtml = Object.entries(attributeDistribution)
+                .sort((a, b) => b[1] - a[1])
+                .slice(0, 10)
+                .map(([attr, count]) => `
+                    <div class="d-flex justify-content-between align-items-center mb-2">
+                        <span>${escapeHtml(attr)}</span>
+                        <div class="d-flex align-items-center">
+                            <div class="progress" style="width: 150px; height: 20px; margin-right: 10px;">
+                                <div class="progress-bar" style="width: ${(count / totalCards * 100).toFixed(1)}%"></div>
+                            </div>
+                            <span class="badge bg-primary">${count}</span>
+                        </div>
+                    </div>
+                `).join('');
+            document.getElementById('attribute-distribution').innerHTML = attributeHtml || '<p class="text-muted">データがありません</p>';
+
+            // Update race distribution
+            const raceHtml = Object.entries(raceDistribution)
+                .sort((a, b) => b[1] - a[1])
+                .slice(0, 10)
+                .map(([race, count]) => `
+                    <div class="d-flex justify-content-between align-items-center mb-2">
+                        <span>${escapeHtml(race)}</span>
+                        <div class="d-flex align-items-center">
+                            <div class="progress" style="width: 150px; height: 20px; margin-right: 10px;">
+                                <div class="progress-bar bg-success" style="width: ${(count / totalCards * 100).toFixed(1)}%"></div>
+                            </div>
+                            <span class="badge bg-success">${count}</span>
+                        </div>
+                    </div>
+                `).join('');
+            document.getElementById('race-distribution').innerHTML = raceHtml || '<p class="text-muted">データがありません</p>';
+
+            // Update level distribution
+            const levelHtml = Object.entries(levelDistribution)
+                .sort((a, b) => {
+                    const aLevel = parseInt(a[0].replace('レベル', ''));
+                    const bLevel = parseInt(b[0].replace('レベル', ''));
+                    return aLevel - bLevel;
+                })
+                .map(([level, count]) => `
+                    <div class="d-flex justify-content-between align-items-center mb-2">
+                        <span>${escapeHtml(level)}</span>
+                        <div class="d-flex align-items-center">
+                            <div class="progress" style="width: 150px; height: 20px; margin-right: 10px;">
+                                <div class="progress-bar bg-warning" style="width: ${(count / totalCards * 100).toFixed(1)}%"></div>
+                            </div>
+                            <span class="badge bg-warning text-dark">${count}</span>
+                        </div>
+                    </div>
+                `).join('');
+            document.getElementById('level-distribution').innerHTML = levelHtml || '<p class="text-muted">データがありません</p>';
+
+            // Update type distribution
+            const typeHtml = Object.entries(typeDistribution)
+                .sort((a, b) => b[1] - a[1])
+                .map(([type, count]) => `
+                    <div class="d-flex justify-content-between align-items-center mb-2">
+                        <span>${escapeHtml(type)}</span>
+                        <div class="d-flex align-items-center">
+                            <div class="progress" style="width: 150px; height: 20px; margin-right: 10px;">
+                                <div class="progress-bar bg-info" style="width: ${(count / totalCards * 100).toFixed(1)}%"></div>
+                            </div>
+                            <span class="badge bg-info">${count}</span>
+                        </div>
+                    </div>
+                `).join('');
+            document.getElementById('type-distribution').innerHTML = typeHtml || '<p class="text-muted">データがありません</p>';
+
+            // Update timeline (registration dates)
+            const dateGroups = {};
+            const today = new Date();
+            const thirtyDaysAgo = new Date(today.getTime() - 30 * 24 * 60 * 60 * 1000);
+
+            // Group cards by registration date (if available)
+            collection.forEach(card => {
+                const regDate = card.data.registeredAt || card.data.addedAt;
+                if (regDate) {
+                    const date = new Date(regDate);
+                    if (date >= thirtyDaysAgo) {
+                        const dateKey = date.toLocaleDateString('ja-JP');
+                        const quantity = parseInt(card.data['枚数']) || 0;
+                        dateGroups[dateKey] = (dateGroups[dateKey] || 0) + quantity;
+                    }
+                }
+            });
+
+            const timelineHtml = Object.entries(dateGroups)
+                .sort((a, b) => new Date(b[0]) - new Date(a[0]))
+                .slice(0, 10)
+                .map(([date, count]) => `
+                    <div class="d-flex justify-content-between align-items-center mb-2">
+                        <span>${escapeHtml(date)}</span>
+                        <span class="badge bg-secondary">${count}枚</span>
+                    </div>
+                `).join('');
+            document.getElementById('timeline-data').innerHTML = timelineHtml || '<p class="text-muted">最近の登録データがありません</p>';
+
+            // Update top cards by quantity
+            const topCards = [...collection]
+                .sort((a, b) => (parseInt(b.data['枚数']) || 0) - (parseInt(a.data['枚数']) || 0))
+                .slice(0, 5);
+
+            const topCardsHtml = topCards.map(card => `
+                <div class="list-group-item">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <strong>${escapeHtml(card.data['名前'])}</strong>
+                            <small class="text-muted d-block">${escapeHtml(card.data['型番'] || '')}</small>
+                        </div>
+                        <span class="badge bg-primary">${card.data['枚数']}枚</span>
+                    </div>
+                </div>
+            `).join('');
+            document.getElementById('analysis-top-cards').innerHTML = topCardsHtml || '<p class="text-muted">カードがありません</p>';
+
+            // Update rarity ranking
+            const rarityRankingHtml = Object.entries(rarityDistribution)
+                .sort((a, b) => b[1] - a[1])
+                .slice(0, 5)
+                .map(([rarity, count], index) => `
+                    <div class="list-group-item">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <span>${index + 1}. ${escapeHtml(rarity)}</span>
+                            <span class="badge bg-secondary">${count}枚</span>
+                        </div>
+                    </div>
+                `).join('');
+            document.getElementById('analysis-rarity-ranking').innerHTML = rarityRankingHtml || '<p class="text-muted">データがありません</p>';
         };
         
         // Update user's ranking data in Firebase
