@@ -232,6 +232,37 @@
             background: rgba(0, 0, 0, 0.5);
         }
         
+        /* Performance optimizations for mobile */
+        @media (max-width: 768px) {
+            /* Optimize animations for mobile */
+            * {
+                -webkit-animation-duration: 0.2s !important;
+                animation-duration: 0.2s !important;
+                -webkit-transform: translateZ(0);
+                transform: translateZ(0);
+            }
+
+            /* Reduce shadow complexity on mobile */
+            .card, .modal-content, .btn {
+                box-shadow: 0 1px 3px rgba(0,0,0,0.1) !important;
+            }
+
+            /* Simplify table for performance */
+            .table-responsive {
+                -webkit-overflow-scrolling: touch;
+            }
+
+            .table td {
+                padding: 0.25rem !important;
+                font-size: 0.875rem;
+            }
+
+            /* Hide non-essential columns on mobile */
+            .tag-cell {
+                display: none !important;
+            }
+        }
+
         /* Mobile responsive for rarity bars */
         @media (max-width: 768px) {
             #rarity-bars {
@@ -1632,10 +1663,6 @@
                     <label class="form-check-label" for="use-tap-quantity-toggle">枚数入力をタップ式にする</label>
                 </div>
                 <hr>
-                <h6>タグのメンテナンス</h6>
-                <p class="text-muted small">カードに設定されているが存在しないタグを検出して削除します。</p>
-                <button class="btn btn-warning mb-3" id="cleanup-tags-btn">存在しないタグをクリーンアップ</button>
-                <hr>
                 <h6>アカウント削除</h6>
                 <p class="text-muted small">この操作は元に戻せません。アカウントに紐づく全てのカードデータが完全に削除されます。</p>
                 <button class="btn btn-danger" id="delete-account-btn">アカウントを削除する</button>
@@ -1659,8 +1686,15 @@
                         <button class="btn btn-primary" type="submit">追加</button>
                     </form>
                     <hr>
-                    <h6>登録済みタグ一覧</h6>
-                    <small class="text-muted">※ドラッグ＆ドロップで順番を変更できます</small>
+                    <div class="d-flex justify-content-between align-items-center mb-2">
+                        <div>
+                            <h6>登録済みタグ一覧</h6>
+                            <small class="text-muted">※ドラッグ＆ドロップで順番を変更できます</small>
+                        </div>
+                        <button class="btn btn-warning btn-sm" id="cleanup-tags-btn">
+                            <i class="bi bi-recycle"></i> 未使用タグをクリーンアップ
+                        </button>
+                    </div>
                     <div id="existing-tags-list" class="mt-2"></div>
                 </div>
                 <div class="modal-footer">
@@ -2241,7 +2275,8 @@
         let currentPage = 1;
         let cardReadingMap = new Map(); // Map for hiragana -> card names
         let cardDetailsMap = new Map(); // Map for card details (level, attribute, etc.)
-        let itemsPerPage = 50;
+        // Set smaller initial page size for mobile devices
+        let itemsPerPage = window.innerWidth <= 768 ? 20 : 50;
         let filteredCardCollection = [];
         let allTags = [];
         
@@ -2520,36 +2555,65 @@
             const endIndex = startIndex + itemsPerPage;
             const paginatedItems = filteredCardCollection.slice(startIndex, endIndex);
 
-            cardTableBody.innerHTML = '';
+            // Use DocumentFragment for better performance
+            const fragment = document.createDocumentFragment();
+
             if (paginatedItems.length === 0) {
-                cardTableBody.innerHTML = '<tr><td colspan="6" class="text-center">該当するカードはありません。</td></tr>';
+                const tr = document.createElement('tr');
+                tr.innerHTML = '<td colspan="6" class="text-center">該当するカードはありません。</td>';
+                fragment.appendChild(tr);
             } else {
+                // Check if mobile for simplified view
+                const isMobile = window.innerWidth <= 768;
+
                 paginatedItems.forEach(card => {
                     const tr = document.createElement('tr');
                     const tags = (card.data.tags || []).map(tag => escapeHtml(tag)).join(', ');
                     const isChecked = selectedCardIds.has(card.id) ? 'checked' : '';
-                    tr.innerHTML = `
-                        <td>
-                            <input type="checkbox" class="form-check-input card-checkbox" data-id="${escapeHtml(card.id)}" ${isChecked}>
-                        </td>
-                        <td>${escapeHtml(card.data['名前'])}</td>
-                        <td>${escapeHtml(card.data['型番'])}</td>
-                        <td>${escapeHtml(card.data['レアリティ'])}</td>
-                        <td>${escapeHtml(card.data['枚数'])}</td>
-                        <td class="tag-cell d-none d-sm-table-cell" title="${escapeHtml(tags)}">
-                            <span class="tags-display" data-card-id="${escapeHtml(card.id)}">${tags}</span>
-                            <button class="btn btn-sm btn-link edit-tags-btn" data-id="${escapeHtml(card.id)}" style="padding: 0 0.25rem; display: none;" title="タグを編集"><i class="bi bi-pencil-square"></i></button>
-                        </td>
-                        <td>
-                            <button class="btn btn-info btn-sm view-detail-btn" data-name="${escapeHtml(card.data['名前'])}" title="詳細表示"><i class="bi bi-eye"></i></button>
-                            <button class="btn btn-primary btn-sm edit-btn" data-id="${escapeHtml(card.id)}"><i class="bi bi-pencil"></i></button>
-                            ${currentListType === 'wishlist' ? `<button class="btn btn-success btn-sm move-to-collection-btn" data-id="${escapeHtml(card.id)}" title="所持カードへ移動"><i class="bi bi-check-circle"></i></button>` : ''}
-                            <button class="btn btn-danger btn-sm delete-btn" data-id="${escapeHtml(card.id)}"><i class="bi bi-trash"></i></button>
-                        </td>
-                    `;
-                    cardTableBody.appendChild(tr);
+
+                    if (isMobile) {
+                        // Simplified mobile view without tags column
+                        tr.innerHTML = `
+                            <td>
+                                <input type="checkbox" class="form-check-input card-checkbox" data-id="${escapeHtml(card.id)}" ${isChecked}>
+                            </td>
+                            <td>${escapeHtml(card.data['名前'])}</td>
+                            <td>${escapeHtml(card.data['型番'])}</td>
+                            <td>${escapeHtml(card.data['レアリティ'])}</td>
+                            <td>${escapeHtml(card.data['枚数'])}</td>
+                            <td>
+                                <button class="btn btn-sm btn-outline-info view-detail-btn" data-id="${escapeHtml(card.id)}" data-card-data='${JSON.stringify(card.data).replace(/'/g, "&#39;")}'>詳細</button>
+                                <button class="btn btn-sm btn-outline-secondary edit-tags-btn" data-id="${escapeHtml(card.id)}" data-current-tags='${JSON.stringify(card.data.tags || []).replace(/'/g, "&#39;")}'>タグ</button>
+                            </td>
+                        `;
+                    } else {
+                        tr.innerHTML = `
+                            <td>
+                                <input type="checkbox" class="form-check-input card-checkbox" data-id="${escapeHtml(card.id)}" ${isChecked}>
+                            </td>
+                            <td>${escapeHtml(card.data['名前'])}</td>
+                            <td>${escapeHtml(card.data['型番'])}</td>
+                            <td>${escapeHtml(card.data['レアリティ'])}</td>
+                            <td>${escapeHtml(card.data['枚数'])}</td>
+                            <td class="tag-cell d-none d-sm-table-cell" title="${escapeHtml(tags)}">
+                                <span class="tags-display" data-card-id="${escapeHtml(card.id)}">${tags}</span>
+                                <button class="btn btn-sm btn-link edit-tags-btn" data-id="${escapeHtml(card.id)}" style="padding: 0 0.25rem; display: none;" title="タグを編集"><i class="bi bi-pencil-square"></i></button>
+                            </td>
+                            <td>
+                                <button class="btn btn-info btn-sm view-detail-btn" data-name="${escapeHtml(card.data['名前'])}" title="詳細表示"><i class="bi bi-eye"></i></button>
+                                <button class="btn btn-primary btn-sm edit-btn" data-id="${escapeHtml(card.id)}"><i class="bi bi-pencil"></i></button>
+                                ${currentListType === 'wishlist' ? `<button class="btn btn-success btn-sm move-to-collection-btn" data-id="${escapeHtml(card.id)}" title="所持カードへ移動"><i class="bi bi-check-circle"></i></button>` : ''}
+                                <button class="btn btn-danger btn-sm delete-btn" data-id="${escapeHtml(card.id)}"><i class="bi bi-trash"></i></button>
+                            </td>
+                        `;
+                    }
+                    fragment.appendChild(tr);
                 });
             }
+
+            // Clear and append all at once for better performance
+            cardTableBody.innerHTML = '';
+            cardTableBody.appendChild(fragment);
 
             updatePaginationControls();
             updateSortIcons();
@@ -5722,8 +5786,28 @@
             checkbox.addEventListener('change', updateCardTypeText);
         });
 
+        // Debounce function for search
+        let searchDebounceTimer = null;
+        const debounceSearch = (callback, delay = 300) => {
+            return function(...args) {
+                clearTimeout(searchDebounceTimer);
+                searchDebounceTimer = setTimeout(() => callback.apply(this, args), delay);
+            };
+        };
+
+        // Apply debounced search on input change for mobile optimization
+        const searchInputs = searchForm.querySelectorAll('input[type="text"]');
+        const debouncedSearch = debounceSearch(() => {
+            applySearchAndFilter();
+        }, 500); // 500ms delay for mobile typing
+
+        searchInputs.forEach(input => {
+            input.addEventListener('input', debouncedSearch);
+        });
+
         searchForm.addEventListener('submit', (e) => {
             e.preventDefault();
+            clearTimeout(searchDebounceTimer); // Cancel pending debounced search
             applySearchAndFilter();
         });
 
