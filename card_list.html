@@ -1741,23 +1741,8 @@
                             </button>
                         </li>
                         <li class="nav-item" role="presentation">
-                            <button class="nav-link" data-bs-toggle="tab" data-bs-target="#attribute-analysis" type="button">
-                                <i class="bi bi-circle-half"></i> 属性
-                            </button>
-                        </li>
-                        <li class="nav-item" role="presentation">
-                            <button class="nav-link" data-bs-toggle="tab" data-bs-target="#race-analysis" type="button">
-                                <i class="bi bi-people"></i> 種族
-                            </button>
-                        </li>
-                        <li class="nav-item" role="presentation">
-                            <button class="nav-link" data-bs-toggle="tab" data-bs-target="#level-analysis" type="button">
-                                <i class="bi bi-star"></i> レベル
-                            </button>
-                        </li>
-                        <li class="nav-item" role="presentation">
-                            <button class="nav-link" data-bs-toggle="tab" data-bs-target="#type-analysis" type="button">
-                                <i class="bi bi-card-text"></i> タイプ
+                            <button class="nav-link" data-bs-toggle="tab" data-bs-target="#recent-history" type="button">
+                                <i class="bi bi-clock-history"></i> 追加履歴
                             </button>
                         </li>
                     </ul>
@@ -1822,48 +1807,12 @@
                             </div>
                         </div>
 
-                        <!-- Attribute Tab -->
-                        <div class="tab-pane fade" id="attribute-analysis">
+                        <!-- Recent History Tab -->
+                        <div class="tab-pane fade" id="recent-history">
                             <div class="card">
                                 <div class="card-body">
-                                    <h6><i class="bi bi-circle-half"></i> 属性分布</h6>
-                                    <div id="attribute-distribution">
-                                        <p class="text-muted">データを読み込み中...</p>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-
-                        <!-- Race Tab -->
-                        <div class="tab-pane fade" id="race-analysis">
-                            <div class="card">
-                                <div class="card-body">
-                                    <h6><i class="bi bi-people"></i> 種族分布（トップ10）</h6>
-                                    <div id="race-distribution">
-                                        <p class="text-muted">データを読み込み中...</p>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-
-                        <!-- Level Tab -->
-                        <div class="tab-pane fade" id="level-analysis">
-                            <div class="card">
-                                <div class="card-body">
-                                    <h6><i class="bi bi-star"></i> レベル/ランク分布</h6>
-                                    <div id="level-distribution">
-                                        <p class="text-muted">データを読み込み中...</p>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-
-                        <!-- Type Tab -->
-                        <div class="tab-pane fade" id="type-analysis">
-                            <div class="card">
-                                <div class="card-body">
-                                    <h6><i class="bi bi-card-text"></i> カードタイプ詳細</h6>
-                                    <div id="type-distribution">
+                                    <h6><i class="bi bi-clock-history"></i> 直近で追加したカード（最新50件）</h6>
+                                    <div id="recent-cards-list" class="list-group">
                                         <p class="text-muted">データを読み込み中...</p>
                                     </div>
                                 </div>
@@ -5407,76 +5356,53 @@
             // Update estimated value
             document.getElementById('analysis-estimated-value').textContent = `¥${totalValue.toLocaleString()}`;
 
-            // Update attribute distribution
-            const attributeHtml = Object.entries(attributeDistribution)
-                .sort((a, b) => b[1] - a[1])
-                .slice(0, 10)
-                .map(([attr, count]) => `
-                    <div class="d-flex justify-content-between align-items-center mb-2">
-                        <span>${escapeHtml(attr)}</span>
-                        <div class="d-flex align-items-center">
-                            <div class="progress" style="width: 150px; height: 20px; margin-right: 10px;">
-                                <div class="progress-bar" style="width: ${(count / totalCards * 100).toFixed(1)}%"></div>
-                            </div>
-                            <span class="badge bg-primary">${count}</span>
-                        </div>
-                    </div>
-                `).join('');
-            document.getElementById('attribute-distribution').innerHTML = attributeHtml || '<p class="text-muted">データがありません</p>';
+            // Update recent cards history
+            const recentCardsHistory = localStorage.getItem('recentCardsHistory');
+            let recentCards = [];
+            if (recentCardsHistory) {
+                try {
+                    recentCards = JSON.parse(recentCardsHistory);
+                } catch(e) {
+                    recentCards = [];
+                }
+            }
 
-            // Update race distribution
-            const raceHtml = Object.entries(raceDistribution)
-                .sort((a, b) => b[1] - a[1])
-                .slice(0, 10)
-                .map(([race, count]) => `
-                    <div class="d-flex justify-content-between align-items-center mb-2">
-                        <span>${escapeHtml(race)}</span>
-                        <div class="d-flex align-items-center">
-                            <div class="progress" style="width: 150px; height: 20px; margin-right: 10px;">
-                                <div class="progress-bar bg-success" style="width: ${(count / totalCards * 100).toFixed(1)}%"></div>
+            const recentCardsHtml = recentCards
+                .slice(0, 50)
+                .map(item => {
+                    const date = new Date(item.timestamp);
+                    const formattedDate = date.toLocaleDateString('ja-JP', {
+                        year: 'numeric',
+                        month: '2-digit',
+                        day: '2-digit',
+                        hour: '2-digit',
+                        minute: '2-digit'
+                    });
+                    return `
+                        <div class="list-group-item">
+                            <div class="d-flex justify-content-between align-items-start">
+                                <div class="flex-grow-1">
+                                    <h6 class="mb-1">${escapeHtml(item.name)}</h6>
+                                    <div class="small text-muted">
+                                        ${item.setCode ? `<span class="badge bg-secondary me-1">${escapeHtml(item.setCode)}</span>` : ''}
+                                        ${item.rarity ? `<span class="badge bg-info me-1">${escapeHtml(item.rarity)}</span>` : ''}
+                                        <span class="badge bg-primary">${item.quantity}枚</span>
+                                    </div>
+                                </div>
+                                <div class="text-end">
+                                    <small class="text-muted">${formattedDate}</small>
+                                    <div>
+                                        <span class="badge ${item.listType === 'wishlist' ? 'bg-warning' : 'bg-success'}">
+                                            ${item.listType === 'wishlist' ? '欲しいカード' : '所持カード'}
+                                        </span>
+                                    </div>
+                                </div>
                             </div>
-                            <span class="badge bg-success">${count}</span>
                         </div>
-                    </div>
-                `).join('');
-            document.getElementById('race-distribution').innerHTML = raceHtml || '<p class="text-muted">データがありません</p>';
+                    `;
+                }).join('');
 
-            // Update level distribution
-            const levelHtml = Object.entries(levelDistribution)
-                .sort((a, b) => {
-                    const aLevel = parseInt(a[0].replace('レベル', ''));
-                    const bLevel = parseInt(b[0].replace('レベル', ''));
-                    return aLevel - bLevel;
-                })
-                .map(([level, count]) => `
-                    <div class="d-flex justify-content-between align-items-center mb-2">
-                        <span>${escapeHtml(level)}</span>
-                        <div class="d-flex align-items-center">
-                            <div class="progress" style="width: 150px; height: 20px; margin-right: 10px;">
-                                <div class="progress-bar bg-warning" style="width: ${(count / totalCards * 100).toFixed(1)}%"></div>
-                            </div>
-                            <span class="badge bg-warning text-dark">${count}</span>
-                        </div>
-                    </div>
-                `).join('');
-            document.getElementById('level-distribution').innerHTML = levelHtml || '<p class="text-muted">データがありません</p>';
-
-            // Update type distribution
-            const typeHtml = Object.entries(typeDistribution)
-                .sort((a, b) => b[1] - a[1])
-                .map(([type, count]) => `
-                    <div class="d-flex justify-content-between align-items-center mb-2">
-                        <span>${escapeHtml(type)}</span>
-                        <div class="d-flex align-items-center">
-                            <div class="progress" style="width: 150px; height: 20px; margin-right: 10px;">
-                                <div class="progress-bar bg-info" style="width: ${(count / totalCards * 100).toFixed(1)}%"></div>
-                            </div>
-                            <span class="badge bg-info">${count}</span>
-                        </div>
-                    </div>
-                `).join('');
-            document.getElementById('type-distribution').innerHTML = typeHtml || '<p class="text-muted">データがありません</p>';
-
+            document.getElementById('recent-cards-list').innerHTML = recentCardsHtml || '<p class="text-muted">まだカードが追加されていません</p>';
 
             // Update top cards by quantity
             const topCards = [...collection]
@@ -6058,7 +5984,32 @@
                     newCard['レアリティ'].toUpperCase().includes('UR')
                 );
                 trackCardAddition(newCard, hasTag, isRare);
-                
+
+                // Save to recent cards history
+                let recentHistory = [];
+                try {
+                    const existingHistory = localStorage.getItem('recentCardsHistory');
+                    if (existingHistory) {
+                        recentHistory = JSON.parse(existingHistory);
+                    }
+                } catch(e) {
+                    recentHistory = [];
+                }
+
+                // Add new card to history
+                recentHistory.unshift({
+                    name: newCard['名前'],
+                    setCode: newCard['型番'],
+                    rarity: newCard['レアリティ'],
+                    quantity: newCard['枚数'],
+                    listType: addType,
+                    timestamp: new Date().toISOString()
+                });
+
+                // Keep only the latest 100 entries
+                recentHistory = recentHistory.slice(0, 100);
+                localStorage.setItem('recentCardsHistory', JSON.stringify(recentHistory));
+
                 // Add points for card addition (5 points per card)
                 const cardQuantity = newCard.枚数 || 1;
                 const pointsToAdd = cardQuantity * 5;
@@ -6067,7 +6018,7 @@
                 } else {
                     addPoints(pointsToAdd, `カード ${cardQuantity}枚追加`);
                 }
-            
+
                 updateTotalCounts(); // Update stats after adding card
                 applySearchAndFilter();
                 addForm.reset();
