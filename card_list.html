@@ -1910,11 +1910,11 @@
 
                                 <!-- Advanced Search Section -->
                                 <div class="col-12">
-                                    <button type="button" class="btn btn-sm btn-secondary" data-bs-toggle="collapse" data-bs-target="#advanced-search" aria-expanded="false">
+                                    <button type="button" class="btn btn-sm btn-secondary" id="advanced-search-btn" data-bs-toggle="collapse" data-bs-target="#advanced-search" aria-expanded="false">
                                         <i class="bi bi-funnel"></i> 詳細検索
                                     </button>
                                 </div>
-                                <div class="collapse col-12" id="advanced-search">
+                                <div class="collapse col-12 mt-2" id="advanced-search">
                                     <div class="card card-body bg-light">
                                         <div class="row g-2">
                                             <div class="col-md-3">
@@ -5150,6 +5150,28 @@
                 handleUserLogout();
             }
         });
+
+        // Fix mobile advanced search toggle
+        setTimeout(() => {
+            const advancedSearchBtn = document.getElementById('advanced-search-btn');
+            const advancedSearchPanel = document.getElementById('advanced-search');
+
+            if (advancedSearchBtn && advancedSearchPanel) {
+                // Remove bootstrap collapse behavior and add manual toggle
+                advancedSearchBtn.removeAttribute('data-bs-toggle');
+                advancedSearchBtn.removeAttribute('data-bs-target');
+
+                advancedSearchBtn.addEventListener('click', () => {
+                    if (advancedSearchPanel.classList.contains('show')) {
+                        advancedSearchPanel.classList.remove('show');
+                        advancedSearchBtn.setAttribute('aria-expanded', 'false');
+                    } else {
+                        advancedSearchPanel.classList.add('show');
+                        advancedSearchBtn.setAttribute('aria-expanded', 'true');
+                    }
+                });
+            }
+        }, 100);
 
         const updateBulkEditControls = () => {
             const bulkEditControls = document.getElementById('bulk-edit-controls');
