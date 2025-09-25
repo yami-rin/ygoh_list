@@ -4679,7 +4679,7 @@
             const sAttribute = document.querySelector('[name="search_attribute"]')?.value;
             // Get selected races from active race buttons
             const sRaces = Array.from(document.querySelectorAll('.race-btn.active'))
-                .map(btn => btn.dataset.race?.toLowerCase());
+                .map(btn => btn.dataset.race); // 族を含む完全な名前を使用（小文字化しない）
 
             // Get selected card types from active sub-type buttons
             const sCardTypes = Array.from(document.querySelectorAll('.sub-type-btn.active'))
@@ -4772,11 +4772,10 @@
 
                     // Check races (multiple selection)
                     if (sRaces.length > 0) {
-                        const normalizedRace = normalizeForSearch(details.race || '');
+                        // 完全一致で比較
                         const hasMatchingRace = sRaces.some(race => {
                             if (!race) return false;
-                            const searchTerm = normalizeForSearch(race);
-                            return normalizedRace.includes(searchTerm);
+                            return details.race === race;
                         });
                         advancedMatch = advancedMatch && hasMatchingRace;
                     }
