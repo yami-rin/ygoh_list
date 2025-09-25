@@ -740,6 +740,9 @@
 
         <!-- セーブ・ロード -->
         <div class="save-load-panel">
+            <div id="autosave-indicator" style="display: none; color: #27ae60; padding: 10px;">
+                <i class="bi bi-check-circle"></i> オートセーブ中...
+            </div>
             <button class="save-btn" onclick="saveGame()">
                 <i class="bi bi-save"></i> セーブ
             </button>
@@ -966,6 +969,7 @@
                     renderDeck();
                     saveGameToFirebase();
                     showNotification(`${card.name}を購入しました！`, 'success');
+                    triggerAutoSave(); // オートセーブ
                 }
             } else {
                 showNotification('ポイントが不足しています！', 'error');
@@ -1076,6 +1080,7 @@
                 renderDeck();
                 saveGameToFirebase();
                 showNotification(`${selectedCards.length}枚のカードを${totalSellPrice}ptsで売却しました！`, 'success');
+                triggerAutoSave(); // オートセーブ
             }
         };
 
@@ -1657,6 +1662,8 @@
                         await updateFirebasePoints(gameData.points);
                     }
 
+                    triggerAutoSave(); // オートセーブ
+
                     cardReward.forEach(card => {
                         if (card) {
                             delete card.currentHp;
@@ -1821,11 +1828,13 @@
         }
 
         // セーブ・ロード
-        function saveGame() {
+        function saveGame(showNotif = true) {
             if (gameData.currentUser) {
                 saveGameToFirebase();
                 updateFirebasePoints(gameData.points);
-                showNotification('ゲームをクラウドにセーブしました！', 'success');
+                if (showNotif) {
+                    showNotification('ゲームをクラウドにセーブしました！', 'success');
+                }
             } else {
                 const saveData = {
                     points: gameData.points,
@@ -1835,8 +1844,31 @@
                     unlockedDungeons: gameData.unlockedDungeons
                 };
                 localStorage.setItem('dungeonGameSave', JSON.stringify(saveData));
-                showNotification('ゲームをローカルにセーブしました！', 'success');
+                if (showNotif) {
+                    showNotification('ゲームをローカルにセーブしました！', 'success');
+                }
             }
+        }
+
+        // オートセーブ機能
+        let autoSaveTimer = null;
+        function triggerAutoSave() {
+            // 既存のタイマーがあれば取り消し
+            if (autoSaveTimer) {
+                clearTimeout(autoSaveTimer);
+            }
+            // 3秒後に自動セーブ
+            autoSaveTimer = setTimeout(() => {
+                const indicator = document.getElementById('autosave-indicator');
+                indicator.style.display = 'block';
+                saveGame(false); // 通知なしでセーブ
+                console.log('オートセーブ完了');
+
+                // 2秒後にインジケーターを非表示
+                setTimeout(() => {
+                    indicator.style.display = 'none';
+                }, 2000);
+            }, 3000);
         }
 
         async function loadGame() {
@@ -1889,8 +1921,18 @@
                 renderDeck();
             });
 
-            // 自動セーブ
-            setInterval(saveGame, 300000);
+            // 自動セーブ（30秒ごと）
+            setInterval(() => {
+                const indicator = document.getElementById('autosave-indicator');
+                indicator.style.display = 'block';
+                saveGame(false);  // 通知なしでセーブ
+                console.log('定期オートセーブ完了');
+
+                // 2秒後にインジケーターを非表示
+                setTimeout(() => {
+                    indicator.style.display = 'none';
+                }, 2000);
+            }, 30000);
         };
     </script>
 </body>
