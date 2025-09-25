@@ -847,21 +847,30 @@
 
             /* Fix modal positioning on mobile */
             .modal-dialog {
-                margin: 0.5rem;
-                max-height: 90vh;
+                margin: 1.75rem auto !important;
+                max-width: calc(100% - 1rem);
             }
             .modal-dialog-centered {
-                display: flex;
-                align-items: center;
-                min-height: calc(100vh - 1rem);
+                min-height: calc(100% - 3.5rem);
+            }
+            .modal-dialog-centered::before {
+                height: calc(100vh - 3.5rem);
             }
             .modal-content {
-                max-height: 85vh;
+                max-height: calc(100vh - 3.5rem);
                 overflow-y: auto;
             }
-            /* Force modal to center on mobile */
-            .modal.show .modal-dialog {
-                transform: translate(0, 0) !important;
+            /* Ensure modals are visible */
+            .modal.show {
+                padding-right: 0 !important;
+            }
+            .modal-backdrop {
+                position: fixed;
+            }
+            body.modal-open {
+                position: fixed;
+                width: 100%;
+                overflow-y: scroll;
             }
             .table th {
                 padding: 0.5rem 0.25rem;
@@ -1073,6 +1082,55 @@
             color: #fff;
             background-color: #8b5cf6;
             border-color: #8b5cf6;
+        }
+
+        .btn-outline-purple.active {
+            color: #fff;
+            background-color: #8b5cf6;
+            border-color: #8b5cf6;
+        }
+
+        /* Additional button styles for card types */
+        .sub-type-btn.btn-outline-info.active {
+            background-color: #17a2b8;
+            border-color: #17a2b8;
+            color: #fff;
+        }
+
+        .sub-type-btn.btn-outline-success.active {
+            background-color: #28a745;
+            border-color: #28a745;
+            color: #fff;
+        }
+
+        .sub-type-btn.btn-outline-primary.active {
+            background-color: #007bff;
+            border-color: #007bff;
+            color: #fff;
+        }
+
+        .sub-type-btn.btn-outline-dark.active {
+            background-color: #343a40;
+            border-color: #343a40;
+            color: #fff;
+        }
+
+        .sub-type-btn.btn-outline-secondary.active {
+            background-color: #6c757d;
+            border-color: #6c757d;
+            color: #fff;
+        }
+
+        .sub-type-btn.btn-outline-warning.active {
+            background-color: #ffc107;
+            border-color: #ffc107;
+            color: #212529;
+        }
+
+        .sub-type-btn.btn-outline-danger.active {
+            background-color: #dc3545;
+            border-color: #dc3545;
+            color: #fff;
         }
 
         .sub-type-group {
@@ -2281,6 +2339,12 @@
                                                                 </button>
                                                                 <button type="button" class="btn btn-sm btn-outline-info sub-type-btn" data-type="儀式">
                                                                     <small>儀式</small>
+                                                                </button>
+                                                                <button type="button" class="btn btn-sm btn-outline-warning sub-type-btn" data-type="チューナー">
+                                                                    <small>チューナー</small>
+                                                                </button>
+                                                                <button type="button" class="btn btn-sm btn-outline-danger sub-type-btn" data-type="リバース">
+                                                                    <small>リバース</small>
                                                                 </button>
                                                             </div>
                                                         </div>
