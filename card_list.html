@@ -2119,62 +2119,18 @@
                                             </div>
                                             <div class="col-md-3">
                                                 <label class="form-label small">カードタイプ</label>
-                                                <div class="dropdown">
-                                                    <button class="btn btn-sm btn-outline-secondary dropdown-toggle w-100" type="button" data-bs-toggle="dropdown" data-bs-auto-close="outside" aria-expanded="false">
-                                                        <span id="card-type-text">すべて</span>
-                                                    </button>
-                                                    <div class="dropdown-menu p-2" style="max-height: 380px; overflow-y: auto;">
-                                                        <div class="mb-2">
-                                                            <div class="btn-group btn-group-sm w-100" role="group">
-                                                                <input type="radio" class="btn-check" name="card-type-mode" id="mode-or" value="or" checked>
-                                                                <label class="btn btn-outline-primary" for="mode-or">OR検索</label>
-                                                                <input type="radio" class="btn-check" name="card-type-mode" id="mode-and" value="and">
-                                                                <label class="btn btn-outline-primary" for="mode-and">AND検索</label>
-                                                            </div>
-                                                            <small class="text-muted d-block mt-1">OR: いずれか含む / AND: すべて含む</small>
-                                                        </div>
-                                                        <hr class="my-2">
-                                                        <div class="form-check">
-                                                            <input class="form-check-input card-type-checkbox" type="checkbox" value="通常" id="type-normal">
-                                                            <label class="form-check-label" for="type-normal">通常</label>
-                                                        </div>
-                                                        <div class="form-check">
-                                                            <input class="form-check-input card-type-checkbox" type="checkbox" value="効果" id="type-effect">
-                                                            <label class="form-check-label" for="type-effect">効果</label>
-                                                        </div>
-                                                        <div class="form-check">
-                                                            <input class="form-check-input card-type-checkbox" type="checkbox" value="融合" id="type-fusion">
-                                                            <label class="form-check-label" for="type-fusion">融合</label>
-                                                        </div>
-                                                        <div class="form-check">
-                                                            <input class="form-check-input card-type-checkbox" type="checkbox" value="シンクロ" id="type-synchro">
-                                                            <label class="form-check-label" for="type-synchro">シンクロ</label>
-                                                        </div>
-                                                        <div class="form-check">
-                                                            <input class="form-check-input card-type-checkbox" type="checkbox" value="エクシーズ" id="type-xyz">
-                                                            <label class="form-check-label" for="type-xyz">エクシーズ</label>
-                                                        </div>
-                                                        <div class="form-check">
-                                                            <input class="form-check-input card-type-checkbox" type="checkbox" value="リンク" id="type-link">
-                                                            <label class="form-check-label" for="type-link">リンク</label>
-                                                        </div>
-                                                        <div class="form-check">
-                                                            <input class="form-check-input card-type-checkbox" type="checkbox" value="ペンデュラム" id="type-pendulum">
-                                                            <label class="form-check-label" for="type-pendulum">ペンデュラム</label>
-                                                        </div>
-                                                        <div class="form-check">
-                                                            <input class="form-check-input card-type-checkbox" type="checkbox" value="儀式" id="type-ritual">
-                                                            <label class="form-check-label" for="type-ritual">儀式</label>
-                                                        </div>
-                                                        <div class="form-check">
-                                                            <input class="form-check-input card-type-checkbox" type="checkbox" value="魔法" id="type-spell">
-                                                            <label class="form-check-label" for="type-spell">魔法</label>
-                                                        </div>
-                                                        <div class="form-check">
-                                                            <input class="form-check-input card-type-checkbox" type="checkbox" value="罠" id="type-trap">
-                                                            <label class="form-check-label" for="type-trap">罠</label>
-                                                        </div>
-                                                    </div>
+                                                <div class="d-flex flex-wrap gap-1">
+                                                    <button type="button" class="btn btn-sm btn-outline-secondary card-type-btn" data-type="all">すべて</button>
+                                                    <button type="button" class="btn btn-sm btn-outline-primary card-type-btn" data-type="通常">通常</button>
+                                                    <button type="button" class="btn btn-sm btn-outline-primary card-type-btn" data-type="効果">効果</button>
+                                                    <button type="button" class="btn btn-sm btn-outline-primary card-type-btn" data-type="融合">融合</button>
+                                                    <button type="button" class="btn btn-sm btn-outline-primary card-type-btn" data-type="シンクロ">シンクロ</button>
+                                                    <button type="button" class="btn btn-sm btn-outline-primary card-type-btn" data-type="エクシーズ">エクシーズ</button>
+                                                    <button type="button" class="btn btn-sm btn-outline-primary card-type-btn" data-type="リンク">リンク</button>
+                                                    <button type="button" class="btn btn-sm btn-outline-primary card-type-btn" data-type="ペンデュラム">ペンデュラム</button>
+                                                    <button type="button" class="btn btn-sm btn-outline-primary card-type-btn" data-type="儀式">儀式</button>
+                                                    <button type="button" class="btn btn-sm btn-outline-warning card-type-btn" data-type="魔法">魔法</button>
+                                                    <button type="button" class="btn btn-sm btn-outline-danger card-type-btn" data-type="罠">罠</button>
                                                 </div>
                                             </div>
                                             <div class="col-md-3">
@@ -2184,10 +2140,6 @@
                                             <div class="col-md-3">
                                                 <label class="form-label small">守備力</label>
                                                 <input type="text" name="search_defense" class="form-control form-control-sm">
-                                            </div>
-                                            <div class="col-md-6">
-                                                <label class="form-label small">カードテキスト</label>
-                                                <input type="text" name="search_text" class="form-control form-control-sm">
                                             </div>
                                         </div>
                                     </div>
@@ -4409,16 +4361,13 @@
             const sAttribute = document.querySelector('[name="search_attribute"]')?.value;
             const sRace = document.querySelector('[name="search_race"]')?.value?.trim()?.toLowerCase();
 
-            // Get selected card types from checkboxes
-            const sCardTypes = Array.from(document.querySelectorAll('.card-type-checkbox:checked'))
-                .map(cb => cb.value);
-
-            // Get search mode (OR or AND)
-            const cardTypeMode = document.querySelector('input[name="card-type-mode"]:checked')?.value || 'or';
+            // Get selected card types from active buttons
+            const sCardTypes = Array.from(document.querySelectorAll('.card-type-btn.active'))
+                .filter(btn => btn.dataset.type !== 'all')
+                .map(btn => btn.dataset.type);
 
             const sAttack = document.querySelector('[name="search_attack"]')?.value?.trim();
             const sDefense = document.querySelector('[name="search_defense"]')?.value?.trim();
-            const sText = normalizeForSearch(document.querySelector('[name="search_text"]')?.value || '');
 
             // Get possible card names from hiragana reading
             let possibleCardNames = [];
@@ -4528,40 +4477,20 @@
                         }
                     }
 
-                    // Check card types (multiple selection with OR/AND mode)
+                    // Check card types (OR selection only - more intuitive)
                     if (sCardTypes.length > 0) {
-                        let hasMatchingType = false;
-
-                        if (cardTypeMode === 'or') {
-                            // OR mode: Check if card has ANY of the selected types
-                            hasMatchingType = sCardTypes.some(type => {
-                                // For spell/trap cards, also check the race field
-                                if (type === '魔法') {
-                                    return (details.cardType && details.cardType.includes(type)) ||
-                                           (details.race && details.race === '魔法');
-                                } else if (type === '罠') {
-                                    return (details.cardType && details.cardType.includes(type)) ||
-                                           (details.race && details.race === '罠');
-                                } else {
-                                    return details.cardType && details.cardType.includes(type);
-                                }
-                            });
-                        } else {
-                            // AND mode: Check if card has ALL of the selected types
-                            hasMatchingType = sCardTypes.every(type => {
-                                // For spell/trap cards, also check the race field
-                                if (type === '魔法') {
-                                    return (details.cardType && details.cardType.includes(type)) ||
-                                           (details.race && details.race === '魔法');
-                                } else if (type === '罠') {
-                                    return (details.cardType && details.cardType.includes(type)) ||
-                                           (details.race && details.race === '罠');
-                                } else {
-                                    return details.cardType && details.cardType.includes(type);
-                                }
-                            });
-                        }
-
+                        const hasMatchingType = sCardTypes.some(type => {
+                            // For spell/trap cards, also check the race field
+                            if (type === '魔法') {
+                                return (details.cardType && details.cardType.includes(type)) ||
+                                       (details.race && details.race === '魔法');
+                            } else if (type === '罠') {
+                                return (details.cardType && details.cardType.includes(type)) ||
+                                       (details.race && details.race === '罠');
+                            } else {
+                                return details.cardType && details.cardType.includes(type);
+                            }
+                        });
                         advancedMatch = advancedMatch && hasMatchingType;
                     }
 
@@ -4575,11 +4504,7 @@
                         advancedMatch = advancedMatch && checkRange(details.defense, sDefense);
                     }
 
-                    // Check card text
-                    if (sText) {
-                        advancedMatch = advancedMatch && (details.cardText && normalizeForSearch(details.cardText).includes(sText));
-                    }
-                } else if (sLevel || sAttribute || sRace || sCardTypes.length > 0 || sAttack || sDefense || sText) {
+                } else if (sLevel || sAttribute || sRace || sCardTypes.length > 0 || sAttack || sDefense) {
                     // If advanced search is used but no details available, don't show it
                     advancedMatch = false;
                 }
@@ -6161,27 +6086,45 @@
             editCardModal.hide();
         });
 
-        // Handle card type checkbox selection
-        const cardTypeCheckboxes = document.querySelectorAll('.card-type-checkbox');
-        const cardTypeText = document.getElementById('card-type-text');
+        // Handle card type button selection
+        const cardTypeButtons = document.querySelectorAll('.card-type-btn');
+        let selectedCardTypes = new Set();
 
-        const updateCardTypeText = () => {
-            const selected = Array.from(cardTypeCheckboxes)
-                .filter(cb => cb.checked)
-                .map(cb => cb.value);
+        cardTypeButtons.forEach(button => {
+            button.addEventListener('click', function() {
+                const type = this.dataset.type;
 
-            if (selected.length === 0) {
-                cardTypeText.textContent = 'すべて';
-            } else if (selected.length === 1) {
-                cardTypeText.textContent = selected[0];
-            } else {
-                cardTypeText.textContent = `${selected.length}個選択`;
-            }
-        };
+                if (type === 'all') {
+                    // Clear all selections
+                    selectedCardTypes.clear();
+                    cardTypeButtons.forEach(btn => btn.classList.remove('active'));
+                    this.classList.add('active');
+                } else {
+                    // Remove "all" selection if it exists
+                    const allBtn = document.querySelector('.card-type-btn[data-type="all"]');
+                    allBtn.classList.remove('active');
 
-        cardTypeCheckboxes.forEach(checkbox => {
-            checkbox.addEventListener('change', updateCardTypeText);
+                    // Toggle this button
+                    if (this.classList.contains('active')) {
+                        this.classList.remove('active');
+                        selectedCardTypes.delete(type);
+                    } else {
+                        this.classList.add('active');
+                        selectedCardTypes.add(type);
+                    }
+
+                    // If no types selected, activate "all"
+                    if (selectedCardTypes.size === 0) {
+                        allBtn.classList.add('active');
+                    }
+                }
+
+                filterCards();
+            });
         });
+
+        // Initialize with "all" selected
+        document.querySelector('.card-type-btn[data-type="all"]')?.classList.add('active');
 
         // Debounce function for search
         let searchDebounceTimer = null;
