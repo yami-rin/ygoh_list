@@ -838,12 +838,31 @@
         @media (max-width: 768px) {
             .navbar-brand { font-size: 1rem; }
             .navbar-text { display: none !important; }
-            .btn-group-mobile { 
+            .btn-group-mobile {
                 display: flex;
                 flex-direction: column;
                 gap: 0.5rem;
             }
             .table { font-size: 0.875rem; }
+
+            /* Fix modal positioning on mobile */
+            .modal-dialog {
+                margin: 0.5rem;
+                max-height: 90vh;
+            }
+            .modal-dialog-centered {
+                display: flex;
+                align-items: center;
+                min-height: calc(100vh - 1rem);
+            }
+            .modal-content {
+                max-height: 85vh;
+                overflow-y: auto;
+            }
+            /* Force modal to center on mobile */
+            .modal.show .modal-dialog {
+                transform: translate(0, 0) !important;
+            }
             .table th {
                 padding: 0.5rem 0.25rem;
                 font-size: 0.8rem;
@@ -975,6 +994,95 @@
             0%, 100% { transform: translateY(0); }
             50% { transform: translateY(-10px); }
         }
+
+        /* Card type selector styles */
+        .card-type-selector {
+            background: rgba(255, 255, 255, 0.05);
+            padding: 10px;
+            border-radius: 8px;
+        }
+
+        .main-type-tab {
+            font-size: 0.85rem;
+            font-weight: 500;
+            border-radius: 20px !important;
+            transition: all 0.3s ease;
+        }
+
+        .main-type-tab:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+        }
+
+        .main-type-tab[data-category="monster"] {
+            color: #6c757d;
+        }
+
+        .main-type-tab[data-category="monster"].active {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border-color: #667eea;
+        }
+
+        .main-type-tab[data-category="spell"] {
+            color: #28a745;
+        }
+
+        .main-type-tab[data-category="spell"].active {
+            background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%);
+            border-color: #28a745;
+        }
+
+        .main-type-tab[data-category="trap"] {
+            color: #dc3545;
+        }
+
+        .main-type-tab[data-category="trap"].active {
+            background: linear-gradient(135deg, #fa709a 0%, #fee140 100%);
+            border-color: #fa709a;
+        }
+
+        .sub-type-container {
+            background: rgba(255, 255, 255, 0.1);
+            padding: 8px;
+            border-radius: 6px;
+            margin-top: 8px;
+        }
+
+        .sub-type-btn {
+            font-size: 0.75rem;
+            padding: 4px 10px;
+            border-radius: 15px;
+            transition: all 0.2s ease;
+        }
+
+        .sub-type-btn:hover {
+            transform: scale(1.05);
+        }
+
+        .sub-type-btn.active {
+            font-weight: bold;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+        }
+
+        .btn-outline-purple {
+            color: #8b5cf6;
+            border-color: #8b5cf6;
+        }
+
+        .btn-outline-purple:hover {
+            color: #fff;
+            background-color: #8b5cf6;
+            border-color: #8b5cf6;
+        }
+
+        .sub-type-group {
+            animation: fadeIn 0.3s ease;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(-5px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
     </style>
 </head>
 <body>
@@ -985,7 +1093,7 @@
 
     <!-- Login Modal -->
     <div class="modal fade" id="auth-modal" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1">
-        <div class="modal-dialog"><div class="modal-content">
+        <div class="modal-dialog modal-dialog-centered"><div class="modal-content">
             <div class="modal-header"><h5 class="modal-title">ログインまたは新規登録</h5></div>
             <div class="modal-body">
                 <div id="auth-error" class="alert alert-danger" style="display: none;"></div>
@@ -1003,7 +1111,7 @@
 
     <!-- Edit Card Modal -->
     <div class="modal fade" id="edit-card-modal" tabindex="-1">
-        <div class="modal-dialog"><div class="modal-content">
+        <div class="modal-dialog modal-dialog-centered"><div class="modal-content">
             <div class="modal-header"><h5 class="modal-title">カード情報の編集</h5><button type="button" class="btn-close" data-bs-dismiss="modal"></button></div>
             <div class="modal-body">
                 <form id="edit-form">
@@ -1033,7 +1141,7 @@
 
     <!-- Card Detail Modal -->
     <div class="modal fade" id="card-detail-modal" tabindex="-1">
-        <div class="modal-dialog modal-lg">
+        <div class="modal-dialog modal-lg modal-dialog-centered modal-dialog-scrollable">
             <div class="modal-content">
                 <div class="modal-header bg-primary text-white">
                     <h5 class="modal-title"><i class="bi bi-info-circle"></i> カード詳細情報</h5>
@@ -1057,7 +1165,7 @@
 
     <!-- How to Use Modal -->
     <div class="modal fade" id="how-to-use-modal" tabindex="-1">
-        <div class="modal-dialog modal-xl"><div class="modal-content">
+        <div class="modal-dialog modal-xl modal-dialog-centered modal-dialog-scrollable"><div class="modal-content">
             <div class="modal-header"><h5 class="modal-title">使い方ガイド</h5><button type="button" class="btn-close" data-bs-dismiss="modal"></button></div>
             <div class="modal-body" style="max-height: 70vh; overflow-y: auto;">
                 <div class="alert alert-info">
@@ -1313,7 +1421,7 @@
 
     <!-- Ranking Modal -->
     <div class="modal fade" id="ranking-modal" tabindex="-1">
-        <div class="modal-dialog modal-lg">
+        <div class="modal-dialog modal-lg modal-dialog-centered modal-dialog-scrollable">
             <div class="modal-content">
                 <div class="modal-header bg-primary text-white">
                     <h5 class="modal-title"><i class="bi bi-trophy"></i> ランキング</h5>
@@ -1413,7 +1521,7 @@
     
     <!-- Profile Modal -->
     <div class="modal fade" id="profile-modal" tabindex="-1">
-        <div class="modal-dialog">
+        <div class="modal-dialog modal-dialog-centered">
             <div class="modal-content">
                 <div class="modal-header bg-info text-white">
                     <h5 class="modal-title"><i class="bi bi-person-circle"></i> プロフィール</h5>
@@ -1508,7 +1616,7 @@
     
     <!-- Point Shop Modal -->
     <div class="modal fade" id="point-shop-modal" tabindex="-1">
-        <div class="modal-dialog modal-lg">
+        <div class="modal-dialog modal-lg modal-dialog-centered modal-dialog-scrollable">
             <div class="modal-content">
                 <div class="modal-header bg-warning text-dark">
                     <h5 class="modal-title"><i class="bi bi-palette"></i> テーマショップ</h5>
@@ -1584,7 +1692,7 @@
     
     <!-- Stats Info Modal -->
     <div class="modal fade" id="stats-info-modal" tabindex="-1">
-        <div class="modal-dialog">
+        <div class="modal-dialog modal-dialog-centered">
             <div class="modal-content">
                 <div class="modal-header">
                     <h5 class="modal-title">コレクション統計の説明</h5>
@@ -1635,7 +1743,7 @@
     </div>
     <!-- Settings Modal -->
     <div class="modal fade" id="settings-modal" tabindex="-1">
-        <div class="modal-dialog"><div class="modal-content">
+        <div class="modal-dialog modal-dialog-centered"><div class="modal-content">
             <div class="modal-header"><h5 class="modal-title">設定</h5><button type="button" class="btn-close" data-bs-dismiss="modal"></button></div>
             <div class="modal-body">
                 <div class="form-check form-switch mb-3">
@@ -1673,7 +1781,7 @@
 
     <!-- Tag Management Modal -->
     <div class="modal fade" id="tag-management-modal" tabindex="-1">
-        <div class="modal-dialog modal-lg">
+        <div class="modal-dialog modal-lg modal-dialog-centered modal-dialog-scrollable">
             <div class="modal-content">
                 <div class="modal-header">
                     <h5 class="modal-title">タグ管理</h5>
@@ -1706,7 +1814,7 @@
     
     <!-- Bulk Tag Edit Modal -->
     <div class="modal fade" id="bulk-tag-modal" tabindex="-1">
-        <div class="modal-dialog">
+        <div class="modal-dialog modal-dialog-centered">
             <div class="modal-content">
                 <div class="modal-header">
                     <h5 class="modal-title" id="bulk-tag-modal-title">タグ一括編集</h5>
@@ -1726,7 +1834,7 @@
 
     <!-- Analysis Modal -->
     <div class="modal fade" id="analysis-modal" tabindex="-1">
-        <div class="modal-dialog modal-xl">
+        <div class="modal-dialog modal-xl modal-dialog-centered modal-dialog-scrollable">
             <div class="modal-content">
                 <div class="modal-header">
                     <h5 class="modal-title"><i class="bi bi-graph-up"></i> コレクション分析</h5>
@@ -2117,20 +2225,79 @@
                                                     <option value="幻想魔族"></option>
                                                 </datalist>
                                             </div>
-                                            <div class="col-md-3">
+                                            <div class="col-md-6">
                                                 <label class="form-label small">カードタイプ</label>
-                                                <div class="d-flex flex-wrap gap-1">
-                                                    <button type="button" class="btn btn-sm btn-outline-secondary card-type-btn" data-type="all">すべて</button>
-                                                    <button type="button" class="btn btn-sm btn-outline-primary card-type-btn" data-type="通常">通常</button>
-                                                    <button type="button" class="btn btn-sm btn-outline-primary card-type-btn" data-type="効果">効果</button>
-                                                    <button type="button" class="btn btn-sm btn-outline-primary card-type-btn" data-type="融合">融合</button>
-                                                    <button type="button" class="btn btn-sm btn-outline-primary card-type-btn" data-type="シンクロ">シンクロ</button>
-                                                    <button type="button" class="btn btn-sm btn-outline-primary card-type-btn" data-type="エクシーズ">エクシーズ</button>
-                                                    <button type="button" class="btn btn-sm btn-outline-primary card-type-btn" data-type="リンク">リンク</button>
-                                                    <button type="button" class="btn btn-sm btn-outline-primary card-type-btn" data-type="ペンデュラム">ペンデュラム</button>
-                                                    <button type="button" class="btn btn-sm btn-outline-primary card-type-btn" data-type="儀式">儀式</button>
-                                                    <button type="button" class="btn btn-sm btn-outline-warning card-type-btn" data-type="魔法">魔法</button>
-                                                    <button type="button" class="btn btn-sm btn-outline-danger card-type-btn" data-type="罠">罠</button>
+                                                <div class="card-type-selector">
+                                                    <!-- メインカテゴリータブ -->
+                                                    <ul class="nav nav-pills nav-fill mb-2" role="tablist">
+                                                        <li class="nav-item" role="presentation">
+                                                            <button class="nav-link active py-1 px-2 main-type-tab" data-category="all" type="button">
+                                                                <i class="bi bi-grid-3x3-gap"></i> すべて
+                                                            </button>
+                                                        </li>
+                                                        <li class="nav-item" role="presentation">
+                                                            <button class="nav-link py-1 px-2 main-type-tab" data-category="monster" type="button">
+                                                                <i class="bi bi-shield-fill"></i> モンスター
+                                                            </button>
+                                                        </li>
+                                                        <li class="nav-item" role="presentation">
+                                                            <button class="nav-link py-1 px-2 main-type-tab" data-category="spell" type="button">
+                                                                <i class="bi bi-book-fill"></i> 魔法
+                                                            </button>
+                                                        </li>
+                                                        <li class="nav-item" role="presentation">
+                                                            <button class="nav-link py-1 px-2 main-type-tab" data-category="trap" type="button">
+                                                                <i class="bi bi-exclamation-triangle-fill"></i> 罠
+                                                            </button>
+                                                        </li>
+                                                    </ul>
+                                                    <!-- サブカテゴリー選択 -->
+                                                    <div class="sub-type-container" style="min-height: 38px;">
+                                                        <div class="sub-type-group" data-category="monster" style="display: none;">
+                                                            <div class="d-flex flex-wrap gap-1">
+                                                                <button type="button" class="btn btn-sm btn-outline-secondary sub-type-btn active" data-type="all-monster">
+                                                                    全モンスター
+                                                                </button>
+                                                                <button type="button" class="btn btn-sm btn-outline-info sub-type-btn" data-type="通常">
+                                                                    <small>通常</small>
+                                                                </button>
+                                                                <button type="button" class="btn btn-sm btn-outline-success sub-type-btn" data-type="効果">
+                                                                    <small>効果</small>
+                                                                </button>
+                                                                <button type="button" class="btn btn-sm btn-outline-purple sub-type-btn" data-type="融合">
+                                                                    <small>融合</small>
+                                                                </button>
+                                                                <button type="button" class="btn btn-sm btn-outline-primary sub-type-btn" data-type="シンクロ">
+                                                                    <small>シンクロ</small>
+                                                                </button>
+                                                                <button type="button" class="btn btn-sm btn-outline-dark sub-type-btn" data-type="エクシーズ">
+                                                                    <small>エクシーズ</small>
+                                                                </button>
+                                                                <button type="button" class="btn btn-sm btn-outline-primary sub-type-btn" data-type="リンク">
+                                                                    <small>リンク</small>
+                                                                </button>
+                                                                <button type="button" class="btn btn-sm btn-outline-secondary sub-type-btn" data-type="ペンデュラム">
+                                                                    <small>ペンデュラム</small>
+                                                                </button>
+                                                                <button type="button" class="btn btn-sm btn-outline-info sub-type-btn" data-type="儀式">
+                                                                    <small>儀式</small>
+                                                                </button>
+                                                            </div>
+                                                        </div>
+                                                        <div class="sub-type-group" data-category="spell" style="display: none;">
+                                                            <button type="button" class="btn btn-sm btn-success sub-type-btn active" data-type="魔法">
+                                                                <i class="bi bi-book"></i> 魔法カード
+                                                            </button>
+                                                        </div>
+                                                        <div class="sub-type-group" data-category="trap" style="display: none;">
+                                                            <button type="button" class="btn btn-sm btn-danger sub-type-btn active" data-type="罠">
+                                                                <i class="bi bi-exclamation-triangle"></i> 罠カード
+                                                            </button>
+                                                        </div>
+                                                        <div class="sub-type-group" data-category="all">
+                                                            <span class="text-muted small">すべてのカードを表示</span>
+                                                        </div>
+                                                    </div>
                                                 </div>
                                             </div>
                                             <div class="col-md-3">
@@ -4355,9 +4522,9 @@
             const sAttribute = document.querySelector('[name="search_attribute"]')?.value;
             const sRace = document.querySelector('[name="search_race"]')?.value?.trim()?.toLowerCase();
 
-            // Get selected card types from active buttons
-            const sCardTypes = Array.from(document.querySelectorAll('.card-type-btn.active'))
-                .filter(btn => btn.dataset.type !== 'all')
+            // Get selected card types from active sub-type buttons
+            const sCardTypes = Array.from(document.querySelectorAll('.sub-type-btn.active'))
+                .filter(btn => btn.dataset.type !== 'all-monster')
                 .map(btn => btn.dataset.type);
 
             const sAttack = document.querySelector('[name="search_attack"]')?.value?.trim();
@@ -6080,45 +6247,90 @@
             editCardModal.hide();
         });
 
-        // Handle card type button selection
-        const cardTypeButtons = document.querySelectorAll('.card-type-btn');
-        let selectedCardTypes = new Set();
+        // Handle card type selection with tabs
+        const mainTypeTabs = document.querySelectorAll('.main-type-tab');
+        const subTypeGroups = document.querySelectorAll('.sub-type-group');
+        const subTypeButtons = document.querySelectorAll('.sub-type-btn');
 
-        cardTypeButtons.forEach(button => {
-            button.addEventListener('click', function() {
-                const type = this.dataset.type;
+        // Handle main category tab clicks
+        mainTypeTabs.forEach(tab => {
+            tab.addEventListener('click', function() {
+                // Update active tab
+                mainTypeTabs.forEach(t => t.classList.remove('active'));
+                this.classList.add('active');
 
-                if (type === 'all') {
-                    // Clear all selections
-                    selectedCardTypes.clear();
-                    cardTypeButtons.forEach(btn => btn.classList.remove('active'));
-                    this.classList.add('active');
-                } else {
-                    // Remove "all" selection if it exists
-                    const allBtn = document.querySelector('.card-type-btn[data-type="all"]');
-                    allBtn.classList.remove('active');
-
-                    // Toggle this button
-                    if (this.classList.contains('active')) {
-                        this.classList.remove('active');
-                        selectedCardTypes.delete(type);
+                // Show/hide sub-type groups
+                const category = this.dataset.category;
+                subTypeGroups.forEach(group => {
+                    if (group.dataset.category === category) {
+                        group.style.display = 'block';
                     } else {
-                        this.classList.add('active');
-                        selectedCardTypes.add(type);
+                        group.style.display = 'none';
                     }
+                });
 
-                    // If no types selected, activate "all"
-                    if (selectedCardTypes.size === 0) {
-                        allBtn.classList.add('active');
-                    }
+                // Reset sub-type selections for this category
+                if (category === 'all') {
+                    // Clear all sub-type selections
+                    subTypeButtons.forEach(btn => btn.classList.remove('active'));
+                } else if (category === 'monster') {
+                    // Activate "all-monster" by default
+                    subTypeButtons.forEach(btn => {
+                        if (btn.dataset.type === 'all-monster') {
+                            btn.classList.add('active');
+                        } else if (btn.parentElement.closest('[data-category="monster"]')) {
+                            btn.classList.remove('active');
+                        }
+                    });
+                } else if (category === 'spell') {
+                    // Activate spell button
+                    subTypeButtons.forEach(btn => {
+                        if (btn.dataset.type === '魔法') {
+                            btn.classList.add('active');
+                        }
+                    });
+                } else if (category === 'trap') {
+                    // Activate trap button
+                    subTypeButtons.forEach(btn => {
+                        if (btn.dataset.type === '罠') {
+                            btn.classList.add('active');
+                        }
+                    });
                 }
 
                 filterCards();
             });
         });
 
-        // Initialize with "all" selected
-        document.querySelector('.card-type-btn[data-type="all"]')?.classList.add('active');
+        // Handle sub-type button clicks
+        subTypeButtons.forEach(button => {
+            button.addEventListener('click', function() {
+                const type = this.dataset.type;
+                const parentGroup = this.closest('.sub-type-group');
+
+                if (type === 'all-monster') {
+                    // Clear all monster sub-type selections
+                    parentGroup.querySelectorAll('.sub-type-btn').forEach(btn => {
+                        btn.classList.remove('active');
+                    });
+                    this.classList.add('active');
+                } else if (parentGroup.dataset.category === 'monster') {
+                    // Toggle selection for monster sub-types
+                    const allMonsterBtn = parentGroup.querySelector('[data-type="all-monster"]');
+                    allMonsterBtn.classList.remove('active');
+
+                    this.classList.toggle('active');
+
+                    // If no sub-types selected, activate "all-monster"
+                    const activeButtons = parentGroup.querySelectorAll('.sub-type-btn.active');
+                    if (activeButtons.length === 0) {
+                        allMonsterBtn.classList.add('active');
+                    }
+                }
+
+                filterCards();
+            });
+        });
 
         // Debounce function for search
         let searchDebounceTimer = null;
