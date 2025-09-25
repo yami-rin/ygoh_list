@@ -190,6 +190,7 @@
             justify-content: space-between;
             align-items: center;
             transition: all 0.2s ease;
+            position: relative;
         }
 
         .deck-card:hover {
@@ -200,6 +201,27 @@
             background: #d4edda;
             border: 2px solid #28a745;
         }
+
+        .deck-card.in-battle {
+            background: #cfe8ff;
+            border: 2px solid #007bff;
+        }
+
+        /* 属性アイコン */
+        .attribute-icon {
+            width: 20px;
+            height: 20px;
+            display: inline-block;
+            border-radius: 50%;
+            margin-left: 5px;
+        }
+
+        .attr-light { background: linear-gradient(135deg, #ffeb3b, #ffc107); }
+        .attr-dark { background: linear-gradient(135deg, #424242, #212121); }
+        .attr-fire { background: linear-gradient(135deg, #ff5722, #d84315); }
+        .attr-water { background: linear-gradient(135deg, #2196f3, #1565c0); }
+        .attr-earth { background: linear-gradient(135deg, #8d6e63, #5d4037); }
+        .attr-wind { background: linear-gradient(135deg, #4caf50, #2e7d32); }
 
         /* バトル画面 */
         .battle-modal {
@@ -224,24 +246,114 @@
             border-radius: 20px;
             padding: 30px;
             width: 90%;
-            max-width: 800px;
+            max-width: 900px;
+            max-height: 90vh;
+            overflow-y: auto;
             box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+        }
+
+        .battle-phase {
+            background: rgba(255,255,255,0.1);
+            border-radius: 10px;
+            padding: 10px;
+            margin-bottom: 15px;
+            text-align: center;
+            color: white;
+        }
+
+        .battle-hands {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+            margin-bottom: 20px;
+        }
+
+        .hand-area {
+            background: rgba(255,255,255,0.1);
+            border-radius: 10px;
+            padding: 15px;
+        }
+
+        .hand-title {
+            color: white;
+            font-weight: bold;
+            margin-bottom: 10px;
+            text-align: center;
+        }
+
+        .hand-cards {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+
+        .hand-card {
+            background: white;
+            border-radius: 8px;
+            padding: 10px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            min-width: 120px;
+            text-align: center;
+            position: relative;
+        }
+
+        .hand-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+        }
+
+        .hand-card.selected {
+            border: 3px solid #ffc107;
+            box-shadow: 0 0 15px rgba(255,193,7,0.5);
+        }
+
+        .hand-card.used {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        .hand-card.enemy {
+            cursor: default;
+        }
+
+        .card-hp-bar {
+            width: 100%;
+            height: 8px;
+            background: #e0e0e0;
+            border-radius: 4px;
+            overflow: hidden;
+            margin-top: 5px;
+        }
+
+        .card-hp-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #27ae60, #2ecc71);
+            transition: width 0.5s ease;
         }
 
         .battle-field {
             display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 30px;
+            grid-template-columns: 1fr auto 1fr;
+            gap: 20px;
+            align-items: center;
             margin-bottom: 20px;
         }
 
-        .battle-card {
+        .active-card {
             background: white;
             border-radius: 10px;
-            padding: 20px;
+            padding: 15px;
             text-align: center;
             position: relative;
             transition: all 0.3s ease;
+        }
+
+        .vs-text {
+            color: white;
+            font-size: 2rem;
+            font-weight: bold;
         }
 
         .battle-card.damage {
@@ -278,6 +390,7 @@
             display: flex;
             gap: 10px;
             justify-content: center;
+            flex-wrap: wrap;
         }
 
         .battle-btn {
@@ -293,20 +406,64 @@
             transform: scale(1.05);
         }
 
+        .battle-btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            transform: scale(1);
+        }
+
         .attack-btn {
             background: linear-gradient(145deg, #e74c3c, #c0392b);
             color: white;
         }
 
-        .defend-btn {
+        .switch-btn {
             background: linear-gradient(145deg, #3498db, #2980b9);
             color: white;
         }
 
-        .retreat-btn {
+        .skill-btn {
+            background: linear-gradient(145deg, #9b59b6, #8e44ad);
+            color: white;
+        }
+
+        .end-turn-btn {
             background: linear-gradient(145deg, #95a5a6, #7f8c8d);
             color: white;
         }
+
+        /* 属性相性表示 */
+        .attribute-matchup {
+            background: rgba(255,255,255,0.9);
+            border-radius: 8px;
+            padding: 10px;
+            margin: 10px 0;
+            text-align: center;
+        }
+
+        .advantage { color: #27ae60; font-weight: bold; }
+        .disadvantage { color: #e74c3c; font-weight: bold; }
+        .neutral { color: #7f8c8d; }
+
+        /* バトルログ */
+        .battle-log {
+            background: rgba(255,255,255,0.1);
+            border-radius: 8px;
+            padding: 10px;
+            max-height: 150px;
+            overflow-y: auto;
+            color: white;
+            font-size: 0.9rem;
+        }
+
+        .log-entry {
+            padding: 3px 0;
+            border-bottom: 1px solid rgba(255,255,255,0.1);
+        }
+
+        .log-damage { color: #ff6b6b; }
+        .log-heal { color: #51cf66; }
+        .log-special { color: #ffd43b; }
 
         /* リザルト画面 */
         .result-modal {
@@ -391,6 +548,10 @@
                 flex-direction: column;
             }
 
+            .battle-hands {
+                grid-template-columns: 1fr;
+            }
+
             .battle-field {
                 grid-template-columns: 1fr;
             }
@@ -404,7 +565,7 @@
             <div class="stats-bar">
                 <div class="stat-item points">
                     <i class="bi bi-coin"></i>
-                    <span id="player-points">1000</span> pts
+                    <span id="player-points">0</span> pts
                 </div>
                 <div class="stat-item deck-count">
                     <i class="bi bi-stack"></i>
@@ -431,7 +592,6 @@
                 <div class="shop-filters mb-3">
                     <select id="shop-filter" class="form-select form-select-sm">
                         <option value="all">すべて</option>
-                        <option value="monster">モンスター</option>
                         <option value="low-cost">低コスト (～500pts)</option>
                         <option value="mid-cost">中コスト (500-1500pts)</option>
                         <option value="high-cost">高コスト (1500pts～)</option>
@@ -450,30 +610,33 @@
                 <div class="dungeon-list" id="dungeon-list">
                     <div class="dungeon-item" data-dungeon-id="1" data-difficulty="easy">
                         <h5>初心者の洞窟</h5>
-                        <p class="mb-1">推奨ATK: 500～1000</p>
+                        <p class="mb-1">推奨デッキ: 3枚以上</p>
                         <span class="difficulty-badge difficulty-easy">EASY</span>
                         <small>報酬: 100-300pts + カード1枚</small>
                     </div>
                     <div class="dungeon-item" data-dungeon-id="2" data-difficulty="normal">
                         <h5>古代の遺跡</h5>
-                        <p class="mb-1">推奨ATK: 1000～2000</p>
+                        <p class="mb-1">推奨デッキ: 5枚以上</p>
                         <span class="difficulty-badge difficulty-normal">NORMAL</span>
                         <small>報酬: 300-700pts + カード1-2枚</small>
                     </div>
                     <div class="dungeon-item" data-dungeon-id="3" data-difficulty="hard">
                         <h5>魔王の城</h5>
-                        <p class="mb-1">推奨ATK: 2000～3000</p>
+                        <p class="mb-1">推奨デッキ: 7枚以上</p>
                         <span class="difficulty-badge difficulty-hard">HARD</span>
                         <small>報酬: 700-1500pts + カード2-3枚</small>
                     </div>
                     <div class="dungeon-item locked" data-dungeon-id="4" data-difficulty="expert">
                         <h5>神々の領域</h5>
-                        <p class="mb-1">推奨ATK: 3000～</p>
+                        <p class="mb-1">推奨デッキ: 10枚以上</p>
                         <span class="difficulty-badge difficulty-expert">EXPERT</span>
                         <small>要求: Lv.10以上</small>
                     </div>
                 </div>
                 <div class="mt-3">
+                    <button id="select-deck-btn" class="btn btn-warning w-100 mb-2">
+                        <i class="bi bi-collection"></i> バトルデッキ選択 <span id="battle-deck-count">(0/3)</span>
+                    </button>
                     <button id="start-battle-btn" class="btn btn-primary w-100" disabled>
                         <i class="bi bi-play-fill"></i> バトル開始
                     </button>
@@ -505,43 +668,62 @@
         <!-- バトル画面（モーダル） -->
         <div id="battle-modal" class="battle-modal">
             <div class="battle-arena">
-                <h2 class="text-white text-center mb-4">BATTLE!</h2>
-                <div class="battle-field">
-                    <div class="battle-card" id="player-card">
-                        <h4 id="player-card-name">-</h4>
-                        <div class="card-stats">
-                            <span class="atk">ATK: <span id="player-atk">0</span></span>
-                            <span class="def">DEF: <span id="player-def">0</span></span>
+                <h2 class="text-white text-center mb-3">BATTLE!</h2>
+
+                <div class="battle-phase">
+                    <h5 id="phase-text">プレイヤーターン</h5>
+                </div>
+
+                <!-- 属性相性表示 -->
+                <div class="attribute-matchup" id="attribute-matchup">
+                    属性相性: <span id="matchup-text">-</span>
+                </div>
+
+                <!-- 手札エリア -->
+                <div class="battle-hands">
+                    <div class="hand-area">
+                        <div class="hand-title">自分の手札</div>
+                        <div class="hand-cards" id="player-hand">
+                            <!-- プレイヤーの手札 -->
                         </div>
-                        <div class="hp-bar">
-                            <div class="hp-fill" id="player-hp" style="width: 100%"></div>
-                        </div>
-                        <small>HP: <span id="player-hp-text">0/0</span></small>
                     </div>
-                    <div class="battle-card" id="enemy-card">
-                        <h4 id="enemy-card-name">-</h4>
-                        <div class="card-stats">
-                            <span class="atk">ATK: <span id="enemy-atk">0</span></span>
-                            <span class="def">DEF: <span id="enemy-def">0</span></span>
+                    <div class="hand-area">
+                        <div class="hand-title">敵の手札</div>
+                        <div class="hand-cards" id="enemy-hand">
+                            <!-- 敵の手札 -->
                         </div>
-                        <div class="hp-bar">
-                            <div class="hp-fill" id="enemy-hp" style="width: 100%"></div>
-                        </div>
-                        <small>HP: <span id="enemy-hp-text">0/0</span></small>
                     </div>
                 </div>
+
+                <!-- バトルフィールド -->
+                <div class="battle-field">
+                    <div class="active-card" id="player-active">
+                        <h5>アクティブカードなし</h5>
+                    </div>
+                    <div class="vs-text">VS</div>
+                    <div class="active-card" id="enemy-active">
+                        <h5>アクティブカードなし</h5>
+                    </div>
+                </div>
+
+                <!-- アクション -->
                 <div class="battle-actions">
-                    <button class="battle-btn attack-btn" id="attack-btn">
+                    <button class="battle-btn attack-btn" id="attack-btn" disabled>
                         <i class="bi bi-lightning"></i> 攻撃
                     </button>
-                    <button class="battle-btn defend-btn" id="defend-btn">
-                        <i class="bi bi-shield"></i> 防御
+                    <button class="battle-btn switch-btn" id="switch-btn">
+                        <i class="bi bi-arrow-repeat"></i> 交代
                     </button>
-                    <button class="battle-btn retreat-btn" id="retreat-btn">
-                        <i class="bi bi-arrow-left"></i> 撤退
+                    <button class="battle-btn skill-btn" id="skill-btn" disabled>
+                        <i class="bi bi-magic"></i> 特殊効果
+                    </button>
+                    <button class="battle-btn end-turn-btn" id="end-turn-btn">
+                        <i class="bi bi-skip-forward"></i> ターン終了
                     </button>
                 </div>
-                <div class="battle-log mt-3 text-white" id="battle-log">
+
+                <!-- バトルログ -->
+                <div class="battle-log mt-3" id="battle-log">
                     <!-- バトルログ -->
                 </div>
             </div>
@@ -592,16 +774,39 @@
 
         // ゲームデータ
         let gameData = {
-            points: 0, // Firebaseから取得
+            points: 0,
             level: 1,
             totalWins: 0,
             deck: [],
+            battleDeck: [], // バトル用に選択したカード
             unlockedDungeons: [1, 2, 3],
             cardDatabase: [],
             currentBattle: null,
             selectedDungeon: null,
-            selectedCard: null,
             currentUser: null
+        };
+
+        // 属性相性テーブル
+        const attributeMatchup = {
+            '光': { strong: ['闇'], weak: ['闇'] },
+            '闇': { strong: ['光'], weak: ['光'] },
+            '炎': { strong: ['風'], weak: ['水'] },
+            '水': { strong: ['炎'], weak: ['地'] },
+            '地': { strong: ['水'], weak: ['風'] },
+            '風': { strong: ['地'], weak: ['炎'] }
+        };
+
+        // 種族による特殊効果
+        const raceAbilities = {
+            'ドラゴン族': { type: 'attack_boost', value: 1.1, description: '攻撃力10%アップ' },
+            '戦士族': { type: 'defense_boost', value: 1.1, description: '防御力10%アップ' },
+            '魔法使い族': { type: 'skill_damage', value: 200, description: '特殊効果: 200ダメージ' },
+            '悪魔族': { type: 'life_drain', value: 0.2, description: 'ダメージの20%回復' },
+            '天使族': { type: 'heal', value: 300, description: '毎ターン300回復' },
+            '機械族': { type: 'counter', value: 0.3, description: '30%の確率で反撃' },
+            '岩石族': { type: 'damage_reduction', value: 0.9, description: '受けるダメージ10%軽減' },
+            '獣族': { type: 'speed', value: 1.2, description: '20%の確率で連続攻撃' },
+            '植物族': { type: 'regenerate', value: 200, description: '毎ターン200回復' }
         };
 
         // カードデータベースの読み込み
@@ -610,11 +815,10 @@
                 const response = await fetch('yugioh_cards_master.csv');
                 const csvText = await response.text();
                 const lines = csvText.split('\n');
-                const headers = lines[0].split(',');
 
                 gameData.cardDatabase = [];
 
-                for (let i = 1; i < lines.length && i < 500; i++) { // 最初の500カードを読み込み
+                for (let i = 1; i < lines.length && i < 1000; i++) {
                     const line = lines[i];
                     if (!line.trim()) continue;
 
@@ -631,14 +835,14 @@
                             defense: parseInt(values[8]?.replace(/^"|"$/g, '').trim()) || 100
                         };
 
-                        // 攻撃力が有効な値のモンスターカードのみ追加（魔法・罠カードは除外）
+                        // モンスターカードのみ（魔法・罠除外）
                         const cardType = card.type?.toLowerCase() || '';
                         const race = card.race?.toLowerCase() || '';
                         const isSpellOrTrap = cardType.includes('魔法') || cardType.includes('罠') ||
                                              race.includes('魔法') || race.includes('罠');
 
                         if (card.attack > 0 && !isNaN(card.attack) && !isSpellOrTrap) {
-                            // 価格計算（攻撃力と防御力に基づく）
+                            // 価格計算
                             card.price = Math.floor((card.attack + card.defense) / 4);
                             card.sellPrice = Math.floor(card.price * 0.5);
 
@@ -662,7 +866,6 @@
                 renderShop();
             } catch (error) {
                 console.error('Failed to load card database:', error);
-                // フォールバックデータ
                 generateFallbackCards();
             }
         }
@@ -697,10 +900,7 @@
                 { id: 'f2', name: '水の魔導師', attack: 1400, defense: 1000, level: 4, attribute: '水', race: '魔法使い族', type: 'モンスター', price: 600, sellPrice: 300, rarity: 'common' },
                 { id: 'f3', name: '風の守護者', attack: 1000, defense: 1800, level: 4, attribute: '風', race: '戦士族', type: 'モンスター', price: 700, sellPrice: 350, rarity: 'common' },
                 { id: 'f4', name: '地の巨人', attack: 2100, defense: 1700, level: 5, attribute: '地', race: '岩石族', type: 'モンスター', price: 950, sellPrice: 475, rarity: 'super-rare' },
-                { id: 'f5', name: '雷の竜', attack: 2400, defense: 2000, level: 6, attribute: '光', race: 'ドラゴン族', type: 'モンスター', price: 1100, sellPrice: 550, rarity: 'super-rare' },
-                { id: 'f6', name: '闇の騎士', attack: 2200, defense: 2100, level: 6, attribute: '闇', race: '戦士族', type: 'モンスター', price: 1075, sellPrice: 537, rarity: 'super-rare' },
-                { id: 'f7', name: '光の天使', attack: 2800, defense: 2300, level: 7, attribute: '光', race: '天使族', type: 'モンスター', price: 1275, sellPrice: 637, rarity: 'ultra-rare' },
-                { id: 'f8', name: '魔王', attack: 3000, defense: 2500, level: 8, attribute: '闇', race: '悪魔族', type: 'モンスター', price: 1375, sellPrice: 687, rarity: 'ultra-rare' }
+                { id: 'f5', name: '雷の竜', attack: 2400, defense: 2000, level: 6, attribute: '光', race: 'ドラゴン族', type: 'モンスター', price: 1100, sellPrice: 550, rarity: 'super-rare' }
             ];
             gameData.cardDatabase = fallbackCards;
             renderShop();
@@ -715,9 +915,6 @@
 
             // フィルタリング
             switch(filter) {
-                case 'monster':
-                    filteredCards = filteredCards.filter(c => c.type === 'モンスター' || c.type === '効果');
-                    break;
                 case 'low-cost':
                     filteredCards = filteredCards.filter(c => c.price <= 500);
                     break;
@@ -732,14 +929,16 @@
             // 価格でソート
             filteredCards.sort((a, b) => a.price - b.price);
 
-            // 最大50枚表示
-            filteredCards = filteredCards.slice(0, 50);
+            // 最大30枚表示
+            filteredCards = filteredCards.slice(0, 30);
 
             shopContainer.innerHTML = '';
             filteredCards.forEach(card => {
                 const cardElement = document.createElement('div');
                 cardElement.className = `card-shop-item ${card.rarity}`;
                 cardElement.onclick = () => buyCard(card);
+
+                const attrClass = `attr-${card.attribute?.toLowerCase() || 'dark'}`;
 
                 cardElement.innerHTML = `
                     <div class="card-price">${card.price} pts</div>
@@ -748,8 +947,10 @@
                         <span class="atk"><i class="bi bi-sword"></i> ${card.attack}</span>
                         <span class="def"><i class="bi bi-shield"></i> ${card.defense}</span>
                         <span>Lv.${card.level}</span>
+                        <span class="attribute-icon ${attrClass}"></span>
                     </div>
                     <small>${card.race} / ${card.attribute}</small>
+                    ${raceAbilities[card.race] ? `<br><small class="text-muted">${raceAbilities[card.race].description}</small>` : ''}
                 `;
 
                 shopContainer.appendChild(cardElement);
@@ -761,9 +962,9 @@
             if (gameData.points >= card.price) {
                 if (confirm(`${card.name}を${card.price}ptsで購入しますか？`)) {
                     gameData.points -= card.price;
-                    gameData.deck.push({...card, uid: Date.now() + Math.random()}); // ユニークIDを追加
+                    gameData.deck.push({...card, uid: Date.now() + Math.random()});
 
-                    // Firebaseのポイントも更新
+                    // Firebaseポイント更新
                     if (gameData.currentUser) {
                         await updateFirebasePoints(gameData.points);
                     }
@@ -786,11 +987,17 @@
             gameData.deck.forEach((card, index) => {
                 const cardElement = document.createElement('div');
                 cardElement.className = 'deck-card';
+                if (gameData.battleDeck.some(c => c.uid === card.uid)) {
+                    cardElement.className += ' in-battle';
+                }
                 cardElement.dataset.index = index;
+
+                const attrClass = `attr-${card.attribute?.toLowerCase() || 'dark'}`;
 
                 cardElement.innerHTML = `
                     <div>
                         <strong>${card.name}</strong>
+                        <span class="attribute-icon ${attrClass}"></span>
                         <div class="small">
                             ATK:${card.attack} DEF:${card.defense} Lv.${card.level}
                         </div>
@@ -807,6 +1014,35 @@
             document.getElementById('deck-count').textContent = gameData.deck.length;
         }
 
+        // バトルデッキ選択
+        document.getElementById('select-deck-btn').onclick = () => {
+            if (gameData.deck.length < 3) {
+                showNotification('デッキに最低3枚のカードが必要です', 'error');
+                return;
+            }
+
+            // 選択モードに切り替え
+            const selectedIndexes = [];
+            gameData.deck.forEach((card, index) => {
+                const elem = document.querySelector(`.deck-card[data-index="${index}"]`);
+                elem.onclick = () => {
+                    if (selectedIndexes.includes(index)) {
+                        selectedIndexes.splice(selectedIndexes.indexOf(index), 1);
+                        elem.classList.remove('in-battle');
+                    } else if (selectedIndexes.length < 5) {  // 最大5枚まで
+                        selectedIndexes.push(index);
+                        elem.classList.add('in-battle');
+                    }
+
+                    gameData.battleDeck = selectedIndexes.map(i => gameData.deck[i]);
+                    document.getElementById('battle-deck-count').textContent = `(${gameData.battleDeck.length}/3)`;
+                    document.getElementById('start-battle-btn').disabled = gameData.battleDeck.length < 3;
+                };
+            });
+
+            showNotification('バトルに使用するカードを3～5枚選択してください', 'info');
+        };
+
         // カード選択切り替え
         function toggleCardSelection(index) {
             const cardElement = document.querySelector(`.deck-card[data-index="${index}"]`);
@@ -814,7 +1050,7 @@
         }
 
         // 選択カード売却
-        document.getElementById('sell-selected-btn').onclick = () => {
+        document.getElementById('sell-selected-btn').onclick = async () => {
             const selectedCards = document.querySelectorAll('.deck-card.selected');
             if (selectedCards.length === 0) {
                 showNotification('売却するカードを選択してください', 'warning');
@@ -831,7 +1067,6 @@
                     indicesToRemove.push(index);
                 });
 
-                // インデックスの大きい順から削除
                 indicesToRemove.sort((a, b) => b - a);
                 indicesToRemove.forEach(index => {
                     gameData.deck.splice(index, 1);
@@ -839,9 +1074,9 @@
 
                 gameData.points += totalSellPrice;
 
-                // Firebaseのポイントも更新
+                // Firebaseポイント更新
                 if (gameData.currentUser) {
-                    updateFirebasePoints(gameData.points);
+                    await updateFirebasePoints(gameData.points);
                 }
 
                 updateStats();
@@ -873,7 +1108,6 @@
                     return;
                 }
 
-                // 選択状態の切り替え
                 document.querySelectorAll('.dungeon-item').forEach(d => d.classList.remove('selected'));
                 this.classList.add('selected');
 
@@ -882,14 +1116,14 @@
                     difficulty: this.dataset.difficulty
                 };
 
-                document.getElementById('start-battle-btn').disabled = false;
+                document.getElementById('start-battle-btn').disabled = gameData.battleDeck.length < 3;
             };
         });
 
         // バトル開始
         document.getElementById('start-battle-btn').onclick = () => {
-            if (gameData.deck.length === 0) {
-                showNotification('デッキにカードがありません', 'error');
+            if (gameData.battleDeck.length < 3) {
+                showNotification('バトルデッキを選択してください', 'error');
                 return;
             }
 
@@ -898,38 +1132,48 @@
                 return;
             }
 
-            // プレイヤーカードを選択（最強のカードを自動選択）
-            gameData.selectedCard = gameData.deck.reduce((prev, current) =>
-                (prev.attack > current.attack) ? prev : current
-            );
-
             startBattle();
         };
 
         // バトル開始処理
         function startBattle() {
             const difficulty = gameData.selectedDungeon.difficulty;
-            const enemy = generateEnemy(difficulty);
+
+            // 敵の手札生成
+            const enemyHand = [];
+            const enemyCount = difficulty === 'easy' ? 3 : difficulty === 'normal' ? 4 : difficulty === 'hard' ? 5 : 6;
+
+            for (let i = 0; i < enemyCount; i++) {
+                enemyHand.push(generateEnemy(difficulty));
+            }
+
+            // プレイヤーの手札を複製（HPを個別管理）
+            const playerHand = gameData.battleDeck.map(card => ({
+                ...card,
+                currentHp: card.defense,
+                maxHp: card.defense,
+                used: false
+            }));
 
             gameData.currentBattle = {
-                player: {
-                    card: gameData.selectedCard,
-                    hp: gameData.selectedCard.defense,
-                    maxHp: gameData.selectedCard.defense,
-                    defending: false
-                },
-                enemy: {
-                    card: enemy,
-                    hp: enemy.defense,
-                    maxHp: enemy.defense,
-                    defending: false
-                },
+                playerHand: playerHand,
+                enemyHand: enemyHand.map(card => ({
+                    ...card,
+                    currentHp: card.defense,
+                    maxHp: card.defense,
+                    used: false
+                })),
+                playerActive: null,
+                enemyActive: null,
                 turn: 'player',
-                log: []
+                turnCount: 0,
+                log: [],
+                phase: 'selection' // selection, battle, end
             };
 
             updateBattleUI();
             document.getElementById('battle-modal').classList.add('active');
+            addBattleLog('バトル開始！カードを選択してください', 'special');
         }
 
         // 敵生成
@@ -938,23 +1182,23 @@
 
             switch(difficulty) {
                 case 'easy':
-                    atkRange = [300, 1000];
-                    defRange = [200, 800];
+                    atkRange = [300, 1200];
+                    defRange = [200, 1000];
                     levelRange = [1, 3];
                     break;
                 case 'normal':
-                    atkRange = [800, 1800];
-                    defRange = [600, 1500];
+                    atkRange = [1000, 2000];
+                    defRange = [800, 1800];
                     levelRange = [3, 5];
                     break;
                 case 'hard':
-                    atkRange = [1500, 2500];
-                    defRange = [1200, 2200];
+                    atkRange = [1800, 3000];
+                    defRange = [1500, 2800];
                     levelRange = [5, 7];
                     break;
                 case 'expert':
                     atkRange = [2500, 4000];
-                    defRange = [2000, 3500];
+                    defRange = [2200, 3800];
                     levelRange = [7, 10];
                     break;
                 default:
@@ -963,7 +1207,7 @@
                     levelRange = [1, 4];
             }
 
-            // カードデータベースから適切な敵を選択
+            // データベースから適切な敵を選択
             const validEnemies = gameData.cardDatabase.filter(card =>
                 card.attack >= atkRange[0] && card.attack <= atkRange[1]
             );
@@ -972,12 +1216,14 @@
                 return {...validEnemies[Math.floor(Math.random() * validEnemies.length)]};
             }
 
-            // フォールバック敵生成
+            // フォールバック
             return {
                 name: `${difficulty}モンスター`,
                 attack: Math.floor(Math.random() * (atkRange[1] - atkRange[0]) + atkRange[0]),
                 defense: Math.floor(Math.random() * (defRange[1] - defRange[0]) + defRange[0]),
                 level: Math.floor(Math.random() * (levelRange[1] - levelRange[0]) + levelRange[0]),
+                attribute: ['光', '闇', '炎', '水', '地', '風'][Math.floor(Math.random() * 6)],
+                race: '戦士族',
                 price: 0,
                 sellPrice: 0
             };
@@ -985,117 +1231,412 @@
 
         // バトルUI更新
         function updateBattleUI() {
+            if (!gameData.currentBattle) return;
+
             const battle = gameData.currentBattle;
 
-            // プレイヤー情報
-            document.getElementById('player-card-name').textContent = battle.player.card.name;
-            document.getElementById('player-atk').textContent = battle.player.card.attack;
-            document.getElementById('player-def').textContent = battle.player.card.defense;
-            document.getElementById('player-hp-text').textContent = `${battle.player.hp}/${battle.player.maxHp}`;
-            document.getElementById('player-hp').style.width = `${(battle.player.hp / battle.player.maxHp) * 100}%`;
+            // フェーズテキスト
+            document.getElementById('phase-text').textContent =
+                battle.turn === 'player' ? 'プレイヤーターン' : '敵ターン';
 
-            // 敵情報
-            document.getElementById('enemy-card-name').textContent = battle.enemy.card.name;
-            document.getElementById('enemy-atk').textContent = battle.enemy.card.attack;
-            document.getElementById('enemy-def').textContent = battle.enemy.card.defense;
-            document.getElementById('enemy-hp-text').textContent = `${battle.enemy.hp}/${battle.enemy.maxHp}`;
-            document.getElementById('enemy-hp').style.width = `${(battle.enemy.hp / battle.enemy.maxHp) * 100}%`;
+            // プレイヤー手札表示
+            const playerHandDiv = document.getElementById('player-hand');
+            playerHandDiv.innerHTML = '';
+            battle.playerHand.forEach((card, index) => {
+                const cardDiv = createHandCard(card, index, 'player');
+                playerHandDiv.appendChild(cardDiv);
+            });
 
-            // 敗北チェック
-            if (battle.player.hp <= 0) {
-                document.getElementById('player-card').classList.add('defeated');
-                endBattle(false);
-            } else if (battle.enemy.hp <= 0) {
-                document.getElementById('enemy-card').classList.add('defeated');
-                endBattle(true);
+            // 敵手札表示
+            const enemyHandDiv = document.getElementById('enemy-hand');
+            enemyHandDiv.innerHTML = '';
+            battle.enemyHand.forEach((card, index) => {
+                const cardDiv = createHandCard(card, index, 'enemy');
+                enemyHandDiv.appendChild(cardDiv);
+            });
+
+            // アクティブカード表示
+            updateActiveCards();
+
+            // 属性相性表示
+            updateAttributeMatchup();
+
+            // ボタン状態更新
+            updateBattleButtons();
+
+            // 勝敗チェック
+            checkBattleEnd();
+        }
+
+        // 手札カード生成
+        function createHandCard(card, index, owner) {
+            const div = document.createElement('div');
+            div.className = `hand-card ${owner === 'enemy' ? 'enemy' : ''}`;
+
+            if (card.used) {
+                div.className += ' used';
+            }
+
+            if (owner === 'player' && gameData.currentBattle.playerActive === index) {
+                div.className += ' selected';
+            } else if (owner === 'enemy' && gameData.currentBattle.enemyActive === index) {
+                div.className += ' selected';
+            }
+
+            const hpPercent = (card.currentHp / card.maxHp) * 100;
+            const attrClass = `attr-${card.attribute?.toLowerCase() || 'dark'}`;
+
+            div.innerHTML = `
+                <h6>${card.name}</h6>
+                <div class="small">
+                    ATK:${card.attack} DEF:${card.defense}
+                    <span class="attribute-icon ${attrClass}"></span>
+                </div>
+                <div class="card-hp-bar">
+                    <div class="card-hp-fill" style="width: ${hpPercent}%"></div>
+                </div>
+                <small>HP: ${card.currentHp}/${card.maxHp}</small>
+            `;
+
+            if (owner === 'player' && !card.used) {
+                div.onclick = () => selectPlayerCard(index);
+            }
+
+            return div;
+        }
+
+        // プレイヤーカード選択
+        function selectPlayerCard(index) {
+            const battle = gameData.currentBattle;
+            if (battle.turn !== 'player' || battle.playerHand[index].used) return;
+
+            battle.playerActive = index;
+            updateBattleUI();
+        }
+
+        // アクティブカード表示更新
+        function updateActiveCards() {
+            const battle = gameData.currentBattle;
+
+            // プレイヤー側
+            const playerActiveDiv = document.getElementById('player-active');
+            if (battle.playerActive !== null && battle.playerActive < battle.playerHand.length) {
+                const card = battle.playerHand[battle.playerActive];
+                const attrClass = `attr-${card.attribute?.toLowerCase() || 'dark'}`;
+                playerActiveDiv.innerHTML = `
+                    <h5>${card.name} <span class="attribute-icon ${attrClass}"></span></h5>
+                    <div>ATK: ${card.attack} / DEF: ${card.defense}</div>
+                    <div class="hp-bar">
+                        <div class="hp-fill" style="width: ${(card.currentHp / card.maxHp) * 100}%"></div>
+                    </div>
+                    <small>HP: ${card.currentHp}/${card.maxHp}</small>
+                    ${raceAbilities[card.race] ? `<br><small class="text-muted">${raceAbilities[card.race].description}</small>` : ''}
+                `;
+            } else {
+                playerActiveDiv.innerHTML = '<h5>アクティブカードなし</h5>';
+            }
+
+            // 敵側
+            const enemyActiveDiv = document.getElementById('enemy-active');
+            if (battle.enemyActive !== null && battle.enemyActive < battle.enemyHand.length) {
+                const card = battle.enemyHand[battle.enemyActive];
+                const attrClass = `attr-${card.attribute?.toLowerCase() || 'dark'}`;
+                enemyActiveDiv.innerHTML = `
+                    <h5>${card.name} <span class="attribute-icon ${attrClass}"></span></h5>
+                    <div>ATK: ${card.attack} / DEF: ${card.defense}</div>
+                    <div class="hp-bar">
+                        <div class="hp-fill" style="width: ${(card.currentHp / card.maxHp) * 100}%"></div>
+                    </div>
+                    <small>HP: ${card.currentHp}/${card.maxHp}</small>
+                `;
+            } else {
+                enemyActiveDiv.innerHTML = '<h5>アクティブカードなし</h5>';
+            }
+        }
+
+        // 属性相性更新
+        function updateAttributeMatchup() {
+            const battle = gameData.currentBattle;
+            const matchupDiv = document.getElementById('matchup-text');
+
+            if (battle.playerActive !== null && battle.enemyActive !== null) {
+                const playerAttr = battle.playerHand[battle.playerActive].attribute;
+                const enemyAttr = battle.enemyHand[battle.enemyActive].attribute;
+
+                const matchup = attributeMatchup[playerAttr];
+                if (matchup) {
+                    if (matchup.strong.includes(enemyAttr)) {
+                        matchupDiv.innerHTML = '<span class="advantage">有利（ダメージ1.5倍）</span>';
+                    } else if (matchup.weak.includes(enemyAttr)) {
+                        matchupDiv.innerHTML = '<span class="disadvantage">不利（ダメージ0.7倍）</span>';
+                    } else {
+                        matchupDiv.innerHTML = '<span class="neutral">通常</span>';
+                    }
+                } else {
+                    matchupDiv.innerHTML = '<span class="neutral">通常</span>';
+                }
+            } else {
+                matchupDiv.innerHTML = '-';
+            }
+        }
+
+        // バトルボタン更新
+        function updateBattleButtons() {
+            const battle = gameData.currentBattle;
+            const attackBtn = document.getElementById('attack-btn');
+            const switchBtn = document.getElementById('switch-btn');
+            const skillBtn = document.getElementById('skill-btn');
+            const endTurnBtn = document.getElementById('end-turn-btn');
+
+            if (battle.turn === 'player') {
+                attackBtn.disabled = battle.playerActive === null || battle.enemyActive === null;
+                switchBtn.disabled = false;
+                endTurnBtn.disabled = false;
+
+                // スキルボタン（特定種族のみ）
+                if (battle.playerActive !== null) {
+                    const card = battle.playerHand[battle.playerActive];
+                    const ability = raceAbilities[card.race];
+                    skillBtn.disabled = !ability || ability.type === 'passive';
+                } else {
+                    skillBtn.disabled = true;
+                }
+            } else {
+                attackBtn.disabled = true;
+                switchBtn.disabled = true;
+                skillBtn.disabled = true;
+                endTurnBtn.disabled = true;
             }
         }
 
         // 攻撃処理
         document.getElementById('attack-btn').onclick = () => {
             const battle = gameData.currentBattle;
-            if (battle.turn !== 'player') return;
+            if (battle.turn !== 'player' || battle.playerActive === null || battle.enemyActive === null) return;
 
-            // ダメージ計算
-            let damage = battle.player.card.attack;
-            if (battle.enemy.defending) {
-                damage = Math.max(1, damage - battle.enemy.card.defense);
-                battle.enemy.defending = false;
+            const playerCard = battle.playerHand[battle.playerActive];
+            const enemyCard = battle.enemyHand[battle.enemyActive];
+
+            // 基本ダメージ計算
+            let damage = playerCard.attack;
+
+            // 属性相性
+            const playerAttr = playerCard.attribute;
+            const enemyAttr = enemyCard.attribute;
+            const matchup = attributeMatchup[playerAttr];
+            if (matchup) {
+                if (matchup.strong.includes(enemyAttr)) {
+                    damage = Math.floor(damage * 1.5);
+                    addBattleLog('属性相性有利！', 'special');
+                } else if (matchup.weak.includes(enemyAttr)) {
+                    damage = Math.floor(damage * 0.7);
+                    addBattleLog('属性相性不利...', 'damage');
+                }
             }
 
-            battle.enemy.hp = Math.max(0, battle.enemy.hp - damage);
+            // 種族能力
+            const ability = raceAbilities[playerCard.race];
+            if (ability && ability.type === 'attack_boost') {
+                damage = Math.floor(damage * ability.value);
+            }
 
-            // アニメーション
-            document.getElementById('enemy-card').classList.add('damage');
-            setTimeout(() => {
-                document.getElementById('enemy-card').classList.remove('damage');
-            }, 500);
+            // ダメージ適用
+            enemyCard.currentHp = Math.max(0, enemyCard.currentHp - damage);
+            addBattleLog(`${playerCard.name}の攻撃！${enemyCard.name}に${damage}ダメージ！`, 'damage');
 
-            addBattleLog(`${battle.player.card.name}の攻撃！ ${damage}ダメージ！`);
+            // 吸血効果
+            if (ability && ability.type === 'life_drain') {
+                const heal = Math.floor(damage * ability.value);
+                playerCard.currentHp = Math.min(playerCard.maxHp, playerCard.currentHp + heal);
+                addBattleLog(`${playerCard.name}はHPを${heal}回復した！`, 'heal');
+            }
+
+            // 連続攻撃
+            if (ability && ability.type === 'speed' && Math.random() < 0.2) {
+                const extraDamage = Math.floor(damage * 0.5);
+                enemyCard.currentHp = Math.max(0, enemyCard.currentHp - extraDamage);
+                addBattleLog(`連続攻撃！追加で${extraDamage}ダメージ！`, 'damage');
+            }
+
             updateBattleUI();
 
-            if (battle.enemy.hp > 0) {
-                battle.turn = 'enemy';
-                setTimeout(enemyTurn, 1500);
+            // 敵が倒れたらカード使用済みに
+            if (enemyCard.currentHp <= 0) {
+                enemyCard.used = true;
+                addBattleLog(`${enemyCard.name}を撃破！`, 'special');
+                battle.enemyActive = null;
             }
+
+            // ターン終了
+            endPlayerTurn();
         };
 
-        // 防御処理
-        document.getElementById('defend-btn').onclick = () => {
+        // 交代処理
+        document.getElementById('switch-btn').onclick = () => {
             const battle = gameData.currentBattle;
             if (battle.turn !== 'player') return;
 
-            battle.player.defending = true;
-            addBattleLog(`${battle.player.card.name}は防御態勢を取った！`);
+            battle.playerActive = null;
+            updateBattleUI();
+            showNotification('別のカードを選択してください', 'info');
+        };
+
+        // 特殊効果
+        document.getElementById('skill-btn').onclick = () => {
+            const battle = gameData.currentBattle;
+            if (battle.turn !== 'player' || battle.playerActive === null) return;
+
+            const playerCard = battle.playerHand[battle.playerActive];
+            const ability = raceAbilities[playerCard.race];
+
+            if (ability && ability.type === 'skill_damage' && battle.enemyActive !== null) {
+                const enemyCard = battle.enemyHand[battle.enemyActive];
+                enemyCard.currentHp = Math.max(0, enemyCard.currentHp - ability.value);
+                addBattleLog(`${playerCard.name}の特殊効果！${ability.value}ダメージ！`, 'special');
+
+                if (enemyCard.currentHp <= 0) {
+                    enemyCard.used = true;
+                    battle.enemyActive = null;
+                }
+            } else if (ability && ability.type === 'heal') {
+                playerCard.currentHp = Math.min(playerCard.maxHp, playerCard.currentHp + ability.value);
+                addBattleLog(`${playerCard.name}の回復効果！${ability.value}HP回復！`, 'heal');
+            }
+
+            updateBattleUI();
+            endPlayerTurn();
+        };
+
+        // ターン終了
+        document.getElementById('end-turn-btn').onclick = () => {
+            endPlayerTurn();
+        };
+
+        function endPlayerTurn() {
+            const battle = gameData.currentBattle;
+
+            // 継続効果処理
+            if (battle.playerActive !== null) {
+                const card = battle.playerHand[battle.playerActive];
+                const ability = raceAbilities[card.race];
+                if (ability && (ability.type === 'regenerate' || ability.type === 'heal')) {
+                    const heal = ability.type === 'heal' ? ability.value : 200;
+                    card.currentHp = Math.min(card.maxHp, card.currentHp + heal);
+                    addBattleLog(`${card.name}は${heal}HP回復した`, 'heal');
+                }
+            }
 
             battle.turn = 'enemy';
+            updateBattleUI();
             setTimeout(enemyTurn, 1500);
-        };
-
-        // 撤退処理
-        document.getElementById('retreat-btn').onclick = () => {
-            if (confirm('撤退しますか？報酬は獲得できません。')) {
-                document.getElementById('battle-modal').classList.remove('active');
-                gameData.currentBattle = null;
-            }
-        };
+        }
 
         // 敵のターン
         function enemyTurn() {
             const battle = gameData.currentBattle;
 
-            // AI判断（単純な攻撃）
-            let damage = battle.enemy.card.attack;
-            if (battle.player.defending) {
-                damage = Math.max(1, damage - battle.player.card.defense);
-                battle.player.defending = false;
+            // 敵のアクティブカード選択
+            if (battle.enemyActive === null || battle.enemyHand[battle.enemyActive].used) {
+                const availableCards = battle.enemyHand.filter(c => !c.used);
+                if (availableCards.length > 0) {
+                    battle.enemyActive = battle.enemyHand.indexOf(availableCards[Math.floor(Math.random() * availableCards.length)]);
+                    addBattleLog(`敵は${battle.enemyHand[battle.enemyActive].name}を場に出した！`, 'special');
+                }
             }
 
-            battle.player.hp = Math.max(0, battle.player.hp - damage);
+            // プレイヤーのアクティブカード選択（ランダム）
+            if (battle.playerActive === null || battle.playerHand[battle.playerActive].used) {
+                const availableCards = battle.playerHand.filter(c => !c.used);
+                if (availableCards.length > 0) {
+                    const targetIndex = Math.floor(Math.random() * availableCards.length);
+                    battle.playerActive = battle.playerHand.indexOf(availableCards[targetIndex]);
+                }
+            }
 
-            // アニメーション
-            document.getElementById('player-card').classList.add('damage');
-            setTimeout(() => {
-                document.getElementById('player-card').classList.remove('damage');
-            }, 500);
+            // 攻撃
+            if (battle.enemyActive !== null && battle.playerActive !== null) {
+                const enemyCard = battle.enemyHand[battle.enemyActive];
+                const playerCard = battle.playerHand[battle.playerActive];
 
-            addBattleLog(`${battle.enemy.card.name}の攻撃！ ${damage}ダメージ！`);
+                let damage = enemyCard.attack;
+
+                // 属性相性
+                const enemyAttr = enemyCard.attribute;
+                const playerAttr = playerCard.attribute;
+                const matchup = attributeMatchup[enemyAttr];
+                if (matchup) {
+                    if (matchup.strong.includes(playerAttr)) {
+                        damage = Math.floor(damage * 1.5);
+                    } else if (matchup.weak.includes(playerAttr)) {
+                        damage = Math.floor(damage * 0.7);
+                    }
+                }
+
+                // プレイヤーの防御能力
+                const playerAbility = raceAbilities[playerCard.race];
+                if (playerAbility && playerAbility.type === 'damage_reduction') {
+                    damage = Math.floor(damage * playerAbility.value);
+                }
+
+                playerCard.currentHp = Math.max(0, playerCard.currentHp - damage);
+                addBattleLog(`${enemyCard.name}の攻撃！${playerCard.name}に${damage}ダメージ！`, 'damage');
+
+                // 反撃
+                if (playerAbility && playerAbility.type === 'counter' && Math.random() < playerAbility.value) {
+                    const counterDamage = Math.floor(playerCard.attack * 0.5);
+                    enemyCard.currentHp = Math.max(0, enemyCard.currentHp - counterDamage);
+                    addBattleLog(`${playerCard.name}の反撃！${counterDamage}ダメージ！`, 'special');
+                }
+
+                if (playerCard.currentHp <= 0) {
+                    playerCard.used = true;
+                    addBattleLog(`${playerCard.name}が倒された！`, 'damage');
+                    battle.playerActive = null;
+                }
+
+                if (enemyCard.currentHp <= 0) {
+                    enemyCard.used = true;
+                    battle.enemyActive = null;
+                }
+            }
+
+            battle.turn = 'player';
+            battle.turnCount++;
             updateBattleUI();
-
-            if (battle.player.hp > 0) {
-                battle.turn = 'player';
-            }
         }
 
         // バトルログ追加
-        function addBattleLog(message) {
-            const logElement = document.getElementById('battle-log');
-            logElement.innerHTML = `<div>${message}</div>` + logElement.innerHTML;
+        function addBattleLog(message, type = '') {
+            const logDiv = document.getElementById('battle-log');
+            const entry = document.createElement('div');
+            entry.className = `log-entry ${type ? 'log-' + type : ''}`;
+            entry.textContent = message;
+            logDiv.insertBefore(entry, logDiv.firstChild);
+
+            // 古いログを削除
+            while (logDiv.children.length > 10) {
+                logDiv.removeChild(logDiv.lastChild);
+            }
+        }
+
+        // バトル終了チェック
+        function checkBattleEnd() {
+            const battle = gameData.currentBattle;
+            if (!battle) return;
+
+            const playerAlive = battle.playerHand.some(c => !c.used);
+            const enemyAlive = battle.enemyHand.some(c => !c.used);
+
+            if (!playerAlive) {
+                endBattle(false);
+            } else if (!enemyAlive) {
+                endBattle(true);
+            }
         }
 
         // バトル終了
-        function endBattle(victory) {
-            setTimeout(() => {
+        async function endBattle(victory) {
+            setTimeout(async () => {
                 document.getElementById('battle-modal').classList.remove('active');
 
                 if (victory) {
@@ -1106,33 +1647,27 @@
                     switch(difficulty) {
                         case 'easy':
                             pointReward = 100 + Math.floor(Math.random() * 200);
-                            cardReward.push(gameData.currentBattle.enemy.card);
+                            if (Math.random() > 0.5) {
+                                cardReward.push(gameData.currentBattle.enemyHand[0]);
+                            }
                             break;
                         case 'normal':
                             pointReward = 300 + Math.floor(Math.random() * 400);
-                            cardReward.push(gameData.currentBattle.enemy.card);
-                            if (Math.random() > 0.5) {
-                                const bonusCard = gameData.cardDatabase[Math.floor(Math.random() * gameData.cardDatabase.length)];
-                                cardReward.push({...bonusCard});
+                            cardReward.push(gameData.currentBattle.enemyHand[0]);
+                            if (Math.random() > 0.3) {
+                                cardReward.push(gameData.currentBattle.enemyHand[1]);
                             }
                             break;
                         case 'hard':
                             pointReward = 700 + Math.floor(Math.random() * 800);
-                            cardReward.push(gameData.currentBattle.enemy.card);
-                            for (let i = 0; i < 2; i++) {
-                                if (Math.random() > 0.3) {
-                                    const bonusCard = gameData.cardDatabase[Math.floor(Math.random() * gameData.cardDatabase.length)];
-                                    cardReward.push({...bonusCard});
-                                }
+                            cardReward = gameData.currentBattle.enemyHand.slice(0, 2);
+                            if (Math.random() > 0.3) {
+                                cardReward.push(gameData.currentBattle.enemyHand[2]);
                             }
                             break;
                         case 'expert':
                             pointReward = 1500 + Math.floor(Math.random() * 1500);
-                            cardReward.push(gameData.currentBattle.enemy.card);
-                            for (let i = 0; i < 3; i++) {
-                                const bonusCard = gameData.cardDatabase[Math.floor(Math.random() * gameData.cardDatabase.length)];
-                                cardReward.push({...bonusCard});
-                            }
+                            cardReward = gameData.currentBattle.enemyHand.slice(0, 3);
                             break;
                     }
 
@@ -1140,20 +1675,25 @@
                     gameData.points += pointReward;
                     gameData.totalWins++;
 
-                    // Firebaseのポイントも更新
+                    // Firebaseポイント更新
                     if (gameData.currentUser) {
-                        updateFirebasePoints(gameData.points);
+                        await updateFirebasePoints(gameData.points);
                     }
+
                     cardReward.forEach(card => {
-                        gameData.deck.push({...card, uid: Date.now() + Math.random()});
+                        if (card) {
+                            delete card.currentHp;
+                            delete card.maxHp;
+                            delete card.used;
+                            gameData.deck.push({...card, uid: Date.now() + Math.random()});
+                        }
                     });
 
-                    // レベルアップチェック
+                    // レベルアップ
                     if (gameData.totalWins >= gameData.level * 5) {
                         gameData.level++;
                         showNotification(`レベルアップ！ Lv.${gameData.level}になりました！`, 'success');
 
-                        // Expert解放
                         if (gameData.level >= 10 && !gameData.unlockedDungeons.includes(4)) {
                             gameData.unlockedDungeons.push(4);
                             document.querySelector('[data-dungeon-id="4"]').classList.remove('locked');
@@ -1161,7 +1701,6 @@
                         }
                     }
 
-                    // リザルト表示
                     showResult(true, pointReward, cardReward);
                 } else {
                     showResult(false, 0, []);
@@ -1171,6 +1710,8 @@
                 renderDeck();
                 saveGameToFirebase();
                 gameData.currentBattle = null;
+                gameData.battleDeck = [];
+                document.getElementById('battle-deck-count').textContent = '(0/3)';
             }, 1000);
         }
 
@@ -1190,7 +1731,9 @@
                 if (cards.length > 0) {
                     rewardHtml += '<p><strong>獲得カード:</strong></p>';
                     cards.forEach(card => {
-                        rewardHtml += `<p>・${card.name} (ATK:${card.attack}/DEF:${card.defense})</p>`;
+                        if (card) {
+                            rewardHtml += `<p>・${card.name} (ATK:${card.attack}/DEF:${card.defense})</p>`;
+                        }
                     });
                 }
                 rewardList.innerHTML = rewardHtml;
@@ -1220,7 +1763,7 @@
         // 通知表示
         function showNotification(message, type) {
             const notification = document.createElement('div');
-            notification.className = `alert alert-${type === 'success' ? 'success' : type === 'error' ? 'danger' : 'warning'} position-fixed top-0 start-50 translate-middle-x mt-3`;
+            notification.className = `alert alert-${type === 'success' ? 'success' : type === 'error' ? 'danger' : type === 'info' ? 'info' : 'warning'} position-fixed top-0 start-50 translate-middle-x mt-3`;
             notification.style.zIndex = '9999';
             notification.textContent = message;
             document.body.appendChild(notification);
@@ -1230,16 +1773,19 @@
             }, 3000);
         }
 
-        // Firebase関連の関数
+        // Firebase関連
         async function updateFirebasePoints(newPoints) {
             if (!gameData.currentUser) return;
 
             try {
-                const userRef = db.collection('users').doc(gameData.currentUser.uid);
-                await userRef.update({
+                // dungeon_dataコレクションを使用
+                const userRef = db.collection('dungeon_data').doc(gameData.currentUser.uid);
+                await userRef.set({
                     points: newPoints,
+                    level: gameData.level,
+                    totalWins: gameData.totalWins,
                     lastUpdated: firebase.firestore.FieldValue.serverTimestamp()
-                });
+                }, { merge: true });
             } catch (error) {
                 console.error('Failed to update points:', error);
             }
@@ -1249,38 +1795,37 @@
             if (!gameData.currentUser) return;
 
             try {
-                const userDoc = await db.collection('users').doc(gameData.currentUser.uid).get();
-                if (userDoc.exists) {
-                    const userData = userDoc.data();
-                    gameData.points = userData.points || 0;
+                // dungeon_dataから読み込み
+                const dungeonDoc = await db.collection('dungeon_data').doc(gameData.currentUser.uid).get();
 
-                    // ダンジョンゲームデータの読み込み
-                    const dungeonDoc = await db.collection('dungeon_saves').doc(gameData.currentUser.uid).get();
-                    if (dungeonDoc.exists) {
-                        const saveData = dungeonDoc.data();
-                        gameData.level = saveData.level || 1;
-                        gameData.totalWins = saveData.totalWins || 0;
-                        gameData.deck = saveData.deck || [];
-                        gameData.unlockedDungeons = saveData.unlockedDungeons || [1, 2, 3];
-
-                        // Expert解放チェック
-                        if (gameData.level >= 10) {
-                            document.querySelector('[data-dungeon-id="4"]').classList.remove('locked');
-                        }
-                    }
+                if (dungeonDoc.exists) {
+                    const data = dungeonDoc.data();
+                    gameData.points = data.points || 1000;
+                    gameData.level = data.level || 1;
+                    gameData.totalWins = data.totalWins || 0;
                 } else {
-                    // 新規ユーザーの場合
-                    await db.collection('users').doc(gameData.currentUser.uid).set({
-                        points: 1000,
-                        createdAt: firebase.firestore.FieldValue.serverTimestamp()
-                    });
+                    // 初回プレイ
                     gameData.points = 1000;
+                    await updateFirebasePoints(gameData.points);
+                }
+
+                // セーブデータ読み込み
+                const saveDoc = await db.collection('dungeon_saves').doc(gameData.currentUser.uid).get();
+                if (saveDoc.exists) {
+                    const saveData = saveDoc.data();
+                    gameData.deck = saveData.deck || [];
+                    gameData.unlockedDungeons = saveData.unlockedDungeons || [1, 2, 3];
+
+                    if (gameData.level >= 10) {
+                        document.querySelector('[data-dungeon-id="4"]')?.classList.remove('locked');
+                    }
                 }
 
                 updateStats();
                 renderDeck();
             } catch (error) {
                 console.error('Failed to load user data:', error);
+                gameData.points = 1000;
             }
         }
 
@@ -1289,29 +1834,34 @@
 
             try {
                 await db.collection('dungeon_saves').doc(gameData.currentUser.uid).set({
-                    level: gameData.level,
-                    totalWins: gameData.totalWins,
                     deck: gameData.deck,
                     unlockedDungeons: gameData.unlockedDungeons,
                     lastUpdated: firebase.firestore.FieldValue.serverTimestamp()
-                });
+                }, { merge: true });
             } catch (error) {
                 console.error('Failed to save game:', error);
             }
         }
 
-        // セーブ機能（ローカルストレージ版）
+        // セーブ・ロード
         function saveGame() {
             if (gameData.currentUser) {
                 saveGameToFirebase();
+                updateFirebasePoints(gameData.points);
                 showNotification('ゲームをクラウドにセーブしました！', 'success');
             } else {
-                localStorage.setItem('dungeonGameSave', JSON.stringify(gameData));
+                const saveData = {
+                    points: gameData.points,
+                    level: gameData.level,
+                    totalWins: gameData.totalWins,
+                    deck: gameData.deck,
+                    unlockedDungeons: gameData.unlockedDungeons
+                };
+                localStorage.setItem('dungeonGameSave', JSON.stringify(saveData));
                 showNotification('ゲームをローカルにセーブしました！', 'success');
             }
         }
 
-        // ロード機能
         async function loadGame() {
             if (gameData.currentUser) {
                 await loadFirebaseUserData();
@@ -1320,22 +1870,19 @@
                 const savedData = localStorage.getItem('dungeonGameSave');
                 if (savedData) {
                     const loadedData = JSON.parse(savedData);
-                    // cardDatabaseは再読み込み時に復元
-                    const currentDatabase = gameData.cardDatabase;
-                    const currentUser = gameData.currentUser;
-                    gameData = loadedData;
-                    gameData.cardDatabase = currentDatabase;
-                    gameData.currentUser = currentUser;
+                    gameData.points = loadedData.points || 1000;
+                    gameData.level = loadedData.level || 1;
+                    gameData.totalWins = loadedData.totalWins || 0;
+                    gameData.deck = loadedData.deck || [];
+                    gameData.unlockedDungeons = loadedData.unlockedDungeons || [1, 2, 3];
+
+                    if (gameData.level >= 10) {
+                        document.querySelector('[data-dungeon-id="4"]')?.classList.remove('locked');
+                    }
 
                     updateStats();
                     renderDeck();
                     renderShop();
-
-                    // ダンジョン解放状態の復元
-                    if (gameData.level >= 10) {
-                        document.querySelector('[data-dungeon-id="4"]').classList.remove('locked');
-                    }
-
                     showNotification('ローカルからゲームをロードしました！', 'success');
                 } else {
                     showNotification('セーブデータが見つかりません', 'warning');
@@ -1343,19 +1890,18 @@
             }
         }
 
-        // フィルター変更時
+        // フィルター変更
         document.getElementById('shop-filter').addEventListener('change', renderShop);
 
         // 初期化
         window.onload = async () => {
-            // Firebase認証状態の確認
+            // Firebase認証状態確認
             auth.onAuthStateChanged(async (user) => {
                 if (user) {
                     gameData.currentUser = user;
                     showNotification(`${user.displayName || user.email}でログイン中`, 'success');
                     await loadFirebaseUserData();
                 } else {
-                    // 未ログインの場合はローカルモード
                     gameData.currentUser = null;
                     gameData.points = 1000;
                     showNotification('ローカルモードで開始', 'info');
@@ -1366,7 +1912,7 @@
                 renderDeck();
             });
 
-            // 自動セーブ（5分ごと）
+            // 自動セーブ
             setInterval(saveGame, 300000);
         };
     </script>
