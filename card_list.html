@@ -1141,6 +1141,53 @@
             from { opacity: 0; transform: translateY(-5px); }
             to { opacity: 1; transform: translateY(0); }
         }
+
+        /* Race selector styles */
+        .race-selector {
+            background: rgba(255, 255, 255, 0.05);
+            padding: 10px;
+            border-radius: 8px;
+            margin-top: 5px;
+        }
+
+        .race-category-tab {
+            font-size: 0.8rem;
+            font-weight: 500;
+            border-radius: 15px !important;
+            transition: all 0.3s ease;
+        }
+
+        .race-category-tab:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+        }
+
+        .race-sub-container {
+            background: rgba(255, 255, 255, 0.1);
+            padding: 8px;
+            border-radius: 6px;
+            margin-top: 8px;
+        }
+
+        .race-btn {
+            font-size: 0.7rem;
+            padding: 3px 8px;
+            border-radius: 12px;
+            transition: all 0.2s ease;
+        }
+
+        .race-btn:hover {
+            transform: scale(1.05);
+        }
+
+        .race-btn.active {
+            font-weight: bold;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+        }
+
+        .race-sub-group {
+            animation: fadeIn 0.3s ease;
+        }
     </style>
 </head>
 <body>
@@ -2251,39 +2298,7 @@
                                                     <option value="神">神</option>
                                                 </select>
                                             </div>
-                                            <div class="col-md-3">
-                                                <label class="form-label small">種族</label>
-                                                <input type="text" name="search_race" class="form-control form-control-sm" list="race-suggestions">
-                                                <datalist id="race-suggestions">
-                                                    <option value="ドラゴン族"></option>
-                                                    <option value="戦士族"></option>
-                                                    <option value="魔法使い族"></option>
-                                                    <option value="天使族"></option>
-                                                    <option value="悪魔族"></option>
-                                                    <option value="機械族"></option>
-                                                    <option value="アンデット族"></option>
-                                                    <option value="獣族"></option>
-                                                    <option value="獣戦士族"></option>
-                                                    <option value="鳥獣族"></option>
-                                                    <option value="植物族"></option>
-                                                    <option value="昆虫族"></option>
-                                                    <option value="水族"></option>
-                                                    <option value="岩石族"></option>
-                                                    <option value="炎族"></option>
-                                                    <option value="雷族"></option>
-                                                    <option value="恐竜族"></option>
-                                                    <option value="魚族"></option>
-                                                    <option value="海竜族"></option>
-                                                    <option value="爬虫類族"></option>
-                                                    <option value="サイキック族"></option>
-                                                    <option value="幻神獣族"></option>
-                                                    <option value="創造神族"></option>
-                                                    <option value="幻竜族"></option>
-                                                    <option value="サイバース族"></option>
-                                                    <option value="幻想魔族"></option>
-                                                </datalist>
-                                            </div>
-                                            <div class="col-md-6">
+                                            <div class="col-md-12">
                                                 <label class="form-label small">カードタイプ</label>
                                                 <div class="card-type-selector">
                                                     <!-- メインカテゴリータブ -->
@@ -2364,6 +2379,143 @@
                                                     </div>
                                                 </div>
                                             </div>
+                                        </div>
+                                        <div class="row g-2 mb-2">
+                                            <div class="col-md-12">
+                                                <label class="form-label small">種族</label>
+                                                <div class="race-selector">
+                                                    <!-- メインカテゴリータブ -->
+                                                    <ul class="nav nav-pills nav-fill mb-2" role="tablist">
+                                                        <li class="nav-item" role="presentation">
+                                                            <button class="nav-link active py-1 px-2 race-category-tab" data-category="all-races" type="button">
+                                                                <small>すべて</small>
+                                                            </button>
+                                                        </li>
+                                                        <li class="nav-item" role="presentation">
+                                                            <button class="nav-link py-1 px-2 race-category-tab" data-category="dragon-warrior" type="button">
+                                                                <small>ドラゴン・戦士系</small>
+                                                            </button>
+                                                        </li>
+                                                        <li class="nav-item" role="presentation">
+                                                            <button class="nav-link py-1 px-2 race-category-tab" data-category="spellcaster-fiend" type="button">
+                                                                <small>魔法・悪魔系</small>
+                                                            </button>
+                                                        </li>
+                                                        <li class="nav-item" role="presentation">
+                                                            <button class="nav-link py-1 px-2 race-category-tab" data-category="beast-nature" type="button">
+                                                                <small>獣・自然系</small>
+                                                            </button>
+                                                        </li>
+                                                        <li class="nav-item" role="presentation">
+                                                            <button class="nav-link py-1 px-2 race-category-tab" data-category="machine-other" type="button">
+                                                                <small>機械・その他</small>
+                                                            </button>
+                                                        </li>
+                                                    </ul>
+                                                    <!-- サブカテゴリー選択 -->
+                                                    <div class="race-sub-container" style="min-height: 76px;">
+                                                        <div class="race-sub-group" data-category="all-races">
+                                                            <span class="text-muted small">すべての種族を表示</span>
+                                                        </div>
+                                                        <div class="race-sub-group" data-category="dragon-warrior" style="display: none;">
+                                                            <div class="d-flex flex-wrap gap-1">
+                                                                <button type="button" class="btn btn-sm btn-outline-primary race-btn" data-race="ドラゴン族">
+                                                                    <small>ドラゴン</small>
+                                                                </button>
+                                                                <button type="button" class="btn btn-sm btn-outline-primary race-btn" data-race="戦士族">
+                                                                    <small>戦士</small>
+                                                                </button>
+                                                                <button type="button" class="btn btn-sm btn-outline-primary race-btn" data-race="獣戦士族">
+                                                                    <small>獣戦士</small>
+                                                                </button>
+                                                                <button type="button" class="btn btn-sm btn-outline-primary race-btn" data-race="恐竜族">
+                                                                    <small>恐竜</small>
+                                                                </button>
+                                                                <button type="button" class="btn btn-sm btn-outline-primary race-btn" data-race="海竜族">
+                                                                    <small>海竜</small>
+                                                                </button>
+                                                                <button type="button" class="btn btn-sm btn-outline-primary race-btn" data-race="幻竜族">
+                                                                    <small>幻竜</small>
+                                                                </button>
+                                                            </div>
+                                                        </div>
+                                                        <div class="race-sub-group" data-category="spellcaster-fiend" style="display: none;">
+                                                            <div class="d-flex flex-wrap gap-1">
+                                                                <button type="button" class="btn btn-sm btn-outline-purple race-btn" data-race="魔法使い族">
+                                                                    <small>魔法使い</small>
+                                                                </button>
+                                                                <button type="button" class="btn btn-sm btn-outline-purple race-btn" data-race="悪魔族">
+                                                                    <small>悪魔</small>
+                                                                </button>
+                                                                <button type="button" class="btn btn-sm btn-outline-purple race-btn" data-race="アンデット族">
+                                                                    <small>アンデット</small>
+                                                                </button>
+                                                                <button type="button" class="btn btn-sm btn-outline-purple race-btn" data-race="天使族">
+                                                                    <small>天使</small>
+                                                                </button>
+                                                                <button type="button" class="btn btn-sm btn-outline-purple race-btn" data-race="幻想魔族">
+                                                                    <small>幻想魔</small>
+                                                                </button>
+                                                            </div>
+                                                        </div>
+                                                        <div class="race-sub-group" data-category="beast-nature" style="display: none;">
+                                                            <div class="d-flex flex-wrap gap-1">
+                                                                <button type="button" class="btn btn-sm btn-outline-success race-btn" data-race="獣族">
+                                                                    <small>獣</small>
+                                                                </button>
+                                                                <button type="button" class="btn btn-sm btn-outline-success race-btn" data-race="鳥獣族">
+                                                                    <small>鳥獣</small>
+                                                                </button>
+                                                                <button type="button" class="btn btn-sm btn-outline-success race-btn" data-race="植物族">
+                                                                    <small>植物</small>
+                                                                </button>
+                                                                <button type="button" class="btn btn-sm btn-outline-success race-btn" data-race="昆虫族">
+                                                                    <small>昆虫</small>
+                                                                </button>
+                                                                <button type="button" class="btn btn-sm btn-outline-success race-btn" data-race="爬虫類族">
+                                                                    <small>爬虫類</small>
+                                                                </button>
+                                                                <button type="button" class="btn btn-sm btn-outline-success race-btn" data-race="魚族">
+                                                                    <small>魚</small>
+                                                                </button>
+                                                                <button type="button" class="btn btn-sm btn-outline-success race-btn" data-race="水族">
+                                                                    <small>水</small>
+                                                                </button>
+                                                            </div>
+                                                        </div>
+                                                        <div class="race-sub-group" data-category="machine-other" style="display: none;">
+                                                            <div class="d-flex flex-wrap gap-1">
+                                                                <button type="button" class="btn btn-sm btn-outline-secondary race-btn" data-race="機械族">
+                                                                    <small>機械</small>
+                                                                </button>
+                                                                <button type="button" class="btn btn-sm btn-outline-secondary race-btn" data-race="岩石族">
+                                                                    <small>岩石</small>
+                                                                </button>
+                                                                <button type="button" class="btn btn-sm btn-outline-secondary race-btn" data-race="炎族">
+                                                                    <small>炎</small>
+                                                                </button>
+                                                                <button type="button" class="btn btn-sm btn-outline-secondary race-btn" data-race="雷族">
+                                                                    <small>雷</small>
+                                                                </button>
+                                                                <button type="button" class="btn btn-sm btn-outline-secondary race-btn" data-race="サイキック族">
+                                                                    <small>サイキック</small>
+                                                                </button>
+                                                                <button type="button" class="btn btn-sm btn-outline-secondary race-btn" data-race="サイバース族">
+                                                                    <small>サイバース</small>
+                                                                </button>
+                                                                <button type="button" class="btn btn-sm btn-outline-secondary race-btn" data-race="幻神獣族">
+                                                                    <small>幻神獣</small>
+                                                                </button>
+                                                                <button type="button" class="btn btn-sm btn-outline-secondary race-btn" data-race="創造神族">
+                                                                    <small>創造神</small>
+                                                                </button>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="row g-2 mb-2">
                                             <div class="col-md-3">
                                                 <label class="form-label small">攻撃力</label>
                                                 <input type="text" name="search_attack" class="form-control form-control-sm">
@@ -4584,7 +4736,9 @@
             // Get advanced search parameters
             const sLevel = document.querySelector('[name="search_level"]')?.value?.trim();
             const sAttribute = document.querySelector('[name="search_attribute"]')?.value;
-            const sRace = document.querySelector('[name="search_race"]')?.value?.trim()?.toLowerCase();
+            // Get selected races from active race buttons
+            const sRaces = Array.from(document.querySelectorAll('.race-btn.active'))
+                .map(btn => btn.dataset.race?.toLowerCase());
 
             // Get selected card types from active sub-type buttons
             const sCardTypes = Array.from(document.querySelectorAll('.sub-type-btn.active'))
@@ -4675,31 +4829,15 @@
                         advancedMatch = advancedMatch && details.attribute === sAttribute;
                     }
 
-                    // Check race - including spell/trap in race field
-                    if (sRace) {
+                    // Check races (multiple selection)
+                    if (sRaces.length > 0) {
                         const normalizedRace = normalizeForSearch(details.race || '');
-                        const normalizedCardType = normalizeForSearch(details.cardType || '');
-                        const searchTerm = sRace;
-
-                        // Check if searching for spell/trap cards
-                        if (searchTerm === '魔法' || searchTerm === 'まほう' || searchTerm === 'spell') {
-                            // Check if race equals exactly 魔法 (not 魔法使い族)
-                            advancedMatch = advancedMatch && (
-                                normalizedRace === '魔法' || normalizedRace === 'まほう' ||
-                                normalizedCardType.includes('魔法') || normalizedCardType.includes('まほう') ||
-                                normalizedRace === 'spell'
-                            );
-                        } else if (searchTerm === '罠' || searchTerm === 'わな' || searchTerm === 'trap') {
-                            // Check if race equals exactly 罠
-                            advancedMatch = advancedMatch && (
-                                normalizedRace === '罠' || normalizedRace === 'わな' ||
-                                normalizedCardType.includes('罠') || normalizedCardType.includes('わな') ||
-                                normalizedRace === 'trap'
-                            );
-                        } else {
-                            // Normal race search
-                            advancedMatch = advancedMatch && normalizedRace.includes(normalizeForSearch(searchTerm));
-                        }
+                        const hasMatchingRace = sRaces.some(race => {
+                            if (!race) return false;
+                            const searchTerm = normalizeForSearch(race);
+                            return normalizedRace.includes(searchTerm);
+                        });
+                        advancedMatch = advancedMatch && hasMatchingRace;
                     }
 
                     // Check card types (OR selection only - more intuitive)
@@ -4729,7 +4867,7 @@
                         advancedMatch = advancedMatch && checkRange(details.defense, sDefense);
                     }
 
-                } else if (sLevel || sAttribute || sRace || sCardTypes.length > 0 || sAttack || sDefense) {
+                } else if (sLevel || sAttribute || sRaces.length > 0 || sCardTypes.length > 0 || sAttack || sDefense) {
                     // If advanced search is used but no details available, don't show it
                     advancedMatch = false;
                 }
@@ -6392,6 +6530,47 @@
                     }
                 }
 
+                filterCards();
+            });
+        });
+
+        // Handle race selection with tabs
+        const raceCategoryTabs = document.querySelectorAll('.race-category-tab');
+        const raceSubGroups = document.querySelectorAll('.race-sub-group');
+        const raceButtons = document.querySelectorAll('.race-btn');
+
+        // Handle race category tab clicks
+        raceCategoryTabs.forEach(tab => {
+            tab.addEventListener('click', function() {
+                // Update active tab
+                raceCategoryTabs.forEach(t => t.classList.remove('active'));
+                this.classList.add('active');
+
+                // Show/hide sub-groups
+                const category = this.dataset.category;
+                raceSubGroups.forEach(group => {
+                    if (group.dataset.category === category) {
+                        group.style.display = 'block';
+                    } else {
+                        group.style.display = 'none';
+                    }
+                });
+
+                // Reset race selections for this category
+                if (category === 'all-races') {
+                    // Clear all race selections
+                    raceButtons.forEach(btn => btn.classList.remove('active'));
+                }
+
+                filterCards();
+            });
+        });
+
+        // Handle race button clicks
+        raceButtons.forEach(button => {
+            button.addEventListener('click', function() {
+                // Toggle selection
+                this.classList.toggle('active');
                 filterCards();
             });
         });
