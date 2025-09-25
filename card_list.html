@@ -4783,11 +4783,11 @@
                     // Check card types (OR selection only - more intuitive)
                     if (sCardTypes.length > 0) {
                         const hasMatchingType = sCardTypes.some(type => {
-                            // For spell/trap cards, check exact match
+                            // For spell/trap cards, check race field (CSVでは魔法・罠は種族列に格納)
                             if (type === '魔法') {
-                                return details.cardType === '魔法';
+                                return details.race === '魔法' || details.cardType === '魔法';
                             } else if (type === '罠') {
-                                return details.cardType === '罠';
+                                return details.race === '罠' || details.cardType === '罠';
                             } else {
                                 return details.cardType && details.cardType.includes(type);
                             }
