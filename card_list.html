@@ -4783,13 +4783,11 @@
                     // Check card types (OR selection only - more intuitive)
                     if (sCardTypes.length > 0) {
                         const hasMatchingType = sCardTypes.some(type => {
-                            // For spell/trap cards, also check the race field
+                            // For spell/trap cards, check exact match
                             if (type === '魔法') {
-                                return (details.cardType && details.cardType.includes(type)) ||
-                                       (details.race && details.race === '魔法');
+                                return details.cardType === '魔法';
                             } else if (type === '罠') {
-                                return (details.cardType && details.cardType.includes(type)) ||
-                                       (details.race && details.race === '罠');
+                                return details.cardType === '罠';
                             } else {
                                 return details.cardType && details.cardType.includes(type);
                             }
@@ -6424,6 +6422,8 @@
                             btn.classList.remove('active');
                         }
                     });
+                    // Auto-apply search when monster tab is clicked
+                    applySearchAndFilter();
                 } else if (category === 'spell') {
                     // Activate spell button
                     subTypeButtons.forEach(btn => {
