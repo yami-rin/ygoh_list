@@ -674,10 +674,7 @@
                     <h5 id="phase-text">プレイヤーターン</h5>
                 </div>
 
-                <!-- 属性相性表示 -->
-                <div class="attribute-matchup" id="attribute-matchup">
-                    属性相性: <span id="matchup-text">-</span>
-                </div>
+                <!-- 属性相性表示（削除） -->
 
                 <!-- 手札エリア -->
                 <div class="battle-hands">
@@ -786,15 +783,8 @@
             currentUser: null
         };
 
-        // 属性相性テーブル
-        const attributeMatchup = {
-            '光': { strong: ['闇'], weak: ['闇'] },
-            '闇': { strong: ['光'], weak: ['光'] },
-            '炎': { strong: ['風'], weak: ['水'] },
-            '水': { strong: ['炎'], weak: ['地'] },
-            '地': { strong: ['水'], weak: ['風'] },
-            '風': { strong: ['地'], weak: ['炎'] }
-        };
+        // 属性相性テーブル（削除）
+        // const attributeMatchup = {};
 
         // 種族による特殊効果
         const raceAbilities = {
@@ -1217,11 +1207,12 @@
 
             // データベースから適切な敵を選択（難易度に応じて弱めのカードを優先）
             const validEnemies = gameData.cardDatabase.filter(card =>
-                card.attack >= atkRange[0] && card.attack <= atkRange[1]
+                card.attack >= atkRange[0] && card.attack <= atkRange[1] &&
+                card.defense >= defRange[0] && card.defense <= defRange[1]
             );
 
-            // 攻撃力でソート（弱い順）
-            validEnemies.sort((a, b) => a.attack - b.attack);
+            // 攻撃力と守備力の合計でソート（弱い順）
+            validEnemies.sort((a, b) => (a.attack + a.defense) - (b.attack + b.defense));
 
             // 難易度に応じて選択範囲を調整
             let selectRange;
@@ -1293,8 +1284,8 @@
             // アクティブカード表示
             updateActiveCards();
 
-            // 属性相性表示
-            updateAttributeMatchup();
+            // 属性相性表示（削除）
+            // updateAttributeMatchup();
 
             // ボタン状態更新
             updateBattleButtons();
@@ -1389,31 +1380,8 @@
             }
         }
 
-        // 属性相性更新
-        function updateAttributeMatchup() {
-            const battle = gameData.currentBattle;
-            const matchupDiv = document.getElementById('matchup-text');
-
-            if (battle.playerActive !== null && battle.enemyActive !== null) {
-                const playerAttr = battle.playerHand[battle.playerActive].attribute;
-                const enemyAttr = battle.enemyHand[battle.enemyActive].attribute;
-
-                const matchup = attributeMatchup[playerAttr];
-                if (matchup) {
-                    if (matchup.strong.includes(enemyAttr)) {
-                        matchupDiv.innerHTML = '<span class="advantage">有利（ダメージ1.5倍）</span>';
-                    } else if (matchup.weak.includes(enemyAttr)) {
-                        matchupDiv.innerHTML = '<span class="disadvantage">不利（ダメージ0.7倍）</span>';
-                    } else {
-                        matchupDiv.innerHTML = '<span class="neutral">通常</span>';
-                    }
-                } else {
-                    matchupDiv.innerHTML = '<span class="neutral">通常</span>';
-                }
-            } else {
-                matchupDiv.innerHTML = '-';
-            }
-        }
+        // 属性相性更新（削除）
+        // function updateAttributeMatchup() { }
 
         // バトルボタン更新
         function updateBattleButtons() {
@@ -1454,20 +1422,6 @@
 
             // 基本ダメージ計算
             let damage = playerCard.attack;
-
-            // 属性相性
-            const playerAttr = playerCard.attribute;
-            const enemyAttr = enemyCard.attribute;
-            const matchup = attributeMatchup[playerAttr];
-            if (matchup) {
-                if (matchup.strong.includes(enemyAttr)) {
-                    damage = Math.floor(damage * 1.5);
-                    addBattleLog('属性相性有利！', 'special');
-                } else if (matchup.weak.includes(enemyAttr)) {
-                    damage = Math.floor(damage * 0.7);
-                    addBattleLog('属性相性不利...', 'damage');
-                }
-            }
 
             // 種族能力
             const ability = raceAbilities[playerCard.race];
@@ -1594,18 +1548,6 @@
                 const playerCard = battle.playerHand[battle.playerActive];
 
                 let damage = enemyCard.attack;
-
-                // 属性相性
-                const enemyAttr = enemyCard.attribute;
-                const playerAttr = playerCard.attribute;
-                const matchup = attributeMatchup[enemyAttr];
-                if (matchup) {
-                    if (matchup.strong.includes(playerAttr)) {
-                        damage = Math.floor(damage * 1.5);
-                    } else if (matchup.weak.includes(playerAttr)) {
-                        damage = Math.floor(damage * 0.7);
-                    }
-                }
 
                 // プレイヤーの防御能力
                 const playerAbility = raceAbilities[playerCard.race];
