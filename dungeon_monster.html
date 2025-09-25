@@ -570,10 +570,29 @@
         </div>
     </div>
 
+    <!-- Firebase SDKs -->
+    <script src="https://www.gstatic.com/firebasejs/10.7.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.0/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.0/firebase-firestore-compat.js"></script>
+
     <script>
+        // Firebase設定
+        const firebaseConfig = {
+            apiKey: "AIzaSyDpPRDVVaJu47mc5mViplae3tuFSUsoUTU",
+            authDomain: "ygocollection-f5c2e.firebaseapp.com",
+            projectId: "ygocollection-f5c2e",
+            storageBucket: "ygocollection-f5c2e.firebasestorage.app",
+            messagingSenderId: "720355401822",
+            appId: "1:720355401822:web:b4c032e1e92c2f97f7ca41"
+        };
+
+        firebase.initializeApp(firebaseConfig);
+        const auth = firebase.auth();
+        const db = firebase.firestore();
+
         // ゲームデータ
         let gameData = {
-            points: 1000,
+            points: 0, // Firebaseから取得
             level: 1,
             totalWins: 0,
             deck: [],
@@ -581,7 +600,8 @@
             cardDatabase: [],
             currentBattle: null,
             selectedDungeon: null,
-            selectedCard: null
+            selectedCard: null,
+            currentUser: null
         };
 
         // カードデータベースの読み込み
@@ -611,8 +631,13 @@
                             defense: parseInt(values[8]?.replace(/^"|"$/g, '').trim()) || 100
                         };
 
-                        // 攻撃力が有効な値のモンスターカードのみ追加
-                        if (card.attack > 0 && !isNaN(card.attack)) {
+                        // 攻撃力が有効な値のモンスターカードのみ追加（魔法・罠カードは除外）
+                        const cardType = card.type?.toLowerCase() || '';
+                        const race = card.race?.toLowerCase() || '';
+                        const isSpellOrTrap = cardType.includes('魔法') || cardType.includes('罠') ||
+                                             race.includes('魔法') || race.includes('罠');
+
+                        if (card.attack > 0 && !isNaN(card.attack) && !isSpellOrTrap) {
                             // 価格計算（攻撃力と防御力に基づく）
                             card.price = Math.floor((card.attack + card.defense) / 4);
                             card.sellPrice = Math.floor(card.price * 0.5);
@@ -732,13 +757,20 @@
         }
 
         // カード購入
-        function buyCard(card) {
+        async function buyCard(card) {
             if (gameData.points >= card.price) {
                 if (confirm(`${card.name}を${card.price}ptsで購入しますか？`)) {
                     gameData.points -= card.price;
                     gameData.deck.push({...card, uid: Date.now() + Math.random()}); // ユニークIDを追加
+
+                    // Firebaseのポイントも更新
+                    if (gameData.currentUser) {
+                        await updateFirebasePoints(gameData.points);
+                    }
+
                     updateStats();
                     renderDeck();
+                    saveGameToFirebase();
                     showNotification(`${card.name}を購入しました！`, 'success');
                 }
             } else {
@@ -806,8 +838,15 @@
                 });
 
                 gameData.points += totalSellPrice;
+
+                // Firebaseのポイントも更新
+                if (gameData.currentUser) {
+                    updateFirebasePoints(gameData.points);
+                }
+
                 updateStats();
                 renderDeck();
+                saveGameToFirebase();
                 showNotification(`${selectedCards.length}枚のカードを${totalSellPrice}ptsで売却しました！`, 'success');
             }
         };
@@ -1100,6 +1139,11 @@
                     // 報酬付与
                     gameData.points += pointReward;
                     gameData.totalWins++;
+
+                    // Firebaseのポイントも更新
+                    if (gameData.currentUser) {
+                        updateFirebasePoints(gameData.points);
+                    }
                     cardReward.forEach(card => {
                         gameData.deck.push({...card, uid: Date.now() + Math.random()});
                     });
@@ -1125,6 +1169,7 @@
 
                 updateStats();
                 renderDeck();
+                saveGameToFirebase();
                 gameData.currentBattle = null;
             }, 1000);
         }
@@ -1185,34 +1230,116 @@
             }, 3000);
         }
 
-        // セーブ機能
-        function saveGame() {
-            localStorage.setItem('dungeonGameSave', JSON.stringify(gameData));
-            showNotification('ゲームをセーブしました！', 'success');
+        // Firebase関連の関数
+        async function updateFirebasePoints(newPoints) {
+            if (!gameData.currentUser) return;
+
+            try {
+                const userRef = db.collection('users').doc(gameData.currentUser.uid);
+                await userRef.update({
+                    points: newPoints,
+                    lastUpdated: firebase.firestore.FieldValue.serverTimestamp()
+                });
+            } catch (error) {
+                console.error('Failed to update points:', error);
+            }
         }
 
-        // ロード機能
-        function loadGame() {
-            const savedData = localStorage.getItem('dungeonGameSave');
-            if (savedData) {
-                const loadedData = JSON.parse(savedData);
-                // cardDatabaseは再読み込み時に復元
-                const currentDatabase = gameData.cardDatabase;
-                gameData = loadedData;
-                gameData.cardDatabase = currentDatabase;
+        async function loadFirebaseUserData() {
+            if (!gameData.currentUser) return;
+
+            try {
+                const userDoc = await db.collection('users').doc(gameData.currentUser.uid).get();
+                if (userDoc.exists) {
+                    const userData = userDoc.data();
+                    gameData.points = userData.points || 0;
+
+                    // ダンジョンゲームデータの読み込み
+                    const dungeonDoc = await db.collection('dungeon_saves').doc(gameData.currentUser.uid).get();
+                    if (dungeonDoc.exists) {
+                        const saveData = dungeonDoc.data();
+                        gameData.level = saveData.level || 1;
+                        gameData.totalWins = saveData.totalWins || 0;
+                        gameData.deck = saveData.deck || [];
+                        gameData.unlockedDungeons = saveData.unlockedDungeons || [1, 2, 3];
+
+                        // Expert解放チェック
+                        if (gameData.level >= 10) {
+                            document.querySelector('[data-dungeon-id="4"]').classList.remove('locked');
+                        }
+                    }
+                } else {
+                    // 新規ユーザーの場合
+                    await db.collection('users').doc(gameData.currentUser.uid).set({
+                        points: 1000,
+                        createdAt: firebase.firestore.FieldValue.serverTimestamp()
+                    });
+                    gameData.points = 1000;
+                }
 
                 updateStats();
                 renderDeck();
-                renderShop();
+            } catch (error) {
+                console.error('Failed to load user data:', error);
+            }
+        }
 
-                // ダンジョン解放状態の復元
-                if (gameData.level >= 10) {
-                    document.querySelector('[data-dungeon-id="4"]').classList.remove('locked');
-                }
+        async function saveGameToFirebase() {
+            if (!gameData.currentUser) return;
 
-                showNotification('ゲームをロードしました！', 'success');
+            try {
+                await db.collection('dungeon_saves').doc(gameData.currentUser.uid).set({
+                    level: gameData.level,
+                    totalWins: gameData.totalWins,
+                    deck: gameData.deck,
+                    unlockedDungeons: gameData.unlockedDungeons,
+                    lastUpdated: firebase.firestore.FieldValue.serverTimestamp()
+                });
+            } catch (error) {
+                console.error('Failed to save game:', error);
+            }
+        }
+
+        // セーブ機能（ローカルストレージ版）
+        function saveGame() {
+            if (gameData.currentUser) {
+                saveGameToFirebase();
+                showNotification('ゲームをクラウドにセーブしました！', 'success');
             } else {
-                showNotification('セーブデータが見つかりません', 'warning');
+                localStorage.setItem('dungeonGameSave', JSON.stringify(gameData));
+                showNotification('ゲームをローカルにセーブしました！', 'success');
+            }
+        }
+
+        // ロード機能
+        async function loadGame() {
+            if (gameData.currentUser) {
+                await loadFirebaseUserData();
+                showNotification('クラウドからゲームをロードしました！', 'success');
+            } else {
+                const savedData = localStorage.getItem('dungeonGameSave');
+                if (savedData) {
+                    const loadedData = JSON.parse(savedData);
+                    // cardDatabaseは再読み込み時に復元
+                    const currentDatabase = gameData.cardDatabase;
+                    const currentUser = gameData.currentUser;
+                    gameData = loadedData;
+                    gameData.cardDatabase = currentDatabase;
+                    gameData.currentUser = currentUser;
+
+                    updateStats();
+                    renderDeck();
+                    renderShop();
+
+                    // ダンジョン解放状態の復元
+                    if (gameData.level >= 10) {
+                        document.querySelector('[data-dungeon-id="4"]').classList.remove('locked');
+                    }
+
+                    showNotification('ローカルからゲームをロードしました！', 'success');
+                } else {
+                    showNotification('セーブデータが見つかりません', 'warning');
+                }
             }
         }
 
@@ -1221,9 +1348,23 @@
 
         // 初期化
         window.onload = async () => {
-            await loadCardDatabase();
-            updateStats();
-            renderDeck();
+            // Firebase認証状態の確認
+            auth.onAuthStateChanged(async (user) => {
+                if (user) {
+                    gameData.currentUser = user;
+                    showNotification(`${user.displayName || user.email}でログイン中`, 'success');
+                    await loadFirebaseUserData();
+                } else {
+                    // 未ログインの場合はローカルモード
+                    gameData.currentUser = null;
+                    gameData.points = 1000;
+                    showNotification('ローカルモードで開始', 'info');
+                }
+
+                await loadCardDatabase();
+                updateStats();
+                renderDeck();
+            });
 
             // 自動セーブ（5分ごと）
             setInterval(saveGame, 300000);
