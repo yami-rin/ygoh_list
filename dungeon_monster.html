@@ -610,32 +610,32 @@
                 <div class="dungeon-list" id="dungeon-list">
                     <div class="dungeon-item" data-dungeon-id="1" data-difficulty="easy">
                         <h5>初心者の洞窟</h5>
-                        <p class="mb-1">推奨デッキ: 3枚以上</p>
+                        <p class="mb-1">推奨デッキ: 3-4枚</p>
                         <span class="difficulty-badge difficulty-easy">EASY</span>
                         <small>報酬: 100-300pts + カード1枚</small>
                     </div>
                     <div class="dungeon-item" data-dungeon-id="2" data-difficulty="normal">
                         <h5>古代の遺跡</h5>
-                        <p class="mb-1">推奨デッキ: 5枚以上</p>
+                        <p class="mb-1">推奨デッキ: 4-6枚</p>
                         <span class="difficulty-badge difficulty-normal">NORMAL</span>
                         <small>報酬: 300-700pts + カード1-2枚</small>
                     </div>
                     <div class="dungeon-item" data-dungeon-id="3" data-difficulty="hard">
                         <h5>魔王の城</h5>
-                        <p class="mb-1">推奨デッキ: 7枚以上</p>
+                        <p class="mb-1">推奨デッキ: 5-8枚</p>
                         <span class="difficulty-badge difficulty-hard">HARD</span>
                         <small>報酬: 700-1500pts + カード2-3枚</small>
                     </div>
                     <div class="dungeon-item locked" data-dungeon-id="4" data-difficulty="expert">
                         <h5>神々の領域</h5>
-                        <p class="mb-1">推奨デッキ: 10枚以上</p>
+                        <p class="mb-1">推奨デッキ: 7-10枚</p>
                         <span class="difficulty-badge difficulty-expert">EXPERT</span>
                         <small>要求: Lv.10以上</small>
                     </div>
                 </div>
                 <div class="mt-3">
                     <button id="select-deck-btn" class="btn btn-warning w-100 mb-2">
-                        <i class="bi bi-collection"></i> バトルデッキ選択 <span id="battle-deck-count">(0/3)</span>
+                        <i class="bi bi-collection"></i> バトルデッキ選択 <span id="battle-deck-count">(0枚) [最小3枚/最大10枚]</span>
                     </button>
                     <button id="start-battle-btn" class="btn btn-primary w-100" disabled>
                         <i class="bi bi-play-fill"></i> バトル開始
@@ -1026,18 +1026,20 @@
                     if (selectedIndexes.includes(index)) {
                         selectedIndexes.splice(selectedIndexes.indexOf(index), 1);
                         elem.classList.remove('in-battle');
-                    } else if (selectedIndexes.length < 5) {  // 最大5枚まで
+                    } else if (selectedIndexes.length < 10) {  // 最大10枚まで
                         selectedIndexes.push(index);
                         elem.classList.add('in-battle');
+                    } else {
+                        showNotification('バトルデッキは最大10枚までです', 'warning');
                     }
 
                     gameData.battleDeck = selectedIndexes.map(i => gameData.deck[i]);
-                    document.getElementById('battle-deck-count').textContent = `(${gameData.battleDeck.length}/3)`;
+                    document.getElementById('battle-deck-count').textContent = `(${gameData.battleDeck.length}枚) [最小3枚/最大10枚]`;
                     document.getElementById('start-battle-btn').disabled = gameData.battleDeck.length < 3;
                 };
             });
 
-            showNotification('バトルに使用するカードを3～5枚選択してください', 'info');
+            showNotification('バトルに使用するカードを3～10枚選択してください', 'info');
         };
 
         // カード選択切り替え
@@ -1695,7 +1697,7 @@
                 saveGameToFirebase();
                 gameData.currentBattle = null;
                 gameData.battleDeck = [];
-                document.getElementById('battle-deck-count').textContent = '(0/3)';
+                document.getElementById('battle-deck-count').textContent = '(0枚) [最小3枚/最大10枚]';
             }, 1000);
         }
 
