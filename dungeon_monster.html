@@ -926,8 +926,11 @@
                     break;
             }
 
-            // 価格でソート
-            filteredCards.sort((a, b) => a.price - b.price);
+            // ランダムシャッフル
+            for (let i = filteredCards.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [filteredCards[i], filteredCards[j]] = [filteredCards[j], filteredCards[i]];
+            }
 
             // 最大30枚表示
             filteredCards = filteredCards.slice(0, 30);
@@ -1155,16 +1158,19 @@
                 used: false
             }));
 
+            // 敵の最初のカードをアクティブに設定
+            const enemyHandProcessed = enemyHand.map(card => ({
+                ...card,
+                currentHp: card.defense,
+                maxHp: card.defense,
+                used: false
+            }));
+
             gameData.currentBattle = {
                 playerHand: playerHand,
-                enemyHand: enemyHand.map(card => ({
-                    ...card,
-                    currentHp: card.defense,
-                    maxHp: card.defense,
-                    used: false
-                })),
+                enemyHand: enemyHandProcessed,
                 playerActive: null,
-                enemyActive: null,
+                enemyActive: 0,  // 敵の最初のカードをアクティブに
                 turn: 'player',
                 turnCount: 0,
                 log: [],
@@ -1173,7 +1179,9 @@
 
             updateBattleUI();
             document.getElementById('battle-modal').classList.add('active');
-            addBattleLog('バトル開始！カードを選択してください', 'special');
+            addBattleLog('バトル開始！', 'special');
+            addBattleLog(`敵は${enemyHandProcessed[0].name}を場に出した！`, 'special');
+            addBattleLog('カードを選択してください', 'special');
         }
 
         // 敵生成
@@ -1207,13 +1215,40 @@
                     levelRange = [1, 4];
             }
 
-            // データベースから適切な敵を選択
+            // データベースから適切な敵を選択（難易度に応じて弱めのカードを優先）
             const validEnemies = gameData.cardDatabase.filter(card =>
                 card.attack >= atkRange[0] && card.attack <= atkRange[1]
             );
 
+            // 攻撃力でソート（弱い順）
+            validEnemies.sort((a, b) => a.attack - b.attack);
+
+            // 難易度に応じて選択範囲を調整
+            let selectRange;
+            switch(difficulty) {
+                case 'easy':
+                    // 下位30%から選択
+                    selectRange = Math.ceil(validEnemies.length * 0.3);
+                    break;
+                case 'normal':
+                    // 下位60%から選択
+                    selectRange = Math.ceil(validEnemies.length * 0.6);
+                    break;
+                case 'hard':
+                    // 全体の80%から選択
+                    selectRange = Math.ceil(validEnemies.length * 0.8);
+                    break;
+                case 'expert':
+                    // 全体から選択
+                    selectRange = validEnemies.length;
+                    break;
+                default:
+                    selectRange = Math.ceil(validEnemies.length * 0.5);
+            }
+
             if (validEnemies.length > 0) {
-                return {...validEnemies[Math.floor(Math.random() * validEnemies.length)]};
+                const candidates = validEnemies.slice(0, selectRange);
+                return {...candidates[Math.floor(Math.random() * candidates.length)]};
             }
 
             // フォールバック
