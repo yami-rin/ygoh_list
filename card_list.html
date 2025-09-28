@@ -6275,7 +6275,20 @@
                         const q = query(collRef, ...constraints);
                         const existingDocs = await getDocs(q);
 
-                        if (existingDocs.empty) {
+                        // タグも含めて完全一致するカードを探す
+                        let exactMatch = null;
+                        for (const doc of existingDocs.docs) {
+                            const docData = doc.data();
+                            const docTags = docData.tags || [];
+                            const newCardTags = newCard.tags || [];
+                            if (docTags.length === newCardTags.length &&
+                                docTags.every(tag => newCardTags.includes(tag))) {
+                                exactMatch = doc;
+                                break;
+                            }
+                        }
+
+                        if (!exactMatch) {
                             const docRef = await addDoc(collRef, newCard);
                             targetCollection.push({ id: docRef.id, data: newCard });
                             // Track card addition date
@@ -6284,9 +6297,8 @@
                                 saveGamificationData();
                             }
                         } else {
-                            const existingDoc = existingDocs.docs[0];
-                            await updateDoc(existingDoc.ref, { 枚数: increment(newCard.枚数) });
-                            const localCard = targetCollection.find(c => c.id === existingDoc.id);
+                            await updateDoc(exactMatch.ref, { 枚数: increment(newCard.枚数) });
+                            const localCard = targetCollection.find(c => c.id === exactMatch.id);
                             if(localCard) localCard.data.枚数 += newCard.枚数;
                         }
                     } else { // ローカルモード
@@ -6294,6 +6306,11 @@
                             if (c.data.名前 !== newCard.名前) return false;
                             if (newCard.型番 && c.data.型番 !== newCard.型番) return false;
                             if (newCard.レアリティ && c.data.レアリティ !== newCard.レアリティ) return false;
+                            // タグが異なる場合は別カードとして扱う
+                            const cardTags = c.data.tags || [];
+                            const newCardTags = newCard.tags || [];
+                            if (cardTags.length !== newCardTags.length) return false;
+                            if (!cardTags.every(tag => newCardTags.includes(tag))) return false;
                             return true;
                         });
                         if (existingCard) {
@@ -6729,10 +6746,24 @@
                             }
                             const q = query(collRef, where("名前", "==", card.名前), where("型番", "==", card.型番), where("レアリティ", "==", card.レアリティ));
                             const existingDocs = await getDocs(q);
-                            if (existingDocs.empty) {
+
+                            // タグも含めて完全一致するカードを探す
+                            let exactMatch = null;
+                            for (const doc of existingDocs.docs) {
+                                const docData = doc.data();
+                                const docTags = docData.tags || [];
+                                const cardTags = card.tags || [];
+                                if (docTags.length === cardTags.length &&
+                                    docTags.every(tag => cardTags.includes(tag))) {
+                                    exactMatch = doc;
+                                    break;
+                                }
+                            }
+
+                            if (!exactMatch) {
                                 batch.set(doc(collRef), card);
                             } else {
-                                batch.update(existingDocs.docs[0].ref, { 枚数: increment(card.枚数 || 1) });
+                                batch.update(exactMatch.ref, { 枚数: increment(card.枚数 || 1) });
                             }
                         }
                         await batch.commit();
@@ -6742,11 +6773,17 @@
                                 card.tags = card.タグ.split(';').filter(t => t.trim());
                                 delete card.タグ;
                             }
-                            const existingCard = cardCollection.find(c => 
-                                c.data.名前 === card.名前 && 
-                                c.data.型番 === card.型番 && 
-                                c.data.レアリティ === card.レアリティ
-                            );
+                            const existingCard = cardCollection.find(c => {
+                                if (c.data.名前 !== card.名前) return false;
+                                if (c.data.型番 !== card.型番) return false;
+                                if (c.data.レアリティ !== card.レアリティ) return false;
+                                // タグも一致確認
+                                const cTags = c.data.tags || [];
+                                const cardTags = card.tags || [];
+                                if (cTags.length !== cardTags.length) return false;
+                                if (!cTags.every(tag => cardTags.includes(tag))) return false;
+                                return true;
+                            });
                             if (existingCard) {
                                 existingCard.data.枚数 += (card.枚数 || 1);
                             } else {
@@ -6768,10 +6805,24 @@
                             }
                             const q = query(wishRef, where("名前", "==", card.名前), where("型番", "==", card.型番), where("レアリティ", "==", card.レアリティ));
                             const existingDocs = await getDocs(q);
-                            if (existingDocs.empty) {
+
+                            // タグも含めて完全一致するカードを探す
+                            let exactMatch = null;
+                            for (const doc of existingDocs.docs) {
+                                const docData = doc.data();
+                                const docTags = docData.tags || [];
+                                const cardTags = card.tags || [];
+                                if (docTags.length === cardTags.length &&
+                                    docTags.every(tag => cardTags.includes(tag))) {
+                                    exactMatch = doc;
+                                    break;
+                                }
+                            }
+
+                            if (!exactMatch) {
                                 batch.set(doc(wishRef), card);
                             } else {
-                                batch.update(existingDocs.docs[0].ref, { 枚数: increment(card.枚数 || 1) });
+                                batch.update(exactMatch.ref, { 枚数: increment(card.枚数 || 1) });
                             }
                         }
                         await batch.commit();
@@ -6781,11 +6832,17 @@
                                 card.tags = card.タグ.split(';').filter(t => t.trim());
                                 delete card.タグ;
                             }
-                            const existingCard = wishlistCollection.find(c => 
-                                c.data.名前 === card.名前 && 
-                                c.data.型番 === card.型番 && 
-                                c.data.レアリティ === card.レアリティ
-                            );
+                            const existingCard = wishlistCollection.find(c => {
+                                if (c.data.名前 !== card.名前) return false;
+                                if (c.data.型番 !== card.型番) return false;
+                                if (c.data.レアリティ !== card.レアリティ) return false;
+                                // タグも一致確認
+                                const cTags = c.data.tags || [];
+                                const cardTags = card.tags || [];
+                                if (cTags.length !== cardTags.length) return false;
+                                if (!cTags.every(tag => cardTags.includes(tag))) return false;
+                                return true;
+                            });
                             if (existingCard) {
                                 existingCard.data.枚数 += (card.枚数 || 1);
                             } else {
