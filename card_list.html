@@ -1795,6 +1795,7 @@
                             <div class="alert alert-warning">
                                 <h5><i class="bi bi-gift"></i> ガチャで限定アイコンを手に入れよう！</h5>
                                 <p>ショップで購入可能なアイテムや、<strong>ガチャ限定のレアアイコン</strong>が手に入るチャンス！</p>
+                                <p class="mb-0"><small><i class="bi bi-info-circle"></i> 既に持っているアイテムが出た場合：Common→10pt、Uncommon→15pt、Rare→20ptに変換されます</small></p>
                             </div>
 
                             <div class="row mb-4">
@@ -4340,23 +4341,43 @@
 
                 let resultsHTML = '<h3>ガチャ結果</h3><div class="row g-2">';
                 let hasNewItem = false;
+                let duplicatePoints = 0;
+
+                // 重複アイテムのポイント変換率
+                const duplicateConversion = {
+                    'common': 10,
+                    'uncommon': 15,
+                    'rare': 20,
+                    'ultra-rare': 0,  // Ultra Rareは重複してもポイント変換なし（そのまま獲得）
+                    'legendary': 0     // Legendaryも重複してもポイント変換なし（そのまま獲得）
+                };
 
                 results.forEach(result => {
                     const isNew = !gamificationData.purchasedItems[result.id];
+                    let convertedToPoints = false;
+                    let pointsAwarded = 0;
+
                     if (isNew) {
                         hasNewItem = true;
                         gamificationData.purchasedItems[result.id] = true;
+                    } else if (duplicateConversion[result.rarity] > 0) {
+                        // 通常レアリティの重複アイテムはポイントに変換
+                        convertedToPoints = true;
+                        pointsAwarded = duplicateConversion[result.rarity];
+                        duplicatePoints += pointsAwarded;
                     }
 
                     const rarityBadge = getRarityBadge(result.rarity);
                     resultsHTML += `
                         <div class="col-6 col-md-4">
-                            <div class="card text-dark ${isNew ? 'border-warning' : ''}" style="${result.rarity === 'legendary' ? 'background: linear-gradient(135deg, #ffd700, #ff6347);' : result.rarity === 'ultra-rare' ? 'background: linear-gradient(135deg, #f093fb, #f5576c);' : ''}">
+                            <div class="card text-dark ${isNew ? 'border-warning' : convertedToPoints ? 'border-info' : ''}" style="${result.rarity === 'legendary' ? 'background: linear-gradient(135deg, #ffd700, #ff6347);' : result.rarity === 'ultra-rare' ? 'background: linear-gradient(135deg, #f093fb, #f5576c);' : ''}">
                                 <div class="card-body text-center p-2">
-                                    ${isNew ? '<span class="badge bg-warning position-absolute top-0 start-0">NEW!</span>' : ''}
+                                    ${isNew ? '<span class="badge bg-warning position-absolute top-0 start-0">NEW!</span>' :
+                                      convertedToPoints ? `<span class="badge bg-info position-absolute top-0 start-0">+${pointsAwarded}pt</span>` : ''}
                                     <div style="font-size: 2rem;">${result.emoji || '🎆'}</div>
                                     <small class="d-block">${result.name}</small>
                                     ${rarityBadge}
+                                    ${convertedToPoints ? '<small class="text-muted d-block mt-1">重複→ポイント変換</small>' : ''}
                                 </div>
                             </div>
                         </div>
@@ -4367,8 +4388,17 @@
 
                 if (hasNewItem) {
                     resultsHTML += '<div class="alert alert-success mt-3"><i class="bi bi-check-circle"></i> 新しいアイテムを獲得しました！</div>';
-                    saveGamificationData();
                 }
+
+                if (duplicatePoints > 0) {
+                    // 重複ポイントを追加
+                    gamificationData.userPoints += duplicatePoints;
+                    resultsHTML += `<div class="alert alert-info mt-3"><i class="bi bi-coin"></i> 重複アイテムが <strong>${duplicatePoints}pt</strong> に変換されました！</div>`;
+                }
+
+                // データを保存
+                saveGamificationData();
+                updatePointsDisplay();
 
                 resultsEl.innerHTML = resultsHTML;
             }, 2000);
