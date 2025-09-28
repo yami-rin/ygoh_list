@@ -3649,33 +3649,31 @@
             ],
             // ガチャ限定アイコン (入手不可能)
             exclusiveIcons: [
-                // かっこいい系 (Ultra Rare)
-                { id: 'icon-dark-knight', name: '暗黒騎士', class: 'icon-dark-knight', emoji: '🛡️', rarity: 'ultra-rare' },  // 盾
-                { id: 'icon-cyber-dragon', name: 'サイバードラゴン', class: 'icon-cyber-dragon', emoji: '🐲', rarity: 'ultra-rare' },  // ドラゴンの顔
-                { id: 'icon-phoenix-flame', name: '不死鳥の炎', class: 'icon-phoenix-flame', emoji: '🦜', rarity: 'ultra-rare' },  // オウム
-                { id: 'icon-shadow-assassin', name: '影の暗殺者', class: 'icon-shadow-assassin', emoji: '🕴️', rarity: 'ultra-rare' },  // 探偵
-                { id: 'icon-thunder-god', name: '雷神', class: 'icon-thunder-god', emoji: '⚡', rarity: 'ultra-rare' },  // 雷
-                { id: 'icon-ice-emperor', name: '氷の皇帝', class: 'icon-ice-emperor', emoji: '🧊', rarity: 'ultra-rare' },  // 氷
-                { id: 'icon-demon-lord', name: '魔王', class: 'icon-demon-lord', emoji: '👺', rarity: 'ultra-rare' },  // ゴブリン
-                { id: 'icon-war-machine', name: 'ウォーマシン', class: 'icon-war-machine', emoji: '🚑', rarity: 'ultra-rare' },  // 救急車（マシン）
+                // Ultra Rare アイコン
+                { id: 'icon-shield', name: '盾', class: 'icon-shield', emoji: '🛡️', rarity: 'ultra-rare', type: 'icon' },
+                { id: 'icon-dragon-face', name: 'ドラゴン', class: 'icon-dragon-face', emoji: '🐲', rarity: 'ultra-rare', type: 'icon' },
+                { id: 'icon-parrot', name: 'オウム', class: 'icon-parrot', emoji: '🦜', rarity: 'ultra-rare', type: 'icon' },
+                { id: 'icon-detective', name: '探偵', class: 'icon-detective', emoji: '🕴️', rarity: 'ultra-rare', type: 'icon' },
+                { id: 'icon-lightning', name: '雷', class: 'icon-lightning', emoji: '⚡', rarity: 'ultra-rare', type: 'icon' },
+                { id: 'icon-ice-cube', name: '氷', class: 'icon-ice-cube', emoji: '🧊', rarity: 'ultra-rare', type: 'icon' },
+                { id: 'icon-ogre', name: '鬼', class: 'icon-ogre', emoji: '👺', rarity: 'ultra-rare', type: 'icon' },
+                { id: 'icon-ambulance', name: '救急車', class: 'icon-ambulance', emoji: '🚑', rarity: 'ultra-rare', type: 'icon' },
+                { id: 'icon-cherry-blossom', name: '桜', class: 'icon-cherry-blossom', emoji: '🌸', rarity: 'ultra-rare', type: 'icon' },
+                { id: 'icon-angel-face', name: '天使', class: 'icon-angel-face', emoji: '😇', rarity: 'ultra-rare', type: 'icon' },
+                { id: 'icon-rabbit', name: 'うさぎ', class: 'icon-rabbit', emoji: '🐰', rarity: 'ultra-rare', type: 'icon' },
+                { id: 'icon-fairy', name: '妖精', class: 'icon-fairy', emoji: '🧚', rarity: 'ultra-rare', type: 'icon' },
+                { id: 'icon-blue-heart', name: '青いハート', class: 'icon-blue-heart', emoji: '💙', rarity: 'ultra-rare', type: 'icon' },
+                { id: 'icon-princess', name: 'プリンセス', class: 'icon-princess', emoji: '👸', rarity: 'ultra-rare', type: 'icon' },
+                { id: 'icon-cat-face', name: 'ネコ', class: 'icon-cat-face', emoji: '🐱', rarity: 'ultra-rare', type: 'icon' },
+                { id: 'icon-hibiscus', name: 'ハイビスカス', class: 'icon-hibiscus', emoji: '🌺', rarity: 'ultra-rare', type: 'icon' },
 
-                // かわいい系 (Ultra Rare)
-                { id: 'icon-magical-girl', name: '魔法少女', class: 'icon-magical-girl', emoji: '🌸', rarity: 'ultra-rare' },  // 桜
-                { id: 'icon-angel-wings', name: '天使の羽', class: 'icon-angel-wings', emoji: '😇', rarity: 'ultra-rare' },  // 天使の顔
-                { id: 'icon-bunny-princess', name: 'うさぎ姫', class: 'icon-bunny-princess', emoji: '🐰', rarity: 'ultra-rare' },  // うさぎ
-                { id: 'icon-fairy-dust', name: '妖精の粉', class: 'icon-fairy-dust', emoji: '🧚', rarity: 'ultra-rare' },  // 妖精
-                { id: 'icon-rainbow-heart', name: '虹のハート', class: 'icon-rainbow-heart', emoji: '💙', rarity: 'ultra-rare' },  // 青いハート
-                { id: 'icon-star-princess', name: '星のプリンセス', class: 'icon-star-princess', emoji: '👸', rarity: 'ultra-rare' },  // プリンセス
-                { id: 'icon-kitty-magic', name: 'ネコマジック', class: 'icon-kitty-magic', emoji: '🐱', rarity: 'ultra-rare' },  // ネコ
-                { id: 'icon-flower-fairy', name: '花の妖精', class: 'icon-flower-fairy', emoji: '🌺', rarity: 'ultra-rare' },  // ハイビスカス
-
-                // レジェンダリー (Legendary - 最高レア)
-                { id: 'icon-chaos-emperor', name: 'カオスエンペラー', class: 'icon-chaos-emperor', emoji: '🌀', rarity: 'legendary' },  // サイクロン
-                { id: 'icon-cosmic-goddess', name: '宇宙の女神', class: 'icon-cosmic-goddess', emoji: '🌌', rarity: 'legendary' },  // 天の川
-                { id: 'icon-eternal-phoenix', name: '永遠の不死鳥', class: 'icon-eternal-phoenix', emoji: '🦩', rarity: 'legendary' },  // フラミンゴ
-                { id: 'icon-divine-dragon', name: '聖なるドラゴン', class: 'icon-divine-dragon', emoji: '🐊', rarity: 'legendary' },  // ワニ（ドラゴン風）
-                { id: 'icon-dream-butterfly', name: '夢の蝶', class: 'icon-dream-butterfly', emoji: '🦋', rarity: 'legendary' },  // 蝶
-                { id: 'icon-infinity-heart', name: '無限の心', class: 'icon-infinity-heart', emoji: '💖', rarity: 'legendary' }  // スパークルハート
+                // Legendary アイコン
+                { id: 'icon-cyclone', name: 'サイクロン', class: 'icon-cyclone', emoji: '🌀', rarity: 'legendary', type: 'icon' },
+                { id: 'icon-milky-way', name: '天の川', class: 'icon-milky-way', emoji: '🌌', rarity: 'legendary', type: 'icon' },
+                { id: 'icon-flamingo', name: 'フラミンゴ', class: 'icon-flamingo', emoji: '🦩', rarity: 'legendary', type: 'icon' },
+                { id: 'icon-crocodile', name: 'ワニ', class: 'icon-crocodile', emoji: '🐊', rarity: 'legendary', type: 'icon' },
+                { id: 'icon-butterfly-ex', name: '蝶', class: 'icon-butterfly-ex', emoji: '🦋', rarity: 'legendary', type: 'icon' },
+                { id: 'icon-sparkle-heart', name: 'キラキラハート', class: 'icon-sparkle-heart', emoji: '💖', rarity: 'legendary', type: 'icon' }
             ]
         };
         
@@ -4393,6 +4391,17 @@
                     // 特殊レアリティの場合のテキスト色
                     const textColorClass = (result.rarity === 'legendary' || result.rarity === 'ultra-rare') ? 'text-white' : '';
 
+                    // アイテムタイプの表示名を取得
+                    const getItemTypeLabel = (type) => {
+                        switch(type) {
+                            case 'theme': return 'テーマ';
+                            case 'frame': return 'フレーム';
+                            case 'background': return '背景';
+                            case 'icon': return 'アイコン';
+                            default: return 'アイテム';
+                        }
+                    };
+
                     resultsHTML += `
                         <div class="col-6 col-md-4">
                             <div class="card ${isNew ? 'border-warning' : convertedToPoints ? 'border-info' : ''}" style="${result.rarity === 'legendary' ? 'background: linear-gradient(135deg, #ffd700, #ff6347);' : result.rarity === 'ultra-rare' ? 'background: linear-gradient(135deg, #f093fb, #f5576c);' : ''}">
@@ -4401,6 +4410,7 @@
                                       convertedToPoints ? `<span class="badge bg-info position-absolute top-0 start-0">+${pointsAwarded}pt</span>` : ''}
                                     <div style="font-size: 2rem;">${displayEmoji}</div>
                                     <small class="d-block">${result.name}</small>
+                                    <small class="d-block text-muted" style="opacity: 0.8;">${getItemTypeLabel(result.type)}</small>
                                     ${rarityBadge}
                                     ${convertedToPoints ? '<small class="d-block mt-1" style="opacity: 0.8;">重複→ポイント変換</small>' : ''}
                                 </div>
