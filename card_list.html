@@ -1204,7 +1204,10 @@
                     <div class="mb-3"><label for="email" class="form-label">メールアドレス</label><input type="email" class="form-control" id="email" required></div>
                     <div class="mb-3"><label for="password" class="form-label">パスワード</label><input type="password" class="form-control" id="password" required></div>
                     <div class="alert alert-info small">
-                        <i class="bi bi-info-circle"></i> 新規登録後、メールアドレスの確認が必要です。
+                        <i class="bi bi-info-circle"></i> <strong>新規登録について</strong><br>
+                        ・メールアドレスの確認が必要です<br>
+                        ・確認メールは<strong>迷惑メール</strong>に分類される場合があります<br>
+                        ・送信元: <code>noreply@ygoh-9bcf6.firebaseapp.com</code>
                     </div>
                     <div class="d-grid gap-2">
                         <button type="button" id="login-btn" class="btn btn-primary">ログイン</button>
@@ -2843,6 +2846,13 @@
         import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, onAuthStateChanged, signOut, deleteUser, setPersistence, browserLocalPersistence, sendEmailVerification } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-auth.js";
         import { getFirestore, collection, getDocs, addDoc, deleteDoc, doc, query, where, updateDoc, increment, writeBatch, getDoc, setDoc } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore.js";
 
+        // Firebase認証メールのリンク切れ問題の解決方法：
+        // 1. Firebase Consoleへアクセス: https://console.firebase.google.com/
+        // 2. Authentication > Templates > メールテンプレート
+        // 3. アクションURLを確認・設定
+        // 4. 承認済みドメインにホスティングURLを追加
+        // 5. メールテンプレートをカスタマイズ（日本語化など）
+
         const firebaseConfig = {
             apiKey: "AIzaSyAOYKalLUb2hbghrjQUS8AWzxpLExBT7aU",
             authDomain: "ygoh-9bcf6.firebaseapp.com",
@@ -4340,9 +4350,13 @@
             if (currentUser && !currentUser.emailVerified) {
                 try {
                     await sendEmailVerification(currentUser);
-                    alert('確認メールを再送信しました。メールボックスを確認してください。');
+                    alert('確認メールを再送信しました！\n\n【確認事項】\n✅ 受信ボックスを確認\n✅ 迷惑メールフォルダを確認\n✅ プロモーション/ソーシャルフォルダも確認\n\n送信元: noreply@ygoh-9bcf6.firebaseapp.com\n\n※リンクの有効期限は1時間です');
                 } catch (error) {
-                    alert('メール送信に失敗しました: ' + error.message);
+                    if (error.code === 'auth/too-many-requests') {
+                        alert('送信回数の上限に達しました。しばらく待ってから再度お試しください。');
+                    } else {
+                        alert('メール送信に失敗しました: ' + error.message);
+                    }
                 }
             }
         };
@@ -6970,7 +6984,7 @@
                 await sendEmailVerification(userCredential.user);
 
                 authError.style.display = 'none';
-                alert('確認メールを送信しました。メールを確認してアカウントを有効化してください。');
+                alert('確認メールを送信しました！\n\n【重要】\n✅ メールが届かない場合：\n・迷惑メールフォルダを確認してください\n・プロモーションフォルダも確認してください\n・送信元: noreply@ygoh-9bcf6.firebaseapp.com\n\n⚠️ リンクが無効の場合：\n・メールが古い可能性があります\n・「確認メールを再送信」ボタンを使用してください');
             } catch (error) {
                 authError.textContent = `新規登録エラー: ${error.message}`;
                 authError.style.display = 'block';
