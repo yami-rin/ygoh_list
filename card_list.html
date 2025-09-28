@@ -1203,6 +1203,9 @@
                 <form id="auth-form">
                     <div class="mb-3"><label for="email" class="form-label">メールアドレス</label><input type="email" class="form-control" id="email" required></div>
                     <div class="mb-3"><label for="password" class="form-label">パスワード</label><input type="password" class="form-control" id="password" required></div>
+                    <div class="alert alert-info small">
+                        <i class="bi bi-info-circle"></i> 新規登録後、メールアドレスの確認が必要です。
+                    </div>
                     <div class="d-grid gap-2">
                         <button type="button" id="login-btn" class="btn btn-primary">ログイン</button>
                         <button type="button" id="signup-btn" class="btn btn-secondary">新規登録</button>
@@ -2837,7 +2840,7 @@
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-app.js";
-        import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, onAuthStateChanged, signOut, deleteUser, setPersistence, browserLocalPersistence } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-auth.js";
+        import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, onAuthStateChanged, signOut, deleteUser, setPersistence, browserLocalPersistence, sendEmailVerification } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-auth.js";
         import { getFirestore, collection, getDocs, addDoc, deleteDoc, doc, query, where, updateDoc, increment, writeBatch, getDoc, setDoc } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore.js";
 
         const firebaseConfig = {
@@ -4329,6 +4332,18 @@
                 updatePointsDisplay();
                 initializeShop();
                 alert('購入しました！');
+            }
+        };
+
+        // メール確認メールを再送信
+        window.resendVerificationEmail = async () => {
+            if (currentUser && !currentUser.emailVerified) {
+                try {
+                    await sendEmailVerification(currentUser);
+                    alert('確認メールを再送信しました。メールボックスを確認してください。');
+                } catch (error) {
+                    alert('メール送信に失敗しました: ' + error.message);
+                }
             }
         };
 
@@ -5857,7 +5872,22 @@
         const handleUserLogin = async (user) => {
             currentUser = user;
             const hideEmail = localStorage.getItem('hideEmail') === 'true';
-            userEmailSpan.textContent = hideEmail ? '' : escapeHtml(user.email);
+
+            // メール認証状態を確認
+            if (user.uid !== 'local_user' && !user.emailVerified) {
+                const verificationWarning = `
+                    <span class="text-warning">
+                        <i class="bi bi-exclamation-triangle"></i> メール未確認
+                        <button class="btn btn-sm btn-outline-warning ms-2" onclick="resendVerificationEmail()">
+                            確認メールを再送信
+                        </button>
+                    </span>
+                `;
+                userEmailSpan.innerHTML = hideEmail ? verificationWarning : escapeHtml(user.email) + ' ' + verificationWarning;
+            } else {
+                userEmailSpan.textContent = hideEmail ? '' : escapeHtml(user.email);
+            }
+
             mainApp.style.display = 'block';
             appLoader.style.display = 'none';
             authModal.hide();
@@ -6932,9 +6962,19 @@
 
         document.getElementById('signup-btn').addEventListener('click', async () => {
             try {
-                await createUserWithEmailAndPassword(auth, document.getElementById('email').value, document.getElementById('password').value);
+                const email = document.getElementById('email').value;
+                const password = document.getElementById('password').value;
+                const userCredential = await createUserWithEmailAndPassword(auth, email, password);
+
+                // メール確認を送信
+                await sendEmailVerification(userCredential.user);
+
                 authError.style.display = 'none';
-            } catch (error) { authError.textContent = `新規登録エラー: ${error.message}`; authError.style.display = 'block'; }
+                alert('確認メールを送信しました。メールを確認してアカウントを有効化してください。');
+            } catch (error) {
+                authError.textContent = `新規登録エラー: ${error.message}`;
+                authError.style.display = 'block';
+            }
         });
 
         logoutBtn.addEventListener('click', () => {
