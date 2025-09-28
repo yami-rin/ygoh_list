@@ -2111,6 +2111,11 @@
                                 <i class="bi bi-clock-history"></i> 追加履歴
                             </button>
                         </li>
+                        <li class="nav-item" role="presentation">
+                            <button class="nav-link" data-bs-toggle="tab" data-bs-target="#calendar-heatmap" type="button">
+                                <i class="bi bi-calendar3"></i> カレンダー
+                            </button>
+                        </li>
                     </ul>
 
                     <!-- Tab Contents -->
@@ -2180,6 +2185,39 @@
                                     <h6><i class="bi bi-clock-history"></i> 直近で追加したカード（最新50件）</h6>
                                     <div id="recent-cards-list" class="list-group">
                                         <p class="text-muted">データを読み込み中...</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Calendar Heatmap Tab -->
+                        <div class="tab-pane fade" id="calendar-heatmap">
+                            <div class="p-3">
+                                <div class="d-flex justify-content-between align-items-center mb-3">
+                                    <h6><i class="bi bi-calendar3"></i> カード追加カレンダー</h6>
+                                    <div class="btn-group" role="group">
+                                        <button type="button" class="btn btn-sm btn-outline-secondary" onclick="changeCalendarMonth(-1)">
+                                            <i class="bi bi-chevron-left"></i>
+                                        </button>
+                                        <button type="button" class="btn btn-sm btn-outline-secondary" id="calendar-month-label">
+                                            2024年12月
+                                        </button>
+                                        <button type="button" class="btn btn-sm btn-outline-secondary" onclick="changeCalendarMonth(1)">
+                                            <i class="bi bi-chevron-right"></i>
+                                        </button>
+                                    </div>
+                                </div>
+                                <div id="calendar-container" style="background: var(--bs-body-bg); padding: 15px; border-radius: 10px;">
+                                    <!-- Calendar will be generated here -->
+                                </div>
+                                <div class="mt-3">
+                                    <small class="text-muted">*色の濃さで追加枚数を表現</small>
+                                    <div class="d-flex gap-2 mt-2">
+                                        <span class="badge" style="background-color: #e0e0e0;">0枚</span>
+                                        <span class="badge" style="background-color: #c6e48b;">1-5枚</span>
+                                        <span class="badge" style="background-color: #7bc96f;">6-10枚</span>
+                                        <span class="badge" style="background-color: #239a3b;">11-20枚</span>
+                                        <span class="badge" style="background-color: #196127;">21枚以上</span>
                                     </div>
                                 </div>
                             </div>
@@ -6115,14 +6153,138 @@
             const analysisBtn = document.getElementById('analysis-btn');
             const refreshBtn = document.getElementById('refresh-analysis-btn');
 
-            analysisBtn.addEventListener('click', () => {
+            analysisBtn.addEventListener('click', async () => {
                 analysisModal.show();
+                await buildCardAdditionHistory();
                 updateAnalysisData();
+                updateCalendarDisplay();
             });
 
             // Add refresh button handler
-            refreshBtn.addEventListener('click', () => {
+            refreshBtn.addEventListener('click', async () => {
+                await buildCardAdditionHistory();
                 updateAnalysisData();
+                updateCalendarDisplay();
+            });
+        };
+
+        // Calendar heatmap functionality
+        let currentCalendarDate = new Date();
+        let cardAdditionHistory = {}; // Store as { 'YYYY-MM-DD': count }
+
+        // Generate calendar heatmap
+        const generateCalendarHeatmap = (year, month) => {
+            const container = document.getElementById('calendar-container');
+            if (!container) return;
+
+            const firstDay = new Date(year, month, 1);
+            const lastDay = new Date(year, month + 1, 0);
+            const startPadding = firstDay.getDay();
+            const daysInMonth = lastDay.getDate();
+
+            // Days of week header
+            const weekDays = ['日', '月', '火', '水', '木', '金', '土'];
+            let html = '<div style="display: grid; grid-template-columns: repeat(7, 1fr); gap: 3px; max-width: 400px; margin: 0 auto;">';
+
+            // Add weekday headers
+            weekDays.forEach(day => {
+                html += `<div style="text-align: center; font-size: 0.8rem; font-weight: bold; padding: 5px;">${day}</div>`;
+            });
+
+            // Add empty cells for padding
+            for (let i = 0; i < startPadding; i++) {
+                html += '<div></div>';
+            }
+
+            // Add days
+            for (let day = 1; day <= daysInMonth; day++) {
+                const dateStr = `${year}-${String(month + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
+                const count = cardAdditionHistory[dateStr] || 0;
+                const color = getHeatmapColor(count);
+                const isToday = dateStr === new Date().toISOString().split('T')[0];
+
+                html += `
+                    <div style="
+                        background-color: ${color};
+                        aspect-ratio: 1;
+                        display: flex;
+                        align-items: center;
+                        justify-content: center;
+                        border-radius: 4px;
+                        cursor: pointer;
+                        position: relative;
+                        border: ${isToday ? '2px solid #007bff' : 'none'};
+                    "
+                    data-bs-toggle="tooltip"
+                    title="${year}年${month + 1}月${day}日: ${count}枚追加">
+                        <span style="font-size: 0.75rem; font-weight: ${count > 0 ? 'bold' : 'normal'};">${day}</span>
+                    </div>
+                `;
+            }
+
+            html += '</div>';
+            container.innerHTML = html;
+
+            // Initialize tooltips
+            const tooltipTriggerList = container.querySelectorAll('[data-bs-toggle="tooltip"]');
+            tooltipTriggerList.forEach(tooltipTriggerEl => new bootstrap.Tooltip(tooltipTriggerEl));
+        };
+
+        // Get color based on card count
+        const getHeatmapColor = (count) => {
+            if (count === 0) return '#e0e0e0';
+            if (count <= 5) return '#c6e48b';
+            if (count <= 10) return '#7bc96f';
+            if (count <= 20) return '#239a3b';
+            return '#196127';
+        };
+
+        // Change calendar month
+        window.changeCalendarMonth = (direction) => {
+            currentCalendarDate.setMonth(currentCalendarDate.getMonth() + direction);
+            updateCalendarDisplay();
+        };
+
+        // Update calendar display
+        const updateCalendarDisplay = () => {
+            const year = currentCalendarDate.getFullYear();
+            const month = currentCalendarDate.getMonth();
+            const label = document.getElementById('calendar-month-label');
+            if (label) {
+                label.textContent = `${year}年${month + 1}月`;
+            }
+            generateCalendarHeatmap(year, month);
+        };
+
+        // Build card addition history from localStorage and Firebase
+        const buildCardAdditionHistory = async () => {
+            cardAdditionHistory = {};
+
+            // Get recent history from localStorage
+            const recentCardsHistory = localStorage.getItem('recentCardsHistory');
+            if (recentCardsHistory) {
+                try {
+                    const history = JSON.parse(recentCardsHistory);
+                    history.forEach(item => {
+                        if (item.timestamp) {
+                            const date = new Date(item.timestamp).toISOString().split('T')[0];
+                            const quantity = parseInt(item.quantity) || 1;
+                            cardAdditionHistory[date] = (cardAdditionHistory[date] || 0) + quantity;
+                        }
+                    });
+                } catch (e) {
+                    console.error('Error parsing recent history:', e);
+                }
+            }
+
+            // Also check current collection for created timestamps if available
+            const collection = getCurrentCollection();
+            collection.forEach(card => {
+                if (card.createdAt) {
+                    const date = new Date(card.createdAt).toISOString().split('T')[0];
+                    const quantity = parseInt(card.data['枚数']) || 1;
+                    cardAdditionHistory[date] = (cardAdditionHistory[date] || 0) + quantity;
+                }
             });
         };
 
