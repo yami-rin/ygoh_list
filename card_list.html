@@ -845,24 +845,24 @@
             }
             .table { font-size: 0.875rem; }
 
-            /* Fix modal positioning on mobile - Remove centered positioning */
+            /* Fix modal positioning on mobile - Natural scroll position */
             .modal-dialog {
-                margin: 0.5rem !important;
+                margin: 1.75rem 0.5rem !important;
                 max-width: calc(100% - 1rem);
             }
             .modal-dialog-centered {
                 min-height: auto !important;
-                display: flex !important;
                 align-items: flex-start !important;
             }
             .modal-dialog-centered::before {
                 display: none !important;
             }
-            .modal {
-                padding-top: 1rem !important;
+            .modal-dialog-scrollable {
+                height: auto !important;
+                max-height: calc(100vh - 3.5rem);
             }
             .modal-content {
-                max-height: calc(100vh - 2rem);
+                max-height: calc(100vh - 3.5rem);
                 overflow-y: auto;
             }
             /* Ensure modals are visible */
