@@ -1752,6 +1752,12 @@
                                 <i class="bi bi-award"></i> アイコン
                             </button>
                         </li>
+                        <li class="nav-item" role="presentation">
+                            <button class="nav-link" data-bs-toggle="tab" data-bs-target="#gacha-tab" type="button">
+                                <i class="bi bi-gift"></i> ガチャ
+                                <span class="badge bg-danger">NEW</span>
+                            </button>
+                        </li>
                     </ul>
                     
                     <!-- Shop Tab Content -->
@@ -1783,7 +1789,129 @@
                                 <!-- Icon items will be populated here -->
                             </div>
                         </div>
-                        
+
+                        <!-- Gacha Tab -->
+                        <div class="tab-pane fade" id="gacha-tab" role="tabpanel">
+                            <div class="alert alert-warning">
+                                <h5><i class="bi bi-gift"></i> ガチャで限定アイコンを手に入れよう！</h5>
+                                <p>ショップで購入可能なアイテムや、<strong>ガチャ限定のレアアイコン</strong>が手に入るチャンス！</p>
+                            </div>
+
+                            <div class="row mb-4">
+                                <div class="col-md-6">
+                                    <div class="card">
+                                        <div class="card-body text-center">
+                                            <h4>単発ガチャ</h4>
+                                            <p class="text-muted">一回のガチャを引く</p>
+                                            <div class="mb-3">
+                                                <i class="bi bi-gift" style="font-size: 3rem; color: #ffa500;"></i>
+                                            </div>
+                                            <button class="btn btn-primary btn-lg" onclick="window.drawGacha(1)">
+                                                <i class="bi bi-coin"></i> 100pt でガチャを引く
+                                            </button>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="card">
+                                        <div class="card-body text-center">
+                                            <h4>10連ガチャ</h4>
+                                            <p class="text-muted">10回分ガチャを引く（100ptお得！）</p>
+                                            <div class="mb-3">
+                                                <i class="bi bi-gift-fill" style="font-size: 3rem; color: #ff6347;"></i>
+                                            </div>
+                                            <button class="btn btn-warning btn-lg" onclick="window.drawGacha(10)">
+                                                <i class="bi bi-coin"></i> 900pt で10回ガチャ
+                                            </button>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="accordion" id="gacha-info-accordion">
+                                <div class="accordion-item">
+                                    <h2 class="accordion-header">
+                                        <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#gacha-rates">
+                                            <i class="bi bi-info-circle me-2"></i> 排出率
+                                        </button>
+                                    </h2>
+                                    <div id="gacha-rates" class="accordion-collapse collapse">
+                                        <div class="accordion-body">
+                                            <table class="table table-sm">
+                                                <thead>
+                                                    <tr>
+                                                        <th>レアリティ</th>
+                                                        <th>排出率</th>
+                                                        <th>説明</th>
+                                                    </tr>
+                                                </thead>
+                                                <tbody>
+                                                    <tr>
+                                                        <td><span class="badge bg-secondary">Common</span></td>
+                                                        <td>60%</td>
+                                                        <td>50-200pt アイテム</td>
+                                                    </tr>
+                                                    <tr>
+                                                        <td><span class="badge bg-primary">Uncommon</span></td>
+                                                        <td>25%</td>
+                                                        <td>250-500pt アイテム</td>
+                                                    </tr>
+                                                    <tr>
+                                                        <td><span class="badge bg-success">Rare</span></td>
+                                                        <td>10%</td>
+                                                        <td>600-1000pt アイテム</td>
+                                                    </tr>
+                                                    <tr>
+                                                        <td><span class="badge bg-warning">Ultra Rare</span></td>
+                                                        <td>4%</td>
+                                                        <td>ガチャ限定アイコン</td>
+                                                    </tr>
+                                                    <tr>
+                                                        <td><span class="badge bg-danger">Legendary</span></td>
+                                                        <td>1%</td>
+                                                        <td>ガチャ限定レジェンダリー</td>
+                                                    </tr>
+                                                </tbody>
+                                            </table>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="accordion-item">
+                                    <h2 class="accordion-header">
+                                        <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#gacha-exclusive-icons">
+                                            <i class="bi bi-star-fill me-2"></i> ガチャ限定アイコン
+                                        </button>
+                                    </h2>
+                                    <div id="gacha-exclusive-icons" class="accordion-collapse collapse">
+                                        <div class="accordion-body">
+                                            <div id="exclusive-icons-display">
+                                                <!-- Will be populated by JavaScript -->
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Gacha Result Modal -->
+                            <div class="modal fade" id="gacha-result-modal" tabindex="-1" data-bs-backdrop="static">
+                                <div class="modal-dialog modal-dialog-centered">
+                                    <div class="modal-content" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);">
+                                        <div class="modal-body text-center text-white p-4">
+                                            <div id="gacha-animation" style="min-height: 200px;">
+                                                <!-- Animation will be shown here -->
+                                            </div>
+                                            <div id="gacha-results" class="mt-3" style="display: none;">
+                                                <!-- Results will be shown here -->
+                                            </div>
+                                            <button type="button" class="btn btn-light mt-3" onclick="window.closeGachaResult()" style="display: none;" id="gacha-close-btn">
+                                                閉じる
+                                            </button>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
                     </div>
                 </div>
                 <div class="modal-footer">
@@ -3517,9 +3645,52 @@
                 { id: 'icon-constellation', name: '星座', cost: 450, class: 'icon-constellation', emoji: '☾' },
                 { id: 'icon-cross3', name: '十字✞', cost: 500, class: 'icon-cross3', emoji: '✞' },
                 { id: 'icon-cross4', name: '十字✟', cost: 550, class: 'icon-cross4', emoji: '✟' },
+            ],
+            // ガチャ限定アイコン (入手不可能)
+            exclusiveIcons: [
+                // かっこいい系 (Ultra Rare)
+                { id: 'icon-dark-knight', name: '暗黒騎士', class: 'icon-dark-knight', emoji: '⚔️🛡️', rarity: 'ultra-rare' },
+                { id: 'icon-cyber-dragon', name: 'サイバードラゴン', class: 'icon-cyber-dragon', emoji: '🤖🐉', rarity: 'ultra-rare' },
+                { id: 'icon-phoenix-flame', name: '不死鳥の炎', class: 'icon-phoenix-flame', emoji: '🔥🦅', rarity: 'ultra-rare' },
+                { id: 'icon-shadow-assassin', name: '影の暗殺者', class: 'icon-shadow-assassin', emoji: '🥷💀', rarity: 'ultra-rare' },
+                { id: 'icon-thunder-god', name: '雷神', class: 'icon-thunder-god', emoji: '⚡👑', rarity: 'ultra-rare' },
+                { id: 'icon-ice-emperor', name: '氷の皇帝', class: 'icon-ice-emperor', emoji: '❄️👑', rarity: 'ultra-rare' },
+                { id: 'icon-demon-lord', name: '魔王', class: 'icon-demon-lord', emoji: '👹🔱', rarity: 'ultra-rare' },
+                { id: 'icon-war-machine', name: 'ウォーマシン', class: 'icon-war-machine', emoji: '🤖⚙️', rarity: 'ultra-rare' },
+
+                // かわいい系 (Ultra Rare)
+                { id: 'icon-magical-girl', name: '魔法少女', class: 'icon-magical-girl', emoji: '🌸✨', rarity: 'ultra-rare' },
+                { id: 'icon-angel-wings', name: '天使の羽', class: 'icon-angel-wings', emoji: '😇🪽', rarity: 'ultra-rare' },
+                { id: 'icon-bunny-princess', name: 'うさぎ姫', class: 'icon-bunny-princess', emoji: '🐰👑', rarity: 'ultra-rare' },
+                { id: 'icon-fairy-dust', name: '妖精の粉', class: 'icon-fairy-dust', emoji: '🧚✨', rarity: 'ultra-rare' },
+                { id: 'icon-rainbow-unicorn', name: '虹のユニコーン', class: 'icon-rainbow-unicorn', emoji: '🦄🌈', rarity: 'ultra-rare' },
+                { id: 'icon-star-princess', name: '星のプリンセス', class: 'icon-star-princess', emoji: '🌟👸', rarity: 'ultra-rare' },
+                { id: 'icon-kitty-magic', name: 'ネコマジック', class: 'icon-kitty-magic', emoji: '🐱🪄', rarity: 'ultra-rare' },
+                { id: 'icon-flower-fairy', name: '花の妖精', class: 'icon-flower-fairy', emoji: '🌺🧚', rarity: 'ultra-rare' },
+
+                // レジェンダリー (Legendary - 最高レア)
+                { id: 'icon-chaos-emperor', name: 'カオスエンペラー', class: 'icon-chaos-emperor', emoji: '🌀⚡🔥', rarity: 'legendary' },
+                { id: 'icon-cosmic-goddess', name: '宇宙の女神', class: 'icon-cosmic-goddess', emoji: '🌌👸✨', rarity: 'legendary' },
+                { id: 'icon-eternal-phoenix', name: '永遠の不死鳥', class: 'icon-eternal-phoenix', emoji: '♾️🔥🦅', rarity: 'legendary' },
+                { id: 'icon-divine-dragon', name: '聖なるドラゴン', class: 'icon-divine-dragon', emoji: '✨🐉💫', rarity: 'legendary' },
+                { id: 'icon-dream-butterfly', name: '夢の蝶', class: 'icon-dream-butterfly', emoji: '🦋💫🌸', rarity: 'legendary' },
+                { id: 'icon-infinity-heart', name: '無限の心', class: 'icon-infinity-heart', emoji: '♾️💖✨', rarity: 'legendary' }
             ]
         };
         
+        // ガチャシステムの定義
+        const GACHA_COST = 100; // ガチャ1回のコスト
+        const GACHA_10X_COST = 900; // 10連ガチャのコスト（割引あり）
+
+        // ガチャの排出率設定
+        const GACHA_RATES = {
+            common: 60,      // 60% - 安いアイテム (50-200pt)
+            uncommon: 25,    // 25% - 中価格アイテム (250-500pt)
+            rare: 10,        // 10% - 高価格アイテム (600-1000pt)
+            ultraRare: 4,    // 4% - ウルトラレア（ガチャ限定）
+            legendary: 1     // 1% - レジェンダリー（ガチャ限定）
+        };
+
         // Initialize daily mission progress
         const initializeDailyMissions = () => {
             const today = new Date().toDateString();
@@ -3770,6 +3941,42 @@
         
         // Initialize shop
         const initializeShop = () => {
+            // Display exclusive icons in gacha info
+            const exclusiveIconsDisplay = document.getElementById('exclusive-icons-display');
+            if (exclusiveIconsDisplay) {
+                let html = '<h6><span class="badge bg-warning">Ultra Rare (4%)</span></h6><div class="row g-2 mb-3">';
+
+                SHOP_ITEMS.exclusiveIcons.filter(i => i.rarity === 'ultra-rare').forEach(icon => {
+                    html += `
+                        <div class="col-4 col-md-3 text-center">
+                            <div class="card">
+                                <div class="card-body p-2">
+                                    <div style="font-size: 2rem;">${icon.emoji}</div>
+                                    <small>${icon.name}</small>
+                                </div>
+                            </div>
+                        </div>
+                    `;
+                });
+
+                html += '</div><h6><span class="badge bg-danger">Legendary (1%)</span></h6><div class="row g-2">';
+
+                SHOP_ITEMS.exclusiveIcons.filter(i => i.rarity === 'legendary').forEach(icon => {
+                    html += `
+                        <div class="col-4 col-md-3 text-center">
+                            <div class="card" style="background: linear-gradient(135deg, #ffd700, #ff6347);">
+                                <div class="card-body p-2 text-white">
+                                    <div style="font-size: 2rem;">${icon.emoji}</div>
+                                    <small>${icon.name}</small>
+                                </div>
+                            </div>
+                        </div>
+                    `;
+                });
+
+                html += '</div>';
+                exclusiveIconsDisplay.innerHTML = html;
+            }
             // Populate themes
             const themeContainer = document.getElementById('theme-shop-items');
             if (themeContainer) {
@@ -4087,7 +4294,177 @@
                 alert('購入しました！');
             }
         };
-        
+
+        // ガチャシステムの実装
+        window.drawGacha = async (count) => {
+            const cost = count === 1 ? GACHA_COST : GACHA_10X_COST;
+
+            if (gamificationData.userPoints < cost) {
+                alert('ポイントが足りません！');
+                return;
+            }
+
+            if (!confirm(`${cost}ptを使って${count}回ガチャを引きますか？`)) {
+                return;
+            }
+
+            // ポイントを減らす
+            gamificationData.userPoints -= cost;
+            saveGamificationData();
+            updatePointsDisplay();
+
+            // ガチャ結果モーダルを表示
+            const gachaResultModal = new bootstrap.Modal(document.getElementById('gacha-result-modal'));
+            gachaResultModal.show();
+
+            // アニメーションを表示
+            const animationEl = document.getElementById('gacha-animation');
+            const resultsEl = document.getElementById('gacha-results');
+            const closeBtn = document.getElementById('gacha-close-btn');
+
+            animationEl.innerHTML = '<div class="spinner-border text-light" style="width: 3rem; height: 3rem;" role="status"></div><h3 class="mt-3">ガチャを回しています...</h3>';
+            resultsEl.style.display = 'none';
+            closeBtn.style.display = 'none';
+
+            // ガチャを引く
+            const results = [];
+            for (let i = 0; i < count; i++) {
+                results.push(performGachaDraw());
+            }
+
+            // アニメーション後に結果を表示
+            setTimeout(() => {
+                animationEl.style.display = 'none';
+                resultsEl.style.display = 'block';
+                closeBtn.style.display = 'inline-block';
+
+                let resultsHTML = '<h3>ガチャ結果</h3><div class="row g-2">';
+                let hasNewItem = false;
+
+                results.forEach(result => {
+                    const isNew = !gamificationData.purchasedItems[result.id];
+                    if (isNew) {
+                        hasNewItem = true;
+                        gamificationData.purchasedItems[result.id] = true;
+                    }
+
+                    const rarityBadge = getRarityBadge(result.rarity);
+                    resultsHTML += `
+                        <div class="col-6 col-md-4">
+                            <div class="card text-dark ${isNew ? 'border-warning' : ''}" style="${result.rarity === 'legendary' ? 'background: linear-gradient(135deg, #ffd700, #ff6347);' : result.rarity === 'ultra-rare' ? 'background: linear-gradient(135deg, #f093fb, #f5576c);' : ''}">
+                                <div class="card-body text-center p-2">
+                                    ${isNew ? '<span class="badge bg-warning position-absolute top-0 start-0">NEW!</span>' : ''}
+                                    <div style="font-size: 2rem;">${result.emoji || '🎆'}</div>
+                                    <small class="d-block">${result.name}</small>
+                                    ${rarityBadge}
+                                </div>
+                            </div>
+                        </div>
+                    `;
+                });
+
+                resultsHTML += '</div>';
+
+                if (hasNewItem) {
+                    resultsHTML += '<div class="alert alert-success mt-3"><i class="bi bi-check-circle"></i> 新しいアイテムを獲得しました！</div>';
+                    saveGamificationData();
+                }
+
+                resultsEl.innerHTML = resultsHTML;
+            }, 2000);
+        };
+
+        // ガチャを実行
+        const performGachaDraw = () => {
+            const random = Math.random() * 100;
+            let accumulated = 0;
+            let rarity = 'common';
+
+            // レアリティを決定
+            if (random < GACHA_RATES.legendary) {
+                rarity = 'legendary';
+            } else if (random < GACHA_RATES.legendary + GACHA_RATES.ultraRare) {
+                rarity = 'ultra-rare';
+            } else if (random < GACHA_RATES.legendary + GACHA_RATES.ultraRare + GACHA_RATES.rare) {
+                rarity = 'rare';
+            } else if (random < GACHA_RATES.legendary + GACHA_RATES.ultraRare + GACHA_RATES.rare + GACHA_RATES.uncommon) {
+                rarity = 'uncommon';
+            } else {
+                rarity = 'common';
+            }
+
+            // レアリティに基づいてアイテムを選択
+            let item;
+            if (rarity === 'legendary' || rarity === 'ultra-rare') {
+                // ガチャ限定アイコンから選択
+                const exclusiveItems = SHOP_ITEMS.exclusiveIcons.filter(i => i.rarity === rarity);
+                item = exclusiveItems[Math.floor(Math.random() * exclusiveItems.length)];
+            } else {
+                // 通常アイテムから選択
+                const allItems = [];
+
+                // コストに基づいてアイテムをフィルタ
+                const costRange = {
+                    common: [50, 200],
+                    uncommon: [250, 500],
+                    rare: [600, 1500]
+                };
+
+                const range = costRange[rarity];
+
+                // 全カテゴリからアイテムを収集
+                SHOP_ITEMS.themes.forEach(t => {
+                    if (t.cost >= range[0] && t.cost <= range[1]) {
+                        allItems.push({...t, type: 'theme', rarity});
+                    }
+                });
+                SHOP_ITEMS.frames.forEach(f => {
+                    if (f.cost >= range[0] && f.cost <= range[1]) {
+                        allItems.push({...f, type: 'frame', rarity});
+                    }
+                });
+                SHOP_ITEMS.backgrounds.forEach(b => {
+                    if (b.cost >= range[0] && b.cost <= range[1]) {
+                        allItems.push({...b, type: 'background', rarity});
+                    }
+                });
+                SHOP_ITEMS.icons.forEach(i => {
+                    if (i.cost >= range[0] && i.cost <= range[1]) {
+                        allItems.push({...i, type: 'icon', rarity});
+                    }
+                });
+
+                item = allItems[Math.floor(Math.random() * allItems.length)];
+            }
+
+            return item;
+        };
+
+        // レアリティバッジを取得
+        const getRarityBadge = (rarity) => {
+            switch(rarity) {
+                case 'legendary':
+                    return '<span class="badge bg-danger">レジェンダリー</span>';
+                case 'ultra-rare':
+                    return '<span class="badge bg-warning">ウルトラレア</span>';
+                case 'rare':
+                    return '<span class="badge bg-success">レア</span>';
+                case 'uncommon':
+                    return '<span class="badge bg-primary">アンコモン</span>';
+                default:
+                    return '<span class="badge bg-secondary">コモン</span>';
+            }
+        };
+
+        // ガチャ結果モーダルを閉じる
+        window.closeGachaResult = () => {
+            const modal = bootstrap.Modal.getInstance(document.getElementById('gacha-result-modal'));
+            if (modal) {
+                modal.hide();
+            }
+            initializeShop();
+        };
+
         // Apply theme
         window.applyTheme = (themeClass) => {
             // Remove all theme classes
