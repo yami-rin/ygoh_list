@@ -2843,15 +2843,22 @@
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-app.js";
-        import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, onAuthStateChanged, signOut, deleteUser, setPersistence, browserLocalPersistence, sendEmailVerification } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-auth.js";
+        import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, onAuthStateChanged, signOut, deleteUser, setPersistence, browserLocalPersistence, sendEmailVerification, applyActionCode } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-auth.js";
         import { getFirestore, collection, getDocs, addDoc, deleteDoc, doc, query, where, updateDoc, increment, writeBatch, getDoc, setDoc } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore.js";
 
-        // Firebase認証メールのリンク切れ問題の解決方法：
-        // 1. Firebase Consoleへアクセス: https://console.firebase.google.com/
-        // 2. Authentication > Templates > メールテンプレート
-        // 3. アクションURLを確認・設定
-        // 4. 承認済みドメインにホスティングURLを追加
-        // 5. メールテンプレートをカスタマイズ（日本語化など）
+        // 🔴 Firebase認証メールのリンク切れ問題の解決方法：
+        //
+        // 【重要】GitHub Pagesでホスティングしている場合の設定：
+        // 1. Firebase Console: https://console.firebase.google.com/
+        // 2. Authentication > Settings > 承認済みドメイン
+        //    - 「yami-rin.github.io」を追加（GitHub Pagesのドメイン）
+        // 3. Authentication > Templates > メールアクション処理
+        //    - アクションURLはデフォルトのまま：
+        //      https://ygoh-9bcf6.firebaseapp.com/__/auth/action
+        // 4. メールテンプレートでリンクの有効期限を確認（デフォルト1時間）
+        //
+        // ※ Firebase Hostingを使用していないため、認証リンクは
+        //   FirebaseのデフォルトURLで処理され、その後アプリにリダイレクトされます
 
         const firebaseConfig = {
             apiKey: "AIzaSyAOYKalLUb2hbghrjQUS8AWzxpLExBT7aU",
@@ -6737,8 +6744,36 @@
             document.getElementById('delete-account-btn').style.display = 'block';
         };
 
-        onAuthStateChanged(auth, (user) => {
+        // メール認証リンクのURLパラメータを処理
+        const handleEmailVerificationLink = async () => {
+            const urlParams = new URLSearchParams(window.location.search);
+            const mode = urlParams.get('mode');
+            const oobCode = urlParams.get('oobCode');
+
+            if (mode === 'verifyEmail' && oobCode) {
+                try {
+                    await applyActionCode(auth, oobCode);
+                    alert('メールアドレスが確認されました！\nログインしてください。');
+                    // URLパラメータをクリア
+                    window.history.replaceState({}, document.title, window.location.pathname);
+                } catch (error) {
+                    console.error('メール確認エラー:', error);
+                    if (error.code === 'auth/invalid-action-code') {
+                        alert('認証リンクが無効または期限切れです。\n新しい確認メールをリクエストしてください。');
+                    } else {
+                        alert('メール確認に失敗しました: ' + error.message);
+                    }
+                }
+            }
+        };
+
+        // ページ読み込み時にメール認証リンクをチェック
+        handleEmailVerificationLink();
+
+        onAuthStateChanged(auth, async (user) => {
             if (user) {
+                // ユーザーがログインしたら、最新の認証状態を取得
+                await user.reload();
                 handleUserLogin(user);
             } else {
                 handleUserLogout();
