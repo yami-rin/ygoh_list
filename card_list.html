@@ -2103,19 +2103,7 @@
         </nav>
 
         <div class="container-fluid">
-             <div id="loading-overlay" style="display: none;">
-                <div class="text-center">
-                    <div class="spinner-border mb-3" role="status"></div>
-                    <div id="progress-container" style="display: none;">
-                        <div class="progress" style="width: 300px; height: 25px; margin: 0 auto;">
-                            <div id="progress-bar" class="progress-bar progress-bar-striped progress-bar-animated"
-                                 role="progressbar" style="width: 0%"
-                                 aria-valuenow="0" aria-valuemin="0" aria-valuemax="100">0%</div>
-                        </div>
-                        <div id="progress-text" class="text-white mt-2">処理中...</div>
-                    </div>
-                </div>
-            </div>
+             <div id="loading-overlay" style="display: none;"><div class="spinner-border" role="status"></div></div>
             <div class="row">
                 <!-- Left Column: Add Card -->
                 <div class="col-lg-5">
@@ -2920,41 +2908,7 @@
         const showRegistrationHistoryToggle = document.getElementById('show-registration-history-toggle');
         const useTapQuantityToggle = document.getElementById('use-tap-quantity-toggle');
 
-        const showLoading = (show, showProgress = false) => {
-            loadingOverlay.style.display = show ? 'flex' : 'none';
-            const progressContainer = document.getElementById('progress-container');
-            const progressBar = document.getElementById('progress-bar');
-            const progressText = document.getElementById('progress-text');
-
-            if (progressContainer) {
-                progressContainer.style.display = showProgress ? 'block' : 'none';
-                if (!show) {
-                    // Reset progress when hiding
-                    progressBar.style.width = '0%';
-                    progressBar.textContent = '0%';
-                    progressBar.setAttribute('aria-valuenow', 0);
-                    progressText.textContent = '処理中...';
-                }
-            }
-        };
-
-        const updateProgress = (current, total, message = '') => {
-            const progressBar = document.getElementById('progress-bar');
-            const progressText = document.getElementById('progress-text');
-
-            if (progressBar && progressText) {
-                const percentage = Math.round((current / total) * 100);
-                progressBar.style.width = `${percentage}%`;
-                progressBar.textContent = `${percentage}%`;
-                progressBar.setAttribute('aria-valuenow', percentage);
-
-                if (message) {
-                    progressText.textContent = message;
-                } else {
-                    progressText.textContent = `処理中... (${current}/${total})`;
-                }
-            }
-        };
+        const showLoading = (show) => { loadingOverlay.style.display = show ? 'flex' : 'none'; };
         
         const updateHistoryButton = (btnId, storageKey, data, titlePrefix) => {
             const btn = document.getElementById(btnId);
@@ -3913,6 +3867,115 @@
             }
         };
         
+        // Undo recent card addition
+        window.undoRecentAddition = async (name, setCode, rarity, quantity, listType, timestamp) => {
+            if (!confirm(`「${name}」の追加を取り消しますか？\n\n注意: この操作により、該当するカードがリストから削除されます。`)) {
+                return;
+            }
+
+            showLoading(true);
+            try {
+                const collection = listType === 'wishlist' ? wishlistCollection : cardCollection;
+                const collRef = getCollectionRef(listType);
+
+                // Find the matching card(s) to remove
+                let removedCount = 0;
+                const cardsToRemove = [];
+
+                // Find cards that match the criteria
+                for (const card of collection) {
+                    if (card.data['名前'] === name &&
+                        (!setCode || card.data['型番'] === setCode) &&
+                        (!rarity || card.data['レアリティ'] === rarity)) {
+
+                        const cardQuantity = parseInt(card.data['枚数']) || 0;
+
+                        if (cardQuantity > quantity) {
+                            // Reduce quantity
+                            card.data['枚数'] = cardQuantity - quantity;
+
+                            if (collRef) {
+                                await updateDoc(doc(collRef, card.id), { '枚数': card.data['枚数'] });
+                            }
+                            removedCount = quantity;
+                            break;
+                        } else if (cardQuantity === quantity) {
+                            // Remove the card entirely
+                            cardsToRemove.push(card);
+                            removedCount = quantity;
+                            break;
+                        } else {
+                            // Card has less quantity than we're trying to remove
+                            cardsToRemove.push(card);
+                            removedCount += cardQuantity;
+                            quantity -= cardQuantity;
+
+                            if (removedCount >= quantity) {
+                                break;
+                            }
+                        }
+                    }
+                }
+
+                // Remove cards that need to be deleted
+                for (const card of cardsToRemove) {
+                    if (collRef) {
+                        await deleteDoc(doc(collRef, card.id));
+                    }
+
+                    // Remove from local collection
+                    const index = collection.indexOf(card);
+                    if (index > -1) {
+                        collection.splice(index, 1);
+                    }
+                }
+
+                // Update recent history in localStorage
+                let recentHistory = [];
+                const recentCardsHistory = localStorage.getItem('recentCardsHistory');
+                if (recentCardsHistory) {
+                    try {
+                        recentHistory = JSON.parse(recentCardsHistory);
+                        // Remove the item from history
+                        recentHistory = recentHistory.filter(item =>
+                            !(item.timestamp === timestamp &&
+                              item.name === name &&
+                              item.listType === listType));
+                        localStorage.setItem('recentCardsHistory', JSON.stringify(recentHistory));
+                    } catch(e) {
+                        console.error('Error updating recent history:', e);
+                    }
+                }
+
+                // Save to localStorage if local user
+                if (!currentUser || currentUser.uid === 'local_user') {
+                    if (listType === 'wishlist') {
+                        localStorage.setItem('wishlistCollection', JSON.stringify(wishlistCollection.map(c => c.data)));
+                    } else {
+                        localStorage.setItem('cardCollection', JSON.stringify(cardCollection.map(c => c.data)));
+                    }
+                }
+
+                // Refresh the display
+                updateTotalCounts();
+                applySearchAndFilter();
+
+                // Refresh analysis modal if it's open
+                const analysisModal = bootstrap.Modal.getInstance(document.getElementById('analysis-modal'));
+                if (analysisModal && analysisModal._isShown) {
+                    updateAnalysisData();
+                }
+
+                showLoading(false);
+                alert(`「${name}」の追加を取り消しました（${removedCount}枚削除）`);
+
+            } catch (error) {
+                showLoading(false);
+                console.error('Error undoing addition:', error);
+                alert('取り消し中にエラーが発生しました: ' + error.message);
+            }
+        };
+
         window.purchaseItem = (itemId, cost, type) => {
             if (gamificationData.userPoints < cost) {
                 alert('ポイントが足りません！');
@@ -5663,10 +5726,13 @@
                                 </div>
                                 <div class="text-end">
                                     <small class="text-muted">${formattedDate}</small>
-                                    <div>
-                                        <span class="badge ${item.listType === 'wishlist' ? 'bg-warning' : 'bg-success'}">
+                                    <div class="mt-1">
+                                        <span class="badge ${item.listType === 'wishlist' ? 'bg-warning' : 'bg-success'} me-1">
                                             ${item.listType === 'wishlist' ? '欲しいカード' : '所持カード'}
                                         </span>
+                                        <button class="btn btn-sm btn-outline-danger" onclick="undoRecentAddition('${escapeHtml(item.name)}', '${escapeHtml(item.setCode || '')}', '${escapeHtml(item.rarity || '')}', ${item.quantity}, '${item.listType}', '${item.timestamp}')" title="この追加を取り消す">
+                                            <i class="bi bi-arrow-counterclockwise"></i> 取消
+                                        </button>
                                     </div>
                                 </div>
                             </div>
@@ -6783,17 +6849,13 @@
             console.log('cardCollection length:', cardCollection.length);
             console.log('wishlistCollection length:', wishlistCollection.length);
 
-            showLoading(true, true); // Show progress bar
+            showLoading(true);
             let linkedCount = 0;
             let notFoundCards = [];
-            const totalCards = cardCollection.length + wishlistCollection.length;
-            let processedCount = 0;
 
             try {
                 // Process collection cards
                 for (const card of cardCollection) {
-                    processedCount++;
-                    updateProgress(processedCount, totalCards, `コレクションを処理中... (${processedCount}/${totalCards})`);
                     const cardName = card.data['名前'];
 
                     // Debug: Show first few card names
@@ -6835,8 +6897,6 @@
 
                 // Process wishlist cards
                 for (const card of wishlistCollection) {
-                    processedCount++;
-                    updateProgress(processedCount, totalCards, `ウィッシュリストを処理中... (${processedCount}/${totalCards})`);
                     const cardName = card.data['名前'];
                     if (cardName && cardDetailsMap.has(cardName)) {
                         const details = cardDetailsMap.get(cardName);
@@ -6872,12 +6932,6 @@
                     localStorage.setItem('cardCollection', JSON.stringify(cardCollection.map(c => c.data)));
                     localStorage.setItem('wishlistCollection', JSON.stringify(wishlistCollection.map(c => c.data)));
                 }
-
-                // Show completion
-                updateProgress(totalCards, totalCards, '連携完了！');
-
-                // Wait a moment to show 100%
-                await new Promise(resolve => setTimeout(resolve, 500));
 
                 showLoading(false);
 
@@ -7143,18 +7197,14 @@
                 return;
             }
 
-            showLoading(true, true); // Show progress bar
+            showLoading(true);
             try {
                 const existingTagNames = allTags.map(t => t.name);
                 let cleanupCount = 0;
                 let updatedCards = [];
-                const totalCards = cardCollection.length + wishlistCollection.length;
-                let processedCount = 0;
 
                 // Check collection cards
                 for (const card of cardCollection) {
-                    processedCount++;
-                    updateProgress(processedCount, totalCards, `タグを確認中... (${processedCount}/${totalCards})`);
                     if (card.data.tags && card.data.tags.length > 0) {
                         const validTags = card.data.tags.filter(tag => existingTagNames.includes(tag));
                         if (validTags.length !== card.data.tags.length) {
@@ -7167,8 +7217,6 @@
 
                 // Check wishlist cards
                 for (const card of wishlistCollection) {
-                    processedCount++;
-                    updateProgress(processedCount, totalCards, `ウィッシュリストのタグを確認中... (${processedCount}/${totalCards})`);
                     if (card.data.tags && card.data.tags.length > 0) {
                         const validTags = card.data.tags.filter(tag => existingTagNames.includes(tag));
                         if (validTags.length !== card.data.tags.length) {
@@ -7186,10 +7234,7 @@
                     }
 
                     // Update cards in Firebase
-                    let updateCount = 0;
                     for (const { card, listType } of updatedCards) {
-                        updateCount++;
-                        updateProgress(updateCount, updatedCards.length, `タグを更新中... (${updateCount}/${updatedCards.length})`);
                         const collRef = getCollectionRef(listType);
                         if (collRef) {
                             await updateDoc(doc(collRef, card.id), { tags: card.data.tags });
@@ -7201,10 +7246,6 @@
                         localStorage.setItem('cardCollection', JSON.stringify(cardCollection));
                         localStorage.setItem('wishlistCollection', JSON.stringify(wishlistCollection));
                     }
-
-                    // Show completion
-                    updateProgress(updatedCards.length, updatedCards.length, 'クリーンアップ完了！');
-                    await new Promise(resolve => setTimeout(resolve, 500));
 
                     alert(`${cleanupCount}枚のカードから存在しないタグを削除しました。`);
                     applySearchAndFilter();
