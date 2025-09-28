@@ -4368,16 +4368,41 @@
                     }
 
                     const rarityBadge = getRarityBadge(result.rarity);
+
+                    // アイテムタイプに応じた絵文字を設定
+                    let displayEmoji = result.emoji;
+                    if (!displayEmoji) {
+                        switch(result.type) {
+                            case 'theme':
+                                displayEmoji = '🎨'; // パレット
+                                break;
+                            case 'frame':
+                                displayEmoji = '🖼️'; // フレーム
+                                break;
+                            case 'background':
+                                displayEmoji = '🌄'; // 背景
+                                break;
+                            case 'icon':
+                                displayEmoji = '🎆'; // アイコンのデフォルト
+                                break;
+                            default:
+                                displayEmoji = '🎆';
+                        }
+                    }
+
+                    // 特殊レアリティの場合のテキスト色
+                    const textColorClass = (result.rarity === 'legendary' || result.rarity === 'ultra-rare') ? 'text-white' : '';
+
                     resultsHTML += `
                         <div class="col-6 col-md-4">
-                            <div class="card text-dark ${isNew ? 'border-warning' : convertedToPoints ? 'border-info' : ''}" style="${result.rarity === 'legendary' ? 'background: linear-gradient(135deg, #ffd700, #ff6347);' : result.rarity === 'ultra-rare' ? 'background: linear-gradient(135deg, #f093fb, #f5576c);' : ''}">
-                                <div class="card-body text-center p-2">
+                            <div class="card ${isNew ? 'border-warning' : convertedToPoints ? 'border-info' : ''}" style="${result.rarity === 'legendary' ? 'background: linear-gradient(135deg, #ffd700, #ff6347);' : result.rarity === 'ultra-rare' ? 'background: linear-gradient(135deg, #f093fb, #f5576c);' : ''}">
+                                <div class="card-body text-center p-2 ${textColorClass}">
                                     ${isNew ? '<span class="badge bg-warning position-absolute top-0 start-0">NEW!</span>' :
                                       convertedToPoints ? `<span class="badge bg-info position-absolute top-0 start-0">+${pointsAwarded}pt</span>` : ''}
-                                    <div style="font-size: 2rem;">${result.emoji || '🎆'}</div>
+                                    <div style="font-size: 2rem;">${displayEmoji}</div>
                                     <small class="d-block">${result.name}</small>
                                     ${rarityBadge}
-                                    ${convertedToPoints ? '<small class="text-muted d-block mt-1">重複→ポイント変換</small>' : ''}
+                                    ${convertedToPoints ? '<small class="d-block mt-1" style="opacity: 0.8;">重複→ポイント変換</small>' : ''}
                                 </div>
                             </div>
                         </div>
