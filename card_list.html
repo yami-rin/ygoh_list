@@ -1172,6 +1172,16 @@
         .clear-race-btn {
             margin-bottom: 5px;
         }
+
+        /* No animations mode */
+        body.no-animations * {
+            transition: none !important;
+            animation: none !important;
+        }
+
+        body.no-animations .progress-bar {
+            transition: width 0.1s !important; /* Keep progress bar functional but fast */
+        }
     </style>
 </head>
 <body>
@@ -1835,6 +1845,7 @@
         <div class="modal-dialog modal-dialog-centered"><div class="modal-content">
             <div class="modal-header"><h5 class="modal-title">設定</h5><button type="button" class="btn-close" data-bs-dismiss="modal"></button></div>
             <div class="modal-body">
+                <h6 class="mb-3"><i class="bi bi-display"></i> 表示設定</h6>
                 <div class="form-check form-switch mb-3">
                     <input class="form-check-input" type="checkbox" role="switch" id="dark-mode-toggle">
                     <label class="form-check-label" for="dark-mode-toggle">ダークモード</label>
@@ -1848,6 +1859,13 @@
                     <label class="form-check-label" for="hide-stats-toggle">コレクション統計を非表示</label>
                 </div>
                 <div class="form-check form-switch mb-3">
+                    <input class="form-check-input" type="checkbox" role="switch" id="show-daily-challenges-toggle">
+                    <label class="form-check-label" for="show-daily-challenges-toggle">今日のチャレンジを表示</label>
+                </div>
+
+                <hr>
+                <h6 class="mb-3"><i class="bi bi-clock-history"></i> 履歴・操作設定</h6>
+                <div class="form-check form-switch mb-3">
                     <input class="form-check-input" type="checkbox" role="switch" id="show-search-history-toggle">
                     <label class="form-check-label" for="show-search-history-toggle">前回の検索履歴ボタンを表示</label>
                 </div>
@@ -1859,6 +1877,39 @@
                     <input class="form-check-input" type="checkbox" role="switch" id="use-tap-quantity-toggle">
                     <label class="form-check-label" for="use-tap-quantity-toggle">枚数入力をタップ式にする</label>
                 </div>
+                <div class="form-check form-switch mb-3">
+                    <input class="form-check-input" type="checkbox" role="switch" id="auto-save-toggle">
+                    <label class="form-check-label" for="auto-save-toggle">データを自動保存する（5分ごと）</label>
+                </div>
+
+                <hr>
+                <h6 class="mb-3"><i class="bi bi-bell"></i> 通知設定</h6>
+                <div class="form-check form-switch mb-3">
+                    <input class="form-check-input" type="checkbox" role="switch" id="show-notifications-toggle">
+                    <label class="form-check-label" for="show-notifications-toggle">アプリ内通知を表示</label>
+                </div>
+                <div class="form-check form-switch mb-3">
+                    <input class="form-check-input" type="checkbox" role="switch" id="sound-effects-toggle">
+                    <label class="form-check-label" for="sound-effects-toggle">効果音を有効にする</label>
+                </div>
+
+                <hr>
+                <h6 class="mb-3"><i class="bi bi-speedometer2"></i> パフォーマンス設定</h6>
+                <div class="form-check form-switch mb-3">
+                    <input class="form-check-input" type="checkbox" role="switch" id="enable-animations-toggle">
+                    <label class="form-check-label" for="enable-animations-toggle">アニメーションを有効にする</label>
+                </div>
+                <div class="mb-3">
+                    <label for="table-rows-per-page" class="form-label">テーブルの表示行数</label>
+                    <select class="form-select form-select-sm" id="table-rows-per-page">
+                        <option value="50">50行</option>
+                        <option value="100" selected>100行（デフォルト）</option>
+                        <option value="200">200行</option>
+                        <option value="500">500行</option>
+                        <option value="all">全て表示</option>
+                    </select>
+                </div>
+
                 <hr>
                 <h6>アカウント削除</h6>
                 <p class="text-muted small">この操作は元に戻せません。アカウントに紐づく全てのカードデータが完全に削除されます。</p>
@@ -2935,8 +2986,12 @@
                 return vA === vB ? 0 : (vA < vB ? -1 : 1) * (sortConfig.direction === 'ascending' ? 1 : -1);
             });
 
-            const startIndex = (currentPage - 1) * itemsPerPage;
-            const endIndex = startIndex + itemsPerPage;
+            // Get table rows setting
+            const rowsPerPage = localStorage.getItem('tableRowsPerPage') || '100';
+            const actualItemsPerPage = rowsPerPage === 'all' ? filteredCardCollection.length : parseInt(rowsPerPage, 10);
+
+            const startIndex = (currentPage - 1) * actualItemsPerPage;
+            const endIndex = startIndex + actualItemsPerPage;
             const paginatedItems = filteredCardCollection.slice(startIndex, endIndex);
 
             // Use DocumentFragment for better performance
@@ -3010,7 +3065,9 @@
         };
 
         const updatePaginationControls = () => {
-            const totalPages = Math.ceil(filteredCardCollection.length / itemsPerPage);
+            const rowsPerPage = localStorage.getItem('tableRowsPerPage') || '100';
+            const actualItemsPerPage = rowsPerPage === 'all' ? filteredCardCollection.length : parseInt(rowsPerPage, 10);
+            const totalPages = Math.ceil(filteredCardCollection.length / actualItemsPerPage);
             const controlsHtml = `
                 <div class="d-flex flex-wrap align-items-center gap-1 gap-sm-2">
                     <span class="text-nowrap">${totalPages > 0 ? currentPage : 0}/${totalPages}ページ</span>
@@ -7059,9 +7116,104 @@
             updateCollectionStats(); // Update immediately
         });
         
+        // Daily challenges toggle
+        const showDailyChallengesToggle = document.getElementById('show-daily-challenges-toggle');
+        showDailyChallengesToggle.addEventListener('change', (e) => {
+            const show = e.target.checked;
+            localStorage.setItem('showDailyChallenges', show);
+            const dailyChallengesCard = document.getElementById('daily-challenges-card');
+            if (dailyChallengesCard) {
+                dailyChallengesCard.style.display = show ? 'block' : 'none';
+            }
+        });
+
+        // Auto save toggle
+        const autoSaveToggle = document.getElementById('auto-save-toggle');
+        let autoSaveInterval = null;
+        autoSaveToggle.addEventListener('change', (e) => {
+            const enable = e.target.checked;
+            localStorage.setItem('autoSave', enable);
+
+            if (enable) {
+                // Set up auto save interval (5 minutes)
+                autoSaveInterval = setInterval(() => {
+                    if (currentUser && currentUser.uid !== 'local_user') {
+                        // Auto save to Firebase
+                        console.log('Auto saving...');
+                        // The data is already being saved when cards are added/modified
+                    } else {
+                        // Save to localStorage
+                        localStorage.setItem('cardCollection', JSON.stringify(cardCollection.map(c => c.data)));
+                        localStorage.setItem('wishlistCollection', JSON.stringify(wishlistCollection.map(c => c.data)));
+                    }
+                }, 300000); // 5 minutes
+            } else {
+                if (autoSaveInterval) {
+                    clearInterval(autoSaveInterval);
+                    autoSaveInterval = null;
+                }
+            }
+        });
+
+        // Show notifications toggle
+        const showNotificationsToggle = document.getElementById('show-notifications-toggle');
+        showNotificationsToggle.addEventListener('change', (e) => {
+            localStorage.setItem('showNotifications', e.target.checked);
+        });
+
+        // Sound effects toggle
+        const soundEffectsToggle = document.getElementById('sound-effects-toggle');
+        soundEffectsToggle.addEventListener('change', (e) => {
+            localStorage.setItem('soundEffects', e.target.checked);
+        });
+
+        // Enable animations toggle
+        const enableAnimationsToggle = document.getElementById('enable-animations-toggle');
+        enableAnimationsToggle.addEventListener('change', (e) => {
+            const enable = e.target.checked;
+            localStorage.setItem('enableAnimations', enable);
+
+            // Apply or remove animation classes
+            if (enable) {
+                document.body.classList.remove('no-animations');
+            } else {
+                document.body.classList.add('no-animations');
+            }
+        });
+
+        // Table rows per page
+        const tableRowsPerPage = document.getElementById('table-rows-per-page');
+        tableRowsPerPage.addEventListener('change', (e) => {
+            localStorage.setItem('tableRowsPerPage', e.target.value);
+            applySearchAndFilter(); // Re-render table with new row limit
+        });
+
         // Initialize settings
         hideEmailToggle.checked = localStorage.getItem('hideEmail') === 'true';
         hideStatsToggle.checked = localStorage.getItem('hideStats') === 'true';
+        showDailyChallengesToggle.checked = localStorage.getItem('showDailyChallenges') !== 'false'; // Default true
+        autoSaveToggle.checked = localStorage.getItem('autoSave') === 'true';
+        showNotificationsToggle.checked = localStorage.getItem('showNotifications') !== 'false'; // Default true
+        soundEffectsToggle.checked = localStorage.getItem('soundEffects') === 'true';
+        enableAnimationsToggle.checked = localStorage.getItem('enableAnimations') !== 'false'; // Default true
+        tableRowsPerPage.value = localStorage.getItem('tableRowsPerPage') || '100';
+
+        // Apply initial settings
+        if (localStorage.getItem('showDailyChallenges') === 'false') {
+            const dailyChallengesCard = document.getElementById('daily-challenges-card');
+            if (dailyChallengesCard) {
+                dailyChallengesCard.style.display = 'none';
+            }
+        }
+
+        if (localStorage.getItem('enableAnimations') === 'false') {
+            document.body.classList.add('no-animations');
+        }
+
+        if (autoSaveToggle.checked) {
+            // Start auto save if enabled
+            autoSaveToggle.dispatchEvent(new Event('change'));
+        }
         
         // Stats info button
         document.getElementById('stats-info-btn').addEventListener('click', () => {
