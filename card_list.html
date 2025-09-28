@@ -845,19 +845,24 @@
             }
             .table { font-size: 0.875rem; }
 
-            /* Fix modal positioning on mobile */
+            /* Fix modal positioning on mobile - Remove centered positioning */
             .modal-dialog {
-                margin: 1.75rem auto !important;
+                margin: 0.5rem !important;
                 max-width: calc(100% - 1rem);
             }
             .modal-dialog-centered {
-                min-height: calc(100% - 3.5rem);
+                min-height: auto !important;
+                display: flex !important;
+                align-items: flex-start !important;
             }
             .modal-dialog-centered::before {
-                height: calc(100vh - 3.5rem);
+                display: none !important;
+            }
+            .modal {
+                padding-top: 1rem !important;
             }
             .modal-content {
-                max-height: calc(100vh - 3.5rem);
+                max-height: calc(100vh - 2rem);
                 overflow-y: auto;
             }
             /* Ensure modals are visible */
@@ -1171,16 +1176,6 @@
 
         .clear-race-btn {
             margin-bottom: 5px;
-        }
-
-        /* No animations mode */
-        body.no-animations * {
-            transition: none !important;
-            animation: none !important;
-        }
-
-        body.no-animations .progress-bar {
-            transition: width 0.1s !important; /* Keep progress bar functional but fast */
         }
     </style>
 </head>
@@ -1883,22 +1878,7 @@
                 </div>
 
                 <hr>
-                <h6 class="mb-3"><i class="bi bi-bell"></i> 通知設定</h6>
-                <div class="form-check form-switch mb-3">
-                    <input class="form-check-input" type="checkbox" role="switch" id="show-notifications-toggle">
-                    <label class="form-check-label" for="show-notifications-toggle">アプリ内通知を表示</label>
-                </div>
-                <div class="form-check form-switch mb-3">
-                    <input class="form-check-input" type="checkbox" role="switch" id="sound-effects-toggle">
-                    <label class="form-check-label" for="sound-effects-toggle">効果音を有効にする</label>
-                </div>
-
-                <hr>
                 <h6 class="mb-3"><i class="bi bi-speedometer2"></i> パフォーマンス設定</h6>
-                <div class="form-check form-switch mb-3">
-                    <input class="form-check-input" type="checkbox" role="switch" id="enable-animations-toggle">
-                    <label class="form-check-label" for="enable-animations-toggle">アニメーションを有効にする</label>
-                </div>
                 <div class="mb-3">
                     <label for="table-rows-per-page" class="form-label">テーブルの表示行数</label>
                     <select class="form-select form-select-sm" id="table-rows-per-page">
@@ -7155,32 +7135,6 @@
             }
         });
 
-        // Show notifications toggle
-        const showNotificationsToggle = document.getElementById('show-notifications-toggle');
-        showNotificationsToggle.addEventListener('change', (e) => {
-            localStorage.setItem('showNotifications', e.target.checked);
-        });
-
-        // Sound effects toggle
-        const soundEffectsToggle = document.getElementById('sound-effects-toggle');
-        soundEffectsToggle.addEventListener('change', (e) => {
-            localStorage.setItem('soundEffects', e.target.checked);
-        });
-
-        // Enable animations toggle
-        const enableAnimationsToggle = document.getElementById('enable-animations-toggle');
-        enableAnimationsToggle.addEventListener('change', (e) => {
-            const enable = e.target.checked;
-            localStorage.setItem('enableAnimations', enable);
-
-            // Apply or remove animation classes
-            if (enable) {
-                document.body.classList.remove('no-animations');
-            } else {
-                document.body.classList.add('no-animations');
-            }
-        });
-
         // Table rows per page
         const tableRowsPerPage = document.getElementById('table-rows-per-page');
         tableRowsPerPage.addEventListener('change', (e) => {
@@ -7193,9 +7147,6 @@
         hideStatsToggle.checked = localStorage.getItem('hideStats') === 'true';
         showDailyChallengesToggle.checked = localStorage.getItem('showDailyChallenges') !== 'false'; // Default true
         autoSaveToggle.checked = localStorage.getItem('autoSave') === 'true';
-        showNotificationsToggle.checked = localStorage.getItem('showNotifications') !== 'false'; // Default true
-        soundEffectsToggle.checked = localStorage.getItem('soundEffects') === 'true';
-        enableAnimationsToggle.checked = localStorage.getItem('enableAnimations') !== 'false'; // Default true
         tableRowsPerPage.value = localStorage.getItem('tableRowsPerPage') || '100';
 
         // Apply initial settings
@@ -7204,10 +7155,6 @@
             if (dailyChallengesCard) {
                 dailyChallengesCard.style.display = 'none';
             }
-        }
-
-        if (localStorage.getItem('enableAnimations') === 'false') {
-            document.body.classList.add('no-animations');
         }
 
         if (autoSaveToggle.checked) {
