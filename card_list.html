@@ -845,25 +845,34 @@
             }
             .table { font-size: 0.875rem; }
 
-            /* Fix modal positioning on mobile - Natural scroll position */
+            /* Fix modal positioning on mobile - Always in viewport */
             .modal-dialog {
-                margin: 1.75rem 0.5rem !important;
-                max-width: calc(100% - 1rem);
+                position: fixed !important;
+                top: 50% !important;
+                left: 50% !important;
+                transform: translate(-50%, -50%) !important;
+                margin: 0 !important;
+                max-width: calc(100% - 2rem);
+                max-height: calc(100vh - 2rem);
+                width: calc(100% - 2rem);
             }
             .modal-dialog-centered {
                 min-height: auto !important;
-                align-items: flex-start !important;
+                align-items: center !important;
             }
             .modal-dialog-centered::before {
                 display: none !important;
             }
             .modal-dialog-scrollable {
                 height: auto !important;
-                max-height: calc(100vh - 3.5rem);
+                max-height: calc(100vh - 2rem);
             }
             .modal-content {
-                max-height: calc(100vh - 3.5rem);
+                max-height: calc(100vh - 2rem);
                 overflow-y: auto;
+            }
+            .modal {
+                overflow-y: auto !important;
             }
             /* Ensure modals are visible */
             .modal.show {
@@ -2923,6 +2932,47 @@
         const tagManagementModal = new bootstrap.Modal(document.getElementById('tag-management-modal'));
         const bulkTagModal = new bootstrap.Modal(document.getElementById('bulk-tag-modal'));
         const analysisModal = new bootstrap.Modal(document.getElementById('analysis-modal'));
+
+        // Ensure modals are always visible when opened
+        const ensureModalVisible = (modalElement) => {
+            if (!modalElement) return;
+
+            // For mobile devices, scroll to top and reset any scroll position
+            if (window.innerWidth <= 768) {
+                // Reset scroll position to top
+                window.scrollTo(0, 0);
+                document.body.scrollTop = 0;
+                document.documentElement.scrollTop = 0;
+
+                // Ensure modal dialog is properly positioned
+                const modalDialog = modalElement.querySelector('.modal-dialog');
+                if (modalDialog) {
+                    modalDialog.scrollIntoView({ behavior: 'instant', block: 'center' });
+                }
+            }
+        };
+
+        // Add show event listeners for all modals
+        const modalElements = [
+            'auth-modal', 'edit-card-modal', 'card-detail-modal',
+            'how-to-use-modal', 'settings-modal', 'tag-management-modal',
+            'bulk-tag-modal', 'analysis-modal', 'point-shop-modal',
+            'profile-modal', 'ranking-modal', 'stats-info-modal'
+        ];
+
+        modalElements.forEach(modalId => {
+            const modalEl = document.getElementById(modalId);
+            if (modalEl) {
+                modalEl.addEventListener('show.bs.modal', () => {
+                    ensureModalVisible(modalEl);
+                });
+
+                // Also ensure visibility after modal is fully shown
+                modalEl.addEventListener('shown.bs.modal', () => {
+                    ensureModalVisible(modalEl);
+                });
+            }
+        });
         const authError = document.getElementById('auth-error');
         const logoutBtn = document.getElementById('logout-btn');
         const userEmailSpan = document.getElementById('user-email');
