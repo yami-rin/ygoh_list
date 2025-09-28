@@ -5984,6 +5984,37 @@
                     selectorContainer.appendChild(btn);
                 }
             });
+
+            // Add gacha exclusive icons that have been obtained
+            SHOP_ITEMS.exclusiveIcons.forEach(exclusiveIcon => {
+                if (gamificationData.purchasedItems[exclusiveIcon.id]) {
+                    const btn = document.createElement('button');
+                    btn.type = 'button';
+                    btn.className = 'btn btn-outline-secondary icon-select';
+                    btn.dataset.icon = exclusiveIcon.emoji;
+
+                    // Add special badge based on rarity
+                    const rarityLabel = exclusiveIcon.rarity === 'legendary' ?
+                        '<span class="badge bg-danger" style="font-size: 0.5rem;">LEGENDARY</span>' :
+                        '<span class="badge bg-warning" style="font-size: 0.5rem;">ULTRA RARE</span>';
+
+                    btn.innerHTML = `${exclusiveIcon.emoji} <small class="d-block" style="font-size: 0.6rem;">${rarityLabel}</small>`;
+                    btn.style.position = 'relative';
+
+                    // Add special border for legendary items
+                    if (exclusiveIcon.rarity === 'legendary') {
+                        btn.style.border = '2px solid #ffd700';
+                        btn.style.boxShadow = '0 0 10px rgba(255, 215, 0, 0.3)';
+                    }
+
+                    btn.addEventListener('click', () => {
+                        document.querySelectorAll('.icon-select').forEach(b => b.classList.remove('active'));
+                        btn.classList.add('active');
+                        selectedIcon = exclusiveIcon.emoji;
+                    });
+                    selectorContainer.appendChild(btn);
+                }
+            });
         };
         
         // Initialize profile functionality
