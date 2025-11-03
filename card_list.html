@@ -5500,6 +5500,18 @@
             const sAttack = document.querySelector('[name="search_attack"]')?.value?.trim();
             const sDefense = document.querySelector('[name="search_defense"]')?.value?.trim();
 
+            // Debug logging
+            console.log('=== Search Debug ===');
+            console.log('Search Mode:', searchMode);
+            console.log('Advanced Criteria:', {
+                level: sLevel,
+                attribute: sAttribute,
+                races: sRaces,
+                cardTypes: sCardTypes,
+                attack: sAttack,
+                defense: sDefense
+            });
+
             // Get possible card names from hiragana reading
             let possibleCardNames = [];
             if (sN) {
@@ -5519,7 +5531,11 @@
 
             // Helper function to check range values (e.g., "2000-3000" or "2500")
             const checkRange = (value, rangeStr) => {
-                if (!rangeStr || !value) return true;
+                // 検索条件がない場合は常にtrue
+                if (!rangeStr) return true;
+
+                // カードにデータがない場合（検索条件があるのにカードにデータがない）
+                if (value === null || value === undefined || value === '') return false;
 
                 // Handle range (e.g., "2000-3000")
                 if (rangeStr.includes('-')) {
@@ -5529,8 +5545,14 @@
                 }
 
                 // Handle single value
-                return value === rangeStr;
+                return value.toString() === rangeStr;
             };
+
+            let matchCount = 0;
+            let totalCards = getCurrentCollection().length;
+            let matchedCards = [];
+            let debugLogCount = 0;
+            const MAX_DEBUG_LOGS = 10;
 
             filteredCardCollection = getCurrentCollection().filter(c => {
                 const d = c.data;
@@ -5578,15 +5600,20 @@
                         if (searchMode === 'or') {
                             // OR検索：いずれかの条件を満たせばOK
                             let orMatch = false;
+                            const debugChecks = [];
 
                             // Check level
-                            if (sLevel && checkRange(details.level, sLevel)) {
-                                orMatch = true;
+                            if (sLevel) {
+                                const levelCheck = checkRange(details.level, sLevel);
+                                debugChecks.push(`Level: ${details.level} vs ${sLevel} = ${levelCheck}`);
+                                if (levelCheck) orMatch = true;
                             }
 
                             // Check attribute
-                            if (sAttribute && details.attribute === sAttribute) {
-                                orMatch = true;
+                            if (sAttribute) {
+                                const attrCheck = details.attribute === sAttribute;
+                                debugChecks.push(`Attribute: ${details.attribute} vs ${sAttribute} = ${attrCheck}`);
+                                if (attrCheck) orMatch = true;
                             }
 
                             // Check races (multiple selection)
@@ -5595,6 +5622,7 @@
                                     if (!race) return false;
                                     return details.race === race;
                                 });
+                                debugChecks.push(`Race: ${details.race} in [${sRaces.join(',')}] = ${hasMatchingRace}`);
                                 if (hasMatchingRace) orMatch = true;
                             }
 
@@ -5610,31 +5638,46 @@
                                         return details.cardType && details.cardType.includes(type);
                                     }
                                 });
+                                debugChecks.push(`CardType: ${details.cardType} matches [${sCardTypes.join(',')}] = ${hasMatchingType}`);
                                 if (hasMatchingType) orMatch = true;
                             }
 
                             // Check attack
-                            if (sAttack && checkRange(details.attack, sAttack)) {
-                                orMatch = true;
+                            if (sAttack) {
+                                const atkCheck = checkRange(details.attack, sAttack);
+                                debugChecks.push(`Attack: ${details.attack} vs ${sAttack} = ${atkCheck}`);
+                                if (atkCheck) orMatch = true;
                             }
 
                             // Check defense
-                            if (sDefense && checkRange(details.defense, sDefense)) {
-                                orMatch = true;
+                            if (sDefense) {
+                                const defCheck = checkRange(details.defense, sDefense);
+                                debugChecks.push(`Defense: ${details.defense} vs ${sDefense} = ${defCheck}`);
+                                if (defCheck) orMatch = true;
+                            }
+
+                            if (debugChecks.length > 0 && !orMatch && debugLogCount < MAX_DEBUG_LOGS) {
+                                console.log(`[OR] Card: ${cardName} FAILED - ${debugChecks.join(', ')}`);
+                                debugLogCount++;
                             }
 
                             advancedMatch = orMatch;
                         } else {
                             // AND検索：すべての条件を満たす必要がある（デフォルト）
+                            const debugChecks = [];
 
                             // Check level
                             if (sLevel) {
-                                advancedMatch = advancedMatch && checkRange(details.level, sLevel);
+                                const levelCheck = checkRange(details.level, sLevel);
+                                debugChecks.push(`Level: ${details.level} vs ${sLevel} = ${levelCheck}`);
+                                advancedMatch = advancedMatch && levelCheck;
                             }
 
                             // Check attribute
                             if (sAttribute) {
-                                advancedMatch = advancedMatch && details.attribute === sAttribute;
+                                const attrCheck = details.attribute === sAttribute;
+                                debugChecks.push(`Attribute: ${details.attribute} vs ${sAttribute} = ${attrCheck}`);
+                                advancedMatch = advancedMatch && attrCheck;
                             }
 
                             // Check races (multiple selection)
@@ -5644,6 +5687,7 @@
                                     if (!race) return false;
                                     return details.race === race;
                                 });
+                                debugChecks.push(`Race: ${details.race} in [${sRaces.join(',')}] = ${hasMatchingRace}`);
                                 advancedMatch = advancedMatch && hasMatchingRace;
                             }
 
@@ -5659,17 +5703,27 @@
                                         return details.cardType && details.cardType.includes(type);
                                     }
                                 });
+                                debugChecks.push(`CardType: ${details.cardType} matches [${sCardTypes.join(',')}] = ${hasMatchingType}`);
                                 advancedMatch = advancedMatch && hasMatchingType;
                             }
 
                             // Check attack
                             if (sAttack) {
-                                advancedMatch = advancedMatch && checkRange(details.attack, sAttack);
+                                const atkCheck = checkRange(details.attack, sAttack);
+                                debugChecks.push(`Attack: ${details.attack} vs ${sAttack} = ${atkCheck}`);
+                                advancedMatch = advancedMatch && atkCheck;
                             }
 
                             // Check defense
                             if (sDefense) {
-                                advancedMatch = advancedMatch && checkRange(details.defense, sDefense);
+                                const defCheck = checkRange(details.defense, sDefense);
+                                debugChecks.push(`Defense: ${details.defense} vs ${sDefense} = ${defCheck}`);
+                                advancedMatch = advancedMatch && defCheck;
+                            }
+
+                            if (debugChecks.length > 0 && !advancedMatch && debugLogCount < MAX_DEBUG_LOGS) {
+                                console.log(`[AND] Card: ${cardName} FAILED - ${debugChecks.join(', ')}`);
+                                debugLogCount++;
                             }
                         }
                     }
@@ -5679,12 +5733,28 @@
                     advancedMatch = false;
                 }
 
-                return nameMatch &&
+                const finalMatch = nameMatch &&
                        (!sC || normalizeForSearch(d['型番']||'').includes(sC)) &&
                        (!sR || normalizeForSearch(d['レアリティ']||'').includes(sR)) &&
                        (!sT || normalizeForSearch((d.tags||[]).join(',')).includes(sT)) &&
                        advancedMatch;
+
+                if (finalMatch) {
+                    matchCount++;
+                    if (matchedCards.length < 5) {
+                        matchedCards.push(cardName);
+                    }
+                }
+
+                return finalMatch;
             });
+
+            console.log(`Search Results: ${matchCount}/${totalCards} cards matched`);
+            if (matchedCards.length > 0) {
+                console.log('First matched cards:', matchedCards.join(', '));
+            }
+            console.log('===================');
+
             currentPage = 1;
             renderTable();
         };
