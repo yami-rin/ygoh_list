@@ -9150,35 +9150,52 @@ Firebase Consoleで確認すべき項目:
 
                 for (const card of selectedCards) {
                     try {
-                        // Check if card already exists
+                        // Check if exact same card already exists (name + number + rarity + tags)
+                        // Query by name first to narrow down candidates
                         const q = query(cardsRef, where('名前', '==', card.name));
                         const querySnapshot = await getDocs(q);
 
-                        if (!querySnapshot.empty) {
-                            // Update existing card quantity
-                            const existingDoc = querySnapshot.docs[0];
-                            const existingQuantity = existingDoc.data()['枚数'] || 0;
-                            const updateData = {
+                        // Find exact match considering card number, rarity, and tags
+                        let exactMatch = null;
+                        const cardNumber = card.number || '';
+                        const cardRarity = card.rarity || '';
+                        const cardTags = card.tags || [];
+
+                        for (const doc of querySnapshot.docs) {
+                            const data = doc.data();
+                            const docNumber = data['型番'] || '';
+                            const docRarity = data['レアリティ'] || '';
+                            const docTags = data.tags || [];
+
+                            // Check if all fields match
+                            if (docNumber === cardNumber && docRarity === cardRarity) {
+                                // Check if tags match (same length and all elements present)
+                                if (docTags.length === cardTags.length) {
+                                    const tagsMatch = docTags.every(tag => cardTags.includes(tag)) &&
+                                                    cardTags.every(tag => docTags.includes(tag));
+                                    if (tagsMatch) {
+                                        exactMatch = doc;
+                                        break;
+                                    }
+                                }
+                            }
+                        }
+
+                        if (exactMatch) {
+                            // Found exact match - add to existing quantity
+                            const existingQuantity = exactMatch.data()['枚数'] || 0;
+                            await updateDoc(exactMatch.ref, {
                                 '枚数': existingQuantity + card.quantity,
                                 '最終更新日': new Date().toISOString().split('T')[0]
-                            };
-                            // Update rarity if provided
-                            if (card.rarity) {
-                                updateData['レアリティ'] = card.rarity;
-                            }
-                            // Update card number if provided
-                            if (card.number) {
-                                updateData['型番'] = card.number;
-                            }
-                            await updateDoc(existingDoc.ref, updateData);
+                            });
                         } else {
-                            // Add new card
+                            // No exact match - add as new card (separate stack)
                             await addDoc(cardsRef, {
                                 '名前': card.name,
-                                '型番': card.number || '',
-                                'レアリティ': card.rarity || '',
+                                '型番': cardNumber,
+                                'レアリティ': cardRarity,
                                 '枚数': card.quantity,
-                                'tags': [],
+                                'tags': cardTags,
                                 '登録日': new Date().toISOString().split('T')[0],
                                 '最終更新日': new Date().toISOString().split('T')[0]
                             });
