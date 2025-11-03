@@ -162,10 +162,13 @@ app.get('/card-list', async (req, res) => {
         }
 
         // Find all rarity class elements
+        // The pattern looks for: <div class="icon rarity pack_X">
         const rarityPattern = /<div\s+class="icon\s+rarity\s+pack_([a-z0-9]+)"[^>]*>/gi;
         const rarities = [];
+        const rarityCodesFound = [];
         while ((match = rarityPattern.exec(html)) !== null) {
             const rarityCode = match[1].toLowerCase();
+            rarityCodesFound.push(rarityCode);
             // Map rarity codes to Japanese rarity names
             const rarityMap = {
                 'n': 'ノーマル',
@@ -184,10 +187,13 @@ app.get('/card-list', async (req, res) => {
                 'kc': 'KCレア',
                 'kcr': 'KCウルトラレア'
             };
-            rarities.push(rarityMap[rarityCode] || 'その他');
+            const mappedRarity = rarityMap[rarityCode] || 'その他';
+            rarities.push(mappedRarity);
+            console.log(`Rarity code: ${rarityCode} -> ${mappedRarity}`);
         }
 
         console.log(`Found ${cardNames.length} card names, ${cardIds.length} card IDs, ${rarities.length} rarities`);
+        console.log(`Rarity codes found:`, rarityCodesFound);
 
         // Get card number (型番) from the first card's detail page
         let baseCardNumber = '';
