@@ -8974,22 +8974,37 @@ Firebase Consoleで確認すべき項目:
                 // Load images asynchronously with fetch to avoid CORS issues
                 const loadCardImage = async (cardId, imgElement) => {
                     try {
-                        const proxyUrl = `https://ygoh-list.onrender.com/image?cid=${cardId}`;
                         console.log(`Loading image for card ${cardId}...`);
 
-                        const response = await fetch(proxyUrl);
-                        console.log(`Response for card ${cardId}: status=${response.status}, ok=${response.ok}`);
+                        // First, get card details to obtain the enc token
+                        const detailUrl = `https://ygoh-list.onrender.com/card-detail?cid=${cardId}`;
+                        const detailResponse = await fetch(detailUrl);
 
-                        if (response.ok) {
-                            const blob = await response.blob();
+                        if (!detailResponse.ok) {
+                            throw new Error(`Failed to get card details: HTTP ${detailResponse.status}`);
+                        }
+
+                        const detailData = await detailResponse.json();
+                        console.log(`Card detail for ${cardId}:`, detailData);
+
+                        // Use the imageUrl from card details (which includes enc token)
+                        const imageUrl = detailData.imageUrl;
+                        if (!imageUrl) {
+                            throw new Error('No image URL in card details');
+                        }
+
+                        console.log(`Fetching image from: ${imageUrl}`);
+                        const imageResponse = await fetch(imageUrl);
+                        console.log(`Image response for card ${cardId}: status=${imageResponse.status}, ok=${imageResponse.ok}`);
+
+                        if (imageResponse.ok) {
+                            const blob = await imageResponse.blob();
                             console.log(`Blob created for card ${cardId}: type=${blob.type}, size=${blob.size}`);
                             const blobUrl = URL.createObjectURL(blob);
                             imgElement.src = blobUrl;
                             console.log(`Image loaded successfully for card ${cardId}`);
                         } else {
-                            const errorText = await response.text();
-                            console.error(`Failed to load image for card ${cardId}: HTTP ${response.status}, ${errorText}`);
-                            throw new Error(`HTTP ${response.status}: ${errorText}`);
+                            throw new Error(`Failed to load image: HTTP ${imageResponse.status}`);
                         }
                     } catch (error) {
                         console.error(`Error loading image for card ${cardId}:`, error);
