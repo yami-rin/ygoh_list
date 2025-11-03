@@ -142,39 +142,67 @@ app.get('/card-list', async (req, res) => {
 
         // Parse card list from HTML
         const cards = [];
-        const cardPattern = /<input[^>]*name="cid"[^>]*value="(\d+)"[^>]*>[\s\S]*?<span[^>]*class="card_name"[^>]*>(.*?)<\/span>/g;
+        const cardMap = new Map(); // To avoid duplicates
 
+        // Pattern 1: Link with card ID in href
+        const pattern1 = /card_search\.action\?ope=2(?:&amp;|&)cid=(\d+)(?:&amp;|&)request_locale=ja[^>]*>([^<]+)</g;
         let match;
-        while ((match = cardPattern.exec(html)) !== null) {
+        while ((match = pattern1.exec(html)) !== null) {
             const cardId = match[1];
-            const cardName = match[2].replace(/<[^>]+>/g, '').trim();
-
-            if (cardId && cardName) {
-                cards.push({
-                    id: cardId,
-                    name: cardName
-                });
+            const cardName = match[2].trim();
+            if (cardId && cardName && !cardMap.has(cardId)) {
+                cardMap.set(cardId, cardName);
             }
         }
 
-        // Alternative parsing if first method fails
-        if (cards.length === 0) {
-            const altPattern = /<div[^>]*class=".*?card_list.*?"[\s\S]*?<a[^>]*href="card_search\.action\?ope=2&cid=(\d+)"[^>]*>([\s\S]*?)<\/a>/g;
-
-            while ((match = altPattern.exec(html)) !== null) {
-                const cardId = match[1];
-                const cardNameHtml = match[2];
-                const nameMatch = cardNameHtml.match(/>([^<]+)</);
-                const cardName = nameMatch ? nameMatch[1].trim() : '';
-
-                if (cardId && cardName) {
-                    cards.push({
-                        id: cardId,
-                        name: cardName
-                    });
+        // Pattern 2: Strong tag with card name and nearby link
+        if (cardMap.size === 0) {
+            const pattern2 = /<strong[^>]*class="card_name"[^>]*>(.*?)<\/strong>[\s\S]{0,200}?cid=(\d+)/g;
+            while ((match = pattern2.exec(html)) !== null) {
+                const cardName = match[1].replace(/<[^>]+>/g, '').trim();
+                const cardId = match[2];
+                if (cardId && cardName && !cardMap.has(cardId)) {
+                    cardMap.set(cardId, cardName);
                 }
             }
         }
+
+        // Pattern 3: Input with name="cid" and value
+        if (cardMap.size === 0) {
+            const pattern3 = /<input[^>]*name="cid"[^>]*value="(\d+)"[^>]*>/g;
+            const cidMatches = [...html.matchAll(pattern3)];
+
+            // Try to find corresponding card names
+            const namePattern = /<(?:span|strong)[^>]*class="[^"]*card_name[^"]*"[^>]*>([^<]+)<\/(?:span|strong)>/g;
+            const nameMatches = [...html.matchAll(namePattern)];
+
+            cidMatches.forEach((cidMatch, index) => {
+                const cardId = cidMatch[1];
+                const cardName = nameMatches[index] ? nameMatches[index][1].trim() : null;
+                if (cardId && cardName && !cardMap.has(cardId)) {
+                    cardMap.set(cardId, cardName);
+                }
+            });
+        }
+
+        // Pattern 4: More flexible - any link containing cid parameter
+        if (cardMap.size === 0) {
+            const pattern4 = /<a[^>]*href="[^"]*cid=(\d+)[^"]*"[^>]*>([\s\S]*?)<\/a>/g;
+            while ((match = pattern4.exec(html)) !== null) {
+                const cardId = match[1];
+                const linkContent = match[2];
+                // Extract text, removing HTML tags
+                const cardName = linkContent.replace(/<[^>]+>/g, '').trim();
+                if (cardId && cardName && cardName.length > 2 && !cardMap.has(cardId)) {
+                    cardMap.set(cardId, cardName);
+                }
+            }
+        }
+
+        // Convert map to array
+        cardMap.forEach((name, id) => {
+            cards.push({ id, name });
+        });
 
         console.log(`Found ${cards.length} cards from search results`);
 
