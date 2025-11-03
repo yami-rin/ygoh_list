@@ -1,0 +1,312 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>遊戯王画像API 詳細テスト</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        body {
+            background: #f5f5f5;
+        }
+        .api-test {
+            background: white;
+            border-radius: 8px;
+            padding: 1rem;
+            margin-bottom: 1rem;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        .api-test.success {
+            border-left: 4px solid #28a745;
+        }
+        .api-test.error {
+            border-left: 4px solid #dc3545;
+        }
+        .api-test img {
+            max-width: 200px;
+            border: 2px solid #ddd;
+            border-radius: 4px;
+        }
+        .code-block {
+            background: #f8f9fa;
+            padding: 0.5rem;
+            border-radius: 4px;
+            font-family: monospace;
+            font-size: 0.85rem;
+            overflow-x: auto;
+        }
+    </style>
+</head>
+<body>
+    <div class="container py-4">
+        <h1 class="mb-4">🎴 遊戯王画像API 詳細テスト</h1>
+
+        <div class="card mb-4">
+            <div class="card-header bg-primary text-white">
+                <h5 class="mb-0">テスト設定</h5>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-6 mb-3">
+                        <label class="form-label">カードID (cid)</label>
+                        <input type="number" class="form-control" id="test-cid" value="21967">
+                        <small class="text-muted">例: 21967, 4001, 5318</small>
+                    </div>
+                    <div class="col-md-6 mb-3">
+                        <label class="form-label">暗号化パラメータ (enc)</label>
+                        <input type="text" class="form-control" id="test-enc" value="4CGllVHuyOJeD-vrlwoqmA">
+                        <small class="text-muted">元のHTMLから取得</small>
+                    </div>
+                </div>
+                <button class="btn btn-primary" onclick="runTests()">
+                    <i class="bi bi-play-fill"></i> テスト実行
+                </button>
+                <button class="btn btn-secondary" onclick="testMultipleCards()">
+                    <i class="bi bi-grid-3x3"></i> 複数カードテスト
+                </button>
+            </div>
+        </div>
+
+        <div id="test-results"></div>
+    </div>
+
+    <script>
+        const API_ENDPOINTS = [
+            {
+                id: 'get_image_with_enc',
+                name: 'get_image.action (encあり)',
+                template: (cid, enc) => `https://www.db.yugioh-card.com/yugiohdb/get_image.action?type=2&cid=${cid}&ciid=1&enc=${enc}`,
+                requiresEnc: true
+            },
+            {
+                id: 'get_image_no_enc',
+                name: 'get_image.action (encなし)',
+                template: (cid) => `https://www.db.yugioh-card.com/yugiohdb/get_image.action?type=2&cid=${cid}&ciid=1`,
+                requiresEnc: false
+            },
+            {
+                id: 'card_image_ja',
+                name: 'card_image.action (日本語)',
+                template: (cid) => `https://www.db.yugioh-card.com/yugiohdb/card_image.action?cid=${cid}&request_locale=ja`,
+                requiresEnc: false
+            },
+            {
+                id: 'card_image_en',
+                name: 'card_image.action (英語)',
+                template: (cid) => `https://www.db.yugioh-card.com/yugiohdb/card_image.action?cid=${cid}&request_locale=en`,
+                requiresEnc: false
+            },
+            {
+                id: 'get_image_type1',
+                name: 'get_image.action (type=1)',
+                template: (cid) => `https://www.db.yugioh-card.com/yugiohdb/get_image.action?type=1&cid=${cid}&ciid=1`,
+                requiresEnc: false
+            },
+            {
+                id: 'get_image_type3',
+                name: 'get_image.action (type=3)',
+                template: (cid) => `https://www.db.yugioh-card.com/yugiohdb/get_image.action?type=3&cid=${cid}&ciid=1`,
+                requiresEnc: false
+            }
+        ];
+
+        async function testImageURL(url, apiInfo) {
+            return new Promise((resolve) => {
+                const img = new Image();
+                const startTime = performance.now();
+
+                // CORSエラーを回避するための設定
+                img.crossOrigin = "anonymous";
+
+                const timeout = setTimeout(() => {
+                    resolve({
+                        success: false,
+                        error: 'Timeout (10秒)',
+                        ...apiInfo
+                    });
+                }, 10000);
+
+                img.onload = () => {
+                    clearTimeout(timeout);
+                    const loadTime = Math.round(performance.now() - startTime);
+                    resolve({
+                        success: true,
+                        width: img.naturalWidth,
+                        height: img.naturalHeight,
+                        loadTime: loadTime,
+                        url: url,
+                        imageElement: img,
+                        ...apiInfo
+                    });
+                };
+
+                img.onerror = (e) => {
+                    clearTimeout(timeout);
+                    resolve({
+                        success: false,
+                        error: 'Failed to load (CORS or 404)',
+                        url: url,
+                        ...apiInfo
+                    });
+                };
+
+                img.src = url;
+            });
+        }
+
+        async function runTests() {
+            const cid = document.getElementById('test-cid').value;
+            const enc = document.getElementById('test-enc').value;
+            const resultsDiv = document.getElementById('test-results');
+
+            resultsDiv.innerHTML = '<div class="alert alert-info">テスト実行中... ⏳</div>';
+
+            const results = [];
+
+            for (const api of API_ENDPOINTS) {
+                const url = api.requiresEnc ? api.template(cid, enc) : api.template(cid);
+                const result = await testImageURL(url, { ...api, url });
+                results.push(result);
+            }
+
+            displayResults(results);
+        }
+
+        function displayResults(results) {
+            const resultsDiv = document.getElementById('test-results');
+            resultsDiv.innerHTML = '';
+
+            // サマリー
+            const successCount = results.filter(r => r.success).length;
+            const totalCount = results.length;
+
+            const summaryDiv = document.createElement('div');
+            summaryDiv.className = `alert ${successCount > 0 ? 'alert-success' : 'alert-danger'}`;
+            summaryDiv.innerHTML = `
+                <h5>📊 テスト結果サマリー</h5>
+                <p class="mb-0">成功: <strong>${successCount} / ${totalCount}</strong> API</p>
+            `;
+            resultsDiv.appendChild(summaryDiv);
+
+            // 各APIの結果
+            results.forEach(result => {
+                const div = document.createElement('div');
+                div.className = `api-test ${result.success ? 'success' : 'error'}`;
+
+                if (result.success) {
+                    div.innerHTML = `
+                        <div class="row">
+                            <div class="col-md-8">
+                                <h6>✅ ${result.name}</h6>
+                                <div class="code-block mb-2">${result.url}</div>
+                                <ul class="mb-0">
+                                    <li><strong>画像サイズ:</strong> ${result.width} x ${result.height}px</li>
+                                    <li><strong>読み込み時間:</strong> ${result.loadTime}ms</li>
+                                    <li><strong>アスペクト比:</strong> ${(result.width / result.height).toFixed(3)}</li>
+                                </ul>
+                            </div>
+                            <div class="col-md-4 text-center">
+                                <img src="${result.url}" alt="${result.name}">
+                            </div>
+                        </div>
+                    `;
+                } else {
+                    div.innerHTML = `
+                        <h6>❌ ${result.name}</h6>
+                        <div class="code-block mb-2">${result.url}</div>
+                        <p class="text-danger mb-0"><strong>エラー:</strong> ${result.error}</p>
+                    `;
+                }
+
+                resultsDiv.appendChild(div);
+            });
+
+            // 推奨API
+            const bestAPI = results.filter(r => r.success).sort((a, b) => a.loadTime - b.loadTime)[0];
+            if (bestAPI) {
+                const recommendDiv = document.createElement('div');
+                recommendDiv.className = 'alert alert-info mt-3';
+                recommendDiv.innerHTML = `
+                    <h5>💡 推奨API</h5>
+                    <p><strong>${bestAPI.name}</strong> (最速: ${bestAPI.loadTime}ms)</p>
+                    <div class="code-block">${bestAPI.url}</div>
+                `;
+                resultsDiv.appendChild(recommendDiv);
+            }
+        }
+
+        async function testMultipleCards() {
+            const testCards = [
+                { cid: 21967, name: 'テストカード' },
+                { cid: 4001, name: 'ブラック・マジシャン' },
+                { cid: 5318, name: '青眼の白龍' },
+                { cid: 12206, name: '死者蘇生' },
+                { cid: 6983, name: '真紅眼の黒竜' }
+            ];
+
+            const resultsDiv = document.getElementById('test-results');
+            resultsDiv.innerHTML = '<div class="alert alert-info">複数カードテスト実行中... ⏳</div>';
+
+            const allResults = [];
+
+            for (const card of testCards) {
+                const cardResults = {
+                    card: card,
+                    apis: []
+                };
+
+                for (const api of API_ENDPOINTS.slice(0, 3)) { // 最初の3つのAPIのみテスト
+                    const url = api.requiresEnc ?
+                        api.template(card.cid, document.getElementById('test-enc').value) :
+                        api.template(card.cid);
+                    const result = await testImageURL(url, { ...api, url });
+                    cardResults.apis.push(result);
+                }
+
+                allResults.push(cardResults);
+            }
+
+            displayMultipleResults(allResults);
+        }
+
+        function displayMultipleResults(allResults) {
+            const resultsDiv = document.getElementById('test-results');
+            resultsDiv.innerHTML = '<h4 class="mb-3">複数カードテスト結果</h4>';
+
+            allResults.forEach(cardResult => {
+                const cardDiv = document.createElement('div');
+                cardDiv.className = 'card mb-3';
+
+                const successCount = cardResult.apis.filter(r => r.success).length;
+
+                cardDiv.innerHTML = `
+                    <div class="card-header">
+                        <h6 class="mb-0">${cardResult.card.name} (CID: ${cardResult.card.cid}) - ${successCount}/${cardResult.apis.length} 成功</h6>
+                    </div>
+                    <div class="card-body">
+                        <div class="row">
+                            ${cardResult.apis.map(api => `
+                                <div class="col-md-4 mb-2">
+                                    <small><strong>${api.name}:</strong></small>
+                                    ${api.success ?
+                                        `<div><img src="${api.url}" style="max-width: 100%; height: auto;" alt="${api.name}"></div>
+                                         <small class="text-success">✓ ${api.width}x${api.height}px</small>` :
+                                        `<small class="text-danger">✗ ${api.error}</small>`
+                                    }
+                                </div>
+                            `).join('')}
+                        </div>
+                    </div>
+                `;
+
+                resultsDiv.appendChild(cardDiv);
+            });
+        }
+
+        // 自動実行
+        window.addEventListener('load', () => {
+            setTimeout(() => runTests(), 500);
+        });
+    </script>
+</body>
+</html>

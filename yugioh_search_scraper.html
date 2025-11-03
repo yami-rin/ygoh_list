@@ -1,0 +1,315 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>遊戯王検索結果スクレイパー</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css">
+    <style>
+        body {
+            background: #f5f5f5;
+        }
+        .card-preview {
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            padding: 1rem;
+            margin-bottom: 1rem;
+            background: white;
+        }
+        .card-preview img {
+            max-width: 150px;
+            border-radius: 4px;
+        }
+        .code-output {
+            background: #1e1e1e;
+            color: #d4d4d4;
+            padding: 1rem;
+            border-radius: 4px;
+            font-family: 'Courier New', monospace;
+            font-size: 0.85rem;
+            max-height: 400px;
+            overflow-y: auto;
+        }
+        .loading-spinner {
+            display: inline-block;
+            width: 1rem;
+            height: 1rem;
+            border: 2px solid #f3f3f3;
+            border-top: 2px solid #3498db;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+    </style>
+</head>
+<body>
+    <div class="container py-4">
+        <h1 class="mb-4">🎴 遊戯王検索結果スクレイパー</h1>
+
+        <div class="card mb-4">
+            <div class="card-header bg-primary text-white">
+                <h5 class="mb-0">検索URL入力</h5>
+            </div>
+            <div class="card-body">
+                <div class="mb-3">
+                    <label class="form-label">検索結果ページURL</label>
+                    <input type="text" class="form-control" id="search-url"
+                           value="https://www.db.yugioh-card.com/yugiohdb/card_search.action?ope=1&sess=1&rp=10&mode=&sort=1&keyword=&stype=1&ctype=&othercon=2&starfr=&starto=&pscalefr=&pscaleto=&linkmarkerfr=&linkmarkerto=&link_m=2&atkfr=&atkto=&deffr=&defto=&releaseDStart=1&releaseMStart=1&releaseYStart=1999&releaseDEnd=&releaseMEnd=&releaseYEnd=">
+                    <small class="text-muted">遊戯王公式DBの検索結果ページURL</small>
+                </div>
+                <div class="mb-3">
+                    <label class="form-label">取得方法</label>
+                    <select class="form-select" id="scrape-method">
+                        <option value="proxy">CORSプロキシ経由</option>
+                        <option value="direct">直接アクセス（CORSエラーの可能性）</option>
+                    </select>
+                </div>
+                <button class="btn btn-primary" onclick="scrapeSearchResults()">
+                    <i class="bi bi-search"></i> スクレイピング開始
+                </button>
+                <button class="btn btn-secondary" onclick="testKnownCards()">
+                    <i class="bi bi-lightning"></i> 既知のカードIDでテスト
+                </button>
+            </div>
+        </div>
+
+        <div class="card mb-4">
+            <div class="card-header">
+                <h5 class="mb-0">抽出されたカード情報</h5>
+            </div>
+            <div class="card-body">
+                <div id="status-message" class="alert alert-info" style="display: none;">
+                    <span class="loading-spinner"></span> 処理中...
+                </div>
+                <div id="cards-result"></div>
+            </div>
+        </div>
+
+        <div class="card mb-4">
+            <div class="card-header">
+                <h5 class="mb-0">実装コード</h5>
+            </div>
+            <div class="card-body">
+                <div id="code-output" class="code-output"></div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let extractedCards = [];
+
+        // 検索結果ページをスクレイピング
+        async function scrapeSearchResults() {
+            const url = document.getElementById('search-url').value;
+            const method = document.getElementById('scrape-method').value;
+            const statusMsg = document.getElementById('status-message');
+            const cardsResult = document.getElementById('cards-result');
+
+            statusMsg.style.display = 'block';
+            cardsResult.innerHTML = '';
+
+            try {
+                let fetchUrl = url;
+                if (method === 'proxy') {
+                    fetchUrl = `https://corsproxy.io/?${encodeURIComponent(url)}`;
+                }
+
+                const response = await fetch(fetchUrl);
+                const html = await response.text();
+
+                // HTMLをパース
+                const parser = new DOMParser();
+                const doc = parser.parseFromString(html, 'text/html');
+
+                // カードIDを抽出する複数の方法を試行
+                const cards = extractCardIdsFromHTML(html, doc);
+
+                if (cards.length > 0) {
+                    extractedCards = cards;
+                    displayCards(cards);
+                    generateCode(cards);
+                    statusMsg.innerHTML = `<i class="bi bi-check-circle"></i> ${cards.length}枚のカードを抽出しました`;
+                    statusMsg.className = 'alert alert-success';
+                } else {
+                    statusMsg.innerHTML = '<i class="bi bi-exclamation-triangle"></i> カードIDを抽出できませんでした';
+                    statusMsg.className = 'alert alert-warning';
+
+                    // デバッグ情報を表示
+                    cardsResult.innerHTML = `
+                        <div class="alert alert-info">
+                            <h6>デバッグ情報:</h6>
+                            <p>HTMLサイズ: ${html.length} bytes</p>
+                            <p>検索方法を変更するか、既知のカードIDでテストしてください。</p>
+                        </div>
+                    `;
+                }
+            } catch (error) {
+                statusMsg.innerHTML = `<i class="bi bi-x-circle"></i> エラー: ${error.message}`;
+                statusMsg.className = 'alert alert-danger';
+                console.error('Scraping error:', error);
+            }
+        }
+
+        // HTMLからカードIDを抽出
+        function extractCardIdsFromHTML(html, doc) {
+            const cards = [];
+
+            // 方法1: JavaScript内のget_image.actionからcidを抽出
+            const imageUrlRegex = /get_image\.action\?[^'"]*(cid=(\d+))[^'"]*/g;
+            let match;
+            const foundCids = new Set();
+
+            while ((match = imageUrlRegex.exec(html)) !== null) {
+                const cid = match[2];
+                if (!foundCids.has(cid)) {
+                    foundCids.add(cid);
+
+                    // カード名を探す（近くのテキストから）
+                    const cidIndex = match.index;
+                    const contextStart = Math.max(0, cidIndex - 500);
+                    const contextEnd = Math.min(html.length, cidIndex + 500);
+                    const context = html.substring(contextStart, contextEnd);
+
+                    // カード名のパターンを探す
+                    const nameMatch = context.match(/card_name['"]\s*>\s*([^<]+)</i) ||
+                                     context.match(/"cardName":"([^"]+)"/i);
+
+                    cards.push({
+                        cid: cid,
+                        name: nameMatch ? nameMatch[1].trim() : `カードID: ${cid}`,
+                        imageUrl: `https://www.db.yugioh-card.com/yugiohdb/card_image.action?cid=${cid}&request_locale=ja`
+                    });
+                }
+            }
+
+            // 方法2: カード詳細ページへのリンクからcidを抽出
+            const detailLinkRegex = /card_search\.action\?ope=2[^'"]*cid=(\d+)/g;
+            while ((match = detailLinkRegex.exec(html)) !== null) {
+                const cid = match[1];
+                if (!foundCids.has(cid)) {
+                    foundCids.add(cid);
+                    cards.push({
+                        cid: cid,
+                        name: `カードID: ${cid}`,
+                        imageUrl: `https://www.db.yugioh-card.com/yugiohdb/card_image.action?cid=${cid}&request_locale=ja`
+                    });
+                }
+            }
+
+            return cards;
+        }
+
+        // 既知のカードIDでテスト
+        function testKnownCards() {
+            const knownCards = [
+                { cid: '4001', name: 'ブラック・マジシャン' },
+                { cid: '5318', name: '青眼の白龍' },
+                { cid: '6983', name: '真紅眼の黒竜' },
+                { cid: '12206', name: '死者蘇生' },
+                { cid: '21385', name: '効果ヴェーラー' },
+                { cid: '7128', name: '増援' },
+                { cid: '7315', name: 'おろかな埋葬' },
+                { cid: '12653', name: '強欲で謙虚な壺' }
+            ];
+
+            extractedCards = knownCards.map(card => ({
+                ...card,
+                imageUrl: `https://www.db.yugioh-card.com/yugiohdb/card_image.action?cid=${card.cid}&request_locale=ja`
+            }));
+
+            displayCards(extractedCards);
+            generateCode(extractedCards);
+
+            const statusMsg = document.getElementById('status-message');
+            statusMsg.style.display = 'block';
+            statusMsg.innerHTML = `<i class="bi bi-check-circle"></i> ${knownCards.length}枚の既知カードで動作テスト`;
+            statusMsg.className = 'alert alert-success';
+        }
+
+        // カード情報を表示
+        function displayCards(cards) {
+            const container = document.getElementById('cards-result');
+            container.innerHTML = '';
+
+            cards.forEach((card, index) => {
+                const cardDiv = document.createElement('div');
+                cardDiv.className = 'card-preview';
+                cardDiv.innerHTML = `
+                    <div class="row align-items-center">
+                        <div class="col-md-2 text-center">
+                            <img src="${card.imageUrl}" alt="${card.name}"
+                                 onerror="this.src='data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 width=%22100%22 height=%22145%22><rect width=%22100%22 height=%22145%22 fill=%22%23ddd%22/><text x=%2250%25%22 y=%2250%25%22 text-anchor=%22middle%22 fill=%22%23999%22>No Image</text></svg>'">
+                        </div>
+                        <div class="col-md-10">
+                            <h6>${card.name}</h6>
+                            <p class="mb-1"><strong>カードID:</strong> <code>${card.cid}</code></p>
+                            <p class="mb-1"><strong>画像URL:</strong></p>
+                            <input type="text" class="form-control form-control-sm" value="${card.imageUrl}" readonly>
+                        </div>
+                    </div>
+                `;
+                container.appendChild(cardDiv);
+            });
+        }
+
+        // 実装コードを生成
+        function generateCode(cards) {
+            const codeOutput = document.getElementById('code-output');
+
+            const code = `
+// 遊戯王検索結果から画像を取得する実装例
+
+// 1. 検索結果ページから情報を抽出
+async function fetchCardsFromSearch(searchUrl) {
+    const proxyUrl = \`https://corsproxy.io/?\${encodeURIComponent(searchUrl)}\`;
+    const response = await fetch(proxyUrl);
+    const html = await response.text();
+
+    // カードIDを抽出
+    const cards = [];
+    const imageUrlRegex = /get_image\\.action\\?[^'"]*(cid=(\\d+))[^'"]*/g;
+    const foundCids = new Set();
+    let match;
+
+    while ((match = imageUrlRegex.exec(html)) !== null) {
+        const cid = match[2];
+        if (!foundCids.has(cid)) {
+            foundCids.add(cid);
+            cards.push({
+                cid: cid,
+                imageUrl: \`https://www.db.yugioh-card.com/yugiohdb/card_image.action?cid=\${cid}&request_locale=ja\`
+            });
+        }
+    }
+
+    return cards;
+}
+
+// 2. カード画像を取得
+function getCardImageUrl(cid) {
+    return \`https://www.db.yugioh-card.com/yugiohdb/card_image.action?cid=\${cid}&request_locale=ja\`;
+}
+
+// 3. 使用例
+const searchUrl = '${document.getElementById('search-url').value}';
+const cards = await fetchCardsFromSearch(searchUrl);
+console.log(\`\${cards.length}枚のカードを取得\`);
+
+// 抽出されたカード (最初の5枚)
+${JSON.stringify(cards.slice(0, 5), null, 2)}
+`;
+
+            codeOutput.textContent = code;
+        }
+
+        // 初期表示
+        window.addEventListener('load', () => {
+            testKnownCards();
+        });
+    </script>
+</body>
+</html>
