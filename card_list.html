@@ -2332,6 +2332,13 @@
                                 <span class="d-none d-sm-inline"> 使い方</span>
                             </button>
                         </div>
+                        <div class="d-inline-block" id="vip-gallery-btn-container" style="display: none;">
+                            <button class="btn btn-warning btn-sm" onclick="window.location.href='card_gallery.html'">
+                                <i class="bi bi-grid-3x3-gap"></i>
+                                <span class="d-none d-sm-inline"> ギャラリー</span>
+                                <i class="bi bi-star-fill ms-1"></i>
+                            </button>
+                        </div>
                         <div class="dropdown d-inline-block">
                             <button class="btn btn-outline-secondary btn-sm dropdown-toggle" type="button" data-bs-toggle="dropdown">
                                 <i class="bi bi-database"></i>
@@ -8617,6 +8624,7 @@ Firebase Consoleで確認すべき項目:
             const statusBadge = document.getElementById('vip-status-badge');
             const vipExportOption = document.getElementById('vip-export-option');
             const profileVipBadge = document.getElementById('profile-vip-badge');
+            const vipGalleryBtnContainer = document.getElementById('vip-gallery-btn-container');
 
             if (isVip) {
                 if (inputSection) inputSection.style.display = 'none';
@@ -8629,6 +8637,7 @@ Firebase Consoleで確認すべき項目:
 
                 // Show VIP features
                 if (vipExportOption) vipExportOption.style.display = 'block';
+                if (vipGalleryBtnContainer) vipGalleryBtnContainer.style.display = 'inline-block';
 
                 // Show VIP badge on profile
                 if (profileVipBadge) profileVipBadge.style.display = 'inline-block';
@@ -8639,6 +8648,7 @@ Firebase Consoleで確認すべき項目:
 
                 // Hide VIP features
                 if (vipExportOption) vipExportOption.style.display = 'none';
+                if (vipGalleryBtnContainer) vipGalleryBtnContainer.style.display = 'none';
 
                 // Hide VIP badge on profile
                 if (profileVipBadge) profileVipBadge.style.display = 'none';
