@@ -2152,6 +2152,80 @@
     </div>
     
     <!-- Bulk Tag Edit Modal -->
+    <!-- Bulk Import Modal -->
+    <div class="modal fade" id="bulk-import-modal" tabindex="-1">
+        <div class="modal-dialog modal-xl modal-dialog-centered modal-dialog-scrollable">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title"><i class="bi bi-plus-square"></i> 一括登録</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="mb-3">
+                        <label for="bulk-import-url" class="form-label">
+                            <i class="bi bi-link-45deg"></i> 遊戯王DBの検索結果URL
+                        </label>
+                        <div class="input-group">
+                            <input type="text" class="form-control" id="bulk-import-url"
+                                placeholder="https://www.db.yugioh-card.com/yugiohdb/card_search.action?ope=1&...">
+                            <button class="btn btn-primary" type="button" id="fetch-cards-btn">
+                                <i class="bi bi-download"></i> カード取得
+                            </button>
+                        </div>
+                        <small class="text-muted">
+                            遊戯王公式DBで検索結果のURLを貼り付けてください。
+                            <br>プロキシサーバー（localhost:3000）が起動している必要があります。
+                        </small>
+                    </div>
+
+                    <div id="bulk-import-loading" class="text-center py-4" style="display: none;">
+                        <div class="spinner-border text-primary" role="status">
+                            <span class="visually-hidden">読み込み中...</span>
+                        </div>
+                        <p class="mt-2">カード情報を取得中...</p>
+                    </div>
+
+                    <div id="bulk-import-results" style="display: none;">
+                        <div class="d-flex justify-content-between align-items-center mb-3">
+                            <h6 class="mb-0">
+                                <span id="bulk-import-count">0</span>件のカードが見つかりました
+                            </h6>
+                            <div>
+                                <button class="btn btn-sm btn-outline-secondary" id="select-all-cards-btn">
+                                    <i class="bi bi-check-square"></i> 全選択
+                                </button>
+                                <button class="btn btn-sm btn-outline-secondary" id="deselect-all-cards-btn">
+                                    <i class="bi bi-square"></i> 全解除
+                                </button>
+                            </div>
+                        </div>
+
+                        <div class="table-responsive" style="max-height: 400px;">
+                            <table class="table table-sm table-hover">
+                                <thead class="sticky-top bg-white">
+                                    <tr>
+                                        <th style="width: 50px;">選択</th>
+                                        <th style="width: 100px;">枚数</th>
+                                        <th>カード名</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="bulk-import-card-list">
+                                    <!-- Cards will be inserted here -->
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">キャンセル</button>
+                    <button type="button" class="btn btn-primary" id="bulk-register-btn" disabled>
+                        <i class="bi bi-save"></i> 登録
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <div class="modal fade" id="bulk-tag-modal" tabindex="-1">
         <div class="modal-dialog modal-dialog-centered">
             <div class="modal-content">
@@ -2357,6 +2431,7 @@
                                 </li>
                                 <li><hr class="dropdown-divider"></li>
                                 <li><button class="dropdown-item" id="link-master-data-btn"><i class="bi bi-link-45deg"></i> マスターデータと連携</button></li>
+                                <li><button class="dropdown-item" id="bulk-import-btn"><i class="bi bi-plus-square"></i> 一括登録</button></li>
                             </ul>
                         </div>
                         <input type="file" id="import-file-input" accept=".json,.csv" style="display: none;">
@@ -8784,6 +8859,173 @@ Firebase Consoleで確認すべき項目:
             document.body.appendChild(link);
             link.click();
             document.body.removeChild(link);
+        });
+
+        // Bulk Import functionality
+        let bulkImportCards = [];
+
+        document.getElementById('bulk-import-btn').addEventListener('click', () => {
+            const bulkImportModal = new bootstrap.Modal(document.getElementById('bulk-import-modal'));
+            bulkImportModal.show();
+        });
+
+        document.getElementById('fetch-cards-btn').addEventListener('click', async () => {
+            const url = document.getElementById('bulk-import-url').value.trim();
+
+            if (!url) {
+                alert('URLを入力してください。');
+                return;
+            }
+
+            if (!url.includes('yugioh-card.com')) {
+                alert('遊戯王公式DBのURLを入力してください。');
+                return;
+            }
+
+            const loadingDiv = document.getElementById('bulk-import-loading');
+            const resultsDiv = document.getElementById('bulk-import-results');
+            const registerBtn = document.getElementById('bulk-register-btn');
+
+            loadingDiv.style.display = 'block';
+            resultsDiv.style.display = 'none';
+            registerBtn.disabled = true;
+
+            try {
+                const proxyUrl = `http://localhost:3000/card-list?url=${encodeURIComponent(url)}`;
+                const response = await fetch(proxyUrl);
+
+                if (!response.ok) {
+                    throw new Error('カード情報の取得に失敗しました。プロキシサーバーが起動しているか確認してください。');
+                }
+
+                const data = await response.json();
+                bulkImportCards = data.cards || [];
+
+                if (bulkImportCards.length === 0) {
+                    throw new Error('カードが見つかりませんでした。');
+                }
+
+                // Display results
+                document.getElementById('bulk-import-count').textContent = bulkImportCards.length;
+                const cardList = document.getElementById('bulk-import-card-list');
+                cardList.innerHTML = '';
+
+                bulkImportCards.forEach((card, index) => {
+                    const row = document.createElement('tr');
+                    row.innerHTML = `
+                        <td>
+                            <input type="checkbox" class="form-check-input bulk-card-checkbox"
+                                data-index="${index}" checked>
+                        </td>
+                        <td>
+                            <input type="number" class="form-control form-control-sm bulk-card-quantity"
+                                data-index="${index}" value="1" min="0" max="99">
+                        </td>
+                        <td>${card.name}</td>
+                    `;
+                    cardList.appendChild(row);
+                });
+
+                loadingDiv.style.display = 'none';
+                resultsDiv.style.display = 'block';
+                registerBtn.disabled = false;
+
+            } catch (error) {
+                console.error('Error fetching cards:', error);
+                alert(error.message || 'カード情報の取得に失敗しました。');
+                loadingDiv.style.display = 'none';
+            }
+        });
+
+        document.getElementById('select-all-cards-btn').addEventListener('click', () => {
+            document.querySelectorAll('.bulk-card-checkbox').forEach(cb => cb.checked = true);
+        });
+
+        document.getElementById('deselect-all-cards-btn').addEventListener('click', () => {
+            document.querySelectorAll('.bulk-card-checkbox').forEach(cb => cb.checked = false);
+        });
+
+        document.getElementById('bulk-register-btn').addEventListener('click', async () => {
+            if (!currentUser) {
+                alert('ログインが必要です。');
+                return;
+            }
+
+            const selectedCards = [];
+            document.querySelectorAll('.bulk-card-checkbox:checked').forEach(cb => {
+                const index = parseInt(cb.dataset.index);
+                const quantityInput = document.querySelector(`.bulk-card-quantity[data-index="${index}"]`);
+                const quantity = parseInt(quantityInput.value) || 0;
+
+                if (quantity > 0) {
+                    selectedCards.push({
+                        ...bulkImportCards[index],
+                        quantity: quantity
+                    });
+                }
+            });
+
+            if (selectedCards.length === 0) {
+                alert('登録するカードを選択してください。');
+                return;
+            }
+
+            if (!confirm(`${selectedCards.length}件のカードを登録しますか？`)) {
+                return;
+            }
+
+            showLoading(true);
+            let successCount = 0;
+            let failCount = 0;
+
+            try {
+                const cardsRef = collection(db, 'users', currentUser.uid, 'cards');
+
+                for (const card of selectedCards) {
+                    try {
+                        // Check if card already exists
+                        const q = query(cardsRef, where('名前', '==', card.name));
+                        const querySnapshot = await getDocs(q);
+
+                        if (!querySnapshot.empty) {
+                            // Update existing card quantity
+                            const existingDoc = querySnapshot.docs[0];
+                            const existingQuantity = existingDoc.data()['枚数'] || 0;
+                            await updateDoc(existingDoc.ref, {
+                                '枚数': existingQuantity + card.quantity,
+                                '最終更新日': new Date().toISOString().split('T')[0]
+                            });
+                        } else {
+                            // Add new card
+                            await addDoc(cardsRef, {
+                                '名前': card.name,
+                                '型番': '',
+                                'レアリティ': '',
+                                '枚数': card.quantity,
+                                'tags': [],
+                                '登録日': new Date().toISOString().split('T')[0],
+                                '最終更新日': new Date().toISOString().split('T')[0]
+                            });
+                        }
+                        successCount++;
+                    } catch (error) {
+                        console.error(`Failed to register ${card.name}:`, error);
+                        failCount++;
+                    }
+                }
+
+                alert(`登録完了\n成功: ${successCount}件\n失敗: ${failCount}件`);
+
+                // Close modal and reload data
+                bootstrap.Modal.getInstance(document.getElementById('bulk-import-modal')).hide();
+                await loadData(currentUser.uid);
+
+            } catch (error) {
+                console.error('Error during bulk registration:', error);
+                alert('一括登録中にエラーが発生しました。');
+            } finally {
+                showLoading(false);
+            }
         });
 
         // Note: checkVipStatus() is called in handleUserLogin() after authentication completes

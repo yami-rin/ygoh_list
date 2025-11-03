@@ -120,6 +120,76 @@ app.get('/card-detail', async (req, res) => {
     }
 });
 
+// Card list proxy endpoint - fetch multiple cards from search results
+app.get('/card-list', async (req, res) => {
+    const searchUrl = req.query.url;
+
+    if (!searchUrl) {
+        return res.status(400).json({ error: 'Search URL is required' });
+    }
+
+    try {
+        const response = await fetch(searchUrl, {
+            headers: {
+                'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36',
+                'Referer': 'https://www.db.yugioh-card.com/',
+                'Accept': 'text/html',
+                'Accept-Language': 'ja,en-US;q=0.9,en;q=0.8'
+            }
+        });
+
+        const html = await response.text();
+
+        // Parse card list from HTML
+        const cards = [];
+        const cardPattern = /<input[^>]*name="cid"[^>]*value="(\d+)"[^>]*>[\s\S]*?<span[^>]*class="card_name"[^>]*>(.*?)<\/span>/g;
+
+        let match;
+        while ((match = cardPattern.exec(html)) !== null) {
+            const cardId = match[1];
+            const cardName = match[2].replace(/<[^>]+>/g, '').trim();
+
+            if (cardId && cardName) {
+                cards.push({
+                    id: cardId,
+                    name: cardName
+                });
+            }
+        }
+
+        // Alternative parsing if first method fails
+        if (cards.length === 0) {
+            const altPattern = /<div[^>]*class=".*?card_list.*?"[\s\S]*?<a[^>]*href="card_search\.action\?ope=2&cid=(\d+)"[^>]*>([\s\S]*?)<\/a>/g;
+
+            while ((match = altPattern.exec(html)) !== null) {
+                const cardId = match[1];
+                const cardNameHtml = match[2];
+                const nameMatch = cardNameHtml.match(/>([^<]+)</);
+                const cardName = nameMatch ? nameMatch[1].trim() : '';
+
+                if (cardId && cardName) {
+                    cards.push({
+                        id: cardId,
+                        name: cardName
+                    });
+                }
+            }
+        }
+
+        console.log(`Found ${cards.length} cards from search results`);
+
+        res.json({
+            success: true,
+            count: cards.length,
+            cards: cards
+        });
+
+    } catch (error) {
+        console.error('Error fetching card list:', error);
+        res.status(500).json({ error: error.message });
+    }
+});
+
 // Health check
 app.get('/health', (req, res) => {
     res.json({ status: 'OK', message: 'Image proxy server is running' });
