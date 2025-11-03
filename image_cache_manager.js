@@ -292,7 +292,13 @@ class ImageCacheManager {
      * @param {string} cardId - カードID
      * @param {string} proxyUrl - プロキシURL
      */
-    async fetchAndCache(cardId, proxyUrl = 'http://localhost:3000') {
+    async fetchAndCache(cardId, proxyUrl = null) {
+        // デフォルトプロキシURL（環境に応じて自動切り替え）
+        if (!proxyUrl) {
+            proxyUrl = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1'
+                ? 'http://localhost:3000'
+                : 'https://yugioh-image-proxy.onrender.com'; // ここにデプロイしたURLを設定
+        }
         try {
             // 既にキャッシュにあるかチェック
             const cachedImage = await this.getImage(cardId);
@@ -337,7 +343,13 @@ class ImageCacheManager {
     /**
      * 複数の画像を一括取得してキャッシュ
      */
-    async fetchAndCacheBatch(cardIds, proxyUrl = 'http://localhost:3000', onProgress = null) {
+    async fetchAndCacheBatch(cardIds, proxyUrl = null, onProgress = null) {
+        // デフォルトプロキシURL（環境に応じて自動切り替え）
+        if (!proxyUrl) {
+            proxyUrl = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1'
+                ? 'http://localhost:3000'
+                : 'https://yugioh-image-proxy.onrender.com'; // ここにデプロイしたURLを設定
+        }
         const results = {
             success: [],
             failed: []

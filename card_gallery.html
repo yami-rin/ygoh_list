@@ -484,7 +484,7 @@
 
                 // Cache miss - fetch from proxy and cache it
                 console.log(`Fetching image for: ${cardName} (ID: ${cardId})`);
-                const imageData = await imageCacheManager.fetchAndCache(cardId, 'http://localhost:3000');
+                const imageData = await imageCacheManager.fetchAndCache(cardId);
                 return imageData;
             } catch (error) {
                 console.error(`Error loading image for ${cardName}:`, error);

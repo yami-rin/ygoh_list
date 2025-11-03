@@ -1,0 +1,10 @@
+services:
+  - type: web
+    name: yugioh-image-proxy
+    env: node
+    buildCommand: npm install
+    startCommand: node image_proxy_server.js
+    envVars:
+      - key: NODE_ENV
+        value: production
+    plan: free
