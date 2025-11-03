@@ -297,7 +297,7 @@ class ImageCacheManager {
         if (!proxyUrl) {
             proxyUrl = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1'
                 ? 'http://localhost:3000'
-                : 'https://yugioh-image-proxy.onrender.com'; // ここにデプロイしたURLを設定
+                : 'https://ygoh-list.onrender.com'; // ここにデプロイしたURLを設定
         }
         try {
             // 既にキャッシュにあるかチェック
@@ -348,7 +348,7 @@ class ImageCacheManager {
         if (!proxyUrl) {
             proxyUrl = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1'
                 ? 'http://localhost:3000'
-                : 'https://yugioh-image-proxy.onrender.com'; // ここにデプロイしたURLを設定
+                : 'https://ygoh-list.onrender.com'; // ここにデプロイしたURLを設定
         }
         const results = {
             success: [],
