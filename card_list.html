@@ -8993,31 +8993,10 @@ Firebase Consoleで確認すべき項目:
                     const cardItem = document.createElement('div');
                     cardItem.className = 'bulk-card-item';
 
-                    // Generate rarity options with selected value
-                    const rarityOptions = [
-                        '',
-                        'ノーマル',
-                        'レア',
-                        'スーパーレア',
-                        'ウルトラレア',
-                        'シークレットレア',
-                        'ホログラフィックレア',
-                        '20thシークレットレア',
-                        'プリズマティックシークレットレア',
-                        'ミレニアムレア',
-                        'パラレルレア',
-                        'ノーマルパラレルレア',
-                        'スーパーパラレルレア',
-                        'エクストラシークレットレア',
-                        'KCレア',
-                        'KCウルトラレア',
-                        'その他'
-                    ].map(rarity => {
-                        const value = rarity;
-                        const label = rarity || '-';
-                        const selected = card.rarity === rarity ? 'selected' : '';
-                        return `<option value="${value}" ${selected}>${label}</option>`;
-                    }).join('');
+                    // Display only the card's actual rarity (readonly)
+                    const rarityDisplay = card.rarity
+                        ? `<input type="text" class="form-control form-control-sm bulk-card-rarity" data-index="${index}" value="${card.rarity}" readonly style="background-color: #e9ecef;">`
+                        : `<input type="text" class="form-control form-control-sm bulk-card-rarity" data-index="${index}" value="-" readonly style="background-color: #e9ecef;">`;
 
                     cardItem.innerHTML = `
                         <img class="bulk-card-image" data-card-id="${card.id}" alt="${card.name}"
@@ -9027,9 +9006,7 @@ Firebase Consoleで確認すべき項目:
                         <div class="bulk-card-controls">
                             <div>
                                 <label>レアリティ</label>
-                                <select class="form-select form-select-sm bulk-card-rarity" data-index="${index}">
-                                    ${rarityOptions}
-                                </select>
+                                ${rarityDisplay}
                             </div>
                             <div>
                                 <label>枚数</label>
@@ -9040,9 +9017,28 @@ Firebase Consoleで確認すべき項目:
                     `;
                     cardGrid.appendChild(cardItem);
 
-                    // Load image asynchronously
+                    // Load image asynchronously with retry
                     const imgElement = cardItem.querySelector('.bulk-card-image');
-                    loadCardImage(card.id, imgElement);
+
+                    // Retry up to 3 times with 2 second delay
+                    const loadWithRetry = async (retries = 3, delay = 2000) => {
+                        for (let i = 0; i < retries; i++) {
+                            try {
+                                await loadCardImage(card.id, imgElement);
+                                return; // Success
+                            } catch (error) {
+                                console.log(`Retry ${i + 1}/${retries} for card ${card.id}`);
+                                if (i < retries - 1) {
+                                    await new Promise(resolve => setTimeout(resolve, delay));
+                                } else {
+                                    // Final failure - show error message
+                                    imgElement.src = "data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' width='200' height='290'><rect width='200' height='290' fill='%23ffe6e6'/><text x='50%' y='45%' text-anchor='middle' fill='%23999' font-size='12'>画像読込失敗</text><text x='50%' y='55%' text-anchor='middle' fill='%23999' font-size='10'>サーバー起動中の</text><text x='50%' y='60%' text-anchor='middle' fill='%23999' font-size='10'>可能性があります</text></svg>";
+                                }
+                            }
+                        }
+                    };
+
+                    loadWithRetry();
                 });
 
                 loadingDiv.style.display = 'none';
