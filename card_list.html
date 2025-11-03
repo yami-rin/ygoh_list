@@ -5626,8 +5626,9 @@
                                 if (hasMatchingRace) orMatch = true;
                             }
 
-                            // Check card types
+                            // Check card types - OR: match ANY of the selected types
                             if (sCardTypes.length > 0) {
+                                // OR検索：いずれかのカードタイプを含めばOK
                                 const hasMatchingType = sCardTypes.some(type => {
                                     // For spell/trap cards, check race field (CSVでは魔法・罠は種族列に格納)
                                     if (type === '魔法') {
@@ -5638,7 +5639,7 @@
                                         return details.cardType && details.cardType.includes(type);
                                     }
                                 });
-                                debugChecks.push(`CardType: ${details.cardType} matches [${sCardTypes.join(',')}] = ${hasMatchingType}`);
+                                debugChecks.push(`CardType: ${details.cardType} matches ANY [${sCardTypes.join(',')}] = ${hasMatchingType}`);
                                 if (hasMatchingType) orMatch = true;
                             }
 
@@ -5681,8 +5682,8 @@
                             }
 
                             // Check races (multiple selection)
+                            // Note: カードは1つの種族しか持たないため、選択した種族のいずれかに一致すればOK
                             if (sRaces.length > 0) {
-                                // 完全一致で比較
                                 const hasMatchingRace = sRaces.some(race => {
                                     if (!race) return false;
                                     return details.race === race;
@@ -5691,9 +5692,10 @@
                                 advancedMatch = advancedMatch && hasMatchingRace;
                             }
 
-                            // Check card types (OR selection only - more intuitive)
+                            // Check card types - AND: must contain ALL selected types
                             if (sCardTypes.length > 0) {
-                                const hasMatchingType = sCardTypes.some(type => {
+                                // AND検索：すべてのカードタイプを含む必要がある
+                                const hasAllTypes = sCardTypes.every(type => {
                                     // For spell/trap cards, check race field (CSVでは魔法・罠は種族列に格納)
                                     if (type === '魔法') {
                                         return details.race === '魔法' || details.cardType === '魔法';
@@ -5703,8 +5705,8 @@
                                         return details.cardType && details.cardType.includes(type);
                                     }
                                 });
-                                debugChecks.push(`CardType: ${details.cardType} matches [${sCardTypes.join(',')}] = ${hasMatchingType}`);
-                                advancedMatch = advancedMatch && hasMatchingType;
+                                debugChecks.push(`CardType: ${details.cardType} contains ALL [${sCardTypes.join(',')}] = ${hasAllTypes}`);
+                                advancedMatch = advancedMatch && hasAllTypes;
                             }
 
                             // Check attack
@@ -7662,7 +7664,7 @@ Firebase Consoleで確認すべき項目:
                     });
                 }
 
-                filterCards();
+                applySearchAndFilter();
             });
         });
 
@@ -7692,7 +7694,7 @@ Firebase Consoleで確認すべき項目:
                     }
                 }
 
-                filterCards();
+                applySearchAndFilter();
             });
         });
 
@@ -7705,7 +7707,7 @@ Firebase Consoleで確認すべき項目:
             button.addEventListener('click', function() {
                 // Toggle selection
                 this.classList.toggle('active');
-                filterCards();
+                applySearchAndFilter();
             });
         });
 
@@ -7713,7 +7715,7 @@ Firebase Consoleで確認すべき項目:
         if (clearRaceBtn) {
             clearRaceBtn.addEventListener('click', function() {
                 raceButtons.forEach(btn => btn.classList.remove('active'));
-                filterCards();
+                applySearchAndFilter();
             });
         }
 
