@@ -2174,7 +2174,6 @@
                         </div>
                         <small class="text-muted">
                             遊戯王公式DBで検索結果のURLを貼り付けてください。
-                            <br>プロキシサーバー（localhost:3000）が起動している必要があります。
                         </small>
                     </div>
 
@@ -8891,11 +8890,11 @@ Firebase Consoleで確認すべき項目:
             registerBtn.disabled = true;
 
             try {
-                const proxyUrl = `http://localhost:3000/card-list?url=${encodeURIComponent(url)}`;
+                const proxyUrl = `https://ygoh-list.onrender.com/card-list?url=${encodeURIComponent(url)}`;
                 const response = await fetch(proxyUrl);
 
                 if (!response.ok) {
-                    throw new Error('カード情報の取得に失敗しました。プロキシサーバーが起動しているか確認してください。');
+                    throw new Error('カード情報の取得に失敗しました。');
                 }
 
                 const data = await response.json();
