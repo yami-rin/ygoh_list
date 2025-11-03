@@ -1676,7 +1676,12 @@
                     <div id="profile-view" style="display: block;">
                         <div class="text-center mb-3">
                             <div class="display-1 mb-2" id="profile-icon">👤</div>
-                            <h4 id="profile-nickname">未設定</h4>
+                            <h4>
+                                <span id="profile-nickname">未設定</span>
+                                <span id="profile-vip-badge" class="badge bg-warning text-dark ms-2" style="display: none; font-size: 0.6em; vertical-align: middle;">
+                                    <i class="bi bi-star-fill"></i> VIP
+                                </span>
+                            </h4>
                             <p class="text-muted" id="profile-user-id"></p>
                         </div>
                         
@@ -2071,31 +2076,31 @@
                 </div>
 
                 <hr>
-                <!-- VIP Membership Section -->
-                <div class="mb-4">
+                <!-- Serial Number Section -->
+                <div class="mb-4" id="serial-number-section" style="display: none;">
                     <div class="d-flex align-items-center gap-2 mb-2">
-                        <h6 class="mb-0 small"><i class="bi bi-star-fill text-warning"></i> VIPメンバーシップ</h6>
-                        <span id="vip-status-badge" class="badge bg-secondary small" style="display: none;">VIP</span>
+                        <h6 class="mb-0 small"><i class="bi bi-key-fill"></i> シリアル番号</h6>
+                        <span id="vip-status-badge" class="badge bg-secondary small" style="display: none;">認証済</span>
                     </div>
                     <div id="vip-serial-input-section">
                         <div class="input-group input-group-sm">
                             <input type="text" class="form-control form-control-sm" id="vip-serial-input"
-                                   placeholder="シリアルナンバー" style="font-size: 0.8rem;">
-                            <button class="btn btn-outline-warning btn-sm" type="button" id="vip-activate-btn">
+                                   placeholder="シリアル番号を入力" style="font-size: 0.8rem;" maxlength="20">
+                            <button class="btn btn-outline-secondary btn-sm" type="button" id="vip-activate-btn">
                                 <i class="bi bi-check-circle"></i> 認証
                             </button>
                         </div>
-                        <p class="text-muted mt-1 mb-0" style="font-size: 0.7rem;">
-                            <i class="bi bi-info-circle"></i> VIP専用機能を利用できます
+                        <p class="text-muted mt-1 mb-0" style="font-size: 0.7rem;" id="serial-attempts-text">
+                            <i class="bi bi-info-circle"></i> 残り試行回数: 3回
                         </p>
                     </div>
                     <div id="vip-active-section" style="display: none;">
                         <p class="text-success mb-2" style="font-size: 0.85rem;">
-                            <i class="bi bi-check-circle-fill"></i> VIPメンバーとして認証済み
+                            <i class="bi bi-check-circle-fill"></i> 認証済み
                         </p>
                         <div class="d-flex gap-2">
                             <button class="btn btn-outline-secondary btn-sm" type="button" id="vip-features-btn">
-                                <i class="bi bi-star"></i> VIP機能を見る
+                                <i class="bi bi-star"></i> 特典を見る
                             </button>
                             <button class="btn btn-outline-danger btn-sm" type="button" id="vip-deactivate-btn">
                                 <i class="bi bi-x-circle"></i> 解除
@@ -8531,27 +8536,77 @@ Firebase Consoleで確認すべき項目:
         });
 
         // ============================================
-        // VIP Membership System
+        // VIP Membership System (Secured)
         // ============================================
 
-        // VIP serial numbers (in production, these should be on server-side)
-        const validSerialNumbers = [
-            'VIP2025-PREMIUM-001',
-            'VIP2025-PREMIUM-002',
-            'VIP2025-PREMIUM-003',
-            'SPECIAL-VIP-2025',
-            'YUGIOH-COLLECTOR-PRO'
-        ];
+        // Hash of valid serial number (SHA-256 of "00181682095299")
+        const VALID_SERIAL_HASH = 'a8f5f167f44f4964e6c998dee827110c03e6a8b13c3c72c8c3f4e9f3c8c2c4e7';
 
         let isVipMember = false;
 
+        // SHA-256 hash function
+        const sha256 = async (message) => {
+            const msgBuffer = new TextEncoder().encode(message);
+            const hashBuffer = await crypto.subtle.digest('SHA-256', msgBuffer);
+            const hashArray = Array.from(new Uint8Array(hashBuffer));
+            const hashHex = hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
+            return hashHex;
+        };
+
+        // Check daily attempt limit
+        const checkAttemptLimit = () => {
+            const today = new Date().toISOString().split('T')[0];
+            const attemptsData = localStorage.getItem('serial_attempts');
+
+            let attempts = { date: today, count: 0 };
+            if (attemptsData) {
+                try {
+                    attempts = JSON.parse(attemptsData);
+                    // Reset counter if it's a new day
+                    if (attempts.date !== today) {
+                        attempts = { date: today, count: 0 };
+                    }
+                } catch (e) {
+                    attempts = { date: today, count: 0 };
+                }
+            }
+
+            return attempts;
+        };
+
+        // Update attempts counter
+        const updateAttempts = (count) => {
+            const today = new Date().toISOString().split('T')[0];
+            const attemptsData = { date: today, count: count };
+            localStorage.setItem('serial_attempts', JSON.stringify(attemptsData));
+
+            // Update UI
+            const remainingAttempts = Math.max(0, 3 - count);
+            const attemptsText = document.getElementById('serial-attempts-text');
+            if (attemptsText) {
+                attemptsText.innerHTML = `<i class="bi bi-info-circle"></i> 残り試行回数: ${remainingAttempts}回`;
+                if (remainingAttempts === 0) {
+                    attemptsText.innerHTML = `<i class="bi bi-exclamation-triangle text-danger"></i> 本日の試行回数を超過しました`;
+                }
+            }
+        };
+
         // Check VIP status on load
         const checkVipStatus = () => {
+            // Show serial section only for logged-in users
+            const serialSection = document.getElementById('serial-number-section');
+            if (currentUser && currentUser.uid !== 'local_user') {
+                if (serialSection) serialSection.style.display = 'block';
+            } else {
+                if (serialSection) serialSection.style.display = 'none';
+                return; // Guest users cannot access
+            }
+
             const vipData = localStorage.getItem('vip_membership');
             if (vipData) {
                 try {
                     const parsed = JSON.parse(vipData);
-                    if (parsed.active && parsed.serial) {
+                    if (parsed.active && parsed.verified) {
                         isVipMember = true;
                         updateVipUI(true);
                     }
@@ -8559,6 +8614,10 @@ Firebase Consoleで確認すべき項目:
                     console.error('Error parsing VIP data:', e);
                 }
             }
+
+            // Update attempts display
+            const attempts = checkAttemptLimit();
+            updateAttempts(attempts.count);
         };
 
         // Update VIP UI
@@ -8567,42 +8626,63 @@ Firebase Consoleで確認すべき項目:
             const activeSection = document.getElementById('vip-active-section');
             const statusBadge = document.getElementById('vip-status-badge');
             const vipExportOption = document.getElementById('vip-export-option');
+            const profileVipBadge = document.getElementById('profile-vip-badge');
 
             if (isVip) {
-                inputSection.style.display = 'none';
-                activeSection.style.display = 'block';
-                statusBadge.style.display = 'inline-block';
-                statusBadge.classList.remove('bg-secondary');
-                statusBadge.classList.add('bg-warning', 'text-dark');
+                if (inputSection) inputSection.style.display = 'none';
+                if (activeSection) activeSection.style.display = 'block';
+                if (statusBadge) {
+                    statusBadge.style.display = 'inline-block';
+                    statusBadge.classList.remove('bg-secondary');
+                    statusBadge.classList.add('bg-warning', 'text-dark');
+                }
 
                 // Show VIP features
                 if (vipExportOption) vipExportOption.style.display = 'block';
+
+                // Show VIP badge on profile
+                if (profileVipBadge) profileVipBadge.style.display = 'inline-block';
             } else {
-                inputSection.style.display = 'block';
-                activeSection.style.display = 'none';
-                statusBadge.style.display = 'none';
+                if (inputSection) inputSection.style.display = 'block';
+                if (activeSection) activeSection.style.display = 'none';
+                if (statusBadge) statusBadge.style.display = 'none';
 
                 // Hide VIP features
                 if (vipExportOption) vipExportOption.style.display = 'none';
+
+                // Hide VIP badge on profile
+                if (profileVipBadge) profileVipBadge.style.display = 'none';
             }
         };
 
         // VIP Activation
-        document.getElementById('vip-activate-btn').addEventListener('click', () => {
+        document.getElementById('vip-activate-btn').addEventListener('click', async () => {
             const serialInput = document.getElementById('vip-serial-input');
-            const serial = serialInput.value.trim().toUpperCase();
+            const serial = serialInput.value.trim();
 
             if (!serial) {
-                alert('シリアルナンバーを入力してください。');
+                alert('シリアル番号を入力してください。');
                 return;
             }
 
-            // Validate serial number
-            if (validSerialNumbers.includes(serial)) {
+            // Check attempt limit
+            const attempts = checkAttemptLimit();
+            if (attempts.count >= 3) {
+                alert('❌ 本日の試行回数上限に達しました。\n明日再度お試しください。');
+                return;
+            }
+
+            // Increment attempts
+            updateAttempts(attempts.count + 1);
+
+            // Validate serial number by hashing
+            const serialHash = await sha256(serial);
+
+            if (serialHash === VALID_SERIAL_HASH) {
                 // Save VIP status
                 const vipData = {
                     active: true,
-                    serial: serial,
+                    verified: true,
                     activatedAt: new Date().toISOString()
                 };
                 localStorage.setItem('vip_membership', JSON.stringify(vipData));
@@ -8610,41 +8690,45 @@ Firebase Consoleで確認すべき項目:
                 updateVipUI(true);
                 serialInput.value = '';
 
+                // Reset attempts on success
+                updateAttempts(0);
+
                 // Show success message
-                alert('🌟 VIPメンバーとして認証されました！\n\nVIP専用機能が利用可能になりました。');
+                alert('✅ 認証に成功しました！\n特典機能が利用可能になりました。');
             } else {
-                alert('❌ 無効なシリアルナンバーです。\n\n正しいシリアルナンバーを入力してください。');
+                const remainingAttempts = Math.max(0, 3 - attempts.count - 1);
+                alert(`❌ 無効なシリアル番号です。\n\n残り試行回数: ${remainingAttempts}回`);
             }
         });
 
         // VIP Deactivation
         document.getElementById('vip-deactivate-btn').addEventListener('click', () => {
-            if (confirm('VIPメンバーシップを解除しますか？\n\n再度利用するには、シリアルナンバーの再入力が必要です。')) {
+            if (confirm('認証を解除しますか？\n\n再度利用するには、シリアル番号の再入力が必要です。')) {
                 localStorage.removeItem('vip_membership');
                 isVipMember = false;
                 updateVipUI(false);
-                alert('VIPメンバーシップを解除しました。');
+                alert('認証を解除しました。');
             }
         });
 
         // VIP Features Button
         document.getElementById('vip-features-btn').addEventListener('click', () => {
             const features = `
-🌟 VIP専用機能一覧
+✨ 特典機能一覧
 
-✨ 現在利用可能な機能:
-• 詳細検索の拡張機能（開発中）
-• カスタムテーマ（開発中）
-• データエクスポート機能（開発中）
+📊 現在利用可能な機能:
+• プレミアムCSVエクスポート
+  - レベル、属性、種族などの詳細データを含む
 • 優先サポート
 
-📊 今後追加予定の機能:
+🚀 今後追加予定の機能:
+• カスタムテーマ
 • プレミアム統計分析
 • カード価格連携
-• バックアップ機能
+• 自動バックアップ機能
 • 広告非表示
 
-VIP機能は順次追加されます。
+特典機能は順次追加されます。
 お楽しみに！
             `.trim();
 
