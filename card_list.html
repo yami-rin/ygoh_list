@@ -9194,7 +9194,7 @@ Firebase Consoleで確認すべき項目:
 
                 // Close modal and reload data
                 bootstrap.Modal.getInstance(document.getElementById('bulk-import-modal')).hide();
-                await loadData(currentUser.uid);
+                await loadCollectionFromFirestore();
 
             } catch (error) {
                 console.error('Error during bulk registration:', error);
