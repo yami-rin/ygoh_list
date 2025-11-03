@@ -140,6 +140,15 @@ app.get('/card-list', async (req, res) => {
 
         const html = await response.text();
 
+        // Debug: Log a sample of the HTML to understand structure
+        console.log('=== HTML Sample (first 5000 chars) ===');
+        console.log(html.substring(0, 5000));
+        console.log('=== HTML Sample (searching for "cid") ===');
+        const cidSamples = html.match(/.{0,100}cid=\d+.{0,100}/g);
+        if (cidSamples) {
+            console.log('Found cid patterns:', cidSamples.slice(0, 5));
+        }
+
         // Parse card list from HTML
         const cards = [];
         const cardMap = new Map(); // To avoid duplicates
@@ -206,10 +215,17 @@ app.get('/card-list', async (req, res) => {
 
         console.log(`Found ${cards.length} cards from search results`);
 
+        // Include HTML sample in response for debugging if no cards found
+        const debugInfo = cards.length === 0 ? {
+            htmlSample: html.substring(0, 1000),
+            cidPatterns: html.match(/.{0,150}cid=\d+.{0,150}/g)?.slice(0, 3) || []
+        } : undefined;
+
         res.json({
             success: true,
             count: cards.length,
-            cards: cards
+            cards: cards,
+            debug: debugInfo
         });
 
     } catch (error) {

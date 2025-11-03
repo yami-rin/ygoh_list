@@ -8900,8 +8900,17 @@ Firebase Consoleで確認すべき項目:
                 const data = await response.json();
                 bulkImportCards = data.cards || [];
 
+                // Debug: Log response data
+                console.log('Proxy response:', data);
+                if (data.debug) {
+                    console.log('=== Debug Info ===');
+                    console.log('HTML Sample:', data.debug.htmlSample);
+                    console.log('CID Patterns:', data.debug.cidPatterns);
+                }
+
                 if (bulkImportCards.length === 0) {
-                    throw new Error('カードが見つかりませんでした。');
+                    console.error('No cards found. Check debug info above.');
+                    throw new Error('カードが見つかりませんでした。URLが正しいか、または検索結果にカードが含まれているか確認してください。');
                 }
 
                 // Display results
