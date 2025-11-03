@@ -140,22 +140,62 @@ app.get('/card-list', async (req, res) => {
 
         const html = await response.text();
 
-        // Debug: Log a sample of the HTML to understand structure
-        console.log('=== HTML Sample (first 5000 chars) ===');
-        console.log(html.substring(0, 5000));
-        console.log('=== HTML Sample (searching for "cid") ===');
-        const cidSamples = html.match(/.{0,100}cid=\d+.{0,100}/g);
-        if (cidSamples) {
-            console.log('Found cid patterns:', cidSamples.slice(0, 5));
+        // Debug: Log samples of the HTML to understand structure
+        console.log('=== HTML Sample (first 2000 chars) ===');
+        console.log(html.substring(0, 2000));
+        console.log('=== Searching for card_image patterns ===');
+        const imagePatterns = html.match(/\$\('#card_image_\d+_\d+'\).*?cid=\d+.*?;/g);
+        if (imagePatterns) {
+            console.log('Found card_image patterns:', imagePatterns.slice(0, 5));
+        }
+        console.log('=== Searching for card name patterns ===');
+        const namePatterns = html.match(/.{0,150}(card_name|cardName|name).{0,150}/gi);
+        if (namePatterns) {
+            console.log('Found name patterns:', namePatterns.slice(0, 5));
         }
 
         // Parse card list from HTML
         const cards = [];
         const cardMap = new Map(); // To avoid duplicates
 
-        // Pattern 1: Link with card ID in href
-        const pattern1 = /card_search\.action\?ope=2(?:&amp;|&)cid=(\d+)(?:&amp;|&)request_locale=ja[^>]*>([^<]+)</g;
+        // Pattern 0: JavaScript card_image pattern (for gallery view)
+        // Extract card IDs from: $('#card_image_X_Y').attr('src', '...cid=XXXXX...')
+        const jsPattern = /\$\('#card_image_(\d+)_\d+'\)\.attr\('src',\s*'[^']*cid=(\d+)[^']*'\)/g;
         let match;
+        const cardIndices = []; // Store card indices for later name matching
+        while ((match = jsPattern.exec(html)) !== null) {
+            const cardIndex = match[1];
+            const cardId = match[2];
+            cardIndices.push({ index: cardIndex, id: cardId });
+            console.log(`Found card index ${cardIndex} with ID ${cardId}`);
+        }
+
+        // Try to find card names by index
+        // Pattern: Look for elements like id="card_name_X_Y" or similar
+        cardIndices.forEach(({ index, id }) => {
+            // Try multiple name patterns
+            const nameRegex1 = new RegExp(`id=["']card_name_${index}_\\d+["'][^>]*>([^<]+)<`, 'i');
+            const nameRegex2 = new RegExp(`\\$\\('#card_name_${index}_\\d+'\\)\\.text\\(['"]([^'"]+)['"]\\)`, 'i');
+            const nameRegex3 = new RegExp(`card_name_${index}[^>]*>\\s*([^<]+?)\\s*<`, 'i');
+
+            let cardName = null;
+            let nameMatch = html.match(nameRegex1) || html.match(nameRegex2) || html.match(nameRegex3);
+            if (nameMatch) {
+                cardName = nameMatch[1].trim();
+            }
+
+            if (cardName && !cardMap.has(id)) {
+                cardMap.set(id, cardName);
+                console.log(`Matched card ${id}: ${cardName}`);
+            } else if (!cardMap.has(id)) {
+                // Store with placeholder name if we can't find it
+                cardMap.set(id, `Card ${id}`);
+                console.log(`Card ${id}: name not found, using placeholder`);
+            }
+        });
+
+        // Pattern 1: Link with card ID in href (fallback for list view)
+        const pattern1 = /card_search\.action\?ope=2(?:&amp;|&)cid=(\d+)(?:&amp;|&)request_locale=ja[^>]*>([^<]+)</g;
         while ((match = pattern1.exec(html)) !== null) {
             const cardId = match[1];
             const cardName = match[2].trim();
@@ -217,8 +257,10 @@ app.get('/card-list', async (req, res) => {
 
         // Include HTML sample in response for debugging if no cards found
         const debugInfo = cards.length === 0 ? {
-            htmlSample: html.substring(0, 1000),
-            cidPatterns: html.match(/.{0,150}cid=\d+.{0,150}/g)?.slice(0, 3) || []
+            htmlSample: html.substring(0, 3000),
+            cardImagePatterns: html.match(/\$\('#card_image_\d+_\d+'\).*?;/g)?.slice(0, 5) || [],
+            namePatterns: html.match(/.{0,100}(card_name|cardName).{0,100}/gi)?.slice(0, 10) || [],
+            strongTags: html.match(/<strong[^>]*>.*?<\/strong>/g)?.slice(0, 10) || []
         } : undefined;
 
         res.json({

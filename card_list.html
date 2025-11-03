@@ -8904,8 +8904,10 @@ Firebase Consoleで確認すべき項目:
                 console.log('Proxy response:', data);
                 if (data.debug) {
                     console.log('=== Debug Info ===');
-                    console.log('HTML Sample:', data.debug.htmlSample);
-                    console.log('CID Patterns:', data.debug.cidPatterns);
+                    console.log('HTML Sample (first 3000 chars):', data.debug.htmlSample);
+                    console.log('Card Image Patterns:', data.debug.cardImagePatterns);
+                    console.log('Name Patterns:', data.debug.namePatterns);
+                    console.log('Strong Tags:', data.debug.strongTags);
                 }
 
                 if (bulkImportCards.length === 0) {
