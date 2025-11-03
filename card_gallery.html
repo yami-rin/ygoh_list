@@ -469,22 +469,20 @@
         const loadAllData = async (userId) => {
             showLoading(true);
             try {
-                // Load collection cards
-                const collectionRef = collection(db, 'cards');
-                const collectionQuery = query(collectionRef, where('userId', '==', userId));
-                const collectionSnapshot = await getDocs(collectionQuery);
+                // Load collection cards from subcollection: users/{userId}/cards
+                const collectionRef = collection(db, 'users', userId, 'cards');
+                const collectionSnapshot = await getDocs(collectionRef);
                 collectionCards = collectionSnapshot.docs.map(doc => ({
                     id: doc.id,
-                    ...doc.data()
+                    data: doc.data()
                 }));
 
-                // Load wishlist cards
-                const wishlistRef = collection(db, 'wishlist');
-                const wishlistQuery = query(wishlistRef, where('userId', '==', userId));
-                const wishlistSnapshot = await getDocs(wishlistQuery);
+                // Load wishlist cards from subcollection: users/{userId}/wishlist
+                const wishlistRef = collection(db, 'users', userId, 'wishlist');
+                const wishlistSnapshot = await getDocs(wishlistRef);
                 wishlistCards = wishlistSnapshot.docs.map(doc => ({
                     id: doc.id,
-                    ...doc.data()
+                    data: doc.data()
                 }));
 
                 // Set initial data based on current list type
@@ -537,9 +535,9 @@
             const tagFilter = document.getElementById('tag-filter').value;
 
             filteredCards = allCards.filter(card => {
-                const matchesSearch = !searchTerm || card['名前']?.toLowerCase().includes(searchTerm);
-                const matchesRarity = !rarityFilter || card['レアリティ'] === rarityFilter;
-                const matchesTag = !tagFilter || (card.tags && card.tags.includes(tagFilter));
+                const matchesSearch = !searchTerm || card.data['名前']?.toLowerCase().includes(searchTerm);
+                const matchesRarity = !rarityFilter || card.data['レアリティ'] === rarityFilter;
+                const matchesTag = !tagFilter || (card.data.tags && card.data.tags.includes(tagFilter));
 
                 return matchesSearch && matchesRarity && matchesTag;
             });
@@ -557,20 +555,20 @@
 
                 switch (field) {
                     case 'name':
-                        valA = a['名前'] || '';
-                        valB = b['名前'] || '';
+                        valA = a.data['名前'] || '';
+                        valB = b.data['名前'] || '';
                         break;
                     case 'code':
-                        valA = a['型番'] || '';
-                        valB = b['型番'] || '';
+                        valA = a.data['型番'] || '';
+                        valB = b.data['型番'] || '';
                         break;
                     case 'quantity':
-                        valA = parseInt(a['枚数']) || 0;
-                        valB = parseInt(b['枚数']) || 0;
+                        valA = parseInt(a.data['枚数']) || 0;
+                        valB = parseInt(b.data['枚数']) || 0;
                         break;
                     case 'rarity':
-                        valA = a['レアリティ'] || '';
-                        valB = b['レアリティ'] || '';
+                        valA = a.data['レアリティ'] || '';
+                        valB = b.data['レアリティ'] || '';
                         break;
                     default:
                         return 0;
@@ -607,29 +605,29 @@
                 `;
             } else {
                 grid.innerHTML = pageCards.map(card => {
-                    const imageUrl = getCardImageUrl(card['名前']);
-                    const tags = (card.tags || []).map(tag =>
+                    const imageUrl = getCardImageUrl(card.data['名前']);
+                    const tags = (card.data.tags || []).map(tag =>
                         `<span class="badge bg-secondary">${escapeHtml(tag)}</span>`
                     ).join(' ');
 
                     return `
-                        <div class="card-item" onclick="viewCardDetail('${escapeHtml(card['名前'])}')">
+                        <div class="card-item" onclick="viewCardDetail('${escapeHtml(card.data['名前'])}')">
                             <div class="card-image-container">
-                                <span class="stock-badge">在庫 ${escapeHtml(card['枚数'])}枚</span>
+                                <span class="stock-badge">在庫 ${escapeHtml(card.data['枚数'])}枚</span>
                                 ${imageUrl ?
-                                    `<img src="${imageUrl}" alt="${escapeHtml(card['名前'])}" loading="lazy" onerror="this.parentElement.innerHTML='<i class=\\'bi bi-card-image card-image-placeholder\\'></i>'">` :
+                                    `<img src="${imageUrl}" alt="${escapeHtml(card.data['名前'])}" loading="lazy" onerror="this.parentElement.innerHTML='<i class=\\'bi bi-card-image card-image-placeholder\\'></i>'">` :
                                     '<i class="bi bi-card-image card-image-placeholder"></i>'
                                 }
                             </div>
                             <div class="card-info">
-                                <div class="card-name">${escapeHtml(card['名前'])}</div>
-                                <div class="card-code">${escapeHtml(card['型番'])}</div>
+                                <div class="card-name">${escapeHtml(card.data['名前'])}</div>
+                                <div class="card-code">${escapeHtml(card.data['型番'])}</div>
                                 <div class="card-rarity">
-                                    <span class="badge bg-info">${escapeHtml(card['レアリティ'])}</span>
+                                    <span class="badge bg-info">${escapeHtml(card.data['レアリティ'])}</span>
                                 </div>
                                 <div class="card-quantity">
                                     <i class="bi bi-layers-fill"></i>
-                                    ${escapeHtml(card['枚数'])}枚所持
+                                    ${escapeHtml(card.data['枚数'])}枚所持
                                 </div>
                                 <div class="card-tags">
                                     ${tags || '<span class="text-muted" style="font-size: 0.7rem;">タグなし</span>'}
@@ -665,7 +663,7 @@
 
         // Update stats
         const updateStats = () => {
-            const totalQuantity = allCards.reduce((sum, card) => sum + (parseInt(card['枚数']) || 0), 0);
+            const totalQuantity = allCards.reduce((sum, card) => sum + (parseInt(card.data['枚数']) || 0), 0);
             const uniqueCount = allCards.length;
             const filteredCount = filteredCards.length;
             const totalPages = Math.ceil(filteredCards.length / itemsPerPage);
@@ -679,13 +677,13 @@
         // Populate filter options
         const populateFilterOptions = () => {
             // Rarities
-            const rarities = [...new Set(allCards.map(card => card['レアリティ']).filter(Boolean))].sort();
+            const rarities = [...new Set(allCards.map(card => card.data['レアリティ']).filter(Boolean))].sort();
             const raritySelect = document.getElementById('rarity-filter');
             raritySelect.innerHTML = '<option value="">すべてのレアリティ</option>' +
                 rarities.map(r => `<option value="${escapeHtml(r)}">${escapeHtml(r)}</option>`).join('');
 
             // Tags
-            const tags = [...new Set(allCards.flatMap(card => card.tags || []))].sort();
+            const tags = [...new Set(allCards.flatMap(card => card.data.tags || []))].sort();
             const tagSelect = document.getElementById('tag-filter');
             tagSelect.innerHTML = '<option value="">すべてのタグ</option>' +
                 tags.map(t => `<option value="${escapeHtml(t)}">${escapeHtml(t)}</option>`).join('');
