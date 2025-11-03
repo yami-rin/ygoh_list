@@ -204,30 +204,84 @@
         }
 
         // 既知のカードIDでテスト
-        function testKnownCards() {
+        async function testKnownCards() {
             const knownCards = [
                 { cid: '4001', name: 'ブラック・マジシャン' },
                 { cid: '5318', name: '青眼の白龍' },
-                { cid: '6983', name: '真紅眼の黒竜' },
-                { cid: '12206', name: '死者蘇生' },
-                { cid: '21385', name: '効果ヴェーラー' },
-                { cid: '7128', name: '増援' },
                 { cid: '7315', name: 'おろかな埋葬' },
-                { cid: '12653', name: '強欲で謙虚な壺' }
+                { cid: '12206', name: '死者蘇生' }
             ];
 
-            extractedCards = knownCards.map(card => ({
-                ...card,
-                imageUrl: `https://www.db.yugioh-card.com/yugiohdb/card_image.action?cid=${card.cid}&request_locale=ja`
-            }));
+            const statusMsg = document.getElementById('status-message');
+            statusMsg.style.display = 'block';
+            statusMsg.innerHTML = '<span class="loading-spinner"></span> カード情報を取得中...';
+            statusMsg.className = 'alert alert-info';
+
+            extractedCards = [];
+
+            for (const card of knownCards) {
+                try {
+                    const cardData = await fetchCardDetail(card.cid);
+                    extractedCards.push({
+                        cid: card.cid,
+                        name: cardData.name || card.name,
+                        imageUrl: cardData.imageUrlWithEnc || cardData.imageUrl,
+                        encToken: cardData.encToken
+                    });
+                } catch (error) {
+                    console.error(`Failed to fetch card ${card.cid}:`, error);
+                    extractedCards.push({
+                        cid: card.cid,
+                        name: card.name,
+                        imageUrl: `https://www.db.yugioh-card.com/yugiohdb/card_image.action?cid=${card.cid}&request_locale=ja`,
+                        encToken: null
+                    });
+                }
+            }
 
             displayCards(extractedCards);
             generateCode(extractedCards);
 
-            const statusMsg = document.getElementById('status-message');
-            statusMsg.style.display = 'block';
-            statusMsg.innerHTML = `<i class="bi bi-check-circle"></i> ${knownCards.length}枚の既知カードで動作テスト`;
+            statusMsg.innerHTML = `<i class="bi bi-check-circle"></i> ${extractedCards.length}枚のカード情報を取得しました`;
             statusMsg.className = 'alert alert-success';
+        }
+
+        // カード詳細ページから情報を取得
+        async function fetchCardDetail(cardId) {
+            const detailUrl = `https://www.db.yugioh-card.com/yugiohdb/card_search.action?ope=2&cid=${cardId}`;
+            const proxyUrl = `https://corsproxy.io/?${encodeURIComponent(detailUrl)}`;
+
+            const response = await fetch(proxyUrl);
+            const html = await response.text();
+
+            return extractCardDataFromDetail(html, cardId);
+        }
+
+        function extractCardDataFromDetail(html, cardId) {
+            const data = {
+                cid: cardId,
+                name: null,
+                imageUrlWithEnc: null,
+                imageUrl: `https://www.db.yugioh-card.com/yugiohdb/card_image.action?cid=${cardId}&request_locale=ja`,
+                encToken: null
+            };
+
+            // Extract enc token from get_image.action
+            const imageRegex = /get_image\.action\?type=2&cid=\d+&ciid=1&enc=([a-zA-Z0-9_-]+)/;
+            const match = html.match(imageRegex);
+            if (match) {
+                data.encToken = match[1];
+                data.imageUrlWithEnc = `https://www.db.yugioh-card.com/yugiohdb/get_image.action?type=2&cid=${cardId}&ciid=1&enc=${data.encToken}`;
+            }
+
+            // Extract card name
+            const nameRegex = /<h1[^>]*>([^<]+)<\/h1>/i;
+            const nameMatch = html.match(nameRegex);
+            if (nameMatch) {
+                data.name = nameMatch[1].trim();
+            }
+
+            return data;
         }
 
         // カード情報を表示
@@ -242,13 +296,14 @@
                     <div class="row align-items-center">
                         <div class="col-md-2 text-center">
                             <img src="${card.imageUrl}" alt="${card.name}"
-                                 onerror="this.src='data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 width=%22100%22 height=%22145%22><rect width=%22100%22 height=%22145%22 fill=%22%23ddd%22/><text x=%2250%25%22 y=%2250%25%22 text-anchor=%22middle%22 fill=%22%23999%22>No Image</text></svg>'">
+                                 onerror="this.parentElement.innerHTML='<div class=\\'text-danger\\'><i class=\\'bi bi-x-circle\\'></i> 画像エラー</div>'">
                         </div>
                         <div class="col-md-10">
                             <h6>${card.name}</h6>
                             <p class="mb-1"><strong>カードID:</strong> <code>${card.cid}</code></p>
+                            ${card.encToken ? `<p class="mb-1"><strong>encトークン:</strong> <code>${card.encToken}</code></p>` : ''}
                             <p class="mb-1"><strong>画像URL:</strong></p>
-                            <input type="text" class="form-control form-control-sm" value="${card.imageUrl}" readonly>
+                            <input type="text" class="form-control form-control-sm" value="${card.imageUrl}" readonly onclick="this.select()">
                         </div>
                     </div>
                 `;
@@ -261,46 +316,87 @@
             const codeOutput = document.getElementById('code-output');
 
             const code = `
-// 遊戯王検索結果から画像を取得する実装例
+// 遊戯王カード画像取得の実装（encトークン対応）
 
-// 1. 検索結果ページから情報を抽出
-async function fetchCardsFromSearch(searchUrl) {
+// ===== 重要な発見 =====
+// 1. 画像URLには2種類ある:
+//    - get_image.action (encトークン必須、確実に動作)
+//    - card_image.action (encなし、一部のカードのみ動作)
+// 2. encトークンはカードごとに異なる
+// 3. encトークンはカード詳細ページから取得する必要がある
+
+// 1. カード詳細ページから情報を取得
+async function fetchCardDetail(cardId) {
+    const detailUrl = \`https://www.db.yugioh-card.com/yugiohdb/card_search.action?ope=2&cid=\${cardId}\`;
+    const proxyUrl = \`https://corsproxy.io/?\${encodeURIComponent(detailUrl)}\`;
+
+    const response = await fetch(proxyUrl);
+    const html = await response.text();
+
+    // encトークンを抽出
+    const imageRegex = /get_image\\.action\\?type=2&cid=\\d+&ciid=1&enc=([a-zA-Z0-9_-]+)/;
+    const match = html.match(imageRegex);
+
+    if (match) {
+        const encToken = match[1];
+        return {
+            cid: cardId,
+            encToken: encToken,
+            imageUrlWithEnc: \`https://www.db.yugioh-card.com/yugiohdb/get_image.action?type=2&cid=\${cardId}&ciid=1&enc=\${encToken}\`,
+            imageUrl: \`https://www.db.yugioh-card.com/yugiohdb/card_image.action?cid=\${cardId}&request_locale=ja\`
+        };
+    }
+
+    return null;
+}
+
+// 2. 検索結果ページからカードIDを抽出
+async function fetchCardIdsFromSearch(searchUrl) {
     const proxyUrl = \`https://corsproxy.io/?\${encodeURIComponent(searchUrl)}\`;
     const response = await fetch(proxyUrl);
     const html = await response.text();
 
-    // カードIDを抽出
-    const cards = [];
-    const imageUrlRegex = /get_image\\.action\\?[^'"]*(cid=(\\d+))[^'"]*/g;
-    const foundCids = new Set();
+    const cardIds = new Set();
+    const regex = /cid=(\\d+)/g;
     let match;
 
-    while ((match = imageUrlRegex.exec(html)) !== null) {
-        const cid = match[2];
-        if (!foundCids.has(cid)) {
-            foundCids.add(cid);
-            cards.push({
-                cid: cid,
-                imageUrl: \`https://www.db.yugioh-card.com/yugiohdb/card_image.action?cid=\${cid}&request_locale=ja\`
-            });
+    while ((match = regex.exec(html)) !== null) {
+        cardIds.add(match[1]);
+    }
+
+    return Array.from(cardIds);
+}
+
+// 3. 完全な実装例
+async function getCardsWithImages(searchUrl) {
+    // Step 1: 検索結果からカードIDを抽出
+    const cardIds = await fetchCardIdsFromSearch(searchUrl);
+
+    // Step 2: 各カードの詳細情報を取得
+    const cards = [];
+    for (const cid of cardIds) {
+        try {
+            const cardDetail = await fetchCardDetail(cid);
+            if (cardDetail) {
+                cards.push(cardDetail);
+            }
+            // レート制限対策: 少し待つ
+            await new Promise(resolve => setTimeout(resolve, 200));
+        } catch (error) {
+            console.error(\`Failed to fetch card \${cid}:\`, error);
         }
     }
 
     return cards;
 }
 
-// 2. カード画像を取得
-function getCardImageUrl(cid) {
-    return \`https://www.db.yugioh-card.com/yugiohdb/card_image.action?cid=\${cid}&request_locale=ja\`;
-}
+// 使用例
+const searchUrl = 'https://www.db.yugioh-card.com/yugiohdb/card_search.action?ope=1&sess=1&rp=10...';
+const cards = await getCardsWithImages(searchUrl);
+console.log(\`\${cards.length}枚のカード情報を取得\`);
 
-// 3. 使用例
-const searchUrl = '${document.getElementById('search-url').value}';
-const cards = await fetchCardsFromSearch(searchUrl);
-console.log(\`\${cards.length}枚のカードを取得\`);
-
-// 抽出されたカード (最初の5枚)
-${JSON.stringify(cards.slice(0, 5), null, 2)}
+// 取得されたカード (最初の3枚)
+${JSON.stringify(cards.slice(0, 3), null, 2)}
 `;
 
             codeOutput.textContent = code;

@@ -1,0 +1,357 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>遊戯王カード情報取得ツール</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css">
+    <style>
+        body { background: #f5f5f5; }
+        .card-display {
+            background: white;
+            border-radius: 8px;
+            padding: 1.5rem;
+            margin-bottom: 1rem;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        .card-display img {
+            max-width: 300px;
+            border: 2px solid #007bff;
+            border-radius: 8px;
+        }
+        .info-table {
+            font-size: 0.9rem;
+        }
+        .info-table th {
+            width: 150px;
+            background: #f8f9fa;
+        }
+        .code-block {
+            background: #1e1e1e;
+            color: #d4d4d4;
+            padding: 1rem;
+            border-radius: 4px;
+            font-family: monospace;
+            font-size: 0.85rem;
+            overflow-x: auto;
+        }
+    </style>
+</head>
+<body>
+    <div class="container py-4">
+        <h1 class="mb-4">🎴 遊戯王カード情報取得ツール</h1>
+
+        <div class="card mb-4">
+            <div class="card-header bg-primary text-white">
+                <h5 class="mb-0">カード詳細ページから情報取得</h5>
+            </div>
+            <div class="card-body">
+                <div class="mb-3">
+                    <label class="form-label">カード詳細ページURL または カードID</label>
+                    <input type="text" class="form-control" id="card-input"
+                           placeholder="https://www.db.yugioh-card.com/yugiohdb/card_search.action?ope=2&cid=7315 または 7315">
+                    <small class="text-muted">URLまたはカードID（cid）を入力</small>
+                </div>
+
+                <button class="btn btn-primary" onclick="fetchCardInfo()">
+                    <i class="bi bi-download"></i> カード情報を取得
+                </button>
+
+                <div class="mt-3">
+                    <strong>クイックテスト:</strong>
+                    <div class="btn-group-vertical btn-group-sm d-block mt-2">
+                        <button class="btn btn-outline-secondary mb-1" onclick="loadCard('7315')">
+                            おろかな埋葬 (CID: 7315)
+                        </button>
+                        <button class="btn btn-outline-secondary mb-1" onclick="loadCard('4001')">
+                            ブラック・マジシャン (CID: 4001)
+                        </button>
+                        <button class="btn btn-outline-secondary mb-1" onclick="loadCard('5318')">
+                            青眼の白龍 (CID: 5318)
+                        </button>
+                        <button class="btn btn-outline-secondary mb-1" onclick="loadCard('12206')">
+                            死者蘇生 (CID: 12206)
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div id="result-container"></div>
+
+        <div class="card" id="code-container" style="display: none;">
+            <div class="card-header">
+                <h5 class="mb-0">実装コード</h5>
+            </div>
+            <div class="card-body">
+                <div id="code-output" class="code-block"></div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let currentCardData = null;
+
+        window.loadCard = (cid) => {
+            document.getElementById('card-input').value = cid;
+            fetchCardInfo();
+        };
+
+        async function fetchCardInfo() {
+            const input = document.getElementById('card-input').value.trim();
+            if (!input) {
+                alert('URLまたはカードIDを入力してください');
+                return;
+            }
+
+            // Extract card ID from URL or use input as ID
+            let cardId;
+            if (input.includes('cid=')) {
+                const match = input.match(/cid=(\d+)/);
+                cardId = match ? match[1] : null;
+            } else {
+                cardId = input;
+            }
+
+            if (!cardId) {
+                alert('有効なカードIDが見つかりません');
+                return;
+            }
+
+            const resultContainer = document.getElementById('result-container');
+            resultContainer.innerHTML = '<div class="alert alert-info"><i class="bi bi-hourglass-split"></i> 読み込み中...</div>';
+
+            try {
+                // Fetch card detail page
+                const detailUrl = `https://www.db.yugioh-card.com/yugiohdb/card_search.action?ope=2&cid=${cardId}`;
+                const proxyUrl = `https://corsproxy.io/?${encodeURIComponent(detailUrl)}`;
+
+                const response = await fetch(proxyUrl);
+                const html = await response.text();
+
+                // Extract card information
+                const cardData = extractCardData(html, cardId);
+
+                if (cardData) {
+                    currentCardData = cardData;
+                    displayCardInfo(cardData);
+                    generateImplementationCode(cardData);
+                } else {
+                    resultContainer.innerHTML = '<div class="alert alert-danger"><i class="bi bi-x-circle"></i> カード情報を取得できませんでした</div>';
+                }
+
+            } catch (error) {
+                console.error('Error:', error);
+                resultContainer.innerHTML = `<div class="alert alert-danger"><i class="bi bi-x-circle"></i> エラー: ${error.message}</div>`;
+            }
+        }
+
+        function extractCardData(html, cardId) {
+            const data = {
+                cid: cardId,
+                name: null,
+                nameJa: null,
+                cardNumber: null,
+                rarity: null,
+                cardText: null,
+                imageUrl: null,
+                imageUrlWithEnc: null,
+                encToken: null
+            };
+
+            // Extract image URL with enc token
+            const imageRegex = /get_image\.action\?type=2&cid=\d+&ciid=1&enc=([a-zA-Z0-9_-]+)/;
+            const imageMatch = html.match(imageRegex);
+            if (imageMatch) {
+                data.encToken = imageMatch[1];
+                data.imageUrlWithEnc = `https://www.db.yugioh-card.com/yugiohdb/get_image.action?type=2&cid=${cardId}&ciid=1&enc=${data.encToken}`;
+            }
+
+            // Try alternative image endpoints
+            data.imageUrl = `https://www.db.yugioh-card.com/yugiohdb/card_image.action?cid=${cardId}&request_locale=ja`;
+
+            // Extract card name
+            const nameRegex = /<h1[^>]*>([^<]+)<\/h1>/i;
+            const nameMatch = html.match(nameRegex);
+            if (nameMatch) {
+                data.name = nameMatch[1].trim();
+            }
+
+            // Extract Japanese name (if different)
+            const nameJaRegex = /<span[^>]*class="[^"]*card_name[^"]*"[^>]*>([^<]+)<\/span>/i;
+            const nameJaMatch = html.match(nameJaRegex);
+            if (nameJaMatch) {
+                data.nameJa = nameJaMatch[1].trim();
+            }
+
+            // Extract card number
+            const numberRegex = /([A-Z0-9]+-[A-Z]+\d+)/;
+            const numberMatch = html.match(numberRegex);
+            if (numberMatch) {
+                data.cardNumber = numberMatch[1];
+            }
+
+            // Extract rarity
+            const rarityRegex = /(Normal|Rare|Super Rare|Ultra Rare|Secret Rare|Common|Parallel|Gold|Ghost|Ultimate)/i;
+            const rarityMatch = html.match(rarityRegex);
+            if (rarityMatch) {
+                data.rarity = rarityMatch[1];
+            }
+
+            // Extract card text
+            const textRegex = /<div[^>]*class="[^"]*card_text[^"]*"[^>]*>([\s\S]*?)<\/div>/i;
+            const textMatch = html.match(textRegex);
+            if (textMatch) {
+                data.cardText = textMatch[1].replace(/<[^>]*>/g, '').trim();
+            }
+
+            return data;
+        }
+
+        function displayCardInfo(cardData) {
+            const container = document.getElementById('result-container');
+
+            container.innerHTML = `
+                <div class="card-display">
+                    <div class="row">
+                        <div class="col-md-4 text-center">
+                            <h5 class="mb-3">カード画像</h5>
+                            <div class="mb-3">
+                                <h6>encトークン付き</h6>
+                                <img src="${cardData.imageUrlWithEnc || ''}" alt="${cardData.name}"
+                                     onerror="this.style.display='none'; this.nextElementSibling.style.display='block';"
+                                     onload="this.style.display='block';">
+                                <div style="display: none;" class="alert alert-warning">
+                                    <i class="bi bi-exclamation-triangle"></i> 画像を読み込めませんでした
+                                </div>
+                            </div>
+                            <div class="mb-3">
+                                <h6>card_image.action</h6>
+                                <img src="${cardData.imageUrl}" alt="${cardData.name}"
+                                     onerror="this.style.display='none'; this.nextElementSibling.style.display='block';"
+                                     onload="this.style.display='block';">
+                                <div style="display: none;" class="alert alert-warning">
+                                    <i class="bi bi-exclamation-triangle"></i> 画像を読み込めませんでした
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-8">
+                            <h5 class="mb-3">カード情報</h5>
+                            <table class="table table-bordered info-table">
+                                <tr>
+                                    <th>カードID</th>
+                                    <td><code>${cardData.cid}</code></td>
+                                </tr>
+                                <tr>
+                                    <th>カード名</th>
+                                    <td>${cardData.name || 'N/A'}</td>
+                                </tr>
+                                ${cardData.nameJa && cardData.nameJa !== cardData.name ? `
+                                <tr>
+                                    <th>日本語名</th>
+                                    <td>${cardData.nameJa}</td>
+                                </tr>
+                                ` : ''}
+                                <tr>
+                                    <th>カード番号</th>
+                                    <td>${cardData.cardNumber || 'N/A'}</td>
+                                </tr>
+                                <tr>
+                                    <th>レアリティ</th>
+                                    <td>${cardData.rarity || 'N/A'}</td>
+                                </tr>
+                                <tr>
+                                    <th>encトークン</th>
+                                    <td><code>${cardData.encToken || 'N/A'}</code></td>
+                                </tr>
+                            </table>
+
+                            ${cardData.cardText ? `
+                            <div class="mt-3">
+                                <strong>カードテキスト:</strong>
+                                <div class="border rounded p-2 mt-2" style="background: #f8f9fa;">
+                                    ${cardData.cardText}
+                                </div>
+                            </div>
+                            ` : ''}
+
+                            <div class="mt-3">
+                                <strong>画像URL (encあり):</strong>
+                                <input type="text" class="form-control form-control-sm mt-1"
+                                       value="${cardData.imageUrlWithEnc || ''}" readonly>
+                            </div>
+
+                            <div class="mt-2">
+                                <strong>画像URL (card_image.action):</strong>
+                                <input type="text" class="form-control form-control-sm mt-1"
+                                       value="${cardData.imageUrl}" readonly>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `;
+        }
+
+        function generateImplementationCode(cardData) {
+            const codeContainer = document.getElementById('code-container');
+            const codeOutput = document.getElementById('code-output');
+
+            const code = `
+// カード情報取得の実装
+
+// 1. カード詳細ページから情報を取得
+async function fetchCardDetail(cardId) {
+    const detailUrl = \`https://www.db.yugioh-card.com/yugiohdb/card_search.action?ope=2&cid=\${cardId}\`;
+    const proxyUrl = \`https://corsproxy.io/?\${encodeURIComponent(detailUrl)}\`;
+
+    const response = await fetch(proxyUrl);
+    const html = await response.text();
+
+    return extractCardData(html, cardId);
+}
+
+// 2. HTMLから画像URLとencトークンを抽出
+function extractCardData(html, cardId) {
+    // encトークン付き画像URL
+    const imageRegex = /get_image\\.action\\?type=2&cid=\\d+&ciid=1&enc=([a-zA-Z0-9_-]+)/;
+    const match = html.match(imageRegex);
+
+    if (match) {
+        const encToken = match[1];
+        return {
+            cid: cardId,
+            imageUrlWithEnc: \`https://www.db.yugioh-card.com/yugiohdb/get_image.action?type=2&cid=\${cardId}&ciid=1&enc=\${encToken}\`,
+            imageUrl: \`https://www.db.yugioh-card.com/yugiohdb/card_image.action?cid=\${cardId}&request_locale=ja\`,
+            encToken: encToken
+        };
+    }
+
+    return null;
+}
+
+// 3. 使用例
+const cardId = '${cardData.cid}';
+const cardInfo = await fetchCardDetail(cardId);
+
+console.log('カードID:', cardInfo.cid);
+console.log('画像URL (encあり):', cardInfo.imageUrlWithEnc);
+console.log('画像URL (標準):', cardInfo.imageUrl);
+console.log('encトークン:', cardInfo.encToken);
+
+// 実際のデータ:
+${JSON.stringify(cardData, null, 2)}
+
+// ===== 重要な発見 =====
+// 1. encトークンはカードごとに異なる
+// 2. encトークンは詳細ページから取得する必要がある
+// 3. card_image.actionでもencなしで画像取得可能（一部のカードのみ）
+// 4. 最も確実なのは get_image.action + encトークン
+`;
+
+            codeOutput.textContent = code;
+            codeContainer.style.display = 'block';
+        }
+    </script>
+</body>
+</html>
