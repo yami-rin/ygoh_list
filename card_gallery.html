@@ -259,7 +259,6 @@
             <h1 class="mb-2">
                 <i class="bi bi-grid-3x3-gap"></i> カードギャラリー
             </h1>
-            <p class="mb-0">所持カードをショップ風に表示</p>
         </div>
     </div>
 
@@ -281,29 +280,21 @@
         <!-- Stats bar -->
         <div class="stats-bar">
             <div class="row text-center">
-                <div class="col-6 col-md-2">
+                <div class="col-6 col-md-3">
                     <h4 class="mb-0 text-primary" id="total-cards">0</h4>
                     <small class="text-muted">総カード枚数</small>
                 </div>
-                <div class="col-6 col-md-2">
+                <div class="col-6 col-md-3">
                     <h4 class="mb-0 text-success" id="unique-cards">0</h4>
                     <small class="text-muted">種類数</small>
                 </div>
-                <div class="col-6 col-md-2 mt-3 mt-md-0">
+                <div class="col-6 col-md-3 mt-3 mt-md-0">
                     <h4 class="mb-0 text-info" id="filtered-cards">0</h4>
                     <small class="text-muted">表示中</small>
                 </div>
-                <div class="col-6 col-md-2 mt-3 mt-md-0">
+                <div class="col-6 col-md-3 mt-3 mt-md-0">
                     <h4 class="mb-0 text-warning" id="current-page-info">0</h4>
                     <small class="text-muted">ページ</small>
-                </div>
-                <div class="col-6 col-md-2 mt-3 mt-md-0">
-                    <h4 class="mb-0 text-secondary" id="cache-count">0</h4>
-                    <small class="text-muted">キャッシュ</small>
-                </div>
-                <div class="col-6 col-md-2 mt-3 mt-md-0">
-                    <h4 class="mb-0 text-dark" id="cache-size">0MB</h4>
-                    <small class="text-muted">容量</small>
                 </div>
             </div>
         </div>
@@ -395,11 +386,50 @@
         <div class="pagination-controls" id="pagination-bottom"></div>
     </div>
 
+    <!-- Card Edit Modal -->
+    <div class="modal fade" id="cardEditModal" tabindex="-1">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="modalCardName">カード編集</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="mb-3">
+                        <label for="modalQuantity" class="form-label">枚数</label>
+                        <input type="number" class="form-control" id="modalQuantity" min="0">
+                    </div>
+                    <div class="mb-3">
+                        <label for="modalTags" class="form-label">タグ（カンマ区切り）</label>
+                        <input type="text" class="form-control" id="modalTags" placeholder="デッキ1, お気に入り">
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">型番</label>
+                        <p class="form-control-plaintext" id="modalCode"></p>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">レアリティ</label>
+                        <p class="form-control-plaintext" id="modalRarity"></p>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-danger" id="deleteCardBtn">
+                        <i class="bi bi-trash"></i> 削除
+                    </button>
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">キャンセル</button>
+                    <button type="button" class="btn btn-primary" id="saveCardBtn">
+                        <i class="bi bi-save"></i> 保存
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-app.js";
         import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-auth.js";
-        import { getFirestore, collection, getDocs, query, where } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore.js";
+        import { getFirestore, collection, getDocs, doc, updateDoc, deleteDoc } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore.js";
 
         // Firebase configuration
         const firebaseConfig = {
@@ -428,6 +458,7 @@
         let currentGridSize = 'medium';
         let currentSort = 'quantity-desc';
         let currentListType = 'collection'; // 'collection' or 'wishlist'
+        let currentEditingCard = null;
 
         // Load card reading data
         const loadCardData = async () => {
@@ -639,7 +670,7 @@
                     ).join(' ');
 
                     return `
-                        <div class="card-item" onclick="viewCardDetail('${escapeHtml(card.data['名前'])}')">
+                        <div class="card-item" onclick="openCardEditModal('${card.id}')">
                             <div class="card-image-container" id="card-img-container-${index}">
                                 <span class="stock-badge">在庫 ${escapeHtml(card.data['枚数'])}枚</span>
                                 <i class="bi bi-card-image card-image-placeholder"></i>
@@ -722,7 +753,7 @@
         };
 
         // Update stats
-        const updateStats = async () => {
+        const updateStats = () => {
             const totalQuantity = allCards.reduce((sum, card) => sum + (parseInt(card.data['枚数']) || 0), 0);
             const uniqueCount = allCards.length;
             const filteredCount = filteredCards.length;
@@ -732,17 +763,6 @@
             document.getElementById('unique-cards').textContent = uniqueCount;
             document.getElementById('filtered-cards').textContent = filteredCount;
             document.getElementById('current-page-info').textContent = `${currentPage}/${totalPages}`;
-
-            // Update cache stats
-            try {
-                const cacheSize = await imageCacheManager.getCacheSize();
-                document.getElementById('cache-count').textContent = cacheSize.count;
-                document.getElementById('cache-size').textContent = cacheSize.sizeMB + 'MB';
-            } catch (error) {
-                console.error('Failed to update cache stats:', error);
-                document.getElementById('cache-count').textContent = '-';
-                document.getElementById('cache-size').textContent = '-';
-            }
         };
 
         // Populate filter options
@@ -778,9 +798,23 @@
             window.scrollTo({ top: 0, behavior: 'smooth' });
         };
 
-        window.viewCardDetail = (cardName) => {
-            // Redirect to main page with card detail
-            window.location.href = `card_list.html#card=${encodeURIComponent(cardName)}`;
+        window.openCardEditModal = (cardId) => {
+            // Find the card in current list
+            const card = allCards.find(c => c.id === cardId);
+            if (!card) return;
+
+            currentEditingCard = card;
+
+            // Populate modal with card data
+            document.getElementById('modalCardName').textContent = card.data['名前'];
+            document.getElementById('modalQuantity').value = card.data['枚数'] || 0;
+            document.getElementById('modalTags').value = (card.data.tags || []).join(', ');
+            document.getElementById('modalCode').textContent = card.data['型番'] || '-';
+            document.getElementById('modalRarity').textContent = card.data['レアリティ'] || '-';
+
+            // Open modal
+            const modal = new bootstrap.Modal(document.getElementById('cardEditModal'));
+            modal.show();
         };
 
         // Event listeners
@@ -836,6 +870,82 @@
 
         document.getElementById('wishlist-tab').addEventListener('click', () => {
             switchListType('wishlist');
+        });
+
+        // Modal save button
+        document.getElementById('saveCardBtn').addEventListener('click', async () => {
+            if (!currentEditingCard || !currentUser) return;
+
+            const newQuantity = parseInt(document.getElementById('modalQuantity').value) || 0;
+            const tagsInput = document.getElementById('modalTags').value;
+            const newTags = tagsInput ? tagsInput.split(',').map(t => t.trim()).filter(t => t) : [];
+
+            try {
+                // Determine collection path based on current list type
+                const collectionPath = currentListType === 'collection' ? 'cards' : 'wishlist';
+                const cardRef = doc(db, 'users', currentUser.uid, collectionPath, currentEditingCard.id);
+
+                await updateDoc(cardRef, {
+                    '枚数': newQuantity,
+                    'tags': newTags
+                });
+
+                // Update local data
+                currentEditingCard.data['枚数'] = newQuantity;
+                currentEditingCard.data.tags = newTags;
+
+                // Close modal
+                const modal = bootstrap.Modal.getInstance(document.getElementById('cardEditModal'));
+                modal.hide();
+
+                // Refresh display
+                applyFilters();
+                renderCards();
+
+                alert('カード情報を更新しました。');
+            } catch (error) {
+                console.error('Error updating card:', error);
+                alert('カード情報の更新に失敗しました。');
+            }
+        });
+
+        // Modal delete button
+        document.getElementById('deleteCardBtn').addEventListener('click', async () => {
+            if (!currentEditingCard || !currentUser) return;
+
+            if (!confirm(`「${currentEditingCard.data['名前']}」を削除してもよろしいですか？`)) {
+                return;
+            }
+
+            try {
+                // Determine collection path based on current list type
+                const collectionPath = currentListType === 'collection' ? 'cards' : 'wishlist';
+                const cardRef = doc(db, 'users', currentUser.uid, collectionPath, currentEditingCard.id);
+
+                await deleteDoc(cardRef);
+
+                // Remove from local data
+                if (currentListType === 'collection') {
+                    collectionCards = collectionCards.filter(c => c.id !== currentEditingCard.id);
+                } else {
+                    wishlistCards = wishlistCards.filter(c => c.id !== currentEditingCard.id);
+                }
+                allCards = currentListType === 'collection' ? collectionCards : wishlistCards;
+
+                // Close modal
+                const modal = bootstrap.Modal.getInstance(document.getElementById('cardEditModal'));
+                modal.hide();
+
+                // Refresh display
+                applyFilters();
+                renderCards();
+                populateFilterOptions();
+
+                alert('カードを削除しました。');
+            } catch (error) {
+                console.error('Error deleting card:', error);
+                alert('カードの削除に失敗しました。');
+            }
         });
 
         // Initialize
