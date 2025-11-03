@@ -453,7 +453,7 @@
         <div class="filter-section">
             <div class="row g-2">
                 <div class="col-md-4">
-                    <input type="text" class="form-control" id="search-input" placeholder="カード名で検索...">
+                    <input type="text" class="form-control" id="search-input" placeholder="カード名・ひらがなで検索...">
                 </div>
                 <div class="col-md-3">
                     <select class="form-select" id="rarity-filter">
@@ -623,6 +623,7 @@
         let allCards = [];
         let filteredCards = [];
         let cardDetailsMap = new Map();
+        let cardReadingMap = new Map(); // Map for hiragana -> card names
         let currentUser = null;
         let currentPage = 1;
         let itemsPerPage = 50;
@@ -648,11 +649,12 @@
                     const values = line.split(',');
                     const cardName = values[1]?.replace(/"/g, '');
                     const cardId = values[0]?.replace(/"/g, '');
+                    const cardReading = values[2]?.replace(/"/g, '');
 
                     if (cardName && cardId) {
                         cardDetailsMap.set(cardName, {
                             cardId: cardId,
-                            reading: values[2]?.replace(/"/g, ''),
+                            reading: cardReading,
                             cardType: values[3]?.replace(/"/g, ''),
                             level: values[4]?.replace(/"/g, ''),
                             attribute: values[5]?.replace(/"/g, ''),
@@ -661,8 +663,34 @@
                             defense: values[8]?.replace(/"/g, ''),
                             cardText: values[9]?.replace(/"/g, '')
                         });
+
+                        // Build reading map for hiragana search
+                        if (cardReading) {
+                            const readingKey = cardReading.toLowerCase();
+
+                            // Store multiple cards with same reading
+                            if (!cardReadingMap.has(readingKey)) {
+                                cardReadingMap.set(readingKey, []);
+                            }
+                            cardReadingMap.get(readingKey).push(cardName);
+
+                            // Also store hiragana version of the reading if it's in katakana
+                            const hiraganaReading = readingKey.replace(/[\u30A1-\u30F6]/g, function(match) {
+                                const code = match.charCodeAt(0) - 0x60;
+                                return String.fromCharCode(code);
+                            });
+
+                            if (hiraganaReading !== readingKey) {
+                                if (!cardReadingMap.has(hiraganaReading)) {
+                                    cardReadingMap.set(hiraganaReading, []);
+                                }
+                                cardReadingMap.get(hiraganaReading).push(cardName);
+                            }
+                        }
                     }
                 }
+
+                console.log(`Loaded ${cardReadingMap.size} card readings and ${cardDetailsMap.size} card details from CSV`);
             } catch (error) {
                 console.error('Error loading card data:', error);
             }
@@ -759,14 +787,63 @@
             }
         };
 
+        // Normalize text for search (convert katakana to hiragana, lowercase)
+        const normalizeForSearch = (text) => {
+            if (!text) return '';
+
+            // Convert to lowercase
+            text = text.toLowerCase();
+
+            // Convert katakana to hiragana
+            text = text.replace(/[ァ-ヶ]/g, (match) => {
+                const code = match.charCodeAt(0) - 0x60;
+                return String.fromCharCode(code);
+            });
+
+            return text;
+        };
+
         // Apply filters
         const applyFilters = () => {
             const searchTerm = document.getElementById('search-input').value.toLowerCase();
             const rarityFilter = document.getElementById('rarity-filter').value;
             const tagFilter = document.getElementById('tag-filter').value;
 
+            // Get possible card names from hiragana reading
+            let possibleCardNames = [];
+            if (searchTerm) {
+                // Check if the search term matches any reading in our map
+                if (cardReadingMap.has(searchTerm)) {
+                    possibleCardNames = cardReadingMap.get(searchTerm);
+                }
+
+                // Also check for partial matches in readings
+                for (const [reading, cards] of cardReadingMap) {
+                    if (reading.includes(searchTerm)) {
+                        possibleCardNames.push(...cards);
+                    }
+                }
+            }
+
+            // Normalize search term for card name matching
+            const normalizedSearchTerm = normalizeForSearch(searchTerm);
+
             filteredCards = allCards.filter(card => {
-                const matchesSearch = !searchTerm || card.data['名前']?.toLowerCase().includes(searchTerm);
+                const cardName = card.data['名前'] || '';
+
+                // Check if matches search
+                let matchesSearch = !searchTerm;
+                if (searchTerm) {
+                    // Direct name match (normalized)
+                    if (normalizeForSearch(cardName).includes(normalizedSearchTerm)) {
+                        matchesSearch = true;
+                    }
+                    // Hiragana reading match
+                    else if (possibleCardNames.includes(cardName)) {
+                        matchesSearch = true;
+                    }
+                }
+
                 const matchesRarity = !rarityFilter || card.data['レアリティ'] === rarityFilter;
                 const matchesTag = !tagFilter || (card.data.tags && card.data.tags.includes(tagFilter));
 
