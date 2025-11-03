@@ -203,14 +203,31 @@ app.get('/card-list', async (req, res) => {
             const cardName = nameMatch ? nameMatch[1].trim() : `Card ${block.id}`;
 
             // Extract ALL rarities for this card
-            const rarityPattern = /<div\s+class="icon\s+rarity\s+pack_([a-z0-9]+)"[^>]*>/gi;
+            // Look for <div class="lr_icon rid rid_X"> ... <span>レアリティ名仕様</span>
+            const rarityPattern = /<div\s+class="lr_icon\s+rid\s+rid_\d+"[^>]*>[\s\S]*?<span[^>]*>([^<]+)<\/span>/gi;
             const cardRarities = [];
             let rarityMatch;
+
             while ((rarityMatch = rarityPattern.exec(block.html)) !== null) {
-                const rarityCode = rarityMatch[1].toLowerCase();
-                const mappedRarity = rarityMap[rarityCode] || 'その他';
-                if (!cardRarities.includes(mappedRarity)) {
-                    cardRarities.push(mappedRarity);
+                let rarityText = rarityMatch[1].trim();
+                // Remove "仕様" suffix if present
+                rarityText = rarityText.replace(/仕様$/, '');
+
+                if (rarityText && !cardRarities.includes(rarityText)) {
+                    cardRarities.push(rarityText);
+                }
+            }
+
+            // Fallback: if no lr_icon found, try the old pack_ method
+            if (cardRarities.length === 0) {
+                const packPattern = /<div\s+class="icon\s+rarity\s+pack_([a-z0-9]+)"[^>]*>/gi;
+                let packMatch;
+                while ((packMatch = packPattern.exec(block.html)) !== null) {
+                    const rarityCode = packMatch[1].toLowerCase();
+                    const mappedRarity = rarityMap[rarityCode] || 'その他';
+                    if (!cardRarities.includes(mappedRarity)) {
+                        cardRarities.push(mappedRarity);
+                    }
                 }
             }
 
