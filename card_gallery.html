@@ -459,6 +459,7 @@
         let currentSort = 'quantity-desc';
         let currentListType = 'collection'; // 'collection' or 'wishlist'
         let currentEditingCard = null;
+        let currentRenderingId = 0; // To prevent duplicate images when rapidly changing pages
 
         // Load card reading data
         const loadCardData = async () => {
@@ -648,6 +649,10 @@
 
         // Render cards (with async image loading)
         const renderCards = async () => {
+            // Increment rendering ID to invalidate previous async operations
+            currentRenderingId++;
+            const thisRenderingId = currentRenderingId;
+
             const grid = document.getElementById('card-grid');
             grid.className = `card-grid size-${currentGridSize}`;
 
@@ -671,7 +676,7 @@
 
                     return `
                         <div class="card-item" onclick="openCardEditModal('${card.id}')">
-                            <div class="card-image-container" id="card-img-container-${index}">
+                            <div class="card-image-container" id="card-img-container-${index}" data-rendering-id="${thisRenderingId}">
                                 <span class="stock-badge">在庫 ${escapeHtml(card.data['枚数'])}枚</span>
                                 <i class="bi bi-card-image card-image-placeholder"></i>
                             </div>
@@ -695,7 +700,12 @@
                         const imageUrl = await getCardImageUrl(card.data['名前']);
                         const container = document.getElementById(`card-img-container-${index}`);
 
-                        if (container && imageUrl) {
+                        // Check if this rendering is still valid (page hasn't changed)
+                        if (!container || parseInt(container.dataset.renderingId) !== thisRenderingId) {
+                            return; // Skip adding image if page has changed
+                        }
+
+                        if (imageUrl) {
                             // Create image element
                             const img = document.createElement('img');
                             img.src = imageUrl;
