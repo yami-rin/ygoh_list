@@ -100,13 +100,18 @@ app.get('/card-detail', async (req, res) => {
         const nameMatch = html.match(/<h1[^>]*>([^<]+)<\/h1>/i);
         const cardName = nameMatch ? nameMatch[1].trim() : null;
 
+        // Build base URL from request
+        const protocol = req.headers['x-forwarded-proto'] || req.protocol || 'https';
+        const host = req.headers['x-forwarded-host'] || req.headers.host || req.hostname;
+        const baseUrl = `${protocol}://${host}`;
+
         res.json({
             cardId,
             cardName,
             encToken,
             imageUrl: encToken ?
-                `http://localhost:${PORT}/image?cid=${cardId}&enc=${encToken}` :
-                `http://localhost:${PORT}/image?cid=${cardId}`
+                `${baseUrl}/image?cid=${cardId}&enc=${encToken}` :
+                `${baseUrl}/image?cid=${cardId}`
         });
 
     } catch (error) {
