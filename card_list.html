@@ -6259,8 +6259,11 @@
 
             // Add analysis functionality
             initializeAnalysis();
+
+            // Check VIP status after login
+            checkVipStatus();
         };
-        
+
         // Track daily usage
         const trackDailyUsage = () => {
             const today = new Date().toISOString().split('T')[0];
@@ -8539,7 +8542,8 @@ Firebase Consoleで確認すべき項目:
         // VIP Membership System (Secured)
         // ============================================
 
-        // Hash of valid serial number (SHA-256 of "00181682095299")
+        // SHA-256 hash of valid serial number
+        // Serial number is not stored in source code for security
         const VALID_SERIAL_HASH = 'a8f5f167f44f4964e6c998dee827110c03e6a8b13c3c72c8c3f4e9f3c8c2c4e7';
 
         let isVipMember = false;
@@ -8786,8 +8790,8 @@ Firebase Consoleで確認すべき項目:
             document.body.removeChild(link);
         });
 
-        // Initialize VIP status on page load
-        checkVipStatus();
+        // Note: checkVipStatus() is called in handleUserLogin() after authentication completes
+        // Do not call it here as currentUser is still null at page load
 
         document.getElementById('delete-account-btn').addEventListener('click', async () => {
             if (!currentUser) return;
