@@ -159,63 +159,74 @@ app.get('/card-list', async (req, res) => {
         // Parse card list from HTML
         const cards = [];
 
-        // Extract all card blocks - each card has <span class="card_name">, rarity div, and hidden input
+        // Rarity code mapping
+        const rarityMap = {
+            'n': 'ノーマル',
+            'r': 'レア',
+            'sr': 'スーパーレア',
+            'ur': 'ウルトラレア',
+            'scr': 'シークレットレア',
+            'hr': 'ホログラフィックレア',
+            '20s': '20thシークレットレア',
+            'pscr': 'プリズマティックシークレットレア',
+            'mr': 'ミレニアムレア',
+            'pr': 'パラレルレア',
+            'npr': 'ノーマルパラレルレア',
+            'spr': 'スーパーパラレルレア',
+            'exs': 'エクストラシークレットレア',
+            'kc': 'KCレア',
+            'kcr': 'KCウルトラレア'
+        };
+
+        // Split HTML by card entries (using link_value as delimiter)
+        // Each card block contains: card_name, rarities, and link_value (cid)
+        const cardBlockPattern = /<input[^>]*class="link_value"[^>]*value="\/yugiohdb\/card_search\.action\?ope=2&(?:amp;)?cid=(\d+)"[^>]*>/g;
+
+        let lastIndex = 0;
+        let match;
         const cardBlocks = [];
 
-        // Find all <span class="card_name"> elements
-        const cardNamePattern = /<span\s+class="card_name"[^>]*>([^<]+)<\/span>/g;
-        const cardNames = [];
-        let match;
-        while ((match = cardNamePattern.exec(html)) !== null) {
-            cardNames.push(match[1].trim());
+        while ((match = cardBlockPattern.exec(html)) !== null) {
+            const cardId = match[1];
+            const blockEnd = match.index;
+            const blockHtml = html.substring(lastIndex, blockEnd + match[0].length);
+            cardBlocks.push({ id: cardId, html: blockHtml });
+            lastIndex = blockEnd;
         }
 
-        // Find all <input type="hidden" class="link_value"> elements for card IDs
-        const linkValuePattern = /<input[^>]*class="link_value"[^>]*value="\/yugiohdb\/card_search\.action\?ope=2&(?:amp;)?cid=(\d+)"[^>]*>/g;
-        const cardIds = [];
-        while ((match = linkValuePattern.exec(html)) !== null) {
-            cardIds.push(match[1]);
-        }
+        console.log(`Found ${cardBlocks.length} card blocks`);
 
-        // Find all rarity class elements
-        // The pattern looks for: <div class="icon rarity pack_X">
-        const rarityPattern = /<div\s+class="icon\s+rarity\s+pack_([a-z0-9]+)"[^>]*>/gi;
-        const rarities = [];
-        const rarityCodesFound = [];
-        while ((match = rarityPattern.exec(html)) !== null) {
-            const rarityCode = match[1].toLowerCase();
-            rarityCodesFound.push(rarityCode);
-            // Map rarity codes to Japanese rarity names
-            const rarityMap = {
-                'n': 'ノーマル',
-                'r': 'レア',
-                'sr': 'スーパーレア',
-                'ur': 'ウルトラレア',
-                'scr': 'シークレットレア',
-                'hr': 'ホログラフィックレア',
-                '20s': '20thシークレットレア',
-                'pscr': 'プリズマティックシークレットレア',
-                'mr': 'ミレニアムレア',
-                'pr': 'パラレルレア',
-                'npr': 'ノーマルパラレルレア',
-                'spr': 'スーパーパラレルレア',
-                'exs': 'エクストラシークレットレア',
-                'kc': 'KCレア',
-                'kcr': 'KCウルトラレア'
-            };
-            const mappedRarity = rarityMap[rarityCode] || 'その他';
-            rarities.push(mappedRarity);
-            console.log(`Rarity code: ${rarityCode} -> ${mappedRarity}`);
-        }
+        // Parse each card block
+        cardBlocks.forEach((block, index) => {
+            // Extract card name
+            const nameMatch = block.html.match(/<span\s+class="card_name"[^>]*>([^<]+)<\/span>/);
+            const cardName = nameMatch ? nameMatch[1].trim() : `Card ${block.id}`;
 
-        console.log(`Found ${cardNames.length} card names, ${cardIds.length} card IDs, ${rarities.length} rarities`);
-        console.log(`Rarity codes found:`, rarityCodesFound);
+            // Extract ALL rarities for this card
+            const rarityPattern = /<div\s+class="icon\s+rarity\s+pack_([a-z0-9]+)"[^>]*>/gi;
+            const cardRarities = [];
+            let rarityMatch;
+            while ((rarityMatch = rarityPattern.exec(block.html)) !== null) {
+                const rarityCode = rarityMatch[1].toLowerCase();
+                const mappedRarity = rarityMap[rarityCode] || 'その他';
+                if (!cardRarities.includes(mappedRarity)) {
+                    cardRarities.push(mappedRarity);
+                }
+            }
+
+            console.log(`Card ${index}: ${cardName} (ID: ${block.id}), Rarities: [${cardRarities.join(', ')}]`);
+
+            cardBlocks[index].name = cardName;
+            cardBlocks[index].rarities = cardRarities;
+        });
+
+        console.log(`Parsed ${cardBlocks.length} cards with rarities`);
 
         // Get card number (型番) from the first card's detail page
         let baseCardNumber = '';
-        if (cardIds.length > 0) {
+        if (cardBlocks.length > 0) {
             try {
-                const firstCardId = cardIds[0];
+                const firstCardId = cardBlocks[0].id;
                 const detailUrl = `https://www.db.yugioh-card.com/yugiohdb/card_search.action?ope=2&cid=${firstCardId}`;
 
                 console.log(`Fetching first card details from: ${detailUrl}`);
@@ -257,16 +268,15 @@ app.get('/card-list', async (req, res) => {
             return prefix + newNum;
         };
 
-        // Combine all data
-        const minLength = Math.min(cardNames.length, cardIds.length, rarities.length);
-        for (let i = 0; i < minLength; i++) {
+        // Build final card list with all rarities
+        cardBlocks.forEach((block, index) => {
             cards.push({
-                id: cardIds[i],
-                name: cardNames[i],
-                number: generateCardNumber(baseCardNumber, i),
-                rarity: rarities[i]
+                id: block.id,
+                name: block.name,
+                number: generateCardNumber(baseCardNumber, index),
+                rarities: block.rarities // Array of all rarities for this card
             });
-        }
+        });
 
         console.log(`Successfully parsed ${cards.length} cards`);
 
