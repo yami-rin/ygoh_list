@@ -669,16 +669,32 @@
                         const container = document.getElementById(`card-img-container-${index}`);
 
                         if (container && imageUrl) {
-                            const stockBadge = container.querySelector('.stock-badge');
-                            const stockBadgeHtml = stockBadge ? stockBadge.outerHTML : '';
+                            // Create image element
+                            const img = document.createElement('img');
+                            img.src = imageUrl;
+                            img.alt = card.data['名前'];
+                            img.loading = 'lazy';
 
-                            container.innerHTML = `
-                                ${stockBadgeHtml}
-                                <img src="${imageUrl}"
-                                     alt="${escapeHtml(card.data['名前'])}"
-                                     loading="lazy"
-                                     onerror="this.parentElement.innerHTML='${stockBadgeHtml}<i class=\\'bi bi-card-image card-image-placeholder\\'></i>'">
-                            `;
+                            // Handle image error
+                            img.onerror = function() {
+                                // Keep stock badge and show placeholder
+                                const stockBadge = this.parentElement.querySelector('.stock-badge');
+                                this.parentElement.innerHTML = '';
+                                if (stockBadge) {
+                                    this.parentElement.appendChild(stockBadge);
+                                }
+                                const placeholder = document.createElement('i');
+                                placeholder.className = 'bi bi-card-image card-image-placeholder';
+                                this.parentElement.appendChild(placeholder);
+                            };
+
+                            // Clear placeholder and add image (keep stock badge)
+                            const stockBadge = container.querySelector('.stock-badge');
+                            const placeholder = container.querySelector('.card-image-placeholder');
+                            if (placeholder) {
+                                placeholder.remove();
+                            }
+                            container.appendChild(img);
                         }
                     } catch (error) {
                         console.error(`Failed to load image for ${card.data['名前']}:`, error);
