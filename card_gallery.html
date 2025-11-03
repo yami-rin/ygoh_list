@@ -263,6 +263,20 @@
     </div>
 
     <div class="container">
+        <!-- List type selector tabs -->
+        <ul class="nav nav-tabs mb-3" role="tablist">
+            <li class="nav-item" role="presentation">
+                <button class="nav-link active" id="collection-tab" data-list-type="collection" type="button">
+                    <i class="bi bi-collection"></i> 所持カード
+                </button>
+            </li>
+            <li class="nav-item" role="presentation">
+                <button class="nav-link" id="wishlist-tab" data-list-type="wishlist" type="button">
+                    <i class="bi bi-star"></i> ウィッシュリスト
+                </button>
+            </li>
+        </ul>
+
         <!-- Stats bar -->
         <div class="stats-bar">
             <div class="row text-center">
@@ -394,6 +408,8 @@
         const db = getFirestore(app);
 
         // State
+        let collectionCards = [];
+        let wishlistCards = [];
         let allCards = [];
         let filteredCards = [];
         let cardDetailsMap = new Map();
@@ -402,6 +418,7 @@
         let itemsPerPage = 50;
         let currentGridSize = 'medium';
         let currentSort = 'quantity-desc';
+        let currentListType = 'collection'; // 'collection' or 'wishlist'
 
         // Load card reading data
         const loadCardData = async () => {
@@ -448,29 +465,59 @@
             return null;
         };
 
-        // Load user's card collection
-        const loadCollection = async (userId) => {
+        // Load user's card collection and wishlist
+        const loadAllData = async (userId) => {
             showLoading(true);
             try {
+                // Load collection cards
                 const collectionRef = collection(db, 'cards');
-                const q = query(collectionRef, where('userId', '==', userId));
-                const snapshot = await getDocs(q);
-
-                allCards = snapshot.docs.map(doc => ({
+                const collectionQuery = query(collectionRef, where('userId', '==', userId));
+                const collectionSnapshot = await getDocs(collectionQuery);
+                collectionCards = collectionSnapshot.docs.map(doc => ({
                     id: doc.id,
                     ...doc.data()
                 }));
 
-                applyFilters();
-                updateStats();
-                renderCards();
-                populateFilterOptions();
+                // Load wishlist cards
+                const wishlistRef = collection(db, 'wishlist');
+                const wishlistQuery = query(wishlistRef, where('userId', '==', userId));
+                const wishlistSnapshot = await getDocs(wishlistQuery);
+                wishlistCards = wishlistSnapshot.docs.map(doc => ({
+                    id: doc.id,
+                    ...doc.data()
+                }));
+
+                // Set initial data based on current list type
+                switchListType(currentListType);
             } catch (error) {
-                console.error('Error loading collection:', error);
+                console.error('Error loading data:', error);
                 alert('カードの読み込みに失敗しました。');
             } finally {
                 showLoading(false);
             }
+        };
+
+        // Switch between collection and wishlist
+        const switchListType = (listType) => {
+            currentListType = listType;
+            allCards = listType === 'collection' ? collectionCards : wishlistCards;
+
+            // Save to localStorage
+            localStorage.setItem('galleryListType', listType);
+
+            // Update tab active state
+            document.querySelectorAll('.nav-link').forEach(tab => {
+                tab.classList.remove('active');
+            });
+            document.getElementById(`${listType}-tab`).classList.add('active');
+
+            // Reset to page 1 when switching
+            currentPage = 1;
+
+            applyFilters();
+            updateStats();
+            renderCards();
+            populateFilterOptions();
         };
 
         // Show/hide loading overlay
@@ -713,6 +760,15 @@
             renderCards();
         });
 
+        // Tab click event listeners
+        document.getElementById('collection-tab').addEventListener('click', () => {
+            switchListType('collection');
+        });
+
+        document.getElementById('wishlist-tab').addEventListener('click', () => {
+            switchListType('wishlist');
+        });
+
         // Initialize
         const init = async () => {
             showLoading(true);
@@ -721,7 +777,7 @@
             onAuthStateChanged(auth, (user) => {
                 if (user) {
                     currentUser = user;
-                    loadCollection(user.uid);
+                    loadAllData(user.uid);
 
                     // Load saved grid size
                     const savedSize = localStorage.getItem('galleryGridSize');
@@ -734,6 +790,12 @@
                                 btn.classList.remove('active');
                             }
                         });
+                    }
+
+                    // Load saved list type
+                    const savedListType = localStorage.getItem('galleryListType');
+                    if (savedListType && (savedListType === 'collection' || savedListType === 'wishlist')) {
+                        currentListType = savedListType;
                     }
                 } else {
                     // Redirect to login page
