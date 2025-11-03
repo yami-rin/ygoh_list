@@ -141,17 +141,15 @@ app.get('/card-list', async (req, res) => {
         const html = await response.text();
 
         // Debug: Log samples of the HTML to understand structure
-        console.log('=== HTML Sample (first 2000 chars) ===');
-        console.log(html.substring(0, 2000));
-        console.log('=== Searching for card_image patterns ===');
-        const imagePatterns = html.match(/\$\('#card_image_\d+_\d+'\).*?cid=\d+.*?;/g);
-        if (imagePatterns) {
-            console.log('Found card_image patterns:', imagePatterns.slice(0, 5));
+        console.log('=== Searching for all jQuery text() calls ===');
+        const textPatterns = html.match(/\$\([^)]+\)\.text\([^)]+\)/g);
+        if (textPatterns) {
+            console.log('Found text() patterns:', textPatterns.slice(0, 20));
         }
-        console.log('=== Searching for card name patterns ===');
-        const namePatterns = html.match(/.{0,150}(card_name|cardName|name).{0,150}/gi);
-        if (namePatterns) {
-            console.log('Found name patterns:', namePatterns.slice(0, 5));
+        console.log('=== Searching for card_name, card_number patterns ===');
+        const idPatterns = html.match(/id=["']card_(name|number)_\d+_\d+["']/g);
+        if (idPatterns) {
+            console.log('Found ID patterns:', idPatterns.slice(0, 10));
         }
 
         // Parse card list from HTML
@@ -160,36 +158,49 @@ app.get('/card-list', async (req, res) => {
 
         // Pattern 0: JavaScript card_image pattern (for gallery view)
         // Extract card IDs from: $('#card_image_X_Y').attr('src', '...cid=XXXXX...')
-        const jsPattern = /\$\('#card_image_(\d+)_\d+'\)\.attr\('src',\s*'[^']*cid=(\d+)[^']*'\)/g;
+        const jsPattern = /\$\('#card_image_(\d+)_(\d+)'\)\.attr\('src',\s*'[^']*cid=(\d+)[^']*'\)/g;
         let match;
-        const cardIndices = []; // Store card indices for later name matching
+        const cardIndices = []; // Store card indices for later name and number matching
         while ((match = jsPattern.exec(html)) !== null) {
-            const cardIndex = match[1];
-            const cardId = match[2];
-            cardIndices.push({ index: cardIndex, id: cardId });
-            console.log(`Found card index ${cardIndex} with ID ${cardId}`);
+            const rowIndex = match[1];
+            const colIndex = match[2];
+            const cardId = match[3];
+            cardIndices.push({ row: rowIndex, col: colIndex, id: cardId });
+            console.log(`Found card at [${rowIndex}][${colIndex}] with ID ${cardId}`);
         }
 
-        // Try to find card names by index
-        // Pattern: Look for elements like id="card_name_X_Y" or similar
-        cardIndices.forEach(({ index, id }) => {
-            // Try multiple name patterns
-            const nameRegex1 = new RegExp(`id=["']card_name_${index}_\\d+["'][^>]*>([^<]+)<`, 'i');
-            const nameRegex2 = new RegExp(`\\$\\('#card_name_${index}_\\d+'\\)\\.text\\(['"]([^'"]+)['"]\\)`, 'i');
-            const nameRegex3 = new RegExp(`card_name_${index}[^>]*>\\s*([^<]+?)\\s*<`, 'i');
-
+        // Try to find card names and numbers by index
+        cardIndices.forEach(({ row, col, id }) => {
             let cardName = null;
+            let cardNumber = null;
+
+            // Pattern 1: jQuery .text() calls for name and number
+            const nameRegex1 = new RegExp(`\\$\\('#card_name_${row}_${col}'\\)\\.text\\(['"]([^'"]+)['"]\\)`, 'i');
+            const nameRegex2 = new RegExp(`\\$\\("#card_name_${row}_${col}"\\)\\.text\\(['"]([^'"]+)['"]\\)`, 'i');
+            const nameRegex3 = new RegExp(`\\$\\(["']#card_name_${row}_${col}["']\\)\\.text\\(["']([^"']+)["']\\)`, 'i');
+
+            const numberRegex1 = new RegExp(`\\$\\('#card_number_${row}_${col}'\\)\\.text\\(['"]([^'"]+)['"]\\)`, 'i');
+            const numberRegex2 = new RegExp(`\\$\\("#card_number_${row}_${col}"\\)\\.text\\(['"]([^'"]+)['"]\\)`, 'i');
+            const numberRegex3 = new RegExp(`\\$\\(["']#card_number_${row}_${col}["']\\)\\.text\\(["']([^"']+)["']\\)`, 'i');
+
+            // Try to match name
             let nameMatch = html.match(nameRegex1) || html.match(nameRegex2) || html.match(nameRegex3);
             if (nameMatch) {
                 cardName = nameMatch[1].trim();
             }
 
+            // Try to match number (card code)
+            let numberMatch = html.match(numberRegex1) || html.match(numberRegex2) || html.match(numberRegex3);
+            if (numberMatch) {
+                cardNumber = numberMatch[1].trim();
+            }
+
             if (cardName && !cardMap.has(id)) {
-                cardMap.set(id, cardName);
-                console.log(`Matched card ${id}: ${cardName}`);
+                cardMap.set(id, { name: cardName, number: cardNumber || '', id: id });
+                console.log(`Matched card ${id}: ${cardName} [${cardNumber || 'no number'}]`);
             } else if (!cardMap.has(id)) {
                 // Store with placeholder name if we can't find it
-                cardMap.set(id, `Card ${id}`);
+                cardMap.set(id, { name: `Card ${id}`, number: '', id: id });
                 console.log(`Card ${id}: name not found, using placeholder`);
             }
         });
@@ -200,7 +211,7 @@ app.get('/card-list', async (req, res) => {
             const cardId = match[1];
             const cardName = match[2].trim();
             if (cardId && cardName && !cardMap.has(cardId)) {
-                cardMap.set(cardId, cardName);
+                cardMap.set(cardId, { name: cardName, number: '', id: cardId });
             }
         }
 
@@ -211,7 +222,7 @@ app.get('/card-list', async (req, res) => {
                 const cardName = match[1].replace(/<[^>]+>/g, '').trim();
                 const cardId = match[2];
                 if (cardId && cardName && !cardMap.has(cardId)) {
-                    cardMap.set(cardId, cardName);
+                    cardMap.set(cardId, { name: cardName, number: '', id: cardId });
                 }
             }
         }
@@ -229,7 +240,7 @@ app.get('/card-list', async (req, res) => {
                 const cardId = cidMatch[1];
                 const cardName = nameMatches[index] ? nameMatches[index][1].trim() : null;
                 if (cardId && cardName && !cardMap.has(cardId)) {
-                    cardMap.set(cardId, cardName);
+                    cardMap.set(cardId, { name: cardName, number: '', id: cardId });
                 }
             });
         }
@@ -243,14 +254,14 @@ app.get('/card-list', async (req, res) => {
                 // Extract text, removing HTML tags
                 const cardName = linkContent.replace(/<[^>]+>/g, '').trim();
                 if (cardId && cardName && cardName.length > 2 && !cardMap.has(cardId)) {
-                    cardMap.set(cardId, cardName);
+                    cardMap.set(cardId, { name: cardName, number: '', id: cardId });
                 }
             }
         }
 
         // Convert map to array
-        cardMap.forEach((name, id) => {
-            cards.push({ id, name });
+        cardMap.forEach((cardData) => {
+            cards.push(cardData);
         });
 
         console.log(`Found ${cards.length} cards from search results`);
