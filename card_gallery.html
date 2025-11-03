@@ -1,0 +1,749 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>カードギャラリー - cardrush風表示</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css">
+    <style>
+        body {
+            background-color: #f8f9fa;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        .header-section {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 2rem 0;
+            margin-bottom: 2rem;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+
+        .controls-bar {
+            background: white;
+            padding: 1rem;
+            border-radius: 8px;
+            margin-bottom: 1.5rem;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+
+        .view-controls {
+            display: flex;
+            gap: 1rem;
+            align-items: center;
+            flex-wrap: wrap;
+        }
+
+        /* Grid layout styles */
+        .card-grid {
+            display: grid;
+            gap: 1rem;
+            margin-bottom: 2rem;
+        }
+
+        .card-grid.size-small {
+            grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+        }
+
+        .card-grid.size-medium {
+            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+        }
+
+        .card-grid.size-large {
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+        }
+
+        .card-item {
+            background: white;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            overflow: hidden;
+            transition: all 0.3s ease;
+            cursor: pointer;
+            display: flex;
+            flex-direction: column;
+            height: 100%;
+        }
+
+        .card-item:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 16px rgba(0,0,0,0.2);
+            border-color: #667eea;
+        }
+
+        .card-image-container {
+            width: 100%;
+            aspect-ratio: 0.686;
+            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .card-image-container img {
+            width: 100%;
+            height: 100%;
+            object-fit: contain;
+            transition: transform 0.3s ease;
+        }
+
+        .card-item:hover .card-image-container img {
+            transform: scale(1.05);
+        }
+
+        .card-image-placeholder {
+            font-size: 4rem;
+            color: rgba(0,0,0,0.1);
+        }
+
+        .card-info {
+            padding: 0.75rem;
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .card-name {
+            font-weight: 600;
+            font-size: 0.9rem;
+            margin-bottom: 0.5rem;
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+            line-height: 1.3;
+            min-height: 2.6em;
+            color: #2c3e50;
+        }
+
+        .card-code {
+            font-size: 0.75rem;
+            color: #666;
+            margin-bottom: 0.25rem;
+        }
+
+        .card-rarity {
+            font-size: 0.75rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .card-quantity {
+            font-size: 0.9rem;
+            font-weight: bold;
+            color: #28a745;
+            margin-bottom: 0.5rem;
+            display: flex;
+            align-items: center;
+            gap: 0.25rem;
+        }
+
+        .card-tags {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.25rem;
+            margin-top: auto;
+        }
+
+        .card-tags .badge {
+            font-size: 0.65rem;
+            padding: 0.25rem 0.5rem;
+        }
+
+        .stock-badge {
+            position: absolute;
+            top: 0.5rem;
+            right: 0.5rem;
+            background: rgba(0, 0, 0, 0.7);
+            color: white;
+            padding: 0.25rem 0.5rem;
+            border-radius: 4px;
+            font-size: 0.7rem;
+            font-weight: bold;
+        }
+
+        .pagination-controls {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 1rem;
+            margin: 2rem 0;
+        }
+
+        .stats-bar {
+            background: white;
+            padding: 1rem;
+            border-radius: 8px;
+            margin-bottom: 1rem;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+
+        .loading-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.5);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 9999;
+        }
+
+        .loading-overlay.hidden {
+            display: none;
+        }
+
+        /* Mobile responsive */
+        @media (max-width: 768px) {
+            .card-grid.size-small {
+                grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+                gap: 0.5rem;
+            }
+
+            .card-grid.size-medium {
+                grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+                gap: 0.75rem;
+            }
+
+            .card-grid.size-large {
+                grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+            }
+
+            .card-info {
+                padding: 0.5rem;
+            }
+
+            .card-name {
+                font-size: 0.8rem;
+            }
+
+            .controls-bar {
+                padding: 0.75rem;
+            }
+
+            .view-controls {
+                font-size: 0.9rem;
+            }
+        }
+
+        .filter-section {
+            background: white;
+            padding: 1rem;
+            border-radius: 8px;
+            margin-bottom: 1rem;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+
+        .filter-section .form-control,
+        .filter-section .form-select {
+            font-size: 0.9rem;
+        }
+    </style>
+</head>
+<body>
+    <!-- Loading overlay -->
+    <div class="loading-overlay hidden" id="loading-overlay">
+        <div class="spinner-border text-light" style="width: 3rem; height: 3rem;" role="status">
+            <span class="visually-hidden">読み込み中...</span>
+        </div>
+    </div>
+
+    <!-- Header -->
+    <div class="header-section">
+        <div class="container">
+            <h1 class="mb-2">
+                <i class="bi bi-grid-3x3-gap"></i> カードギャラリー
+            </h1>
+            <p class="mb-0">所持カードをショップ風に表示</p>
+        </div>
+    </div>
+
+    <div class="container">
+        <!-- Stats bar -->
+        <div class="stats-bar">
+            <div class="row text-center">
+                <div class="col-6 col-md-3">
+                    <h4 class="mb-0 text-primary" id="total-cards">0</h4>
+                    <small class="text-muted">総カード枚数</small>
+                </div>
+                <div class="col-6 col-md-3">
+                    <h4 class="mb-0 text-success" id="unique-cards">0</h4>
+                    <small class="text-muted">種類数</small>
+                </div>
+                <div class="col-6 col-md-3 mt-3 mt-md-0">
+                    <h4 class="mb-0 text-info" id="filtered-cards">0</h4>
+                    <small class="text-muted">表示中</small>
+                </div>
+                <div class="col-6 col-md-3 mt-3 mt-md-0">
+                    <h4 class="mb-0 text-warning" id="current-page-info">0</h4>
+                    <small class="text-muted">ページ</small>
+                </div>
+            </div>
+        </div>
+
+        <!-- Filter section -->
+        <div class="filter-section">
+            <div class="row g-2">
+                <div class="col-md-4">
+                    <input type="text" class="form-control" id="search-input" placeholder="カード名で検索...">
+                </div>
+                <div class="col-md-3">
+                    <select class="form-select" id="rarity-filter">
+                        <option value="">すべてのレアリティ</option>
+                    </select>
+                </div>
+                <div class="col-md-3">
+                    <select class="form-select" id="tag-filter">
+                        <option value="">すべてのタグ</option>
+                    </select>
+                </div>
+                <div class="col-md-2">
+                    <button class="btn btn-outline-secondary w-100" id="clear-filters">
+                        <i class="bi bi-x-circle"></i> クリア
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Controls bar -->
+        <div class="controls-bar">
+            <div class="view-controls">
+                <!-- Display count -->
+                <div class="input-group" style="width: auto;">
+                    <label class="input-group-text" for="items-per-page">表示件数</label>
+                    <select class="form-select" id="items-per-page" style="width: auto;">
+                        <option value="10">10</option>
+                        <option value="20">20</option>
+                        <option value="30">30</option>
+                        <option value="50" selected>50</option>
+                        <option value="100">100</option>
+                    </select>
+                </div>
+
+                <!-- Grid size selector -->
+                <div class="btn-group" role="group">
+                    <button type="button" class="btn btn-outline-secondary btn-sm size-btn" data-size="small" title="小">
+                        <i class="bi bi-square" style="font-size: 0.7rem;"></i> 小
+                    </button>
+                    <button type="button" class="btn btn-outline-secondary btn-sm size-btn active" data-size="medium" title="中">
+                        <i class="bi bi-square" style="font-size: 0.9rem;"></i> 中
+                    </button>
+                    <button type="button" class="btn btn-outline-secondary btn-sm size-btn" data-size="large" title="大">
+                        <i class="bi bi-square" style="font-size: 1.1rem;"></i> 大
+                    </button>
+                </div>
+
+                <!-- Sort selector -->
+                <div class="input-group" style="width: auto;">
+                    <label class="input-group-text" for="sort-select">並び替え</label>
+                    <select class="form-select" id="sort-select" style="width: auto;">
+                        <option value="name-asc">名前 (昇順)</option>
+                        <option value="name-desc">名前 (降順)</option>
+                        <option value="code-asc">型番 (昇順)</option>
+                        <option value="code-desc">型番 (降順)</option>
+                        <option value="quantity-desc" selected>枚数 (多い順)</option>
+                        <option value="quantity-asc">枚数 (少ない順)</option>
+                        <option value="rarity-asc">レアリティ (昇順)</option>
+                        <option value="rarity-desc">レアリティ (降順)</option>
+                    </select>
+                </div>
+
+                <div class="ms-auto">
+                    <button class="btn btn-primary btn-sm" onclick="window.location.href='card_list.html'">
+                        <i class="bi bi-arrow-left"></i> リスト表示に戻る
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Pagination top -->
+        <div class="pagination-controls" id="pagination-top"></div>
+
+        <!-- Card grid -->
+        <div class="card-grid size-medium" id="card-grid">
+            <!-- Cards will be rendered here -->
+        </div>
+
+        <!-- Pagination bottom -->
+        <div class="pagination-controls" id="pagination-bottom"></div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-app.js";
+        import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-auth.js";
+        import { getFirestore, collection, getDocs, query, where } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore.js";
+
+        // Firebase configuration
+        const firebaseConfig = {
+            apiKey: "AIzaSyAOYKalLUb2hbghrjQUS8AWzxpLExBT7aU",
+            authDomain: "ygoh-9bcf6.firebaseapp.com",
+            projectId: "ygoh-9bcf6",
+            storageBucket: "ygoh-9bcf6.firebasestorage.app",
+            messagingSenderId: "515041224138",
+            appId: "1:515041224138:web:8de47b38ed9cc1bb8afd37",
+            measurementId: "G-ZGSRE8MHZ2"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+        const db = getFirestore(app);
+
+        // State
+        let allCards = [];
+        let filteredCards = [];
+        let cardDetailsMap = new Map();
+        let currentUser = null;
+        let currentPage = 1;
+        let itemsPerPage = 50;
+        let currentGridSize = 'medium';
+        let currentSort = 'quantity-desc';
+
+        // Load card reading data
+        const loadCardData = async () => {
+            try {
+                const response = await fetch('yugioh_cards_master.csv');
+                const csvText = await response.text();
+                const lines = csvText.split('\n');
+                const headers = lines[0].split(',');
+
+                // Parse CSV and build card details map
+                for (let i = 1; i < lines.length; i++) {
+                    const line = lines[i].trim();
+                    if (!line) continue;
+
+                    const values = line.split(',');
+                    const cardName = values[1]?.replace(/"/g, '');
+                    const cardId = values[0]?.replace(/"/g, '');
+
+                    if (cardName && cardId) {
+                        cardDetailsMap.set(cardName, {
+                            cardId: cardId,
+                            reading: values[2]?.replace(/"/g, ''),
+                            cardType: values[3]?.replace(/"/g, ''),
+                            level: values[4]?.replace(/"/g, ''),
+                            attribute: values[5]?.replace(/"/g, ''),
+                            race: values[6]?.replace(/"/g, ''),
+                            attack: values[7]?.replace(/"/g, ''),
+                            defense: values[8]?.replace(/"/g, ''),
+                            cardText: values[9]?.replace(/"/g, '')
+                        });
+                    }
+                }
+            } catch (error) {
+                console.error('Error loading card data:', error);
+            }
+        };
+
+        // Get card image URL
+        const getCardImageUrl = (cardName) => {
+            const details = cardDetailsMap.get(cardName);
+            if (details?.cardId) {
+                return `https://www.db.yugioh-card.com/yugiohdb/card_image.action?cid=${details.cardId}&request_locale=ja`;
+            }
+            return null;
+        };
+
+        // Load user's card collection
+        const loadCollection = async (userId) => {
+            showLoading(true);
+            try {
+                const collectionRef = collection(db, 'cards');
+                const q = query(collectionRef, where('userId', '==', userId));
+                const snapshot = await getDocs(q);
+
+                allCards = snapshot.docs.map(doc => ({
+                    id: doc.id,
+                    ...doc.data()
+                }));
+
+                applyFilters();
+                updateStats();
+                renderCards();
+                populateFilterOptions();
+            } catch (error) {
+                console.error('Error loading collection:', error);
+                alert('カードの読み込みに失敗しました。');
+            } finally {
+                showLoading(false);
+            }
+        };
+
+        // Show/hide loading overlay
+        const showLoading = (show) => {
+            const overlay = document.getElementById('loading-overlay');
+            if (show) {
+                overlay.classList.remove('hidden');
+            } else {
+                overlay.classList.add('hidden');
+            }
+        };
+
+        // Apply filters
+        const applyFilters = () => {
+            const searchTerm = document.getElementById('search-input').value.toLowerCase();
+            const rarityFilter = document.getElementById('rarity-filter').value;
+            const tagFilter = document.getElementById('tag-filter').value;
+
+            filteredCards = allCards.filter(card => {
+                const matchesSearch = !searchTerm || card['名前']?.toLowerCase().includes(searchTerm);
+                const matchesRarity = !rarityFilter || card['レアリティ'] === rarityFilter;
+                const matchesTag = !tagFilter || (card.tags && card.tags.includes(tagFilter));
+
+                return matchesSearch && matchesRarity && matchesTag;
+            });
+
+            sortCards();
+            currentPage = 1;
+        };
+
+        // Sort cards
+        const sortCards = () => {
+            const [field, direction] = currentSort.split('-');
+
+            filteredCards.sort((a, b) => {
+                let valA, valB;
+
+                switch (field) {
+                    case 'name':
+                        valA = a['名前'] || '';
+                        valB = b['名前'] || '';
+                        break;
+                    case 'code':
+                        valA = a['型番'] || '';
+                        valB = b['型番'] || '';
+                        break;
+                    case 'quantity':
+                        valA = parseInt(a['枚数']) || 0;
+                        valB = parseInt(b['枚数']) || 0;
+                        break;
+                    case 'rarity':
+                        valA = a['レアリティ'] || '';
+                        valB = b['レアリティ'] || '';
+                        break;
+                    default:
+                        return 0;
+                }
+
+                if (typeof valA === 'string') {
+                    valA = valA.toLowerCase();
+                    valB = valB.toLowerCase();
+                }
+
+                if (direction === 'asc') {
+                    return valA > valB ? 1 : valA < valB ? -1 : 0;
+                } else {
+                    return valA < valB ? 1 : valA > valB ? -1 : 0;
+                }
+            });
+        };
+
+        // Render cards
+        const renderCards = () => {
+            const grid = document.getElementById('card-grid');
+            grid.className = `card-grid size-${currentGridSize}`;
+
+            const startIndex = (currentPage - 1) * itemsPerPage;
+            const endIndex = startIndex + itemsPerPage;
+            const pageCards = filteredCards.slice(startIndex, endIndex);
+
+            if (pageCards.length === 0) {
+                grid.innerHTML = `
+                    <div class="text-center py-5 w-100">
+                        <i class="bi bi-inbox" style="font-size: 4rem; color: #ccc;"></i>
+                        <p class="text-muted mt-3">該当するカードはありません。</p>
+                    </div>
+                `;
+            } else {
+                grid.innerHTML = pageCards.map(card => {
+                    const imageUrl = getCardImageUrl(card['名前']);
+                    const tags = (card.tags || []).map(tag =>
+                        `<span class="badge bg-secondary">${escapeHtml(tag)}</span>`
+                    ).join(' ');
+
+                    return `
+                        <div class="card-item" onclick="viewCardDetail('${escapeHtml(card['名前'])}')">
+                            <div class="card-image-container">
+                                <span class="stock-badge">在庫 ${escapeHtml(card['枚数'])}枚</span>
+                                ${imageUrl ?
+                                    `<img src="${imageUrl}" alt="${escapeHtml(card['名前'])}" loading="lazy" onerror="this.parentElement.innerHTML='<i class=\\'bi bi-card-image card-image-placeholder\\'></i>'">` :
+                                    '<i class="bi bi-card-image card-image-placeholder"></i>'
+                                }
+                            </div>
+                            <div class="card-info">
+                                <div class="card-name">${escapeHtml(card['名前'])}</div>
+                                <div class="card-code">${escapeHtml(card['型番'])}</div>
+                                <div class="card-rarity">
+                                    <span class="badge bg-info">${escapeHtml(card['レアリティ'])}</span>
+                                </div>
+                                <div class="card-quantity">
+                                    <i class="bi bi-layers-fill"></i>
+                                    ${escapeHtml(card['枚数'])}枚所持
+                                </div>
+                                <div class="card-tags">
+                                    ${tags || '<span class="text-muted" style="font-size: 0.7rem;">タグなし</span>'}
+                                </div>
+                            </div>
+                        </div>
+                    `;
+                }).join('');
+            }
+
+            updatePagination();
+            updateStats();
+        };
+
+        // Update pagination
+        const updatePagination = () => {
+            const totalPages = Math.ceil(filteredCards.length / itemsPerPage);
+            const paginationHtml = `
+                <button class="btn btn-outline-primary btn-sm" ${currentPage <= 1 ? 'disabled' : ''} onclick="changePage(${currentPage - 1})">
+                    <i class="bi bi-chevron-left"></i> 前へ
+                </button>
+                <span class="mx-3">
+                    <strong>${currentPage}</strong> / ${totalPages} ページ
+                </span>
+                <button class="btn btn-outline-primary btn-sm" ${currentPage >= totalPages ? 'disabled' : ''} onclick="changePage(${currentPage + 1})">
+                    次へ <i class="bi bi-chevron-right"></i>
+                </button>
+            `;
+
+            document.getElementById('pagination-top').innerHTML = paginationHtml;
+            document.getElementById('pagination-bottom').innerHTML = paginationHtml;
+        };
+
+        // Update stats
+        const updateStats = () => {
+            const totalQuantity = allCards.reduce((sum, card) => sum + (parseInt(card['枚数']) || 0), 0);
+            const uniqueCount = allCards.length;
+            const filteredCount = filteredCards.length;
+            const totalPages = Math.ceil(filteredCards.length / itemsPerPage);
+
+            document.getElementById('total-cards').textContent = totalQuantity;
+            document.getElementById('unique-cards').textContent = uniqueCount;
+            document.getElementById('filtered-cards').textContent = filteredCount;
+            document.getElementById('current-page-info').textContent = `${currentPage}/${totalPages}`;
+        };
+
+        // Populate filter options
+        const populateFilterOptions = () => {
+            // Rarities
+            const rarities = [...new Set(allCards.map(card => card['レアリティ']).filter(Boolean))].sort();
+            const raritySelect = document.getElementById('rarity-filter');
+            raritySelect.innerHTML = '<option value="">すべてのレアリティ</option>' +
+                rarities.map(r => `<option value="${escapeHtml(r)}">${escapeHtml(r)}</option>`).join('');
+
+            // Tags
+            const tags = [...new Set(allCards.flatMap(card => card.tags || []))].sort();
+            const tagSelect = document.getElementById('tag-filter');
+            tagSelect.innerHTML = '<option value="">すべてのタグ</option>' +
+                tags.map(t => `<option value="${escapeHtml(t)}">${escapeHtml(t)}</option>`).join('');
+        };
+
+        // Utility functions
+        const escapeHtml = (str) => {
+            if (str == null) return '';
+            return String(str)
+                .replace(/&/g, '&amp;')
+                .replace(/</g, '&lt;')
+                .replace(/>/g, '&gt;')
+                .replace(/"/g, '&quot;')
+                .replace(/'/g, '&#039;');
+        };
+
+        // Global functions
+        window.changePage = (page) => {
+            currentPage = page;
+            renderCards();
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        };
+
+        window.viewCardDetail = (cardName) => {
+            // Redirect to main page with card detail
+            window.location.href = `card_list.html#card=${encodeURIComponent(cardName)}`;
+        };
+
+        // Event listeners
+        document.getElementById('items-per-page').addEventListener('change', (e) => {
+            itemsPerPage = parseInt(e.target.value);
+            currentPage = 1;
+            renderCards();
+        });
+
+        document.querySelectorAll('.size-btn').forEach(btn => {
+            btn.addEventListener('click', (e) => {
+                document.querySelectorAll('.size-btn').forEach(b => b.classList.remove('active'));
+                e.target.closest('button').classList.add('active');
+                currentGridSize = e.target.closest('button').dataset.size;
+                localStorage.setItem('galleryGridSize', currentGridSize);
+                renderCards();
+            });
+        });
+
+        document.getElementById('sort-select').addEventListener('change', (e) => {
+            currentSort = e.target.value;
+            applyFilters();
+            renderCards();
+        });
+
+        document.getElementById('search-input').addEventListener('input', () => {
+            applyFilters();
+            renderCards();
+        });
+
+        document.getElementById('rarity-filter').addEventListener('change', () => {
+            applyFilters();
+            renderCards();
+        });
+
+        document.getElementById('tag-filter').addEventListener('change', () => {
+            applyFilters();
+            renderCards();
+        });
+
+        document.getElementById('clear-filters').addEventListener('click', () => {
+            document.getElementById('search-input').value = '';
+            document.getElementById('rarity-filter').value = '';
+            document.getElementById('tag-filter').value = '';
+            applyFilters();
+            renderCards();
+        });
+
+        // Initialize
+        const init = async () => {
+            showLoading(true);
+            await loadCardData();
+
+            onAuthStateChanged(auth, (user) => {
+                if (user) {
+                    currentUser = user;
+                    loadCollection(user.uid);
+
+                    // Load saved grid size
+                    const savedSize = localStorage.getItem('galleryGridSize');
+                    if (savedSize) {
+                        currentGridSize = savedSize;
+                        document.querySelectorAll('.size-btn').forEach(btn => {
+                            if (btn.dataset.size === savedSize) {
+                                btn.classList.add('active');
+                            } else {
+                                btn.classList.remove('active');
+                            }
+                        });
+                    }
+                } else {
+                    // Redirect to login page
+                    alert('ログインが必要です。');
+                    window.location.href = 'card_list.html';
+                }
+            });
+        };
+
+        init();
+    </script>
+</body>
+</html>
