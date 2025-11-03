@@ -1186,6 +1186,42 @@
         .clear-race-btn {
             margin-bottom: 5px;
         }
+
+        /* Search mode (AND/OR) toggle styles */
+        .btn-check:checked + .btn-outline-primary {
+            background-color: #0d6efd;
+            border-color: #0d6efd;
+            color: #fff;
+        }
+
+        .btn-check:checked + .btn-outline-success {
+            background-color: #198754;
+            border-color: #198754;
+            color: #fff;
+        }
+
+        /* Smooth transition for search mode buttons */
+        .btn-group .btn-outline-primary,
+        .btn-group .btn-outline-success {
+            transition: all 0.2s ease-in-out;
+        }
+
+        /* Mobile responsive adjustments for search mode */
+        @media (max-width: 768px) {
+            #advanced-search .btn-group {
+                width: 100%;
+            }
+
+            #advanced-search .btn-group .btn {
+                flex: 1;
+                font-size: 0.875rem;
+            }
+
+            #search-mode-description {
+                display: block;
+                margin-top: 0.5rem;
+            }
+        }
     </style>
 </head>
 <body>
@@ -2477,6 +2513,28 @@
                                 </div>
                                 <div class="collapse col-12 mt-2" id="advanced-search">
                                     <div class="card card-body bg-light">
+                                        <!-- AND/OR Search Mode Selector -->
+                                        <div class="row g-2 mb-3">
+                                            <div class="col-12">
+                                                <div class="d-flex align-items-center gap-2 flex-wrap">
+                                                    <label class="form-label small mb-0 me-2">検索モード:</label>
+                                                    <div class="btn-group btn-group-sm" role="group" aria-label="検索モード">
+                                                        <input type="radio" class="btn-check" name="search_mode" id="search-mode-and" value="and" checked autocomplete="off">
+                                                        <label class="btn btn-outline-primary" for="search-mode-and">
+                                                            <i class="bi bi-intersect"></i> AND検索
+                                                        </label>
+                                                        <input type="radio" class="btn-check" name="search_mode" id="search-mode-or" value="or" autocomplete="off">
+                                                        <label class="btn btn-outline-success" for="search-mode-or">
+                                                            <i class="bi bi-union"></i> OR検索
+                                                        </label>
+                                                    </div>
+                                                    <small class="text-muted ms-2">
+                                                        <i class="bi bi-info-circle"></i>
+                                                        <span id="search-mode-description">すべての条件を満たすカードを検索</span>
+                                                    </small>
+                                                </div>
+                                            </div>
+                                        </div>
                                         <div class="row g-2">
                                             <div class="col-md-3">
                                                 <label class="form-label small">レベル</label>
@@ -3139,12 +3197,36 @@
             }
         };
 
+        // モーダル表示時の背景スクロール制御
+        const disableBodyScroll = () => {
+            // スマートフォンでのスクロールを無効化
+            document.body.style.overflow = 'hidden';
+            document.body.style.position = 'fixed';
+            document.body.style.width = '100%';
+            // 現在のスクロール位置を保存
+            document.body.dataset.scrollY = window.scrollY.toString();
+            document.body.style.top = `-${window.scrollY}px`;
+        };
+
+        const enableBodyScroll = () => {
+            // スクロールを再度有効化
+            const scrollY = document.body.dataset.scrollY || '0';
+            document.body.style.overflow = '';
+            document.body.style.position = '';
+            document.body.style.width = '';
+            document.body.style.top = '';
+            // 保存していたスクロール位置に戻す
+            window.scrollTo(0, parseInt(scrollY));
+            delete document.body.dataset.scrollY;
+        };
+
         // Add show event listeners for all modals
         const modalElements = [
             'auth-modal', 'edit-card-modal', 'card-detail-modal',
             'how-to-use-modal', 'settings-modal', 'tag-management-modal',
             'bulk-tag-modal', 'analysis-modal', 'point-shop-modal',
-            'profile-modal', 'ranking-modal', 'stats-info-modal'
+            'profile-modal', 'ranking-modal', 'stats-info-modal',
+            'gacha-result-modal'
         ];
 
         modalElements.forEach(modalId => {
@@ -3152,11 +3234,23 @@
             if (modalEl) {
                 modalEl.addEventListener('show.bs.modal', () => {
                     ensureModalVisible(modalEl);
+                    // モバイルデバイスでのみ背景スクロールを無効化
+                    if (window.innerWidth <= 768) {
+                        disableBodyScroll();
+                    }
                 });
 
                 // Also ensure visibility after modal is fully shown
                 modalEl.addEventListener('shown.bs.modal', () => {
                     ensureModalVisible(modalEl);
+                });
+
+                // モーダルを閉じる時にスクロールを再度有効化
+                modalEl.addEventListener('hidden.bs.modal', () => {
+                    // モバイルデバイスでのみ
+                    if (window.innerWidth <= 768) {
+                        enableBodyScroll();
+                    }
                 });
             }
         });
@@ -5388,6 +5482,9 @@
             // Get basic search parameters
             const [sN,sC,sR,sT] = ['search_name','search_set_code','search_rarity','search_tags'].map(n=>normalizeForSearch(document.querySelector(`[name="${n}"]`).value));
 
+            // Get search mode (AND/OR)
+            const searchMode = document.querySelector('input[name="search_mode"]:checked')?.value || 'and';
+
             // Get advanced search parameters
             const sLevel = document.querySelector('[name="search_level"]')?.value?.trim();
             const sAttribute = document.querySelector('[name="search_attribute"]')?.value;
@@ -5473,50 +5570,105 @@
                 }
 
                 if (details) {
+                    // Check if any advanced search criteria is specified
+                    const hasAdvancedCriteria = sLevel || sAttribute || sRaces.length > 0 || sCardTypes.length > 0 || sAttack || sDefense;
 
-                    // Check level
-                    if (sLevel) {
-                        advancedMatch = advancedMatch && checkRange(details.level, sLevel);
-                    }
+                    if (searchMode === 'or' && hasAdvancedCriteria) {
+                        // OR検索：いずれかの条件を満たせばOK
+                        let orMatch = false;
 
-                    // Check attribute
-                    if (sAttribute) {
-                        advancedMatch = advancedMatch && details.attribute === sAttribute;
-                    }
+                        // Check level
+                        if (sLevel && checkRange(details.level, sLevel)) {
+                            orMatch = true;
+                        }
 
-                    // Check races (multiple selection)
-                    if (sRaces.length > 0) {
-                        // 完全一致で比較
-                        const hasMatchingRace = sRaces.some(race => {
-                            if (!race) return false;
-                            return details.race === race;
-                        });
-                        advancedMatch = advancedMatch && hasMatchingRace;
-                    }
+                        // Check attribute
+                        if (sAttribute && details.attribute === sAttribute) {
+                            orMatch = true;
+                        }
 
-                    // Check card types (OR selection only - more intuitive)
-                    if (sCardTypes.length > 0) {
-                        const hasMatchingType = sCardTypes.some(type => {
-                            // For spell/trap cards, check race field (CSVでは魔法・罠は種族列に格納)
-                            if (type === '魔法') {
-                                return details.race === '魔法' || details.cardType === '魔法';
-                            } else if (type === '罠') {
-                                return details.race === '罠' || details.cardType === '罠';
-                            } else {
-                                return details.cardType && details.cardType.includes(type);
-                            }
-                        });
-                        advancedMatch = advancedMatch && hasMatchingType;
-                    }
+                        // Check races (multiple selection)
+                        if (sRaces.length > 0) {
+                            const hasMatchingRace = sRaces.some(race => {
+                                if (!race) return false;
+                                return details.race === race;
+                            });
+                            if (hasMatchingRace) orMatch = true;
+                        }
 
-                    // Check attack
-                    if (sAttack) {
-                        advancedMatch = advancedMatch && checkRange(details.attack, sAttack);
-                    }
+                        // Check card types
+                        if (sCardTypes.length > 0) {
+                            const hasMatchingType = sCardTypes.some(type => {
+                                // For spell/trap cards, check race field (CSVでは魔法・罠は種族列に格納)
+                                if (type === '魔法') {
+                                    return details.race === '魔法' || details.cardType === '魔法';
+                                } else if (type === '罠') {
+                                    return details.race === '罠' || details.cardType === '罠';
+                                } else {
+                                    return details.cardType && details.cardType.includes(type);
+                                }
+                            });
+                            if (hasMatchingType) orMatch = true;
+                        }
 
-                    // Check defense
-                    if (sDefense) {
-                        advancedMatch = advancedMatch && checkRange(details.defense, sDefense);
+                        // Check attack
+                        if (sAttack && checkRange(details.attack, sAttack)) {
+                            orMatch = true;
+                        }
+
+                        // Check defense
+                        if (sDefense && checkRange(details.defense, sDefense)) {
+                            orMatch = true;
+                        }
+
+                        advancedMatch = orMatch;
+                    } else {
+                        // AND検索：すべての条件を満たす必要がある（デフォルト）
+
+                        // Check level
+                        if (sLevel) {
+                            advancedMatch = advancedMatch && checkRange(details.level, sLevel);
+                        }
+
+                        // Check attribute
+                        if (sAttribute) {
+                            advancedMatch = advancedMatch && details.attribute === sAttribute;
+                        }
+
+                        // Check races (multiple selection)
+                        if (sRaces.length > 0) {
+                            // 完全一致で比較
+                            const hasMatchingRace = sRaces.some(race => {
+                                if (!race) return false;
+                                return details.race === race;
+                            });
+                            advancedMatch = advancedMatch && hasMatchingRace;
+                        }
+
+                        // Check card types (OR selection only - more intuitive)
+                        if (sCardTypes.length > 0) {
+                            const hasMatchingType = sCardTypes.some(type => {
+                                // For spell/trap cards, check race field (CSVでは魔法・罠は種族列に格納)
+                                if (type === '魔法') {
+                                    return details.race === '魔法' || details.cardType === '魔法';
+                                } else if (type === '罠') {
+                                    return details.race === '罠' || details.cardType === '罠';
+                                } else {
+                                    return details.cardType && details.cardType.includes(type);
+                                }
+                            });
+                            advancedMatch = advancedMatch && hasMatchingType;
+                        }
+
+                        // Check attack
+                        if (sAttack) {
+                            advancedMatch = advancedMatch && checkRange(details.attack, sAttack);
+                        }
+
+                        // Check defense
+                        if (sDefense) {
+                            advancedMatch = advancedMatch && checkRange(details.defense, sDefense);
+                        }
                     }
 
                 } else if (sLevel || sAttribute || sRaces.length > 0 || sCardTypes.length > 0 || sAttack || sDefense) {
@@ -6750,20 +6902,75 @@
             const mode = urlParams.get('mode');
             const oobCode = urlParams.get('oobCode');
 
+            // デバッグ情報をコンソールに出力
+            console.log('=== メール認証デバッグ情報 ===');
+            console.log('Current URL:', window.location.href);
+            console.log('URL Parameters:', {
+                mode: mode,
+                oobCode: oobCode,
+                allParams: Array.from(urlParams.entries())
+            });
+
             if (mode === 'verifyEmail' && oobCode) {
                 try {
+                    console.log('認証コード検証中:', oobCode);
                     await applyActionCode(auth, oobCode);
                     alert('メールアドレスが確認されました！\nログインしてください。');
                     // URLパラメータをクリア
                     window.history.replaceState({}, document.title, window.location.pathname);
                 } catch (error) {
-                    console.error('メール確認エラー:', error);
+                    console.error('メール確認エラーの詳細:', {
+                        code: error.code,
+                        message: error.message,
+                        fullError: error
+                    });
+
+                    let errorMessage = '';
+
                     if (error.code === 'auth/invalid-action-code') {
-                        alert('認証リンクが無効または期限切れです。\n新しい確認メールをリクエストしてください。');
+                        errorMessage = `認証リンクが無効です。
+
+考えられる原因と対策:
+
+1. リンクの有効期限切れ（24時間以内）
+   → 新しい確認メールをリクエストしてください
+
+2. すでに使用済みのリンク
+   → ログインして認証状態を確認してください
+
+3. URLが不完全
+   → メール内のリンクを最初から最後まで完全にコピーしてください
+
+4. ローカルファイルで開いている（file://）
+   → Webサーバー経由でアクセスしてください：
+     python -m http.server 8000
+     http://localhost:8000/card_list.html
+
+5. Firebase設定の問題
+   → コンソールで詳細を確認してください`;
+                    } else if (error.code === 'auth/expired-action-code') {
+                        errorMessage = 'リンクの有効期限（24時間）が切れています。\n新しい確認メールをリクエストしてください。';
+                    } else if (error.code === 'auth/user-disabled') {
+                        errorMessage = 'このアカウントは無効化されています。';
+                    } else if (error.code === 'auth/user-not-found') {
+                        errorMessage = 'ユーザーが見つかりません。先にアカウントを作成してください。';
                     } else {
-                        alert('メール確認に失敗しました: ' + error.message);
+                        errorMessage = `メール確認に失敗しました。
+
+エラー詳細: ${error.message}
+エラーコード: ${error.code}
+
+Firebase Consoleで確認すべき項目:
+- Authentication > Settings > Authorized domains
+- メールテンプレートのアクションURL設定`;
                     }
+
+                    alert(errorMessage);
                 }
+            } else if (mode || oobCode) {
+                console.warn('不完全なURLパラメータ:', { mode, oobCode });
+                if (!mode) console.warn('modeパラメータが欠落しています');
+                if (!oobCode) console.warn('oobCodeパラメータが欠落しています');
             }
         };
 
@@ -7460,6 +7667,23 @@
             e.preventDefault();
             clearTimeout(searchDebounceTimer); // Cancel pending debounced search
             applySearchAndFilter();
+        });
+
+        // Search mode change handlers (AND/OR toggle)
+        const searchModeRadios = document.querySelectorAll('input[name="search_mode"]');
+        const searchModeDescription = document.getElementById('search-mode-description');
+
+        searchModeRadios.forEach(radio => {
+            radio.addEventListener('change', (e) => {
+                const mode = e.target.value;
+                if (mode === 'and') {
+                    searchModeDescription.textContent = 'すべての条件を満たすカードを検索';
+                } else {
+                    searchModeDescription.textContent = 'いずれかの条件を満たすカードを検索';
+                }
+                // Trigger search when mode changes
+                applySearchAndFilter();
+            });
         });
 
         document.getElementById('items-per-page').addEventListener('change', (e) => {
