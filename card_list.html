@@ -2259,17 +2259,27 @@
                         }
 
                         .bulk-card-rarities {
-                            max-height: 120px;
+                            max-height: 150px;
                             overflow-y: auto;
                         }
 
-                        .bulk-card-rarities .form-check {
-                            margin-bottom: 0.25rem;
+                        .rarity-quantity-row {
+                            display: flex;
+                            align-items: center;
+                            gap: 0.5rem;
+                            margin-bottom: 0.5rem;
                         }
 
-                        .bulk-card-rarities .form-check-label {
+                        .rarity-label {
                             font-size: 0.8rem;
-                            cursor: pointer;
+                            font-weight: 600;
+                            min-width: 40px;
+                            margin: 0;
+                        }
+
+                        .rarity-quantity-row input {
+                            flex: 1;
+                            max-width: 70px;
                         }
 
                         @media (max-width: 768px) {
@@ -9031,15 +9041,15 @@ Firebase Consoleで確認すべき項目:
                     const cardItem = document.createElement('div');
                     cardItem.className = 'bulk-card-item';
 
-                    // Display all rarities for this card as checkboxes
+                    // Display all rarities for this card with quantity input for each
                     let rarityDisplay = '';
                     if (card.rarities && card.rarities.length > 0) {
                         rarityDisplay = card.rarities.map((rarity, rIdx) => `
-                            <div class="form-check" style="font-size: 0.85rem;">
-                                <input class="form-check-input bulk-card-rarity-check" type="checkbox"
+                            <div class="rarity-quantity-row">
+                                <label class="rarity-label">${rarity}</label>
+                                <input type="number" class="form-control form-control-sm bulk-card-rarity-quantity"
                                        data-index="${index}" data-rarity="${rarity}"
-                                       id="rarity-${index}-${rIdx}">
-                                <label class="form-check-label" for="rarity-${index}-${rIdx}">${rarity}</label>
+                                       min="0" max="99" value="0">
                             </div>
                         `).join('');
                     } else {
@@ -9053,13 +9063,8 @@ Firebase Consoleで確認すべき項目:
                         ${card.number ? `<div class="bulk-card-number">${card.number}</div>` : ''}
                         <div class="bulk-card-controls">
                             <div class="bulk-card-rarities">
-                                <label>レアリティ</label>
+                                <label style="font-weight: 600; margin-bottom: 0.5rem; display: block;">レアリティ別枚数</label>
                                 ${rarityDisplay}
-                            </div>
-                            <div>
-                                <label>枚数</label>
-                                <input type="number" class="form-control form-control-sm bulk-card-quantity"
-                                    data-index="${index}" value="0" min="0" max="99">
                             </div>
                         </div>
                     `;
@@ -9107,34 +9112,21 @@ Firebase Consoleで確認すべき項目:
             }
 
             const selectedCards = [];
-            const quantityInputs = document.querySelectorAll('.bulk-card-quantity');
 
-            quantityInputs.forEach(input => {
+            // Get all rarity quantity inputs
+            const rarityQuantityInputs = document.querySelectorAll('.bulk-card-rarity-quantity');
+
+            rarityQuantityInputs.forEach(input => {
                 const index = parseInt(input.dataset.index);
+                const rarity = input.dataset.rarity;
                 const quantity = parseInt(input.value) || 0;
 
                 if (quantity > 0) {
-                    // Get all checked rarities for this card
-                    const rarityCheckboxes = document.querySelectorAll(`.bulk-card-rarity-check[data-index="${index}"]:checked`);
-
-                    if (rarityCheckboxes.length > 0) {
-                        // Add a separate entry for each checked rarity
-                        rarityCheckboxes.forEach(checkbox => {
-                            const rarity = checkbox.dataset.rarity;
-                            selectedCards.push({
-                                ...bulkImportCards[index],
-                                quantity: quantity,
-                                rarity: rarity
-                            });
-                        });
-                    } else {
-                        // No rarity selected, add without rarity
-                        selectedCards.push({
-                            ...bulkImportCards[index],
-                            quantity: quantity,
-                            rarity: ''
-                        });
-                    }
+                    selectedCards.push({
+                        ...bulkImportCards[index],
+                        quantity: quantity,
+                        rarity: rarity
+                    });
                 }
             });
 

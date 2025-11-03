@@ -203,18 +203,16 @@ app.get('/card-list', async (req, res) => {
             const cardName = nameMatch ? nameMatch[1].trim() : `Card ${block.id}`;
 
             // Extract ALL rarities for this card
-            // Look for <div class="lr_icon rid rid_X"> ... <span>レアリティ名仕様</span>
-            const rarityPattern = /<div\s+class="lr_icon\s+rid\s+rid_\d+"[^>]*>[\s\S]*?<span[^>]*>([^<]+)<\/span>/gi;
+            // Look for <div class="lr_icon rid rid_X"> ... <p>SR</p>
+            const rarityPattern = /<div\s+class="lr_icon\s+rid\s+rid_\d+"[^>]*>[\s\S]*?<p>([^<]+)<\/p>/gi;
             const cardRarities = [];
             let rarityMatch;
 
             while ((rarityMatch = rarityPattern.exec(block.html)) !== null) {
-                let rarityText = rarityMatch[1].trim();
-                // Remove "仕様" suffix if present
-                rarityText = rarityText.replace(/仕様$/, '');
+                let rarityCode = rarityMatch[1].trim();
 
-                if (rarityText && !cardRarities.includes(rarityText)) {
-                    cardRarities.push(rarityText);
+                if (rarityCode && !cardRarities.includes(rarityCode)) {
+                    cardRarities.push(rarityCode);
                 }
             }
 
