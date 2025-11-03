@@ -140,129 +140,113 @@ app.get('/card-list', async (req, res) => {
 
         const html = await response.text();
 
-        // Debug: Log samples of the HTML to understand structure
-        console.log('=== Searching for all jQuery text() calls ===');
-        const textPatterns = html.match(/\$\([^)]+\)\.text\([^)]+\)/g);
-        if (textPatterns) {
-            console.log('Found text() patterns:', textPatterns.slice(0, 20));
-        }
-        console.log('=== Searching for card_name, card_number patterns ===');
-        const idPatterns = html.match(/id=["']card_(name|number)_\d+_\d+["']/g);
-        if (idPatterns) {
-            console.log('Found ID patterns:', idPatterns.slice(0, 10));
-        }
-
         // Parse card list from HTML
         const cards = [];
-        const cardMap = new Map(); // To avoid duplicates
 
-        // Pattern 0: JavaScript card_image pattern (for gallery view)
-        // Extract card IDs from: $('#card_image_X_Y').attr('src', '...cid=XXXXX...')
-        const jsPattern = /\$\('#card_image_(\d+)_(\d+)'\)\.attr\('src',\s*'[^']*cid=(\d+)[^']*'\)/g;
+        // Extract all card blocks - each card has <span class="card_name">, rarity div, and hidden input
+        const cardBlocks = [];
+
+        // Find all <span class="card_name"> elements
+        const cardNamePattern = /<span\s+class="card_name"[^>]*>([^<]+)<\/span>/g;
+        const cardNames = [];
         let match;
-        const cardIndices = []; // Store card indices for later name and number matching
-        while ((match = jsPattern.exec(html)) !== null) {
-            const rowIndex = match[1];
-            const colIndex = match[2];
-            const cardId = match[3];
-            cardIndices.push({ row: rowIndex, col: colIndex, id: cardId });
-            console.log(`Found card at [${rowIndex}][${colIndex}] with ID ${cardId}`);
+        while ((match = cardNamePattern.exec(html)) !== null) {
+            cardNames.push(match[1].trim());
         }
 
-        // Try to find card names and numbers by index
-        cardIndices.forEach(({ row, col, id }) => {
-            let cardName = null;
-            let cardNumber = null;
-
-            // Pattern 1: jQuery .text() calls for name and number
-            const nameRegex1 = new RegExp(`\\$\\('#card_name_${row}_${col}'\\)\\.text\\(['"]([^'"]+)['"]\\)`, 'i');
-            const nameRegex2 = new RegExp(`\\$\\("#card_name_${row}_${col}"\\)\\.text\\(['"]([^'"]+)['"]\\)`, 'i');
-            const nameRegex3 = new RegExp(`\\$\\(["']#card_name_${row}_${col}["']\\)\\.text\\(["']([^"']+)["']\\)`, 'i');
-
-            const numberRegex1 = new RegExp(`\\$\\('#card_number_${row}_${col}'\\)\\.text\\(['"]([^'"]+)['"]\\)`, 'i');
-            const numberRegex2 = new RegExp(`\\$\\("#card_number_${row}_${col}"\\)\\.text\\(['"]([^'"]+)['"]\\)`, 'i');
-            const numberRegex3 = new RegExp(`\\$\\(["']#card_number_${row}_${col}["']\\)\\.text\\(["']([^"']+)["']\\)`, 'i');
-
-            // Try to match name
-            let nameMatch = html.match(nameRegex1) || html.match(nameRegex2) || html.match(nameRegex3);
-            if (nameMatch) {
-                cardName = nameMatch[1].trim();
-            }
-
-            // Try to match number (card code)
-            let numberMatch = html.match(numberRegex1) || html.match(numberRegex2) || html.match(numberRegex3);
-            if (numberMatch) {
-                cardNumber = numberMatch[1].trim();
-            }
-
-            if (cardName && !cardMap.has(id)) {
-                cardMap.set(id, { name: cardName, number: cardNumber || '', id: id });
-                console.log(`Matched card ${id}: ${cardName} [${cardNumber || 'no number'}]`);
-            } else if (!cardMap.has(id)) {
-                // Store with placeholder name if we can't find it
-                cardMap.set(id, { name: `Card ${id}`, number: '', id: id });
-                console.log(`Card ${id}: name not found, using placeholder`);
-            }
-        });
-
-        // Pattern 1: Link with card ID in href (fallback for list view)
-        const pattern1 = /card_search\.action\?ope=2(?:&amp;|&)cid=(\d+)(?:&amp;|&)request_locale=ja[^>]*>([^<]+)</g;
-        while ((match = pattern1.exec(html)) !== null) {
-            const cardId = match[1];
-            const cardName = match[2].trim();
-            if (cardId && cardName && !cardMap.has(cardId)) {
-                cardMap.set(cardId, { name: cardName, number: '', id: cardId });
-            }
+        // Find all <input type="hidden" class="link_value"> elements for card IDs
+        const linkValuePattern = /<input[^>]*class="link_value"[^>]*value="\/yugiohdb\/card_search\.action\?ope=2&(?:amp;)?cid=(\d+)"[^>]*>/g;
+        const cardIds = [];
+        while ((match = linkValuePattern.exec(html)) !== null) {
+            cardIds.push(match[1]);
         }
 
-        // Pattern 2: Strong tag with card name and nearby link
-        if (cardMap.size === 0) {
-            const pattern2 = /<strong[^>]*class="card_name"[^>]*>(.*?)<\/strong>[\s\S]{0,200}?cid=(\d+)/g;
-            while ((match = pattern2.exec(html)) !== null) {
-                const cardName = match[1].replace(/<[^>]+>/g, '').trim();
-                const cardId = match[2];
-                if (cardId && cardName && !cardMap.has(cardId)) {
-                    cardMap.set(cardId, { name: cardName, number: '', id: cardId });
+        // Find all rarity class elements
+        const rarityPattern = /<div\s+class="icon\s+rarity\s+pack_([a-z0-9]+)"[^>]*>/gi;
+        const rarities = [];
+        while ((match = rarityPattern.exec(html)) !== null) {
+            const rarityCode = match[1].toLowerCase();
+            // Map rarity codes to Japanese rarity names
+            const rarityMap = {
+                'n': 'ノーマル',
+                'r': 'レア',
+                'sr': 'スーパーレア',
+                'ur': 'ウルトラレア',
+                'scr': 'シークレットレア',
+                'hr': 'ホログラフィックレア',
+                '20s': '20thシークレットレア',
+                'pscr': 'プリズマティックシークレットレア',
+                'mr': 'ミレニアムレア',
+                'pr': 'パラレルレア',
+                'npr': 'ノーマルパラレルレア',
+                'spr': 'スーパーパラレルレア',
+                'exs': 'エクストラシークレットレア',
+                'kc': 'KCレア',
+                'kcr': 'KCウルトラレア'
+            };
+            rarities.push(rarityMap[rarityCode] || 'その他');
+        }
+
+        console.log(`Found ${cardNames.length} card names, ${cardIds.length} card IDs, ${rarities.length} rarities`);
+
+        // Get card number (型番) from the first card's detail page
+        let baseCardNumber = '';
+        if (cardIds.length > 0) {
+            try {
+                const firstCardId = cardIds[0];
+                const detailUrl = `https://www.db.yugioh-card.com/yugiohdb/card_search.action?ope=2&cid=${firstCardId}`;
+
+                console.log(`Fetching first card details from: ${detailUrl}`);
+                const detailResponse = await fetch(detailUrl, {
+                    headers: {
+                        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36',
+                        'Referer': 'https://www.db.yugioh-card.com/',
+                        'Accept': 'text/html',
+                        'Accept-Language': 'ja,en-US;q=0.9,en;q=0.8'
+                    }
+                });
+
+                const detailHtml = await detailResponse.text();
+
+                // Extract card number from <div class="card_number">
+                const cardNumberMatch = detailHtml.match(/<div\s+class="card_number">([^<]+)<\/div>/);
+                if (cardNumberMatch) {
+                    baseCardNumber = cardNumberMatch[1].trim();
+                    console.log(`Base card number: ${baseCardNumber}`);
                 }
+            } catch (error) {
+                console.error('Failed to fetch first card details:', error);
             }
         }
 
-        // Pattern 3: Input with name="cid" and value
-        if (cardMap.size === 0) {
-            const pattern3 = /<input[^>]*name="cid"[^>]*value="(\d+)"[^>]*>/g;
-            const cidMatches = [...html.matchAll(pattern3)];
+        // Generate card numbers by incrementing the base number
+        const generateCardNumber = (baseNumber, index) => {
+            if (!baseNumber) return '';
 
-            // Try to find corresponding card names
-            const namePattern = /<(?:span|strong)[^>]*class="[^"]*card_name[^"]*"[^>]*>([^<]+)<\/(?:span|strong)>/g;
-            const nameMatches = [...html.matchAll(namePattern)];
+            // Extract prefix and number from base (e.g., "LB-01" -> "LB-" and "01")
+            const match = baseNumber.match(/^(.+?)(\d+)$/);
+            if (!match) return baseNumber;
 
-            cidMatches.forEach((cidMatch, index) => {
-                const cardId = cidMatch[1];
-                const cardName = nameMatches[index] ? nameMatches[index][1].trim() : null;
-                if (cardId && cardName && !cardMap.has(cardId)) {
-                    cardMap.set(cardId, { name: cardName, number: '', id: cardId });
-                }
+            const prefix = match[1];
+            const startNum = parseInt(match[2], 10);
+            const numLength = match[2].length; // Preserve leading zeros
+
+            const newNum = (startNum + index).toString().padStart(numLength, '0');
+            return prefix + newNum;
+        };
+
+        // Combine all data
+        const minLength = Math.min(cardNames.length, cardIds.length, rarities.length);
+        for (let i = 0; i < minLength; i++) {
+            cards.push({
+                id: cardIds[i],
+                name: cardNames[i],
+                number: generateCardNumber(baseCardNumber, i),
+                rarity: rarities[i]
             });
         }
 
-        // Pattern 4: More flexible - any link containing cid parameter
-        if (cardMap.size === 0) {
-            const pattern4 = /<a[^>]*href="[^"]*cid=(\d+)[^"]*"[^>]*>([\s\S]*?)<\/a>/g;
-            while ((match = pattern4.exec(html)) !== null) {
-                const cardId = match[1];
-                const linkContent = match[2];
-                // Extract text, removing HTML tags
-                const cardName = linkContent.replace(/<[^>]+>/g, '').trim();
-                if (cardId && cardName && cardName.length > 2 && !cardMap.has(cardId)) {
-                    cardMap.set(cardId, { name: cardName, number: '', id: cardId });
-                }
-            }
-        }
-
-        // Convert map to array
-        cardMap.forEach((cardData) => {
-            cards.push(cardData);
-        });
+        console.log(`Successfully parsed ${cards.length} cards`);
 
         console.log(`Found ${cards.length} cards from search results`);
 

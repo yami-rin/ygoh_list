@@ -8977,6 +8977,32 @@ Firebase Consoleで確認すべき項目:
                     // Get card image URL
                     const imageUrl = `https://ygoh-list.onrender.com/image?cid=${card.id}`;
 
+                    // Generate rarity options with selected value
+                    const rarityOptions = [
+                        '',
+                        'ノーマル',
+                        'レア',
+                        'スーパーレア',
+                        'ウルトラレア',
+                        'シークレットレア',
+                        'ホログラフィックレア',
+                        '20thシークレットレア',
+                        'プリズマティックシークレットレア',
+                        'ミレニアムレア',
+                        'パラレルレア',
+                        'ノーマルパラレルレア',
+                        'スーパーパラレルレア',
+                        'エクストラシークレットレア',
+                        'KCレア',
+                        'KCウルトラレア',
+                        'その他'
+                    ].map(rarity => {
+                        const value = rarity;
+                        const label = rarity || '-';
+                        const selected = card.rarity === rarity ? 'selected' : '';
+                        return `<option value="${value}" ${selected}>${label}</option>`;
+                    }).join('');
+
                     cardItem.innerHTML = `
                         <img src="${imageUrl}" alt="${card.name}" class="bulk-card-image"
                             onerror="this.src='data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 width=%22200%22 height=%22290%22><rect width=%22200%22 height=%22290%22 fill=%22%23ddd%22/><text x=%2250%%22 y=%2250%%22 text-anchor=%22middle%22 dy=%22.3em%22 fill=%22%23999%22>No Image</text></svg>'">
@@ -8986,17 +9012,7 @@ Firebase Consoleで確認すべき項目:
                             <div>
                                 <label>レアリティ</label>
                                 <select class="form-select form-select-sm bulk-card-rarity" data-index="${index}">
-                                    <option value="">-</option>
-                                    <option value="ノーマル">ノーマル</option>
-                                    <option value="レア">レア</option>
-                                    <option value="スーパーレア">スーパーレア</option>
-                                    <option value="ウルトラレア">ウルトラレア</option>
-                                    <option value="シークレットレア">シークレットレア</option>
-                                    <option value="ホログラフィックレア">ホログラフィックレア</option>
-                                    <option value="20thシークレットレア">20thシークレットレア</option>
-                                    <option value="プリズマティックシークレットレア">プリズマティックシークレットレア</option>
-                                    <option value="ミレニアムレア">ミレニアムレア</option>
-                                    <option value="その他">その他</option>
+                                    ${rarityOptions}
                                 </select>
                             </div>
                             <div>
