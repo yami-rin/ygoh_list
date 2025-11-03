@@ -1,0 +1,660 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>画像キャッシュテスト - カードID保存</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            padding: 20px;
+            min-height: 100vh;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        .header {
+            background: white;
+            padding: 30px;
+            border-radius: 12px;
+            margin-bottom: 20px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+        }
+
+        h1 {
+            color: #333;
+            margin-bottom: 10px;
+        }
+
+        .subtitle {
+            color: #666;
+            font-size: 14px;
+        }
+
+        .section {
+            background: white;
+            border-radius: 12px;
+            padding: 20px;
+            margin-bottom: 20px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+        }
+
+        .section h2 {
+            color: #333;
+            margin-bottom: 15px;
+            padding-bottom: 10px;
+            border-bottom: 2px solid #f0f0f0;
+        }
+
+        .controls {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+        }
+
+        input[type="number"],
+        input[type="text"] {
+            padding: 12px;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            font-size: 16px;
+            flex: 1;
+            min-width: 200px;
+        }
+
+        button {
+            padding: 12px 24px;
+            background: #667eea;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        button:hover {
+            background: #5568d3;
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+        }
+
+        button.danger {
+            background: #ef5350;
+        }
+
+        button.danger:hover {
+            background: #e53935;
+        }
+
+        button.secondary {
+            background: #78909c;
+        }
+
+        button.secondary:hover {
+            background: #607d8b;
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+
+        .stat-box {
+            text-align: center;
+            padding: 20px;
+            border-radius: 8px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+
+        .stat-number {
+            font-size: 32px;
+            font-weight: bold;
+        }
+
+        .stat-label {
+            font-size: 14px;
+            margin-top: 5px;
+            opacity: 0.9;
+        }
+
+        .image-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+            gap: 15px;
+            margin-top: 20px;
+        }
+
+        .image-card {
+            background: #f5f5f5;
+            border: 2px solid #ddd;
+            border-radius: 8px;
+            padding: 10px;
+            transition: all 0.3s;
+        }
+
+        .image-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 16px rgba(0,0,0,0.2);
+            border-color: #667eea;
+        }
+
+        .image-card img {
+            width: 100%;
+            height: auto;
+            border-radius: 4px;
+            background: white;
+        }
+
+        .image-info {
+            margin-top: 10px;
+            font-size: 14px;
+        }
+
+        .image-info strong {
+            color: #333;
+        }
+
+        .image-info .detail {
+            color: #666;
+            font-size: 12px;
+            margin-top: 5px;
+        }
+
+        .image-actions {
+            margin-top: 10px;
+            display: flex;
+            gap: 5px;
+        }
+
+        .image-actions button {
+            flex: 1;
+            padding: 6px 12px;
+            font-size: 12px;
+        }
+
+        .progress-bar {
+            width: 100%;
+            height: 30px;
+            background: #f0f0f0;
+            border-radius: 15px;
+            overflow: hidden;
+            margin: 15px 0;
+            position: relative;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #667eea 0%, #764ba2 100%);
+            transition: width 0.3s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: bold;
+            font-size: 14px;
+        }
+
+        .log {
+            background: #1e1e1e;
+            color: #d4d4d4;
+            padding: 15px;
+            border-radius: 8px;
+            font-family: 'Consolas', 'Monaco', monospace;
+            font-size: 13px;
+            max-height: 300px;
+            overflow-y: auto;
+            margin-top: 15px;
+        }
+
+        .log-entry {
+            margin: 3px 0;
+            padding: 3px 0;
+        }
+
+        .log-entry.success { color: #4ec9b0; }
+        .log-entry.error { color: #f48771; }
+        .log-entry.info { color: #9cdcfe; }
+
+        .batch-input {
+            width: 100%;
+            min-height: 100px;
+            padding: 12px;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            font-family: 'Consolas', monospace;
+            font-size: 14px;
+            resize: vertical;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🎴 遊戯王カード画像キャッシュシステム</h1>
+            <p class="subtitle">カードIDと画像を紐づけてIndexedDBに保存・管理します</p>
+        </div>
+
+        <!-- Stats Section -->
+        <div class="section">
+            <h2>📊 キャッシュ統計</h2>
+            <div class="stats-grid">
+                <div class="stat-box">
+                    <div class="stat-number" id="cache-count">0</div>
+                    <div class="stat-label">保存済み画像</div>
+                </div>
+                <div class="stat-box">
+                    <div class="stat-number" id="cache-size">0 MB</div>
+                    <div class="stat-label">使用容量</div>
+                </div>
+                <div class="stat-box">
+                    <div class="stat-number" id="success-rate">0%</div>
+                    <div class="stat-label">成功率</div>
+                </div>
+            </div>
+            <div class="controls">
+                <button onclick="updateStats()">統計を更新</button>
+                <button class="secondary" onclick="exportCache()">キャッシュをエクスポート</button>
+                <button class="danger" onclick="clearCache()">全削除</button>
+            </div>
+        </div>
+
+        <!-- Single Card Section -->
+        <div class="section">
+            <h2>🔍 単一カード取得・保存</h2>
+            <div class="controls">
+                <input type="number" id="single-card-id" placeholder="カードID (例: 7315)" value="7315">
+                <button onclick="fetchAndSaveCard()">取得して保存</button>
+                <button class="secondary" onclick="loadCachedCard()">キャッシュから読込</button>
+                <button class="danger" onclick="deleteCard()">削除</button>
+            </div>
+            <div id="single-card-result"></div>
+        </div>
+
+        <!-- Batch Processing Section -->
+        <div class="section">
+            <h2>📦 一括処理</h2>
+            <p style="color: #666; margin-bottom: 10px;">
+                カードIDをカンマ区切りまたは改行区切りで入力してください（例: 7315, 4007, 5818）
+            </p>
+            <textarea
+                class="batch-input"
+                id="batch-card-ids"
+                placeholder="7315, 4007, 5818, 6983, 10389"
+            >7315, 4007, 5818, 6983, 10389</textarea>
+            <div class="controls" style="margin-top: 10px;">
+                <button onclick="batchFetchAndSave()">一括取得・保存</button>
+                <button class="secondary" onclick="batchLoadCached()">一括読込</button>
+            </div>
+            <div class="progress-bar" id="batch-progress" style="display: none;">
+                <div class="progress-fill" id="batch-progress-fill" style="width: 0%;">0%</div>
+            </div>
+            <div id="batch-result"></div>
+        </div>
+
+        <!-- Cached Images Display -->
+        <div class="section">
+            <h2>💾 保存済み画像一覧</h2>
+            <div class="controls">
+                <button onclick="loadAllCached()">全て表示</button>
+                <button class="secondary" onclick="sortByDate()">日付順</button>
+                <button class="secondary" onclick="sortByCardId()">ID順</button>
+            </div>
+            <div class="image-grid" id="cached-images-grid"></div>
+        </div>
+
+        <!-- Log Section -->
+        <div class="section">
+            <h2>📝 実行ログ</h2>
+            <div class="log" id="log-container">
+                <div class="log-entry info">準備完了</div>
+            </div>
+        </div>
+    </div>
+
+    <script src="image_cache_manager.js"></script>
+    <script>
+        const PROXY_URL = 'http://localhost:3000';
+        let stats = { success: 0, failed: 0 };
+
+        // ログ出力
+        function log(message, type = 'info') {
+            const container = document.getElementById('log-container');
+            const timestamp = new Date().toLocaleTimeString('ja-JP');
+            const entry = document.createElement('div');
+            entry.className = `log-entry ${type}`;
+            entry.textContent = `[${timestamp}] ${message}`;
+            container.insertBefore(entry, container.firstChild);
+
+            while (container.children.length > 100) {
+                container.removeChild(container.lastChild);
+            }
+        }
+
+        // 統計更新
+        async function updateStats() {
+            try {
+                const cacheSize = await imageCacheManager.getCacheSize();
+                document.getElementById('cache-count').textContent = cacheSize.count;
+                document.getElementById('cache-size').textContent = cacheSize.sizeMB + ' MB';
+
+                const total = stats.success + stats.failed;
+                const rate = total > 0 ? Math.round((stats.success / total) * 100) : 0;
+                document.getElementById('success-rate').textContent = rate + '%';
+
+                log(`統計更新: ${cacheSize.count}枚, ${cacheSize.sizeMB}MB`, 'success');
+            } catch (error) {
+                log(`統計更新エラー: ${error.message}`, 'error');
+            }
+        }
+
+        // 単一カード取得・保存
+        async function fetchAndSaveCard() {
+            const cardId = document.getElementById('single-card-id').value;
+            if (!cardId) {
+                alert('カードIDを入力してください');
+                return;
+            }
+
+            const resultDiv = document.getElementById('single-card-result');
+            resultDiv.innerHTML = '<p>取得中...</p>';
+
+            try {
+                log(`カードID ${cardId} を取得中...`, 'info');
+
+                const imageData = await imageCacheManager.fetchAndCache(cardId, PROXY_URL);
+
+                if (imageData) {
+                    const info = await imageCacheManager.getCardInfo(cardId);
+                    resultDiv.innerHTML = `
+                        <div class="image-grid">
+                            <div class="image-card">
+                                <img src="${imageData}" alt="Card ${cardId}">
+                                <div class="image-info">
+                                    <strong>カードID: ${cardId}</strong>
+                                    <div class="detail">カード名: ${info.cardName || 'N/A'}</div>
+                                    <div class="detail">保存日時: ${new Date(info.timestamp).toLocaleString('ja-JP')}</div>
+                                    <div class="detail">サイズ: ${(info.imageSize / 1024).toFixed(2)} KB</div>
+                                </div>
+                            </div>
+                        </div>
+                    `;
+
+                    stats.success++;
+                    log(`✓ カードID ${cardId} を保存しました`, 'success');
+                    await updateStats();
+                } else {
+                    throw new Error('画像の取得に失敗しました');
+                }
+            } catch (error) {
+                stats.failed++;
+                resultDiv.innerHTML = `<p style="color: #ef5350;">エラー: ${error.message}</p>`;
+                log(`✗ カードID ${cardId} の取得失敗: ${error.message}`, 'error');
+                await updateStats();
+            }
+        }
+
+        // キャッシュから読込
+        async function loadCachedCard() {
+            const cardId = document.getElementById('single-card-id').value;
+            if (!cardId) {
+                alert('カードIDを入力してください');
+                return;
+            }
+
+            try {
+                const imageData = await imageCacheManager.getImage(cardId);
+
+                if (imageData) {
+                    const info = await imageCacheManager.getCardInfo(cardId);
+                    const resultDiv = document.getElementById('single-card-result');
+                    resultDiv.innerHTML = `
+                        <div class="image-grid">
+                            <div class="image-card">
+                                <img src="${imageData}" alt="Card ${cardId}">
+                                <div class="image-info">
+                                    <strong>カードID: ${cardId}</strong>
+                                    <div class="detail">カード名: ${info.cardName || 'N/A'}</div>
+                                    <div class="detail">保存日時: ${new Date(info.timestamp).toLocaleString('ja-JP')}</div>
+                                    <div class="detail">最終アクセス: ${new Date(info.lastAccessed).toLocaleString('ja-JP')}</div>
+                                </div>
+                            </div>
+                        </div>
+                    `;
+                    log(`✓ キャッシュから読込: カードID ${cardId}`, 'success');
+                } else {
+                    alert('キャッシュに画像がありません');
+                    log(`キャッシュに画像なし: カードID ${cardId}`, 'info');
+                }
+            } catch (error) {
+                alert(`エラー: ${error.message}`);
+                log(`読込エラー: ${error.message}`, 'error');
+            }
+        }
+
+        // カード削除
+        async function deleteCard() {
+            const cardId = document.getElementById('single-card-id').value;
+            if (!cardId) {
+                alert('カードIDを入力してください');
+                return;
+            }
+
+            if (confirm(`カードID ${cardId} の画像を削除しますか？`)) {
+                try {
+                    await imageCacheManager.deleteImage(cardId);
+                    document.getElementById('single-card-result').innerHTML = '';
+                    log(`✓ 削除完了: カードID ${cardId}`, 'success');
+                    await updateStats();
+                } catch (error) {
+                    log(`削除エラー: ${error.message}`, 'error');
+                }
+            }
+        }
+
+        // 一括取得・保存
+        async function batchFetchAndSave() {
+            const input = document.getElementById('batch-card-ids').value;
+            const cardIds = input.split(/[\s,]+/).filter(id => id.trim()).map(id => id.trim());
+
+            if (cardIds.length === 0) {
+                alert('カードIDを入力してください');
+                return;
+            }
+
+            const progressBar = document.getElementById('batch-progress');
+            const progressFill = document.getElementById('batch-progress-fill');
+            const resultDiv = document.getElementById('batch-result');
+
+            progressBar.style.display = 'block';
+            resultDiv.innerHTML = '';
+
+            log(`一括処理開始: ${cardIds.length}枚`, 'info');
+
+            const results = await imageCacheManager.fetchAndCacheBatch(
+                cardIds,
+                PROXY_URL,
+                (progress) => {
+                    const percent = Math.round((progress.current / progress.total) * 100);
+                    progressFill.style.width = percent + '%';
+                    progressFill.textContent = `${progress.current}/${progress.total} (${percent}%)`;
+                    log(`処理中: ${progress.cardId} (${progress.current}/${progress.total})`, 'info');
+                }
+            );
+
+            stats.success += results.success.length;
+            stats.failed += results.failed.length;
+
+            resultDiv.innerHTML = `
+                <div style="padding: 15px; background: #f5f5f5; border-radius: 8px; margin-top: 15px;">
+                    <p><strong>✓ 成功:</strong> ${results.success.length}枚</p>
+                    <p><strong>✗ 失敗:</strong> ${results.failed.length}枚</p>
+                    ${results.failed.length > 0 ? `
+                        <details style="margin-top: 10px;">
+                            <summary>失敗の詳細</summary>
+                            <ul>
+                                ${results.failed.map(f => `<li>ID ${f.cardId}: ${f.error}</li>`).join('')}
+                            </ul>
+                        </details>
+                    ` : ''}
+                </div>
+            `;
+
+            log(`一括処理完了: 成功${results.success.length}件, 失敗${results.failed.length}件`, 'success');
+
+            await updateStats();
+            await loadAllCached();
+        }
+
+        // 一括読込
+        async function batchLoadCached() {
+            const input = document.getElementById('batch-card-ids').value;
+            const cardIds = input.split(/[\s,]+/).filter(id => id.trim()).map(id => id.trim());
+
+            if (cardIds.length === 0) {
+                alert('カードIDを入力してください');
+                return;
+            }
+
+            const gridDiv = document.getElementById('cached-images-grid');
+            gridDiv.innerHTML = '';
+
+            for (const cardId of cardIds) {
+                try {
+                    const imageData = await imageCacheManager.getImage(cardId);
+                    if (imageData) {
+                        const info = await imageCacheManager.getCardInfo(cardId);
+                        displayImageCard(gridDiv, cardId, imageData, info);
+                    }
+                } catch (error) {
+                    log(`読込エラー (ID ${cardId}): ${error.message}`, 'error');
+                }
+            }
+
+            log(`${cardIds.length}枚の読込完了`, 'success');
+        }
+
+        // 全て表示
+        async function loadAllCached() {
+            try {
+                const allImages = await imageCacheManager.getAllImages();
+                const gridDiv = document.getElementById('cached-images-grid');
+                gridDiv.innerHTML = '';
+
+                if (allImages.length === 0) {
+                    gridDiv.innerHTML = '<p style="color: #666;">保存済み画像はありません</p>';
+                    return;
+                }
+
+                for (const img of allImages) {
+                    displayImageCard(gridDiv, img.cardId, img.imageData, img);
+                }
+
+                log(`${allImages.length}枚を表示`, 'success');
+            } catch (error) {
+                log(`表示エラー: ${error.message}`, 'error');
+            }
+        }
+
+        // 画像カード表示
+        function displayImageCard(container, cardId, imageData, info) {
+            const card = document.createElement('div');
+            card.className = 'image-card';
+            card.innerHTML = `
+                <img src="${imageData}" alt="Card ${cardId}">
+                <div class="image-info">
+                    <strong>ID: ${cardId}</strong>
+                    <div class="detail">${info.cardName || 'カード名なし'}</div>
+                    <div class="detail">${new Date(info.timestamp).toLocaleDateString('ja-JP')}</div>
+                    <div class="detail">${(info.imageSize / 1024).toFixed(1)} KB</div>
+                </div>
+                <div class="image-actions">
+                    <button class="danger" onclick="deleteAndRefresh('${cardId}')">削除</button>
+                </div>
+            `;
+            container.appendChild(card);
+        }
+
+        // 削除して更新
+        async function deleteAndRefresh(cardId) {
+            if (confirm(`カードID ${cardId} を削除しますか？`)) {
+                await imageCacheManager.deleteImage(cardId);
+                await loadAllCached();
+                await updateStats();
+                log(`削除: カードID ${cardId}`, 'success');
+            }
+        }
+
+        // ソート
+        async function sortByDate() {
+            const allImages = await imageCacheManager.getAllImages();
+            allImages.sort((a, b) => b.timestamp - a.timestamp);
+            displaySortedImages(allImages);
+        }
+
+        async function sortByCardId() {
+            const allImages = await imageCacheManager.getAllImages();
+            allImages.sort((a, b) => parseInt(a.cardId) - parseInt(b.cardId));
+            displaySortedImages(allImages);
+        }
+
+        function displaySortedImages(images) {
+            const gridDiv = document.getElementById('cached-images-grid');
+            gridDiv.innerHTML = '';
+            for (const img of images) {
+                displayImageCard(gridDiv, img.cardId, img.imageData, img);
+            }
+        }
+
+        // エクスポート
+        async function exportCache() {
+            try {
+                await imageCacheManager.exportCache();
+                log('キャッシュをエクスポートしました', 'success');
+            } catch (error) {
+                log(`エクスポートエラー: ${error.message}`, 'error');
+            }
+        }
+
+        // 全削除
+        async function clearCache() {
+            if (confirm('全てのキャッシュを削除しますか？この操作は取り消せません。')) {
+                try {
+                    await imageCacheManager.clearAllCache();
+                    document.getElementById('cached-images-grid').innerHTML = '';
+                    log('全てのキャッシュを削除しました', 'success');
+                    await updateStats();
+                } catch (error) {
+                    log(`削除エラー: ${error.message}`, 'error');
+                }
+            }
+        }
+
+        // 初期化
+        (async () => {
+            try {
+                await imageCacheManager.init();
+                log('IndexedDB初期化完了', 'success');
+                await updateStats();
+            } catch (error) {
+                log(`初期化エラー: ${error.message}`, 'error');
+            }
+        })();
+    </script>
+</body>
+</html>

@@ -1,0 +1,20 @@
+{
+  "name": "yugioh-image-proxy",
+  "version": "1.0.0",
+  "description": "遊戯王カード画像プロキシサーバー",
+  "main": "image_proxy_server.js",
+  "scripts": {
+    "start": "node image_proxy_server.js",
+    "dev": "nodemon image_proxy_server.js"
+  },
+  "keywords": ["yugioh", "proxy", "image", "cors"],
+  "author": "",
+  "license": "MIT",
+  "dependencies": {
+    "express": "^4.18.2",
+    "node-fetch": "^2.6.7"
+  },
+  "devDependencies": {
+    "nodemon": "^2.0.20"
+  }
+}

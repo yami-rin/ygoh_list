@@ -6,7 +6,6 @@
     <title>カードギャラリー - グリッド表示</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css">
-    <script src="image_cache_manager.js"></script>
     <style>
         body {
             background-color: #f8f9fa;
@@ -281,29 +280,21 @@
         <!-- Stats bar -->
         <div class="stats-bar">
             <div class="row text-center">
-                <div class="col-6 col-md-2">
+                <div class="col-6 col-md-3">
                     <h4 class="mb-0 text-primary" id="total-cards">0</h4>
                     <small class="text-muted">総カード枚数</small>
                 </div>
-                <div class="col-6 col-md-2">
+                <div class="col-6 col-md-3">
                     <h4 class="mb-0 text-success" id="unique-cards">0</h4>
                     <small class="text-muted">種類数</small>
                 </div>
-                <div class="col-6 col-md-2 mt-3 mt-md-0">
+                <div class="col-6 col-md-3 mt-3 mt-md-0">
                     <h4 class="mb-0 text-info" id="filtered-cards">0</h4>
                     <small class="text-muted">表示中</small>
                 </div>
-                <div class="col-6 col-md-2 mt-3 mt-md-0">
+                <div class="col-6 col-md-3 mt-3 mt-md-0">
                     <h4 class="mb-0 text-warning" id="current-page-info">0</h4>
                     <small class="text-muted">ページ</small>
-                </div>
-                <div class="col-6 col-md-2 mt-3 mt-md-0">
-                    <h4 class="mb-0 text-secondary" id="cache-count">0</h4>
-                    <small class="text-muted">キャッシュ</small>
-                </div>
-                <div class="col-6 col-md-2 mt-3 mt-md-0">
-                    <h4 class="mb-0 text-dark" id="cache-size">0MB</h4>
-                    <small class="text-muted">容量</small>
                 </div>
             </div>
         </div>
@@ -465,32 +456,13 @@
             }
         };
 
-        // Get card image URL (with cache support)
-        const getCardImageUrl = async (cardName) => {
+        // Get card image URL
+        const getCardImageUrl = (cardName) => {
             const details = cardDetailsMap.get(cardName);
-            if (!details?.cardId) {
-                return null;
+            if (details?.cardId) {
+                return `https://www.db.yugioh-card.com/yugiohdb/card_image.action?cid=${details.cardId}&request_locale=ja`;
             }
-
-            const cardId = details.cardId;
-
-            try {
-                // Check cache first
-                const cachedImage = await imageCacheManager.getImage(cardId);
-                if (cachedImage) {
-                    console.log(`Using cached image for: ${cardName} (ID: ${cardId})`);
-                    return cachedImage;
-                }
-
-                // Cache miss - fetch from proxy and cache it
-                console.log(`Fetching image for: ${cardName} (ID: ${cardId})`);
-                const imageData = await imageCacheManager.fetchAndCache(cardId, 'http://localhost:3000');
-                return imageData;
-            } catch (error) {
-                console.error(`Error loading image for ${cardName}:`, error);
-                // Fallback to direct URL (will likely fail due to CORS, but worth trying)
-                return `https://www.db.yugioh-card.com/yugiohdb/card_image.action?cid=${cardId}&request_locale=ja`;
-            }
+            return null;
         };
 
         // Load user's card collection and wishlist
@@ -615,8 +587,8 @@
             });
         };
 
-        // Render cards (with async image loading)
-        const renderCards = async () => {
+        // Render cards
+        const renderCards = () => {
             const grid = document.getElementById('card-grid');
             grid.className = `card-grid size-${currentGridSize}`;
 
@@ -632,17 +604,20 @@
                     </div>
                 `;
             } else {
-                // First render with placeholders
-                grid.innerHTML = pageCards.map((card, index) => {
+                grid.innerHTML = pageCards.map(card => {
+                    const imageUrl = getCardImageUrl(card.data['名前']);
                     const tags = (card.data.tags || []).map(tag =>
                         `<span class="badge bg-secondary">${escapeHtml(tag)}</span>`
                     ).join(' ');
 
                     return `
                         <div class="card-item" onclick="viewCardDetail('${escapeHtml(card.data['名前'])}')">
-                            <div class="card-image-container" id="card-img-container-${index}">
+                            <div class="card-image-container">
                                 <span class="stock-badge">在庫 ${escapeHtml(card.data['枚数'])}枚</span>
-                                <i class="bi bi-card-image card-image-placeholder"></i>
+                                ${imageUrl ?
+                                    `<img src="${imageUrl}" alt="${escapeHtml(card.data['名前'])}" loading="lazy" onerror="this.parentElement.innerHTML='<i class=\\'bi bi-card-image card-image-placeholder\\'></i>'">` :
+                                    '<i class="bi bi-card-image card-image-placeholder"></i>'
+                                }
                             </div>
                             <div class="card-info">
                                 <div class="card-name">${escapeHtml(card.data['名前'])}</div>
@@ -661,29 +636,6 @@
                         </div>
                     `;
                 }).join('');
-
-                // Then load images asynchronously
-                pageCards.forEach(async (card, index) => {
-                    try {
-                        const imageUrl = await getCardImageUrl(card.data['名前']);
-                        const container = document.getElementById(`card-img-container-${index}`);
-
-                        if (container && imageUrl) {
-                            const stockBadge = container.querySelector('.stock-badge');
-                            const stockBadgeHtml = stockBadge ? stockBadge.outerHTML : '';
-
-                            container.innerHTML = `
-                                ${stockBadgeHtml}
-                                <img src="${imageUrl}"
-                                     alt="${escapeHtml(card.data['名前'])}"
-                                     loading="lazy"
-                                     onerror="this.parentElement.innerHTML='${stockBadgeHtml}<i class=\\'bi bi-card-image card-image-placeholder\\'></i>'">
-                            `;
-                        }
-                    } catch (error) {
-                        console.error(`Failed to load image for ${card.data['名前']}:`, error);
-                    }
-                });
             }
 
             updatePagination();
@@ -710,7 +662,7 @@
         };
 
         // Update stats
-        const updateStats = async () => {
+        const updateStats = () => {
             const totalQuantity = allCards.reduce((sum, card) => sum + (parseInt(card.data['枚数']) || 0), 0);
             const uniqueCount = allCards.length;
             const filteredCount = filteredCards.length;
@@ -720,17 +672,6 @@
             document.getElementById('unique-cards').textContent = uniqueCount;
             document.getElementById('filtered-cards').textContent = filteredCount;
             document.getElementById('current-page-info').textContent = `${currentPage}/${totalPages}`;
-
-            // Update cache stats
-            try {
-                const cacheSize = await imageCacheManager.getCacheSize();
-                document.getElementById('cache-count').textContent = cacheSize.count;
-                document.getElementById('cache-size').textContent = cacheSize.sizeMB + 'MB';
-            } catch (error) {
-                console.error('Failed to update cache stats:', error);
-                document.getElementById('cache-count').textContent = '-';
-                document.getElementById('cache-size').textContent = '-';
-            }
         };
 
         // Populate filter options
@@ -829,15 +770,6 @@
         // Initialize
         const init = async () => {
             showLoading(true);
-
-            // Initialize image cache manager
-            try {
-                await imageCacheManager.init();
-                console.log('Image cache manager initialized');
-            } catch (error) {
-                console.error('Failed to initialize image cache manager:', error);
-            }
-
             await loadCardData();
 
             onAuthStateChanged(auth, (user) => {
