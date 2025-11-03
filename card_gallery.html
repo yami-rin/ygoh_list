@@ -453,7 +453,7 @@
         <div class="filter-section">
             <div class="row g-2">
                 <div class="col-md-4">
-                    <input type="text" class="form-control" id="search-input" placeholder="カード名・ひらがなで検索...">
+                    <input type="text" class="form-control" id="search-input" placeholder="カード名で検索...">
                 </div>
                 <div class="col-md-3">
                     <select class="form-select" id="rarity-filter">
@@ -799,6 +799,9 @@
                 const code = match.charCodeAt(0) - 0x60;
                 return String.fromCharCode(code);
             });
+
+            // Remove middle dots (・) for more flexible search
+            text = text.replace(/・/g, '');
 
             return text;
         };

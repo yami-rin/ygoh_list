@@ -5645,24 +5645,27 @@
         // Helper function to normalize text for search
         const normalizeForSearch = (text) => {
             if (!text) return '';
-            
+
             // Convert to lowercase
             text = text.toLowerCase();
-            
+
             // Convert katakana to hiragana
             text = text.replace(/[ァ-ヶ]/g, (match) => {
                 const code = match.charCodeAt(0) - 0x60;
                 return String.fromCharCode(code);
             });
-            
+
             // Convert full-width alphanumeric to half-width
             text = text.replace(/[Ａ-Ｚａ-ｚ０-９]/g, (match) => {
                 return String.fromCharCode(match.charCodeAt(0) - 0xFEE0);
             });
-            
+
             // Convert full-width space to half-width
             text = text.replace(/　/g, ' ');
-            
+
+            // Remove middle dots (・) for more flexible search
+            text = text.replace(/・/g, '');
+
             return text;
         };
         
