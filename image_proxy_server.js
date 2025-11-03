@@ -27,8 +27,13 @@ app.get('/image', async (req, res) => {
     const cardId = req.query.cid;
     const encToken = req.query.enc;
 
+    // Always set CORS headers
+    res.header('Access-Control-Allow-Origin', '*');
+
     if (!cardId) {
-        return res.status(400).json({ error: 'Card ID is required' });
+        // Return error as plain text, not JSON
+        res.status(400).set('Content-Type', 'text/plain').send('Card ID is required');
+        return;
     }
 
     try {
@@ -40,6 +45,8 @@ app.get('/image', async (req, res) => {
             imageUrl = `https://www.db.yugioh-card.com/yugiohdb/card_image.action?cid=${cardId}&request_locale=ja`;
         }
 
+        console.log(`Fetching image for card ${cardId} from: ${imageUrl}`);
+
         // Fetch image with proper headers
         const response = await fetch(imageUrl, {
             headers: {
@@ -50,23 +57,32 @@ app.get('/image', async (req, res) => {
             }
         });
 
+        console.log(`Response status for card ${cardId}: ${response.status}`);
+
         if (!response.ok) {
-            return res.status(response.status).json({
-                error: `Failed to fetch image: HTTP ${response.status}`
-            });
+            console.error(`Failed to fetch image for card ${cardId}: HTTP ${response.status}`);
+            // Return a placeholder SVG instead of JSON error
+            const placeholderSvg = `<svg xmlns="http://www.w3.org/2000/svg" width="200" height="290"><rect width="200" height="290" fill="#ddd"/><text x="50%" y="50%" text-anchor="middle" dy=".3em" fill="#999" font-size="14">Error ${response.status}</text></svg>`;
+            res.status(200).set('Content-Type', 'image/svg+xml').send(placeholderSvg);
+            return;
         }
 
         // Get image buffer
         const imageBuffer = await response.buffer();
         const contentType = response.headers.get('content-type') || 'image/jpeg';
 
-        // Send image
+        console.log(`Successfully fetched image for card ${cardId}, content-type: ${contentType}`);
+
+        // Send image with CORS headers
         res.set('Content-Type', contentType);
+        res.set('Access-Control-Allow-Origin', '*');
         res.send(imageBuffer);
 
     } catch (error) {
-        console.error('Error fetching image:', error);
-        res.status(500).json({ error: error.message });
+        console.error(`Error fetching image for card ${cardId}:`, error);
+        // Return a placeholder SVG instead of JSON error
+        const placeholderSvg = `<svg xmlns="http://www.w3.org/2000/svg" width="200" height="290"><rect width="200" height="290" fill="#ddd"/><text x="50%" y="50%" text-anchor="middle" dy=".3em" fill="#999" font-size="12">Server Error</text></svg>`;
+        res.status(200).set('Content-Type', 'image/svg+xml').set('Access-Control-Allow-Origin', '*').send(placeholderSvg);
     }
 });
 

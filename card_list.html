@@ -8975,17 +8975,26 @@ Firebase Consoleで確認すべき項目:
                 const loadCardImage = async (cardId, imgElement) => {
                     try {
                         const proxyUrl = `https://ygoh-list.onrender.com/image?cid=${cardId}`;
+                        console.log(`Loading image for card ${cardId}...`);
+
                         const response = await fetch(proxyUrl);
+                        console.log(`Response for card ${cardId}: status=${response.status}, ok=${response.ok}`);
+
                         if (response.ok) {
                             const blob = await response.blob();
+                            console.log(`Blob created for card ${cardId}: type=${blob.type}, size=${blob.size}`);
                             const blobUrl = URL.createObjectURL(blob);
                             imgElement.src = blobUrl;
+                            console.log(`Image loaded successfully for card ${cardId}`);
                         } else {
-                            throw new Error('Failed to load image');
+                            const errorText = await response.text();
+                            console.error(`Failed to load image for card ${cardId}: HTTP ${response.status}, ${errorText}`);
+                            throw new Error(`HTTP ${response.status}: ${errorText}`);
                         }
                     } catch (error) {
-                        console.error(`Failed to load image for card ${cardId}:`, error);
+                        console.error(`Error loading image for card ${cardId}:`, error);
                         imgElement.src = "data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' width='200' height='290'><rect width='200' height='290' fill='%23ddd'/><text x='50%' y='50%' text-anchor='middle' dy='.3em' fill='%23999' font-size='14'>No Image</text></svg>";
+                        throw error; // Re-throw for retry logic
                     }
                 };
 
