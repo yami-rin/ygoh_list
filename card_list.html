@@ -2071,6 +2071,40 @@
                 </div>
 
                 <hr>
+                <!-- VIP Membership Section -->
+                <div class="mb-4">
+                    <div class="d-flex align-items-center gap-2 mb-2">
+                        <h6 class="mb-0 small"><i class="bi bi-star-fill text-warning"></i> VIPメンバーシップ</h6>
+                        <span id="vip-status-badge" class="badge bg-secondary small" style="display: none;">VIP</span>
+                    </div>
+                    <div id="vip-serial-input-section">
+                        <div class="input-group input-group-sm">
+                            <input type="text" class="form-control form-control-sm" id="vip-serial-input"
+                                   placeholder="シリアルナンバー" style="font-size: 0.8rem;">
+                            <button class="btn btn-outline-warning btn-sm" type="button" id="vip-activate-btn">
+                                <i class="bi bi-check-circle"></i> 認証
+                            </button>
+                        </div>
+                        <p class="text-muted mt-1 mb-0" style="font-size: 0.7rem;">
+                            <i class="bi bi-info-circle"></i> VIP専用機能を利用できます
+                        </p>
+                    </div>
+                    <div id="vip-active-section" style="display: none;">
+                        <p class="text-success mb-2" style="font-size: 0.85rem;">
+                            <i class="bi bi-check-circle-fill"></i> VIPメンバーとして認証済み
+                        </p>
+                        <div class="d-flex gap-2">
+                            <button class="btn btn-outline-secondary btn-sm" type="button" id="vip-features-btn">
+                                <i class="bi bi-star"></i> VIP機能を見る
+                            </button>
+                            <button class="btn btn-outline-danger btn-sm" type="button" id="vip-deactivate-btn">
+                                <i class="bi bi-x-circle"></i> 解除
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <hr>
                 <h6>アカウント削除</h6>
                 <p class="text-muted small">この操作は元に戻せません。アカウントに紐づく全てのカードデータが完全に削除されます。</p>
                 <button class="btn btn-danger" id="delete-account-btn">アカウントを削除する</button>
@@ -2304,6 +2338,11 @@
                                 <li><hr class="dropdown-divider"></li>
                                 <li><button class="dropdown-item" id="export-json-btn">JSON形式でエクスポート</button></li>
                                 <li><button class="dropdown-item" id="export-csv-btn">CSV形式でエクスポート</button></li>
+                                <li id="vip-export-option" style="display: none;">
+                                    <button class="dropdown-item text-warning" id="export-premium-csv-btn">
+                                        <i class="bi bi-star-fill"></i> プレミアムエクスポート (VIP)
+                                    </button>
+                                </li>
                                 <li><hr class="dropdown-divider"></li>
                                 <li><button class="dropdown-item" id="link-master-data-btn"><i class="bi bi-link-45deg"></i> マスターデータと連携</button></li>
                             </ul>
@@ -8490,6 +8529,181 @@ Firebase Consoleで確認すべき項目:
                 showLoading(false);
             }
         });
+
+        // ============================================
+        // VIP Membership System
+        // ============================================
+
+        // VIP serial numbers (in production, these should be on server-side)
+        const validSerialNumbers = [
+            'VIP2025-PREMIUM-001',
+            'VIP2025-PREMIUM-002',
+            'VIP2025-PREMIUM-003',
+            'SPECIAL-VIP-2025',
+            'YUGIOH-COLLECTOR-PRO'
+        ];
+
+        let isVipMember = false;
+
+        // Check VIP status on load
+        const checkVipStatus = () => {
+            const vipData = localStorage.getItem('vip_membership');
+            if (vipData) {
+                try {
+                    const parsed = JSON.parse(vipData);
+                    if (parsed.active && parsed.serial) {
+                        isVipMember = true;
+                        updateVipUI(true);
+                    }
+                } catch (e) {
+                    console.error('Error parsing VIP data:', e);
+                }
+            }
+        };
+
+        // Update VIP UI
+        const updateVipUI = (isVip) => {
+            const inputSection = document.getElementById('vip-serial-input-section');
+            const activeSection = document.getElementById('vip-active-section');
+            const statusBadge = document.getElementById('vip-status-badge');
+            const vipExportOption = document.getElementById('vip-export-option');
+
+            if (isVip) {
+                inputSection.style.display = 'none';
+                activeSection.style.display = 'block';
+                statusBadge.style.display = 'inline-block';
+                statusBadge.classList.remove('bg-secondary');
+                statusBadge.classList.add('bg-warning', 'text-dark');
+
+                // Show VIP features
+                if (vipExportOption) vipExportOption.style.display = 'block';
+            } else {
+                inputSection.style.display = 'block';
+                activeSection.style.display = 'none';
+                statusBadge.style.display = 'none';
+
+                // Hide VIP features
+                if (vipExportOption) vipExportOption.style.display = 'none';
+            }
+        };
+
+        // VIP Activation
+        document.getElementById('vip-activate-btn').addEventListener('click', () => {
+            const serialInput = document.getElementById('vip-serial-input');
+            const serial = serialInput.value.trim().toUpperCase();
+
+            if (!serial) {
+                alert('シリアルナンバーを入力してください。');
+                return;
+            }
+
+            // Validate serial number
+            if (validSerialNumbers.includes(serial)) {
+                // Save VIP status
+                const vipData = {
+                    active: true,
+                    serial: serial,
+                    activatedAt: new Date().toISOString()
+                };
+                localStorage.setItem('vip_membership', JSON.stringify(vipData));
+                isVipMember = true;
+                updateVipUI(true);
+                serialInput.value = '';
+
+                // Show success message
+                alert('🌟 VIPメンバーとして認証されました！\n\nVIP専用機能が利用可能になりました。');
+            } else {
+                alert('❌ 無効なシリアルナンバーです。\n\n正しいシリアルナンバーを入力してください。');
+            }
+        });
+
+        // VIP Deactivation
+        document.getElementById('vip-deactivate-btn').addEventListener('click', () => {
+            if (confirm('VIPメンバーシップを解除しますか？\n\n再度利用するには、シリアルナンバーの再入力が必要です。')) {
+                localStorage.removeItem('vip_membership');
+                isVipMember = false;
+                updateVipUI(false);
+                alert('VIPメンバーシップを解除しました。');
+            }
+        });
+
+        // VIP Features Button
+        document.getElementById('vip-features-btn').addEventListener('click', () => {
+            const features = `
+🌟 VIP専用機能一覧
+
+✨ 現在利用可能な機能:
+• 詳細検索の拡張機能（開発中）
+• カスタムテーマ（開発中）
+• データエクスポート機能（開発中）
+• 優先サポート
+
+📊 今後追加予定の機能:
+• プレミアム統計分析
+• カード価格連携
+• バックアップ機能
+• 広告非表示
+
+VIP機能は順次追加されます。
+お楽しみに！
+            `.trim();
+
+            alert(features);
+        });
+
+        // VIP Premium Export Function
+        document.getElementById('export-premium-csv-btn').addEventListener('click', () => {
+            if (!isVipMember) {
+                alert('この機能はVIPメンバー専用です。');
+                return;
+            }
+
+            const collection = getCurrentCollection();
+            if (collection.length === 0) {
+                alert('エクスポートするカードがありません。');
+                return;
+            }
+
+            // Premium CSV with extended data
+            let csvContent = '\uFEFF'; // BOM for UTF-8
+            csvContent += 'カード名,型番,レアリティ,枚数,タグ,レベル,属性,種族,カードタイプ,攻撃力,守備力,登録日,最終更新日\n';
+
+            collection.forEach(card => {
+                const d = card.data;
+                const details = d.linkedDetails || cardDetailsMap.get(d['名前'] || '');
+
+                const row = [
+                    d['名前'] || '',
+                    d['型番'] || '',
+                    d['レアリティ'] || '',
+                    d['枚数'] || 0,
+                    (d.tags || []).join('|'),
+                    details?.level || '',
+                    details?.attribute || '',
+                    details?.race || '',
+                    details?.cardType || '',
+                    details?.attack || '',
+                    details?.defense || '',
+                    d['登録日'] || '',
+                    d['最終更新日'] || ''
+                ].map(val => `"${String(val).replace(/"/g, '""')}"`);
+
+                csvContent += row.join(',') + '\n';
+            });
+
+            const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+            const link = document.createElement('a');
+            const url = URL.createObjectURL(blob);
+            link.setAttribute('href', url);
+            link.setAttribute('download', `premium_card_collection_${new Date().toISOString().split('T')[0]}.csv`);
+            link.style.visibility = 'hidden';
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+        });
+
+        // Initialize VIP status on page load
+        checkVipStatus();
 
         document.getElementById('delete-account-btn').addEventListener('click', async () => {
             if (!currentUser) return;
