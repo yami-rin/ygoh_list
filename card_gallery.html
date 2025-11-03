@@ -243,6 +243,156 @@
         .filter-section .form-select {
             font-size: 0.9rem;
         }
+
+        /* Side panel styles */
+        .edit-panel-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            z-index: 1050;
+            display: none;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+
+        .edit-panel-overlay.show {
+            display: block;
+            opacity: 1;
+        }
+
+        .edit-panel {
+            position: fixed;
+            top: 0;
+            right: -100%;
+            width: 90%;
+            max-width: 900px;
+            height: 100vh;
+            background: white;
+            z-index: 1051;
+            transition: right 0.3s ease;
+            overflow-y: auto;
+            box-shadow: -4px 0 10px rgba(0, 0, 0, 0.3);
+        }
+
+        .edit-panel.show {
+            right: 0;
+        }
+
+        .edit-panel-content {
+            display: flex;
+            height: 100%;
+            flex-direction: row;
+        }
+
+        .edit-panel-left {
+            flex: 1;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 2rem;
+            position: relative;
+        }
+
+        .edit-panel-left img {
+            max-width: 100%;
+            max-height: 80vh;
+            object-fit: contain;
+            border-radius: 8px;
+            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.3);
+        }
+
+        .edit-panel-right {
+            flex: 1;
+            padding: 2rem;
+            overflow-y: auto;
+            background: white;
+        }
+
+        .edit-panel-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 2rem;
+            padding-bottom: 1rem;
+            border-bottom: 2px solid #e9ecef;
+        }
+
+        .edit-panel-header h3 {
+            margin: 0;
+            color: #2c3e50;
+        }
+
+        .edit-panel-close {
+            background: none;
+            border: none;
+            font-size: 2rem;
+            cursor: pointer;
+            color: #6c757d;
+            padding: 0;
+            width: 40px;
+            height: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 50%;
+            transition: all 0.2s;
+        }
+
+        .edit-panel-close:hover {
+            background: #f8f9fa;
+            color: #000;
+        }
+
+        .edit-panel-form .form-label {
+            font-weight: 600;
+            color: #495057;
+            margin-bottom: 0.5rem;
+        }
+
+        .edit-panel-form .form-control,
+        .edit-panel-form .form-control-plaintext {
+            margin-bottom: 1.5rem;
+        }
+
+        .edit-panel-actions {
+            display: flex;
+            gap: 1rem;
+            margin-top: 2rem;
+            padding-top: 2rem;
+            border-top: 2px solid #e9ecef;
+        }
+
+        .edit-panel-actions button {
+            flex: 1;
+        }
+
+        @media (max-width: 768px) {
+            .edit-panel {
+                width: 100%;
+                max-width: 100%;
+            }
+
+            .edit-panel-content {
+                flex-direction: column;
+            }
+
+            .edit-panel-left {
+                min-height: 300px;
+                max-height: 40vh;
+            }
+
+            .edit-panel-left img {
+                max-height: 35vh;
+            }
+
+            .edit-panel-right {
+                flex: none;
+            }
+        }
     </style>
 </head>
 <body>
@@ -386,41 +536,62 @@
         <div class="pagination-controls" id="pagination-bottom"></div>
     </div>
 
-    <!-- Card Edit Modal -->
-    <div class="modal fade" id="cardEditModal" tabindex="-1">
-        <div class="modal-dialog modal-dialog-centered">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h5 class="modal-title" id="modalCardName">カード編集</h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-                </div>
-                <div class="modal-body">
-                    <div class="mb-3">
-                        <label for="modalQuantity" class="form-label">枚数</label>
-                        <input type="number" class="form-control" id="modalQuantity" min="0">
-                    </div>
-                    <div class="mb-3">
-                        <label for="modalTags" class="form-label">タグ（カンマ区切り）</label>
-                        <input type="text" class="form-control" id="modalTags" placeholder="デッキ1, お気に入り">
-                    </div>
-                    <div class="mb-3">
-                        <label class="form-label">型番</label>
-                        <p class="form-control-plaintext" id="modalCode"></p>
-                    </div>
-                    <div class="mb-3">
-                        <label class="form-label">レアリティ</label>
-                        <p class="form-control-plaintext" id="modalRarity"></p>
-                    </div>
-                </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-danger" id="deleteCardBtn">
-                        <i class="bi bi-trash"></i> 削除
-                    </button>
-                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">キャンセル</button>
-                    <button type="button" class="btn btn-primary" id="saveCardBtn">
-                        <i class="bi bi-save"></i> 保存
+    <!-- Card Edit Side Panel -->
+    <div class="edit-panel-overlay" id="editPanelOverlay"></div>
+    <div class="edit-panel" id="editPanel">
+        <div class="edit-panel-content">
+            <!-- Left side: Card Image -->
+            <div class="edit-panel-left">
+                <img id="panelCardImage" src="" alt="Card Image">
+            </div>
+
+            <!-- Right side: Edit Form -->
+            <div class="edit-panel-right">
+                <div class="edit-panel-header">
+                    <h3 id="panelCardName">カード編集</h3>
+                    <button class="edit-panel-close" id="closePanelBtn">
+                        <i class="bi bi-x"></i>
                     </button>
                 </div>
+
+                <form class="edit-panel-form">
+                    <div class="mb-3">
+                        <label for="panelQuantity" class="form-label">
+                            <i class="bi bi-stack"></i> 枚数
+                        </label>
+                        <input type="number" class="form-control" id="panelQuantity" min="0">
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="panelTags" class="form-label">
+                            <i class="bi bi-tags"></i> タグ（カンマ区切り）
+                        </label>
+                        <input type="text" class="form-control" id="panelTags" placeholder="デッキ1, お気に入り">
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label">
+                            <i class="bi bi-upc"></i> 型番
+                        </label>
+                        <p class="form-control-plaintext" id="panelCode">-</p>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label">
+                            <i class="bi bi-gem"></i> レアリティ
+                        </label>
+                        <p class="form-control-plaintext" id="panelRarity">-</p>
+                    </div>
+
+                    <div class="edit-panel-actions">
+                        <button type="button" class="btn btn-danger" id="deletePanelCardBtn">
+                            <i class="bi bi-trash"></i> 削除
+                        </button>
+                        <button type="button" class="btn btn-primary" id="savePanelCardBtn">
+                            <i class="bi bi-save"></i> 保存
+                        </button>
+                    </div>
+                </form>
             </div>
         </div>
     </div>
@@ -808,23 +979,39 @@
             window.scrollTo({ top: 0, behavior: 'smooth' });
         };
 
-        window.openCardEditModal = (cardId) => {
+        window.openCardEditModal = async (cardId) => {
             // Find the card in current list
             const card = allCards.find(c => c.id === cardId);
             if (!card) return;
 
             currentEditingCard = card;
 
-            // Populate modal with card data
-            document.getElementById('modalCardName').textContent = card.data['名前'];
-            document.getElementById('modalQuantity').value = card.data['枚数'] || 0;
-            document.getElementById('modalTags').value = (card.data.tags || []).join(', ');
-            document.getElementById('modalCode').textContent = card.data['型番'] || '-';
-            document.getElementById('modalRarity').textContent = card.data['レアリティ'] || '-';
+            // Populate panel with card data
+            document.getElementById('panelCardName').textContent = card.data['名前'];
+            document.getElementById('panelQuantity').value = card.data['枚数'] || 0;
+            document.getElementById('panelTags').value = (card.data.tags || []).join(', ');
+            document.getElementById('panelCode').textContent = card.data['型番'] || '-';
+            document.getElementById('panelRarity').textContent = card.data['レアリティ'] || '-';
 
-            // Open modal
-            const modal = new bootstrap.Modal(document.getElementById('cardEditModal'));
-            modal.show();
+            // Load card image
+            const imageUrl = await getCardImageUrl(card.data['名前']);
+            const panelImage = document.getElementById('panelCardImage');
+            if (imageUrl) {
+                panelImage.src = imageUrl;
+                panelImage.style.display = 'block';
+            } else {
+                panelImage.style.display = 'none';
+            }
+
+            // Show panel
+            document.getElementById('editPanelOverlay').classList.add('show');
+            document.getElementById('editPanel').classList.add('show');
+        };
+
+        // Close panel function
+        const closeEditPanel = () => {
+            document.getElementById('editPanelOverlay').classList.remove('show');
+            document.getElementById('editPanel').classList.remove('show');
         };
 
         // Event listeners
@@ -882,12 +1069,16 @@
             switchListType('wishlist');
         });
 
-        // Modal save button
-        document.getElementById('saveCardBtn').addEventListener('click', async () => {
+        // Close panel button
+        document.getElementById('closePanelBtn').addEventListener('click', closeEditPanel);
+        document.getElementById('editPanelOverlay').addEventListener('click', closeEditPanel);
+
+        // Panel save button
+        document.getElementById('savePanelCardBtn').addEventListener('click', async () => {
             if (!currentEditingCard || !currentUser) return;
 
-            const newQuantity = parseInt(document.getElementById('modalQuantity').value) || 0;
-            const tagsInput = document.getElementById('modalTags').value;
+            const newQuantity = parseInt(document.getElementById('panelQuantity').value) || 0;
+            const tagsInput = document.getElementById('panelTags').value;
             const newTags = tagsInput ? tagsInput.split(',').map(t => t.trim()).filter(t => t) : [];
 
             try {
@@ -904,9 +1095,8 @@
                 currentEditingCard.data['枚数'] = newQuantity;
                 currentEditingCard.data.tags = newTags;
 
-                // Close modal
-                const modal = bootstrap.Modal.getInstance(document.getElementById('cardEditModal'));
-                modal.hide();
+                // Close panel
+                closeEditPanel();
 
                 // Refresh display
                 applyFilters();
@@ -919,8 +1109,8 @@
             }
         });
 
-        // Modal delete button
-        document.getElementById('deleteCardBtn').addEventListener('click', async () => {
+        // Panel delete button
+        document.getElementById('deletePanelCardBtn').addEventListener('click', async () => {
             if (!currentEditingCard || !currentUser) return;
 
             if (!confirm(`「${currentEditingCard.data['名前']}」を削除してもよろしいですか？`)) {
@@ -942,9 +1132,8 @@
                 }
                 allCards = currentListType === 'collection' ? collectionCards : wishlistCards;
 
-                // Close modal
-                const modal = bootstrap.Modal.getInstance(document.getElementById('cardEditModal'));
-                modal.hide();
+                // Close panel
+                closeEditPanel();
 
                 // Refresh display
                 applyFilters();
