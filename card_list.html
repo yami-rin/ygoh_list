@@ -5573,101 +5573,104 @@
                     // Check if any advanced search criteria is specified
                     const hasAdvancedCriteria = sLevel || sAttribute || sRaces.length > 0 || sCardTypes.length > 0 || sAttack || sDefense;
 
-                    if (searchMode === 'or' && hasAdvancedCriteria) {
-                        // OR検索：いずれかの条件を満たせばOK
-                        let orMatch = false;
+                    // Only apply advanced filtering if criteria is specified
+                    if (hasAdvancedCriteria) {
+                        if (searchMode === 'or') {
+                            // OR検索：いずれかの条件を満たせばOK
+                            let orMatch = false;
 
-                        // Check level
-                        if (sLevel && checkRange(details.level, sLevel)) {
-                            orMatch = true;
-                        }
+                            // Check level
+                            if (sLevel && checkRange(details.level, sLevel)) {
+                                orMatch = true;
+                            }
 
-                        // Check attribute
-                        if (sAttribute && details.attribute === sAttribute) {
-                            orMatch = true;
-                        }
+                            // Check attribute
+                            if (sAttribute && details.attribute === sAttribute) {
+                                orMatch = true;
+                            }
 
-                        // Check races (multiple selection)
-                        if (sRaces.length > 0) {
-                            const hasMatchingRace = sRaces.some(race => {
-                                if (!race) return false;
-                                return details.race === race;
-                            });
-                            if (hasMatchingRace) orMatch = true;
-                        }
+                            // Check races (multiple selection)
+                            if (sRaces.length > 0) {
+                                const hasMatchingRace = sRaces.some(race => {
+                                    if (!race) return false;
+                                    return details.race === race;
+                                });
+                                if (hasMatchingRace) orMatch = true;
+                            }
 
-                        // Check card types
-                        if (sCardTypes.length > 0) {
-                            const hasMatchingType = sCardTypes.some(type => {
-                                // For spell/trap cards, check race field (CSVでは魔法・罠は種族列に格納)
-                                if (type === '魔法') {
-                                    return details.race === '魔法' || details.cardType === '魔法';
-                                } else if (type === '罠') {
-                                    return details.race === '罠' || details.cardType === '罠';
-                                } else {
-                                    return details.cardType && details.cardType.includes(type);
-                                }
-                            });
-                            if (hasMatchingType) orMatch = true;
-                        }
+                            // Check card types
+                            if (sCardTypes.length > 0) {
+                                const hasMatchingType = sCardTypes.some(type => {
+                                    // For spell/trap cards, check race field (CSVでは魔法・罠は種族列に格納)
+                                    if (type === '魔法') {
+                                        return details.race === '魔法' || details.cardType === '魔法';
+                                    } else if (type === '罠') {
+                                        return details.race === '罠' || details.cardType === '罠';
+                                    } else {
+                                        return details.cardType && details.cardType.includes(type);
+                                    }
+                                });
+                                if (hasMatchingType) orMatch = true;
+                            }
 
-                        // Check attack
-                        if (sAttack && checkRange(details.attack, sAttack)) {
-                            orMatch = true;
-                        }
+                            // Check attack
+                            if (sAttack && checkRange(details.attack, sAttack)) {
+                                orMatch = true;
+                            }
 
-                        // Check defense
-                        if (sDefense && checkRange(details.defense, sDefense)) {
-                            orMatch = true;
-                        }
+                            // Check defense
+                            if (sDefense && checkRange(details.defense, sDefense)) {
+                                orMatch = true;
+                            }
 
-                        advancedMatch = orMatch;
-                    } else {
-                        // AND検索：すべての条件を満たす必要がある（デフォルト）
+                            advancedMatch = orMatch;
+                        } else {
+                            // AND検索：すべての条件を満たす必要がある（デフォルト）
 
-                        // Check level
-                        if (sLevel) {
-                            advancedMatch = advancedMatch && checkRange(details.level, sLevel);
-                        }
+                            // Check level
+                            if (sLevel) {
+                                advancedMatch = advancedMatch && checkRange(details.level, sLevel);
+                            }
 
-                        // Check attribute
-                        if (sAttribute) {
-                            advancedMatch = advancedMatch && details.attribute === sAttribute;
-                        }
+                            // Check attribute
+                            if (sAttribute) {
+                                advancedMatch = advancedMatch && details.attribute === sAttribute;
+                            }
 
-                        // Check races (multiple selection)
-                        if (sRaces.length > 0) {
-                            // 完全一致で比較
-                            const hasMatchingRace = sRaces.some(race => {
-                                if (!race) return false;
-                                return details.race === race;
-                            });
-                            advancedMatch = advancedMatch && hasMatchingRace;
-                        }
+                            // Check races (multiple selection)
+                            if (sRaces.length > 0) {
+                                // 完全一致で比較
+                                const hasMatchingRace = sRaces.some(race => {
+                                    if (!race) return false;
+                                    return details.race === race;
+                                });
+                                advancedMatch = advancedMatch && hasMatchingRace;
+                            }
 
-                        // Check card types (OR selection only - more intuitive)
-                        if (sCardTypes.length > 0) {
-                            const hasMatchingType = sCardTypes.some(type => {
-                                // For spell/trap cards, check race field (CSVでは魔法・罠は種族列に格納)
-                                if (type === '魔法') {
-                                    return details.race === '魔法' || details.cardType === '魔法';
-                                } else if (type === '罠') {
-                                    return details.race === '罠' || details.cardType === '罠';
-                                } else {
-                                    return details.cardType && details.cardType.includes(type);
-                                }
-                            });
-                            advancedMatch = advancedMatch && hasMatchingType;
-                        }
+                            // Check card types (OR selection only - more intuitive)
+                            if (sCardTypes.length > 0) {
+                                const hasMatchingType = sCardTypes.some(type => {
+                                    // For spell/trap cards, check race field (CSVでは魔法・罠は種族列に格納)
+                                    if (type === '魔法') {
+                                        return details.race === '魔法' || details.cardType === '魔法';
+                                    } else if (type === '罠') {
+                                        return details.race === '罠' || details.cardType === '罠';
+                                    } else {
+                                        return details.cardType && details.cardType.includes(type);
+                                    }
+                                });
+                                advancedMatch = advancedMatch && hasMatchingType;
+                            }
 
-                        // Check attack
-                        if (sAttack) {
-                            advancedMatch = advancedMatch && checkRange(details.attack, sAttack);
-                        }
+                            // Check attack
+                            if (sAttack) {
+                                advancedMatch = advancedMatch && checkRange(details.attack, sAttack);
+                            }
 
-                        // Check defense
-                        if (sDefense) {
-                            advancedMatch = advancedMatch && checkRange(details.defense, sDefense);
+                            // Check defense
+                            if (sDefense) {
+                                advancedMatch = advancedMatch && checkRange(details.defense, sDefense);
+                            }
                         }
                     }
 
