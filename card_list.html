@@ -3519,6 +3519,13 @@
         const updateSearchHistoryButton = () => updateHistoryButton('prev-search-btn', 'showSearchHistory', lastSearchKeyword, '前回の検索');
         const updateRegistrationHistoryButton = () => updateHistoryButton('prev-registration-btn', 'showRegistrationHistory', lastRegistrationData, '前回の登録');
         
+        const decodeHtmlEntities = (str) => {
+            if (str == null) return '';
+            const textarea = document.createElement('textarea');
+            textarea.innerHTML = str;
+            return textarea.value;
+        };
+
         const escapeHtml = (str) => str == null ? '' : String(str).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#039;');
         
         const getCurrentCollection = () => currentListType === 'collection' ? cardCollection : wishlistCollection;
@@ -3558,6 +3565,7 @@
                     const tr = document.createElement('tr');
                     const tags = (card.data.tags || []).map(tag => escapeHtml(tag)).join(', ');
                     const isChecked = selectedCardIds.has(card.id) ? 'checked' : '';
+                    const decodedName = decodeHtmlEntities(card.data['名前']);
 
                     if (isMobile) {
                         // Simplified mobile view without tags column
@@ -3565,7 +3573,7 @@
                             <td>
                                 <input type="checkbox" class="form-check-input card-checkbox" data-id="${escapeHtml(card.id)}" ${isChecked}>
                             </td>
-                            <td>${escapeHtml(card.data['名前'])}</td>
+                            <td>${escapeHtml(decodedName)}</td>
                             <td>${escapeHtml(card.data['型番'])}</td>
                             <td>${escapeHtml(card.data['レアリティ'])}</td>
                             <td>${escapeHtml(card.data['枚数'])}</td>
@@ -3579,7 +3587,7 @@
                             <td>
                                 <input type="checkbox" class="form-check-input card-checkbox" data-id="${escapeHtml(card.id)}" ${isChecked}>
                             </td>
-                            <td>${escapeHtml(card.data['名前'])}</td>
+                            <td>${escapeHtml(decodedName)}</td>
                             <td>${escapeHtml(card.data['型番'])}</td>
                             <td>${escapeHtml(card.data['レアリティ'])}</td>
                             <td>${escapeHtml(card.data['枚数'])}</td>
@@ -3588,7 +3596,7 @@
                                 <button class="btn btn-sm btn-link edit-tags-btn" data-id="${escapeHtml(card.id)}" style="padding: 0 0.25rem; display: none;" title="タグを編集"><i class="bi bi-pencil-square"></i></button>
                             </td>
                             <td>
-                                <button class="btn btn-info btn-sm view-detail-btn" data-name="${escapeHtml(card.data['名前'])}" title="詳細表示"><i class="bi bi-eye"></i></button>
+                                <button class="btn btn-info btn-sm view-detail-btn" data-name="${escapeHtml(decodedName)}" title="詳細表示"><i class="bi bi-eye"></i></button>
                                 <button class="btn btn-primary btn-sm edit-btn" data-id="${escapeHtml(card.id)}"><i class="bi bi-pencil"></i></button>
                                 ${currentListType === 'wishlist' ? `<button class="btn btn-success btn-sm move-to-collection-btn" data-id="${escapeHtml(card.id)}" title="所持カードへ移動"><i class="bi bi-check-circle"></i></button>` : ''}
                                 <button class="btn btn-danger btn-sm delete-btn" data-id="${escapeHtml(card.id)}"><i class="bi bi-trash"></i></button>

@@ -1676,6 +1676,7 @@
                         }
                     }
 
+                    const decodedName = decodeHtmlEntities(card.data['名前']);
                     const onclickAttr = isUnowned ? '' : `onclick="openCardEditModal('${card.id}')"`;
                     const draggableAttr = isUnowned ? '' : `draggable="true" ondragstart="handleDragStart(event, ${index})" class="draggable"`;
 
@@ -1687,7 +1688,7 @@
                                 <i class="bi bi-card-image card-image-placeholder"></i>
                             </div>
                             <div class="card-info">
-                                <div class="card-name">${escapeHtml(card.data['名前'])}</div>
+                                <div class="card-name">${escapeHtml(decodedName)}</div>
                                 <div class="card-code">${escapeHtml(card.data['型番'])}</div>
                                 <div class="card-rarity">
                                     <span class="badge bg-info">${escapeHtml(card.data['レアリティ'])}</span>
@@ -1801,6 +1802,13 @@
         };
 
         // Utility functions
+        const decodeHtmlEntities = (str) => {
+            if (str == null) return '';
+            const textarea = document.createElement('textarea');
+            textarea.innerHTML = str;
+            return textarea.value;
+        };
+
         const escapeHtml = (str) => {
             if (str == null) return '';
             return String(str)
@@ -1829,7 +1837,8 @@
             currentEditingCard = card;
 
             // Populate panel with card data
-            document.getElementById('panelCardName').textContent = card.data['名前'];
+            const decodedName = decodeHtmlEntities(card.data['名前']);
+            document.getElementById('panelCardName').textContent = decodedName;
             document.getElementById('panelQuantity').value = card.data['枚数'] || 0;
             document.getElementById('panelTags').value = (card.data.tags || []).join(', ');
             document.getElementById('panelCode').textContent = card.data['型番'] || '-';
