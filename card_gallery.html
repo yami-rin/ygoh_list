@@ -1881,14 +1881,14 @@
         };
 
         // Open deck builder panel
-        const openDeckBuilder = (deck = null) => {
+        const openDeckBuilder = async (deck = null) => {
             currentDeck = deck || { mainDeck: [], extraDeck: [], sideDeck: [] };
 
             document.getElementById('deckName').value = currentDeck.name || '';
             document.getElementById('deckMemo').value = currentDeck.memo || '';
             document.getElementById('deckBuilderTitle').textContent = deck ? 'デッキ編集' : '新規デッキ';
 
-            renderDeckCards();
+            await renderDeckCards();
 
             document.getElementById('deckBuilderPanel').classList.add('active');
             document.querySelector('.card-grid').classList.add('deck-builder-open');
@@ -1985,11 +1985,11 @@
         };
 
         // Render cards in deck builder
-        const renderDeckCards = () => {
+        const renderDeckCards = async () => {
             if (!currentDeck) return;
 
             // Helper function to render a deck section
-            const renderDeckSection = (deckType, cards, containerId, countId) => {
+            const renderDeckSection = async (deckType, cards, containerId, countId) => {
                 const container = document.getElementById(containerId);
                 const placeholder = document.querySelector(`#${containerId.replace('CardsList', 'DropZone')} .deck-drop-placeholder`);
                 const count = cards.reduce((sum, c) => sum + c.quantity, 0);
@@ -2004,15 +2004,14 @@
 
                 if (placeholder) placeholder.style.display = 'none';
 
+                // First render placeholder cards
                 container.innerHTML = cards.map((deckCard, index) => {
-                    const imageUrl = `https://ygoh-list.onrender.com/api/card-image/${encodeURIComponent(deckCard.name || '')}`;
                     return `
-                    <div class="deck-card-item">
+                    <div class="deck-card-item" data-card-index="${index}">
                         <div class="deck-card-image-wrapper">
                             <div class="deck-card-image-container">
-                                <img src="${imageUrl}" alt="${escapeHtml(deckCard.name)}"
-                                     onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
-                                <div class="deck-card-image-placeholder" style="display:none;">
+                                <img data-card-name="${escapeHtml(deckCard.name)}" alt="${escapeHtml(deckCard.name)}" style="display:none;">
+                                <div class="deck-card-image-placeholder">
                                     <i class="bi bi-card-image"></i>
                                 </div>
                                 <div class="deck-card-rarity">${escapeHtml(deckCard.rarity || '')}</div>
@@ -2031,16 +2030,37 @@
                     </div>
                 `;
                 }).join('');
+
+                // Then load images asynchronously
+                for (let i = 0; i < cards.length; i++) {
+                    const card = cards[i];
+                    const cardItem = container.querySelector(`[data-card-index="${i}"]`);
+                    if (!cardItem) continue;
+
+                    const img = cardItem.querySelector('img');
+                    const placeholder = cardItem.querySelector('.deck-card-image-placeholder');
+
+                    try {
+                        const imageUrl = await getCardImageUrl(card.name);
+                        if (imageUrl) {
+                            img.src = imageUrl;
+                            img.style.display = 'block';
+                            placeholder.style.display = 'none';
+                        }
+                    } catch (error) {
+                        console.error(`Failed to load image for ${card.name}:`, error);
+                    }
+                }
             };
 
             // Render each section
-            renderDeckSection('main', currentDeck.mainDeck || [], 'mainDeckCardsList', 'mainDeckCount');
-            renderDeckSection('extra', currentDeck.extraDeck || [], 'extraDeckCardsList', 'extraDeckCount');
-            renderDeckSection('side', currentDeck.sideDeck || [], 'sideDeckCardsList', 'sideDeckCount');
+            await renderDeckSection('main', currentDeck.mainDeck || [], 'mainDeckCardsList', 'mainDeckCount');
+            await renderDeckSection('extra', currentDeck.extraDeck || [], 'extraDeckCardsList', 'extraDeckCount');
+            await renderDeckSection('side', currentDeck.sideDeck || [], 'sideDeckCardsList', 'sideDeckCount');
         };
 
         // Add card to deck
-        const addCardToDeck = (cardData, deckType) => {
+        const addCardToDeck = async (cardData, deckType) => {
             if (!currentDeck) {
                 alert('デッキを開いてください');
                 return;
@@ -2080,20 +2100,20 @@
                 });
             }
 
-            renderDeckCards();
+            await renderDeckCards();
         };
 
         // Remove card from deck
-        window.removeCardFromDeck = (deckType, index) => {
+        window.removeCardFromDeck = async (deckType, index) => {
             if (!currentDeck) return;
             const deckKey = deckType === 'main' ? 'mainDeck' :
                           deckType === 'extra' ? 'extraDeck' : 'sideDeck';
             currentDeck[deckKey].splice(index, 1);
-            renderDeckCards();
+            await renderDeckCards();
         };
 
         // Change card quantity in deck
-        window.changeDeckCardQuantity = (deckType, index, delta) => {
+        window.changeDeckCardQuantity = async (deckType, index, delta) => {
             if (!currentDeck) return;
             const deckKey = deckType === 'main' ? 'mainDeck' :
                           deckType === 'extra' ? 'extraDeck' : 'sideDeck';
@@ -2101,11 +2121,11 @@
             if (currentDeck[deckKey][index].quantity < 1) {
                 currentDeck[deckKey].splice(index, 1);
             }
-            renderDeckCards();
+            await renderDeckCards();
         };
 
         // Set card quantity in deck
-        window.setDeckCardQuantity = (deckType, index, value) => {
+        window.setDeckCardQuantity = async (deckType, index, value) => {
             if (!currentDeck) return;
             const deckKey = deckType === 'main' ? 'mainDeck' :
                           deckType === 'extra' ? 'extraDeck' : 'sideDeck';
@@ -2115,11 +2135,11 @@
             } else {
                 currentDeck[deckKey][index].quantity = Math.min(99, qty);
             }
-            renderDeckCards();
+            await renderDeckCards();
         };
 
         // Clear deck section
-        window.clearDeckSection = (deckType) => {
+        window.clearDeckSection = async (deckType) => {
             if (!currentDeck) return;
             const deckName = deckType === 'main' ? 'メインデッキ' :
                            deckType === 'extra' ? 'エクストラデッキ' : 'サイドデッキ';
@@ -2128,7 +2148,7 @@
             const deckKey = deckType === 'main' ? 'mainDeck' :
                           deckType === 'extra' ? 'extraDeck' : 'sideDeck';
             currentDeck[deckKey] = [];
-            renderDeckCards();
+            await renderDeckCards();
         };
 
         // Setup drag and drop
