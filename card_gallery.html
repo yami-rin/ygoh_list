@@ -417,6 +417,78 @@
             display: block;
         }
 
+        /* Deck List Panel Styles */
+        .deck-list-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.5);
+            z-index: 1060;
+            display: none;
+        }
+
+        .deck-list-overlay.active {
+            display: block;
+        }
+
+        .deck-list-panel {
+            position: fixed;
+            top: 0;
+            right: -500px;
+            width: 500px;
+            height: 100%;
+            background: white;
+            box-shadow: -4px 0 10px rgba(0,0,0,0.2);
+            z-index: 1070;
+            transition: right 0.3s ease;
+            overflow-y: auto;
+        }
+
+        .deck-list-panel.active {
+            right: 0;
+        }
+
+        .deck-list-header {
+            padding: 1.5rem;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            position: sticky;
+            top: 0;
+            z-index: 10;
+        }
+
+        .deck-list-header h4 {
+            margin: 0;
+        }
+
+        .deck-list-close {
+            background: none;
+            border: none;
+            color: white;
+            font-size: 1.5rem;
+            cursor: pointer;
+            width: 30px;
+            height: 30px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 50%;
+            transition: background 0.2s;
+        }
+
+        .deck-list-close:hover {
+            background: rgba(255,255,255,0.2);
+        }
+
+        .deck-list-content {
+            padding: 1.5rem;
+        }
+
         .deck-builder-panel {
             position: fixed;
             top: 0;
@@ -606,6 +678,15 @@
         }
 
         @media (max-width: 768px) {
+            .deck-list-panel {
+                width: 100%;
+                right: -100%;
+            }
+
+            .deck-list-panel.active {
+                right: 0;
+            }
+
             .deck-builder-panel {
                 width: 100%;
                 left: -100%;
@@ -849,28 +930,24 @@
         </div>
     </div>
 
-    <!-- Deck List Modal -->
-    <div class="modal fade" id="deck-list-modal" tabindex="-1" data-bs-backdrop="static" data-bs-keyboard="false">
-        <div class="modal-dialog modal-lg modal-dialog-centered modal-dialog-scrollable">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h5 class="modal-title"><i class="bi bi-stack"></i> デッキ管理</h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-                </div>
-                <div class="modal-body">
-                    <div class="d-flex justify-content-between align-items-center mb-3">
-                        <h6 class="mb-0">デッキ一覧</h6>
-                        <button class="btn btn-primary btn-sm" id="create-new-deck-btn">
-                            <i class="bi bi-plus-circle"></i> 新規デッキ作成
-                        </button>
-                    </div>
-                    <div id="deck-list-container">
-                        <!-- Deck list will be rendered here -->
-                    </div>
-                </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">閉じる</button>
-                </div>
+    <!-- Deck List Side Panel -->
+    <div class="deck-list-overlay" id="deckListOverlay"></div>
+    <div class="deck-list-panel" id="deckListPanel">
+        <div class="deck-list-header">
+            <h4><i class="bi bi-stack"></i> デッキ管理</h4>
+            <button class="deck-list-close" id="closeDeckListBtn">
+                <i class="bi bi-x"></i>
+            </button>
+        </div>
+        <div class="deck-list-content">
+            <div class="d-flex justify-content-between align-items-center mb-3">
+                <h6 class="mb-0">デッキ一覧</h6>
+                <button class="btn btn-primary btn-sm" id="create-new-deck-btn">
+                    <i class="bi bi-plus-circle"></i> 新規デッキ作成
+                </button>
+            </div>
+            <div id="deck-list-container">
+                <!-- Deck list will be rendered here -->
             </div>
         </div>
     </div>
@@ -1003,7 +1080,8 @@
         // Deck system state
         let decks = []; // All user's decks
         let currentDeck = null; // Currently editing deck
-        let deckListModal = null;
+        const deckListPanel = document.getElementById('deckListPanel');
+        const deckListOverlay = document.getElementById('deckListOverlay');
         let draggedCard = null; // Card being dragged
 
         // Load card reading data
@@ -1762,6 +1840,18 @@
             }
         };
 
+        // Open deck list panel
+        const openDeckList = () => {
+            deckListPanel.classList.add('active');
+            deckListOverlay.classList.add('active');
+        };
+
+        // Close deck list panel
+        const closeDeckList = () => {
+            deckListPanel.classList.remove('active');
+            deckListOverlay.classList.remove('active');
+        };
+
         // Open deck builder panel
         const openDeckBuilder = (deck = null) => {
             currentDeck = deck || { mainDeck: [], extraDeck: [], sideDeck: [] };
@@ -1830,7 +1920,7 @@
         window.editDeck = (deckId) => {
             const deck = decks.find(d => d.id === deckId);
             if (deck) {
-                if (deckListModal) deckListModal.hide();
+                closeDeckList();
                 openDeckBuilder(deck);
             }
         };
@@ -2004,14 +2094,16 @@
         document.getElementById('deck-manager-btn').addEventListener('click', async () => {
             await loadDecks();
             renderDeckList();
-            deckListModal = new bootstrap.Modal(document.getElementById('deck-list-modal'));
-            deckListModal.show();
+            openDeckList();
         });
 
         document.getElementById('create-new-deck-btn').addEventListener('click', () => {
-            if (deckListModal) deckListModal.hide();
+            closeDeckList();
             openDeckBuilder();
         });
+
+        document.getElementById('closeDeckListBtn').addEventListener('click', closeDeckList);
+        document.getElementById('deckListOverlay').addEventListener('click', closeDeckList);
 
         document.getElementById('closeDeckBuilderBtn').addEventListener('click', closeDeckBuilder);
         document.getElementById('deckBuilderOverlay').addEventListener('click', closeDeckBuilder);
