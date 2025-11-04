@@ -9374,12 +9374,15 @@ Firebase Consoleで確認すべき項目:
                             }
                         }
 
+                        const currentTimestamp = new Date().toISOString();
+                        const currentDate = currentTimestamp.split('T')[0];
+
                         if (exactMatch) {
                             // Found exact match - add to existing quantity
                             const existingQuantity = exactMatch.data()['枚数'] || 0;
                             await updateDoc(exactMatch.ref, {
                                 '枚数': existingQuantity + card.quantity,
-                                '最終更新日': new Date().toISOString().split('T')[0]
+                                '最終更新日': currentDate
                             });
                         } else {
                             // No exact match - add as new card (separate stack)
@@ -9389,10 +9392,31 @@ Firebase Consoleで確認すべき項目:
                                 'レアリティ': cardRarity,
                                 '枚数': card.quantity,
                                 'tags': cardTags,
-                                '登録日': new Date().toISOString().split('T')[0],
-                                '最終更新日': new Date().toISOString().split('T')[0]
+                                '登録日': currentDate,
+                                '最終更新日': currentDate,
+                                'createdAt': currentTimestamp
                             });
                         }
+
+                        // Add to recent history for analysis
+                        try {
+                            const recentHistory = JSON.parse(localStorage.getItem('recentCardsHistory') || '[]');
+                            recentHistory.unshift({
+                                name: card.name,
+                                setCode: cardNumber,
+                                rarity: cardRarity,
+                                quantity: card.quantity,
+                                timestamp: currentTimestamp
+                            });
+                            // Keep only last 1000 entries
+                            if (recentHistory.length > 1000) {
+                                recentHistory.splice(1000);
+                            }
+                            localStorage.setItem('recentCardsHistory', JSON.stringify(recentHistory));
+                        } catch (e) {
+                            console.error('Error updating recent history:', e);
+                        }
+
                         successCount++;
                     } catch (error) {
                         console.error(`Failed to register ${card.name}:`, error);
