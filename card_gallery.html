@@ -73,6 +73,37 @@
             border-color: #667eea;
         }
 
+        /* Unowned card styles */
+        .card-item.unowned {
+            opacity: 0.7;
+            border-color: #ccc;
+        }
+
+        .card-item.unowned .card-image-container img {
+            filter: grayscale(100%);
+        }
+
+        .card-item.unowned:hover {
+            opacity: 0.85;
+        }
+
+        .card-item.unowned .card-quantity {
+            color: #6c757d;
+        }
+
+        .unowned-badge {
+            position: absolute;
+            top: 8px;
+            right: 8px;
+            background: rgba(108, 117, 125, 0.9);
+            color: white;
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-size: 0.7rem;
+            font-weight: 600;
+            z-index: 1;
+        }
+
         .card-image-container {
             width: 100%;
             aspect-ratio: 0.686;
@@ -471,6 +502,16 @@
                     </button>
                 </div>
             </div>
+            <div class="row g-2 mt-2">
+                <div class="col-md-12">
+                    <div class="form-check form-switch">
+                        <input class="form-check-input" type="checkbox" id="show-unowned-cards" role="switch">
+                        <label class="form-check-label" for="show-unowned-cards">
+                            <i class="bi bi-eye"></i> 未所持カードを表示（全カードデータから）
+                        </label>
+                    </div>
+                </div>
+            </div>
         </div>
 
         <!-- Controls bar -->
@@ -811,6 +852,7 @@
             const searchTerm = document.getElementById('search-input').value.toLowerCase();
             const rarityFilter = document.getElementById('rarity-filter').value;
             const tagFilter = document.getElementById('tag-filter').value;
+            const showUnowned = document.getElementById('show-unowned-cards').checked;
 
             // Get possible card names from hiragana reading
             let possibleCardNames = [];
@@ -831,6 +873,7 @@
             // Normalize search term for card name matching
             const normalizedSearchTerm = normalizeForSearch(searchTerm);
 
+            // Filter owned cards
             filteredCards = allCards.filter(card => {
                 const cardName = card.data['名前'] || '';
 
@@ -852,6 +895,47 @@
 
                 return matchesSearch && matchesRarity && matchesTag;
             });
+
+            // Add unowned cards if checkbox is checked
+            if (showUnowned) {
+                // Get owned card names
+                const ownedCardNames = new Set(allCards.map(card => card.data['名前']));
+
+                // Create unowned cards from cardDetailsMap
+                const unownedCards = [];
+                for (const [cardName, details] of cardDetailsMap) {
+                    if (!ownedCardNames.has(cardName)) {
+                        // Apply filters to unowned cards too
+                        let matchesSearch = !searchTerm;
+                        if (searchTerm) {
+                            if (normalizeForSearch(cardName).includes(normalizedSearchTerm)) {
+                                matchesSearch = true;
+                            } else if (possibleCardNames.includes(cardName)) {
+                                matchesSearch = true;
+                            }
+                        }
+
+                        // Note: unowned cards don't have rarity or tags, so skip those filters
+                        if (matchesSearch && !rarityFilter && !tagFilter) {
+                            unownedCards.push({
+                                id: 'unowned-' + details.cardId,
+                                data: {
+                                    '名前': cardName,
+                                    '型番': details.cardId || '',
+                                    'レアリティ': '-',
+                                    '枚数': 0,
+                                    'tags': [],
+                                    'unowned': true
+                                },
+                                unowned: true
+                            });
+                        }
+                    }
+                }
+
+                // Add unowned cards to filtered results
+                filteredCards = [...filteredCards, ...unownedCards];
+            }
 
             sortCards();
             currentPage = 1;
@@ -925,10 +1009,17 @@
                         `<span class="badge bg-secondary">${escapeHtml(tag)}</span>`
                     ).join(' ');
 
+                    const isUnowned = card.unowned || card.data.unowned;
+                    const unownedClass = isUnowned ? ' unowned' : '';
+                    const unownedBadge = isUnowned ? '<span class="unowned-badge">未所持</span>' : '';
+                    const stockBadge = isUnowned ? '' : `<span class="stock-badge">在庫 ${escapeHtml(card.data['枚数'])}枚</span>`;
+                    const onclickAttr = isUnowned ? '' : `onclick="openCardEditModal('${card.id}')"`;
+
                     return `
-                        <div class="card-item" onclick="openCardEditModal('${card.id}')">
+                        <div class="card-item${unownedClass}" ${onclickAttr}>
                             <div class="card-image-container" id="card-img-container-${index}" data-rendering-id="${thisRenderingId}">
-                                <span class="stock-badge">在庫 ${escapeHtml(card.data['枚数'])}枚</span>
+                                ${stockBadge}
+                                ${unownedBadge}
                                 <i class="bi bi-card-image card-image-placeholder"></i>
                             </div>
                             <div class="card-info">
@@ -1136,6 +1227,11 @@
             document.getElementById('search-input').value = '';
             document.getElementById('rarity-filter').value = '';
             document.getElementById('tag-filter').value = '';
+            applyFilters();
+            renderCards();
+        });
+
+        document.getElementById('show-unowned-cards').addEventListener('change', () => {
             applyFilters();
             renderCards();
         });
