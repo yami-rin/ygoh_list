@@ -733,6 +733,21 @@
                 margin-left: 0;
             }
         }
+
+        /* Advanced filter button styles */
+        .level-btn.active,
+        .race-btn.active {
+            background-color: #0d6efd !important;
+            color: white !important;
+            border-color: #0d6efd !important;
+        }
+
+        .level-btn:hover,
+        .race-btn:hover {
+            background-color: #0d6efd;
+            color: white;
+            border-color: #0d6efd;
+        }
     </style>
 </head>
 <body>
@@ -795,20 +810,132 @@
                 <div class="col-md-4">
                     <input type="text" class="form-control" id="search-input" placeholder="カード名で検索...">
                 </div>
-                <div class="col-md-3">
+                <div class="col-md-2">
                     <select class="form-select" id="rarity-filter">
                         <option value="">すべてのレアリティ</option>
                     </select>
                 </div>
-                <div class="col-md-3">
+                <div class="col-md-2">
                     <select class="form-select" id="tag-filter">
                         <option value="">すべてのタグ</option>
                     </select>
                 </div>
                 <div class="col-md-2">
+                    <button class="btn btn-outline-info w-100" type="button" data-bs-toggle="collapse" data-bs-target="#advanced-search">
+                        <i class="bi bi-funnel"></i> 詳細検索
+                    </button>
+                </div>
+                <div class="col-md-2">
                     <button class="btn btn-outline-secondary w-100" id="clear-filters">
                         <i class="bi bi-x-circle"></i> クリア
                     </button>
+                </div>
+            </div>
+            <!-- Advanced Search (Collapsible) -->
+            <div class="collapse mt-3" id="advanced-search">
+                <div class="card card-body bg-light">
+                    <div class="row g-3">
+                        <!-- Level/Rank/Link -->
+                        <div class="col-12">
+                            <label class="form-label small fw-bold">レベル・ランク・リンク</label>
+                            <div class="d-flex flex-wrap gap-1">
+                                <button type="button" class="btn btn-sm btn-outline-secondary level-btn active" data-level="">
+                                    すべて
+                                </button>
+                                <button type="button" class="btn btn-sm btn-outline-primary level-btn" data-level="0">0</button>
+                                <button type="button" class="btn btn-sm btn-outline-primary level-btn" data-level="1">1</button>
+                                <button type="button" class="btn btn-sm btn-outline-primary level-btn" data-level="2">2</button>
+                                <button type="button" class="btn btn-sm btn-outline-primary level-btn" data-level="3">3</button>
+                                <button type="button" class="btn btn-sm btn-outline-primary level-btn" data-level="4">4</button>
+                                <button type="button" class="btn btn-sm btn-outline-primary level-btn" data-level="5">5</button>
+                                <button type="button" class="btn btn-sm btn-outline-primary level-btn" data-level="6">6</button>
+                                <button type="button" class="btn btn-sm btn-outline-primary level-btn" data-level="7">7</button>
+                                <button type="button" class="btn btn-sm btn-outline-primary level-btn" data-level="8">8</button>
+                                <button type="button" class="btn btn-sm btn-outline-primary level-btn" data-level="9">9</button>
+                                <button type="button" class="btn btn-sm btn-outline-primary level-btn" data-level="10">10</button>
+                                <button type="button" class="btn btn-sm btn-outline-primary level-btn" data-level="11">11</button>
+                                <button type="button" class="btn btn-sm btn-outline-primary level-btn" data-level="12">12</button>
+                                <button type="button" class="btn btn-sm btn-outline-primary level-btn" data-level="13">13</button>
+                            </div>
+                        </div>
+                        <!-- Attribute -->
+                        <div class="col-md-6">
+                            <label class="form-label small fw-bold">属性</label>
+                            <select class="form-select form-select-sm" id="attribute-filter">
+                                <option value="">すべて</option>
+                                <option value="闇">闇</option>
+                                <option value="光">光</option>
+                                <option value="地">地</option>
+                                <option value="水">水</option>
+                                <option value="炎">炎</option>
+                                <option value="風">風</option>
+                                <option value="神">神</option>
+                            </select>
+                        </div>
+                        <!-- Card Type -->
+                        <div class="col-md-6">
+                            <label class="form-label small fw-bold">カードタイプ</label>
+                            <select class="form-select form-select-sm" id="card-type-filter">
+                                <option value="">すべて</option>
+                                <option value="通常">通常</option>
+                                <option value="効果">効果</option>
+                                <option value="融合">融合</option>
+                                <option value="シンクロ">シンクロ</option>
+                                <option value="エクシーズ">エクシーズ</option>
+                                <option value="リンク">リンク</option>
+                                <option value="ペンデュラム">ペンデュラム</option>
+                                <option value="儀式">儀式</option>
+                                <option value="チューナー">チューナー</option>
+                                <option value="魔法">魔法</option>
+                                <option value="罠">罠</option>
+                            </select>
+                        </div>
+                        <!-- Race -->
+                        <div class="col-12">
+                            <label class="form-label small fw-bold">種族</label>
+                            <div class="d-flex flex-wrap gap-1">
+                                <button type="button" class="btn btn-sm btn-outline-secondary race-btn active" data-race="">
+                                    すべて
+                                </button>
+                                <button type="button" class="btn btn-sm btn-outline-primary race-btn" data-race="ドラゴン族">ドラゴン族</button>
+                                <button type="button" class="btn btn-sm btn-outline-primary race-btn" data-race="戦士族">戦士族</button>
+                                <button type="button" class="btn btn-sm btn-outline-primary race-btn" data-race="獣戦士族">獣戦士族</button>
+                                <button type="button" class="btn btn-sm btn-outline-primary race-btn" data-race="魔法使い族">魔法使い族</button>
+                                <button type="button" class="btn btn-sm btn-outline-primary race-btn" data-race="天使族">天使族</button>
+                                <button type="button" class="btn btn-sm btn-outline-primary race-btn" data-race="悪魔族">悪魔族</button>
+                                <button type="button" class="btn btn-sm btn-outline-primary race-btn" data-race="アンデット族">アンデット族</button>
+                                <button type="button" class="btn btn-sm btn-outline-primary race-btn" data-race="機械族">機械族</button>
+                                <button type="button" class="btn btn-sm btn-outline-primary race-btn" data-race="獣族">獣族</button>
+                                <button type="button" class="btn btn-sm btn-outline-primary race-btn" data-race="鳥獣族">鳥獣族</button>
+                                <button type="button" class="btn btn-sm btn-outline-primary race-btn" data-race="植物族">植物族</button>
+                                <button type="button" class="btn btn-sm btn-outline-primary race-btn" data-race="昆虫族">昆虫族</button>
+                                <button type="button" class="btn btn-sm btn-outline-primary race-btn" data-race="水族">水族</button>
+                                <button type="button" class="btn btn-sm btn-outline-primary race-btn" data-race="岩石族">岩石族</button>
+                                <button type="button" class="btn btn-sm btn-outline-primary race-btn" data-race="炎族">炎族</button>
+                                <button type="button" class="btn btn-sm btn-outline-primary race-btn" data-race="雷族">雷族</button>
+                                <button type="button" class="btn btn-sm btn-outline-primary race-btn" data-race="恐竜族">恐竜族</button>
+                                <button type="button" class="btn btn-sm btn-outline-primary race-btn" data-race="魚族">魚族</button>
+                                <button type="button" class="btn btn-sm btn-outline-primary race-btn" data-race="海竜族">海竜族</button>
+                                <button type="button" class="btn btn-sm btn-outline-primary race-btn" data-race="爬虫類族">爬虫類族</button>
+                                <button type="button" class="btn btn-sm btn-outline-primary race-btn" data-race="サイキック族">サイキック族</button>
+                                <button type="button" class="btn btn-sm btn-outline-primary race-btn" data-race="幻竜族">幻竜族</button>
+                                <button type="button" class="btn btn-sm btn-outline-primary race-btn" data-race="サイバース族">サイバース族</button>
+                                <button type="button" class="btn btn-sm btn-outline-primary race-btn" data-race="幻神獣族">幻神獣族</button>
+                                <button type="button" class="btn btn-sm btn-outline-primary race-btn" data-race="創造神族">創造神族</button>
+                                <button type="button" class="btn btn-sm btn-outline-primary race-btn" data-race="幻想魔族">幻想魔族</button>
+                            </div>
+                        </div>
+                        <!-- Attack -->
+                        <div class="col-md-6">
+                            <label class="form-label small fw-bold">攻撃力</label>
+                            <input type="text" class="form-control form-control-sm" id="attack-filter" placeholder="例: 2500">
+                        </div>
+                        <!-- Defense -->
+                        <div class="col-md-6">
+                            <label class="form-label small fw-bold">守備力</label>
+                            <input type="text" class="form-control form-control-sm" id="defense-filter" placeholder="例: 2000">
+                        </div>
+                    </div>
                 </div>
             </div>
             <div class="row g-2 mt-2">
@@ -1095,6 +1222,10 @@
         let currentEditingCard = null;
         let currentRenderingId = 0; // To prevent duplicate images when rapidly changing pages
 
+        // Advanced filter state
+        let selectedLevel = '';
+        let selectedRace = '';
+
         // Deck system state
         let decks = []; // All user's decks
         let currentDeck = null; // Currently editing deck
@@ -1285,6 +1416,14 @@
             const tagFilter = document.getElementById('tag-filter').value;
             const showUnowned = document.getElementById('show-unowned-cards').checked;
 
+            // Advanced filters
+            const levelFilter = selectedLevel;
+            const attributeFilter = document.getElementById('attribute-filter').value;
+            const cardTypeFilter = document.getElementById('card-type-filter').value;
+            const raceFilter = selectedRace;
+            const attackFilter = document.getElementById('attack-filter').value.trim();
+            const defenseFilter = document.getElementById('defense-filter').value.trim();
+
             // Get possible card names from hiragana reading
             let possibleCardNames = [];
             if (searchTerm) {
@@ -1324,7 +1463,15 @@
                 const matchesRarity = !rarityFilter || card.data['レアリティ'] === rarityFilter;
                 const matchesTag = !tagFilter || (card.data.tags && card.data.tags.includes(tagFilter));
 
-                return matchesSearch && matchesRarity && matchesTag;
+                // Advanced filters
+                const matchesLevel = !levelFilter || (card.data['レベル'] && card.data['レベル'].toString() === levelFilter);
+                const matchesAttribute = !attributeFilter || card.data['属性'] === attributeFilter;
+                const matchesCardType = !cardTypeFilter || (card.data['カードの種類'] && card.data['カードの種類'].includes(cardTypeFilter));
+                const matchesRace = !raceFilter || card.data['種族'] === raceFilter;
+                const matchesAttack = !attackFilter || (card.data['攻撃力'] && card.data['攻撃力'].toString() === attackFilter);
+                const matchesDefense = !defenseFilter || (card.data['守備力'] && card.data['守備力'].toString() === defenseFilter);
+
+                return matchesSearch && matchesRarity && matchesTag && matchesLevel && matchesAttribute && matchesCardType && matchesRace && matchesAttack && matchesDefense;
             });
 
             // Add unowned cards if checkbox is checked
@@ -1705,6 +1852,64 @@
             document.getElementById('search-input').value = '';
             document.getElementById('rarity-filter').value = '';
             document.getElementById('tag-filter').value = '';
+            document.getElementById('attribute-filter').value = '';
+            document.getElementById('card-type-filter').value = '';
+            document.getElementById('attack-filter').value = '';
+            document.getElementById('defense-filter').value = '';
+
+            // Clear level filter
+            selectedLevel = '';
+            document.querySelectorAll('.level-btn').forEach(btn => btn.classList.remove('active'));
+            document.querySelector('.level-btn[data-level=""]').classList.add('active');
+
+            // Clear race filter
+            selectedRace = '';
+            document.querySelectorAll('.race-btn').forEach(btn => btn.classList.remove('active'));
+            document.querySelector('.race-btn[data-race=""]').classList.add('active');
+
+            applyFilters();
+            renderCards();
+        });
+
+        // Level filter buttons
+        document.querySelectorAll('.level-btn').forEach(btn => {
+            btn.addEventListener('click', () => {
+                selectedLevel = btn.dataset.level;
+                document.querySelectorAll('.level-btn').forEach(b => b.classList.remove('active'));
+                btn.classList.add('active');
+                applyFilters();
+                renderCards();
+            });
+        });
+
+        // Race filter buttons
+        document.querySelectorAll('.race-btn').forEach(btn => {
+            btn.addEventListener('click', () => {
+                selectedRace = btn.dataset.race;
+                document.querySelectorAll('.race-btn').forEach(b => b.classList.remove('active'));
+                btn.classList.add('active');
+                applyFilters();
+                renderCards();
+            });
+        });
+
+        // Other advanced filters
+        document.getElementById('attribute-filter').addEventListener('change', () => {
+            applyFilters();
+            renderCards();
+        });
+
+        document.getElementById('card-type-filter').addEventListener('change', () => {
+            applyFilters();
+            renderCards();
+        });
+
+        document.getElementById('attack-filter').addEventListener('input', () => {
+            applyFilters();
+            renderCards();
+        });
+
+        document.getElementById('defense-filter').addEventListener('input', () => {
             applyFilters();
             renderCards();
         });
