@@ -677,6 +677,52 @@
             gap: 0.5rem;
         }
 
+        /* Deck View Styles */
+        .deck-view-section {
+            margin-bottom: 2rem;
+        }
+
+        .deck-view-section-title {
+            font-size: 1.2rem;
+            font-weight: 600;
+            margin-bottom: 1rem;
+            padding-bottom: 0.5rem;
+            border-bottom: 2px solid #667eea;
+            color: #2c3e50;
+        }
+
+        .deck-view-grid {
+            display: grid;
+            grid-template-columns: repeat(10, 1fr);
+            gap: 0.5rem;
+            margin-bottom: 1rem;
+        }
+
+        .deck-view-card {
+            position: relative;
+            aspect-ratio: 59/86;
+            border-radius: 4px;
+            overflow: hidden;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+
+        .deck-view-card img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .deck-view-card-placeholder {
+            width: 100%;
+            height: 100%;
+            background: #f0f0f0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #999;
+            font-size: 0.7rem;
+        }
+
         .deck-list-item-memo {
             color: #6c757d;
             font-size: 0.9rem;
@@ -1205,7 +1251,32 @@
         </div>
     </div>
 
+    <!-- Deck View Modal -->
+    <div class="modal fade" id="deckViewModal" tabindex="-1">
+        <div class="modal-dialog modal-fullscreen">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">
+                        <i class="bi bi-eye"></i> <span id="viewDeckName">デッキ閲覧</span>
+                    </h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body" style="background: #f8f9fa;">
+                    <div class="mb-3 d-flex justify-content-end gap-2">
+                        <button class="btn btn-primary" id="exportDeckImageBtn">
+                            <i class="bi bi-download"></i> 画像として保存
+                        </button>
+                    </div>
+                    <div id="deckViewContent" style="background: white; padding: 2rem; border-radius: 8px;">
+                        <!-- Deck content will be rendered here -->
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-app.js";
         import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-auth.js";
@@ -2316,14 +2387,17 @@
                 const cardTypes = (deck.mainDeck?.length || 0) + (deck.extraDeck?.length || 0) + (deck.sideDeck?.length || 0);
 
                 return `
-                    <div class="deck-list-item" onclick="editDeck('${deck.id}')">
+                    <div class="deck-list-item" onclick="viewDeck('${deck.id}')">
                         <div class="deck-list-item-header">
                             <div class="deck-list-item-name">${escapeHtml(deck.name || '無題')}</div>
                             <div class="deck-list-item-actions">
-                                <button class="btn btn-sm btn-outline-primary" onclick="event.stopPropagation(); editDeck('${deck.id}')">
+                                <button class="btn btn-sm btn-outline-info" onclick="event.stopPropagation(); viewDeck('${deck.id}')" title="閲覧">
+                                    <i class="bi bi-eye"></i>
+                                </button>
+                                <button class="btn btn-sm btn-outline-primary" onclick="event.stopPropagation(); editDeck('${deck.id}')" title="編集">
                                     <i class="bi bi-pencil"></i>
                                 </button>
-                                <button class="btn btn-sm btn-outline-danger" onclick="event.stopPropagation(); deleteDeckFromList('${deck.id}')">
+                                <button class="btn btn-sm btn-outline-danger" onclick="event.stopPropagation(); deleteDeckFromList('${deck.id}')" title="削除">
                                     <i class="bi bi-trash"></i>
                                 </button>
                             </div>
@@ -2373,6 +2447,140 @@
                 alert('デッキの削除に失敗しました');
             }
         };
+
+        // View deck in modal
+        let currentViewingDeck = null;
+
+        window.viewDeck = async (deckId) => {
+            const deck = decks.find(d => d.id === deckId);
+            if (!deck) return;
+
+            currentViewingDeck = deck;
+
+            // Set deck name
+            document.getElementById('viewDeckName').textContent = deck.name || '無題のデッキ';
+
+            // Render deck view
+            await renderDeckView(deck);
+
+            // Show modal
+            const modal = new bootstrap.Modal(document.getElementById('deckViewModal'));
+            modal.show();
+        };
+
+        const renderDeckView = async (deck) => {
+            const container = document.getElementById('deckViewContent');
+
+            const renderSection = async (title, cards, sectionId) => {
+                if (!cards || cards.length === 0) return '';
+
+                // Expand cards based on quantity
+                const expandedCards = cards.flatMap(card =>
+                    Array(card.quantity).fill(card)
+                );
+
+                let html = `
+                    <div class="deck-view-section">
+                        <div class="deck-view-section-title">${title} (${expandedCards.length}枚)</div>
+                        <div class="deck-view-grid" id="${sectionId}">
+                `;
+
+                // Add placeholder cards
+                expandedCards.forEach((card, index) => {
+                    html += `
+                        <div class="deck-view-card" data-card-name="${escapeHtml(card.name)}">
+                            <div class="deck-view-card-placeholder">
+                                <i class="bi bi-card-image"></i>
+                            </div>
+                        </div>
+                    `;
+                });
+
+                html += `
+                        </div>
+                    </div>
+                `;
+
+                return html;
+            };
+
+            // Build HTML
+            let html = `
+                <div style="text-align: center; margin-bottom: 2rem;">
+                    <h3>${escapeHtml(deck.name || '無題のデッキ')}</h3>
+                    ${deck.memo ? `<p style="color: #6c757d;">${escapeHtml(deck.memo)}</p>` : ''}
+                </div>
+            `;
+
+            html += await renderSection('メインデッキ', deck.mainDeck, 'view-main-deck');
+            html += await renderSection('エクストラデッキ', deck.extraDeck, 'view-extra-deck');
+            html += await renderSection('サイドデッキ', deck.sideDeck, 'view-side-deck');
+
+            container.innerHTML = html;
+
+            // Load images asynchronously
+            const loadSectionImages = async (cards, sectionId) => {
+                if (!cards || cards.length === 0) return;
+
+                const expandedCards = cards.flatMap(card =>
+                    Array(card.quantity).fill(card)
+                );
+
+                const cardElements = document.querySelectorAll(`#${sectionId} .deck-view-card`);
+
+                for (let i = 0; i < expandedCards.length; i++) {
+                    const card = expandedCards[i];
+                    const cardElement = cardElements[i];
+
+                    if (!cardElement) continue;
+
+                    try {
+                        const imageUrl = await getCardImageUrl(card.name);
+                        if (imageUrl) {
+                            cardElement.innerHTML = `<img src="${imageUrl}" alt="${escapeHtml(card.name)}">`;
+                        }
+                    } catch (error) {
+                        console.error(`Failed to load image for ${card.name}:`, error);
+                    }
+                }
+            };
+
+            // Load images for all sections
+            await Promise.all([
+                loadSectionImages(deck.mainDeck, 'view-main-deck'),
+                loadSectionImages(deck.extraDeck, 'view-extra-deck'),
+                loadSectionImages(deck.sideDeck, 'view-side-deck')
+            ]);
+        };
+
+        // Export deck as image
+        document.getElementById('exportDeckImageBtn').addEventListener('click', async () => {
+            if (!currentViewingDeck) return;
+
+            const content = document.getElementById('deckViewContent');
+
+            try {
+                const canvas = await html2canvas(content, {
+                    scale: 2,
+                    backgroundColor: '#ffffff',
+                    logging: false,
+                    useCORS: true
+                });
+
+                // Convert to blob and download
+                canvas.toBlob((blob) => {
+                    const url = URL.createObjectURL(blob);
+                    const a = document.createElement('a');
+                    a.href = url;
+                    a.download = `${currentViewingDeck.name || 'デッキ'}.png`;
+                    a.click();
+                    URL.revokeObjectURL(url);
+                });
+            } catch (error) {
+                console.error('Error exporting deck image:', error);
+                alert('画像の出力に失敗しました');
+            }
+        });
 
         // Render cards in deck builder
         const renderDeckCards = async () => {
