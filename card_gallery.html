@@ -568,13 +568,16 @@
             box-shadow: 0 2px 6px rgba(0,0,0,0.1);
         }
 
+        .deck-card-image-wrapper {
+            flex-shrink: 0;
+        }
+
         .deck-card-image-container {
             width: 50px;
             height: 73px;
             background: #f8f9fa;
             border-radius: 4px;
             overflow: hidden;
-            flex-shrink: 0;
             position: relative;
         }
 
@@ -594,16 +597,29 @@
             font-size: 1.5rem;
         }
 
-        .deck-card-info {
-            flex: 1;
-            display: flex;
-            flex-direction: column;
-            gap: 0.5rem;
+        .deck-card-rarity {
+            position: absolute;
+            top: 2px;
+            right: 2px;
+            background: rgba(0, 0, 0, 0.75);
+            color: white;
+            padding: 1px 4px;
+            border-radius: 3px;
+            font-size: 0.6rem;
+            font-weight: 600;
+            line-height: 1.2;
         }
 
-        .deck-card-name {
-            font-weight: 600;
-            font-size: 0.85rem;
+        .deck-card-code {
+            position: absolute;
+            bottom: 2px;
+            left: 0;
+            right: 0;
+            background: rgba(0, 0, 0, 0.75);
+            color: white;
+            padding: 2px 4px;
+            font-size: 0.55rem;
+            text-align: center;
             line-height: 1.2;
         }
 
@@ -669,6 +685,12 @@
             font-weight: 600;
             font-size: 1.1rem;
             color: #2c3e50;
+            flex: 1;
+        }
+
+        .deck-list-item-actions {
+            display: flex;
+            gap: 0.5rem;
         }
 
         .deck-list-item-memo {
@@ -1907,9 +1929,14 @@
                     <div class="deck-list-item" onclick="editDeck('${deck.id}')">
                         <div class="deck-list-item-header">
                             <div class="deck-list-item-name">${escapeHtml(deck.name || '無題')}</div>
-                            <button class="btn btn-sm btn-outline-primary" onclick="event.stopPropagation(); editDeck('${deck.id}')">
-                                <i class="bi bi-pencil"></i>
-                            </button>
+                            <div class="deck-list-item-actions">
+                                <button class="btn btn-sm btn-outline-primary" onclick="event.stopPropagation(); editDeck('${deck.id}')">
+                                    <i class="bi bi-pencil"></i>
+                                </button>
+                                <button class="btn btn-sm btn-outline-danger" onclick="event.stopPropagation(); deleteDeckFromList('${deck.id}')">
+                                    <i class="bi bi-trash"></i>
+                                </button>
+                            </div>
                         </div>
                         ${deck.memo ? `<div class="deck-list-item-memo">${escapeHtml(deck.memo)}</div>` : ''}
                         <div class="deck-list-item-stats">
@@ -1928,6 +1955,32 @@
             if (deck) {
                 closeDeckList();
                 openDeckBuilder(deck);
+            }
+        };
+
+        // Delete deck from list
+        window.deleteDeckFromList = async (deckId) => {
+            const deck = decks.find(d => d.id === deckId);
+            if (!deck) return;
+
+            if (!confirm(`「${deck.name || '無題'}」を削除してもよろしいですか？`)) {
+                return;
+            }
+
+            try {
+                if (!currentUser) return;
+
+                const deckRef = doc(db, 'users', currentUser.uid, 'decks', deckId);
+                await deleteDoc(deckRef);
+
+                // Remove from local array
+                decks = decks.filter(d => d.id !== deckId);
+                renderDeckList();
+
+                alert('デッキを削除しました');
+            } catch (error) {
+                console.error('Error deleting deck:', error);
+                alert('デッキの削除に失敗しました');
             }
         };
 
@@ -1952,27 +2005,28 @@
                 if (placeholder) placeholder.style.display = 'none';
 
                 container.innerHTML = cards.map((deckCard, index) => {
-                    const imageUrl = `https://ygoh-list.onrender.com/api/card-image/${encodeURIComponent(deckCard.code || '')}`;
+                    const imageUrl = `https://ygoh-list.onrender.com/api/card-image/${encodeURIComponent(deckCard.name || '')}`;
                     return `
                     <div class="deck-card-item">
-                        <div class="deck-card-image-container">
-                            <img src="${imageUrl}" alt="${escapeHtml(deckCard.name)}"
-                                 onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
-                            <div class="deck-card-image-placeholder" style="display:none;">
-                                <i class="bi bi-card-image"></i>
+                        <div class="deck-card-image-wrapper">
+                            <div class="deck-card-image-container">
+                                <img src="${imageUrl}" alt="${escapeHtml(deckCard.name)}"
+                                     onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
+                                <div class="deck-card-image-placeholder" style="display:none;">
+                                    <i class="bi bi-card-image"></i>
+                                </div>
+                                <div class="deck-card-rarity">${escapeHtml(deckCard.rarity || '')}</div>
+                                <div class="deck-card-code">${escapeHtml(deckCard.code || '')}</div>
                             </div>
                         </div>
-                        <div class="deck-card-info">
-                            <div class="deck-card-name">${escapeHtml(deckCard.name)}</div>
-                            <div class="deck-card-quantity">
-                                <button class="btn btn-sm btn-outline-secondary" onclick="changeDeckCardQuantity('${deckType}', ${index}, -1)">-</button>
-                                <input type="number" class="form-control form-control-sm" value="${deckCard.quantity}"
-                                       onchange="setDeckCardQuantity('${deckType}', ${index}, this.value)" min="1" max="99">
-                                <button class="btn btn-sm btn-outline-secondary" onclick="changeDeckCardQuantity('${deckType}', ${index}, 1)">+</button>
-                                <button class="btn btn-sm btn-outline-danger" onclick="removeCardFromDeck('${deckType}', ${index})">
-                                    <i class="bi bi-x"></i>
-                                </button>
-                            </div>
+                        <div class="deck-card-quantity">
+                            <button class="btn btn-sm btn-outline-secondary" onclick="changeDeckCardQuantity('${deckType}', ${index}, -1)">-</button>
+                            <input type="number" class="form-control form-control-sm" value="${deckCard.quantity}"
+                                   onchange="setDeckCardQuantity('${deckType}', ${index}, this.value)" min="1" max="99">
+                            <button class="btn btn-sm btn-outline-secondary" onclick="changeDeckCardQuantity('${deckType}', ${index}, 1)">+</button>
+                            <button class="btn btn-sm btn-outline-danger" onclick="removeCardFromDeck('${deckType}', ${index})">
+                                <i class="bi bi-x"></i>
+                            </button>
                         </div>
                     </div>
                 `;
