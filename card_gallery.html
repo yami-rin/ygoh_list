@@ -401,7 +401,216 @@
             flex: 1;
         }
 
+        /* Deck Builder Panel Styles */
+        .deck-builder-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.5);
+            z-index: 1040;
+            display: none;
+        }
+
+        .deck-builder-overlay.active {
+            display: block;
+        }
+
+        .deck-builder-panel {
+            position: fixed;
+            top: 0;
+            left: -400px;
+            width: 400px;
+            height: 100%;
+            background: white;
+            box-shadow: 4px 0 10px rgba(0,0,0,0.2);
+            z-index: 1050;
+            transition: left 0.3s ease;
+            overflow-y: auto;
+        }
+
+        .deck-builder-panel.active {
+            left: 0;
+        }
+
+        .deck-builder-header {
+            padding: 1.5rem;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            position: sticky;
+            top: 0;
+            z-index: 10;
+        }
+
+        .deck-builder-header h4 {
+            margin: 0;
+        }
+
+        .deck-builder-close {
+            background: none;
+            border: none;
+            color: white;
+            font-size: 1.5rem;
+            cursor: pointer;
+            width: 30px;
+            height: 30px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 50%;
+            transition: background 0.2s;
+        }
+
+        .deck-builder-close:hover {
+            background: rgba(255,255,255,0.2);
+        }
+
+        .deck-builder-content {
+            padding: 1.5rem;
+        }
+
+        .deck-info-section {
+            margin-bottom: 1.5rem;
+        }
+
+        .deck-cards-section {
+            margin-bottom: 1.5rem;
+        }
+
+        .deck-drop-zone {
+            min-height: 300px;
+            border: 2px dashed #dee2e6;
+            border-radius: 8px;
+            padding: 1rem;
+            background: #f8f9fa;
+            position: relative;
+        }
+
+        .deck-drop-zone.drag-over {
+            border-color: #667eea;
+            background: #e7f1ff;
+        }
+
+        .deck-drop-placeholder {
+            text-align: center;
+            color: #adb5bd;
+            padding: 2rem;
+        }
+
+        .deck-drop-placeholder p {
+            margin: 0.5rem 0 0 0;
+        }
+
+        .deck-card-item {
+            background: white;
+            border: 1px solid #dee2e6;
+            border-radius: 6px;
+            padding: 0.75rem;
+            margin-bottom: 0.5rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            transition: all 0.2s;
+        }
+
+        .deck-card-item:hover {
+            box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+        }
+
+        .deck-card-name {
+            font-weight: 600;
+            font-size: 0.9rem;
+            flex: 1;
+            margin-right: 0.5rem;
+        }
+
+        .deck-card-quantity {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .deck-card-quantity button {
+            width: 24px;
+            height: 24px;
+            padding: 0;
+            border-radius: 4px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .deck-card-quantity input {
+            width: 50px;
+            text-align: center;
+            padding: 0.25rem;
+        }
+
+        .deck-builder-actions {
+            padding-top: 1rem;
+            border-top: 1px solid #dee2e6;
+        }
+
+        /* Drag and drop styles */
+        .card-item.dragging {
+            opacity: 0.5;
+            cursor: grabbing;
+        }
+
+        .card-item.draggable {
+            cursor: grab;
+        }
+
+        .deck-list-item {
+            background: white;
+            border: 1px solid #dee2e6;
+            border-radius: 8px;
+            padding: 1rem;
+            margin-bottom: 1rem;
+            transition: all 0.2s;
+        }
+
+        .deck-list-item:hover {
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            border-color: #667eea;
+        }
+
+        .deck-list-item-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: start;
+            margin-bottom: 0.5rem;
+        }
+
+        .deck-list-item-name {
+            font-weight: 600;
+            font-size: 1.1rem;
+            color: #2c3e50;
+        }
+
+        .deck-list-item-memo {
+            color: #6c757d;
+            font-size: 0.9rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .deck-list-item-stats {
+            display: flex;
+            gap: 1rem;
+            font-size: 0.85rem;
+            color: #495057;
+        }
+
         @media (max-width: 768px) {
+            .deck-builder-panel {
+                width: 100%;
+                left: -100%;
+            }
+
             .edit-panel {
                 width: 100%;
                 max-width: 100%;
@@ -557,7 +766,10 @@
                     </select>
                 </div>
 
-                <div class="ms-auto">
+                <div class="ms-auto d-flex gap-2">
+                    <button class="btn btn-warning btn-sm" id="deck-manager-btn">
+                        <i class="bi bi-stack"></i> デッキ管理
+                    </button>
                     <button class="btn btn-primary btn-sm" onclick="window.location.href='card_list.html'">
                         <i class="bi bi-arrow-left"></i> リスト表示に戻る
                     </button>
@@ -637,11 +849,88 @@
         </div>
     </div>
 
+    <!-- Deck List Modal -->
+    <div class="modal fade" id="deck-list-modal" tabindex="-1">
+        <div class="modal-dialog modal-lg modal-dialog-centered modal-dialog-scrollable">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title"><i class="bi bi-stack"></i> デッキ管理</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="d-flex justify-content-between align-items-center mb-3">
+                        <h6 class="mb-0">デッキ一覧</h6>
+                        <button class="btn btn-primary btn-sm" id="create-new-deck-btn">
+                            <i class="bi bi-plus-circle"></i> 新規デッキ作成
+                        </button>
+                    </div>
+                    <div id="deck-list-container">
+                        <!-- Deck list will be rendered here -->
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">閉じる</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Deck Builder Side Panel -->
+    <div class="deck-builder-overlay" id="deckBuilderOverlay"></div>
+    <div class="deck-builder-panel" id="deckBuilderPanel">
+        <div class="deck-builder-header">
+            <h4 id="deckBuilderTitle">デッキ編集</h4>
+            <button class="deck-builder-close" id="closeDeckBuilderBtn">
+                <i class="bi bi-x"></i>
+            </button>
+        </div>
+        <div class="deck-builder-content">
+            <!-- Deck Info -->
+            <div class="deck-info-section">
+                <div class="mb-2">
+                    <label class="form-label small fw-bold">デッキ名</label>
+                    <input type="text" class="form-control form-control-sm" id="deckName" placeholder="デッキ名を入力">
+                </div>
+                <div class="mb-3">
+                    <label class="form-label small fw-bold">メモ</label>
+                    <textarea class="form-control form-control-sm" id="deckMemo" rows="2" placeholder="メモを入力"></textarea>
+                </div>
+            </div>
+
+            <!-- Deck Cards -->
+            <div class="deck-cards-section">
+                <div class="d-flex justify-content-between align-items-center mb-2">
+                    <h6 class="mb-0">デッキ内容 (<span id="deckCardCount">0</span>枚)</h6>
+                    <button class="btn btn-outline-danger btn-sm" id="clearDeckBtn">
+                        <i class="bi bi-trash"></i> クリア
+                    </button>
+                </div>
+                <div class="deck-drop-zone" id="deckDropZone">
+                    <div class="deck-drop-placeholder">
+                        <i class="bi bi-plus-circle" style="font-size: 2rem;"></i>
+                        <p>カードをドラッグ&ドロップ</p>
+                    </div>
+                    <div id="deckCardsList"></div>
+                </div>
+            </div>
+
+            <!-- Actions -->
+            <div class="deck-builder-actions">
+                <button class="btn btn-success w-100" id="saveDeckBtn">
+                    <i class="bi bi-save"></i> デッキを保存
+                </button>
+                <button class="btn btn-outline-danger w-100 mt-2" id="deleteDeckBtn">
+                    <i class="bi bi-trash"></i> デッキを削除
+                </button>
+            </div>
+        </div>
+    </div>
+
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-app.js";
         import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-auth.js";
-        import { getFirestore, collection, getDocs, doc, updateDoc, deleteDoc } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore.js";
+        import { getFirestore, collection, getDocs, doc, updateDoc, deleteDoc, addDoc, setDoc } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore.js";
 
         // Firebase configuration
         const firebaseConfig = {
@@ -673,6 +962,12 @@
         let currentListType = 'collection'; // 'collection' or 'wishlist'
         let currentEditingCard = null;
         let currentRenderingId = 0; // To prevent duplicate images when rapidly changing pages
+
+        // Deck system state
+        let decks = []; // All user's decks
+        let currentDeck = null; // Currently editing deck
+        let deckListModal = null;
+        let draggedCard = null; // Card being dragged
 
         // Load card reading data
         const loadCardData = async () => {
@@ -982,6 +1277,15 @@
             });
         };
 
+        // Handle drag start for cards
+        window.handleDragStart = (event, index) => {
+            const startIndex = (currentPage - 1) * itemsPerPage;
+            const cardIndex = startIndex + index;
+            draggedCard = filteredCards[cardIndex];
+            event.dataTransfer.effectAllowed = 'copy';
+            event.target.classList.add('dragging');
+        };
+
         // Render cards (with async image loading)
         const renderCards = async () => {
             // Increment rendering ID to invalidate previous async operations
@@ -1014,9 +1318,10 @@
                     const unownedBadge = isUnowned ? '<span class="unowned-badge">未所持</span>' : '';
                     const stockBadge = isUnowned ? '' : `<span class="stock-badge">在庫 ${escapeHtml(card.data['枚数'])}枚</span>`;
                     const onclickAttr = isUnowned ? '' : `onclick="openCardEditModal('${card.id}')"`;
+                    const draggableAttr = isUnowned ? '' : `draggable="true" ondragstart="handleDragStart(event, ${index})" class="draggable"`;
 
                     return `
-                        <div class="card-item${unownedClass}" ${onclickAttr}>
+                        <div class="card-item${unownedClass}" ${onclickAttr} ${draggableAttr} data-card-index="${index}">
                             <div class="card-image-container" id="card-img-container-${index}" data-rendering-id="${thisRenderingId}">
                                 ${stockBadge}
                                 ${unownedBadge}
@@ -1322,6 +1627,290 @@
                 alert('カードの削除に失敗しました。');
             }
         });
+
+        // ==================== DECK SYSTEM ====================
+
+        // Load all decks from Firestore
+        const loadDecks = async () => {
+            if (!currentUser) return;
+            try {
+                const decksRef = collection(db, 'users', currentUser.uid, 'decks');
+                const snapshot = await getDocs(decksRef);
+                decks = snapshot.docs.map(doc => ({
+                    id: doc.id,
+                    ...doc.data()
+                }));
+                console.log(`Loaded ${decks.length} decks`);
+            } catch (error) {
+                console.error('Error loading decks:', error);
+            }
+        };
+
+        // Save deck to Firestore
+        const saveDeck = async () => {
+            if (!currentUser || !currentDeck) return;
+
+            const deckData = {
+                name: document.getElementById('deckName').value || '無題のデッキ',
+                memo: document.getElementById('deckMemo').value || '',
+                cards: currentDeck.cards || [],
+                updatedAt: new Date().toISOString()
+            };
+
+            try {
+                if (currentDeck.id) {
+                    // Update existing deck
+                    const deckRef = doc(db, 'users', currentUser.uid, 'decks', currentDeck.id);
+                    await updateDoc(deckRef, deckData);
+                    alert('デッキを保存しました');
+                } else {
+                    // Create new deck
+                    deckData.createdAt = new Date().toISOString();
+                    const decksRef = collection(db, 'users', currentUser.uid, 'decks');
+                    const docRef = await addDoc(decksRef, deckData);
+                    currentDeck.id = docRef.id;
+                    alert('デッキを作成しました');
+                }
+                await loadDecks();
+                renderDeckList();
+            } catch (error) {
+                console.error('Error saving deck:', error);
+                alert('デッキの保存に失敗しました');
+            }
+        };
+
+        // Delete deck
+        const deleteDeck = async () => {
+            if (!currentUser || !currentDeck || !currentDeck.id) return;
+
+            if (!confirm('このデッキを削除しますか？')) return;
+
+            try {
+                const deckRef = doc(db, 'users', currentUser.uid, 'decks', currentDeck.id);
+                await deleteDoc(deckRef);
+                alert('デッキを削除しました');
+                closeDeckBuilder();
+                await loadDecks();
+                renderDeckList();
+            } catch (error) {
+                console.error('Error deleting deck:', error);
+                alert('デッキの削除に失敗しました');
+            }
+        };
+
+        // Open deck builder panel
+        const openDeckBuilder = (deck = null) => {
+            currentDeck = deck || { cards: [] };
+
+            document.getElementById('deckName').value = currentDeck.name || '';
+            document.getElementById('deckMemo').value = currentDeck.memo || '';
+            document.getElementById('deckBuilderTitle').textContent = deck ? 'デッキ編集' : '新規デッキ';
+
+            renderDeckCards();
+
+            document.getElementById('deckBuilderPanel').classList.add('active');
+            document.getElementById('deckBuilderOverlay').classList.add('active');
+
+            // Hide delete button for new decks
+            document.getElementById('deleteDeckBtn').style.display = deck && deck.id ? 'block' : 'none';
+        };
+
+        // Close deck builder panel
+        const closeDeckBuilder = () => {
+            document.getElementById('deckBuilderPanel').classList.remove('active');
+            document.getElementById('deckBuilderOverlay').classList.remove('active');
+            currentDeck = null;
+        };
+
+        // Render deck list in modal
+        const renderDeckList = () => {
+            const container = document.getElementById('deck-list-container');
+
+            if (decks.length === 0) {
+                container.innerHTML = `
+                    <div class="text-center py-4">
+                        <i class="bi bi-inbox" style="font-size: 3rem; color: #ccc;"></i>
+                        <p class="text-muted mt-2">デッキがありません</p>
+                    </div>
+                `;
+                return;
+            }
+
+            container.innerHTML = decks.map(deck => {
+                const cardCount = deck.cards ? deck.cards.reduce((sum, c) => sum + c.quantity, 0) : 0;
+                const cardTypes = deck.cards ? deck.cards.length : 0;
+
+                return `
+                    <div class="deck-list-item" onclick="editDeck('${deck.id}')">
+                        <div class="deck-list-item-header">
+                            <div class="deck-list-item-name">${escapeHtml(deck.name || '無題')}</div>
+                            <button class="btn btn-sm btn-outline-primary" onclick="event.stopPropagation(); editDeck('${deck.id}')">
+                                <i class="bi bi-pencil"></i>
+                            </button>
+                        </div>
+                        ${deck.memo ? `<div class="deck-list-item-memo">${escapeHtml(deck.memo)}</div>` : ''}
+                        <div class="deck-list-item-stats">
+                            <span><i class="bi bi-collection"></i> ${cardCount}枚</span>
+                            <span><i class="bi bi-card-list"></i> ${cardTypes}種</span>
+                            <span><i class="bi bi-clock"></i> ${new Date(deck.updatedAt || deck.createdAt).toLocaleDateString('ja-JP')}</span>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        };
+
+        // Edit deck (called from deck list)
+        window.editDeck = (deckId) => {
+            const deck = decks.find(d => d.id === deckId);
+            if (deck) {
+                if (deckListModal) deckListModal.hide();
+                openDeckBuilder(deck);
+            }
+        };
+
+        // Render cards in deck builder
+        const renderDeckCards = () => {
+            const container = document.getElementById('deckCardsList');
+            const placeholder = document.querySelector('.deck-drop-placeholder');
+
+            if (!currentDeck || !currentDeck.cards || currentDeck.cards.length === 0) {
+                container.innerHTML = '';
+                if (placeholder) placeholder.style.display = 'block';
+                document.getElementById('deckCardCount').textContent = '0';
+                return;
+            }
+
+            if (placeholder) placeholder.style.display = 'none';
+
+            const totalCards = currentDeck.cards.reduce((sum, c) => sum + c.quantity, 0);
+            document.getElementById('deckCardCount').textContent = totalCards;
+
+            container.innerHTML = currentDeck.cards.map((deckCard, index) => `
+                <div class="deck-card-item">
+                    <div class="deck-card-name">${escapeHtml(deckCard.name)}</div>
+                    <div class="deck-card-quantity">
+                        <button class="btn btn-sm btn-outline-secondary" onclick="changeDeckCardQuantity(${index}, -1)">-</button>
+                        <input type="number" class="form-control form-control-sm" value="${deckCard.quantity}"
+                               onchange="setDeckCardQuantity(${index}, this.value)" min="1" max="99">
+                        <button class="btn btn-sm btn-outline-secondary" onclick="changeDeckCardQuantity(${index}, 1)">+</button>
+                        <button class="btn btn-sm btn-outline-danger" onclick="removeCardFromDeck(${index})">
+                            <i class="bi bi-x"></i>
+                        </button>
+                    </div>
+                </div>
+            `).join('');
+        };
+
+        // Add card to deck
+        const addCardToDeck = (cardData) => {
+            if (!currentDeck) {
+                alert('デッキを開いてください');
+                return;
+            }
+
+            // Check if card already exists
+            const existingIndex = currentDeck.cards.findIndex(c => c.cardId === cardData.id);
+
+            if (existingIndex >= 0) {
+                currentDeck.cards[existingIndex].quantity++;
+            } else {
+                currentDeck.cards.push({
+                    cardId: cardData.id,
+                    name: cardData.data['名前'],
+                    code: cardData.data['型番'],
+                    rarity: cardData.data['レアリティ'],
+                    quantity: 1
+                });
+            }
+
+            renderDeckCards();
+        };
+
+        // Remove card from deck
+        window.removeCardFromDeck = (index) => {
+            if (!currentDeck) return;
+            currentDeck.cards.splice(index, 1);
+            renderDeckCards();
+        };
+
+        // Change card quantity in deck
+        window.changeDeckCardQuantity = (index, delta) => {
+            if (!currentDeck) return;
+            currentDeck.cards[index].quantity += delta;
+            if (currentDeck.cards[index].quantity < 1) {
+                currentDeck.cards.splice(index, 1);
+            }
+            renderDeckCards();
+        };
+
+        // Set card quantity in deck
+        window.setDeckCardQuantity = (index, value) => {
+            if (!currentDeck) return;
+            const qty = parseInt(value) || 1;
+            if (qty < 1) {
+                currentDeck.cards.splice(index, 1);
+            } else {
+                currentDeck.cards[index].quantity = Math.min(99, qty);
+            }
+            renderDeckCards();
+        };
+
+        // Clear all cards from deck
+        const clearDeck = () => {
+            if (!currentDeck) return;
+            if (!confirm('デッキ内のカードをすべて削除しますか？')) return;
+            currentDeck.cards = [];
+            renderDeckCards();
+        };
+
+        // Setup drag and drop
+        const setupDragAndDrop = () => {
+            const dropZone = document.getElementById('deckDropZone');
+
+            dropZone.addEventListener('dragover', (e) => {
+                e.preventDefault();
+                dropZone.classList.add('drag-over');
+            });
+
+            dropZone.addEventListener('dragleave', () => {
+                dropZone.classList.remove('drag-over');
+            });
+
+            dropZone.addEventListener('drop', (e) => {
+                e.preventDefault();
+                dropZone.classList.remove('drag-over');
+
+                if (draggedCard) {
+                    addCardToDeck(draggedCard);
+                    draggedCard = null;
+                }
+            });
+        };
+
+        // Event listeners for deck system
+        document.getElementById('deck-manager-btn').addEventListener('click', async () => {
+            await loadDecks();
+            renderDeckList();
+            deckListModal = new bootstrap.Modal(document.getElementById('deck-list-modal'));
+            deckListModal.show();
+        });
+
+        document.getElementById('create-new-deck-btn').addEventListener('click', () => {
+            if (deckListModal) deckListModal.hide();
+            openDeckBuilder();
+        });
+
+        document.getElementById('closeDeckBuilderBtn').addEventListener('click', closeDeckBuilder);
+        document.getElementById('deckBuilderOverlay').addEventListener('click', closeDeckBuilder);
+
+        document.getElementById('saveDeckBtn').addEventListener('click', saveDeck);
+        document.getElementById('deleteDeckBtn').addEventListener('click', deleteDeck);
+        document.getElementById('clearDeckBtn').addEventListener('click', clearDeck);
+
+        // Initialize drag and drop
+        setupDragAndDrop();
+
+        // ==================== END DECK SYSTEM ====================
 
         // Initialize
         const init = async () => {
