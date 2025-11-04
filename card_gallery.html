@@ -44,8 +44,10 @@
             transition: margin-left 0.3s ease;
         }
 
-        .card-grid.deck-builder-open {
+        body.deck-builder-open .header-section,
+        body.deck-builder-open .container {
             margin-left: 420px;
+            transition: margin-left 0.3s ease;
         }
 
         .card-grid.size-small {
@@ -729,7 +731,8 @@
                 flex: none;
             }
 
-            .card-grid.deck-builder-open {
+            body.deck-builder-open .header-section,
+            body.deck-builder-open .container {
                 margin-left: 0;
             }
         }
@@ -2269,7 +2272,7 @@
             await renderDeckCards();
 
             document.getElementById('deckBuilderPanel').classList.add('active');
-            document.querySelector('.card-grid').classList.add('deck-builder-open');
+            document.body.classList.add('deck-builder-open');
 
             // Hide delete button for new decks
             document.getElementById('deleteDeckBtn').style.display = deck && deck.id ? 'block' : 'none';
@@ -2278,7 +2281,7 @@
         // Close deck builder panel
         const closeDeckBuilder = () => {
             document.getElementById('deckBuilderPanel').classList.remove('active');
-            document.querySelector('.card-grid').classList.remove('deck-builder-open');
+            document.body.classList.remove('deck-builder-open');
             currentDeck = null;
         };
 
