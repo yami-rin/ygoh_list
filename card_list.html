@@ -2302,6 +2302,45 @@
         </div>
     </div>
 
+    <!-- Custom CSS Modal (VIP) -->
+    <div class="modal fade" id="custom-css-modal" tabindex="-1">
+        <div class="modal-dialog modal-lg modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title"><i class="bi bi-palette"></i> カスタムCSS <span class="badge bg-warning text-dark">VIP</span></h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="alert alert-info">
+                        <i class="bi bi-info-circle"></i> ここで入力したCSSは、このページのスタイルをカスタマイズします。
+                    </div>
+                    <div class="mb-3">
+                        <label for="custom-css-input" class="form-label">CSS コード</label>
+                        <textarea class="form-control font-monospace" id="custom-css-input" rows="12"
+                                  placeholder="/* カスタムCSSをここに入力 */&#10;&#10;.card {&#10;    border-color: gold !important;&#10;}"></textarea>
+                        <small class="text-muted">
+                            例: .card { background-color: #f0f0f0; }
+                        </small>
+                    </div>
+                    <div class="d-flex gap-2">
+                        <button type="button" class="btn btn-primary" id="apply-custom-css-btn">
+                            <i class="bi bi-check-circle"></i> 適用
+                        </button>
+                        <button type="button" class="btn btn-outline-secondary" id="preview-custom-css-btn">
+                            <i class="bi bi-eye"></i> プレビュー
+                        </button>
+                        <button type="button" class="btn btn-outline-danger" id="reset-custom-css-btn">
+                            <i class="bi bi-arrow-counterclockwise"></i> リセット
+                        </button>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">閉じる</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <div class="modal fade" id="bulk-tag-modal" tabindex="-1">
         <div class="modal-dialog modal-dialog-centered">
             <div class="modal-content">
@@ -2482,12 +2521,17 @@
                                 <span class="d-none d-sm-inline"> 使い方</span>
                             </button>
                         </div>
-                        <div class="d-inline-block" id="vip-gallery-btn-container" style="display: none;">
-                            <button class="btn btn-warning btn-sm" onclick="window.location.href='card_gallery.html'">
-                                <i class="bi bi-grid-3x3-gap"></i>
-                                <span class="d-none d-sm-inline"> ギャラリー</span>
-                                <i class="bi bi-star-fill ms-1"></i>
+                        <!-- VIP Menu -->
+                        <div class="dropdown d-inline-block" id="vip-menu-container" style="display: none;">
+                            <button class="btn btn-warning btn-sm dropdown-toggle" type="button" data-bs-toggle="dropdown">
+                                <i class="bi bi-star-fill"></i>
+                                <span class="d-none d-sm-inline"> VIP</span>
                             </button>
+                            <ul class="dropdown-menu dropdown-menu-end">
+                                <li><button class="dropdown-item" id="vip-gallery-btn"><i class="bi bi-grid-3x3-gap"></i> カードギャラリー</button></li>
+                                <li><button class="dropdown-item" id="vip-custom-css-btn"><i class="bi bi-palette"></i> カスタムCSS</button></li>
+                                <li><button class="dropdown-item" id="vip-bulk-import-btn"><i class="bi bi-plus-square"></i> 一括登録</button></li>
+                            </ul>
                         </div>
                         <div class="dropdown d-inline-block">
                             <button class="btn btn-outline-secondary btn-sm dropdown-toggle" type="button" data-bs-toggle="dropdown">
@@ -2502,7 +2546,6 @@
                                 <li><button class="dropdown-item" id="export-csv-btn">CSV形式でエクスポート</button></li>
                                 <li><hr class="dropdown-divider"></li>
                                 <li><button class="dropdown-item" id="link-master-data-btn"><i class="bi bi-link-45deg"></i> マスターデータと連携</button></li>
-                                <li><button class="dropdown-item" id="bulk-import-btn"><i class="bi bi-plus-square"></i> 一括登録</button></li>
                             </ul>
                         </div>
                         <input type="file" id="import-file-input" accept=".json,.csv" style="display: none;">
@@ -8771,9 +8814,8 @@ Firebase Consoleで確認すべき項目:
             const inputSection = document.getElementById('vip-serial-input-section');
             const activeSection = document.getElementById('vip-active-section');
             const statusBadge = document.getElementById('vip-status-badge');
-            const vipExportOption = document.getElementById('vip-export-option');
             const profileVipBadge = document.getElementById('profile-vip-badge');
-            const vipGalleryBtnContainer = document.getElementById('vip-gallery-btn-container');
+            const vipMenuContainer = document.getElementById('vip-menu-container');
 
             if (isVip) {
                 if (inputSection) inputSection.style.display = 'none';
@@ -8784,9 +8826,8 @@ Firebase Consoleで確認すべき項目:
                     statusBadge.classList.add('bg-warning', 'text-dark');
                 }
 
-                // Show VIP features
-                if (vipExportOption) vipExportOption.style.display = 'block';
-                if (vipGalleryBtnContainer) vipGalleryBtnContainer.style.display = 'inline-block';
+                // Show VIP menu
+                if (vipMenuContainer) vipMenuContainer.style.display = 'inline-block';
 
                 // Show VIP badge on profile
                 if (profileVipBadge) profileVipBadge.style.display = 'inline-block';
@@ -8795,9 +8836,8 @@ Firebase Consoleで確認すべき項目:
                 if (activeSection) activeSection.style.display = 'none';
                 if (statusBadge) statusBadge.style.display = 'none';
 
-                // Hide VIP features
-                if (vipExportOption) vipExportOption.style.display = 'none';
-                if (vipGalleryBtnContainer) vipGalleryBtnContainer.style.display = 'none';
+                // Hide VIP menu
+                if (vipMenuContainer) vipMenuContainer.style.display = 'none';
 
                 // Hide VIP badge on profile
                 if (profileVipBadge) profileVipBadge.style.display = 'none';
@@ -8868,6 +8908,7 @@ Firebase Consoleで確認すべき項目:
 📊 現在利用可能な機能:
 • カードギャラリー
 • カスタムCSS
+• 一括登録
 
 🚀 今後追加予定の機能:
 • 未定
@@ -8876,7 +8917,125 @@ Firebase Consoleで確認すべき項目:
             alert(features);
         });
 
-        // VIP Premium Export Function
+        // VIP Menu Items Event Handlers
+        // Gallery
+        document.getElementById('vip-gallery-btn').addEventListener('click', () => {
+            if (!isVipMember) {
+                alert('この機能はVIPメンバー専用です。');
+                return;
+            }
+            window.location.href = 'card_gallery.html';
+        });
+
+        // Custom CSS
+        document.getElementById('vip-custom-css-btn').addEventListener('click', () => {
+            if (!isVipMember) {
+                alert('この機能はVIPメンバー専用です。');
+                return;
+            }
+            const customCssModal = new bootstrap.Modal(document.getElementById('custom-css-modal'));
+            customCssModal.show();
+
+            // Load saved CSS
+            const savedCss = localStorage.getItem('vip_custom_css');
+            if (savedCss) {
+                document.getElementById('custom-css-input').value = savedCss;
+            }
+        });
+
+        // Bulk Import (VIP)
+        document.getElementById('vip-bulk-import-btn').addEventListener('click', () => {
+            if (!isVipMember) {
+                alert('この機能はVIPメンバー専用です。');
+                return;
+            }
+            const bulkImportModal = new bootstrap.Modal(document.getElementById('bulk-import-modal'));
+            bulkImportModal.show();
+        });
+
+        // Custom CSS Functionality
+        let customStyleElement = null;
+
+        // Apply Custom CSS
+        document.getElementById('apply-custom-css-btn').addEventListener('click', () => {
+            if (!isVipMember) {
+                alert('この機能はVIPメンバー専用です。');
+                return;
+            }
+
+            const cssCode = document.getElementById('custom-css-input').value;
+
+            // Save to localStorage
+            localStorage.setItem('vip_custom_css', cssCode);
+
+            // Apply CSS
+            applyCustomCss(cssCode);
+
+            alert('✅ カスタムCSSを適用しました。');
+        });
+
+        // Preview Custom CSS (temporary)
+        document.getElementById('preview-custom-css-btn').addEventListener('click', () => {
+            if (!isVipMember) {
+                alert('この機能はVIPメンバー専用です。');
+                return;
+            }
+
+            const cssCode = document.getElementById('custom-css-input').value;
+            applyCustomCss(cssCode);
+            alert('👁️ プレビュー中です。保存するには「適用」を押してください。');
+        });
+
+        // Reset Custom CSS
+        document.getElementById('reset-custom-css-btn').addEventListener('click', () => {
+            if (!isVipMember) {
+                alert('この機能はVIPメンバー専用です。');
+                return;
+            }
+
+            if (confirm('カスタムCSSをリセットしますか？')) {
+                localStorage.removeItem('vip_custom_css');
+                document.getElementById('custom-css-input').value = '';
+
+                // Remove custom style element
+                if (customStyleElement) {
+                    customStyleElement.remove();
+                    customStyleElement = null;
+                }
+
+                alert('✅ カスタムCSSをリセットしました。');
+            }
+        });
+
+        // Function to apply custom CSS
+        const applyCustomCss = (cssCode) => {
+            // Remove existing custom style
+            if (customStyleElement) {
+                customStyleElement.remove();
+            }
+
+            // Create new style element
+            customStyleElement = document.createElement('style');
+            customStyleElement.id = 'vip-custom-css';
+            customStyleElement.textContent = cssCode;
+            document.head.appendChild(customStyleElement);
+        };
+
+        // Load custom CSS on page load
+        const loadCustomCss = () => {
+            if (!isVipMember) return;
+
+            const savedCss = localStorage.getItem('vip_custom_css');
+            if (savedCss) {
+                applyCustomCss(savedCss);
+            }
+        };
+
+        // Call loadCustomCss after VIP check
+        setTimeout(loadCustomCss, 100);
+
+        // VIP Premium Export Function (Removed - button no longer exists)
+        /*
         document.getElementById('export-premium-csv-btn').addEventListener('click', () => {
             if (!isVipMember) {
                 alert('この機能はVIPメンバー専用です。');
@@ -8926,16 +9085,20 @@ Firebase Consoleで確認すべき項目:
             link.click();
             document.body.removeChild(link);
         });
+        */
 
         // Bulk Import functionality
         let bulkImportCards = [];
 
-        document.getElementById('bulk-import-btn').addEventListener('click', () => {
-            const bulkImportModal = new bootstrap.Modal(document.getElementById('bulk-import-modal'));
-            bulkImportModal.show();
-        });
+        // Note: Bulk import button is now in VIP menu (vip-bulk-import-btn)
 
         document.getElementById('fetch-cards-btn').addEventListener('click', async () => {
+            // VIP check for bulk import
+            if (!isVipMember) {
+                alert('この機能はVIPメンバー専用です。');
+                return;
+            }
+
             const url = document.getElementById('bulk-import-url').value.trim();
 
             if (!url) {
@@ -9098,6 +9261,12 @@ Firebase Consoleで確認すべき項目:
         });
 
         document.getElementById('bulk-register-btn').addEventListener('click', async () => {
+            // VIP check for bulk import
+            if (!isVipMember) {
+                alert('この機能はVIPメンバー専用です。');
+                return;
+            }
+
             if (!currentUser) {
                 alert('ログインが必要です。');
                 return;
