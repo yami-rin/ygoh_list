@@ -944,6 +944,16 @@
                             <i class="bi bi-save"></i> 保存
                         </button>
                     </div>
+
+                    <!-- Deck usage section -->
+                    <div id="deckUsageSection" style="display: none; margin-top: 1rem; padding-top: 1rem; border-top: 1px solid #dee2e6;">
+                        <label class="form-label">
+                            <i class="bi bi-collection"></i> デッキ使用状況
+                        </label>
+                        <div id="deckUsageList" style="font-size: 0.9rem; color: #495057;">
+                            <!-- Deck usage will be displayed here -->
+                        </div>
+                    </div>
                 </form>
             </div>
         </div>
@@ -1439,7 +1449,16 @@
                     const isUnowned = card.unowned || card.data.unowned;
                     const unownedClass = isUnowned ? ' unowned' : '';
                     const unownedBadge = isUnowned ? '<span class="unowned-badge">未所持</span>' : '';
-                    const stockBadge = isUnowned ? '' : `<span class="stock-badge">在庫 ${escapeHtml(card.data['枚数'])}枚</span>`;
+
+                    // Calculate stock display with deck usage
+                    let stockBadge = '';
+                    if (!isUnowned) {
+                        const totalStock = card.data['枚数'] || 0;
+                        const { totalUsed } = getCardUsageInDecks(card.id);
+                        const availableStock = totalStock - totalUsed;
+                        stockBadge = `<span class="stock-badge">在庫 ${availableStock}-${totalUsed}(${totalStock})枚</span>`;
+                    }
+
                     const onclickAttr = isUnowned ? '' : `onclick="openCardEditModal('${card.id}')"`;
                     const draggableAttr = isUnowned ? '' : `draggable="true" ondragstart="handleDragStart(event, ${index})" class="draggable"`;
 
@@ -1609,6 +1628,22 @@
                 panelImage.style.display = 'none';
             }
 
+            // Display deck usage
+            const { usageMap, totalUsed } = getCardUsageInDecks(cardId);
+            const deckUsageSection = document.getElementById('deckUsageSection');
+            const deckUsageList = document.getElementById('deckUsageList');
+
+            if (totalUsed > 0) {
+                let usageHTML = '';
+                for (const [deckName, count] of Object.entries(usageMap)) {
+                    usageHTML += `<div style="margin-bottom: 0.3rem;">・${deckName}: ${count}枚</div>`;
+                }
+                deckUsageList.innerHTML = usageHTML;
+                deckUsageSection.style.display = 'block';
+            } else {
+                deckUsageSection.style.display = 'none';
+            }
+
             // Show panel
             document.getElementById('editPanelOverlay').classList.add('show');
             document.getElementById('editPanel').classList.add('show');
@@ -1759,6 +1794,41 @@
         });
 
         // ==================== DECK SYSTEM ====================
+
+        // Count card usage across all decks
+        const getCardUsageInDecks = (cardId) => {
+            const usageMap = {}; // { deckName: count }
+            let totalUsed = 0;
+
+            decks.forEach(deck => {
+                let deckTotal = 0;
+
+                // Check main deck
+                if (deck.mainDeck) {
+                    const mainCard = deck.mainDeck.find(c => c.cardId === cardId);
+                    if (mainCard) deckTotal += mainCard.quantity;
+                }
+
+                // Check extra deck
+                if (deck.extraDeck) {
+                    const extraCard = deck.extraDeck.find(c => c.cardId === cardId);
+                    if (extraCard) deckTotal += extraCard.quantity;
+                }
+
+                // Check side deck
+                if (deck.sideDeck) {
+                    const sideCard = deck.sideDeck.find(c => c.cardId === cardId);
+                    if (sideCard) deckTotal += sideCard.quantity;
+                }
+
+                if (deckTotal > 0) {
+                    usageMap[deck.name || '無題のデッキ'] = deckTotal;
+                    totalUsed += deckTotal;
+                }
+            });
+
+            return { usageMap, totalUsed };
+        };
 
         // Load all decks from Firestore
         const loadDecks = async () => {
