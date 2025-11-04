@@ -850,7 +850,7 @@
     </div>
 
     <!-- Deck List Modal -->
-    <div class="modal fade" id="deck-list-modal" tabindex="-1">
+    <div class="modal fade" id="deck-list-modal" tabindex="-1" data-bs-backdrop="static" data-bs-keyboard="false">
         <div class="modal-dialog modal-lg modal-dialog-centered modal-dialog-scrollable">
             <div class="modal-content">
                 <div class="modal-header">
@@ -902,7 +902,7 @@
                 <!-- Main Deck -->
                 <div class="mb-3">
                     <div class="d-flex justify-content-between align-items-center mb-2">
-                        <h6 class="mb-0">メインデッキ (<span id="mainDeckCount">0</span>/40~60)</h6>
+                        <h6 class="mb-0">メインデッキ (<span id="mainDeckCount">0</span>/1~60)</h6>
                         <button class="btn btn-outline-danger btn-sm" onclick="clearDeckSection('main')">
                             <i class="bi bi-trash"></i>
                         </button>
@@ -1398,15 +1398,19 @@
 
                             // Handle image error
                             img.onerror = function() {
+                                // Save parent reference before clearing
+                                const parent = this.parentElement;
+                                if (!parent) return;
+
                                 // Keep stock badge and show placeholder
-                                const stockBadge = this.parentElement.querySelector('.stock-badge');
-                                this.parentElement.innerHTML = '';
+                                const stockBadge = parent.querySelector('.stock-badge');
+                                parent.innerHTML = '';
                                 if (stockBadge) {
-                                    this.parentElement.appendChild(stockBadge);
+                                    parent.appendChild(stockBadge);
                                 }
                                 const placeholder = document.createElement('i');
                                 placeholder.className = 'bi bi-card-image card-image-placeholder';
-                                this.parentElement.appendChild(placeholder);
+                                parent.appendChild(placeholder);
                             };
 
                             // Clear placeholder and add image (keep stock badge)
@@ -1704,8 +1708,8 @@
             const extraCount = deckData.extraDeck.reduce((sum, c) => sum + c.quantity, 0);
             const sideCount = deckData.sideDeck.reduce((sum, c) => sum + c.quantity, 0);
 
-            if (mainCount < 40 || mainCount > 60) {
-                alert(`メインデッキは40~60枚である必要があります。\n現在: ${mainCount}枚`);
+            if (mainCount < 1 || mainCount > 60) {
+                alert(`メインデッキは1~60枚である必要があります。\n現在: ${mainCount}枚`);
                 return;
             }
             if (extraCount > 15) {
