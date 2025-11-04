@@ -552,29 +552,28 @@
             margin: 0.5rem 0 0 0;
         }
 
+        .deck-cards-grid {
+            display: grid;
+            grid-template-columns: repeat(5, 1fr);
+            gap: 0.5rem;
+        }
+
         .deck-card-item {
             background: white;
             border: 1px solid #dee2e6;
             border-radius: 6px;
-            padding: 0.75rem;
-            margin-bottom: 0.5rem;
-            display: flex;
-            gap: 0.75rem;
-            align-items: center;
+            padding: 0.5rem;
             transition: all 0.2s;
         }
 
         .deck-card-item:hover {
             box-shadow: 0 2px 6px rgba(0,0,0,0.1);
-        }
-
-        .deck-card-image-wrapper {
-            flex-shrink: 0;
+            transform: translateY(-2px);
         }
 
         .deck-card-image-container {
-            width: 50px;
-            height: 73px;
+            width: 100%;
+            aspect-ratio: 0.686;
             background: #f8f9fa;
             border-radius: 4px;
             overflow: hidden;
@@ -594,55 +593,46 @@
             align-items: center;
             justify-content: center;
             color: #adb5bd;
-            font-size: 1.5rem;
+            font-size: 2rem;
         }
 
         .deck-card-rarity {
             position: absolute;
-            top: 2px;
-            right: 2px;
-            background: rgba(0, 0, 0, 0.75);
+            top: 4px;
+            right: 4px;
+            background: rgba(0, 0, 0, 0.8);
             color: white;
-            padding: 1px 4px;
+            padding: 2px 6px;
             border-radius: 3px;
-            font-size: 0.6rem;
+            font-size: 0.7rem;
             font-weight: 600;
             line-height: 1.2;
         }
 
         .deck-card-code {
             position: absolute;
-            bottom: 2px;
+            bottom: 4px;
             left: 0;
             right: 0;
-            background: rgba(0, 0, 0, 0.75);
+            background: rgba(0, 0, 0, 0.8);
             color: white;
-            padding: 2px 4px;
-            font-size: 0.55rem;
+            padding: 3px 6px;
+            font-size: 0.65rem;
             text-align: center;
             line-height: 1.2;
         }
 
-        .deck-card-quantity {
-            display: flex;
-            align-items: center;
-            gap: 0.5rem;
-        }
-
-        .deck-card-quantity button {
-            width: 24px;
-            height: 24px;
-            padding: 0;
-            border-radius: 4px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-        }
-
-        .deck-card-quantity input {
-            width: 50px;
-            text-align: center;
-            padding: 0.25rem;
+        .deck-card-quantity-badge {
+            position: absolute;
+            top: 4px;
+            left: 4px;
+            background: rgba(40, 167, 69, 0.9);
+            color: white;
+            padding: 2px 6px;
+            border-radius: 3px;
+            font-size: 0.75rem;
+            font-weight: 700;
+            line-height: 1.2;
         }
 
         .deck-builder-actions {
@@ -707,6 +697,10 @@
         }
 
         @media (max-width: 768px) {
+            .deck-cards-grid {
+                grid-template-columns: repeat(3, 1fr);
+            }
+
             .deck-list-panel {
                 width: 100%;
                 left: -100%;
@@ -1011,9 +1005,6 @@
                 <div class="mb-3">
                     <div class="d-flex justify-content-between align-items-center mb-2">
                         <h6 class="mb-0">メインデッキ (<span id="mainDeckCount">0</span>/1~60)</h6>
-                        <button class="btn btn-outline-danger btn-sm" onclick="clearDeckSection('main')">
-                            <i class="bi bi-trash"></i>
-                        </button>
                     </div>
                     <div class="deck-drop-zone" id="mainDeckDropZone" data-deck-type="main">
                         <div class="deck-drop-placeholder">
@@ -1028,9 +1019,6 @@
                 <div class="mb-3">
                     <div class="d-flex justify-content-between align-items-center mb-2">
                         <h6 class="mb-0">エクストラデッキ (<span id="extraDeckCount">0</span>/0~15)</h6>
-                        <button class="btn btn-outline-danger btn-sm" onclick="clearDeckSection('extra')">
-                            <i class="bi bi-trash"></i>
-                        </button>
                     </div>
                     <div class="deck-drop-zone" id="extraDeckDropZone" data-deck-type="extra">
                         <div class="deck-drop-placeholder">
@@ -1045,9 +1033,6 @@
                 <div class="mb-3">
                     <div class="d-flex justify-content-between align-items-center mb-2">
                         <h6 class="mb-0">サイドデッキ (<span id="sideDeckCount">0</span>/0~15)</h6>
-                        <button class="btn btn-outline-danger btn-sm" onclick="clearDeckSection('side')">
-                            <i class="bi bi-trash"></i>
-                        </button>
                     </div>
                     <div class="deck-drop-zone" id="sideDeckDropZone" data-deck-type="side">
                         <div class="deck-drop-placeholder">
@@ -2004,51 +1989,44 @@
 
                 if (placeholder) placeholder.style.display = 'none';
 
-                // First render placeholder cards
-                container.innerHTML = cards.map((deckCard, index) => {
+                // First render placeholder cards in grid
+                container.innerHTML = `<div class="deck-cards-grid">` + cards.map((deckCard, index) => {
                     return `
                     <div class="deck-card-item" data-card-index="${index}">
-                        <div class="deck-card-image-wrapper">
-                            <div class="deck-card-image-container">
-                                <img data-card-name="${escapeHtml(deckCard.name)}" alt="${escapeHtml(deckCard.name)}" style="display:none;">
-                                <div class="deck-card-image-placeholder">
-                                    <i class="bi bi-card-image"></i>
-                                </div>
-                                <div class="deck-card-rarity">${escapeHtml(deckCard.rarity || '')}</div>
-                                <div class="deck-card-code">${escapeHtml(deckCard.code || '')}</div>
+                        <div class="deck-card-image-container">
+                            <img data-card-name="${escapeHtml(deckCard.name)}" alt="${escapeHtml(deckCard.name)}" style="display:none;">
+                            <div class="deck-card-image-placeholder">
+                                <i class="bi bi-card-image"></i>
                             </div>
-                        </div>
-                        <div class="deck-card-quantity">
-                            <button class="btn btn-sm btn-outline-secondary" onclick="changeDeckCardQuantity('${deckType}', ${index}, -1)">-</button>
-                            <input type="number" class="form-control form-control-sm" value="${deckCard.quantity}"
-                                   onchange="setDeckCardQuantity('${deckType}', ${index}, this.value)" min="1" max="99">
-                            <button class="btn btn-sm btn-outline-secondary" onclick="changeDeckCardQuantity('${deckType}', ${index}, 1)">+</button>
-                            <button class="btn btn-sm btn-outline-danger" onclick="removeCardFromDeck('${deckType}', ${index})">
-                                <i class="bi bi-x"></i>
-                            </button>
+                            ${deckCard.quantity > 1 ? `<div class="deck-card-quantity-badge">×${deckCard.quantity}</div>` : ''}
+                            <div class="deck-card-rarity">${escapeHtml(deckCard.rarity || '')}</div>
+                            <div class="deck-card-code">${escapeHtml(deckCard.code || '')}</div>
                         </div>
                     </div>
                 `;
-                }).join('');
+                }).join('') + `</div>`;
 
                 // Then load images asynchronously
-                for (let i = 0; i < cards.length; i++) {
-                    const card = cards[i];
-                    const cardItem = container.querySelector(`[data-card-index="${i}"]`);
-                    if (!cardItem) continue;
+                const grid = container.querySelector('.deck-cards-grid');
+                if (grid) {
+                    for (let i = 0; i < cards.length; i++) {
+                        const card = cards[i];
+                        const cardItem = grid.querySelector(`[data-card-index="${i}"]`);
+                        if (!cardItem) continue;
 
-                    const img = cardItem.querySelector('img');
-                    const placeholder = cardItem.querySelector('.deck-card-image-placeholder');
+                        const img = cardItem.querySelector('img');
+                        const placeholder = cardItem.querySelector('.deck-card-image-placeholder');
 
-                    try {
-                        const imageUrl = await getCardImageUrl(card.name);
-                        if (imageUrl) {
-                            img.src = imageUrl;
-                            img.style.display = 'block';
-                            placeholder.style.display = 'none';
+                        try {
+                            const imageUrl = await getCardImageUrl(card.name);
+                            if (imageUrl) {
+                                img.src = imageUrl;
+                                img.style.display = 'block';
+                                placeholder.style.display = 'none';
+                            }
+                        } catch (error) {
+                            console.error(`Failed to load image for ${card.name}:`, error);
                         }
-                    } catch (error) {
-                        console.error(`Failed to load image for ${card.name}:`, error);
                     }
                 }
             };
@@ -2100,54 +2078,6 @@
                 });
             }
 
-            await renderDeckCards();
-        };
-
-        // Remove card from deck
-        window.removeCardFromDeck = async (deckType, index) => {
-            if (!currentDeck) return;
-            const deckKey = deckType === 'main' ? 'mainDeck' :
-                          deckType === 'extra' ? 'extraDeck' : 'sideDeck';
-            currentDeck[deckKey].splice(index, 1);
-            await renderDeckCards();
-        };
-
-        // Change card quantity in deck
-        window.changeDeckCardQuantity = async (deckType, index, delta) => {
-            if (!currentDeck) return;
-            const deckKey = deckType === 'main' ? 'mainDeck' :
-                          deckType === 'extra' ? 'extraDeck' : 'sideDeck';
-            currentDeck[deckKey][index].quantity += delta;
-            if (currentDeck[deckKey][index].quantity < 1) {
-                currentDeck[deckKey].splice(index, 1);
-            }
-            await renderDeckCards();
-        };
-
-        // Set card quantity in deck
-        window.setDeckCardQuantity = async (deckType, index, value) => {
-            if (!currentDeck) return;
-            const deckKey = deckType === 'main' ? 'mainDeck' :
-                          deckType === 'extra' ? 'extraDeck' : 'sideDeck';
-            const qty = parseInt(value) || 1;
-            if (qty < 1) {
-                currentDeck[deckKey].splice(index, 1);
-            } else {
-                currentDeck[deckKey][index].quantity = Math.min(99, qty);
-            }
-            await renderDeckCards();
-        };
-
-        // Clear deck section
-        window.clearDeckSection = async (deckType) => {
-            if (!currentDeck) return;
-            const deckName = deckType === 'main' ? 'メインデッキ' :
-                           deckType === 'extra' ? 'エクストラデッキ' : 'サイドデッキ';
-            if (!confirm(`${deckName}のカードをすべて削除しますか？`)) return;
-
-            const deckKey = deckType === 'main' ? 'mainDeck' :
-                          deckType === 'extra' ? 'extraDeck' : 'sideDeck';
-            currentDeck[deckKey] = [];
             await renderDeckCards();
         };
 
