@@ -2189,10 +2189,18 @@
                     </div>
 
                     <div id="bulk-import-results" style="display: none;">
-                        <div class="mb-3">
+                        <div class="mb-3 d-flex justify-content-between align-items-center">
                             <h6 class="mb-0">
                                 <span id="bulk-import-count">0</span>件のカードが見つかりました
                             </h6>
+                            <div class="d-flex align-items-center gap-2">
+                                <label for="bulk-default-quantity" class="mb-0 small">初期枚数:</label>
+                                <input type="number" class="form-control form-control-sm" id="bulk-default-quantity"
+                                       min="0" max="99" value="0" style="width: 70px;">
+                                <button class="btn btn-sm btn-outline-primary" id="apply-default-quantity-btn" title="すべてのカードに初期枚数を適用">
+                                    <i class="bi bi-arrow-repeat"></i> 適用
+                                </button>
+                            </div>
                         </div>
 
                         <div id="bulk-import-card-grid" style="max-height: 600px; overflow-y: auto;">
@@ -9211,6 +9219,8 @@ Firebase Consoleで確認すべき項目:
                     }
                 };
 
+                const defaultQuantity = parseInt(document.getElementById('bulk-default-quantity').value) || 0;
+
                 bulkImportCards.forEach((card, index) => {
                     const cardItem = document.createElement('div');
                     cardItem.className = 'bulk-card-item';
@@ -9223,7 +9233,7 @@ Firebase Consoleで確認すべき項目:
                                 <label class="rarity-label">${rarity}</label>
                                 <input type="number" class="form-control form-control-sm bulk-card-rarity-quantity"
                                        data-index="${index}" data-rarity="${rarity}"
-                                       min="0" max="99" value="0">
+                                       min="0" max="99" value="${defaultQuantity}">
                             </div>
                         `).join('');
                     } else {
@@ -9295,6 +9305,15 @@ Firebase Consoleで確認すべき項目:
                     alert(`❌ エラー: ${errorMsg}\n\nURLが正しいか確認してください。`);
                 }
             }
+        });
+
+        // Apply default quantity to all rarity inputs
+        document.getElementById('apply-default-quantity-btn').addEventListener('click', () => {
+            const defaultQuantity = parseInt(document.getElementById('bulk-default-quantity').value) || 0;
+            const allQuantityInputs = document.querySelectorAll('.bulk-card-rarity-quantity');
+            allQuantityInputs.forEach(input => {
+                input.value = defaultQuantity;
+            });
         });
 
         document.getElementById('bulk-register-btn').addEventListener('click', async () => {
