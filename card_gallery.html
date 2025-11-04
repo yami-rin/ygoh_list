@@ -1506,15 +1506,15 @@
                 const matchesRarity = !rarityFilter || card.data['レアリティ'] === rarityFilter;
                 const matchesTag = !tagFilter || (card.data.tags && card.data.tags.includes(tagFilter));
 
-                // Advanced filters - use linkedDetails for card details
+                // Advanced filters - use linkedDetails for card details (English field names)
                 const details = card.data.linkedDetails || {};
-                const matchesLevel = !levelFilter || (details['レベル'] && details['レベル'].toString() === levelFilter);
-                const matchesAttribute = !attributeFilter || details['属性'] === attributeFilter;
+                const matchesLevel = !levelFilter || (details.level && details.level.toString() === levelFilter);
+                const matchesAttribute = !attributeFilter || details.attribute === attributeFilter;
 
                 // Card type filter with AND/OR logic
                 let matchesCardType = true;
                 if (cardTypeFilters.length > 0) {
-                    const cardType = details['カードタイプ'] || '';
+                    const cardType = details.cardType || '';
                     if (cardTypeSearchMode === 'and') {
                         // AND: All selected types must be present
                         matchesCardType = cardTypeFilters.every(type => cardType.includes(type));
@@ -1524,9 +1524,9 @@
                     }
                 }
 
-                const matchesRace = !raceFilter || details['種族'] === raceFilter;
-                const matchesAttack = !attackFilter || (details['攻撃力'] && details['攻撃力'].toString() === attackFilter);
-                const matchesDefense = !defenseFilter || (details['守備力'] && details['守備力'].toString() === defenseFilter);
+                const matchesRace = !raceFilter || details.race === raceFilter;
+                const matchesAttack = !attackFilter || (details.attack && details.attack.toString() === attackFilter);
+                const matchesDefense = !defenseFilter || (details.defense && details.defense.toString() === defenseFilter);
 
                 return matchesSearch && matchesRarity && matchesTag && matchesLevel && matchesAttribute && matchesCardType && matchesRace && matchesAttack && matchesDefense;
             });
