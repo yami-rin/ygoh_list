@@ -1828,7 +1828,9 @@
                         if (!container) return;
 
                         try {
-                            const imageUrl = await getCardImageUrl(card.data['名前']);
+                            // Decode HTML entities in card name before fetching image
+                            const decodedCardName = decodeHtmlEntities(card.data['名前']);
+                            const imageUrl = await getCardImageUrl(decodedCardName);
 
                             // Check if this rendering is still valid (page hasn't changed)
                             if (parseInt(container.dataset.renderingId) !== thisRenderingId) {
@@ -1839,7 +1841,7 @@
                                 // Create image element
                                 const img = document.createElement('img');
                                 img.src = imageUrl;
-                                img.alt = card.data['名前'];
+                                img.alt = decodedCardName;
                                 img.loading = 'lazy';
 
                                 // Handle image error
@@ -2022,7 +2024,7 @@
             document.getElementById('panelRarity').textContent = card.data['レアリティ'] || '-';
 
             // Load card image
-            const imageUrl = await getCardImageUrl(card.data['名前']);
+            const imageUrl = await getCardImageUrl(decodedName);
             const panelImage = document.getElementById('panelCardImage');
             if (imageUrl) {
                 panelImage.src = imageUrl;
@@ -2647,9 +2649,11 @@
                     if (!cardElement) continue;
 
                     try {
-                        const imageUrl = await getCardImageUrl(card.name);
+                        // Decode HTML entities in card name before fetching image
+                        const decodedCardName = decodeHtmlEntities(card.name);
+                        const imageUrl = await getCardImageUrl(decodedCardName);
                         if (imageUrl) {
-                            cardElement.innerHTML = `<img src="${imageUrl}" alt="${escapeHtml(card.name)}">`;
+                            cardElement.innerHTML = `<img src="${imageUrl}" alt="${escapeHtml(decodedCardName)}">`;
                         }
                     } catch (error) {
                         console.error(`Failed to load image for ${card.name}:`, error);
@@ -2716,11 +2720,12 @@
 
                 // First render placeholder cards in grid (repeat each card by its quantity)
                 container.innerHTML = `<div class="deck-cards-grid">` + cards.flatMap((deckCard, index) => {
+                    const decodedCardName = decodeHtmlEntities(deckCard.name);
                     return Array(deckCard.quantity).fill(null).map((_, copyIndex) => {
                         return `
                         <div class="deck-card-item" data-card-index="${index}" data-copy-index="${copyIndex}" data-deck-type="${deckType}" draggable="true">
                             <div class="deck-card-image-container">
-                                <img data-card-name="${escapeHtml(deckCard.name)}" alt="${escapeHtml(deckCard.name)}" style="display:none;">
+                                <img data-card-name="${escapeHtml(decodedCardName)}" alt="${escapeHtml(decodedCardName)}" style="display:none;">
                                 <div class="deck-card-image-placeholder">
                                     <i class="bi bi-card-image"></i>
                                 </div>
@@ -2740,7 +2745,9 @@
                         const cardItems = grid.querySelectorAll(`[data-card-index="${i}"]`);
 
                         try {
-                            const imageUrl = await getCardImageUrl(card.name);
+                            // Decode HTML entities in card name before fetching image
+                            const decodedCardName = decodeHtmlEntities(card.name);
+                            const imageUrl = await getCardImageUrl(decodedCardName);
                             if (imageUrl) {
                                 // Apply the same image to all copies of this card
                                 cardItems.forEach(cardItem => {
