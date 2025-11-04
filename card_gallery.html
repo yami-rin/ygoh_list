@@ -899,18 +899,55 @@
 
             <!-- Deck Cards -->
             <div class="deck-cards-section">
-                <div class="d-flex justify-content-between align-items-center mb-2">
-                    <h6 class="mb-0">デッキ内容 (<span id="deckCardCount">0</span>枚)</h6>
-                    <button class="btn btn-outline-danger btn-sm" id="clearDeckBtn">
-                        <i class="bi bi-trash"></i> クリア
-                    </button>
-                </div>
-                <div class="deck-drop-zone" id="deckDropZone">
-                    <div class="deck-drop-placeholder">
-                        <i class="bi bi-plus-circle" style="font-size: 2rem;"></i>
-                        <p>カードをドラッグ&ドロップ</p>
+                <!-- Main Deck -->
+                <div class="mb-3">
+                    <div class="d-flex justify-content-between align-items-center mb-2">
+                        <h6 class="mb-0">メインデッキ (<span id="mainDeckCount">0</span>/40~60)</h6>
+                        <button class="btn btn-outline-danger btn-sm" onclick="clearDeckSection('main')">
+                            <i class="bi bi-trash"></i>
+                        </button>
                     </div>
-                    <div id="deckCardsList"></div>
+                    <div class="deck-drop-zone" id="mainDeckDropZone" data-deck-type="main">
+                        <div class="deck-drop-placeholder">
+                            <i class="bi bi-plus-circle"></i>
+                            <p class="small mb-0">メインデッキ (40~60枚)</p>
+                        </div>
+                        <div id="mainDeckCardsList"></div>
+                    </div>
+                </div>
+
+                <!-- Extra Deck -->
+                <div class="mb-3">
+                    <div class="d-flex justify-content-between align-items-center mb-2">
+                        <h6 class="mb-0">エクストラデッキ (<span id="extraDeckCount">0</span>/0~15)</h6>
+                        <button class="btn btn-outline-danger btn-sm" onclick="clearDeckSection('extra')">
+                            <i class="bi bi-trash"></i>
+                        </button>
+                    </div>
+                    <div class="deck-drop-zone" id="extraDeckDropZone" data-deck-type="extra">
+                        <div class="deck-drop-placeholder">
+                            <i class="bi bi-plus-circle"></i>
+                            <p class="small mb-0">エクストラデッキ (0~15枚)</p>
+                        </div>
+                        <div id="extraDeckCardsList"></div>
+                    </div>
+                </div>
+
+                <!-- Side Deck -->
+                <div class="mb-3">
+                    <div class="d-flex justify-content-between align-items-center mb-2">
+                        <h6 class="mb-0">サイドデッキ (<span id="sideDeckCount">0</span>/0~15)</h6>
+                        <button class="btn btn-outline-danger btn-sm" onclick="clearDeckSection('side')">
+                            <i class="bi bi-trash"></i>
+                        </button>
+                    </div>
+                    <div class="deck-drop-zone" id="sideDeckDropZone" data-deck-type="side">
+                        <div class="deck-drop-placeholder">
+                            <i class="bi bi-plus-circle"></i>
+                            <p class="small mb-0">サイドデッキ (0~15枚)</p>
+                        </div>
+                        <div id="sideDeckCardsList"></div>
+                    </div>
                 </div>
             </div>
 
@@ -1456,6 +1493,9 @@
         };
 
         window.openCardEditModal = async (cardId) => {
+            // Don't open edit modal if deck builder is active
+            if (currentDeck) return;
+
             // Find the card in current list
             const card = allCards.find(c => c.id === cardId);
             if (!card) return;
@@ -1653,9 +1693,29 @@
             const deckData = {
                 name: document.getElementById('deckName').value || '無題のデッキ',
                 memo: document.getElementById('deckMemo').value || '',
-                cards: currentDeck.cards || [],
+                mainDeck: currentDeck.mainDeck || [],
+                extraDeck: currentDeck.extraDeck || [],
+                sideDeck: currentDeck.sideDeck || [],
                 updatedAt: new Date().toISOString()
             };
+
+            // Validate deck counts
+            const mainCount = deckData.mainDeck.reduce((sum, c) => sum + c.quantity, 0);
+            const extraCount = deckData.extraDeck.reduce((sum, c) => sum + c.quantity, 0);
+            const sideCount = deckData.sideDeck.reduce((sum, c) => sum + c.quantity, 0);
+
+            if (mainCount < 40 || mainCount > 60) {
+                alert(`メインデッキは40~60枚である必要があります。\n現在: ${mainCount}枚`);
+                return;
+            }
+            if (extraCount > 15) {
+                alert(`エクストラデッキは0~15枚である必要があります。\n現在: ${extraCount}枚`);
+                return;
+            }
+            if (sideCount > 15) {
+                alert(`サイドデッキは0~15枚である必要があります。\n現在: ${sideCount}枚`);
+                return;
+            }
 
             try {
                 if (currentDeck.id) {
@@ -1700,7 +1760,7 @@
 
         // Open deck builder panel
         const openDeckBuilder = (deck = null) => {
-            currentDeck = deck || { cards: [] };
+            currentDeck = deck || { mainDeck: [], extraDeck: [], sideDeck: [] };
 
             document.getElementById('deckName').value = currentDeck.name || '';
             document.getElementById('deckMemo').value = currentDeck.memo || '';
@@ -1737,8 +1797,11 @@
             }
 
             container.innerHTML = decks.map(deck => {
-                const cardCount = deck.cards ? deck.cards.reduce((sum, c) => sum + c.quantity, 0) : 0;
-                const cardTypes = deck.cards ? deck.cards.length : 0;
+                const mainCount = deck.mainDeck ? deck.mainDeck.reduce((sum, c) => sum + c.quantity, 0) : 0;
+                const extraCount = deck.extraDeck ? deck.extraDeck.reduce((sum, c) => sum + c.quantity, 0) : 0;
+                const sideCount = deck.sideDeck ? deck.sideDeck.reduce((sum, c) => sum + c.quantity, 0) : 0;
+                const cardCount = mainCount + extraCount + sideCount;
+                const cardTypes = (deck.mainDeck?.length || 0) + (deck.extraDeck?.length || 0) + (deck.sideDeck?.length || 0);
 
                 return `
                     <div class="deck-list-item" onclick="editDeck('${deck.id}')">
@@ -1770,51 +1833,79 @@
 
         // Render cards in deck builder
         const renderDeckCards = () => {
-            const container = document.getElementById('deckCardsList');
-            const placeholder = document.querySelector('.deck-drop-placeholder');
+            if (!currentDeck) return;
 
-            if (!currentDeck || !currentDeck.cards || currentDeck.cards.length === 0) {
-                container.innerHTML = '';
-                if (placeholder) placeholder.style.display = 'block';
-                document.getElementById('deckCardCount').textContent = '0';
-                return;
-            }
+            // Helper function to render a deck section
+            const renderDeckSection = (deckType, cards, containerId, countId) => {
+                const container = document.getElementById(containerId);
+                const placeholder = document.querySelector(`#${containerId.replace('CardsList', 'DropZone')} .deck-drop-placeholder`);
+                const count = cards.reduce((sum, c) => sum + c.quantity, 0);
 
-            if (placeholder) placeholder.style.display = 'none';
+                document.getElementById(countId).textContent = count;
 
-            const totalCards = currentDeck.cards.reduce((sum, c) => sum + c.quantity, 0);
-            document.getElementById('deckCardCount').textContent = totalCards;
+                if (cards.length === 0) {
+                    container.innerHTML = '';
+                    if (placeholder) placeholder.style.display = 'block';
+                    return;
+                }
 
-            container.innerHTML = currentDeck.cards.map((deckCard, index) => `
-                <div class="deck-card-item">
-                    <div class="deck-card-name">${escapeHtml(deckCard.name)}</div>
-                    <div class="deck-card-quantity">
-                        <button class="btn btn-sm btn-outline-secondary" onclick="changeDeckCardQuantity(${index}, -1)">-</button>
-                        <input type="number" class="form-control form-control-sm" value="${deckCard.quantity}"
-                               onchange="setDeckCardQuantity(${index}, this.value)" min="1" max="99">
-                        <button class="btn btn-sm btn-outline-secondary" onclick="changeDeckCardQuantity(${index}, 1)">+</button>
-                        <button class="btn btn-sm btn-outline-danger" onclick="removeCardFromDeck(${index})">
-                            <i class="bi bi-x"></i>
-                        </button>
+                if (placeholder) placeholder.style.display = 'none';
+
+                container.innerHTML = cards.map((deckCard, index) => `
+                    <div class="deck-card-item">
+                        <div class="deck-card-name">${escapeHtml(deckCard.name)}</div>
+                        <div class="deck-card-quantity">
+                            <button class="btn btn-sm btn-outline-secondary" onclick="changeDeckCardQuantity('${deckType}', ${index}, -1)">-</button>
+                            <input type="number" class="form-control form-control-sm" value="${deckCard.quantity}"
+                                   onchange="setDeckCardQuantity('${deckType}', ${index}, this.value)" min="1" max="99">
+                            <button class="btn btn-sm btn-outline-secondary" onclick="changeDeckCardQuantity('${deckType}', ${index}, 1)">+</button>
+                            <button class="btn btn-sm btn-outline-danger" onclick="removeCardFromDeck('${deckType}', ${index})">
+                                <i class="bi bi-x"></i>
+                            </button>
+                        </div>
                     </div>
-                </div>
-            `).join('');
+                `).join('');
+            };
+
+            // Render each section
+            renderDeckSection('main', currentDeck.mainDeck || [], 'mainDeckCardsList', 'mainDeckCount');
+            renderDeckSection('extra', currentDeck.extraDeck || [], 'extraDeckCardsList', 'extraDeckCount');
+            renderDeckSection('side', currentDeck.sideDeck || [], 'sideDeckCardsList', 'sideDeckCount');
         };
 
         // Add card to deck
-        const addCardToDeck = (cardData) => {
+        const addCardToDeck = (cardData, deckType) => {
             if (!currentDeck) {
                 alert('デッキを開いてください');
                 return;
             }
 
-            // Check if card already exists
-            const existingIndex = currentDeck.cards.findIndex(c => c.cardId === cardData.id);
+            // Determine which deck to add to
+            const deckKey = deckType === 'main' ? 'mainDeck' :
+                          deckType === 'extra' ? 'extraDeck' : 'sideDeck';
+
+            if (!currentDeck[deckKey]) {
+                currentDeck[deckKey] = [];
+            }
+
+            // Check count limits before adding
+            const currentCount = currentDeck[deckKey].reduce((sum, c) => sum + c.quantity, 0);
+            const limit = deckType === 'main' ? 60 : 15;
+
+            if (currentCount >= limit) {
+                const deckName = deckType === 'main' ? 'メインデッキ' :
+                               deckType === 'extra' ? 'エクストラデッキ' : 'サイドデッキ';
+                alert(`${deckName}は${limit}枚までです。`);
+                return;
+            }
+
+            // Check if card already exists in this deck
+            const existingIndex = currentDeck[deckKey].findIndex(c => c.cardId === cardData.id);
 
             if (existingIndex >= 0) {
-                currentDeck.cards[existingIndex].quantity++;
+                currentDeck[deckKey][existingIndex].quantity++;
             } else {
-                currentDeck.cards.push({
+                currentDeck[deckKey].push({
                     cardId: cardData.id,
                     name: cardData.data['名前'],
                     code: cardData.data['型番'],
@@ -1827,64 +1918,82 @@
         };
 
         // Remove card from deck
-        window.removeCardFromDeck = (index) => {
+        window.removeCardFromDeck = (deckType, index) => {
             if (!currentDeck) return;
-            currentDeck.cards.splice(index, 1);
+            const deckKey = deckType === 'main' ? 'mainDeck' :
+                          deckType === 'extra' ? 'extraDeck' : 'sideDeck';
+            currentDeck[deckKey].splice(index, 1);
             renderDeckCards();
         };
 
         // Change card quantity in deck
-        window.changeDeckCardQuantity = (index, delta) => {
+        window.changeDeckCardQuantity = (deckType, index, delta) => {
             if (!currentDeck) return;
-            currentDeck.cards[index].quantity += delta;
-            if (currentDeck.cards[index].quantity < 1) {
-                currentDeck.cards.splice(index, 1);
+            const deckKey = deckType === 'main' ? 'mainDeck' :
+                          deckType === 'extra' ? 'extraDeck' : 'sideDeck';
+            currentDeck[deckKey][index].quantity += delta;
+            if (currentDeck[deckKey][index].quantity < 1) {
+                currentDeck[deckKey].splice(index, 1);
             }
             renderDeckCards();
         };
 
         // Set card quantity in deck
-        window.setDeckCardQuantity = (index, value) => {
+        window.setDeckCardQuantity = (deckType, index, value) => {
             if (!currentDeck) return;
+            const deckKey = deckType === 'main' ? 'mainDeck' :
+                          deckType === 'extra' ? 'extraDeck' : 'sideDeck';
             const qty = parseInt(value) || 1;
             if (qty < 1) {
-                currentDeck.cards.splice(index, 1);
+                currentDeck[deckKey].splice(index, 1);
             } else {
-                currentDeck.cards[index].quantity = Math.min(99, qty);
+                currentDeck[deckKey][index].quantity = Math.min(99, qty);
             }
             renderDeckCards();
         };
 
-        // Clear all cards from deck
-        const clearDeck = () => {
+        // Clear deck section
+        window.clearDeckSection = (deckType) => {
             if (!currentDeck) return;
-            if (!confirm('デッキ内のカードをすべて削除しますか？')) return;
-            currentDeck.cards = [];
+            const deckName = deckType === 'main' ? 'メインデッキ' :
+                           deckType === 'extra' ? 'エクストラデッキ' : 'サイドデッキ';
+            if (!confirm(`${deckName}のカードをすべて削除しますか？`)) return;
+
+            const deckKey = deckType === 'main' ? 'mainDeck' :
+                          deckType === 'extra' ? 'extraDeck' : 'sideDeck';
+            currentDeck[deckKey] = [];
             renderDeckCards();
         };
 
         // Setup drag and drop
         const setupDragAndDrop = () => {
-            const dropZone = document.getElementById('deckDropZone');
+            const setupDropZone = (dropZoneId, deckType) => {
+                const dropZone = document.getElementById(dropZoneId);
+                if (!dropZone) return;
 
-            dropZone.addEventListener('dragover', (e) => {
-                e.preventDefault();
-                dropZone.classList.add('drag-over');
-            });
+                dropZone.addEventListener('dragover', (e) => {
+                    e.preventDefault();
+                    dropZone.classList.add('drag-over');
+                });
 
-            dropZone.addEventListener('dragleave', () => {
-                dropZone.classList.remove('drag-over');
-            });
+                dropZone.addEventListener('dragleave', () => {
+                    dropZone.classList.remove('drag-over');
+                });
 
-            dropZone.addEventListener('drop', (e) => {
-                e.preventDefault();
-                dropZone.classList.remove('drag-over');
+                dropZone.addEventListener('drop', (e) => {
+                    e.preventDefault();
+                    dropZone.classList.remove('drag-over');
 
-                if (draggedCard) {
-                    addCardToDeck(draggedCard);
-                    draggedCard = null;
-                }
-            });
+                    if (draggedCard) {
+                        addCardToDeck(draggedCard, deckType);
+                        draggedCard = null;
+                    }
+                });
+            };
+
+            setupDropZone('mainDeckDropZone', 'main');
+            setupDropZone('extraDeckDropZone', 'extra');
+            setupDropZone('sideDeckDropZone', 'side');
         };
 
         // Event listeners for deck system
@@ -1905,7 +2014,6 @@
 
         document.getElementById('saveDeckBtn').addEventListener('click', saveDeck);
         document.getElementById('deleteDeckBtn').addEventListener('click', deleteDeck);
-        document.getElementById('clearDeckBtn').addEventListener('click', clearDeck);
 
         // Initialize drag and drop
         setupDragAndDrop();
