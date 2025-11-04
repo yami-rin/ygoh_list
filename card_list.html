@@ -2173,7 +2173,8 @@
                             </button>
                         </div>
                         <small class="text-body-secondary">
-                            遊戯王公式DBで検索結果のURLを貼り付けてください。
+                            遊戯王公式DBで検索結果のURLを貼り付けてください。<br>
+                            <span class="text-warning">⚠️ 初回アクセス時は、サーバー起動のため1分ほど時間がかかります。</span>
                         </small>
                     </div>
 
@@ -2181,7 +2182,10 @@
                         <div class="spinner-border text-primary" role="status">
                             <span class="visually-hidden">読み込み中...</span>
                         </div>
-                        <p class="mt-2">カード情報を取得中...</p>
+                        <p class="mt-2 mb-1">カード情報を取得中...</p>
+                        <small class="text-muted">
+                            ※初回アクセス時は、サーバーの起動に1分ほどかかる場合があります
+                        </small>
                     </div>
 
                     <div id="bulk-import-results" style="display: none;">
@@ -9121,9 +9125,21 @@ Firebase Consoleで確認すべき項目:
 
             try {
                 const proxyUrl = `https://ygoh-list.onrender.com/card-list?url=${encodeURIComponent(url)}`;
-                const response = await fetch(proxyUrl);
+
+                // Fetch with timeout (60 seconds for server startup)
+                const controller = new AbortController();
+                const timeoutId = setTimeout(() => controller.abort(), 60000);
+
+                const response = await fetch(proxyUrl, {
+                    signal: controller.signal
+                });
+                clearTimeout(timeoutId);
 
                 if (!response.ok) {
+                    // Check if it's a server error that might indicate startup
+                    if (response.status >= 500 && response.status < 600) {
+                        throw new Error('SERVER_STARTING');
+                    }
                     throw new Error('カード情報の取得に失敗しました。');
                 }
 
@@ -9255,8 +9271,26 @@ Firebase Consoleで確認すべき項目:
 
             } catch (error) {
                 console.error('Error fetching cards:', error);
-                alert(error.message || 'カード情報の取得に失敗しました。');
                 loadingDiv.style.display = 'none';
+
+                // Handle different error types
+                if (error.name === 'AbortError') {
+                    // Timeout error
+                    if (confirm('⏱️ サーバーの起動に時間がかかっています。\n\nRenderの無料プランのため、初回アクセス時はサーバーが起動するまで1分ほどかかる場合があります。\n\nもう一度試しますか？')) {
+                        document.getElementById('fetch-cards-btn').click();
+                    }
+                } else if (error.message === 'SERVER_STARTING') {
+                    // Server error (likely starting up)
+                    if (confirm('🚀 サーバーを起動中です...\n\nRenderの無料プランのため、しばらく時間がかかります。\n少し待ってから、もう一度試しますか？（推奨: 30秒後）')) {
+                        setTimeout(() => {
+                            document.getElementById('fetch-cards-btn').click();
+                        }, 2000);
+                    }
+                } else {
+                    // Other errors
+                    const errorMsg = error.message || 'カード情報の取得に失敗しました。';
+                    alert(`❌ エラー: ${errorMsg}\n\nURLが正しいか確認してください。`);
+                }
             }
         });
 
