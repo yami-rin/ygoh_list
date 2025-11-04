@@ -8731,9 +8731,12 @@ Firebase Consoleで確認すべき項目:
         // VIP Membership System (Secured)
         // ============================================
 
-        // SHA-256 hash of valid serial number
-        // Serial number is not stored in source code for security
-        const VALID_SERIAL_HASH = '1a0475ee08c7580c51f9492b1f26dbff0528c4754a023adb532e6a437b747216';
+        // SHA-256 hashes of valid serial numbers
+        // Serial numbers are not stored in source code for security
+        const VALID_SERIAL_HASHES = [
+            '1a0475ee08c7580c51f9492b1f26dbff0528c4754a023adb532e6a437b747216', // Original serial
+            '4abe6d8174c8939aa058f78639c49b3ff7c51898c9386dcf007d06d3dc8537d6'  // 0P3NC48DG411ERY
+        ];
 
         let isVipMember = false;
 
@@ -8871,7 +8874,7 @@ Firebase Consoleで確認すべき項目:
             // Validate serial number by hashing
             const serialHash = await sha256(serial);
 
-            if (serialHash === VALID_SERIAL_HASH) {
+            if (VALID_SERIAL_HASHES.includes(serialHash)) {
                 // Save VIP status
                 const vipData = {
                     active: true,
