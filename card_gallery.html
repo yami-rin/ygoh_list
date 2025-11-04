@@ -736,6 +736,7 @@
 
         /* Advanced filter button styles */
         .level-btn.active,
+        .attribute-btn.active,
         .race-btn.active,
         .card-type-btn.active {
             background-color: #0d6efd !important;
@@ -744,6 +745,7 @@
         }
 
         .level-btn:hover,
+        .attribute-btn:hover,
         .race-btn:hover,
         .card-type-btn:hover {
             background-color: #0d6efd;
@@ -863,16 +865,18 @@
                         <!-- Attribute -->
                         <div class="col-12">
                             <label class="form-label small fw-bold">属性</label>
-                            <select class="form-select form-select-sm" id="attribute-filter">
-                                <option value="">すべて</option>
-                                <option value="闇">闇</option>
-                                <option value="光">光</option>
-                                <option value="地">地</option>
-                                <option value="水">水</option>
-                                <option value="炎">炎</option>
-                                <option value="風">風</option>
-                                <option value="神">神</option>
-                            </select>
+                            <div class="d-flex flex-wrap gap-1">
+                                <button type="button" class="btn btn-sm btn-outline-secondary attribute-btn active" data-attribute="">
+                                    すべて
+                                </button>
+                                <button type="button" class="btn btn-sm btn-outline-primary attribute-btn" data-attribute="闇">闇</button>
+                                <button type="button" class="btn btn-sm btn-outline-primary attribute-btn" data-attribute="光">光</button>
+                                <button type="button" class="btn btn-sm btn-outline-primary attribute-btn" data-attribute="地">地</button>
+                                <button type="button" class="btn btn-sm btn-outline-primary attribute-btn" data-attribute="水">水</button>
+                                <button type="button" class="btn btn-sm btn-outline-primary attribute-btn" data-attribute="炎">炎</button>
+                                <button type="button" class="btn btn-sm btn-outline-primary attribute-btn" data-attribute="風">風</button>
+                                <button type="button" class="btn btn-sm btn-outline-primary attribute-btn" data-attribute="神">神</button>
+                            </div>
                         </div>
                         <!-- Card Type -->
                         <div class="col-12">
@@ -1237,6 +1241,7 @@
 
         // Advanced filter state
         let selectedLevel = '';
+        let selectedAttribute = '';
         let selectedRace = '';
         let selectedCardTypes = []; // Array for multiple card types
         let cardTypeSearchMode = 'and'; // 'and' or 'or'
@@ -1433,11 +1438,25 @@
 
             // Advanced filters
             const levelFilter = selectedLevel;
-            const attributeFilter = document.getElementById('attribute-filter').value;
+            const attributeFilter = selectedAttribute;
             const cardTypeFilters = selectedCardTypes; // Array of selected card types
             const raceFilter = selectedRace;
-            const attackFilter = document.getElementById('attack-filter').value.trim();
-            const defenseFilter = document.getElementById('defense-filter').value.trim();
+            const attackFilter = document.getElementById('attack-filter') ? document.getElementById('attack-filter').value.trim() : '';
+            const defenseFilter = document.getElementById('defense-filter') ? document.getElementById('defense-filter').value.trim() : '';
+
+            // Debug logging
+            console.log('Filter values:', {
+                searchTerm,
+                rarityFilter,
+                tagFilter,
+                levelFilter,
+                attributeFilter,
+                cardTypeFilters,
+                raceFilter,
+                attackFilter,
+                defenseFilter,
+                allCardsCount: allCards.length
+            });
 
             // Get possible card names from hiragana reading
             let possibleCardNames = [];
@@ -1501,6 +1520,8 @@
 
                 return matchesSearch && matchesRarity && matchesTag && matchesLevel && matchesAttribute && matchesCardType && matchesRace && matchesAttack && matchesDefense;
             });
+
+            console.log('Filtered cards count:', filteredCards.length);
 
             // Add unowned cards if checkbox is checked
             if (showUnowned) {
@@ -1880,27 +1901,39 @@
             document.getElementById('search-input').value = '';
             document.getElementById('rarity-filter').value = '';
             document.getElementById('tag-filter').value = '';
-            document.getElementById('attribute-filter').value = '';
-            document.getElementById('attack-filter').value = '';
-            document.getElementById('defense-filter').value = '';
+            if (document.getElementById('attack-filter')) document.getElementById('attack-filter').value = '';
+            if (document.getElementById('defense-filter')) document.getElementById('defense-filter').value = '';
 
             // Clear level filter
             selectedLevel = '';
             document.querySelectorAll('.level-btn').forEach(btn => btn.classList.remove('active'));
-            document.querySelector('.level-btn[data-level=""]').classList.add('active');
+            if (document.querySelector('.level-btn[data-level=""]')) {
+                document.querySelector('.level-btn[data-level=""]').classList.add('active');
+            }
+
+            // Clear attribute filter
+            selectedAttribute = '';
+            document.querySelectorAll('.attribute-btn').forEach(btn => btn.classList.remove('active'));
+            if (document.querySelector('.attribute-btn[data-attribute=""]')) {
+                document.querySelector('.attribute-btn[data-attribute=""]').classList.add('active');
+            }
 
             // Clear race filter
             selectedRace = '';
             document.querySelectorAll('.race-btn').forEach(btn => btn.classList.remove('active'));
-            document.querySelector('.race-btn[data-race=""]').classList.add('active');
+            if (document.querySelector('.race-btn[data-race=""]')) {
+                document.querySelector('.race-btn[data-race=""]').classList.add('active');
+            }
 
             // Clear card type filter
             selectedCardTypes = [];
             document.querySelectorAll('.card-type-btn').forEach(btn => btn.classList.remove('active'));
 
             // Reset card type mode to AND
-            document.getElementById('card-type-and').checked = true;
-            cardTypeSearchMode = 'and';
+            if (document.getElementById('card-type-and')) {
+                document.getElementById('card-type-and').checked = true;
+                cardTypeSearchMode = 'and';
+            }
 
             applyFilters();
             renderCards();
@@ -1911,6 +1944,17 @@
             btn.addEventListener('click', () => {
                 selectedLevel = btn.dataset.level;
                 document.querySelectorAll('.level-btn').forEach(b => b.classList.remove('active'));
+                btn.classList.add('active');
+                applyFilters();
+                renderCards();
+            });
+        });
+
+        // Attribute filter buttons
+        document.querySelectorAll('.attribute-btn').forEach(btn => {
+            btn.addEventListener('click', () => {
+                selectedAttribute = btn.dataset.attribute;
+                document.querySelectorAll('.attribute-btn').forEach(b => b.classList.remove('active'));
                 btn.classList.add('active');
                 applyFilters();
                 renderCards();
@@ -1960,21 +2004,20 @@
             });
         });
 
-        // Other advanced filters
-        document.getElementById('attribute-filter').addEventListener('change', () => {
-            applyFilters();
-            renderCards();
-        });
+        // Other advanced filters (attack and defense)
+        if (document.getElementById('attack-filter')) {
+            document.getElementById('attack-filter').addEventListener('input', () => {
+                applyFilters();
+                renderCards();
+            });
+        }
 
-        document.getElementById('attack-filter').addEventListener('input', () => {
-            applyFilters();
-            renderCards();
-        });
-
-        document.getElementById('defense-filter').addEventListener('input', () => {
-            applyFilters();
-            renderCards();
-        });
+        if (document.getElementById('defense-filter')) {
+            document.getElementById('defense-filter').addEventListener('input', () => {
+                applyFilters();
+                renderCards();
+            });
+        }
 
         document.getElementById('show-unowned-cards').addEventListener('change', () => {
             applyFilters();
