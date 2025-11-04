@@ -41,6 +41,11 @@
             display: grid;
             gap: 1rem;
             margin-bottom: 2rem;
+            transition: margin-left 0.3s ease;
+        }
+
+        .card-grid.deck-builder-open {
+            margin-left: 420px;
         }
 
         .card-grid.size-small {
@@ -402,52 +407,22 @@
         }
 
         /* Deck Builder Panel Styles */
-        .deck-builder-overlay {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(0,0,0,0.5);
-            z-index: 1040;
-            display: none;
-        }
-
-        .deck-builder-overlay.active {
-            display: block;
-        }
-
         /* Deck List Panel Styles */
-        .deck-list-overlay {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(0,0,0,0.5);
-            z-index: 1060;
-            display: none;
-        }
-
-        .deck-list-overlay.active {
-            display: block;
-        }
-
         .deck-list-panel {
             position: fixed;
             top: 0;
-            right: -500px;
-            width: 500px;
+            left: -450px;
+            width: 450px;
             height: 100%;
             background: white;
-            box-shadow: -4px 0 10px rgba(0,0,0,0.2);
-            z-index: 1070;
-            transition: right 0.3s ease;
+            box-shadow: 4px 0 10px rgba(0,0,0,0.2);
+            z-index: 1060;
+            transition: left 0.3s ease;
             overflow-y: auto;
         }
 
         .deck-list-panel.active {
-            right: 0;
+            left: 0;
         }
 
         .deck-list-header {
@@ -584,7 +559,7 @@
             padding: 0.75rem;
             margin-bottom: 0.5rem;
             display: flex;
-            justify-content: space-between;
+            gap: 0.75rem;
             align-items: center;
             transition: all 0.2s;
         }
@@ -593,11 +568,43 @@
             box-shadow: 0 2px 6px rgba(0,0,0,0.1);
         }
 
+        .deck-card-image-container {
+            width: 50px;
+            height: 73px;
+            background: #f8f9fa;
+            border-radius: 4px;
+            overflow: hidden;
+            flex-shrink: 0;
+            position: relative;
+        }
+
+        .deck-card-image-container img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .deck-card-image-placeholder {
+            width: 100%;
+            height: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #adb5bd;
+            font-size: 1.5rem;
+        }
+
+        .deck-card-info {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+        }
+
         .deck-card-name {
             font-weight: 600;
-            font-size: 0.9rem;
-            flex: 1;
-            margin-right: 0.5rem;
+            font-size: 0.85rem;
+            line-height: 1.2;
         }
 
         .deck-card-quantity {
@@ -680,11 +687,11 @@
         @media (max-width: 768px) {
             .deck-list-panel {
                 width: 100%;
-                right: -100%;
+                left: -100%;
             }
 
             .deck-list-panel.active {
-                right: 0;
+                left: 0;
             }
 
             .deck-builder-panel {
@@ -712,6 +719,10 @@
 
             .edit-panel-right {
                 flex: none;
+            }
+
+            .card-grid.deck-builder-open {
+                margin-left: 0;
             }
         }
     </style>
@@ -931,7 +942,6 @@
     </div>
 
     <!-- Deck List Side Panel -->
-    <div class="deck-list-overlay" id="deckListOverlay"></div>
     <div class="deck-list-panel" id="deckListPanel">
         <div class="deck-list-header">
             <h4><i class="bi bi-stack"></i> デッキ管理</h4>
@@ -953,7 +963,6 @@
     </div>
 
     <!-- Deck Builder Side Panel -->
-    <div class="deck-builder-overlay" id="deckBuilderOverlay"></div>
     <div class="deck-builder-panel" id="deckBuilderPanel">
         <div class="deck-builder-header">
             <h4 id="deckBuilderTitle">デッキ編集</h4>
@@ -1081,7 +1090,6 @@
         let decks = []; // All user's decks
         let currentDeck = null; // Currently editing deck
         const deckListPanel = document.getElementById('deckListPanel');
-        const deckListOverlay = document.getElementById('deckListOverlay');
         let draggedCard = null; // Card being dragged
 
         // Load card reading data
@@ -1843,13 +1851,11 @@
         // Open deck list panel
         const openDeckList = () => {
             deckListPanel.classList.add('active');
-            deckListOverlay.classList.add('active');
         };
 
         // Close deck list panel
         const closeDeckList = () => {
             deckListPanel.classList.remove('active');
-            deckListOverlay.classList.remove('active');
         };
 
         // Open deck builder panel
@@ -1863,7 +1869,7 @@
             renderDeckCards();
 
             document.getElementById('deckBuilderPanel').classList.add('active');
-            document.getElementById('deckBuilderOverlay').classList.add('active');
+            document.querySelector('.card-grid').classList.add('deck-builder-open');
 
             // Hide delete button for new decks
             document.getElementById('deleteDeckBtn').style.display = deck && deck.id ? 'block' : 'none';
@@ -1872,7 +1878,7 @@
         // Close deck builder panel
         const closeDeckBuilder = () => {
             document.getElementById('deckBuilderPanel').classList.remove('active');
-            document.getElementById('deckBuilderOverlay').classList.remove('active');
+            document.querySelector('.card-grid').classList.remove('deck-builder-open');
             currentDeck = null;
         };
 
@@ -1945,20 +1951,32 @@
 
                 if (placeholder) placeholder.style.display = 'none';
 
-                container.innerHTML = cards.map((deckCard, index) => `
+                container.innerHTML = cards.map((deckCard, index) => {
+                    const imageUrl = `https://ygoh-list.onrender.com/api/card-image/${encodeURIComponent(deckCard.code || '')}`;
+                    return `
                     <div class="deck-card-item">
-                        <div class="deck-card-name">${escapeHtml(deckCard.name)}</div>
-                        <div class="deck-card-quantity">
-                            <button class="btn btn-sm btn-outline-secondary" onclick="changeDeckCardQuantity('${deckType}', ${index}, -1)">-</button>
-                            <input type="number" class="form-control form-control-sm" value="${deckCard.quantity}"
-                                   onchange="setDeckCardQuantity('${deckType}', ${index}, this.value)" min="1" max="99">
-                            <button class="btn btn-sm btn-outline-secondary" onclick="changeDeckCardQuantity('${deckType}', ${index}, 1)">+</button>
-                            <button class="btn btn-sm btn-outline-danger" onclick="removeCardFromDeck('${deckType}', ${index})">
-                                <i class="bi bi-x"></i>
-                            </button>
+                        <div class="deck-card-image-container">
+                            <img src="${imageUrl}" alt="${escapeHtml(deckCard.name)}"
+                                 onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
+                            <div class="deck-card-image-placeholder" style="display:none;">
+                                <i class="bi bi-card-image"></i>
+                            </div>
+                        </div>
+                        <div class="deck-card-info">
+                            <div class="deck-card-name">${escapeHtml(deckCard.name)}</div>
+                            <div class="deck-card-quantity">
+                                <button class="btn btn-sm btn-outline-secondary" onclick="changeDeckCardQuantity('${deckType}', ${index}, -1)">-</button>
+                                <input type="number" class="form-control form-control-sm" value="${deckCard.quantity}"
+                                       onchange="setDeckCardQuantity('${deckType}', ${index}, this.value)" min="1" max="99">
+                                <button class="btn btn-sm btn-outline-secondary" onclick="changeDeckCardQuantity('${deckType}', ${index}, 1)">+</button>
+                                <button class="btn btn-sm btn-outline-danger" onclick="removeCardFromDeck('${deckType}', ${index})">
+                                    <i class="bi bi-x"></i>
+                                </button>
+                            </div>
                         </div>
                     </div>
-                `).join('');
+                `;
+                }).join('');
             };
 
             // Render each section
@@ -2103,10 +2121,8 @@
         });
 
         document.getElementById('closeDeckListBtn').addEventListener('click', closeDeckList);
-        document.getElementById('deckListOverlay').addEventListener('click', closeDeckList);
 
         document.getElementById('closeDeckBuilderBtn').addEventListener('click', closeDeckBuilder);
-        document.getElementById('deckBuilderOverlay').addEventListener('click', closeDeckBuilder);
 
         document.getElementById('saveDeckBtn').addEventListener('click', saveDeck);
         document.getElementById('deleteDeckBtn').addEventListener('click', deleteDeck);
