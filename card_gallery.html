@@ -884,8 +884,11 @@
         <!-- Filter section -->
         <div class="filter-section">
             <div class="row g-2">
-                <div class="col-md-4">
-                    <input type="text" class="form-control" id="search-input" placeholder="カード名または型番で検索...">
+                <div class="col-md-3">
+                    <input type="text" class="form-control" id="search-input" placeholder="カード名で検索...">
+                </div>
+                <div class="col-md-2">
+                    <input type="text" class="form-control" id="code-search-input" placeholder="型番で検索...">
                 </div>
                 <div class="col-md-2">
                     <select class="form-select" id="rarity-filter">
@@ -1530,6 +1533,7 @@
         // Apply filters
         const applyFilters = () => {
             const searchTerm = document.getElementById('search-input').value.toLowerCase();
+            const codeSearchTerm = document.getElementById('code-search-input').value.toLowerCase();
             const rarityFilter = document.getElementById('rarity-filter').value;
             const tagFilter = document.getElementById('tag-filter').value;
             const showUnowned = document.getElementById('show-unowned-cards').checked;
@@ -1589,20 +1593,24 @@
                 const cardName = card.data['名前'] || '';
                 const cardCode = card.data['型番'] || '';
 
-                // Check if matches search
-                let matchesSearch = !searchTerm;
+                // Check if matches name search
+                let matchesNameSearch = !searchTerm;
                 if (searchTerm) {
                     // Direct name match (normalized)
                     if (normalizeForSearch(cardName).includes(normalizedSearchTerm)) {
-                        matchesSearch = true;
-                    }
-                    // Card code match
-                    else if (cardCode.toLowerCase().includes(searchTerm)) {
-                        matchesSearch = true;
+                        matchesNameSearch = true;
                     }
                     // Hiragana reading match
                     else if (possibleCardNames.includes(cardName)) {
-                        matchesSearch = true;
+                        matchesNameSearch = true;
+                    }
+                }
+
+                // Check if matches code search
+                let matchesCodeSearch = !codeSearchTerm;
+                if (codeSearchTerm) {
+                    if (cardCode.toLowerCase().includes(codeSearchTerm)) {
+                        matchesCodeSearch = true;
                     }
                 }
 
@@ -1631,7 +1639,7 @@
                 const matchesAttack = !attackFilter || (details.attack && details.attack.toString() === attackFilter);
                 const matchesDefense = !defenseFilter || (details.defense && details.defense.toString() === defenseFilter);
 
-                return matchesSearch && matchesRarity && matchesTag && matchesLevel && matchesAttribute && matchesCardType && matchesRace && matchesAttack && matchesDefense;
+                return matchesNameSearch && matchesCodeSearch && matchesRarity && matchesTag && matchesLevel && matchesAttribute && matchesCardType && matchesRace && matchesAttack && matchesDefense;
             });
 
             console.log('Filtered cards count:', filteredCards.length);
@@ -1647,19 +1655,27 @@
                     if (!ownedCardNames.has(cardName)) {
                         // Apply filters to unowned cards too
                         const cardCode = details.cardId || '';
-                        let matchesSearch = !searchTerm;
+
+                        // Check if matches name search
+                        let matchesNameSearch = !searchTerm;
                         if (searchTerm) {
                             if (normalizeForSearch(cardName).includes(normalizedSearchTerm)) {
-                                matchesSearch = true;
-                            } else if (cardCode.toLowerCase().includes(searchTerm)) {
-                                matchesSearch = true;
+                                matchesNameSearch = true;
                             } else if (possibleCardNames.includes(cardName)) {
-                                matchesSearch = true;
+                                matchesNameSearch = true;
+                            }
+                        }
+
+                        // Check if matches code search
+                        let matchesCodeSearch = !codeSearchTerm;
+                        if (codeSearchTerm) {
+                            if (cardCode.toLowerCase().includes(codeSearchTerm)) {
+                                matchesCodeSearch = true;
                             }
                         }
 
                         // Note: unowned cards don't have rarity or tags, so skip those filters
-                        if (matchesSearch && !rarityFilter && !tagFilter) {
+                        if (matchesNameSearch && matchesCodeSearch && !rarityFilter && !tagFilter) {
                             unownedCards.push({
                                 id: 'unowned-' + details.cardId,
                                 data: {
@@ -2070,6 +2086,11 @@
             renderCards();
         });
 
+        document.getElementById('code-search-input').addEventListener('input', () => {
+            applyFilters();
+            renderCards();
+        });
+
         document.getElementById('rarity-filter').addEventListener('change', () => {
             applyFilters();
             renderCards();
@@ -2082,6 +2103,7 @@
 
         document.getElementById('clear-filters').addEventListener('click', () => {
             document.getElementById('search-input').value = '';
+            document.getElementById('code-search-input').value = '';
             document.getElementById('rarity-filter').value = '';
             document.getElementById('tag-filter').value = '';
             if (document.getElementById('attack-filter')) document.getElementById('attack-filter').value = '';
