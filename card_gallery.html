@@ -1243,6 +1243,29 @@
 
             onAuthStateChanged(auth, (user) => {
                 if (user) {
+                    // Check if user is VIP member
+                    const vipData = localStorage.getItem('vip_membership');
+                    let isVipMember = false;
+
+                    if (vipData) {
+                        try {
+                            const parsed = JSON.parse(vipData);
+                            if (parsed.active && parsed.verified) {
+                                isVipMember = true;
+                            }
+                        } catch (e) {
+                            console.error('Error parsing VIP data:', e);
+                        }
+                    }
+
+                    // Redirect non-VIP users
+                    if (!isVipMember) {
+                        alert('このページはVIPメンバー専用です。\n\nカードリストページに戻ります。');
+                        window.location.href = 'card_list.html';
+                        return;
+                    }
+
+                    // User is VIP, proceed with loading
                     currentUser = user;
                     loadAllData(user.uid);
 
