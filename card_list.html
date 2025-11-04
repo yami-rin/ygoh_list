@@ -7221,6 +7221,10 @@
             wishlistCollection = [];
             renderTable([]);
             document.getElementById('delete-account-btn').style.display = 'block';
+
+            // Hide VIP menu on logout
+            isVipMember = false;
+            updateVipUI(false);
         };
 
         // メール認証リンクのURLパラメータを処理
@@ -8811,6 +8815,7 @@ Firebase Consoleで確認すべき項目:
                 if (serialSection) serialSection.style.display = 'block';
             } else {
                 if (serialSection) serialSection.style.display = 'none';
+                updateVipUI(false); // Hide VIP menu for guest users
                 return; // Guest users cannot access
             }
 
@@ -8821,10 +8826,18 @@ Firebase Consoleで確認すべき項目:
                     if (parsed.active && parsed.verified) {
                         isVipMember = true;
                         updateVipUI(true);
+                    } else {
+                        isVipMember = false;
+                        updateVipUI(false);
                     }
                 } catch (e) {
                     console.error('Error parsing VIP data:', e);
+                    isVipMember = false;
+                    updateVipUI(false);
                 }
+            } else {
+                isVipMember = false;
+                updateVipUI(false);
             }
 
             // Update attempts display
