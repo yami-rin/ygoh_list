@@ -633,6 +633,15 @@
             cursor: grab;
         }
 
+        .deck-card-item {
+            cursor: grab;
+        }
+
+        .deck-card-item.dragging {
+            opacity: 0.5;
+            cursor: grabbing;
+        }
+
         .deck-list-item {
             background: white;
             border: 1px solid #dee2e6;
@@ -1080,7 +1089,8 @@
         let decks = []; // All user's decks
         let currentDeck = null; // Currently editing deck
         const deckListPanel = document.getElementById('deckListPanel');
-        let draggedCard = null; // Card being dragged
+        let draggedCard = null; // Card being dragged from gallery
+        let draggedDeckCard = null; // Deck card being dragged (for moving between decks or removing)
 
         // Load card reading data
         const loadCardData = async () => {
@@ -1976,7 +1986,7 @@
                 container.innerHTML = `<div class="deck-cards-grid">` + cards.flatMap((deckCard, index) => {
                     return Array(deckCard.quantity).fill(null).map((_, copyIndex) => {
                         return `
-                        <div class="deck-card-item" data-card-index="${index}" data-copy-index="${copyIndex}">
+                        <div class="deck-card-item" data-card-index="${index}" data-copy-index="${copyIndex}" data-deck-type="${deckType}" draggable="true">
                             <div class="deck-card-image-container">
                                 <img data-card-name="${escapeHtml(deckCard.name)}" alt="${escapeHtml(deckCard.name)}" style="display:none;">
                                 <div class="deck-card-image-placeholder">
@@ -2013,6 +2023,23 @@
                             console.error(`Failed to load image for ${card.name}:`, error);
                         }
                     }
+
+                    // Setup drag events for deck cards
+                    grid.querySelectorAll('.deck-card-item').forEach(cardItem => {
+                        cardItem.addEventListener('dragstart', (e) => {
+                            const cardIndex = parseInt(cardItem.dataset.cardIndex);
+                            const sourceDeckType = cardItem.dataset.deckType;
+                            draggedDeckCard = {
+                                card: cards[cardIndex],
+                                sourceDeckType: sourceDeckType
+                            };
+                            cardItem.classList.add('dragging');
+                        });
+
+                        cardItem.addEventListener('dragend', (e) => {
+                            cardItem.classList.remove('dragging');
+                        });
+                    });
                 }
             };
 
@@ -2066,6 +2093,75 @@
             await renderDeckCards();
         };
 
+        // Remove card from deck
+        const removeCardFromDeck = async (card, sourceDeckType) => {
+            if (!currentDeck) return;
+
+            const deckKey = sourceDeckType === 'main' ? 'mainDeck' :
+                          sourceDeckType === 'extra' ? 'extraDeck' : 'sideDeck';
+
+            const existingIndex = currentDeck[deckKey].findIndex(c => c.cardId === card.cardId);
+            if (existingIndex !== -1) {
+                if (currentDeck[deckKey][existingIndex].quantity > 1) {
+                    currentDeck[deckKey][existingIndex].quantity--;
+                } else {
+                    currentDeck[deckKey].splice(existingIndex, 1);
+                }
+                await renderDeckCards();
+            }
+        };
+
+        // Move card between deck sections
+        const moveCardBetweenDecks = async (card, sourceDeckType, targetDeckType) => {
+            if (!currentDeck || sourceDeckType === targetDeckType) return;
+
+            // Check target deck limits first
+            const targetKey = targetDeckType === 'main' ? 'mainDeck' :
+                           targetDeckType === 'extra' ? 'extraDeck' : 'sideDeck';
+
+            if (!currentDeck[targetKey]) {
+                currentDeck[targetKey] = [];
+            }
+
+            const currentCount = currentDeck[targetKey].reduce((sum, c) => sum + c.quantity, 0);
+            const limit = targetDeckType === 'main' ? 60 : 15;
+
+            if (currentCount >= limit) {
+                const deckName = targetDeckType === 'main' ? 'メインデッキ' :
+                               targetDeckType === 'extra' ? 'エクストラデッキ' : 'サイドデッキ';
+                alert(`${deckName}は${limit}枚までです。`);
+                return;
+            }
+
+            // Remove from source
+            const sourceKey = sourceDeckType === 'main' ? 'mainDeck' :
+                           sourceDeckType === 'extra' ? 'extraDeck' : 'sideDeck';
+            const existingIndex = currentDeck[sourceKey].findIndex(c => c.cardId === card.cardId);
+            if (existingIndex === -1) return;
+
+            if (currentDeck[sourceKey][existingIndex].quantity > 1) {
+                currentDeck[sourceKey][existingIndex].quantity--;
+            } else {
+                currentDeck[sourceKey].splice(existingIndex, 1);
+            }
+
+            // Add to target deck
+            const targetIndex = currentDeck[targetKey].findIndex(c => c.cardId === card.cardId);
+            if (targetIndex !== -1) {
+                currentDeck[targetKey][targetIndex].quantity++;
+            } else {
+                currentDeck[targetKey].push({
+                    cardId: card.cardId,
+                    name: card.name,
+                    code: card.code,
+                    rarity: card.rarity,
+                    quantity: 1
+                });
+            }
+
+            await renderDeckCards();
+        };
+
         // Setup drag and drop
         const setupDragAndDrop = () => {
             const setupDropZone = (dropZoneId, deckType) => {
@@ -2081,13 +2177,19 @@
                     dropZone.classList.remove('drag-over');
                 });
 
-                dropZone.addEventListener('drop', (e) => {
+                dropZone.addEventListener('drop', async (e) => {
                     e.preventDefault();
                     dropZone.classList.remove('drag-over');
 
+                    // Handle card from gallery
                     if (draggedCard) {
                         addCardToDeck(draggedCard, deckType);
                         draggedCard = null;
+                    }
+                    // Handle card from deck (moving between decks)
+                    else if (draggedDeckCard) {
+                        await moveCardBetweenDecks(draggedDeckCard.card, draggedDeckCard.sourceDeckType, deckType);
+                        draggedDeckCard = null;
                     }
                 });
             };
@@ -2095,6 +2197,26 @@
             setupDropZone('mainDeckDropZone', 'main');
             setupDropZone('extraDeckDropZone', 'extra');
             setupDropZone('sideDeckDropZone', 'side');
+
+            // Setup drop on panel outside (for card removal)
+            const deckBuilderPanel = document.getElementById('deckBuilderPanel');
+            if (deckBuilderPanel) {
+                deckBuilderPanel.addEventListener('dragover', (e) => {
+                    // Only allow dropping deck cards outside drop zones
+                    if (draggedDeckCard && !e.target.closest('.deck-drop-zone')) {
+                        e.preventDefault();
+                    }
+                });
+
+                deckBuilderPanel.addEventListener('drop', async (e) => {
+                    // If dropped outside drop zones, remove card
+                    if (draggedDeckCard && !e.target.closest('.deck-drop-zone')) {
+                        e.preventDefault();
+                        await removeCardFromDeck(draggedDeckCard.card, draggedDeckCard.sourceDeckType);
+                        draggedDeckCard = null;
+                    }
+                });
+            }
         };
 
         // Event listeners for deck system
