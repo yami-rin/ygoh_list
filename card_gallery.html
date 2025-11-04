@@ -1462,6 +1462,9 @@
             if (allCards.length > 0) {
                 console.log('First card data sample:', allCards[0].data);
                 console.log('Available fields:', Object.keys(allCards[0].data));
+                if (allCards[0].data.linkedDetails) {
+                    console.log('LinkedDetails:', allCards[0].data.linkedDetails);
+                }
             }
 
             // Get possible card names from hiragana reading
@@ -1503,14 +1506,15 @@
                 const matchesRarity = !rarityFilter || card.data['レアリティ'] === rarityFilter;
                 const matchesTag = !tagFilter || (card.data.tags && card.data.tags.includes(tagFilter));
 
-                // Advanced filters
-                const matchesLevel = !levelFilter || (card.data['レベル'] && card.data['レベル'].toString() === levelFilter);
-                const matchesAttribute = !attributeFilter || card.data['属性'] === attributeFilter;
+                // Advanced filters - use linkedDetails for card details
+                const details = card.data.linkedDetails || {};
+                const matchesLevel = !levelFilter || (details['レベル'] && details['レベル'].toString() === levelFilter);
+                const matchesAttribute = !attributeFilter || details['属性'] === attributeFilter;
 
                 // Card type filter with AND/OR logic
                 let matchesCardType = true;
                 if (cardTypeFilters.length > 0) {
-                    const cardType = card.data['カードタイプ'] || '';
+                    const cardType = details['カードタイプ'] || '';
                     if (cardTypeSearchMode === 'and') {
                         // AND: All selected types must be present
                         matchesCardType = cardTypeFilters.every(type => cardType.includes(type));
@@ -1520,9 +1524,9 @@
                     }
                 }
 
-                const matchesRace = !raceFilter || card.data['種族'] === raceFilter;
-                const matchesAttack = !attackFilter || (card.data['攻撃力'] && card.data['攻撃力'].toString() === attackFilter);
-                const matchesDefense = !defenseFilter || (card.data['守備力'] && card.data['守備力'].toString() === defenseFilter);
+                const matchesRace = !raceFilter || details['種族'] === raceFilter;
+                const matchesAttack = !attackFilter || (details['攻撃力'] && details['攻撃力'].toString() === attackFilter);
+                const matchesDefense = !defenseFilter || (details['守備力'] && details['守備力'].toString() === defenseFilter);
 
                 return matchesSearch && matchesRarity && matchesTag && matchesLevel && matchesAttribute && matchesCardType && matchesRace && matchesAttack && matchesDefense;
             });
