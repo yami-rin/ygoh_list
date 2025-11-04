@@ -1458,6 +1458,12 @@
                 allCardsCount: allCards.length
             });
 
+            // Debug: Show first card's data structure
+            if (allCards.length > 0) {
+                console.log('First card data sample:', allCards[0].data);
+                console.log('Available fields:', Object.keys(allCards[0].data));
+            }
+
             // Get possible card names from hiragana reading
             let possibleCardNames = [];
             if (searchTerm) {
@@ -1504,7 +1510,7 @@
                 // Card type filter with AND/OR logic
                 let matchesCardType = true;
                 if (cardTypeFilters.length > 0) {
-                    const cardType = card.data['カードの種類'] || '';
+                    const cardType = card.data['カードタイプ'] || '';
                     if (cardTypeSearchMode === 'and') {
                         // AND: All selected types must be present
                         matchesCardType = cardTypeFilters.every(type => cardType.includes(type));
