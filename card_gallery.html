@@ -554,15 +554,15 @@
 
         .deck-cards-grid {
             display: grid;
-            grid-template-columns: repeat(5, 1fr);
-            gap: 0.5rem;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 0.75rem;
         }
 
         .deck-card-item {
             background: white;
             border: 1px solid #dee2e6;
             border-radius: 6px;
-            padding: 0.5rem;
+            padding: 0.75rem;
             transition: all 0.2s;
         }
 
@@ -616,22 +616,9 @@
             right: 0;
             background: rgba(0, 0, 0, 0.8);
             color: white;
-            padding: 3px 6px;
-            font-size: 0.65rem;
+            padding: 2px 4px;
+            font-size: 0.5rem;
             text-align: center;
-            line-height: 1.2;
-        }
-
-        .deck-card-quantity-badge {
-            position: absolute;
-            top: 4px;
-            left: 4px;
-            background: rgba(40, 167, 69, 0.9);
-            color: white;
-            padding: 2px 6px;
-            border-radius: 3px;
-            font-size: 0.75rem;
-            font-weight: 700;
             line-height: 1.2;
         }
 
@@ -1989,21 +1976,22 @@
 
                 if (placeholder) placeholder.style.display = 'none';
 
-                // First render placeholder cards in grid
-                container.innerHTML = `<div class="deck-cards-grid">` + cards.map((deckCard, index) => {
-                    return `
-                    <div class="deck-card-item" data-card-index="${index}">
-                        <div class="deck-card-image-container">
-                            <img data-card-name="${escapeHtml(deckCard.name)}" alt="${escapeHtml(deckCard.name)}" style="display:none;">
-                            <div class="deck-card-image-placeholder">
-                                <i class="bi bi-card-image"></i>
+                // First render placeholder cards in grid (repeat each card by its quantity)
+                container.innerHTML = `<div class="deck-cards-grid">` + cards.flatMap((deckCard, index) => {
+                    return Array(deckCard.quantity).fill(null).map((_, copyIndex) => {
+                        return `
+                        <div class="deck-card-item" data-card-index="${index}" data-copy-index="${copyIndex}">
+                            <div class="deck-card-image-container">
+                                <img data-card-name="${escapeHtml(deckCard.name)}" alt="${escapeHtml(deckCard.name)}" style="display:none;">
+                                <div class="deck-card-image-placeholder">
+                                    <i class="bi bi-card-image"></i>
+                                </div>
+                                <div class="deck-card-rarity">${escapeHtml(deckCard.rarity || '')}</div>
+                                <div class="deck-card-code">${escapeHtml(deckCard.code || '')}</div>
                             </div>
-                            ${deckCard.quantity > 1 ? `<div class="deck-card-quantity-badge">×${deckCard.quantity}</div>` : ''}
-                            <div class="deck-card-rarity">${escapeHtml(deckCard.rarity || '')}</div>
-                            <div class="deck-card-code">${escapeHtml(deckCard.code || '')}</div>
                         </div>
-                    </div>
-                `;
+                    `;
+                    });
                 }).join('') + `</div>`;
 
                 // Then load images asynchronously
@@ -2011,18 +1999,19 @@
                 if (grid) {
                     for (let i = 0; i < cards.length; i++) {
                         const card = cards[i];
-                        const cardItem = grid.querySelector(`[data-card-index="${i}"]`);
-                        if (!cardItem) continue;
-
-                        const img = cardItem.querySelector('img');
-                        const placeholder = cardItem.querySelector('.deck-card-image-placeholder');
+                        const cardItems = grid.querySelectorAll(`[data-card-index="${i}"]`);
 
                         try {
                             const imageUrl = await getCardImageUrl(card.name);
                             if (imageUrl) {
-                                img.src = imageUrl;
-                                img.style.display = 'block';
-                                placeholder.style.display = 'none';
+                                // Apply the same image to all copies of this card
+                                cardItems.forEach(cardItem => {
+                                    const img = cardItem.querySelector('img');
+                                    const placeholder = cardItem.querySelector('.deck-card-image-placeholder');
+                                    img.src = imageUrl;
+                                    img.style.display = 'block';
+                                    placeholder.style.display = 'none';
+                                });
                             }
                         } catch (error) {
                             console.error(`Failed to load image for ${card.name}:`, error);
