@@ -885,7 +885,7 @@
         <div class="filter-section">
             <div class="row g-2">
                 <div class="col-md-4">
-                    <input type="text" class="form-control" id="search-input" placeholder="カード名で検索...">
+                    <input type="text" class="form-control" id="search-input" placeholder="カード名または型番で検索...">
                 </div>
                 <div class="col-md-2">
                     <select class="form-select" id="rarity-filter">
@@ -1587,12 +1587,17 @@
             // Filter owned cards
             filteredCards = allCards.filter(card => {
                 const cardName = card.data['名前'] || '';
+                const cardCode = card.data['型番'] || '';
 
                 // Check if matches search
                 let matchesSearch = !searchTerm;
                 if (searchTerm) {
                     // Direct name match (normalized)
                     if (normalizeForSearch(cardName).includes(normalizedSearchTerm)) {
+                        matchesSearch = true;
+                    }
+                    // Card code match
+                    else if (cardCode.toLowerCase().includes(searchTerm)) {
                         matchesSearch = true;
                     }
                     // Hiragana reading match
@@ -1641,9 +1646,12 @@
                 for (const [cardName, details] of cardDetailsMap) {
                     if (!ownedCardNames.has(cardName)) {
                         // Apply filters to unowned cards too
+                        const cardCode = details.cardId || '';
                         let matchesSearch = !searchTerm;
                         if (searchTerm) {
                             if (normalizeForSearch(cardName).includes(normalizedSearchTerm)) {
+                                matchesSearch = true;
+                            } else if (cardCode.toLowerCase().includes(searchTerm)) {
                                 matchesSearch = true;
                             } else if (possibleCardNames.includes(cardName)) {
                                 matchesSearch = true;
@@ -1660,7 +1668,8 @@
                                     'レアリティ': '-',
                                     '枚数': 0,
                                     'tags': [],
-                                    'unowned': true
+                                    'unowned': true,
+                                    'linkedDetails': details
                                 },
                                 unowned: true
                             });
@@ -1861,6 +1870,20 @@
                                     reloadBtn.remove();
                                 }
                                 container.appendChild(img);
+                            } else {
+                                // No image URL - show reload button
+                                const existingReloadBtn = container.querySelector('.card-image-reload');
+                                if (!existingReloadBtn) {
+                                    const reloadBtn = document.createElement('button');
+                                    reloadBtn.className = 'card-image-reload';
+                                    reloadBtn.innerHTML = '<i class="bi bi-arrow-clockwise"></i>再読み込み';
+                                    reloadBtn.onclick = (e) => {
+                                        e.stopPropagation();
+                                        reloadBtn.remove();
+                                        loadCardImage();
+                                    };
+                                    container.appendChild(reloadBtn);
+                                }
                             }
                         } catch (error) {
                             console.error(`Failed to load image for ${card.data['名前']}:`, error);
