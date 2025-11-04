@@ -1213,6 +1213,9 @@
                     data: doc.data()
                 }));
 
+                // Load decks to calculate card usage
+                await loadDecks();
+
                 // Set initial data based on current list type
                 switchListType(currentListType);
             } catch (error) {
@@ -1456,7 +1459,12 @@
                         const totalStock = card.data['枚数'] || 0;
                         const { totalUsed } = getCardUsageInDecks(card.id);
                         const availableStock = totalStock - totalUsed;
-                        stockBadge = `<span class="stock-badge">在庫 ${availableStock}-${totalUsed}(${totalStock})枚</span>`;
+
+                        if (totalUsed > 0) {
+                            stockBadge = `<span class="stock-badge">在庫 ${availableStock}(${totalStock})枚</span>`;
+                        } else {
+                            stockBadge = `<span class="stock-badge">在庫 ${totalStock}枚</span>`;
+                        }
                     }
 
                     const onclickAttr = isUnowned ? '' : `onclick="openCardEditModal('${card.id}')"`;
@@ -1893,6 +1901,7 @@
                 }
                 await loadDecks();
                 renderDeckList();
+                renderCards(); // Re-render cards to update stock badges
             } catch (error) {
                 console.error('Error saving deck:', error);
                 alert('デッキの保存に失敗しました');
@@ -1912,6 +1921,7 @@
                 closeDeckBuilder();
                 await loadDecks();
                 renderDeckList();
+                renderCards(); // Re-render cards to update stock badges
             } catch (error) {
                 console.error('Error deleting deck:', error);
                 alert('デッキの削除に失敗しました');
