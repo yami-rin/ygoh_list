@@ -1153,7 +1153,7 @@
                 <img id="panelCardImage" src="" alt="Card Image">
                 <!-- Illustration selector (only shown for cards with multiple illustrations) -->
                 <div id="illustrationSelector" style="display: none; margin-top: 1rem;">
-                    <button class="btn btn-sm btn-outline-primary w-100" id="changeIllustrationBtn">
+                    <button class="btn btn-sm btn-outline-success w-100" id="changeIllustrationBtn">
                         <i class="bi bi-image"></i> イラスト違いを選択
                     </button>
                     <div id="illustrationOptions" style="display: none; margin-top: 0.5rem; max-height: 150px; overflow-y: auto;">
@@ -2150,10 +2150,26 @@
                                 console.log('New ciid:', ill.ciid);
                                 console.log('New imageUrl:', ill.imageUrl);
 
-                                // Update main image
+                                // Update main panel image
                                 panelImage.src = ill.imageUrl;
                                 panelImage.dataset.currentCiid = ill.ciid;
                                 console.log('Panel image updated. Current src:', panelImage.src);
+
+                                // Update gallery card image
+                                if (currentEditingCard) {
+                                    const galleryCardImg = document.querySelector(`.card[data-card-id="${currentEditingCard.id}"] img`);
+                                    if (galleryCardImg) {
+                                        console.log('Updating gallery card image for card ID:', currentEditingCard.id);
+                                        galleryCardImg.src = ill.imageUrl;
+                                        console.log('Gallery card image updated to:', ill.imageUrl);
+                                    } else {
+                                        console.warn('Gallery card image element not found for card ID:', currentEditingCard.id);
+                                    }
+
+                                    // Store ciid in card data for future reference
+                                    currentEditingCard.selectedCiid = ill.ciid;
+                                    console.log('Stored ciid in card data:', ill.ciid);
+                                }
 
                                 // Update active state
                                 optionsDiv.querySelectorAll('.illustration-option').forEach(opt => {
