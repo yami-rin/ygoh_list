@@ -2641,8 +2641,10 @@
                                 <div class="mb-3"><label for="rarity" class="form-label">レアリティ</label><input type="text" class="form-control" id="rarity" name="rarity"></div>
                                 <div class="mb-3">
                                     <label for="quantity" class="form-label">枚数</label>
-                                    <div id="quantity-input-container">
-                                        <input type="number" class="form-control" id="quantity" name="quantity" value="1" min="1" required>
+                                    <div id="quantity-input-container" class="input-group">
+                                        <button class="btn btn-outline-secondary" type="button" id="quantity-decrease">-</button>
+                                        <input type="number" class="form-control" id="quantity" name="quantity" value="1" min="1" required style="text-align: center;">
+                                        <button class="btn btn-outline-secondary" type="button" id="quantity-increase">+</button>
                                     </div>
                                 </div>
                                 <div class="mb-3">
@@ -9252,9 +9254,13 @@ Firebase Consoleで確認すべき項目:
                         rarityDisplay = card.rarities.map((rarity, rIdx) => `
                             <div class="rarity-quantity-row">
                                 <label class="rarity-label">${rarity}</label>
-                                <input type="number" class="form-control form-control-sm bulk-card-rarity-quantity"
-                                       data-index="${index}" data-rarity="${rarity}"
-                                       min="0" max="99" value="${defaultQuantity}">
+                                <div class="input-group input-group-sm" style="max-width: 130px;">
+                                    <button class="btn btn-outline-secondary quantity-decrease" type="button" data-index="${index}" data-rarity="${rarity}">-</button>
+                                    <input type="number" class="form-control form-control-sm bulk-card-rarity-quantity"
+                                           data-index="${index}" data-rarity="${rarity}"
+                                           min="0" max="99" value="${defaultQuantity}" style="text-align: center;">
+                                    <button class="btn btn-outline-secondary quantity-increase" type="button" data-index="${index}" data-rarity="${rarity}">+</button>
+                                </div>
                             </div>
                         `).join('');
                     } else {
@@ -9297,6 +9303,36 @@ Firebase Consoleで確認すべき項目:
                     };
 
                     loadWithRetry();
+                });
+
+                // Add event listeners for +/- buttons
+                document.querySelectorAll('.quantity-decrease').forEach(btn => {
+                    btn.addEventListener('click', (e) => {
+                        const index = e.target.dataset.index;
+                        const rarity = e.target.dataset.rarity;
+                        const input = document.querySelector(`.bulk-card-rarity-quantity[data-index="${index}"][data-rarity="${rarity}"]`);
+                        if (input) {
+                            const currentValue = parseInt(input.value) || 0;
+                            if (currentValue > 0) {
+                                input.value = currentValue - 1;
+                            }
+                        }
+                    });
+                });
+
+                document.querySelectorAll('.quantity-increase').forEach(btn => {
+                    btn.addEventListener('click', (e) => {
+                        const index = e.target.dataset.index;
+                        const rarity = e.target.dataset.rarity;
+                        const input = document.querySelector(`.bulk-card-rarity-quantity[data-index="${index}"][data-rarity="${rarity}"]`);
+                        if (input) {
+                            const currentValue = parseInt(input.value) || 0;
+                            const maxValue = parseInt(input.max) || 99;
+                            if (currentValue < maxValue) {
+                                input.value = currentValue + 1;
+                            }
+                        }
+                    });
                 });
 
                 loadingDiv.style.display = 'none';
@@ -9887,6 +9923,22 @@ Firebase Consoleで確認すべき項目:
                 document.getElementById('set_code').value = e.target.dataset.setCode;
                 document.getElementById('rarity').value = e.target.dataset.rarity;
             }
+        });
+
+        // Quantity +/- buttons for card registration
+        document.getElementById('quantity-decrease').addEventListener('click', () => {
+            const quantityInput = document.getElementById('quantity');
+            const currentValue = parseInt(quantityInput.value) || 1;
+            const minValue = parseInt(quantityInput.min) || 1;
+            if (currentValue > minValue) {
+                quantityInput.value = currentValue - 1;
+            }
+        });
+
+        document.getElementById('quantity-increase').addEventListener('click', () => {
+            const quantityInput = document.getElementById('quantity');
+            const currentValue = parseInt(quantityInput.value) || 1;
+            quantityInput.value = currentValue + 1;
         });
     </script>
 </body>
