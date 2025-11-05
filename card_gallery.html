@@ -1875,7 +1875,8 @@
                         try {
                             // Decode HTML entities in card name before fetching image
                             const decodedCardName = decodeHtmlEntities(card.data['名前']);
-                            const imageUrl = await getCardImageUrl(decodedCardName);
+                            const ciid = card.data.selectedCiid || '1';  // Use saved ciid if available
+                            const imageUrl = await getCardImageUrl(decodedCardName, ciid);
 
                             // Check if this rendering is still valid (page hasn't changed)
                             if (parseInt(container.dataset.renderingId) !== thisRenderingId) {
@@ -2093,7 +2094,7 @@
 
             // Load card image and illustrations asynchronously (don't block panel opening)
             const details = cardDetailsMap.get(decodedName);
-            let currentCiid = '1';
+            let currentCiid = card.data.selectedCiid || '1';  // Use saved ciid if available
 
             // Load image first (fast)
             const panelImage = document.getElementById('panelCardImage');
@@ -2195,9 +2196,22 @@
                                     console.warn('Gallery card item:', galleryCardItem);
                                 }
 
-                                // Store ciid in card data for future reference
+                                // Store ciid in card data and save to Firestore
                                 currentEditingCard.selectedCiid = ill.ciid;
+                                currentEditingCard.data.selectedCiid = ill.ciid;
                                 console.log('Stored ciid in card data:', ill.ciid);
+
+                                // Save to Firestore
+                                if (currentUser) {
+                                    const cardRef = doc(db, 'users', currentUser.uid, 'cards', currentEditingCard.id);
+                                    updateDoc(cardRef, {
+                                        selectedCiid: ill.ciid
+                                    }).then(() => {
+                                        console.log('Selected ciid saved to Firestore');
+                                    }).catch(error => {
+                                        console.error('Error saving selectedCiid to Firestore:', error);
+                                    });
+                                }
                             }
 
                             // Update active state
