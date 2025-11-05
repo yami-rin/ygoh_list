@@ -9446,16 +9446,9 @@ Firebase Consoleで確認すべき項目:
                 return;
             }
 
-            console.log('About to show confirmation dialog...');
-            const confirmResult = confirm(`${selectedCards.length}件のカードを登録しますか？`);
-            console.log('Confirmation result:', confirmResult);
-
-            if (!confirmResult) {
-                console.log('User cancelled registration');
-                return;
-            }
-
-            console.log('User confirmed, proceeding with registration...');
+            // Note: confirm() doesn't work inside Bootstrap modal due to z-index/backdrop issues
+            // User already clicked the register button, so we can proceed directly
+            console.log(`Proceeding with registration of ${selectedCards.length} cards...`);
 
             showLoading(true);
             let successCount = 0;
