@@ -1887,13 +1887,20 @@
                     let stockBadge = '';
                     if (!isUnowned) {
                         const totalStock = card.data['枚数'] || 0;
-                        const { totalUsed } = getCardUsageInDecks(card.id);
-                        const availableStock = totalStock - totalUsed;
 
-                        if (totalUsed > 0) {
-                            stockBadge = `<span class="stock-badge">在庫 ${availableStock}(${totalStock})枚</span>`;
+                        if (currentListType === 'wishlist') {
+                            // For wishlist, show only "必要数" without deck usage
+                            stockBadge = `<span class="stock-badge">必要数 ${totalStock}枚</span>`;
                         } else {
-                            stockBadge = `<span class="stock-badge">在庫 ${totalStock}枚</span>`;
+                            // For collection, show stock with deck usage
+                            const { totalUsed } = getCardUsageInDecks(card.id);
+                            const availableStock = totalStock - totalUsed;
+
+                            if (totalUsed > 0) {
+                                stockBadge = `<span class="stock-badge">在庫 ${availableStock}(${totalStock})枚</span>`;
+                            } else {
+                                stockBadge = `<span class="stock-badge">在庫 ${totalStock}枚</span>`;
+                            }
                         }
                     }
 
