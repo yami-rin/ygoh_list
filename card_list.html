@@ -9446,9 +9446,16 @@ Firebase Consoleで確認すべき項目:
                 return;
             }
 
-            if (!confirm(`${selectedCards.length}件のカードを登録しますか？`)) {
+            console.log('About to show confirmation dialog...');
+            const confirmResult = confirm(`${selectedCards.length}件のカードを登録しますか？`);
+            console.log('Confirmation result:', confirmResult);
+
+            if (!confirmResult) {
+                console.log('User cancelled registration');
                 return;
             }
+
+            console.log('User confirmed, proceeding with registration...');
 
             showLoading(true);
             let successCount = 0;
