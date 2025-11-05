@@ -6404,6 +6404,10 @@
                 applySearchAndFilter();
                 loadAllTags(); // ローカルモードでもタグをロード・初期化
                 document.getElementById('delete-account-btn').style.display = 'none';
+
+                // Hide VIP menu for guest users
+                const vipMenuContainer = document.getElementById('vip-menu-container');
+                if (vipMenuContainer) vipMenuContainer.style.display = 'none';
             }
             applyTheme();
             
@@ -8863,6 +8867,9 @@ Firebase Consoleで確認すべき項目:
             const profileVipBadge = document.getElementById('profile-vip-badge');
             const vipMenuContainer = document.getElementById('vip-menu-container');
 
+            // For guest users, hide everything including input section
+            const isGuest = !currentUser || currentUser.uid === 'local_user';
+
             if (isVip) {
                 if (inputSection) inputSection.style.display = 'none';
                 if (activeSection) activeSection.style.display = 'block';
@@ -8878,7 +8885,8 @@ Firebase Consoleで確認すべき項目:
                 // Show VIP badge on profile
                 if (profileVipBadge) profileVipBadge.style.display = 'inline-block';
             } else {
-                if (inputSection) inputSection.style.display = 'block';
+                // For guest users, hide input section as well
+                if (inputSection) inputSection.style.display = isGuest ? 'none' : 'block';
                 if (activeSection) activeSection.style.display = 'none';
                 if (statusBadge) statusBadge.style.display = 'none';
 
