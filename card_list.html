@@ -9412,13 +9412,17 @@ Firebase Consoleで確認すべき項目:
 
             // Get all rarity quantity inputs
             const rarityQuantityInputs = document.querySelectorAll('.bulk-card-rarity-quantity');
+            console.log('Found rarity quantity inputs:', rarityQuantityInputs.length);
 
             rarityQuantityInputs.forEach(input => {
                 const index = parseInt(input.dataset.index);
                 const rarity = input.dataset.rarity;
                 const quantity = parseInt(input.value) || 0;
 
+                console.log(`Processing input - index: ${index}, rarity: ${rarity}, quantity: ${quantity}`);
+
                 if (quantity > 0) {
+                    console.log(`Adding card to selectedCards - bulkImportCards[${index}]:`, bulkImportCards[index]);
                     selectedCards.push({
                         ...bulkImportCards[index],
                         quantity: quantity,
@@ -9427,7 +9431,11 @@ Firebase Consoleで確認すべき項目:
                 }
             });
 
+            console.log('Selected cards:', selectedCards);
+            console.log('Selected cards count:', selectedCards.length);
+
             if (selectedCards.length === 0) {
+                console.log('No cards selected, showing alert');
                 alert('枚数が1以上のカードを登録してください。');
                 return;
             }
