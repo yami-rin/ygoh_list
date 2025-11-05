@@ -9308,6 +9308,8 @@ Firebase Consoleで確認すべき項目:
                 // Add event listeners for +/- buttons
                 document.querySelectorAll('.quantity-decrease').forEach(btn => {
                     btn.addEventListener('click', (e) => {
+                        e.preventDefault();
+                        e.stopPropagation();
                         const index = e.target.dataset.index;
                         const rarity = e.target.dataset.rarity;
                         const input = document.querySelector(`.bulk-card-rarity-quantity[data-index="${index}"][data-rarity="${rarity}"]`);
@@ -9322,6 +9324,8 @@ Firebase Consoleで確認すべき項目:
 
                 document.querySelectorAll('.quantity-increase').forEach(btn => {
                     btn.addEventListener('click', (e) => {
+                        e.preventDefault();
+                        e.stopPropagation();
                         const index = e.target.dataset.index;
                         const rarity = e.target.dataset.rarity;
                         const input = document.querySelector(`.bulk-card-rarity-quantity[data-index="${index}"][data-rarity="${rarity}"]`);
@@ -9373,17 +9377,36 @@ Firebase Consoleで確認すべき項目:
             });
         });
 
-        document.getElementById('bulk-register-btn').addEventListener('click', async () => {
+        const bulkRegisterBtn = document.getElementById('bulk-register-btn');
+        console.log('Setting up bulk-register-btn event listener. Button element:', bulkRegisterBtn);
+
+        if (!bulkRegisterBtn) {
+            console.error('ERROR: bulk-register-btn element not found!');
+        } else {
+            console.log('Button found. Attaching event listener...');
+        }
+
+        bulkRegisterBtn.addEventListener('click', async (event) => {
+            console.log('=== BULK REGISTER BUTTON CLICKED ===');
+            console.log('Event:', event);
+            console.log('Button disabled:', event.target.disabled);
+            console.log('isVipMember:', isVipMember);
+            console.log('currentUser:', currentUser);
+
             // VIP check for bulk import
             if (!isVipMember) {
+                console.log('VIP check failed!');
                 alert('この機能はVIPメンバー専用です。');
                 return;
             }
 
             if (!currentUser) {
+                console.log('User not logged in!');
                 alert('ログインが必要です。');
                 return;
             }
+
+            console.log('Checks passed. Starting bulk registration...');
 
             const selectedCards = [];
 
