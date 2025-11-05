@@ -237,6 +237,19 @@ app.get('/card-list', async (req, res) => {
 
         console.log(`Parsed ${cardBlocks.length} cards with rarities`);
 
+        // Extract release date from search results page
+        let releaseDate = '';
+        const releaseDateMatch = html.match(/<p\s+id="previewed"[^>]*>[\s\S]*?公開日\s*:\s*(\d{4})年(\d{2})月(\d{2})日[\s\S]*?<\/p>/);
+        if (releaseDateMatch) {
+            const year = releaseDateMatch[1];
+            const month = releaseDateMatch[2];
+            const day = releaseDateMatch[3];
+            releaseDate = `${year}-${month}-${day}`;
+            console.log(`Release date from search results: ${releaseDate}`);
+        } else {
+            console.log('No release date found in search results');
+        }
+
         // Get card number (型番) from the first card's detail page
         let baseCardNumber = '';
         if (cardBlocks.length > 0) {
@@ -256,11 +269,44 @@ app.get('/card-list', async (req, res) => {
 
                 const detailHtml = await detailResponse.text();
 
-                // Extract card number from <div class="card_number">
-                const cardNumberMatch = detailHtml.match(/<div\s+class="card_number">([^<]+)<\/div>/);
-                if (cardNumberMatch) {
-                    baseCardNumber = cardNumberMatch[1].trim();
-                    console.log(`Base card number: ${baseCardNumber}`);
+                // If release date is available, find card_number matching that date
+                if (releaseDate) {
+                    console.log(`Looking for card_number with matching release date: ${releaseDate}`);
+
+                    // Find all card_number and time pairs
+                    // Pattern: <div class="time">YYYY-MM-DD</div> ... <div class="card_number">XXX</div>
+                    const timePattern = /<div\s+class="time">\s*([0-9-]+)\s*<\/div>[\s\S]*?<div\s+class="card_number">\s*([^\s<]+)\s*<\/div>/g;
+                    let match;
+
+                    while ((match = timePattern.exec(detailHtml)) !== null) {
+                        const timeValue = match[1].trim();
+                        const cardNumber = match[2].trim();
+
+                        console.log(`Found card_number: ${cardNumber}, time: ${timeValue}`);
+
+                        if (timeValue === releaseDate) {
+                            baseCardNumber = cardNumber;
+                            console.log(`Matched! Using card number: ${baseCardNumber}`);
+                            break;
+                        }
+                    }
+
+                    // If no match found, fall back to first card_number
+                    if (!baseCardNumber) {
+                        console.log('No matching date found, falling back to first card_number');
+                        const cardNumberMatch = detailHtml.match(/<div\s+class="card_number">([^<]+)<\/div>/);
+                        if (cardNumberMatch) {
+                            baseCardNumber = cardNumberMatch[1].trim();
+                            console.log(`Fallback card number: ${baseCardNumber}`);
+                        }
+                    }
+                } else {
+                    // No release date available, use first card_number
+                    const cardNumberMatch = detailHtml.match(/<div\s+class="card_number">([^<]+)<\/div>/);
+                    if (cardNumberMatch) {
+                        baseCardNumber = cardNumberMatch[1].trim();
+                        console.log(`Base card number: ${baseCardNumber}`);
+                    }
                 }
             } catch (error) {
                 console.error('Failed to fetch first card details:', error);
