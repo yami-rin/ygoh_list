@@ -2307,7 +2307,7 @@
                 <div class="modal-footer">
                     <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">キャンセル</button>
                     <button type="button" class="btn btn-primary" id="bulk-register-btn" disabled>
-                        <i class="bi bi-save"></i> 登録
+                        <i class="bi bi-save" style="pointer-events: none;"></i> 登録
                     </button>
                 </div>
             </div>
@@ -9389,7 +9389,9 @@ Firebase Consoleで確認すべき項目:
         bulkRegisterBtn.addEventListener('click', async (event) => {
             console.log('=== BULK REGISTER BUTTON CLICKED ===');
             console.log('Event:', event);
-            console.log('Button disabled:', event.target.disabled);
+            console.log('Event target:', event.target);
+            console.log('Event currentTarget:', event.currentTarget);
+            console.log('Button disabled:', event.currentTarget.disabled);
             console.log('isVipMember:', isVipMember);
             console.log('currentUser:', currentUser);
 
@@ -9414,20 +9416,24 @@ Firebase Consoleで確認すべき項目:
             const rarityQuantityInputs = document.querySelectorAll('.bulk-card-rarity-quantity');
             console.log('Found rarity quantity inputs:', rarityQuantityInputs.length);
 
-            rarityQuantityInputs.forEach(input => {
-                const index = parseInt(input.dataset.index);
-                const rarity = input.dataset.rarity;
-                const quantity = parseInt(input.value) || 0;
+            rarityQuantityInputs.forEach((input, forEachIndex) => {
+                try {
+                    const index = parseInt(input.dataset.index);
+                    const rarity = input.dataset.rarity;
+                    const quantity = parseInt(input.value) || 0;
 
-                console.log(`Processing input - index: ${index}, rarity: ${rarity}, quantity: ${quantity}`);
+                    console.log(`Processing input ${forEachIndex} - index: ${index}, rarity: ${rarity}, quantity: ${quantity}`);
 
-                if (quantity > 0) {
-                    console.log(`Adding card to selectedCards - bulkImportCards[${index}]:`, bulkImportCards[index]);
-                    selectedCards.push({
-                        ...bulkImportCards[index],
-                        quantity: quantity,
-                        rarity: rarity
-                    });
+                    if (quantity > 0) {
+                        console.log(`Adding card to selectedCards - bulkImportCards[${index}]:`, bulkImportCards[index]);
+                        selectedCards.push({
+                            ...bulkImportCards[index],
+                            quantity: quantity,
+                            rarity: rarity
+                        });
+                    }
+                } catch (error) {
+                    console.error(`Error processing input ${forEachIndex}:`, error);
                 }
             });
 
