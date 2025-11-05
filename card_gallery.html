@@ -792,12 +792,12 @@
             position: absolute;
             top: 2px;
             right: 2px;
-            background: rgba(0, 0, 0, 0.7);
+            background: rgba(0, 0, 0, 0.8);
             color: white;
-            padding: 3px 6px;
-            border-radius: 3px;
-            font-size: 0.75rem;
-            font-weight: 600;
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-size: 1rem;
+            font-weight: 700;
             line-height: 1.2;
         }
 
@@ -806,11 +806,11 @@
             bottom: 2px;
             left: 0;
             right: 0;
-            background: rgba(0, 0, 0, 0.7);
+            background: rgba(0, 0, 0, 0.8);
             color: white;
-            padding: 3px 6px;
-            font-size: 0.7rem;
-            font-weight: 500;
+            padding: 4px 8px;
+            font-size: 0.9rem;
+            font-weight: 600;
             text-align: center;
             white-space: nowrap;
             overflow: hidden;
@@ -2931,31 +2931,38 @@
 
             const content = document.getElementById('deckViewContent');
 
+            // Save original width
+            const originalWidth = content.style.width;
+            const originalMaxWidth = content.style.maxWidth;
+
             try {
+                // Set fixed width for consistent export (1080px target)
+                content.style.width = '1080px';
+                content.style.maxWidth = '1080px';
+
+                // Wait a moment for layout to update
+                await new Promise(resolve => setTimeout(resolve, 100));
+
                 const canvas = await html2canvas(content, {
-                    scale: 1.5,
+                    scale: 1,
                     backgroundColor: '#ffffff',
                     logging: false,
-                    useCORS: true
+                    useCORS: true,
+                    width: 1080
                 });
 
-                // Resize canvas to smartphone-friendly size (max width: 1080px)
-                const maxWidth = 1080;
-                let finalCanvas = canvas;
+                // Always resize to exactly 1080px width
+                const targetWidth = 1080;
+                const scale = targetWidth / canvas.width;
+                const resizedCanvas = document.createElement('canvas');
+                resizedCanvas.width = targetWidth;
+                resizedCanvas.height = canvas.height * scale;
 
-                if (canvas.width > maxWidth) {
-                    const scale = maxWidth / canvas.width;
-                    const resizedCanvas = document.createElement('canvas');
-                    resizedCanvas.width = maxWidth;
-                    resizedCanvas.height = canvas.height * scale;
-
-                    const ctx = resizedCanvas.getContext('2d');
-                    ctx.drawImage(canvas, 0, 0, resizedCanvas.width, resizedCanvas.height);
-                    finalCanvas = resizedCanvas;
-                }
+                const ctx = resizedCanvas.getContext('2d');
+                ctx.drawImage(canvas, 0, 0, resizedCanvas.width, resizedCanvas.height);
 
                 // Convert to blob and download
-                finalCanvas.toBlob((blob) => {
+                resizedCanvas.toBlob((blob) => {
                     const url = URL.createObjectURL(blob);
                     const a = document.createElement('a');
                     a.href = url;
@@ -2966,6 +2973,10 @@
             } catch (error) {
                 console.error('Error exporting deck image:', error);
                 alert('画像の出力に失敗しました');
+            } finally {
+                // Restore original width
+                content.style.width = originalWidth;
+                content.style.maxWidth = originalMaxWidth;
             }
         });
 
