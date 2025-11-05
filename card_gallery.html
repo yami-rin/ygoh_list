@@ -1153,7 +1153,7 @@
                 <img id="panelCardImage" src="" alt="Card Image">
                 <!-- Illustration selector (only shown for cards with multiple illustrations) -->
                 <div id="illustrationSelector" style="display: none; margin-top: 1rem;">
-                    <button class="btn btn-sm btn-outline-success w-100" id="changeIllustrationBtn">
+                    <button class="btn btn-sm btn-success w-100" id="changeIllustrationBtn">
                         <i class="bi bi-image"></i> イラスト違いを選択
                     </button>
                     <div id="illustrationOptions" style="display: none; margin-top: 0.5rem; max-height: 150px; overflow-y: auto;">
@@ -1846,7 +1846,7 @@
                     const draggableAttr = isUnowned ? '' : `draggable="true" ondragstart="handleDragStart(event, ${index})" class="draggable"`;
 
                     return `
-                        <div class="card-item${unownedClass}" ${onclickAttr} ${draggableAttr} data-card-index="${index}">
+                        <div class="card-item${unownedClass}" ${onclickAttr} ${draggableAttr} data-card-index="${index}" data-card-id="${card.id}">
                             <div class="card-image-container" id="card-img-container-${index}" data-rendering-id="${thisRenderingId}">
                                 ${stockBadge}
                                 ${unownedBadge}
@@ -2060,7 +2060,7 @@
 
             currentEditingCard = card;
 
-            // Populate panel with card data
+            // Populate panel with card data immediately (synchronous)
             const decodedName = decodeHtmlEntities(card.data['名前']);
             document.getElementById('panelCardName').textContent = decodedName;
             document.getElementById('panelQuantity').value = card.data['枚数'] || 0;
@@ -2068,124 +2068,136 @@
             document.getElementById('panelCode').textContent = card.data['型番'] || '-';
             document.getElementById('panelRarity').textContent = card.data['レアリティ'] || '-';
 
-            // Get card details to check for multiple illustrations
+            // Open panel immediately
+            document.getElementById('editPanel').classList.add('open');
+
+            // Hide illustration selector initially
+            document.getElementById('illustrationSelector').style.display = 'none';
+
+            // Load card image and illustrations asynchronously (don't block panel opening)
             const details = cardDetailsMap.get(decodedName);
-            let illustrations = [];
             let currentCiid = '1';
 
-            if (details?.cardId) {
-                try {
-                    console.log(`Fetching illustrations for card: ${decodedName}, cardId: ${details.cardId}`);
-
-                    // Fetch card details from proxy
-                    const proxyUrl = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1'
-                        ? 'http://localhost:3000'
-                        : 'https://ygoh-list.onrender.com';
-
-                    const detailResponse = await fetch(`${proxyUrl}/card-detail?cid=${details.cardId}`);
-                    const cardDetail = await detailResponse.json();
-
-                    console.log('Card detail response:', cardDetail);
-                    console.log('Illustrations:', cardDetail.illustrations);
-
-                    if (cardDetail.illustrations && cardDetail.illustrations.length > 1) {
-                        illustrations = cardDetail.illustrations;
-                        console.log(`Found ${illustrations.length} illustrations, showing selector`);
-
-                        // Show illustration selector
-                        document.getElementById('illustrationSelector').style.display = 'block';
-                    } else {
-                        console.log('Single illustration card, hiding selector');
-                        // Hide illustration selector for single illustration cards
-                        document.getElementById('illustrationSelector').style.display = 'none';
-                    }
-                } catch (error) {
-                    console.error('Error fetching card illustrations:', error);
-                    document.getElementById('illustrationSelector').style.display = 'none';
-                }
-            }
-
-            // Load card image
-            console.log(`Loading initial card image for: ${decodedName}, ciid: ${currentCiid}`);
-            const imageUrl = await getCardImageUrl(decodedName, currentCiid);
-            console.log('Initial image URL:', imageUrl);
+            // Load image first (fast)
             const panelImage = document.getElementById('panelCardImage');
-            if (imageUrl) {
-                panelImage.src = imageUrl;
-                panelImage.style.display = 'block';
-                panelImage.dataset.currentCiid = currentCiid;
-                console.log('Panel image set to:', panelImage.src, 'with ciid:', currentCiid);
-            } else {
-                console.log('No image URL found, hiding panel image');
-                panelImage.style.display = 'none';
+            console.log(`Loading initial card image for: ${decodedName}, ciid: ${currentCiid}`);
+            getCardImageUrl(decodedName, currentCiid).then(imageUrl => {
+                console.log('Initial image URL:', imageUrl);
+                if (imageUrl) {
+                    panelImage.src = imageUrl;
+                    panelImage.style.display = 'block';
+                    panelImage.dataset.currentCiid = currentCiid;
+                    console.log('Panel image set to:', panelImage.src, 'with ciid:', currentCiid);
+                } else {
+                    console.log('No image URL found, hiding panel image');
+                    panelImage.style.display = 'none';
+                }
+            });
+
+            // Fetch illustrations in background (slower)
+            if (details?.cardId) {
+                console.log(`Fetching illustrations for card: ${decodedName}, cardId: ${details.cardId}`);
+
+                const proxyUrl = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1'
+                    ? 'http://localhost:3000'
+                    : 'https://ygoh-list.onrender.com';
+
+                fetch(`${proxyUrl}/card-detail?cid=${details.cardId}`)
+                    .then(response => response.json())
+                    .then(cardDetail => {
+                        console.log('Card detail response:', cardDetail);
+                        console.log('Illustrations:', cardDetail.illustrations);
+
+                        if (cardDetail.illustrations && cardDetail.illustrations.length > 1) {
+                            const illustrations = cardDetail.illustrations;
+                            console.log(`Found ${illustrations.length} illustrations, showing selector`);
+
+                            // Show illustration selector
+                            document.getElementById('illustrationSelector').style.display = 'block';
+
+                            // Setup illustration selector
+                            setupIllustrationSelector(illustrations, currentCiid, panelImage);
+                        } else {
+                            console.log('Single illustration card, keeping selector hidden');
+                        }
+                    })
+                    .catch(error => {
+                        console.error('Error fetching card illustrations:', error);
+                    });
             }
 
-            // Setup illustration selector if there are multiple illustrations
-            if (illustrations.length > 1) {
-                const changeBtn = document.getElementById('changeIllustrationBtn');
-                const optionsDiv = document.getElementById('illustrationOptions');
+        };
 
-                // Toggle illustration options
-                changeBtn.onclick = () => {
-                    console.log('=== CHANGE ILLUSTRATION BUTTON CLICKED ===');
-                    const isVisible = optionsDiv.style.display !== 'none';
-                    console.log('Options currently visible:', isVisible);
-                    optionsDiv.style.display = isVisible ? 'none' : 'flex';
+        // Helper function to setup illustration selector
+        const setupIllustrationSelector = (illustrations, currentCiid, panelImage) => {
+            const changeBtn = document.getElementById('changeIllustrationBtn');
+            const optionsDiv = document.getElementById('illustrationOptions');
 
-                    // Load thumbnails if first time opening
-                    if (!isVisible && optionsDiv.children.length === 0) {
-                        console.log('Loading illustration thumbnails...');
-                        illustrations.forEach((ill, index) => {
-                            const img = document.createElement('img');
-                            img.src = ill.imageUrl;
-                            img.className = 'illustration-option';
-                            if (ill.ciid === currentCiid) {
-                                img.classList.add('active');
-                            }
-                            img.title = `イラスト ${ill.ciid}`;
-                            img.onclick = async () => {
-                                console.log('=== ILLUSTRATION CHANGE CLICKED ===');
-                                console.log('Selected illustration:', ill);
-                                console.log('Previous ciid:', panelImage.dataset.currentCiid);
-                                console.log('New ciid:', ill.ciid);
-                                console.log('New imageUrl:', ill.imageUrl);
+            // Clear previous options
+            optionsDiv.innerHTML = '';
 
-                                // Update main panel image
-                                panelImage.src = ill.imageUrl;
-                                panelImage.dataset.currentCiid = ill.ciid;
-                                console.log('Panel image updated. Current src:', panelImage.src);
+            // Toggle illustration options
+            changeBtn.onclick = () => {
+                console.log('=== CHANGE ILLUSTRATION BUTTON CLICKED ===');
+                const isVisible = optionsDiv.style.display !== 'none';
+                console.log('Options currently visible:', isVisible);
+                optionsDiv.style.display = isVisible ? 'none' : 'flex';
 
-                                // Update gallery card image
-                                if (currentEditingCard) {
-                                    const galleryCardImg = document.querySelector(`.card[data-card-id="${currentEditingCard.id}"] img`);
-                                    if (galleryCardImg) {
-                                        console.log('Updating gallery card image for card ID:', currentEditingCard.id);
-                                        galleryCardImg.src = ill.imageUrl;
-                                        console.log('Gallery card image updated to:', ill.imageUrl);
-                                    } else {
-                                        console.warn('Gallery card image element not found for card ID:', currentEditingCard.id);
-                                    }
+                // Load thumbnails if first time opening
+                if (!isVisible && optionsDiv.children.length === 0) {
+                    console.log('Loading illustration thumbnails...');
+                    illustrations.forEach((ill, index) => {
+                        const img = document.createElement('img');
+                        img.src = ill.imageUrl;
+                        img.className = 'illustration-option';
+                        if (ill.ciid === currentCiid) {
+                            img.classList.add('active');
+                        }
+                        img.title = `イラスト ${ill.ciid}`;
+                        img.onclick = async () => {
+                            console.log('=== ILLUSTRATION CHANGE CLICKED ===');
+                            console.log('Selected illustration:', ill);
+                            console.log('Previous ciid:', panelImage.dataset.currentCiid);
+                            console.log('New ciid:', ill.ciid);
+                            console.log('New imageUrl:', ill.imageUrl);
 
-                                    // Store ciid in card data for future reference
-                                    currentEditingCard.selectedCiid = ill.ciid;
-                                    console.log('Stored ciid in card data:', ill.ciid);
+                            // Update main panel image
+                            panelImage.src = ill.imageUrl;
+                            panelImage.dataset.currentCiid = ill.ciid;
+                            console.log('Panel image updated. Current src:', panelImage.src);
+
+                            // Update gallery card image
+                            if (currentEditingCard) {
+                                const galleryCardItem = document.querySelector(`.card-item[data-card-id="${currentEditingCard.id}"]`);
+                                const galleryCardImg = galleryCardItem?.querySelector('img');
+                                if (galleryCardImg) {
+                                    console.log('Updating gallery card image for card ID:', currentEditingCard.id);
+                                    galleryCardImg.src = ill.imageUrl;
+                                    console.log('Gallery card image updated to:', ill.imageUrl);
+                                } else {
+                                    console.warn('Gallery card image element not found for card ID:', currentEditingCard.id);
+                                    console.warn('Gallery card item:', galleryCardItem);
                                 }
 
-                                // Update active state
-                                optionsDiv.querySelectorAll('.illustration-option').forEach(opt => {
-                                    opt.classList.remove('active');
-                                });
-                                img.classList.add('active');
+                                // Store ciid in card data for future reference
+                                currentEditingCard.selectedCiid = ill.ciid;
+                                console.log('Stored ciid in card data:', ill.ciid);
+                            }
 
-                                // Close options
-                                optionsDiv.style.display = 'none';
-                                console.log('Illustration options closed');
-                            };
-                            optionsDiv.appendChild(img);
-                        });
-                    }
-                };
-            }
+                            // Update active state
+                            optionsDiv.querySelectorAll('.illustration-option').forEach(opt => {
+                                opt.classList.remove('active');
+                            });
+                            img.classList.add('active');
+
+                            // Close options
+                            optionsDiv.style.display = 'none';
+                            console.log('Illustration options closed');
+                        };
+                        optionsDiv.appendChild(img);
+                    });
+                }
+            };
 
             // Display deck usage
             const { usageMap, totalUsed } = getCardUsageInDecks(cardId);
