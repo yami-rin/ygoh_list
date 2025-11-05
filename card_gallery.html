@@ -2068,8 +2068,25 @@
             document.getElementById('panelCode').textContent = card.data['型番'] || '-';
             document.getElementById('panelRarity').textContent = card.data['レアリティ'] || '-';
 
+            // Display deck usage
+            const { usageMap, totalUsed } = getCardUsageInDecks(cardId);
+            const deckUsageSection = document.getElementById('deckUsageSection');
+            const deckUsageList = document.getElementById('deckUsageList');
+
+            if (totalUsed > 0) {
+                let usageHTML = '';
+                for (const [deckName, count] of Object.entries(usageMap)) {
+                    usageHTML += `<div style="margin-bottom: 0.3rem;">・${deckName}: ${count}枚</div>`;
+                }
+                deckUsageList.innerHTML = usageHTML;
+                deckUsageSection.style.display = 'block';
+            } else {
+                deckUsageSection.style.display = 'none';
+            }
+
             // Open panel immediately
-            document.getElementById('editPanel').classList.add('open');
+            document.getElementById('editPanelOverlay').classList.add('show');
+            document.getElementById('editPanel').classList.add('show');
 
             // Hide illustration selector initially
             document.getElementById('illustrationSelector').style.display = 'none';
@@ -2125,7 +2142,6 @@
                         console.error('Error fetching card illustrations:', error);
                     });
             }
-
         };
 
         // Helper function to setup illustration selector
@@ -2198,26 +2214,6 @@
                     });
                 }
             };
-
-            // Display deck usage
-            const { usageMap, totalUsed } = getCardUsageInDecks(cardId);
-            const deckUsageSection = document.getElementById('deckUsageSection');
-            const deckUsageList = document.getElementById('deckUsageList');
-
-            if (totalUsed > 0) {
-                let usageHTML = '';
-                for (const [deckName, count] of Object.entries(usageMap)) {
-                    usageHTML += `<div style="margin-bottom: 0.3rem;">・${deckName}: ${count}枚</div>`;
-                }
-                deckUsageList.innerHTML = usageHTML;
-                deckUsageSection.style.display = 'block';
-            } else {
-                deckUsageSection.style.display = 'none';
-            }
-
-            // Show panel
-            document.getElementById('editPanelOverlay').classList.add('show');
-            document.getElementById('editPanel').classList.add('show');
         };
 
         // Close panel function
