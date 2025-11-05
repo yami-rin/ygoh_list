@@ -628,6 +628,11 @@
             transform: translateY(-2px);
         }
 
+        .deck-card-item.unowned img {
+            filter: grayscale(100%) brightness(0.7);
+            opacity: 0.6;
+        }
+
         .deck-card-image-container {
             width: 100%;
             aspect-ratio: 0.686;
@@ -2644,38 +2649,54 @@
                     ...(deckData.sideDeck || [])
                 ];
 
+                console.log('Checking deck cards for unowned:', allDeckCards);
+
                 const unownedCardsToAdd = [];
                 for (const deckCard of allDeckCards) {
+                    console.log('Checking card:', deckCard.cardId, deckCard.name);
+
                     // Check if card is in collection
                     const isInCollection = collectionCards.some(c => c.id === deckCard.cardId);
+                    console.log('  In collection:', isInCollection);
 
                     if (!isInCollection) {
                         // Check if already in wishlist
                         const isInWishlist = wishlistCards.some(c => c.id === deckCard.cardId);
+                        console.log('  In wishlist:', isInWishlist);
 
                         if (!isInWishlist) {
-                            // Find card data from allCards
-                            const cardData = allCards.find(c => c.id === deckCard.cardId);
-                            if (cardData) {
-                                unownedCardsToAdd.push({
-                                    cardId: deckCard.cardId,
-                                    cardData: cardData.data
-                                });
-                            }
+                            // Use the card data from deckCard itself
+                            // Since we already have name, code, rarity stored in deckCard
+                            unownedCardsToAdd.push({
+                                cardId: deckCard.cardId,
+                                name: deckCard.name,
+                                code: deckCard.code,
+                                rarity: deckCard.rarity,
+                                selectedCiid: deckCard.selectedCiid
+                            });
+                            console.log('  Added to unowned list');
                         }
                     }
                 }
+
+                console.log('Unowned cards to add:', unownedCardsToAdd);
 
                 // Add unowned cards to wishlist
                 if (unownedCardsToAdd.length > 0) {
                     const wishlistRef = collection(db, 'users', currentUser.uid, 'wishlist');
                     for (const card of unownedCardsToAdd) {
                         const wishlistData = {
-                            ...card.cardData,
+                            名前: card.name,
+                            型番: card.code,
+                            レアリティ: card.rarity,
                             枚数: 1,
                             tags: [],
                             addedAt: new Date().toISOString()
                         };
+                        if (card.selectedCiid) {
+                            wishlistData.selectedCiid = card.selectedCiid;
+                        }
+                        console.log('Adding to wishlist:', card.cardId, wishlistData);
                         await setDoc(doc(wishlistRef, card.cardId), wishlistData);
                     }
                     console.log(`Added ${unownedCardsToAdd.length} unowned cards to wishlist`);
@@ -3082,9 +3103,12 @@
                 // First render placeholder cards in grid (repeat each card by its quantity)
                 container.innerHTML = `<div class="deck-cards-grid">` + cards.flatMap((deckCard, index) => {
                     const decodedCardName = decodeHtmlEntities(deckCard.name);
+                    // Check if card is unowned
+                    const isUnowned = !collectionCards.some(c => c.id === deckCard.cardId);
+                    const unownedClass = isUnowned ? ' unowned' : '';
                     return Array(deckCard.quantity).fill(null).map((_, copyIndex) => {
                         return `
-                        <div class="deck-card-item" data-card-index="${index}" data-copy-index="${copyIndex}" data-deck-type="${deckType}" draggable="true">
+                        <div class="deck-card-item${unownedClass}" data-card-index="${index}" data-copy-index="${copyIndex}" data-deck-type="${deckType}" data-card-id="${deckCard.cardId}" draggable="true">
                             <div class="deck-card-image-container">
                                 <img data-card-name="${escapeHtml(decodedCardName)}" alt="${escapeHtml(decodedCardName)}" style="display:none;">
                                 <div class="deck-card-image-placeholder">
