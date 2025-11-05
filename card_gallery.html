@@ -2075,6 +2075,8 @@
 
             if (details?.cardId) {
                 try {
+                    console.log(`Fetching illustrations for card: ${decodedName}, cardId: ${details.cardId}`);
+
                     // Fetch card details from proxy
                     const proxyUrl = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1'
                         ? 'http://localhost:3000'
@@ -2083,12 +2085,17 @@
                     const detailResponse = await fetch(`${proxyUrl}/card-detail?cid=${details.cardId}`);
                     const cardDetail = await detailResponse.json();
 
+                    console.log('Card detail response:', cardDetail);
+                    console.log('Illustrations:', cardDetail.illustrations);
+
                     if (cardDetail.illustrations && cardDetail.illustrations.length > 1) {
                         illustrations = cardDetail.illustrations;
+                        console.log(`Found ${illustrations.length} illustrations, showing selector`);
 
                         // Show illustration selector
                         document.getElementById('illustrationSelector').style.display = 'block';
                     } else {
+                        console.log('Single illustration card, hiding selector');
                         // Hide illustration selector for single illustration cards
                         document.getElementById('illustrationSelector').style.display = 'none';
                     }
@@ -2099,13 +2106,17 @@
             }
 
             // Load card image
+            console.log(`Loading initial card image for: ${decodedName}, ciid: ${currentCiid}`);
             const imageUrl = await getCardImageUrl(decodedName, currentCiid);
+            console.log('Initial image URL:', imageUrl);
             const panelImage = document.getElementById('panelCardImage');
             if (imageUrl) {
                 panelImage.src = imageUrl;
                 panelImage.style.display = 'block';
                 panelImage.dataset.currentCiid = currentCiid;
+                console.log('Panel image set to:', panelImage.src, 'with ciid:', currentCiid);
             } else {
+                console.log('No image URL found, hiding panel image');
                 panelImage.style.display = 'none';
             }
 
@@ -2116,11 +2127,14 @@
 
                 // Toggle illustration options
                 changeBtn.onclick = () => {
+                    console.log('=== CHANGE ILLUSTRATION BUTTON CLICKED ===');
                     const isVisible = optionsDiv.style.display !== 'none';
+                    console.log('Options currently visible:', isVisible);
                     optionsDiv.style.display = isVisible ? 'none' : 'flex';
 
                     // Load thumbnails if first time opening
                     if (!isVisible && optionsDiv.children.length === 0) {
+                        console.log('Loading illustration thumbnails...');
                         illustrations.forEach((ill, index) => {
                             const img = document.createElement('img');
                             img.src = ill.imageUrl;
@@ -2130,9 +2144,16 @@
                             }
                             img.title = `イラスト ${ill.ciid}`;
                             img.onclick = async () => {
+                                console.log('=== ILLUSTRATION CHANGE CLICKED ===');
+                                console.log('Selected illustration:', ill);
+                                console.log('Previous ciid:', panelImage.dataset.currentCiid);
+                                console.log('New ciid:', ill.ciid);
+                                console.log('New imageUrl:', ill.imageUrl);
+
                                 // Update main image
                                 panelImage.src = ill.imageUrl;
                                 panelImage.dataset.currentCiid = ill.ciid;
+                                console.log('Panel image updated. Current src:', panelImage.src);
 
                                 // Update active state
                                 optionsDiv.querySelectorAll('.illustration-option').forEach(opt => {
@@ -2142,6 +2163,7 @@
 
                                 // Close options
                                 optionsDiv.style.display = 'none';
+                                console.log('Illustration options closed');
                             };
                             optionsDiv.appendChild(img);
                         });
