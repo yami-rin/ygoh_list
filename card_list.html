@@ -8816,10 +8816,15 @@ Firebase Consoleで確認すべき項目:
         // Check VIP status on load
         const checkVipStatus = () => {
             const serialSection = document.getElementById('serial-number-section');
+            const vipMenuContainer = document.getElementById('vip-menu-container');
 
             // Guest users cannot access VIP features
             if (!currentUser || currentUser.uid === 'local_user') {
+                console.log('[DEBUG] checkVipStatus: Guest user detected, hiding VIP features');
                 if (serialSection) serialSection.style.display = 'none';
+                // Explicitly hide VIP menu for guest users
+                if (vipMenuContainer) vipMenuContainer.style.display = 'none';
+                console.log('[DEBUG] checkVipStatus: VIP menu display after hiding:', vipMenuContainer ? vipMenuContainer.style.display : 'not found');
                 updateVipUI(false); // Hide VIP menu for guest users
                 return;
             }
@@ -8872,6 +8877,7 @@ Firebase Consoleで確認すべき項目:
 
             // Guest users can never be VIP
             if (isGuest) {
+                console.log('[DEBUG] Guest user detected in updateVipUI, hiding all VIP elements');
                 if (inputSection) inputSection.style.display = 'none';
                 if (activeSection) activeSection.style.display = 'none';
                 if (statusBadge) statusBadge.style.display = 'none';
