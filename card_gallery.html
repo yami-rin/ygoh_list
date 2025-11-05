@@ -714,6 +714,37 @@
             cursor: grabbing;
         }
 
+        /* Context menu */
+        .context-menu {
+            position: fixed;
+            background: white;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.2);
+            padding: 4px 0;
+            z-index: 10000;
+            display: none;
+            min-width: 180px;
+        }
+
+        .context-menu-item {
+            padding: 8px 16px;
+            cursor: pointer;
+            font-size: 0.9rem;
+            white-space: nowrap;
+            user-select: none;
+        }
+
+        .context-menu-item:hover {
+            background: #f0f0f0;
+        }
+
+        .context-menu-item i {
+            margin-right: 8px;
+            width: 16px;
+            display: inline-block;
+        }
+
         .deck-list-item {
             background: white;
             border: 1px solid #dee2e6;
@@ -936,6 +967,11 @@
             <li class="nav-item" role="presentation">
                 <button class="nav-link" id="wishlist-tab" data-list-type="wishlist" type="button">
                     <i class="bi bi-star"></i> ウィッシュリスト
+                </button>
+            </li>
+            <li class="nav-item" role="presentation">
+                <button class="nav-link" id="bookmark-tab" data-list-type="bookmark" type="button">
+                    <i class="bi bi-bookmark"></i> ブックマーク
                 </button>
             </li>
         </ul>
@@ -1427,6 +1463,7 @@
         // State
         let collectionCards = [];
         let wishlistCards = [];
+        let bookmarkCards = [];
         let allCards = [];
         let filteredCards = [];
         let cardDetailsMap = new Map();
@@ -1436,7 +1473,7 @@
         let itemsPerPage = 50;
         let currentGridSize = 'medium';
         let currentSort = 'quantity-desc';
-        let currentListType = 'collection'; // 'collection' or 'wishlist'
+        let currentListType = 'collection'; // 'collection', 'wishlist', or 'bookmark'
         let currentEditingCard = null;
         let currentRenderingId = 0; // To prevent duplicate images when rapidly changing pages
 
@@ -1566,6 +1603,14 @@
                     data: doc.data()
                 }));
 
+                // Load bookmark cards from subcollection: users/{userId}/bookmarks
+                const bookmarkRef = collection(db, 'users', userId, 'bookmarks');
+                const bookmarkSnapshot = await getDocs(bookmarkRef);
+                bookmarkCards = bookmarkSnapshot.docs.map(doc => ({
+                    id: doc.id,
+                    data: doc.data()
+                }));
+
                 // Load decks to calculate card usage
                 await loadDecks();
 
@@ -1579,10 +1624,12 @@
             }
         };
 
-        // Switch between collection and wishlist
+        // Switch between collection, wishlist, and bookmark
         const switchListType = (listType) => {
             currentListType = listType;
-            allCards = listType === 'collection' ? collectionCards : wishlistCards;
+            allCards = listType === 'collection' ? collectionCards :
+                       listType === 'wishlist' ? wishlistCards :
+                       bookmarkCards;
 
             // Save to localStorage
             localStorage.setItem('galleryListType', listType);
@@ -2306,6 +2353,158 @@
             document.getElementById('illustrationSelector').style.display = 'none';
         };
 
+        // ==================== BOOKMARK FUNCTIONS ====================
+
+        /**
+         * Add card to bookmarks
+         */
+        const addToBookmarks = async (cardData) => {
+            if (!currentUser) return;
+
+            try {
+                const bookmarkRef = doc(db, 'users', currentUser.uid, 'bookmarks', cardData.id);
+                await setDoc(bookmarkRef, {
+                    名前: cardData.data['名前'],
+                    型番: cardData.data['型番'],
+                    レアリティ: cardData.data['レアリティ'],
+                    枚数: cardData.data['枚数'] || 1,
+                    tags: cardData.data.tags || [],
+                    selectedCiid: cardData.data.selectedCiid,
+                    addedAt: new Date().toISOString()
+                });
+
+                console.log('Added to bookmarks:', cardData.id);
+
+                // Reload bookmarks
+                await loadAllData(currentUser.uid);
+
+                alert('ブックマークに追加しました');
+            } catch (error) {
+                console.error('Error adding to bookmarks:', error);
+                alert('ブックマークの追加に失敗しました');
+            }
+        };
+
+        /**
+         * Remove card from bookmarks
+         */
+        const removeFromBookmarks = async (cardId) => {
+            if (!currentUser) return;
+
+            try {
+                const bookmarkRef = doc(db, 'users', currentUser.uid, 'bookmarks', cardId);
+                await deleteDoc(bookmarkRef);
+
+                console.log('Removed from bookmarks:', cardId);
+
+                // Reload bookmarks
+                await loadAllData(currentUser.uid);
+
+                alert('ブックマークから削除しました');
+            } catch (error) {
+                console.error('Error removing from bookmarks:', error);
+                alert('ブックマークの削除に失敗しました');
+            }
+        };
+
+        /**
+         * Check if card is bookmarked
+         */
+        const isBookmarked = (cardId) => {
+            return bookmarkCards.some(c => c.id === cardId);
+        };
+
+        /**
+         * Setup context menu for cards
+         */
+        const setupContextMenu = () => {
+            const contextMenu = document.getElementById('contextMenu');
+            const cardGrid = document.getElementById('card-grid');
+
+            // Show context menu
+            const showContextMenu = (x, y, items) => {
+                contextMenu.innerHTML = items.map(item =>
+                    `<div class="context-menu-item" data-action="${item.action}">
+                        <i class="bi ${item.icon}"></i>${item.label}
+                    </div>`
+                ).join('');
+
+                contextMenu.style.left = x + 'px';
+                contextMenu.style.top = y + 'px';
+                contextMenu.style.display = 'block';
+
+                // Attach handlers
+                contextMenu.querySelectorAll('.context-menu-item').forEach(el => {
+                    el.addEventListener('click', () => {
+                        const action = el.dataset.action;
+                        const handler = items.find(i => i.action === action)?.handler;
+                        if (handler) handler();
+                        hideContextMenu();
+                    });
+                });
+
+                // Keep within viewport
+                const rect = contextMenu.getBoundingClientRect();
+                if (rect.right > window.innerWidth) {
+                    contextMenu.style.left = (window.innerWidth - rect.width - 10) + 'px';
+                }
+                if (rect.bottom > window.innerHeight) {
+                    contextMenu.style.top = (window.innerHeight - rect.height - 10) + 'px';
+                }
+            };
+
+            // Hide context menu
+            const hideContextMenu = () => {
+                contextMenu.style.display = 'none';
+                contextMenu.innerHTML = '';
+            };
+
+            // Card grid right-click
+            cardGrid.addEventListener('contextmenu', (e) => {
+                const cardItem = e.target.closest('.card-item');
+                if (!cardItem) return;
+
+                e.preventDefault();
+                e.stopPropagation();
+
+                const cardIndex = parseInt(cardItem.dataset.cardIndex);
+                const startIndex = (currentPage - 1) * itemsPerPage;
+                const card = filteredCards[startIndex + cardIndex];
+
+                if (!card) return;
+
+                const menuItems = [];
+
+                // Bookmark option
+                if (isBookmarked(card.id)) {
+                    menuItems.push({
+                        label: 'ブックマークから削除',
+                        icon: 'bi-bookmark-dash',
+                        action: 'remove-bookmark',
+                        handler: () => removeFromBookmarks(card.id)
+                    });
+                } else {
+                    menuItems.push({
+                        label: 'ブックマークに追加',
+                        icon: 'bi-bookmark-plus',
+                        action: 'add-bookmark',
+                        handler: () => addToBookmarks(card)
+                    });
+                }
+
+                showContextMenu(e.pageX, e.pageY, menuItems);
+            });
+
+            // Hide when clicking anywhere
+            document.addEventListener('click', (e) => {
+                if (!contextMenu.contains(e.target)) {
+                    hideContextMenu();
+                }
+            });
+        };
+
+        // ==================== END BOOKMARK FUNCTIONS ====================
+
         // Event listeners
         document.getElementById('items-per-page').addEventListener('change', (e) => {
             itemsPerPage = parseInt(e.target.value);
@@ -2484,6 +2683,10 @@
 
         document.getElementById('wishlist-tab').addEventListener('click', () => {
             switchListType('wishlist');
+        });
+
+        document.getElementById('bookmark-tab').addEventListener('click', () => {
+            switchListType('bookmark');
         });
 
         // Close panel button
@@ -3399,6 +3602,9 @@
         // Initialize drag and drop
         setupDragAndDrop();
 
+        // Initialize context menu
+        setupContextMenu();
+
         // ==================== END DECK SYSTEM ====================
 
         // Initialize
@@ -3458,7 +3664,7 @@
 
                     // Load saved list type
                     const savedListType = localStorage.getItem('galleryListType');
-                    if (savedListType && (savedListType === 'collection' || savedListType === 'wishlist')) {
+                    if (savedListType && (savedListType === 'collection' || savedListType === 'wishlist' || savedListType === 'bookmark')) {
                         currentListType = savedListType;
                     }
 
@@ -3483,5 +3689,9 @@
 
         init();
     </script>
+
+    <!-- Context Menu -->
+    <div id="contextMenu" class="context-menu"></div>
+
 </body>
 </html>
