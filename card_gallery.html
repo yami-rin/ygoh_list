@@ -679,6 +679,12 @@
             line-height: 1.2;
         }
 
+        /* Hide code and rarity when toggle is off */
+        .hide-card-details .deck-card-code,
+        .hide-card-details .deck-card-rarity {
+            display: none;
+        }
+
         .deck-builder-actions {
             padding-top: 1rem;
             border-top: 1px solid #dee2e6;
@@ -780,6 +786,40 @@
             justify-content: center;
             color: #999;
             font-size: 0.7rem;
+        }
+
+        .deck-view-card-rarity {
+            position: absolute;
+            top: 2px;
+            right: 2px;
+            background: rgba(0, 0, 0, 0.7);
+            color: white;
+            padding: 2px 4px;
+            border-radius: 3px;
+            font-size: 0.6rem;
+            font-weight: 500;
+            line-height: 1.2;
+        }
+
+        .deck-view-card-code {
+            position: absolute;
+            bottom: 2px;
+            left: 0;
+            right: 0;
+            background: rgba(0, 0, 0, 0.7);
+            color: white;
+            padding: 2px 4px;
+            font-size: 0.6rem;
+            text-align: center;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        /* Hide code and rarity in deck view when toggle is off */
+        .hide-card-details .deck-view-card-code,
+        .hide-card-details .deck-view-card-rarity {
+            display: none;
         }
 
         .deck-list-item-memo {
@@ -1248,9 +1288,14 @@
     <div class="deck-builder-panel" id="deckBuilderPanel">
         <div class="deck-builder-header">
             <h4 id="deckBuilderTitle">デッキ編集</h4>
-            <button class="deck-builder-close" id="closeDeckBuilderBtn">
-                <i class="bi bi-x"></i>
-            </button>
+            <div style="display: flex; gap: 0.5rem;">
+                <button class="btn btn-sm btn-outline-secondary" id="toggleCardDetailsBtn" title="型番・レアリティの表示/非表示">
+                    <i class="bi bi-info-circle"></i>
+                </button>
+                <button class="deck-builder-close" id="closeDeckBuilderBtn">
+                    <i class="bi bi-x"></i>
+                </button>
+            </div>
         </div>
         <div class="deck-builder-content">
             <!-- Deck Info -->
@@ -1330,7 +1375,12 @@
                     <h5 class="modal-title">
                         <i class="bi bi-eye"></i> <span id="viewDeckName">デッキ閲覧</span>
                     </h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                    <div class="d-flex gap-2 align-items-center">
+                        <button class="btn btn-sm btn-outline-secondary" id="toggleDeckViewDetailsBtn" title="型番・レアリティの表示/非表示">
+                            <i class="bi bi-info-circle"></i>
+                        </button>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                    </div>
                 </div>
                 <div class="modal-body" style="background: #f8f9fa;">
                     <div class="mb-3 d-flex justify-content-end gap-2">
@@ -2759,6 +2809,21 @@
             // Render deck view
             await renderDeckView(deck);
 
+            // Load saved card details visibility preference
+            const hideCardDetails = localStorage.getItem('deckViewHideCardDetails');
+            const deckViewContent = document.getElementById('deckViewContent');
+            const btn = document.getElementById('toggleDeckViewDetailsBtn');
+
+            if (hideCardDetails === 'true') {
+                deckViewContent.classList.add('hide-card-details');
+                btn.classList.remove('btn-outline-secondary');
+                btn.classList.add('btn-secondary');
+            } else {
+                deckViewContent.classList.remove('hide-card-details');
+                btn.classList.remove('btn-secondary');
+                btn.classList.add('btn-outline-secondary');
+            }
+
             // Show modal
             const modal = new bootstrap.Modal(document.getElementById('deckViewModal'));
             modal.show();
@@ -2788,6 +2853,8 @@
                             <div class="deck-view-card-placeholder">
                                 <i class="bi bi-card-image"></i>
                             </div>
+                            ${card.rarity ? `<div class="deck-view-card-rarity">${escapeHtml(card.rarity)}</div>` : ''}
+                            ${card.code ? `<div class="deck-view-card-code">${escapeHtml(card.code)}</div>` : ''}
                         </div>
                     `;
                 });
@@ -2833,9 +2900,15 @@
                     try {
                         // Decode HTML entities in card name before fetching image
                         const decodedCardName = decodeHtmlEntities(card.name);
-                        const imageUrl = await getCardImageUrl(decodedCardName);
+                        // Use selectedCiid if available, otherwise default to '1'
+                        const ciid = card.selectedCiid || '1';
+                        const imageUrl = await getCardImageUrl(decodedCardName, ciid);
                         if (imageUrl) {
-                            cardElement.innerHTML = `<img src="${imageUrl}" alt="${escapeHtml(decodedCardName)}">`;
+                            // Replace placeholder with image, keeping code and rarity elements
+                            const placeholder = cardElement.querySelector('.deck-view-card-placeholder');
+                            if (placeholder) {
+                                placeholder.outerHTML = `<img src="${imageUrl}" alt="${escapeHtml(decodedCardName)}">`;
+                            }
                         }
                     } catch (error) {
                         console.error(`Failed to load image for ${card.name}:`, error);
@@ -2878,6 +2951,26 @@
                 console.error('Error exporting deck image:', error);
                 alert('画像の出力に失敗しました');
             }
+        });
+
+        // Toggle card details (code and rarity) visibility in deck view modal
+        document.getElementById('toggleDeckViewDetailsBtn').addEventListener('click', () => {
+            const deckViewContent = document.getElementById('deckViewContent');
+            const btn = document.getElementById('toggleDeckViewDetailsBtn');
+            const isHidden = deckViewContent.classList.toggle('hide-card-details');
+
+            // Update button appearance
+            if (isHidden) {
+                btn.classList.remove('btn-outline-secondary');
+                btn.classList.add('btn-secondary');
+            } else {
+                btn.classList.remove('btn-secondary');
+                btn.classList.add('btn-outline-secondary');
+            }
+
+            // Save preference
+            localStorage.setItem('deckViewHideCardDetails', isHidden.toString());
+            console.log('Deck view card details visibility toggled:', isHidden ? 'hidden' : 'visible');
         });
 
         // Render cards in deck builder
@@ -2929,7 +3022,9 @@
                         try {
                             // Decode HTML entities in card name before fetching image
                             const decodedCardName = decodeHtmlEntities(card.name);
-                            const imageUrl = await getCardImageUrl(decodedCardName);
+                            // Use selectedCiid if available, otherwise default to '1'
+                            const ciid = card.selectedCiid || '1';
+                            const imageUrl = await getCardImageUrl(decodedCardName, ciid);
                             if (imageUrl) {
                                 // Apply the same image to all copies of this card
                                 cardItems.forEach(cardItem => {
@@ -3002,13 +3097,18 @@
             if (existingIndex >= 0) {
                 currentDeck[deckKey][existingIndex].quantity++;
             } else {
-                currentDeck[deckKey].push({
+                const deckCard = {
                     cardId: cardData.id,
                     name: cardData.data['名前'],
                     code: cardData.data['型番'],
                     rarity: cardData.data['レアリティ'],
                     quantity: 1
-                });
+                };
+                // Include selectedCiid if it exists
+                if (cardData.data.selectedCiid) {
+                    deckCard.selectedCiid = cardData.data.selectedCiid;
+                }
+                currentDeck[deckKey].push(deckCard);
             }
 
             await renderDeckCards();
@@ -3156,6 +3256,26 @@
 
         document.getElementById('closeDeckBuilderBtn').addEventListener('click', closeDeckBuilder);
 
+        // Toggle card details (code and rarity) visibility
+        document.getElementById('toggleCardDetailsBtn').addEventListener('click', () => {
+            const deckBuilderPanel = document.getElementById('deckBuilderPanel');
+            const btn = document.getElementById('toggleCardDetailsBtn');
+            const isHidden = deckBuilderPanel.classList.toggle('hide-card-details');
+
+            // Update button appearance
+            if (isHidden) {
+                btn.classList.remove('btn-outline-secondary');
+                btn.classList.add('btn-secondary');
+            } else {
+                btn.classList.remove('btn-secondary');
+                btn.classList.add('btn-outline-secondary');
+            }
+
+            // Save preference
+            localStorage.setItem('deckBuilderHideCardDetails', isHidden.toString());
+            console.log('Card details visibility toggled:', isHidden ? 'hidden' : 'visible');
+        });
+
         document.getElementById('saveDeckBtn').addEventListener('click', saveDeck);
         document.getElementById('deleteDeckBtn').addEventListener('click', deleteDeck);
 
@@ -3223,6 +3343,18 @@
                     const savedListType = localStorage.getItem('galleryListType');
                     if (savedListType && (savedListType === 'collection' || savedListType === 'wishlist')) {
                         currentListType = savedListType;
+                    }
+
+                    // Load saved card details visibility preference
+                    const hideCardDetails = localStorage.getItem('deckBuilderHideCardDetails');
+                    if (hideCardDetails === 'true') {
+                        const deckBuilderPanel = document.getElementById('deckBuilderPanel');
+                        const btn = document.getElementById('toggleCardDetailsBtn');
+                        if (deckBuilderPanel && btn) {
+                            deckBuilderPanel.classList.add('hide-card-details');
+                            btn.classList.remove('btn-outline-secondary');
+                            btn.classList.add('btn-secondary');
+                        }
                     }
                 } else {
                     // Redirect to login page
