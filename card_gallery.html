@@ -2146,12 +2146,9 @@
             const details = cardDetailsMap.get(decodedName);
             let currentCiid = card.data.selectedCiid || '1';  // Use saved ciid if available
 
-            // Use card.id (Firestore ID) as cardId if details not found in cardDetailsMap
-            const cardId = details?.cardId || card.id;
-
             // Load image first (fast)
             const panelImage = document.getElementById('panelCardImage');
-            console.log(`Loading initial card image for: ${decodedName}, ciid: ${currentCiid}, cardId: ${cardId}`);
+            console.log(`Loading initial card image for: ${decodedName}, ciid: ${currentCiid}`);
             getCardImageUrl(decodedName, currentCiid).then(imageUrl => {
                 console.log('Initial image URL:', imageUrl);
                 if (imageUrl) {
@@ -2166,14 +2163,14 @@
             });
 
             // Fetch illustrations in background (slower)
-            if (cardId) {
-                console.log(`Fetching illustrations for card: ${decodedName}, cardId: ${cardId}`);
+            if (details?.cardId) {
+                console.log(`Fetching illustrations for card: ${decodedName}, cardId: ${details.cardId}`);
 
                 const proxyUrl = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1'
                     ? 'http://localhost:3000'
                     : 'https://ygoh-list.onrender.com';
 
-                fetch(`${proxyUrl}/card-detail?cid=${cardId}`)
+                fetch(`${proxyUrl}/card-detail?cid=${details.cardId}`)
                     .then(response => response.json())
                     .then(cardDetail => {
                         console.log('Card detail response:', cardDetail);
