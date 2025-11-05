@@ -1893,8 +1893,9 @@
                     }
 
                     const decodedName = decodeHtmlEntities(card.data['名前']);
+                    // Allow dragging for both owned and unowned cards, but only owned cards can open edit modal
                     const onclickAttr = isUnowned ? '' : `onclick="openCardEditModal('${card.id}')"`;
-                    const draggableAttr = isUnowned ? '' : `draggable="true" ondragstart="handleDragStart(event, ${index})" class="draggable"`;
+                    const draggableAttr = `draggable="true" ondragstart="handleDragStart(event, ${index})" class="draggable"`;
 
                     return `
                         <div class="card-item${unownedClass}" ${onclickAttr} ${draggableAttr} data-card-index="${index}" data-card-id="${card.id}">
@@ -2636,20 +2637,78 @@
             }
 
             try {
+                // Check for unowned cards and add to wishlist
+                const allDeckCards = [
+                    ...(deckData.mainDeck || []),
+                    ...(deckData.extraDeck || []),
+                    ...(deckData.sideDeck || [])
+                ];
+
+                const unownedCardsToAdd = [];
+                for (const deckCard of allDeckCards) {
+                    // Check if card is in collection
+                    const isInCollection = collectionCards.some(c => c.id === deckCard.cardId);
+
+                    if (!isInCollection) {
+                        // Check if already in wishlist
+                        const isInWishlist = wishlistCards.some(c => c.id === deckCard.cardId);
+
+                        if (!isInWishlist) {
+                            // Find card data from allCards
+                            const cardData = allCards.find(c => c.id === deckCard.cardId);
+                            if (cardData) {
+                                unownedCardsToAdd.push({
+                                    cardId: deckCard.cardId,
+                                    cardData: cardData.data
+                                });
+                            }
+                        }
+                    }
+                }
+
+                // Add unowned cards to wishlist
+                if (unownedCardsToAdd.length > 0) {
+                    const wishlistRef = collection(db, 'users', currentUser.uid, 'wishlist');
+                    for (const card of unownedCardsToAdd) {
+                        const wishlistData = {
+                            ...card.cardData,
+                            枚数: 1,
+                            tags: [],
+                            addedAt: new Date().toISOString()
+                        };
+                        await setDoc(doc(wishlistRef, card.cardId), wishlistData);
+                    }
+                    console.log(`Added ${unownedCardsToAdd.length} unowned cards to wishlist`);
+                }
+
                 if (currentDeck.id) {
                     // Update existing deck
                     const deckRef = doc(db, 'users', currentUser.uid, 'decks', currentDeck.id);
                     await updateDoc(deckRef, deckData);
-                    alert('デッキを保存しました');
+                    if (unownedCardsToAdd.length > 0) {
+                        alert(`デッキを保存しました\n未所持カード ${unownedCardsToAdd.length} 枚をウィッシュリストに追加しました`);
+                    } else {
+                        alert('デッキを保存しました');
+                    }
                 } else {
                     // Create new deck
                     deckData.createdAt = new Date().toISOString();
                     const decksRef = collection(db, 'users', currentUser.uid, 'decks');
                     const docRef = await addDoc(decksRef, deckData);
                     currentDeck.id = docRef.id;
-                    alert('デッキを作成しました');
+                    if (unownedCardsToAdd.length > 0) {
+                        alert(`デッキを作成しました\n未所持カード ${unownedCardsToAdd.length} 枚をウィッシュリストに追加しました`);
+                    } else {
+                        alert('デッキを作成しました');
+                    }
                 }
-                await loadDecks();
+
+                // Reload data to reflect wishlist changes
+                if (unownedCardsToAdd.length > 0) {
+                    await loadAllData(currentUser.uid);
+                } else {
+                    await loadDecks();
+                }
                 renderDeckList();
                 renderCards(); // Re-render cards to update stock badges
             } catch (error) {
