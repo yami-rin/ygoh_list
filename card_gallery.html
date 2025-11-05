@@ -823,6 +823,57 @@
             display: none;
         }
 
+        /* Context menu */
+        .context-menu {
+            position: fixed;
+            background: white;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.2);
+            padding: 4px 0;
+            z-index: 10000;
+            display: none;
+        }
+
+        .context-menu-item {
+            padding: 8px 20px;
+            cursor: pointer;
+            font-size: 0.9rem;
+            white-space: nowrap;
+        }
+
+        .context-menu-item:hover {
+            background: #f0f0f0;
+        }
+
+        .context-menu-item i {
+            margin-right: 8px;
+            width: 16px;
+        }
+
+        /* Drag over indicator for card reordering */
+        .deck-card-item.drag-over-before::before {
+            content: '';
+            position: absolute;
+            left: -3px;
+            top: 0;
+            bottom: 0;
+            width: 3px;
+            background: #667eea;
+            z-index: 10;
+        }
+
+        .deck-card-item.drag-over-after::after {
+            content: '';
+            position: absolute;
+            right: -3px;
+            top: 0;
+            bottom: 0;
+            width: 3px;
+            background: #667eea;
+            z-index: 10;
+        }
+
         .deck-list-item-memo {
             color: #6c757d;
             font-size: 0.9rem;
@@ -1397,6 +1448,9 @@
         </div>
     </div>
 
+    <!-- Context Menu -->
+    <div id="contextMenu" class="context-menu"></div>
+
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
     <script type="module">
@@ -1916,6 +1970,39 @@
                         </div>
                     `;
                 }).join('');
+
+                // Add context menu to gallery cards
+                setTimeout(() => {
+                    grid.querySelectorAll('.card-item:not(.unowned)').forEach((cardEl, index) => {
+                        cardEl.addEventListener('contextmenu', (e) => {
+                            e.preventDefault();
+                            const cardIndex = parseInt(cardEl.dataset.cardIndex);
+                            const card = pageCards[cardIndex];
+                            if (!card || card.unowned || card.data.unowned) return;
+
+                            showContextMenu(e.pageX, e.pageY, [
+                                {
+                                    action: 'addToMain',
+                                    icon: 'bi-plus-circle',
+                                    label: 'メインデッキに追加',
+                                    handler: () => addCardToDeck(card, 'main')
+                                },
+                                {
+                                    action: 'addToExtra',
+                                    icon: 'bi-plus-circle',
+                                    label: 'エクストラデッキに追加',
+                                    handler: () => addCardToDeck(card, 'extra')
+                                },
+                                {
+                                    action: 'addToSide',
+                                    icon: 'bi-plus-circle',
+                                    label: 'サイドデッキに追加',
+                                    handler: () => addCardToDeck(card, 'side')
+                                }
+                            ]);
+                        });
+                    });
+                }, 0);
 
                 // Then load images asynchronously
                 pageCards.forEach(async (card, index) => {
@@ -3068,19 +3155,77 @@
                     }
 
                     // Setup drag events for deck cards
-                    grid.querySelectorAll('.deck-card-item').forEach(cardItem => {
+                    grid.querySelectorAll('.deck-card-item').forEach((cardItem, globalIndex) => {
+                        const cardIndex = parseInt(cardItem.dataset.cardIndex);
+                        const copyIndex = parseInt(cardItem.dataset.copyIndex);
+                        const sourceDeckType = cardItem.dataset.deckType;
+
                         cardItem.addEventListener('dragstart', (e) => {
-                            const cardIndex = parseInt(cardItem.dataset.cardIndex);
-                            const sourceDeckType = cardItem.dataset.deckType;
                             draggedDeckCard = {
                                 card: cards[cardIndex],
-                                sourceDeckType: sourceDeckType
+                                sourceDeckType: sourceDeckType,
+                                cardIndex: cardIndex,
+                                globalIndex: globalIndex
                             };
                             cardItem.classList.add('dragging');
                         });
 
                         cardItem.addEventListener('dragend', (e) => {
                             cardItem.classList.remove('dragging');
+                            // Remove all drag-over indicators
+                            grid.querySelectorAll('.drag-over-before, .drag-over-after').forEach(el => {
+                                el.classList.remove('drag-over-before', 'drag-over-after');
+                            });
+                        });
+
+                        // Allow dropping on other cards for reordering
+                        cardItem.addEventListener('dragover', (e) => {
+                            if (!draggedDeckCard || draggedDeckCard.sourceDeckType !== sourceDeckType) return;
+                            e.preventDefault();
+                            e.stopPropagation();
+
+                            const targetIndex = globalIndex;
+                            const dragIndex = draggedDeckCard.globalIndex;
+
+                            if (targetIndex === dragIndex) return;
+
+                            // Remove previous indicators
+                            grid.querySelectorAll('.drag-over-before, .drag-over-after').forEach(el => {
+                                el.classList.remove('drag-over-before', 'drag-over-after');
+                            });
+
+                            // Show indicator based on drop position
+                            if (dragIndex < targetIndex) {
+                                cardItem.classList.add('drag-over-after');
+                            } else {
+                                cardItem.classList.add('drag-over-before');
+                            }
+                        });
+
+                        cardItem.addEventListener('drop', async (e) => {
+                            if (!draggedDeckCard || draggedDeckCard.sourceDeckType !== sourceDeckType) return;
+                            e.preventDefault();
+                            e.stopPropagation();
+
+                            const targetIndex = globalIndex;
+                            const dragIndex = draggedDeckCard.globalIndex;
+
+                            if (targetIndex !== dragIndex) {
+                                await reorderCardsInDeck(sourceDeckType, cardIndex, sourceDeckType, parseInt(cardItem.dataset.cardIndex));
+                            }
+                        });
+
+                        // Right-click menu for deck cards
+                        cardItem.addEventListener('contextmenu', (e) => {
+                            e.preventDefault();
+                            showContextMenu(e.pageX, e.pageY, [
+                                {
+                                    action: 'remove',
+                                    icon: 'bi-trash',
+                                    label: 'デッキから削除',
+                                    handler: () => removeCardFromDeck(cards[cardIndex], sourceDeckType)
+                                }
+                            ]);
                         });
                     });
                 }
@@ -3265,6 +3410,54 @@
                     }
                 });
             }
+        };
+
+        // Context menu functions
+        const contextMenu = document.getElementById('contextMenu');
+
+        const showContextMenu = (x, y, items) => {
+            contextMenu.innerHTML = items.map(item =>
+                `<div class="context-menu-item" data-action="${item.action}">
+                    <i class="bi ${item.icon}"></i>${item.label}
+                </div>`
+            ).join('');
+
+            contextMenu.style.left = x + 'px';
+            contextMenu.style.top = y + 'px';
+            contextMenu.style.display = 'block';
+
+            // Add click handlers
+            contextMenu.querySelectorAll('.context-menu-item').forEach(el => {
+                el.addEventListener('click', () => {
+                    const action = el.dataset.action;
+                    const handler = items.find(i => i.action === action)?.handler;
+                    if (handler) handler();
+                    hideContextMenu();
+                });
+            });
+        };
+
+        const hideContextMenu = () => {
+            contextMenu.style.display = 'none';
+        };
+
+        // Hide menu on click outside
+        document.addEventListener('click', hideContextMenu);
+
+        // Reorder cards within deck
+        const reorderCardsInDeck = async (fromDeckType, fromIndex, toDeckType, toIndex) => {
+            if (fromDeckType !== toDeckType) return;
+
+            const deckKey = fromDeckType === 'main' ? 'mainDeck' :
+                           fromDeckType === 'extra' ? 'extraDeck' : 'sideDeck';
+
+            if (!currentDeck || !currentDeck[deckKey]) return;
+
+            const cards = currentDeck[deckKey];
+            const [movedCard] = cards.splice(fromIndex, 1);
+            cards.splice(toIndex, 0, movedCard);
+
+            await renderDeckCards();
         };
 
         // Event listeners for deck system
