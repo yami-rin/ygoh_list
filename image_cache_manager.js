@@ -289,53 +289,80 @@ class ImageCacheManager {
 
     /**
      * 画像をプロキシ経由で取得してキャッシュに保存
+     * @param {string} cacheKey - キャッシュキー (cardId or cardId_ciid)
      * @param {string} cardId - カードID
+     * @param {string} ciid - イラストID (デフォルト: '1')
      * @param {string} proxyUrl - プロキシURL
      */
-    async fetchAndCache(cardId, proxyUrl = null) {
+    async fetchAndCache(cacheKey, cardId = null, ciid = '1', proxyUrl = null) {
+        // Backward compatibility: if only one argument, treat as cardId
+        if (arguments.length === 1) {
+            cardId = cacheKey;
+            cacheKey = `${cardId}_1`;
+            ciid = '1';
+        }
+
+        // If cardId is not provided, extract from cacheKey
+        if (!cardId) {
+            const parts = cacheKey.split('_');
+            cardId = parts[0];
+            ciid = parts[1] || '1';
+        }
+
         // デフォルトプロキシURL（環境に応じて自動切り替え）
         if (!proxyUrl) {
             proxyUrl = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1'
                 ? 'http://localhost:3000'
                 : 'https://ygoh-list.onrender.com'; // ここにデプロイしたURLを設定
         }
+
         try {
             // 既にキャッシュにあるかチェック
-            const cachedImage = await this.getImage(cardId);
+            const cachedImage = await this.getImage(cacheKey);
             if (cachedImage) {
-                console.log(`Using cached image for card ID: ${cardId}`);
+                console.log(`Using cached image for cache key: ${cacheKey}`);
                 return cachedImage;
             }
 
-            console.log(`Fetching image for card ID: ${cardId}`);
+            console.log(`Fetching image for card ID: ${cardId}, ciid: ${ciid}`);
 
             // カード詳細を取得
             const detailUrl = `${proxyUrl}/card-detail?cid=${cardId}`;
             const detailResponse = await fetch(detailUrl);
             const cardDetail = await detailResponse.json();
 
-            if (!cardDetail.imageUrl) {
+            // Find the correct illustration
+            let imageUrl;
+            if (cardDetail.illustrations && cardDetail.illustrations.length > 0) {
+                const illustration = cardDetail.illustrations.find(ill => ill.ciid === ciid);
+                imageUrl = illustration ? illustration.imageUrl : cardDetail.imageUrl;
+            } else {
+                imageUrl = cardDetail.imageUrl;
+            }
+
+            if (!imageUrl) {
                 throw new Error('Image URL not found');
             }
 
             // 画像を取得
-            const imageResponse = await fetch(cardDetail.imageUrl);
+            const imageResponse = await fetch(imageUrl);
             const blob = await imageResponse.blob();
             const objectUrl = URL.createObjectURL(blob);
 
             // キャッシュに保存
-            await this.saveImage(cardId, objectUrl, {
+            await this.saveImage(cacheKey, objectUrl, {
                 cardName: cardDetail.cardName,
-                encToken: cardDetail.encToken
+                encToken: cardDetail.encToken,
+                ciid: ciid
             });
 
             // ObjectURLをクリーンアップ
             URL.revokeObjectURL(objectUrl);
 
             // 保存された画像を返す
-            return await this.getImage(cardId);
+            return await this.getImage(cacheKey);
         } catch (error) {
-            console.error(`Error fetching and caching image for card ID ${cardId}:`, error);
+            console.error(`Error fetching and caching image for cache key ${cacheKey}:`, error);
             throw error;
         }
     }

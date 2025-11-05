@@ -353,6 +353,7 @@
             flex: 1;
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             display: flex;
+            flex-direction: column;
             align-items: center;
             justify-content: center;
             padding: 2rem;
@@ -361,10 +362,44 @@
 
         .edit-panel-left img {
             max-width: 100%;
-            max-height: 80vh;
+            max-height: 70vh;
             object-fit: contain;
             border-radius: 8px;
             box-shadow: 0 8px 24px rgba(0, 0, 0, 0.3);
+        }
+
+        #illustrationSelector {
+            width: 100%;
+            max-width: 300px;
+        }
+
+        #illustrationOptions {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.5rem;
+            background: rgba(255, 255, 255, 0.95);
+            padding: 0.75rem;
+            border-radius: 8px;
+        }
+
+        .illustration-option {
+            width: 60px;
+            height: 84px;
+            cursor: pointer;
+            border: 2px solid transparent;
+            border-radius: 4px;
+            transition: all 0.2s;
+            object-fit: cover;
+        }
+
+        .illustration-option:hover {
+            border-color: #667eea;
+            transform: scale(1.05);
+        }
+
+        .illustration-option.active {
+            border-color: #667eea;
+            box-shadow: 0 0 8px rgba(102, 126, 234, 0.5);
         }
 
         .edit-panel-right {
@@ -1116,6 +1151,15 @@
             <!-- Left side: Card Image -->
             <div class="edit-panel-left">
                 <img id="panelCardImage" src="" alt="Card Image">
+                <!-- Illustration selector (only shown for cards with multiple illustrations) -->
+                <div id="illustrationSelector" style="display: none; margin-top: 1rem;">
+                    <button class="btn btn-sm btn-outline-primary w-100" id="changeIllustrationBtn">
+                        <i class="bi bi-image"></i> イラスト違いを選択
+                    </button>
+                    <div id="illustrationOptions" style="display: none; margin-top: 0.5rem; max-height: 150px; overflow-y: auto;">
+                        <!-- Illustration thumbnails will be added here -->
+                    </div>
+                </div>
             </div>
 
             <!-- Right side: Edit Form -->
@@ -1418,25 +1462,26 @@
         };
 
         // Get card image URL (with cache support)
-        const getCardImageUrl = async (cardName) => {
+        const getCardImageUrl = async (cardName, ciid = '1') => {
             const details = cardDetailsMap.get(cardName);
             if (!details?.cardId) {
                 return null;
             }
 
             const cardId = details.cardId;
+            const cacheKey = `${cardId}_${ciid}`; // Use cardId_ciid as cache key
 
             try {
                 // Check cache first
-                const cachedImage = await imageCacheManager.getImage(cardId);
+                const cachedImage = await imageCacheManager.getImage(cacheKey);
                 if (cachedImage) {
-                    console.log(`Using cached image for: ${cardName} (ID: ${cardId})`);
+                    console.log(`Using cached image for: ${cardName} (ID: ${cardId}, ciid: ${ciid})`);
                     return cachedImage;
                 }
 
                 // Cache miss - fetch from proxy and cache it
-                console.log(`Fetching image for: ${cardName} (ID: ${cardId})`);
-                const imageData = await imageCacheManager.fetchAndCache(cardId);
+                console.log(`Fetching image for: ${cardName} (ID: ${cardId}, ciid: ${ciid})`);
+                const imageData = await imageCacheManager.fetchAndCache(cacheKey, cardId, ciid);
                 return imageData;
             } catch (error) {
                 console.error(`Error loading image for ${cardName}:`, error);
@@ -2023,14 +2068,85 @@
             document.getElementById('panelCode').textContent = card.data['型番'] || '-';
             document.getElementById('panelRarity').textContent = card.data['レアリティ'] || '-';
 
+            // Get card details to check for multiple illustrations
+            const details = cardDetailsMap.get(decodedName);
+            let illustrations = [];
+            let currentCiid = '1';
+
+            if (details?.cardId) {
+                try {
+                    // Fetch card details from proxy
+                    const proxyUrl = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1'
+                        ? 'http://localhost:3000'
+                        : 'https://ygoh-list.onrender.com';
+
+                    const detailResponse = await fetch(`${proxyUrl}/card-detail?cid=${details.cardId}`);
+                    const cardDetail = await detailResponse.json();
+
+                    if (cardDetail.illustrations && cardDetail.illustrations.length > 1) {
+                        illustrations = cardDetail.illustrations;
+
+                        // Show illustration selector
+                        document.getElementById('illustrationSelector').style.display = 'block';
+                    } else {
+                        // Hide illustration selector for single illustration cards
+                        document.getElementById('illustrationSelector').style.display = 'none';
+                    }
+                } catch (error) {
+                    console.error('Error fetching card illustrations:', error);
+                    document.getElementById('illustrationSelector').style.display = 'none';
+                }
+            }
+
             // Load card image
-            const imageUrl = await getCardImageUrl(decodedName);
+            const imageUrl = await getCardImageUrl(decodedName, currentCiid);
             const panelImage = document.getElementById('panelCardImage');
             if (imageUrl) {
                 panelImage.src = imageUrl;
                 panelImage.style.display = 'block';
+                panelImage.dataset.currentCiid = currentCiid;
             } else {
                 panelImage.style.display = 'none';
+            }
+
+            // Setup illustration selector if there are multiple illustrations
+            if (illustrations.length > 1) {
+                const changeBtn = document.getElementById('changeIllustrationBtn');
+                const optionsDiv = document.getElementById('illustrationOptions');
+
+                // Toggle illustration options
+                changeBtn.onclick = () => {
+                    const isVisible = optionsDiv.style.display !== 'none';
+                    optionsDiv.style.display = isVisible ? 'none' : 'flex';
+
+                    // Load thumbnails if first time opening
+                    if (!isVisible && optionsDiv.children.length === 0) {
+                        illustrations.forEach((ill, index) => {
+                            const img = document.createElement('img');
+                            img.src = ill.imageUrl;
+                            img.className = 'illustration-option';
+                            if (ill.ciid === currentCiid) {
+                                img.classList.add('active');
+                            }
+                            img.title = `イラスト ${ill.ciid}`;
+                            img.onclick = async () => {
+                                // Update main image
+                                panelImage.src = ill.imageUrl;
+                                panelImage.dataset.currentCiid = ill.ciid;
+
+                                // Update active state
+                                optionsDiv.querySelectorAll('.illustration-option').forEach(opt => {
+                                    opt.classList.remove('active');
+                                });
+                                img.classList.add('active');
+
+                                // Close options
+                                optionsDiv.style.display = 'none';
+                            };
+                            optionsDiv.appendChild(img);
+                        });
+                    }
+                };
             }
 
             // Display deck usage
@@ -2058,6 +2174,12 @@
         const closeEditPanel = () => {
             document.getElementById('editPanelOverlay').classList.remove('show');
             document.getElementById('editPanel').classList.remove('show');
+
+            // Clear illustration options
+            const optionsDiv = document.getElementById('illustrationOptions');
+            optionsDiv.innerHTML = '';
+            optionsDiv.style.display = 'none';
+            document.getElementById('illustrationSelector').style.display = 'none';
         };
 
         // Event listeners

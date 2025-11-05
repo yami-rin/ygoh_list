@@ -26,6 +26,7 @@ app.use((req, res, next) => {
 app.get('/image', async (req, res) => {
     const cardId = req.query.cid;
     const encToken = req.query.enc;
+    const ciid = req.query.ciid || '1'; // Default to ciid=1 if not specified
 
     // Always set CORS headers
     res.header('Access-Control-Allow-Origin', '*');
@@ -40,12 +41,12 @@ app.get('/image', async (req, res) => {
         // Build image URL
         let imageUrl;
         if (encToken) {
-            imageUrl = `https://www.db.yugioh-card.com/yugiohdb/get_image.action?type=2&cid=${cardId}&ciid=1&enc=${encToken}`;
+            imageUrl = `https://www.db.yugioh-card.com/yugiohdb/get_image.action?type=2&cid=${cardId}&ciid=${ciid}&enc=${encToken}`;
         } else {
             imageUrl = `https://www.db.yugioh-card.com/yugiohdb/card_image.action?cid=${cardId}&request_locale=ja`;
         }
 
-        console.log(`Fetching image for card ${cardId} from: ${imageUrl}`);
+        console.log(`Fetching image for card ${cardId} (ciid=${ciid}) from: ${imageUrl}`);
 
         // Fetch image with proper headers
         const response = await fetch(imageUrl, {
@@ -108,25 +109,50 @@ app.get('/card-detail', async (req, res) => {
 
         const html = await response.text();
 
-        // Extract enc token
-        const encMatch = html.match(/get_image\.action\?type=2&cid=\d+&ciid=1&enc=([a-zA-Z0-9_-]+)/);
-        const encToken = encMatch ? encMatch[1] : null;
-
         // Extract card name
         const nameMatch = html.match(/<h1[^>]*>([^<]+)<\/h1>/i);
         const cardName = nameMatch ? nameMatch[1].trim() : null;
+
+        // Extract all card images with different illustrations (ciid)
+        // Pattern: get_image.action?type=2&cid=XXXX&ciid=Y&enc=ZZZZ
+        const imagePattern = /get_image\.action\?type=2&cid=\d+&ciid=(\d+)&enc=([a-zA-Z0-9_-]+)/g;
+        const illustrations = [];
+        let match;
+
+        while ((match = imagePattern.exec(html)) !== null) {
+            const ciid = match[1];
+            const encToken = match[2];
+
+            // Avoid duplicates
+            if (!illustrations.find(ill => ill.ciid === ciid)) {
+                illustrations.push({
+                    ciid: ciid,
+                    encToken: encToken
+                });
+            }
+        }
+
+        console.log(`Found ${illustrations.length} illustration(s) for card ${cardId}`);
 
         // Build base URL from request
         const protocol = req.headers['x-forwarded-proto'] || req.protocol || 'https';
         const host = req.headers['x-forwarded-host'] || req.headers.host || req.hostname;
         const baseUrl = `${protocol}://${host}`;
 
+        // Default to first illustration if none found
+        const defaultIllustration = illustrations.length > 0 ? illustrations[0] : { ciid: '1', encToken: null };
+
         res.json({
             cardId,
             cardName,
-            encToken,
-            imageUrl: encToken ?
-                `${baseUrl}/image?cid=${cardId}&enc=${encToken}` :
+            encToken: defaultIllustration.encToken, // For backward compatibility
+            illustrations: illustrations.map(ill => ({
+                ciid: ill.ciid,
+                encToken: ill.encToken,
+                imageUrl: `${baseUrl}/image?cid=${cardId}&ciid=${ill.ciid}&enc=${ill.encToken}`
+            })),
+            imageUrl: defaultIllustration.encToken ?
+                `${baseUrl}/image?cid=${cardId}&ciid=${defaultIllustration.ciid}&enc=${defaultIllustration.encToken}` :
                 `${baseUrl}/image?cid=${cardId}`
         });
 
