@@ -8811,14 +8811,13 @@ Firebase Consoleで確認すべき項目:
 
         // Check VIP status on load
         const checkVipStatus = () => {
-            // Show serial section only for logged-in users
             const serialSection = document.getElementById('serial-number-section');
-            if (currentUser && currentUser.uid !== 'local_user') {
-                if (serialSection) serialSection.style.display = 'block';
-            } else {
+
+            // Guest users cannot access VIP features
+            if (!currentUser || currentUser.uid === 'local_user') {
                 if (serialSection) serialSection.style.display = 'none';
                 updateVipUI(false); // Hide VIP menu for guest users
-                return; // Guest users cannot access
+                return;
             }
 
             const vipData = localStorage.getItem('vip_membership');
@@ -8828,23 +8827,32 @@ Firebase Consoleで確認すべき項目:
                     if (parsed.active && parsed.verified) {
                         isVipMember = true;
                         updateVipUI(true);
+                        // Show serial section only for VIP users
+                        if (serialSection) serialSection.style.display = 'block';
                     } else {
                         isVipMember = false;
                         updateVipUI(false);
+                        // Hide serial section for non-VIP users
+                        if (serialSection) serialSection.style.display = 'none';
                     }
                 } catch (e) {
                     console.error('Error parsing VIP data:', e);
                     isVipMember = false;
                     updateVipUI(false);
+                    if (serialSection) serialSection.style.display = 'none';
                 }
             } else {
                 isVipMember = false;
                 updateVipUI(false);
+                // Hide serial section for non-VIP users
+                if (serialSection) serialSection.style.display = 'none';
             }
 
-            // Update attempts display
-            const attempts = checkAttemptLimit();
-            updateAttempts(attempts.count);
+            // Update attempts display (only if VIP)
+            if (isVipMember) {
+                const attempts = checkAttemptLimit();
+                updateAttempts(attempts.count);
+            }
         };
 
         // Update VIP UI
