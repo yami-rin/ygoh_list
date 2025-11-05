@@ -823,37 +823,6 @@
             display: none;
         }
 
-        /* Context menu */
-        .context-menu {
-            position: fixed;
-            background: white;
-            border: 1px solid #ddd;
-            border-radius: 4px;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.2);
-            padding: 4px 0;
-            z-index: 10000;
-            display: none;
-            min-width: 180px;
-        }
-
-        .context-menu-item {
-            padding: 8px 16px;
-            cursor: pointer;
-            font-size: 0.9rem;
-            white-space: nowrap;
-            user-select: none;
-        }
-
-        .context-menu-item:hover {
-            background: #f0f0f0;
-        }
-
-        .context-menu-item i {
-            margin-right: 8px;
-            width: 16px;
-            display: inline-block;
-        }
-
         .deck-list-item-memo {
             color: #6c757d;
             font-size: 0.9rem;
@@ -1427,9 +1396,6 @@
             </div>
         </div>
     </div>
-
-    <!-- Context Menu -->
-    <div id="contextMenu" class="context-menu"></div>
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
@@ -3108,48 +3074,13 @@
                             const sourceDeckType = cardItem.dataset.deckType;
                             draggedDeckCard = {
                                 card: cards[cardIndex],
-                                sourceDeckType: sourceDeckType,
-                                sourceIndex: cardIndex
+                                sourceDeckType: sourceDeckType
                             };
                             cardItem.classList.add('dragging');
                         });
 
                         cardItem.addEventListener('dragend', (e) => {
                             cardItem.classList.remove('dragging');
-                        });
-
-                        // Allow reordering within same deck type
-                        cardItem.addEventListener('dragover', (e) => {
-                            if (draggedDeckCard && draggedDeckCard.sourceDeckType === deckType) {
-                                e.preventDefault();
-                            }
-                        });
-
-                        cardItem.addEventListener('drop', async (e) => {
-                            if (draggedDeckCard && draggedDeckCard.sourceDeckType === deckType) {
-                                e.preventDefault();
-                                e.stopPropagation();
-
-                                const targetIndex = parseInt(cardItem.dataset.cardIndex);
-                                const sourceIndex = draggedDeckCard.sourceIndex;
-
-                                if (sourceIndex !== targetIndex) {
-                                    // Reorder cards in the array
-                                    const deckKey = deckType === 'main' ? 'mainDeck' :
-                                                    deckType === 'extra' ? 'extraDeck' :
-                                                    deckType === 'side' ? 'sideDeck' : null;
-
-                                    if (deckKey && currentDeck[deckKey]) {
-                                        const [movedCard] = currentDeck[deckKey].splice(sourceIndex, 1);
-                                        currentDeck[deckKey].splice(targetIndex, 0, movedCard);
-
-                                        // Re-render to show new order
-                                        await renderDeckCards();
-                                    }
-                                }
-
-                                draggedDeckCard = null;
-                            }
                         });
                     });
                 }
@@ -3380,185 +3311,6 @@
 
         // ==================== END DECK SYSTEM ====================
 
-        // ==================== CONTEXT MENU ====================
-
-        const contextMenu = document.getElementById('contextMenu');
-
-        /**
-         * Show context menu at specified position with given items
-         * @param {number} x - X coordinate
-         * @param {number} y - Y coordinate
-         * @param {Array} items - Menu items [{label, icon, action, handler}]
-         */
-        const showContextMenu = (x, y, items) => {
-            // Build menu HTML
-            contextMenu.innerHTML = items.map(item =>
-                `<div class="context-menu-item" data-action="${item.action}">
-                    <i class="bi ${item.icon}"></i>${item.label}
-                </div>`
-            ).join('');
-
-            // Position menu
-            contextMenu.style.left = x + 'px';
-            contextMenu.style.top = y + 'px';
-            contextMenu.style.display = 'block';
-
-            // Attach click handlers
-            contextMenu.querySelectorAll('.context-menu-item').forEach(el => {
-                el.addEventListener('click', () => {
-                    const action = el.dataset.action;
-                    const handler = items.find(i => i.action === action)?.handler;
-                    if (handler) handler();
-                    hideContextMenu();
-                });
-            });
-
-            // Ensure menu stays within viewport
-            const rect = contextMenu.getBoundingClientRect();
-            if (rect.right > window.innerWidth) {
-                contextMenu.style.left = (window.innerWidth - rect.width - 10) + 'px';
-            }
-            if (rect.bottom > window.innerHeight) {
-                contextMenu.style.top = (window.innerHeight - rect.height - 10) + 'px';
-            }
-        };
-
-        /**
-         * Hide context menu
-         */
-        const hideContextMenu = () => {
-            contextMenu.style.display = 'none';
-            contextMenu.innerHTML = '';
-        };
-
-        // Hide context menu when clicking anywhere
-        document.addEventListener('click', (e) => {
-            if (!contextMenu.contains(e.target)) {
-                hideContextMenu();
-            }
-        });
-
-        // Prevent default context menu
-        document.addEventListener('contextmenu', (e) => {
-            // Only prevent default if we're going to show our custom menu
-            // This will be set up in the next step
-        });
-
-        /**
-         * Setup context menu for gallery cards
-         */
-        const setupGalleryCardContextMenu = () => {
-            const cardGrid = document.getElementById('card-grid');
-
-            cardGrid.addEventListener('contextmenu', (e) => {
-                // Find the card-item element
-                const cardItem = e.target.closest('.card-item');
-                if (!cardItem) return;
-
-                // Don't show context menu for unowned cards
-                if (cardItem.classList.contains('unowned')) return;
-
-                e.preventDefault();
-                e.stopPropagation();
-
-                const cardId = cardItem.dataset.cardId;
-                const cardIndex = parseInt(cardItem.dataset.cardIndex);
-
-                // Get card data
-                const startIndex = (currentPage - 1) * itemsPerPage;
-                const card = filteredCards[startIndex + cardIndex];
-
-                if (!card) return;
-
-                // Check if deck is currently open
-                if (!currentDeck || !currentDeckKey) {
-                    // No deck is open, so we can't add to deck
-                    showContextMenu(e.pageX, e.pageY, [
-                        {
-                            label: 'デッキを開いてください',
-                            icon: 'bi-info-circle',
-                            action: 'info',
-                            handler: () => {
-                                alert('カードを追加するには、まずデッキを開いてください。');
-                            }
-                        }
-                    ]);
-                    return;
-                }
-
-                // Build context menu items for gallery card
-                const menuItems = [
-                    {
-                        label: 'デッキに追加',
-                        icon: 'bi-plus-circle',
-                        action: 'add-to-deck',
-                        handler: () => {
-                            addCardToDeck(card, 'main');
-                        }
-                    }
-                ];
-
-                showContextMenu(e.pageX, e.pageY, menuItems);
-            });
-        };
-
-        /**
-         * Setup context menu for deck cards
-         */
-        const setupDeckCardContextMenu = () => {
-            // Use event delegation on the deck builder panel
-            const deckBuilderPanel = document.getElementById('deckBuilderPanel');
-
-            deckBuilderPanel.addEventListener('contextmenu', (e) => {
-                // Find the deck-card-item element
-                const deckCardItem = e.target.closest('.deck-card-item');
-                if (!deckCardItem) return;
-
-                e.preventDefault();
-                e.stopPropagation();
-
-                const cardIndex = parseInt(deckCardItem.dataset.cardIndex);
-                const deckType = deckCardItem.dataset.deckType;
-
-                if (!currentDeck || isNaN(cardIndex)) return;
-
-                // Determine which deck array to use
-                const deckKey = deckType === 'main' ? 'mainDeck' :
-                                deckType === 'extra' ? 'extraDeck' :
-                                deckType === 'side' ? 'sideDeck' : null;
-
-                if (!deckKey) return;
-
-                const card = currentDeck[deckKey][cardIndex];
-                if (!card) return;
-
-                // Build context menu items for deck card
-                const menuItems = [
-                    {
-                        label: 'デッキから削除',
-                        icon: 'bi-dash-circle',
-                        action: 'remove-from-deck',
-                        handler: async () => {
-                            // Decrease quantity by 1
-                            if (card.quantity > 1) {
-                                card.quantity--;
-                            } else {
-                                // Remove card entirely if quantity is 1
-                                currentDeck[deckKey].splice(cardIndex, 1);
-                            }
-
-                            // Re-render the deck
-                            await renderDeckCards();
-                        }
-                    }
-                ];
-
-                showContextMenu(e.pageX, e.pageY, menuItems);
-            });
-        };
-
-        // ==================== END CONTEXT MENU ====================
-
         // Initialize
         const init = async () => {
             showLoading(true);
@@ -3638,12 +3390,6 @@
                 }
             });
         };
-
-        // Setup context menu for gallery cards
-        setupGalleryCardContextMenu();
-
-        // Setup context menu for deck cards
-        setupDeckCardContextMenu();
 
         init();
     </script>
