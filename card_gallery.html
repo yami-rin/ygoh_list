@@ -4983,14 +4983,15 @@
                     this.mainDeck = this.expandDeckCards(deckData.mainDeck || []);
                     this.extraDeck = this.expandDeckCards(deckData.extraDeck || []);
 
+                    // Save original deck state for reset
+                    this.originalMainDeck = JSON.parse(JSON.stringify(this.mainDeck));
+                    this.originalExtraDeck = JSON.parse(JSON.stringify(this.extraDeck));
+
                     // Shuffle main deck
                     this.shuffleDeck(this.mainDeck);
 
-                    // Clear field and hand
+                    // Clear field and hand (this calls updateDeckCounts internally)
                     this.clearField();
-
-                    // Update deck counts
-                    this.updateDeckCounts();
 
                     // Render deck viewer
                     this.renderDeckViewer(deckData);
@@ -5152,16 +5153,19 @@
 
             // Reset field and draw 5
             resetAndDraw5() {
-                if (!this.currentDeck) {
+                if (!this.currentDeck || !this.originalMainDeck) {
                     alert('まずデッキを読み込んでください。');
                     return;
                 }
 
-                // Put hand cards back to deck
-                this.mainDeck.push(...this.hand);
+                // Restore original deck state (deep copy)
+                this.mainDeck = JSON.parse(JSON.stringify(this.originalMainDeck));
+                this.extraDeck = JSON.parse(JSON.stringify(this.originalExtraDeck));
+
+                // Shuffle main deck
                 this.shuffleDeck(this.mainDeck);
 
-                // Clear field
+                // Clear field and hand
                 this.clearField();
 
                 // Draw 5
@@ -5563,11 +5567,17 @@
 
                     wrapper.innerHTML = `
                         <div class="card-controls">
-                            <button class="card-control-btn" onclick="duelSimulator.rotateCard('${zoneName}', ${cardIndex}); event.stopPropagation();">↻</button>
-                            <button class="card-control-btn" onclick="duelSimulator.removeCardFromZone('${zoneName}', ${cardIndex}); event.stopPropagation();">×</button>
+                            <button class="card-control-btn" onclick="duelSimulator.rotateCard('${zoneName}', ${cardIndex}); event.stopPropagation();" title="カードを回転">↻</button>
+                            <button class="card-control-btn" onclick="duelSimulator.removeCardFromZone('${zoneName}', ${cardIndex}); event.stopPropagation();" title="手札に戻す">↩</button>
                         </div>
                         <img src="${imageData}" class="field-card" alt="${card.name}" draggable="false">
                     `;
+
+                    // Double-click to return to hand
+                    wrapper.addEventListener('dblclick', (e) => {
+                        e.stopPropagation();
+                        this.removeCardFromZone(zoneName, cardIndex);
+                    });
 
                     // Add drag events
                     wrapper.addEventListener('dragstart', (e) => {
