@@ -347,20 +347,24 @@ class ImageCacheManager {
             // 画像を取得
             const imageResponse = await fetch(imageUrl);
             const blob = await imageResponse.blob();
-            const objectUrl = URL.createObjectURL(blob);
+
+            // BlobをBase64データURLに変換
+            const dataUrl = await new Promise((resolve, reject) => {
+                const reader = new FileReader();
+                reader.onloadend = () => resolve(reader.result);
+                reader.onerror = reject;
+                reader.readAsDataURL(blob);
+            });
 
             // キャッシュに保存
-            await this.saveImage(cacheKey, objectUrl, {
+            await this.saveImage(cacheKey, dataUrl, {
                 cardName: cardDetail.cardName,
                 encToken: cardDetail.encToken,
                 ciid: ciid
             });
 
-            // ObjectURLをクリーンアップ
-            URL.revokeObjectURL(objectUrl);
-
             // 保存された画像を返す
-            return await this.getImage(cacheKey);
+            return dataUrl;
         } catch (error) {
             console.error(`Error fetching and caching image for cache key ${cacheKey}:`, error);
             throw error;
