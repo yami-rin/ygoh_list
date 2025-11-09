@@ -1819,7 +1819,7 @@
 
             <!-- Top Section: Field, Monster Zones, Banished & Graveyard -->
             <div class="field-top-section">
-                <div class="row g-2">
+                <div class="row g-0">
                     <!-- Left: Field -->
                     <div class="col-2">
                         <div class="card-zone field-zone" data-zone="field">
@@ -1829,7 +1829,7 @@
 
                     <!-- Center: Monster Zones (5) -->
                     <div class="col-8">
-                        <div class="row g-2">
+                        <div class="row g-0">
                             <div class="col">
                                 <div class="card-zone monster-zone" data-zone="monster-1"></div>
                             </div>
@@ -1850,7 +1850,7 @@
 
                     <!-- Right: Banished (top) & Graveyard (bottom) -->
                     <div class="col-2">
-                        <div class="row g-2">
+                        <div class="row g-0">
                             <div class="col-12">
                                 <div class="card-zone banish-zone" data-zone="banished">
                                     <div class="zone-label">除外</div>
@@ -1870,7 +1870,7 @@
 
             <!-- Middle Section: EX Deck, Spell/Trap Zones, Main Deck -->
             <div class="field-middle-section">
-                <div class="row g-2">
+                <div class="row g-0">
                     <!-- Left: Extra Deck -->
                     <div class="col-2">
                         <div class="card-zone deck-zone" data-zone="extra-deck">
@@ -1881,7 +1881,7 @@
 
                     <!-- Center: Spell/Trap Zones (5) -->
                     <div class="col-8">
-                        <div class="row g-2">
+                        <div class="row g-0">
                             <div class="col">
                                 <div class="card-zone spell-trap-zone" data-zone="spell-trap-1"></div>
                             </div>
@@ -5030,16 +5030,8 @@
                     handCard.dataset.cardId = card.cardId;
                     handCard.dataset.handIndex = index;
 
-                    // Use image cache manager to get image
-                    const cacheKey = card.selectedCiid ? `${card.cardId}_${card.selectedCiid}` : `${card.cardId}_1`;
-                    imageCacheManager.fetchAndCache(cacheKey, card.cardId, card.selectedCiid || '1')
-                        .then(imageData => {
-                            handCard.innerHTML = `<img src="${imageData}" alt="${card.name}">`;
-                        })
-                        .catch(error => {
-                            console.error('Error loading card image:', error);
-                            handCard.innerHTML = `<div style="background: #ddd; width: 100%; height: 100%; display: flex; align-items: center; justify-content: center; font-size: 0.6rem; text-align: center; padding: 5px;">${card.name}</div>`;
-                        });
+                    // Add placeholder first
+                    handCard.innerHTML = `<div style="background: #ddd; width: 100%; height: 100%; display: flex; align-items: center; justify-content: center; font-size: 0.6rem; text-align: center; padding: 5px;">${card.name || 'Loading...'}</div>`;
 
                     // Drag events
                     handCard.addEventListener('dragstart', (e) => {
@@ -5051,7 +5043,19 @@
                         handCard.style.opacity = '1';
                     });
 
+                    // Add to container first
                     handContainer.appendChild(handCard);
+
+                    // Then load image asynchronously
+                    const cacheKey = card.selectedCiid ? `${card.cardId}_${card.selectedCiid}` : `${card.cardId}_1`;
+                    imageCacheManager.fetchAndCache(cacheKey, card.cardId, card.selectedCiid || '1')
+                        .then(imageData => {
+                            handCard.innerHTML = `<img src="${imageData}" alt="${card.name}">`;
+                        })
+                        .catch(error => {
+                            console.error('Error loading card image:', error);
+                            handCard.innerHTML = `<div style="background: #ddd; width: 100%; height: 100%; display: flex; align-items: center; justify-content: center; font-size: 0.6rem; text-align: center; padding: 5px;">${card.name}</div>`;
+                        });
                 });
             },
 
