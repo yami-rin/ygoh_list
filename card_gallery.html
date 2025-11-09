@@ -1115,7 +1115,7 @@
         .field-top-section,
         .field-middle-section,
         .field-bottom-section {
-            margin-bottom: 15px;
+            margin-bottom: 5px;
         }
 
         .card-zone {
@@ -1176,11 +1176,6 @@
             background: rgba(255, 255, 255, 0.05);
         }
 
-        .grave-zone,
-        .banish-zone {
-            margin-bottom: 10px;
-        }
-
         .grave-zone {
             background: rgba(147, 51, 234, 0.1);
             border-color: rgba(147, 51, 234, 0.4);
@@ -1189,11 +1184,6 @@
         .banish-zone {
             background: rgba(234, 179, 8, 0.1);
             border-color: rgba(234, 179, 8, 0.4);
-        }
-
-        .pendulum-zone {
-            background: rgba(34, 197, 94, 0.1);
-            border-color: rgba(34, 197, 94, 0.4);
         }
 
         .field-zone {
@@ -1746,51 +1736,39 @@
                 </div>
             </div>
 
-            <!-- Top Section: Extra Deck Zones, Field, Graveyard, Banished -->
+            <!-- Top Section: Field, Monster Zones, Banished -->
             <div class="field-top-section">
                 <div class="row g-2">
-                    <!-- Left: Pendulum & Field -->
+                    <!-- Left: Field -->
                     <div class="col-2">
-                        <div class="card-zone pendulum-zone" data-zone="pendulum-left">
-                            <div class="zone-label">ペンデュラム</div>
-                        </div>
                         <div class="card-zone field-zone" data-zone="field">
                             <div class="zone-label">フィールド</div>
                         </div>
                     </div>
 
-                    <!-- Center: Monster Zones (top row) -->
+                    <!-- Center: Monster Zones (5) -->
                     <div class="col-8">
                         <div class="row g-2">
-                            <div class="col-2">
+                            <div class="col">
                                 <div class="card-zone monster-zone" data-zone="monster-1"></div>
                             </div>
-                            <div class="col-2">
+                            <div class="col">
                                 <div class="card-zone monster-zone" data-zone="monster-2"></div>
                             </div>
-                            <div class="col-2">
+                            <div class="col">
                                 <div class="card-zone monster-zone" data-zone="monster-3"></div>
                             </div>
-                            <div class="col-2">
+                            <div class="col">
                                 <div class="card-zone monster-zone" data-zone="monster-4"></div>
                             </div>
-                            <div class="col-2">
+                            <div class="col">
                                 <div class="card-zone monster-zone" data-zone="monster-5"></div>
-                            </div>
-                            <div class="col-2">
-                                <div class="card-zone pendulum-zone" data-zone="pendulum-right">
-                                    <div class="zone-label">ペンデュラム</div>
-                                </div>
                             </div>
                         </div>
                     </div>
 
-                    <!-- Right: Graveyard & Banished -->
+                    <!-- Right: Banished -->
                     <div class="col-2">
-                        <div class="card-zone grave-zone" data-zone="graveyard">
-                            <div class="zone-label">墓地</div>
-                            <div class="zone-count" id="grave-count">0</div>
-                        </div>
                         <div class="card-zone banish-zone" data-zone="banished">
                             <div class="zone-label">除外</div>
                             <div class="zone-count" id="banish-count">0</div>
@@ -1799,31 +1777,45 @@
                 </div>
             </div>
 
-            <!-- Middle Section: Spell/Trap Zones -->
+            <!-- Middle Section: Graveyard, Spell/Trap Zones, Main Deck -->
             <div class="field-middle-section">
                 <div class="row g-2">
-                    <div class="col-2"></div>
-                    <div class="col-8">
-                        <div class="row g-2">
-                            <div class="col-2">
-                                <div class="card-zone spell-trap-zone" data-zone="spell-trap-1"></div>
-                            </div>
-                            <div class="col-2">
-                                <div class="card-zone spell-trap-zone" data-zone="spell-trap-2"></div>
-                            </div>
-                            <div class="col-2">
-                                <div class="card-zone spell-trap-zone" data-zone="spell-trap-3"></div>
-                            </div>
-                            <div class="col-2">
-                                <div class="card-zone spell-trap-zone" data-zone="spell-trap-4"></div>
-                            </div>
-                            <div class="col-2">
-                                <div class="card-zone spell-trap-zone" data-zone="spell-trap-5"></div>
-                            </div>
-                            <div class="col-2"></div>
+                    <!-- Left: Graveyard -->
+                    <div class="col-2">
+                        <div class="card-zone grave-zone" data-zone="graveyard">
+                            <div class="zone-label">墓地</div>
+                            <div class="zone-count" id="grave-count">0</div>
                         </div>
                     </div>
-                    <div class="col-2"></div>
+
+                    <!-- Center: Spell/Trap Zones (5) -->
+                    <div class="col-8">
+                        <div class="row g-2">
+                            <div class="col">
+                                <div class="card-zone spell-trap-zone" data-zone="spell-trap-1"></div>
+                            </div>
+                            <div class="col">
+                                <div class="card-zone spell-trap-zone" data-zone="spell-trap-2"></div>
+                            </div>
+                            <div class="col">
+                                <div class="card-zone spell-trap-zone" data-zone="spell-trap-3"></div>
+                            </div>
+                            <div class="col">
+                                <div class="card-zone spell-trap-zone" data-zone="spell-trap-4"></div>
+                            </div>
+                            <div class="col">
+                                <div class="card-zone spell-trap-zone" data-zone="spell-trap-5"></div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Right: Main Deck -->
+                    <div class="col-2">
+                        <div class="card-zone deck-zone" data-zone="main-deck">
+                            <div class="zone-label">デッキ</div>
+                            <div class="zone-count" id="main-deck-count">0</div>
+                        </div>
+                    </div>
                 </div>
             </div>
 
@@ -1856,12 +1848,8 @@
                         </div>
                     </div>
 
-                    <!-- Right: Deck & Action Buttons -->
+                    <!-- Right: Action Buttons -->
                     <div class="col-2">
-                        <div class="card-zone deck-zone" data-zone="main-deck">
-                            <div class="zone-label">デッキ</div>
-                            <div class="zone-count" id="main-deck-count">0</div>
-                        </div>
                         <div class="action-buttons">
                             <button class="btn btn-sm btn-primary w-100 mb-2" id="draw-1-btn">
                                 1ドロー
@@ -4829,9 +4817,12 @@
 
                 // Clear all card zones
                 document.querySelectorAll('.card-zone').forEach(zone => {
-                    zone.innerHTML = zone.querySelector('.zone-label')?.outerHTML || '';
+                    const labelEl = zone.querySelector('.zone-label');
                     const countEl = zone.querySelector('.zone-count');
-                    if (countEl) zone.innerHTML += countEl.outerHTML;
+
+                    zone.innerHTML = '';
+                    if (labelEl) zone.appendChild(labelEl.cloneNode(true));
+                    if (countEl) zone.appendChild(countEl.cloneNode(true));
                     zone.classList.remove('has-card');
                 });
 
@@ -4901,10 +4892,15 @@
 
             // Update deck counts
             updateDeckCounts() {
-                document.getElementById('main-deck-count').textContent = this.mainDeck.length;
-                document.getElementById('extra-deck-count').textContent = this.extraDeck.length;
-                document.getElementById('grave-count').textContent = this.graveyard.length;
-                document.getElementById('banish-count').textContent = this.banished.length;
+                const mainDeckCount = document.getElementById('main-deck-count');
+                const extraDeckCount = document.getElementById('extra-deck-count');
+                const graveCount = document.getElementById('grave-count');
+                const banishCount = document.getElementById('banish-count');
+
+                if (mainDeckCount) mainDeckCount.textContent = this.mainDeck.length;
+                if (extraDeckCount) extraDeckCount.textContent = this.extraDeck.length;
+                if (graveCount) graveCount.textContent = this.graveyard.length;
+                if (banishCount) banishCount.textContent = this.banished.length;
             },
 
             // Setup drag and drop for zones
@@ -5021,7 +5017,12 @@
                     delete this.field[zoneName];
 
                     const zone = document.querySelector(`[data-zone="${zoneName}"]`);
-                    zone.innerHTML = zone.querySelector('.zone-label')?.outerHTML || '';
+                    const labelEl = zone.querySelector('.zone-label');
+                    const countEl = zone.querySelector('.zone-count');
+
+                    zone.innerHTML = '';
+                    if (labelEl) zone.appendChild(labelEl.cloneNode(true));
+                    if (countEl) zone.appendChild(countEl.cloneNode(true));
                     zone.classList.remove('has-card');
 
                     this.renderHand();
