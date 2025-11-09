@@ -4835,6 +4835,10 @@
                     const deckData = deckDoc.data();
                     this.currentDeck = { id: deckId, ...deckData };
 
+                    console.log('[loadDeck] Deck data loaded:', deckData.name);
+                    console.log('[loadDeck] Sample mainDeck card:', deckData.mainDeck?.[0]);
+                    console.log('[loadDeck] Sample extraDeck card:', deckData.extraDeck?.[0]);
+
                     // Expand deck cards (flatten by quantity)
                     this.mainDeck = this.expandDeckCards(deckData.mainDeck || []);
                     this.extraDeck = this.expandDeckCards(deckData.extraDeck || []);
