@@ -6,7 +6,6 @@
     <title>カードギャラリー - グリッド表示</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css">
-    <script src="image_cache_manager.js"></script>
     <style>
         body {
             background-color: #f8f9fa;
@@ -208,10 +207,6 @@
         .card-item.unowned {
             opacity: 0.7;
             border-color: #ccc;
-        }
-
-        .card-item.unowned .card-image-container img {
-            filter: grayscale(100%);
         }
 
         .card-item.unowned:hover {
@@ -752,9 +747,8 @@
             transform: translateY(-2px);
         }
 
-        .deck-card-item.unowned img {
-            filter: grayscale(100%) brightness(0.7);
-            opacity: 0.6;
+        .deck-card-item.unowned {
+            opacity: 0.7;
         }
 
         .deck-card-image-container {
@@ -1731,33 +1725,17 @@
             }
         };
 
-        // Get card image URL (with cache support)
-        const getCardImageUrl = async (cardName, ciid = '1') => {
+        // Get official card URL (no image caching - user views on official site)
+        const getOfficialCardUrl = (cardName) => {
             const details = cardDetailsMap.get(cardName);
             if (!details?.cardId) {
-                return null;
+                // Fallback to search by name
+                return `https://www.db.yugioh-card.com/yugiohdb/card_search.action?ope=1&sess=1&keyword=${encodeURIComponent(cardName)}&stype=1&request_locale=ja`;
             }
 
             const cardId = details.cardId;
-            const cacheKey = `${cardId}_${ciid}`; // Use cardId_ciid as cache key
-
-            try {
-                // Check cache first
-                const cachedImage = await imageCacheManager.getImage(cacheKey);
-                if (cachedImage) {
-                    console.log(`Using cached image for: ${cardName} (ID: ${cardId}, ciid: ${ciid})`);
-                    return cachedImage;
-                }
-
-                // Cache miss - fetch from proxy and cache it
-                console.log(`Fetching image for: ${cardName} (ID: ${cardId}, ciid: ${ciid})`);
-                const imageData = await imageCacheManager.fetchAndCache(cacheKey, cardId, ciid);
-                return imageData;
-            } catch (error) {
-                console.error(`Error loading image for ${cardName}:`, error);
-                // Fallback to direct URL (will likely fail due to CORS, but worth trying)
-                return `https://www.db.yugioh-card.com/yugiohdb/card_image.action?cid=${cardId}&request_locale=ja`;
-            }
+            // Direct link to card details page
+            return `https://www.db.yugioh-card.com/yugiohdb/card_search.action?ope=2&cid=${cardId}&request_locale=ja`;
         };
 
         // Load user's card collection and wishlist
@@ -2133,19 +2111,24 @@
                     const onclickAttr = isUnowned ? '' : `onclick="openCardEditModal('${card.id}')"`;
                     const draggableAttr = `draggable="true" ondragstart="handleDragStart(event, ${index})" class="draggable"`;
 
+                    const officialUrl = getOfficialCardUrl(decodedName);
+
                     return `
                         <div class="card-item${unownedClass}" ${onclickAttr} ${draggableAttr} data-card-index="${index}" data-card-id="${card.id}">
-                            <div class="card-image-container" id="card-img-container-${index}" data-rendering-id="${thisRenderingId}">
+                            <div class="card-image-container" id="card-img-container-${index}" data-rendering-id="${thisRenderingId}" style="display: flex; flex-direction: column; justify-content: center; align-items: center; padding: 1rem; text-align: center; background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);">
                                 ${stockBadge}
                                 ${unownedBadge}
-                                <i class="bi bi-card-image card-image-placeholder"></i>
+                                <i class="bi bi-card-image" style="font-size: 3rem; color: rgba(0,0,0,0.2); margin-bottom: 0.5rem;"></i>
+                                <div style="font-size: 0.75rem; color: #666; margin-bottom: 0.5rem; font-weight: 600;">${escapeHtml(card.data['型番'] || 'コード不明')}</div>
+                                <div style="font-size: 0.65rem; color: #888; margin-bottom: 0.75rem;">
+                                    <span class="badge bg-info" style="font-size: 0.6rem;">${escapeHtml(card.data['レアリティ'] || '')}</span>
+                                </div>
+                                <a href="${officialUrl}" target="_blank" rel="noopener noreferrer" class="btn btn-sm btn-primary" style="font-size: 0.65rem; padding: 0.25rem 0.5rem; text-decoration: none;" onclick="event.stopPropagation();">
+                                    <i class="bi bi-box-arrow-up-right"></i> 公式サイトで見る
+                                </a>
                             </div>
                             <div class="card-info">
                                 <div class="card-name">${escapeHtml(decodedName)}</div>
-                                <div class="card-code">${escapeHtml(card.data['型番'])}</div>
-                                <div class="card-rarity">
-                                    <span class="badge bg-info">${escapeHtml(card.data['レアリティ'])}</span>
-                                </div>
                                 <div class="card-tags">
                                     ${tags || '<span class="text-muted" style="font-size: 0.7rem;">タグなし</span>'}
                                 </div>
@@ -2154,113 +2137,7 @@
                     `;
                 }).join('');
 
-                // Then load images asynchronously
-                pageCards.forEach(async (card, index) => {
-                    const loadCardImage = async () => {
-                        const container = document.getElementById(`card-img-container-${index}`);
-                        if (!container) return;
-
-                        try {
-                            // Decode HTML entities in card name before fetching image
-                            const decodedCardName = decodeHtmlEntities(card.data['名前']);
-                            const ciid = card.data.selectedCiid || '1';  // Use saved ciid if available
-                            const imageUrl = await getCardImageUrl(decodedCardName, ciid);
-
-                            // Check if this rendering is still valid (page hasn't changed)
-                            if (parseInt(container.dataset.renderingId) !== thisRenderingId) {
-                                return; // Skip adding image if page has changed
-                            }
-
-                            if (imageUrl) {
-                                // Create image element
-                                const img = document.createElement('img');
-                                img.src = imageUrl;
-                                img.alt = decodedCardName;
-                                img.loading = 'lazy';
-
-                                // Handle image error
-                                img.onerror = function() {
-                                    // Save parent reference before clearing
-                                    const parent = this.parentElement;
-                                    if (!parent) return;
-
-                                    // Keep stock badge and show placeholder with reload button
-                                    const stockBadge = parent.querySelector('.stock-badge');
-                                    const unownedBadge = parent.querySelector('.unowned-badge');
-                                    parent.innerHTML = '';
-                                    if (stockBadge) {
-                                        parent.appendChild(stockBadge);
-                                    }
-                                    if (unownedBadge) {
-                                        parent.appendChild(unownedBadge);
-                                    }
-                                    const placeholder = document.createElement('i');
-                                    placeholder.className = 'bi bi-card-image card-image-placeholder';
-                                    parent.appendChild(placeholder);
-
-                                    // Add reload button
-                                    const reloadBtn = document.createElement('button');
-                                    reloadBtn.className = 'card-image-reload';
-                                    reloadBtn.innerHTML = '<i class="bi bi-arrow-clockwise"></i>再読み込み';
-                                    reloadBtn.onclick = (e) => {
-                                        e.stopPropagation();
-                                        reloadBtn.remove();
-                                        loadCardImage();
-                                    };
-                                    parent.appendChild(reloadBtn);
-                                };
-
-                                // Clear placeholder and add image (keep stock badge)
-                                const stockBadge = container.querySelector('.stock-badge');
-                                const unownedBadge = container.querySelector('.unowned-badge');
-                                const placeholder = container.querySelector('.card-image-placeholder');
-                                const reloadBtn = container.querySelector('.card-image-reload');
-                                if (placeholder) {
-                                    placeholder.remove();
-                                }
-                                if (reloadBtn) {
-                                    reloadBtn.remove();
-                                }
-                                container.appendChild(img);
-                            } else {
-                                // No image URL - show reload button
-                                const existingReloadBtn = container.querySelector('.card-image-reload');
-                                if (!existingReloadBtn) {
-                                    const reloadBtn = document.createElement('button');
-                                    reloadBtn.className = 'card-image-reload';
-                                    reloadBtn.innerHTML = '<i class="bi bi-arrow-clockwise"></i>再読み込み';
-                                    reloadBtn.onclick = (e) => {
-                                        e.stopPropagation();
-                                        reloadBtn.remove();
-                                        loadCardImage();
-                                    };
-                                    container.appendChild(reloadBtn);
-                                }
-                            }
-                        } catch (error) {
-                            console.error(`Failed to load image for ${card.data['名前']}:`, error);
-
-                            // Show reload button on error
-                            const container = document.getElementById(`card-img-container-${index}`);
-                            if (container && parseInt(container.dataset.renderingId) === thisRenderingId) {
-                                const existingReloadBtn = container.querySelector('.card-image-reload');
-                                if (!existingReloadBtn) {
-                                    const reloadBtn = document.createElement('button');
-                                    reloadBtn.className = 'card-image-reload';
-                                    reloadBtn.innerHTML = '<i class="bi bi-arrow-clockwise"></i>再読み込み';
-                                    reloadBtn.onclick = (e) => {
-                                        e.stopPropagation();
-                                        reloadBtn.remove();
-                                        loadCardImage();
-                                    };
-                                    container.appendChild(reloadBtn);
-                                }
-                            }
-                        }
-                    };
-
-                    loadCardImage();
-                });
+                // No async image loading - cards now show info and link to official site
             }
 
             updatePagination();
@@ -3314,15 +3191,18 @@
                         <div class="deck-view-grid" id="${sectionId}">
                 `;
 
-                // Add placeholder cards
+                // Add cards with info and official site link
                 expandedCards.forEach((card, index) => {
+                    const decodedCardName = decodeHtmlEntities(card.name);
+                    const officialUrl = getOfficialCardUrl(decodedCardName);
                     html += `
-                        <div class="deck-view-card" data-card-name="${escapeHtml(card.name)}">
-                            <div class="deck-view-card-placeholder">
-                                <i class="bi bi-card-image"></i>
-                            </div>
-                            ${card.rarity ? `<div class="deck-view-card-rarity">${escapeHtml(card.rarity)}</div>` : ''}
-                            ${card.code ? `<div class="deck-view-card-code">${escapeHtml(card.code)}</div>` : ''}
+                        <div class="deck-view-card" data-card-name="${escapeHtml(card.name)}" title="${escapeHtml(decodedCardName)}" style="display: flex; flex-direction: column; justify-content: center; align-items: center; background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%); padding: 0.5rem;">
+                            <i class="bi bi-card-image" style="font-size: 2.5rem; color: rgba(0,0,0,0.15); margin-bottom: 0.25rem;"></i>
+                            ${card.code ? `<div style="font-size: 0.6rem; color: #666; font-weight: 600; margin-bottom: 0.25rem; text-align: center;">${escapeHtml(card.code)}</div>` : ''}
+                            ${card.rarity ? `<div style="font-size: 0.55rem; color: #888; margin-bottom: 0.35rem;"><span class="badge bg-info" style="font-size: 0.5rem; padding: 0.15rem 0.3rem;">${escapeHtml(card.rarity)}</span></div>` : ''}
+                            <a href="${officialUrl}" target="_blank" rel="noopener noreferrer" class="btn btn-sm btn-primary" style="font-size: 0.55rem; padding: 0.2rem 0.4rem; text-decoration: none;" title="公式サイトで画像を見る">
+                                <i class="bi bi-box-arrow-up-right"></i>
+                            </a>
                         </div>
                     `;
                 });
@@ -3349,47 +3229,7 @@
 
             container.innerHTML = html;
 
-            // Load images asynchronously
-            const loadSectionImages = async (cards, sectionId) => {
-                if (!cards || cards.length === 0) return;
-
-                const expandedCards = cards.flatMap(card =>
-                    Array(card.quantity).fill(card)
-                );
-
-                const cardElements = document.querySelectorAll(`#${sectionId} .deck-view-card`);
-
-                for (let i = 0; i < expandedCards.length; i++) {
-                    const card = expandedCards[i];
-                    const cardElement = cardElements[i];
-
-                    if (!cardElement) continue;
-
-                    try {
-                        // Decode HTML entities in card name before fetching image
-                        const decodedCardName = decodeHtmlEntities(card.name);
-                        // Use selectedCiid if available, otherwise default to '1'
-                        const ciid = card.selectedCiid || '1';
-                        const imageUrl = await getCardImageUrl(decodedCardName, ciid);
-                        if (imageUrl) {
-                            // Replace placeholder with image, keeping code and rarity elements
-                            const placeholder = cardElement.querySelector('.deck-view-card-placeholder');
-                            if (placeholder) {
-                                placeholder.outerHTML = `<img src="${imageUrl}" alt="${escapeHtml(decodedCardName)}">`;
-                            }
-                        }
-                    } catch (error) {
-                        console.error(`Failed to load image for ${card.name}:`, error);
-                    }
-                }
-            };
-
-            // Load images for all sections
-            await Promise.all([
-                loadSectionImages(deck.mainDeck, 'view-main-deck'),
-                loadSectionImages(deck.extraDeck, 'view-extra-deck'),
-                loadSectionImages(deck.sideDeck, 'view-side-deck')
-            ]);
+            // No async image loading - cards now show info and link to official site
         };
 
         // Export deck as image
@@ -3487,57 +3327,34 @@
 
                 if (placeholder) placeholder.style.display = 'none';
 
-                // First render placeholder cards in grid (repeat each card by its quantity)
+                // Render cards with info and official site link (no image loading)
                 container.innerHTML = `<div class="deck-cards-grid">` + cards.flatMap((deckCard, index) => {
                     const decodedCardName = decodeHtmlEntities(deckCard.name);
                     // Check if card is unowned
                     const isUnowned = !collectionCards.some(c => c.id === deckCard.cardId);
                     const unownedClass = isUnowned ? ' unowned' : '';
+                    const officialUrl = getOfficialCardUrl(decodedCardName);
                     return Array(deckCard.quantity).fill(null).map((_, copyIndex) => {
                         return `
-                        <div class="deck-card-item${unownedClass}" data-card-index="${index}" data-copy-index="${copyIndex}" data-deck-type="${deckType}" data-card-id="${deckCard.cardId}" draggable="true">
-                            <div class="deck-card-image-container">
-                                <img data-card-name="${escapeHtml(decodedCardName)}" alt="${escapeHtml(decodedCardName)}" style="display:none;">
-                                <div class="deck-card-image-placeholder">
-                                    <i class="bi bi-card-image"></i>
+                        <div class="deck-card-item${unownedClass}" data-card-index="${index}" data-copy-index="${copyIndex}" data-deck-type="${deckType}" data-card-id="${deckCard.cardId}" draggable="true" title="${escapeHtml(decodedCardName)}">
+                            <div class="deck-card-image-container" style="display: flex; flex-direction: column; justify-content: center; align-items: center; padding: 0.5rem; background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);">
+                                <i class="bi bi-card-image" style="font-size: 2rem; color: rgba(0,0,0,0.15); margin-bottom: 0.25rem;"></i>
+                                <div style="font-size: 0.55rem; color: #666; margin-bottom: 0.25rem; font-weight: 600; text-align: center; word-break: break-all;">${escapeHtml(deckCard.code || '')}</div>
+                                <div style="font-size: 0.5rem; color: #888; margin-bottom: 0.25rem;">
+                                    <span class="badge bg-info" style="font-size: 0.45rem; padding: 0.15rem 0.3rem;">${escapeHtml(deckCard.rarity || '')}</span>
                                 </div>
-                                <div class="deck-card-rarity">${escapeHtml(deckCard.rarity || '')}</div>
-                                <div class="deck-card-code">${escapeHtml(deckCard.code || '')}</div>
+                                <a href="${officialUrl}" target="_blank" rel="noopener noreferrer" class="btn btn-sm btn-primary" style="font-size: 0.5rem; padding: 0.15rem 0.35rem; text-decoration: none;" onclick="event.stopPropagation();" title="公式サイトで画像を見る">
+                                    <i class="bi bi-box-arrow-up-right"></i>
+                                </a>
                             </div>
                         </div>
                     `;
                     });
                 }).join('') + `</div>`;
 
-                // Then load images asynchronously
+                // No async image loading - setup drag events for deck cards
                 const grid = container.querySelector('.deck-cards-grid');
                 if (grid) {
-                    for (let i = 0; i < cards.length; i++) {
-                        const card = cards[i];
-                        const cardItems = grid.querySelectorAll(`[data-card-index="${i}"]`);
-
-                        try {
-                            // Decode HTML entities in card name before fetching image
-                            const decodedCardName = decodeHtmlEntities(card.name);
-                            // Use selectedCiid if available, otherwise default to '1'
-                            const ciid = card.selectedCiid || '1';
-                            const imageUrl = await getCardImageUrl(decodedCardName, ciid);
-                            if (imageUrl) {
-                                // Apply the same image to all copies of this card
-                                cardItems.forEach(cardItem => {
-                                    const img = cardItem.querySelector('img');
-                                    const placeholder = cardItem.querySelector('.deck-card-image-placeholder');
-                                    img.src = imageUrl;
-                                    img.style.display = 'block';
-                                    placeholder.style.display = 'none';
-                                });
-                            }
-                        } catch (error) {
-                            console.error(`Failed to load image for ${card.name}:`, error);
-                        }
-                    }
-
-                    // Setup drag events for deck cards
                     grid.querySelectorAll('.deck-card-item').forEach(cardItem => {
                         cardItem.addEventListener('dragstart', (e) => {
                             const cardIndex = parseInt(cardItem.dataset.cardIndex);
@@ -3934,13 +3751,8 @@
         const init = async () => {
             showLoading(true);
 
-            // Initialize image cache manager
-            try {
-                await imageCacheManager.init();
-                console.log('Image cache manager initialized');
-            } catch (error) {
-                console.error('Failed to initialize image cache manager:', error);
-            }
+            // Image caching removed - cards now link to official site
+            // No image cache manager initialization needed
 
             await loadCardData();
 
