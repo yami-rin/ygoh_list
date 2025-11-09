@@ -1112,6 +1112,10 @@
             box-shadow: 0 2px 8px rgba(0,0,0,0.1);
         }
 
+        .ex-monster-row {
+            margin-bottom: 0px;
+        }
+
         .field-top-section {
             margin-bottom: 0px;
         }
@@ -1872,6 +1876,30 @@
                 </div>
             </div>
 
+            <!-- EX Monster Zone Row -->
+            <div class="ex-monster-row mb-0">
+                <div style="display: flex; gap: 0;">
+                    <!-- Empty space for alignment -->
+                    <div style="flex: 1 1 0; min-width: 0;"></div>
+                    <div style="flex: 1 1 0; min-width: 0;"></div>
+                    <!-- EX Monster Left (above monster-2) -->
+                    <div style="flex: 1 1 0; min-width: 0;">
+                        <div class="card-zone ex-monster-zone" data-zone="ex-monster-left">
+                            <div class="zone-label">EX左</div>
+                        </div>
+                    </div>
+                    <div style="flex: 1 1 0; min-width: 0;"></div>
+                    <!-- EX Monster Right (above monster-4) -->
+                    <div style="flex: 1 1 0; min-width: 0;">
+                        <div class="card-zone ex-monster-zone" data-zone="ex-monster-right">
+                            <div class="zone-label">EX右</div>
+                        </div>
+                    </div>
+                    <div style="flex: 1 1 0; min-width: 0;"></div>
+                    <div style="flex: 1 1 0; min-width: 0;"></div>
+                </div>
+            </div>
+
             <!-- Top Section: Field, Monster Zones, Banished & Graveyard -->
             <div class="field-top-section">
                 <div style="display: flex; gap: 0;">
@@ -1882,32 +1910,18 @@
                         </div>
                     </div>
 
-                    <!-- Center: Monster Zones (5) with EX Monster Zones above 2 & 4 -->
+                    <!-- Center: Monster Zones (5) -->
                     <div style="flex: 1 1 0; min-width: 0;">
                         <div class="card-zone monster-zone" data-zone="monster-1"></div>
                     </div>
-                    <div style="flex: 1 1 0; min-width: 0; display: flex; flex-direction: column; gap: 0;">
-                        <div style="flex: 1 1 0; min-height: 0;">
-                            <div class="card-zone ex-monster-zone" data-zone="ex-monster-left" style="height: 100%;">
-                                <div class="zone-label">EX左</div>
-                            </div>
-                        </div>
-                        <div style="flex: 1 1 0; min-height: 0;">
-                            <div class="card-zone monster-zone" data-zone="monster-2" style="height: 100%;"></div>
-                        </div>
+                    <div style="flex: 1 1 0; min-width: 0;">
+                        <div class="card-zone monster-zone" data-zone="monster-2"></div>
                     </div>
                     <div style="flex: 1 1 0; min-width: 0;">
                         <div class="card-zone monster-zone" data-zone="monster-3"></div>
                     </div>
-                    <div style="flex: 1 1 0; min-width: 0; display: flex; flex-direction: column; gap: 0;">
-                        <div style="flex: 1 1 0; min-height: 0;">
-                            <div class="card-zone ex-monster-zone" data-zone="ex-monster-right" style="height: 100%;">
-                                <div class="zone-label">EX右</div>
-                            </div>
-                        </div>
-                        <div style="flex: 1 1 0; min-height: 0;">
-                            <div class="card-zone monster-zone" data-zone="monster-4" style="height: 100%;"></div>
-                        </div>
+                    <div style="flex: 1 1 0; min-width: 0;">
+                        <div class="card-zone monster-zone" data-zone="monster-4"></div>
                     </div>
                     <div style="flex: 1 1 0; min-width: 0;">
                         <div class="card-zone monster-zone" data-zone="monster-5"></div>
