@@ -2110,6 +2110,14 @@
         const auth = getAuth(app);
         const db = getFirestore(app);
 
+        // Make auth and db globally available for duel simulator
+        window.auth = auth;
+        window.db = db;
+        window.collection = collection;
+        window.getDocs = getDocs;
+        window.getDoc = getDoc;
+        window.doc = doc;
+
         // State
         let collectionCards = [];
         let wishlistCards = [];
