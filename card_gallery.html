@@ -1879,9 +1879,15 @@
             <!-- EX Monster Zone Row -->
             <div class="ex-monster-row mb-0">
                 <div style="display: flex; gap: 0;">
-                    <!-- Empty space for alignment -->
-                    <div style="flex: 1 1 0; min-width: 0;"></div>
-                    <div style="flex: 1 1 0; min-width: 0;"></div>
+                    <!-- Left: EX Deck List -->
+                    <div style="flex: 2 1 0; min-width: 0; padding: 5px;">
+                        <div class="zone-mini-list" style="background: rgba(168, 85, 247, 0.05); border: 1px solid rgba(168, 85, 247, 0.3); border-radius: 5px; padding: 5px; height: 100%; overflow-y: auto; max-height: 150px;">
+                            <div style="font-size: 0.7rem; font-weight: bold; color: #a855f7; margin-bottom: 3px; text-align: center;">
+                                EXデッキ (<span id="ex-list-count">0</span>)
+                            </div>
+                            <div id="ex-deck-mini-list" class="mini-card-list" style="display: flex; flex-wrap: wrap; gap: 2px; justify-content: center;"></div>
+                        </div>
+                    </div>
                     <!-- EX Monster Left (above monster-2) -->
                     <div style="flex: 1 1 0; min-width: 0;">
                         <div class="card-zone ex-monster-zone" data-zone="ex-monster-left">
@@ -1895,8 +1901,23 @@
                             <div class="zone-label">EX右</div>
                         </div>
                     </div>
-                    <div style="flex: 1 1 0; min-width: 0;"></div>
-                    <div style="flex: 1 1 0; min-width: 0;"></div>
+                    <!-- Right: Graveyard & Banished Lists -->
+                    <div style="flex: 2 1 0; min-width: 0; padding: 5px; display: flex; flex-direction: column; gap: 5px;">
+                        <!-- Graveyard List -->
+                        <div class="zone-mini-list" style="background: rgba(139, 92, 246, 0.05); border: 1px solid rgba(139, 92, 246, 0.3); border-radius: 5px; padding: 5px; flex: 1; overflow-y: auto; max-height: 70px;">
+                            <div style="font-size: 0.7rem; font-weight: bold; color: #8b5cf6; margin-bottom: 3px; text-align: center;">
+                                墓地 (<span id="grave-list-count">0</span>)
+                            </div>
+                            <div id="graveyard-mini-list" class="mini-card-list" style="display: flex; flex-wrap: wrap; gap: 2px; justify-content: center;"></div>
+                        </div>
+                        <!-- Banished List -->
+                        <div class="zone-mini-list" style="background: rgba(234, 88, 12, 0.05); border: 1px solid rgba(234, 88, 12, 0.3); border-radius: 5px; padding: 5px; flex: 1; overflow-y: auto; max-height: 70px;">
+                            <div style="font-size: 0.7rem; font-weight: bold; color: #ea580c; margin-bottom: 3px; text-align: center;">
+                                除外 (<span id="banish-list-count">0</span>)
+                            </div>
+                            <div id="banished-mini-list" class="mini-card-list" style="display: flex; flex-wrap: wrap; gap: 2px; justify-content: center;"></div>
+                        </div>
+                    </div>
                 </div>
             </div>
 
@@ -5253,11 +5274,132 @@
                 if (graveDisplayCount) graveDisplayCount.textContent = this.graveyard.length;
                 if (banishDisplayCount) banishDisplayCount.textContent = this.banished.length;
 
+                // Update mini list counts
+                const exListCount = document.getElementById('ex-list-count');
+                const graveListCount = document.getElementById('grave-list-count');
+                const banishListCount = document.getElementById('banish-list-count');
+
+                if (exListCount) exListCount.textContent = this.extraDeck.length;
+                if (graveListCount) graveListCount.textContent = this.graveyard.length;
+                if (banishListCount) banishListCount.textContent = this.banished.length;
+
                 // Render permanent displays
                 this.renderPermanentDisplay('main-deck', this.mainDeck);
                 this.renderPermanentDisplay('extra-deck', this.extraDeck);
                 this.renderPermanentDisplay('graveyard', this.graveyard);
                 this.renderPermanentDisplay('banished', this.banished);
+
+                // Render mini lists
+                this.renderMiniList('ex-deck-mini-list', this.extraDeck, 'extra-deck');
+                this.renderMiniList('graveyard-mini-list', this.graveyard, 'graveyard');
+                this.renderMiniList('banished-mini-list', this.banished, 'banished');
+            },
+
+            // Render mini card list
+            async renderMiniList(containerId, cards, source) {
+                const container = document.getElementById(containerId);
+                if (!container) return;
+
+                container.innerHTML = '';
+
+                for (let i = 0; i < cards.length; i++) {
+                    const card = cards[i];
+                    await this.addCardToMiniList(container, card, source, i);
+                }
+            },
+
+            // Add card to mini list
+            async addCardToMiniList(container, card, source, index) {
+                const cardDetails = window.cardDetailsMap?.get(card.name);
+                if (!cardDetails || !cardDetails.cardId) {
+                    return;
+                }
+
+                const actualCardId = cardDetails.cardId;
+                const ciid = card.selectedCiid || '1';
+                const cacheKey = `${actualCardId}_${ciid}`;
+
+                try {
+                    const imageData = await imageCacheManager.fetchAndCache(cacheKey, actualCardId, ciid);
+
+                    const cardDiv = document.createElement('div');
+                    cardDiv.className = 'mini-card-item';
+                    cardDiv.draggable = true;
+                    cardDiv.style.cssText = 'width: 30px; height: 44px; border-radius: 2px; overflow: hidden; cursor: pointer; transition: transform 0.2s; border: 1px solid rgba(0,0,0,0.1);';
+                    cardDiv.innerHTML = `<img src="${imageData}" alt="${card.name}" style="width: 100%; height: 100%; object-fit: cover;" draggable="false">`;
+
+                    // Hover effect
+                    cardDiv.addEventListener('mouseenter', () => {
+                        cardDiv.style.transform = 'scale(1.2)';
+                        cardDiv.style.zIndex = '10';
+                    });
+                    cardDiv.addEventListener('mouseleave', () => {
+                        cardDiv.style.transform = 'scale(1)';
+                        cardDiv.style.zIndex = '1';
+                    });
+
+                    // Click to add to hand
+                    cardDiv.addEventListener('click', () => {
+                        this.moveFromZoneToHand(source, index);
+                    });
+
+                    // Drag events
+                    cardDiv.addEventListener('dragstart', (e) => {
+                        const dragData = {
+                            source: 'mini-list',
+                            zoneType: source,
+                            card: card,
+                            index: index
+                        };
+                        e.dataTransfer.setData('text/plain', JSON.stringify(dragData));
+                        cardDiv.style.opacity = '0.5';
+                    });
+
+                    cardDiv.addEventListener('dragend', () => {
+                        cardDiv.style.opacity = '1';
+                    });
+
+                    container.appendChild(cardDiv);
+                } catch (error) {
+                    console.error('[addCardToMiniList] Error loading card image:', error, 'Card:', card.name);
+                }
+            },
+
+            // Move card from zone to hand (for mini lists and zones)
+            moveFromZoneToHand(source, index) {
+                let card;
+
+                if (source === 'extra-deck') {
+                    if (index < this.extraDeck.length) {
+                        card = this.extraDeck.splice(index, 1)[0];
+                    }
+                } else if (source === 'graveyard') {
+                    if (index < this.graveyard.length) {
+                        card = this.graveyard.splice(index, 1)[0];
+                        // Also remove from field.graveyard using object reference
+                        const fieldIndex = this.field.graveyard.indexOf(card);
+                        if (fieldIndex !== -1) {
+                            this.field.graveyard.splice(fieldIndex, 1);
+                        }
+                        this.renderZone('graveyard');
+                    }
+                } else if (source === 'banished') {
+                    if (index < this.banished.length) {
+                        card = this.banished.splice(index, 1)[0];
+                        // Also remove from field.banished using object reference
+                        const fieldIndex = this.field.banished.indexOf(card);
+                        if (fieldIndex !== -1) {
+                            this.field.banished.splice(fieldIndex, 1);
+                        }
+                        this.renderZone('banished');
+                    }
+                }
+
+                if (card) {
+                    this.hand.push(card);
+                    this.renderHand();
+                    this.updateDeckCounts();
+                }
             },
 
             // Render permanent display area
@@ -5327,31 +5469,35 @@
                 let cardIndex;
 
                 if (source === 'main-deck') {
-                    cardIndex = this.mainDeck.findIndex(c => c === targetCard);
+                    cardIndex = this.mainDeck.indexOf(targetCard);
                     if (cardIndex !== -1) {
                         removedCard = this.mainDeck.splice(cardIndex, 1)[0];
                     }
                 } else if (source === 'extra-deck') {
-                    cardIndex = this.extraDeck.findIndex(c => c === targetCard);
+                    cardIndex = this.extraDeck.indexOf(targetCard);
                     if (cardIndex !== -1) {
                         removedCard = this.extraDeck.splice(cardIndex, 1)[0];
                     }
                 } else if (source === 'graveyard') {
-                    cardIndex = this.graveyard.findIndex(c => c === targetCard);
+                    cardIndex = this.graveyard.indexOf(targetCard);
                     if (cardIndex !== -1) {
                         removedCard = this.graveyard.splice(cardIndex, 1)[0];
-                        // Also remove from field.graveyard
-                        const fieldIndex = this.field.graveyard.findIndex(c => c === targetCard);
-                        if (fieldIndex !== -1) this.field.graveyard.splice(fieldIndex, 1);
+                        // Also remove from field.graveyard using object reference
+                        const fieldIndex = this.field.graveyard.indexOf(removedCard);
+                        if (fieldIndex !== -1) {
+                            this.field.graveyard.splice(fieldIndex, 1);
+                        }
                         this.renderZone('graveyard');
                     }
                 } else if (source === 'banished') {
-                    cardIndex = this.banished.findIndex(c => c === targetCard);
+                    cardIndex = this.banished.indexOf(targetCard);
                     if (cardIndex !== -1) {
                         removedCard = this.banished.splice(cardIndex, 1)[0];
-                        // Also remove from field.banished
-                        const fieldIndex = this.field.banished.findIndex(c => c === targetCard);
-                        if (fieldIndex !== -1) this.field.banished.splice(fieldIndex, 1);
+                        // Also remove from field.banished using object reference
+                        const fieldIndex = this.field.banished.indexOf(removedCard);
+                        if (fieldIndex !== -1) {
+                            this.field.banished.splice(fieldIndex, 1);
+                        }
                         this.renderZone('banished');
                     }
                 }
