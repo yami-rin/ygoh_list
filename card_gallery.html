@@ -5350,14 +5350,17 @@
 
                     // Click to add to hand
                     cardDiv.addEventListener('click', () => {
-                        // Find current index of this card object in the array
+                        // Find current index by card name and ciid (not by object reference)
                         let currentIndex = -1;
+                        const cardName = card.name;
+                        const cardCiid = card.selectedCiid || '1';
+
                         if (source === 'extra-deck') {
-                            currentIndex = this.extraDeck.indexOf(card);
+                            currentIndex = this.extraDeck.findIndex(c => c.name === cardName && (c.selectedCiid || '1') === cardCiid);
                         } else if (source === 'graveyard') {
-                            currentIndex = this.graveyard.indexOf(card);
+                            currentIndex = this.graveyard.findIndex(c => c.name === cardName && (c.selectedCiid || '1') === cardCiid);
                         } else if (source === 'banished') {
-                            currentIndex = this.banished.indexOf(card);
+                            currentIndex = this.banished.findIndex(c => c.name === cardName && (c.selectedCiid || '1') === cardCiid);
                         }
 
                         if (currentIndex !== -1) {
@@ -5367,14 +5370,17 @@
 
                     // Drag events
                     cardDiv.addEventListener('dragstart', (e) => {
-                        // Find current index of this card object in the array
+                        // Find current index by card name and ciid (not by object reference)
                         let currentIndex = -1;
+                        const cardName = card.name;
+                        const cardCiid = card.selectedCiid || '1';
+
                         if (source === 'extra-deck') {
-                            currentIndex = this.extraDeck.indexOf(card);
+                            currentIndex = this.extraDeck.findIndex(c => c.name === cardName && (c.selectedCiid || '1') === cardCiid);
                         } else if (source === 'graveyard') {
-                            currentIndex = this.graveyard.indexOf(card);
+                            currentIndex = this.graveyard.findIndex(c => c.name === cardName && (c.selectedCiid || '1') === cardCiid);
                         } else if (source === 'banished') {
-                            currentIndex = this.banished.indexOf(card);
+                            currentIndex = this.banished.findIndex(c => c.name === cardName && (c.selectedCiid || '1') === cardCiid);
                         }
 
                         const dragData = {
