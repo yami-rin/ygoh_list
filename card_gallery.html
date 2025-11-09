@@ -2997,16 +2997,50 @@
             }
         };
 
+        // Remove undefined values from object (Firestore doesn't support undefined)
+        const removeUndefined = (obj) => {
+            if (Array.isArray(obj)) {
+                return obj.map(item => removeUndefined(item));
+            } else if (obj !== null && typeof obj === 'object') {
+                const cleaned = {};
+                for (const key in obj) {
+                    if (obj[key] !== undefined) {
+                        cleaned[key] = removeUndefined(obj[key]);
+                    }
+                }
+                return cleaned;
+            }
+            return obj;
+        };
+
         // Save deck to Firestore
         const saveDeck = async () => {
             if (!currentUser || !currentDeck) return;
 
+            // Clean deck data to remove undefined values
+            const cleanDeckArray = (deckArray) => {
+                return (deckArray || []).map(card => {
+                    const cleanedCard = {
+                        cardId: card.cardId,
+                        name: card.name,
+                        code: card.code || '',
+                        rarity: card.rarity || '',
+                        quantity: card.quantity
+                    };
+                    // Only add selectedCiid if it exists
+                    if (card.selectedCiid) {
+                        cleanedCard.selectedCiid = card.selectedCiid;
+                    }
+                    return cleanedCard;
+                });
+            };
+
             const deckData = {
                 name: document.getElementById('deckName').value || '無題のデッキ',
                 memo: document.getElementById('deckMemo').value || '',
-                mainDeck: currentDeck.mainDeck || [],
-                extraDeck: currentDeck.extraDeck || [],
-                sideDeck: currentDeck.sideDeck || [],
+                mainDeck: cleanDeckArray(currentDeck.mainDeck),
+                extraDeck: cleanDeckArray(currentDeck.extraDeck),
+                sideDeck: cleanDeckArray(currentDeck.sideDeck),
                 updatedAt: new Date().toISOString()
             };
 
@@ -3054,13 +3088,17 @@
                         if (!isInWishlist) {
                             // Use the card data from deckCard itself
                             // Since we already have name, code, rarity stored in deckCard
-                            unownedCardsToAdd.push({
+                            const cardToAdd = {
                                 cardId: deckCard.cardId,
                                 name: deckCard.name,
-                                code: deckCard.code,
-                                rarity: deckCard.rarity,
-                                selectedCiid: deckCard.selectedCiid
-                            });
+                                code: deckCard.code || '',
+                                rarity: deckCard.rarity || ''
+                            };
+                            // Only add selectedCiid if it exists
+                            if (deckCard.selectedCiid) {
+                                cardToAdd.selectedCiid = deckCard.selectedCiid;
+                            }
+                            unownedCardsToAdd.push(cardToAdd);
                             console.log('  Added to unowned list');
                         }
                     }
@@ -3073,13 +3111,14 @@
                     const wishlistRef = collection(db, 'users', currentUser.uid, 'wishlist');
                     for (const card of unownedCardsToAdd) {
                         const wishlistData = {
-                            名前: card.name,
-                            型番: card.code,
-                            レアリティ: card.rarity,
+                            名前: card.name || '',
+                            型番: card.code || '',
+                            レアリティ: card.rarity || '',
                             枚数: 1,
                             tags: [],
                             addedAt: new Date().toISOString()
                         };
+                        // Only add selectedCiid if it exists
                         if (card.selectedCiid) {
                             wishlistData.selectedCiid = card.selectedCiid;
                         }
@@ -3655,15 +3694,19 @@
             flatCards.forEach(flatCard => {
                 const key = flatCard.cardId;
                 if (!cardMap.has(key)) {
-                    cardMap.set(key, {
+                    const mapEntry = {
                         cardId: flatCard.cardId,
                         name: flatCard.name,
-                        code: flatCard.code,
-                        rarity: flatCard.rarity,
-                        selectedCiid: flatCard.selectedCiid,
+                        code: flatCard.code || '',
+                        rarity: flatCard.rarity || '',
                         quantity: 0,
                         positions: []
-                    });
+                    };
+                    // Only add selectedCiid if it exists
+                    if (flatCard.selectedCiid) {
+                        mapEntry.selectedCiid = flatCard.selectedCiid;
+                    }
+                    cardMap.set(key, mapEntry);
                 }
                 const entry = cardMap.get(key);
                 entry.quantity++;
@@ -3679,14 +3722,18 @@
 
                 if (existingIndex === -1) {
                     // Create new entry
-                    newDeck.push({
+                    const newEntry = {
                         cardId: flatCard.cardId,
                         name: flatCard.name,
-                        code: flatCard.code,
-                        rarity: flatCard.rarity,
-                        selectedCiid: flatCard.selectedCiid,
+                        code: flatCard.code || '',
+                        rarity: flatCard.rarity || '',
                         quantity: 1
-                    });
+                    };
+                    // Only add selectedCiid if it exists
+                    if (flatCard.selectedCiid) {
+                        newEntry.selectedCiid = flatCard.selectedCiid;
+                    }
+                    newDeck.push(newEntry);
                 } else {
                     // Increment quantity of existing entry
                     newDeck[existingIndex].quantity++;
@@ -3742,12 +3789,12 @@
             } else {
                 const deckCard = {
                     cardId: cardData.id,
-                    name: cardData.data['名前'],
-                    code: cardData.data['型番'],
-                    rarity: cardData.data['レアリティ'],
+                    name: cardData.data['名前'] || '',
+                    code: cardData.data['型番'] || '',
+                    rarity: cardData.data['レアリティ'] || '',
                     quantity: 1
                 };
-                // Include selectedCiid if it exists
+                // Only include selectedCiid if it exists
                 if (cardData.data.selectedCiid) {
                     deckCard.selectedCiid = cardData.data.selectedCiid;
                 }
