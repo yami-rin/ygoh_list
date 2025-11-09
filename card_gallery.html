@@ -4951,7 +4951,8 @@
             graveyard: [],
             banished: [],
             counter: 1,
-            renderingLists: new Set(), // Track which lists are currently being rendered
+            renderingLists: new Set(), // Track which mini lists are currently being rendered
+            renderingDisplays: new Set(), // Track which permanent displays are currently being rendered
 
             // Load deck list from Firestore
             async loadDeckList() {
@@ -5384,24 +5385,13 @@
 
                     // Drag events
                     cardDiv.addEventListener('dragstart', (e) => {
-                        // Find current index by card name and ciid (not by object reference)
-                        let currentIndex = -1;
-                        const cardName = card.name;
-                        const cardCiid = card.selectedCiid || '1';
-
-                        if (source === 'extra-deck') {
-                            currentIndex = this.extraDeck.findIndex(c => c.name === cardName && (c.selectedCiid || '1') === cardCiid);
-                        } else if (source === 'graveyard') {
-                            currentIndex = this.graveyard.findIndex(c => c.name === cardName && (c.selectedCiid || '1') === cardCiid);
-                        } else if (source === 'banished') {
-                            currentIndex = this.banished.findIndex(c => c.name === cardName && (c.selectedCiid || '1') === cardCiid);
-                        }
-
+                        // Use the render index directly for accurate card removal
+                        // This ensures the exact card being dragged is removed, even if there are duplicates
                         const dragData = {
                             source: 'mini-list',
                             zoneType: source,
                             card: card,
-                            index: currentIndex
+                            index: index  // Use render index for precise identification
                         };
                         e.dataTransfer.setData('text/plain', JSON.stringify(dragData));
                         cardDiv.style.opacity = '0.5';
@@ -5456,14 +5446,27 @@
 
             // Render permanent display area
             async renderPermanentDisplay(type, cards) {
-                const container = document.getElementById(`${type}-display`);
-                if (!container) return;
+                // Prevent concurrent rendering of the same display
+                if (this.renderingDisplays.has(type)) {
+                    return;
+                }
 
-                container.innerHTML = '';
+                // Mark this display as being rendered
+                this.renderingDisplays.add(type);
 
-                for (let i = 0; i < cards.length; i++) {
-                    const card = cards[i];
-                    await this.addCardToPermanentDisplay(container, card, type, i);
+                try {
+                    const container = document.getElementById(`${type}-display`);
+                    if (!container) return;
+
+                    container.innerHTML = '';
+
+                    for (let i = 0; i < cards.length; i++) {
+                        const card = cards[i];
+                        await this.addCardToPermanentDisplay(container, card, type, i);
+                    }
+                } finally {
+                    // Always remove from set when done
+                    this.renderingDisplays.delete(type);
                 }
             },
 
