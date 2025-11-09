@@ -4951,6 +4951,7 @@
             graveyard: [],
             banished: [],
             counter: 1,
+            renderingLists: new Set(), // Track which lists are currently being rendered
 
             // Load deck list from Firestore
             async loadDeckList() {
@@ -5307,14 +5308,27 @@
 
             // Render mini card list
             async renderMiniList(containerId, cards, source) {
-                const container = document.getElementById(containerId);
-                if (!container) return;
+                // Prevent concurrent rendering of the same list
+                if (this.renderingLists.has(containerId)) {
+                    return;
+                }
 
-                container.innerHTML = '';
+                // Mark this list as being rendered
+                this.renderingLists.add(containerId);
 
-                for (let i = 0; i < cards.length; i++) {
-                    const card = cards[i];
-                    await this.addCardToMiniList(container, card, source, i);
+                try {
+                    const container = document.getElementById(containerId);
+                    if (!container) return;
+
+                    container.innerHTML = '';
+
+                    for (let i = 0; i < cards.length; i++) {
+                        const card = cards[i];
+                        await this.addCardToMiniList(container, card, source, i);
+                    }
+                } finally {
+                    // Always remove from set when done
+                    this.renderingLists.delete(containerId);
                 }
             },
 
