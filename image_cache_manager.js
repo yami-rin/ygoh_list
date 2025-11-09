@@ -115,10 +115,10 @@ class ImageCacheManager {
                     data.lastAccessed = Date.now();
                     objectStore.put(data);
 
-                    console.log(`Image retrieved for card ID: ${cardId}`);
+                    console.log(`[getImage] Image retrieved for cache key: ${cardId}, data type: ${typeof request.result.imageData}, length: ${request.result.imageData?.length}`);
                     resolve(request.result.imageData);
                 } else {
-                    console.log(`No image found for card ID: ${cardId}`);
+                    console.log(`[getImage] No image found for cache key: ${cardId} (will fetch from server)`);
                     resolve(null);
                 }
             };
@@ -317,14 +317,16 @@ class ImageCacheManager {
         }
 
         try {
+            console.log(`[fetchAndCache] Called with cacheKey: ${cacheKey}, cardId: ${cardId}, ciid: ${ciid}`);
+
             // 既にキャッシュにあるかチェック
             const cachedImage = await this.getImage(cacheKey);
             if (cachedImage) {
-                console.log(`Using cached image for cache key: ${cacheKey}`);
+                console.log(`[fetchAndCache] Using cached image for cache key: ${cacheKey}`);
                 return cachedImage;
             }
 
-            console.log(`Fetching image for card ID: ${cardId}, ciid: ${ciid}`);
+            console.log(`[fetchAndCache] Cache miss. Fetching image for card ID: ${cardId}, ciid: ${ciid}`);
 
             // カード詳細を取得
             const detailUrl = `${proxyUrl}/card-detail?cid=${cardId}`;
@@ -357,12 +359,14 @@ class ImageCacheManager {
             });
 
             // キャッシュに保存
+            console.log(`[fetchAndCache] Saving to cache. Key: ${cacheKey}, dataUrl length: ${dataUrl.length}`);
             await this.saveImage(cacheKey, dataUrl, {
                 cardName: cardDetail.cardName,
                 encToken: cardDetail.encToken,
                 ciid: ciid
             });
 
+            console.log(`[fetchAndCache] Successfully cached and returning image for: ${cacheKey}`);
             // 保存された画像を返す
             return dataUrl;
         } catch (error) {
