@@ -1096,6 +1096,295 @@
             color: white;
             border-color: #0d6efd;
         }
+
+        /* Duel Simulator Styles */
+        .duel-field {
+            background: linear-gradient(135deg, #2c3e50 0%, #34495e 100%);
+            border-radius: 15px;
+            padding: 20px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+        }
+
+        .deck-selector-section {
+            background: rgba(255, 255, 255, 0.95);
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+
+        .field-top-section,
+        .field-middle-section,
+        .field-bottom-section {
+            margin-bottom: 15px;
+        }
+
+        .card-zone {
+            aspect-ratio: 421/614;
+            background: rgba(255, 255, 255, 0.1);
+            border: 2px dashed rgba(255, 255, 255, 0.3);
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+
+        .card-zone:hover {
+            background: rgba(255, 255, 255, 0.15);
+            border-color: rgba(255, 255, 255, 0.5);
+        }
+
+        .card-zone.has-card {
+            background: rgba(255, 255, 255, 0.2);
+            border: 2px solid rgba(102, 126, 234, 0.8);
+        }
+
+        .card-zone.drag-over {
+            background: rgba(102, 126, 234, 0.3);
+            border-color: rgba(102, 126, 234, 1);
+            transform: scale(1.05);
+        }
+
+        .zone-label {
+            font-size: 0.7rem;
+            color: rgba(255, 255, 255, 0.6);
+            text-align: center;
+            position: absolute;
+            top: 5px;
+            left: 50%;
+            transform: translateX(-50%);
+            pointer-events: none;
+        }
+
+        .zone-count {
+            position: absolute;
+            bottom: 5px;
+            right: 5px;
+            background: rgba(0, 0, 0, 0.7);
+            color: white;
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-size: 0.75rem;
+            font-weight: bold;
+            pointer-events: none;
+        }
+
+        .monster-zone,
+        .spell-trap-zone {
+            background: rgba(255, 255, 255, 0.05);
+        }
+
+        .grave-zone,
+        .banish-zone {
+            margin-bottom: 10px;
+        }
+
+        .grave-zone {
+            background: rgba(147, 51, 234, 0.1);
+            border-color: rgba(147, 51, 234, 0.4);
+        }
+
+        .banish-zone {
+            background: rgba(234, 179, 8, 0.1);
+            border-color: rgba(234, 179, 8, 0.4);
+        }
+
+        .pendulum-zone {
+            background: rgba(34, 197, 94, 0.1);
+            border-color: rgba(34, 197, 94, 0.4);
+        }
+
+        .field-zone {
+            background: rgba(59, 130, 246, 0.1);
+            border-color: rgba(59, 130, 246, 0.4);
+        }
+
+        .deck-zone {
+            background: rgba(239, 68, 68, 0.1);
+            border-color: rgba(239, 68, 68, 0.4);
+        }
+
+        .hand-zone {
+            background: rgba(255, 255, 255, 0.05);
+            border: 2px solid rgba(255, 255, 255, 0.2);
+            border-radius: 10px;
+            padding: 15px;
+            min-height: 180px;
+            position: relative;
+        }
+
+        .hand-label {
+            color: rgba(255, 255, 255, 0.7);
+            font-size: 0.9rem;
+            margin-bottom: 10px;
+            text-align: center;
+        }
+
+        .hand-cards {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+
+        .field-card {
+            width: 100%;
+            height: 100%;
+            border-radius: 6px;
+            object-fit: cover;
+            cursor: move;
+            position: relative;
+        }
+
+        .field-card img {
+            width: 100%;
+            height: 100%;
+            border-radius: 6px;
+            object-fit: cover;
+        }
+
+        .hand-card {
+            width: 80px;
+            aspect-ratio: 421/614;
+            border-radius: 6px;
+            overflow: hidden;
+            cursor: move;
+            transition: transform 0.2s ease;
+            position: relative;
+        }
+
+        .hand-card img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .hand-card:hover {
+            transform: translateY(-10px);
+        }
+
+        .counter-display {
+            background: rgba(255, 255, 255, 0.1);
+            border: 2px solid rgba(255, 255, 255, 0.3);
+            border-radius: 10px;
+            padding: 15px;
+            text-align: center;
+            margin-bottom: 10px;
+        }
+
+        .counter-value {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            margin-bottom: 5px;
+        }
+
+        .counter-btn {
+            background: rgba(102, 126, 234, 0.8);
+            border: none;
+            color: white;
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            cursor: pointer;
+            font-size: 0.8rem;
+            transition: all 0.2s ease;
+        }
+
+        .counter-btn:hover {
+            background: rgba(102, 126, 234, 1);
+            transform: scale(1.1);
+        }
+
+        #counter-number {
+            font-size: 1.5rem;
+            font-weight: bold;
+            color: white;
+            min-width: 40px;
+        }
+
+        .counter-label {
+            color: rgba(255, 255, 255, 0.7);
+            font-size: 0.8rem;
+        }
+
+        .action-buttons {
+            margin-top: 10px;
+        }
+
+        .action-buttons .btn {
+            font-size: 0.8rem;
+        }
+
+        /* Card in field with rotation */
+        .field-card-wrapper {
+            width: 100%;
+            height: 100%;
+            position: relative;
+        }
+
+        .field-card-wrapper.rotated {
+            transform: rotate(90deg);
+        }
+
+        .field-card-wrapper .card-controls {
+            position: absolute;
+            top: 5px;
+            right: 5px;
+            display: none;
+            gap: 5px;
+        }
+
+        .field-card-wrapper:hover .card-controls {
+            display: flex;
+        }
+
+        .card-control-btn {
+            background: rgba(0, 0, 0, 0.7);
+            border: none;
+            color: white;
+            width: 25px;
+            height: 25px;
+            border-radius: 50%;
+            cursor: pointer;
+            font-size: 0.7rem;
+            transition: all 0.2s ease;
+        }
+
+        .card-control-btn:hover {
+            background: rgba(102, 126, 234, 1);
+        }
+
+        /* Mobile responsiveness for duel field */
+        @media (max-width: 768px) {
+            .duel-field {
+                padding: 10px;
+            }
+
+            .card-zone {
+                border-width: 1px;
+            }
+
+            .zone-label {
+                font-size: 0.6rem;
+            }
+
+            .hand-card {
+                width: 60px;
+            }
+
+            .counter-display {
+                padding: 10px;
+            }
+
+            .action-buttons .btn {
+                font-size: 0.7rem;
+                padding: 5px;
+            }
+        }
     </style>
 </head>
 <body>
@@ -1175,6 +1464,11 @@
             <li class="nav-item" role="presentation">
                 <button class="nav-link" id="bookmark-tab" data-list-type="bookmark" type="button">
                     <i class="bi bi-bookmark"></i> ブックマーク
+                </button>
+            </li>
+            <li class="nav-item" role="presentation">
+                <button class="nav-link" id="duel-simulator-tab" data-list-type="duel-simulator" type="button">
+                    <i class="bi bi-grid-3x3"></i> デュエルシミュレーター
                 </button>
             </li>
         </ul>
@@ -1427,6 +1721,159 @@
 
         <!-- Pagination bottom -->
         <div class="pagination-controls" id="pagination-bottom"></div>
+    </div>
+
+    <!-- Duel Simulator -->
+    <div class="container" id="duel-simulator-container" style="display: none;">
+        <div class="duel-field">
+            <!-- Select Deck Section -->
+            <div class="deck-selector-section mb-4">
+                <div class="row align-items-center">
+                    <div class="col-md-6">
+                        <label class="form-label"><i class="bi bi-box"></i> デッキを選択</label>
+                        <select class="form-select" id="simulator-deck-select">
+                            <option value="">デッキを選択してください...</option>
+                        </select>
+                    </div>
+                    <div class="col-md-6 d-flex gap-2 mt-3 mt-md-0">
+                        <button class="btn btn-primary" id="load-deck-btn" disabled>
+                            <i class="bi bi-download"></i> デッキをロード
+                        </button>
+                        <button class="btn btn-secondary" id="clear-field-btn">
+                            <i class="bi bi-x-circle"></i> フィールドをクリア
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Top Section: Extra Deck Zones, Field, Graveyard, Banished -->
+            <div class="field-top-section">
+                <div class="row g-2">
+                    <!-- Left: Pendulum & Field -->
+                    <div class="col-2">
+                        <div class="card-zone pendulum-zone" data-zone="pendulum-left">
+                            <div class="zone-label">ペンデュラム</div>
+                        </div>
+                        <div class="card-zone field-zone" data-zone="field">
+                            <div class="zone-label">フィールド</div>
+                        </div>
+                    </div>
+
+                    <!-- Center: Monster Zones (top row) -->
+                    <div class="col-8">
+                        <div class="row g-2">
+                            <div class="col-2">
+                                <div class="card-zone monster-zone" data-zone="monster-1"></div>
+                            </div>
+                            <div class="col-2">
+                                <div class="card-zone monster-zone" data-zone="monster-2"></div>
+                            </div>
+                            <div class="col-2">
+                                <div class="card-zone monster-zone" data-zone="monster-3"></div>
+                            </div>
+                            <div class="col-2">
+                                <div class="card-zone monster-zone" data-zone="monster-4"></div>
+                            </div>
+                            <div class="col-2">
+                                <div class="card-zone monster-zone" data-zone="monster-5"></div>
+                            </div>
+                            <div class="col-2">
+                                <div class="card-zone pendulum-zone" data-zone="pendulum-right">
+                                    <div class="zone-label">ペンデュラム</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Right: Graveyard & Banished -->
+                    <div class="col-2">
+                        <div class="card-zone grave-zone" data-zone="graveyard">
+                            <div class="zone-label">墓地</div>
+                            <div class="zone-count" id="grave-count">0</div>
+                        </div>
+                        <div class="card-zone banish-zone" data-zone="banished">
+                            <div class="zone-label">除外</div>
+                            <div class="zone-count" id="banish-count">0</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Middle Section: Spell/Trap Zones -->
+            <div class="field-middle-section">
+                <div class="row g-2">
+                    <div class="col-2"></div>
+                    <div class="col-8">
+                        <div class="row g-2">
+                            <div class="col-2">
+                                <div class="card-zone spell-trap-zone" data-zone="spell-trap-1"></div>
+                            </div>
+                            <div class="col-2">
+                                <div class="card-zone spell-trap-zone" data-zone="spell-trap-2"></div>
+                            </div>
+                            <div class="col-2">
+                                <div class="card-zone spell-trap-zone" data-zone="spell-trap-3"></div>
+                            </div>
+                            <div class="col-2">
+                                <div class="card-zone spell-trap-zone" data-zone="spell-trap-4"></div>
+                            </div>
+                            <div class="col-2">
+                                <div class="card-zone spell-trap-zone" data-zone="spell-trap-5"></div>
+                            </div>
+                            <div class="col-2"></div>
+                        </div>
+                    </div>
+                    <div class="col-2"></div>
+                </div>
+            </div>
+
+            <!-- Bottom Section: Hand, Counter, Deck, Buttons -->
+            <div class="field-bottom-section">
+                <div class="row g-2">
+                    <!-- Left: Counter & Extra Deck -->
+                    <div class="col-2">
+                        <div class="counter-display">
+                            <div class="counter-value" id="counter-value">
+                                <button class="counter-btn" id="counter-up">▲</button>
+                                <span id="counter-number">1</span>
+                                <button class="counter-btn" id="counter-down">▼</button>
+                            </div>
+                            <div class="counter-label">カウンター</div>
+                        </div>
+                        <div class="card-zone deck-zone" data-zone="extra-deck">
+                            <div class="zone-label">EXデッキ</div>
+                            <div class="zone-count" id="extra-deck-count">0</div>
+                        </div>
+                    </div>
+
+                    <!-- Center: Hand Zone -->
+                    <div class="col-8">
+                        <div class="hand-zone" data-zone="hand">
+                            <div class="hand-label">手札</div>
+                            <div class="hand-cards" id="hand-cards">
+                                <!-- Hand cards will appear here -->
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Right: Deck & Action Buttons -->
+                    <div class="col-2">
+                        <div class="card-zone deck-zone" data-zone="main-deck">
+                            <div class="zone-label">デッキ</div>
+                            <div class="zone-count" id="main-deck-count">0</div>
+                        </div>
+                        <div class="action-buttons">
+                            <button class="btn btn-sm btn-primary w-100 mb-2" id="draw-1-btn">
+                                1ドロー
+                            </button>
+                            <button class="btn btn-sm btn-secondary w-100" id="reset-draw-5-btn">
+                                盤面リセット<br>& 5ドロー
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
     </div>
 
     <!-- Card Edit Side Panel -->
@@ -1829,6 +2276,10 @@
 
         // Switch between collection, wishlist, and bookmark
         const switchListType = (listType) => {
+            // Hide duel simulator and show card gallery
+            document.getElementById('duel-simulator-container').style.display = 'none';
+            document.querySelector('.container:has(#card-grid)').style.display = 'block';
+
             currentListType = listType;
             allCards = listType === 'collection' ? collectionCards :
                        listType === 'wishlist' ? wishlistCards :
@@ -2930,6 +3381,25 @@
 
         document.getElementById('bookmark-tab').addEventListener('click', () => {
             switchListType('bookmark');
+        });
+
+        document.getElementById('duel-simulator-tab').addEventListener('click', () => {
+            // Hide card gallery sections
+            document.querySelector('.container:has(#card-grid)').style.display = 'none';
+
+            // Show duel simulator
+            document.getElementById('duel-simulator-container').style.display = 'block';
+
+            // Update tab active state
+            document.querySelectorAll('.nav-link').forEach(tab => {
+                tab.classList.remove('active');
+            });
+            document.getElementById('duel-simulator-tab').classList.add('active');
+
+            // Load decks into selector if not already loaded
+            if (!duelSimulator.decksLoaded) {
+                duelSimulator.loadDeckList();
+            }
         });
 
         // Close panel button
@@ -4222,6 +4692,406 @@
                 navbar.classList.remove('scrolled');
             }
         });
+
+        // Duel Simulator Module
+        const duelSimulator = {
+            decksLoaded: false,
+            currentDeck: null,
+            mainDeck: [],
+            extraDeck: [],
+            field: {},
+            hand: [],
+            graveyard: [],
+            banished: [],
+            counter: 1,
+
+            // Load deck list from Firestore
+            async loadDeckList() {
+                try {
+                    if (!auth.currentUser) {
+                        alert('デッキを読み込むにはログインが必要です。');
+                        return;
+                    }
+
+                    const decksRef = collection(db, `users/${auth.currentUser.uid}/decks`);
+                    const snapshot = await getDocs(decksRef);
+                    const deckSelect = document.getElementById('simulator-deck-select');
+
+                    deckSelect.innerHTML = '<option value="">デッキを選択してください...</option>';
+
+                    snapshot.forEach(doc => {
+                        const deckData = doc.data();
+                        const option = document.createElement('option');
+                        option.value = doc.id;
+                        option.textContent = `${deckData.name} (メイン: ${(deckData.mainDeck || []).reduce((sum, c) => sum + (c.quantity || 0), 0)})`;
+                        deckSelect.appendChild(option);
+                    });
+
+                    this.decksLoaded = true;
+
+                    // Enable load button when deck is selected
+                    deckSelect.addEventListener('change', () => {
+                        document.getElementById('load-deck-btn').disabled = !deckSelect.value;
+                    });
+                } catch (error) {
+                    console.error('Error loading deck list:', error);
+                    alert('デッキリストの読み込みに失敗しました。');
+                }
+            },
+
+            // Load selected deck into simulator
+            async loadDeck() {
+                try {
+                    const deckSelect = document.getElementById('simulator-deck-select');
+                    const deckId = deckSelect.value;
+
+                    if (!deckId) {
+                        alert('デッキを選択してください。');
+                        return;
+                    }
+
+                    const deckDoc = await getDoc(doc(db, `users/${auth.currentUser.uid}/decks`, deckId));
+                    if (!deckDoc.exists()) {
+                        alert('デッキが見つかりません。');
+                        return;
+                    }
+
+                    const deckData = deckDoc.data();
+                    this.currentDeck = { id: deckId, ...deckData };
+
+                    // Expand deck cards (flatten by quantity)
+                    this.mainDeck = this.expandDeckCards(deckData.mainDeck || []);
+                    this.extraDeck = this.expandDeckCards(deckData.extraDeck || []);
+
+                    // Shuffle main deck
+                    this.shuffleDeck(this.mainDeck);
+
+                    // Clear field and hand
+                    this.clearField();
+
+                    // Update deck counts
+                    this.updateDeckCounts();
+
+                    alert(`デッキ「${deckData.name}」を読み込みました！`);
+                } catch (error) {
+                    console.error('Error loading deck:', error);
+                    alert('デッキの読み込みに失敗しました。');
+                }
+            },
+
+            // Expand deck cards by quantity
+            expandDeckCards(deckCards) {
+                const expanded = [];
+                deckCards.forEach(card => {
+                    for (let i = 0; i < (card.quantity || 1); i++) {
+                        expanded.push({ ...card });
+                    }
+                });
+                return expanded;
+            },
+
+            // Shuffle deck
+            shuffleDeck(deck) {
+                for (let i = deck.length - 1; i > 0; i--) {
+                    const j = Math.floor(Math.random() * (i + 1));
+                    [deck[i], deck[j]] = [deck[j], deck[i]];
+                }
+            },
+
+            // Draw cards
+            drawCards(count) {
+                if (this.mainDeck.length === 0) {
+                    alert('デッキに残りカードがありません！');
+                    return;
+                }
+
+                const drawn = this.mainDeck.splice(0, Math.min(count, this.mainDeck.length));
+                this.hand.push(...drawn);
+                this.renderHand();
+                this.updateDeckCounts();
+            },
+
+            // Clear field
+            clearField() {
+                this.field = {};
+                this.hand = [];
+                this.graveyard = [];
+                this.banished = [];
+                this.counter = 1;
+
+                // Clear all card zones
+                document.querySelectorAll('.card-zone').forEach(zone => {
+                    zone.innerHTML = zone.querySelector('.zone-label')?.outerHTML || '';
+                    const countEl = zone.querySelector('.zone-count');
+                    if (countEl) zone.innerHTML += countEl.outerHTML;
+                    zone.classList.remove('has-card');
+                });
+
+                // Clear hand
+                document.getElementById('hand-cards').innerHTML = '';
+
+                // Reset counter
+                document.getElementById('counter-number').textContent = '1';
+
+                this.updateDeckCounts();
+            },
+
+            // Reset field and draw 5
+            resetAndDraw5() {
+                if (!this.currentDeck) {
+                    alert('まずデッキを読み込んでください。');
+                    return;
+                }
+
+                // Put hand cards back to deck
+                this.mainDeck.push(...this.hand);
+                this.shuffleDeck(this.mainDeck);
+
+                // Clear field
+                this.clearField();
+
+                // Draw 5
+                this.drawCards(5);
+            },
+
+            // Render hand
+            renderHand() {
+                const handContainer = document.getElementById('hand-cards');
+                handContainer.innerHTML = '';
+
+                this.hand.forEach((card, index) => {
+                    const handCard = document.createElement('div');
+                    handCard.className = 'hand-card';
+                    handCard.draggable = true;
+                    handCard.dataset.cardId = card.cardId;
+                    handCard.dataset.handIndex = index;
+
+                    // Use image cache manager to get image
+                    const cacheKey = card.selectedCiid ? `${card.cardId}_${card.selectedCiid}` : `${card.cardId}_1`;
+                    imageCacheManager.fetchAndCache(cacheKey, card.cardId, card.selectedCiid || '1')
+                        .then(imageData => {
+                            handCard.innerHTML = `<img src="${imageData}" alt="${card.name}">`;
+                        })
+                        .catch(error => {
+                            console.error('Error loading card image:', error);
+                            handCard.innerHTML = `<div style="background: #ddd; width: 100%; height: 100%; display: flex; align-items: center; justify-content: center; font-size: 0.6rem; text-align: center; padding: 5px;">${card.name}</div>`;
+                        });
+
+                    // Drag events
+                    handCard.addEventListener('dragstart', (e) => {
+                        e.dataTransfer.setData('text/plain', JSON.stringify({ source: 'hand', index, card }));
+                        handCard.style.opacity = '0.5';
+                    });
+
+                    handCard.addEventListener('dragend', () => {
+                        handCard.style.opacity = '1';
+                    });
+
+                    handContainer.appendChild(handCard);
+                });
+            },
+
+            // Update deck counts
+            updateDeckCounts() {
+                document.getElementById('main-deck-count').textContent = this.mainDeck.length;
+                document.getElementById('extra-deck-count').textContent = this.extraDeck.length;
+                document.getElementById('grave-count').textContent = this.graveyard.length;
+                document.getElementById('banish-count').textContent = this.banished.length;
+            },
+
+            // Setup drag and drop for zones
+            setupDragAndDrop() {
+                const zones = document.querySelectorAll('.card-zone');
+
+                zones.forEach(zone => {
+                    zone.addEventListener('dragover', (e) => {
+                        e.preventDefault();
+                        zone.classList.add('drag-over');
+                    });
+
+                    zone.addEventListener('dragleave', () => {
+                        zone.classList.remove('drag-over');
+                    });
+
+                    zone.addEventListener('drop', (e) => {
+                        e.preventDefault();
+                        zone.classList.remove('drag-over');
+
+                        try {
+                            const data = JSON.parse(e.dataTransfer.getData('text/plain'));
+                            const zoneName = zone.dataset.zone;
+
+                            if (!zoneName) return;
+
+                            // Handle special zones
+                            if (zoneName === 'graveyard') {
+                                this.moveToGraveyard(data);
+                                return;
+                            }
+
+                            if (zoneName === 'banished') {
+                                this.moveToBanished(data);
+                                return;
+                            }
+
+                            // Place card in zone
+                            if (data.source === 'hand') {
+                                this.placeCardInZone(data.card, zoneName, data.index);
+                            }
+                        } catch (error) {
+                            console.error('Error handling drop:', error);
+                        }
+                    });
+                });
+
+                // Graveyard and Banished zone clicks to view
+                document.querySelector('[data-zone="graveyard"]').addEventListener('click', () => {
+                    if (this.graveyard.length > 0) {
+                        alert(`墓地: ${this.graveyard.map(c => c.name).join(', ')}`);
+                    }
+                });
+
+                document.querySelector('[data-zone="banished"]').addEventListener('click', () => {
+                    if (this.banished.length > 0) {
+                        alert(`除外: ${this.banished.map(c => c.name).join(', ')}`);
+                    }
+                });
+            },
+
+            // Place card in zone
+            placeCardInZone(card, zoneName, handIndex) {
+                // Remove from hand
+                if (handIndex !== undefined) {
+                    this.hand.splice(handIndex, 1);
+                    this.renderHand();
+                }
+
+                // Add to field
+                this.field[zoneName] = card;
+
+                // Render card in zone
+                const zone = document.querySelector(`[data-zone="${zoneName}"]`);
+                const cacheKey = card.selectedCiid ? `${card.cardId}_${card.selectedCiid}` : `${card.cardId}_1`;
+
+                imageCacheManager.fetchAndCache(cacheKey, card.cardId, card.selectedCiid || '1')
+                    .then(imageData => {
+                        const wrapper = document.createElement('div');
+                        wrapper.className = 'field-card-wrapper';
+                        wrapper.innerHTML = `
+                            <div class="card-controls">
+                                <button class="card-control-btn" onclick="duelSimulator.rotateCard('${zoneName}')">↻</button>
+                                <button class="card-control-btn" onclick="duelSimulator.removeCard('${zoneName}')">×</button>
+                            </div>
+                            <img src="${imageData}" class="field-card" alt="${card.name}">
+                        `;
+
+                        zone.innerHTML = '';
+                        zone.appendChild(wrapper);
+                        zone.classList.add('has-card');
+                    })
+                    .catch(error => {
+                        console.error('Error loading card image:', error);
+                        zone.innerHTML = `<div style="font-size: 0.7rem; color: white;">${card.name}</div>`;
+                        zone.classList.add('has-card');
+                    });
+            },
+
+            // Rotate card in zone
+            rotateCard(zoneName) {
+                const zone = document.querySelector(`[data-zone="${zoneName}"]`);
+                const wrapper = zone.querySelector('.field-card-wrapper');
+                if (wrapper) {
+                    wrapper.classList.toggle('rotated');
+                }
+            },
+
+            // Remove card from zone
+            removeCard(zoneName) {
+                const card = this.field[zoneName];
+                if (card) {
+                    this.hand.push(card);
+                    delete this.field[zoneName];
+
+                    const zone = document.querySelector(`[data-zone="${zoneName}"]`);
+                    zone.innerHTML = zone.querySelector('.zone-label')?.outerHTML || '';
+                    zone.classList.remove('has-card');
+
+                    this.renderHand();
+                }
+            },
+
+            // Move to graveyard
+            moveToGraveyard(data) {
+                if (data.source === 'hand') {
+                    const card = this.hand.splice(data.index, 1)[0];
+                    this.graveyard.push(card);
+                    this.renderHand();
+                    this.updateDeckCounts();
+                }
+            },
+
+            // Move to banished
+            moveToBanished(data) {
+                if (data.source === 'hand') {
+                    const card = this.hand.splice(data.index, 1)[0];
+                    this.banished.push(card);
+                    this.renderHand();
+                    this.updateDeckCounts();
+                }
+            },
+
+            // Initialize simulator
+            init() {
+                // Load deck button
+                document.getElementById('load-deck-btn').addEventListener('click', () => {
+                    this.loadDeck();
+                });
+
+                // Clear field button
+                document.getElementById('clear-field-btn').addEventListener('click', () => {
+                    if (confirm('フィールドをクリアしますか？')) {
+                        this.clearField();
+                    }
+                });
+
+                // Draw 1 button
+                document.getElementById('draw-1-btn').addEventListener('click', () => {
+                    this.drawCards(1);
+                });
+
+                // Reset and draw 5 button
+                document.getElementById('reset-draw-5-btn').addEventListener('click', () => {
+                    if (confirm('盤面をリセットして5枚ドローしますか？')) {
+                        this.resetAndDraw5();
+                    }
+                });
+
+                // Counter buttons
+                document.getElementById('counter-up').addEventListener('click', () => {
+                    this.counter++;
+                    document.getElementById('counter-number').textContent = this.counter;
+                });
+
+                document.getElementById('counter-down').addEventListener('click', () => {
+                    if (this.counter > 0) {
+                        this.counter--;
+                        document.getElementById('counter-number').textContent = this.counter;
+                    }
+                });
+
+                // Setup drag and drop
+                this.setupDragAndDrop();
+            }
+        };
+
+        // Initialize duel simulator when DOM is ready
+        if (document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', () => {
+                duelSimulator.init();
+            });
+        } else {
+            duelSimulator.init();
+        }
     </script>
 
     <!-- Context Menu -->
