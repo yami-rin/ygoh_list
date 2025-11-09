@@ -5610,7 +5610,14 @@
                                 this.placeCardInZone(data.card, zoneName, data.index);
                             } else if (data.source === 'field') {
                                 // Moving from another zone
+                                console.log(`[field drag] Moving from ${data.zoneName} to ${zoneName}`);
                                 this.placeCardInZone(data.card, zoneName, undefined, data.zoneName, data.cardIndex);
+
+                                // If moving from graveyard or banished, update mini-lists
+                                if (data.zoneName === 'graveyard' || data.zoneName === 'banished') {
+                                    console.log(`[field drag] Updating deck counts for ${data.zoneName}`);
+                                    this.updateDeckCounts();
+                                }
                             } else if (data.source === 'deck-viewer') {
                                 // Adding from deck viewer
                                 this.placeCardInZone(data.card, zoneName);
@@ -5753,6 +5760,28 @@
                 if (sourceZone && sourceIndex !== null) {
                     // Moving from another zone
                     this.field[sourceZone].splice(sourceIndex, 1);
+
+                    // If source is graveyard or banished, also remove from main arrays
+                    if (sourceZone === 'graveyard') {
+                        console.log(`[placeCardInZone] Removing from graveyard array: ${card.name}`);
+                        const mainIndex = this.graveyard.findIndex(c =>
+                            c.name === card.name && (c.selectedCiid || '1') === (card.selectedCiid || '1')
+                        );
+                        if (mainIndex !== -1) {
+                            this.graveyard.splice(mainIndex, 1);
+                            console.log(`[placeCardInZone] Removed from graveyard at index ${mainIndex}`);
+                        }
+                    } else if (sourceZone === 'banished') {
+                        console.log(`[placeCardInZone] Removing from banished array: ${card.name}`);
+                        const mainIndex = this.banished.findIndex(c =>
+                            c.name === card.name && (c.selectedCiid || '1') === (card.selectedCiid || '1')
+                        );
+                        if (mainIndex !== -1) {
+                            this.banished.splice(mainIndex, 1);
+                            console.log(`[placeCardInZone] Removed from banished at index ${mainIndex}`);
+                        }
+                    }
+
                     this.renderZone(sourceZone);
                 } else if (handIndex !== undefined) {
                     // Moving from hand
