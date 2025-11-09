@@ -1117,7 +1117,13 @@
         }
 
         .ex-monster-row > div {
-            min-height: 180px;
+            align-items: flex-start;
+        }
+
+        /* Make mini list areas align to top, not affecting row height */
+        .ex-monster-row > div > div:first-child,
+        .ex-monster-row > div > div:last-child {
+            align-self: flex-start;
         }
 
         .field-top-section {
