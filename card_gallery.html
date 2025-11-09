@@ -1202,6 +1202,11 @@
             border-color: rgba(239, 68, 68, 0.4);
         }
 
+        .pendulum-zone {
+            background: rgba(16, 185, 129, 0.1);
+            border-color: rgba(16, 185, 129, 0.4);
+        }
+
         .hand-zone {
             background: rgba(255, 255, 255, 0.05);
             border: 2px solid rgba(255, 255, 255, 0.2);
@@ -1877,18 +1882,32 @@
                         </div>
                     </div>
 
-                    <!-- Center: Monster Zones (5) -->
+                    <!-- Center: Monster Zones (5) with Pendulum Zones above 2 & 4 -->
                     <div style="flex: 1 1 0; min-width: 0;">
                         <div class="card-zone monster-zone" data-zone="monster-1"></div>
                     </div>
-                    <div style="flex: 1 1 0; min-width: 0;">
-                        <div class="card-zone monster-zone" data-zone="monster-2"></div>
+                    <div style="flex: 1 1 0; min-width: 0; display: flex; flex-direction: column; gap: 0;">
+                        <div style="flex: 1 1 0; min-height: 0;">
+                            <div class="card-zone pendulum-zone" data-zone="pendulum-left" style="height: 100%;">
+                                <div class="zone-label">P左</div>
+                            </div>
+                        </div>
+                        <div style="flex: 1 1 0; min-height: 0;">
+                            <div class="card-zone monster-zone" data-zone="monster-2" style="height: 100%;"></div>
+                        </div>
                     </div>
                     <div style="flex: 1 1 0; min-width: 0;">
                         <div class="card-zone monster-zone" data-zone="monster-3"></div>
                     </div>
-                    <div style="flex: 1 1 0; min-width: 0;">
-                        <div class="card-zone monster-zone" data-zone="monster-4"></div>
+                    <div style="flex: 1 1 0; min-width: 0; display: flex; flex-direction: column; gap: 0;">
+                        <div style="flex: 1 1 0; min-height: 0;">
+                            <div class="card-zone pendulum-zone" data-zone="pendulum-right" style="height: 100%;">
+                                <div class="zone-label">P右</div>
+                            </div>
+                        </div>
+                        <div style="flex: 1 1 0; min-height: 0;">
+                            <div class="card-zone monster-zone" data-zone="monster-4" style="height: 100%;"></div>
+                        </div>
                     </div>
                     <div style="flex: 1 1 0; min-width: 0;">
                         <div class="card-zone monster-zone" data-zone="monster-5"></div>
@@ -4877,6 +4896,7 @@
                 'field': [],
                 'monster-1': [], 'monster-2': [], 'monster-3': [], 'monster-4': [], 'monster-5': [],
                 'spell-trap-1': [], 'spell-trap-2': [], 'spell-trap-3': [], 'spell-trap-4': [], 'spell-trap-5': [],
+                'pendulum-left': [], 'pendulum-right': [],
                 'graveyard': [],
                 'banished': [],
                 'extra-deck': [],
@@ -5262,8 +5282,7 @@
                         const dragData = {
                             source: 'permanent-display',
                             displayType: source,
-                            index: index,
-                            card: card
+                            card: card  // Pass the card object directly
                         };
                         e.dataTransfer.setData('text/plain', JSON.stringify(dragData));
                         cardDiv.style.opacity = '0.5';
@@ -5275,7 +5294,7 @@
 
                     // Click to add to hand
                     cardDiv.addEventListener('click', () => {
-                        this.moveFromPermanentDisplayToHand(source, index);
+                        this.moveFromPermanentDisplayToHand(source, card);
                     });
 
                     container.appendChild(cardDiv);
@@ -5285,28 +5304,42 @@
             },
 
             // Move card from permanent display to hand
-            moveFromPermanentDisplayToHand(source, index) {
-                let card;
-                if (source === 'main-deck' && this.mainDeck[index]) {
-                    card = this.mainDeck.splice(index, 1)[0];
-                } else if (source === 'extra-deck' && this.extraDeck[index]) {
-                    card = this.extraDeck.splice(index, 1)[0];
-                } else if (source === 'graveyard' && this.graveyard[index]) {
-                    card = this.graveyard.splice(index, 1)[0];
-                    // Also remove from field.graveyard
-                    const fieldIndex = this.field.graveyard.findIndex(c => c === card);
-                    if (fieldIndex !== -1) this.field.graveyard.splice(fieldIndex, 1);
-                    this.renderZone('graveyard');
-                } else if (source === 'banished' && this.banished[index]) {
-                    card = this.banished.splice(index, 1)[0];
-                    // Also remove from field.banished
-                    const fieldIndex = this.field.banished.findIndex(c => c === card);
-                    if (fieldIndex !== -1) this.field.banished.splice(fieldIndex, 1);
-                    this.renderZone('banished');
+            moveFromPermanentDisplayToHand(source, targetCard) {
+                let removedCard;
+                let cardIndex;
+
+                if (source === 'main-deck') {
+                    cardIndex = this.mainDeck.findIndex(c => c === targetCard);
+                    if (cardIndex !== -1) {
+                        removedCard = this.mainDeck.splice(cardIndex, 1)[0];
+                    }
+                } else if (source === 'extra-deck') {
+                    cardIndex = this.extraDeck.findIndex(c => c === targetCard);
+                    if (cardIndex !== -1) {
+                        removedCard = this.extraDeck.splice(cardIndex, 1)[0];
+                    }
+                } else if (source === 'graveyard') {
+                    cardIndex = this.graveyard.findIndex(c => c === targetCard);
+                    if (cardIndex !== -1) {
+                        removedCard = this.graveyard.splice(cardIndex, 1)[0];
+                        // Also remove from field.graveyard
+                        const fieldIndex = this.field.graveyard.findIndex(c => c === targetCard);
+                        if (fieldIndex !== -1) this.field.graveyard.splice(fieldIndex, 1);
+                        this.renderZone('graveyard');
+                    }
+                } else if (source === 'banished') {
+                    cardIndex = this.banished.findIndex(c => c === targetCard);
+                    if (cardIndex !== -1) {
+                        removedCard = this.banished.splice(cardIndex, 1)[0];
+                        // Also remove from field.banished
+                        const fieldIndex = this.field.banished.findIndex(c => c === targetCard);
+                        if (fieldIndex !== -1) this.field.banished.splice(fieldIndex, 1);
+                        this.renderZone('banished');
+                    }
                 }
 
-                if (card) {
-                    this.hand.push(card);
+                if (removedCard) {
+                    this.hand.push(removedCard);
                     this.renderHand();
                     this.updateDeckCounts();
                 }
@@ -5357,23 +5390,40 @@
                                 // Adding from deck viewer
                                 this.placeCardInZone(data.card, zoneName);
                             } else if (data.source === 'permanent-display') {
-                                // Remove from permanent display source
-                                let card;
+                                // Remove from permanent display source using card object
+                                let removedCard;
+                                let cardIndex;
+
                                 if (data.displayType === 'main-deck') {
-                                    card = this.mainDeck.splice(data.index, 1)[0];
+                                    cardIndex = this.mainDeck.findIndex(c => c === data.card || (c.name === data.card.name && c.selectedCiid === data.card.selectedCiid));
+                                    if (cardIndex !== -1) {
+                                        removedCard = this.mainDeck.splice(cardIndex, 1)[0];
+                                    }
                                 } else if (data.displayType === 'extra-deck') {
-                                    card = this.extraDeck.splice(data.index, 1)[0];
+                                    cardIndex = this.extraDeck.findIndex(c => c === data.card || (c.name === data.card.name && c.selectedCiid === data.card.selectedCiid));
+                                    if (cardIndex !== -1) {
+                                        removedCard = this.extraDeck.splice(cardIndex, 1)[0];
+                                    }
                                 } else if (data.displayType === 'graveyard') {
-                                    card = this.graveyard.splice(data.index, 1)[0];
-                                    const fieldIndex = this.field.graveyard.findIndex(c => c === card);
-                                    if (fieldIndex !== -1) this.field.graveyard.splice(fieldIndex, 1);
+                                    cardIndex = this.graveyard.findIndex(c => c === data.card || (c.name === data.card.name && c.selectedCiid === data.card.selectedCiid));
+                                    if (cardIndex !== -1) {
+                                        removedCard = this.graveyard.splice(cardIndex, 1)[0];
+                                        const fieldIndex = this.field.graveyard.findIndex(c => c === removedCard || (c.name === removedCard.name && c.selectedCiid === removedCard.selectedCiid));
+                                        if (fieldIndex !== -1) this.field.graveyard.splice(fieldIndex, 1);
+                                        this.renderZone('graveyard');
+                                    }
                                 } else if (data.displayType === 'banished') {
-                                    card = this.banished.splice(data.index, 1)[0];
-                                    const fieldIndex = this.field.banished.findIndex(c => c === card);
-                                    if (fieldIndex !== -1) this.field.banished.splice(fieldIndex, 1);
+                                    cardIndex = this.banished.findIndex(c => c === data.card || (c.name === data.card.name && c.selectedCiid === data.card.selectedCiid));
+                                    if (cardIndex !== -1) {
+                                        removedCard = this.banished.splice(cardIndex, 1)[0];
+                                        const fieldIndex = this.field.banished.findIndex(c => c === removedCard || (c.name === removedCard.name && c.selectedCiid === removedCard.selectedCiid));
+                                        if (fieldIndex !== -1) this.field.banished.splice(fieldIndex, 1);
+                                        this.renderZone('banished');
+                                    }
                                 }
-                                if (card) {
-                                    this.placeCardInZone(card, zoneName);
+
+                                if (removedCard) {
+                                    this.placeCardInZone(removedCard, zoneName);
                                     this.updateDeckCounts();
                                 }
                             }
