@@ -1428,6 +1428,56 @@
             overflow: hidden;
             text-overflow: ellipsis;
         }
+
+        /* Permanent Cards Display Section */
+        .permanent-cards-section {
+            background: rgba(0, 0, 0, 0.3);
+            border-radius: 10px;
+            padding: 15px;
+        }
+
+        .permanent-card-area {
+            background: rgba(0, 0, 0, 0.4);
+            border-radius: 8px;
+            padding: 10px;
+            height: 100%;
+        }
+
+        .permanent-card-list {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 5px;
+            max-height: 300px;
+            overflow-y: auto;
+            padding: 5px;
+        }
+
+        .permanent-card-item {
+            width: 60px;
+            aspect-ratio: 421/614;
+            border-radius: 4px;
+            overflow: hidden;
+            cursor: grab;
+            transition: transform 0.2s ease;
+            position: relative;
+            border: 2px solid #ddd;
+        }
+
+        .permanent-card-item:hover {
+            transform: scale(1.1);
+            z-index: 10;
+            border-color: #667eea;
+        }
+
+        .permanent-card-item:active {
+            cursor: grabbing;
+        }
+
+        .permanent-card-item img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
     </style>
 </head>
 <body>
@@ -1937,6 +1987,51 @@
                             <button class="btn btn-sm btn-secondary w-100" id="reset-draw-5-btn">
                                 盤面リセット<br>& 5ドロー
                             </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Permanent Display Section for Decks, Graveyard, Banished -->
+            <div class="permanent-cards-section mt-3">
+                <div class="row g-2">
+                    <!-- Main Deck Display -->
+                    <div class="col-md-3">
+                        <div class="permanent-card-area">
+                            <h6 class="text-white mb-2"><i class="bi bi-stack"></i> メインデッキ (<span id="main-deck-display-count">0</span>)</h6>
+                            <div class="permanent-card-list" id="main-deck-display">
+                                <!-- Main deck cards will appear here -->
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Extra Deck Display -->
+                    <div class="col-md-3">
+                        <div class="permanent-card-area">
+                            <h6 class="text-white mb-2"><i class="bi bi-star"></i> EXデッキ (<span id="extra-deck-display-count">0</span>)</h6>
+                            <div class="permanent-card-list" id="extra-deck-display">
+                                <!-- Extra deck cards will appear here -->
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Graveyard Display -->
+                    <div class="col-md-3">
+                        <div class="permanent-card-area">
+                            <h6 class="text-white mb-2"><i class="bi bi-archive"></i> 墓地 (<span id="graveyard-display-count">0</span>)</h6>
+                            <div class="permanent-card-list" id="graveyard-display">
+                                <!-- Graveyard cards will appear here -->
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Banished Display -->
+                    <div class="col-md-3">
+                        <div class="permanent-card-area">
+                            <h6 class="text-white mb-2"><i class="bi bi-slash-circle"></i> 除外 (<span id="banished-display-count">0</span>)</h6>
+                            <div class="permanent-card-list" id="banished-display">
+                                <!-- Banished cards will appear here -->
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -5108,6 +5203,113 @@
                 if (extraDeckCount) extraDeckCount.textContent = this.extraDeck.length;
                 if (graveCount) graveCount.textContent = this.graveyard.length;
                 if (banishCount) banishCount.textContent = this.banished.length;
+
+                // Update permanent display counts
+                const mainDisplayCount = document.getElementById('main-deck-display-count');
+                const extraDisplayCount = document.getElementById('extra-deck-display-count');
+                const graveDisplayCount = document.getElementById('graveyard-display-count');
+                const banishDisplayCount = document.getElementById('banished-display-count');
+
+                if (mainDisplayCount) mainDisplayCount.textContent = this.mainDeck.length;
+                if (extraDisplayCount) extraDisplayCount.textContent = this.extraDeck.length;
+                if (graveDisplayCount) graveDisplayCount.textContent = this.graveyard.length;
+                if (banishDisplayCount) banishDisplayCount.textContent = this.banished.length;
+
+                // Render permanent displays
+                this.renderPermanentDisplay('main-deck', this.mainDeck);
+                this.renderPermanentDisplay('extra-deck', this.extraDeck);
+                this.renderPermanentDisplay('graveyard', this.graveyard);
+                this.renderPermanentDisplay('banished', this.banished);
+            },
+
+            // Render permanent display area
+            async renderPermanentDisplay(type, cards) {
+                const container = document.getElementById(`${type}-display`);
+                if (!container) return;
+
+                container.innerHTML = '';
+
+                for (let i = 0; i < cards.length; i++) {
+                    const card = cards[i];
+                    await this.addCardToPermanentDisplay(container, card, type, i);
+                }
+            },
+
+            // Add card to permanent display
+            async addCardToPermanentDisplay(container, card, source, index) {
+                const cardDetails = window.cardDetailsMap?.get(card.name);
+                if (!cardDetails || !cardDetails.cardId) {
+                    console.warn(`[addCardToPermanentDisplay] No card details found for:`, card.name);
+                    return;
+                }
+
+                const actualCardId = cardDetails.cardId;
+                const ciid = card.selectedCiid || '1';
+                const cacheKey = `${actualCardId}_${ciid}`;
+
+                try {
+                    const imageData = await imageCacheManager.fetchAndCache(cacheKey, actualCardId, ciid);
+
+                    const cardDiv = document.createElement('div');
+                    cardDiv.className = 'permanent-card-item';
+                    cardDiv.draggable = true;
+                    cardDiv.dataset.source = source;
+                    cardDiv.dataset.index = index;
+                    cardDiv.innerHTML = `<img src="${imageData}" alt="${card.name}">`;
+
+                    // Drag events
+                    cardDiv.addEventListener('dragstart', (e) => {
+                        const dragData = {
+                            source: 'permanent-display',
+                            displayType: source,
+                            index: index,
+                            card: card
+                        };
+                        e.dataTransfer.setData('text/plain', JSON.stringify(dragData));
+                        cardDiv.style.opacity = '0.5';
+                    });
+
+                    cardDiv.addEventListener('dragend', () => {
+                        cardDiv.style.opacity = '1';
+                    });
+
+                    // Click to add to hand
+                    cardDiv.addEventListener('click', () => {
+                        this.moveFromPermanentDisplayToHand(source, index);
+                    });
+
+                    container.appendChild(cardDiv);
+                } catch (error) {
+                    console.error('[addCardToPermanentDisplay] Error loading card image:', error, 'Card:', card.name);
+                }
+            },
+
+            // Move card from permanent display to hand
+            moveFromPermanentDisplayToHand(source, index) {
+                let card;
+                if (source === 'main-deck' && this.mainDeck[index]) {
+                    card = this.mainDeck.splice(index, 1)[0];
+                } else if (source === 'extra-deck' && this.extraDeck[index]) {
+                    card = this.extraDeck.splice(index, 1)[0];
+                } else if (source === 'graveyard' && this.graveyard[index]) {
+                    card = this.graveyard.splice(index, 1)[0];
+                    // Also remove from field.graveyard
+                    const fieldIndex = this.field.graveyard.findIndex(c => c === card);
+                    if (fieldIndex !== -1) this.field.graveyard.splice(fieldIndex, 1);
+                    this.renderZone('graveyard');
+                } else if (source === 'banished' && this.banished[index]) {
+                    card = this.banished.splice(index, 1)[0];
+                    // Also remove from field.banished
+                    const fieldIndex = this.field.banished.findIndex(c => c === card);
+                    if (fieldIndex !== -1) this.field.banished.splice(fieldIndex, 1);
+                    this.renderZone('banished');
+                }
+
+                if (card) {
+                    this.hand.push(card);
+                    this.renderHand();
+                    this.updateDeckCounts();
+                }
             },
 
             // Setup drag and drop for zones
@@ -5154,6 +5356,26 @@
                             } else if (data.source === 'deck-viewer') {
                                 // Adding from deck viewer
                                 this.placeCardInZone(data.card, zoneName);
+                            } else if (data.source === 'permanent-display') {
+                                // Remove from permanent display source
+                                let card;
+                                if (data.displayType === 'main-deck') {
+                                    card = this.mainDeck.splice(data.index, 1)[0];
+                                } else if (data.displayType === 'extra-deck') {
+                                    card = this.extraDeck.splice(data.index, 1)[0];
+                                } else if (data.displayType === 'graveyard') {
+                                    card = this.graveyard.splice(data.index, 1)[0];
+                                    const fieldIndex = this.field.graveyard.findIndex(c => c === card);
+                                    if (fieldIndex !== -1) this.field.graveyard.splice(fieldIndex, 1);
+                                } else if (data.displayType === 'banished') {
+                                    card = this.banished.splice(data.index, 1)[0];
+                                    const fieldIndex = this.field.banished.findIndex(c => c === card);
+                                    if (fieldIndex !== -1) this.field.banished.splice(fieldIndex, 1);
+                                }
+                                if (card) {
+                                    this.placeCardInZone(card, zoneName);
+                                    this.updateDeckCounts();
+                                }
                             }
                         } catch (error) {
                             console.error('Error handling drop:', error);
@@ -5235,12 +5457,9 @@
                     stackContainer.appendChild(countBadge);
                 }
 
-                // Render cards (show last 3 cards stacked)
-                const visibleCards = cards.slice(-3);
-                visibleCards.forEach((card, index) => {
-                    const cardIndex = cards.length - 3 + index;
-                    const actualIndex = cardIndex < 0 ? 0 : cardIndex;
-                    this.renderFieldCard(stackContainer, card, zoneName, actualIndex, index * 3);
+                // Render all cards with offset so bottom cards are visible
+                cards.forEach((card, index) => {
+                    this.renderFieldCard(stackContainer, card, zoneName, index, index * 20);
                 });
 
                 // Click to view all cards
