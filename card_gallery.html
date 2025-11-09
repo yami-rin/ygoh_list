@@ -5619,37 +5619,56 @@
                                 let removedCard;
                                 let cardIndex;
 
+                                console.log(`[permanent-display drop] displayType: ${data.displayType}, card: ${data.card.name}, ciid: ${data.card.selectedCiid}`);
+
                                 if (data.displayType === 'main-deck') {
-                                    cardIndex = this.mainDeck.findIndex(c => c === data.card || (c.name === data.card.name && c.selectedCiid === data.card.selectedCiid));
+                                    cardIndex = this.mainDeck.findIndex(c => c === data.card || (c.name === data.card.name && (c.selectedCiid || '1') === (data.card.selectedCiid || '1')));
                                     if (cardIndex !== -1) {
                                         removedCard = this.mainDeck.splice(cardIndex, 1)[0];
                                     }
                                 } else if (data.displayType === 'extra-deck') {
-                                    cardIndex = this.extraDeck.findIndex(c => c === data.card || (c.name === data.card.name && c.selectedCiid === data.card.selectedCiid));
+                                    cardIndex = this.extraDeck.findIndex(c => c === data.card || (c.name === data.card.name && (c.selectedCiid || '1') === (data.card.selectedCiid || '1')));
                                     if (cardIndex !== -1) {
                                         removedCard = this.extraDeck.splice(cardIndex, 1)[0];
                                     }
                                 } else if (data.displayType === 'graveyard') {
-                                    cardIndex = this.graveyard.findIndex(c => c === data.card || (c.name === data.card.name && c.selectedCiid === data.card.selectedCiid));
+                                    console.log(`[permanent-display drop] graveyard length before: ${this.graveyard.length}`);
+                                    cardIndex = this.graveyard.findIndex(c => c === data.card || (c.name === data.card.name && (c.selectedCiid || '1') === (data.card.selectedCiid || '1')));
+                                    console.log(`[permanent-display drop] found cardIndex: ${cardIndex}`);
                                     if (cardIndex !== -1) {
                                         removedCard = this.graveyard.splice(cardIndex, 1)[0];
-                                        const fieldIndex = this.field.graveyard.findIndex(c => c === removedCard || (c.name === removedCard.name && c.selectedCiid === removedCard.selectedCiid));
-                                        if (fieldIndex !== -1) this.field.graveyard.splice(fieldIndex, 1);
+                                        console.log(`[permanent-display drop] removed from graveyard: ${removedCard.name}`);
+                                        const fieldIndex = this.field.graveyard.findIndex(c => c === removedCard || (c.name === removedCard.name && (c.selectedCiid || '1') === (removedCard.selectedCiid || '1')));
+                                        if (fieldIndex !== -1) {
+                                            this.field.graveyard.splice(fieldIndex, 1);
+                                            console.log(`[permanent-display drop] removed from field.graveyard at index ${fieldIndex}`);
+                                        }
                                         this.renderZone('graveyard');
                                     }
+                                    console.log(`[permanent-display drop] graveyard length after: ${this.graveyard.length}`);
                                 } else if (data.displayType === 'banished') {
-                                    cardIndex = this.banished.findIndex(c => c === data.card || (c.name === data.card.name && c.selectedCiid === data.card.selectedCiid));
+                                    console.log(`[permanent-display drop] banished length before: ${this.banished.length}`);
+                                    cardIndex = this.banished.findIndex(c => c === data.card || (c.name === data.card.name && (c.selectedCiid || '1') === (data.card.selectedCiid || '1')));
+                                    console.log(`[permanent-display drop] found cardIndex: ${cardIndex}`);
                                     if (cardIndex !== -1) {
                                         removedCard = this.banished.splice(cardIndex, 1)[0];
-                                        const fieldIndex = this.field.banished.findIndex(c => c === removedCard || (c.name === removedCard.name && c.selectedCiid === removedCard.selectedCiid));
-                                        if (fieldIndex !== -1) this.field.banished.splice(fieldIndex, 1);
+                                        console.log(`[permanent-display drop] removed from banished: ${removedCard.name}`);
+                                        const fieldIndex = this.field.banished.findIndex(c => c === removedCard || (c.name === removedCard.name && (c.selectedCiid || '1') === (removedCard.selectedCiid || '1')));
+                                        if (fieldIndex !== -1) {
+                                            this.field.banished.splice(fieldIndex, 1);
+                                            console.log(`[permanent-display drop] removed from field.banished at index ${fieldIndex}`);
+                                        }
                                         this.renderZone('banished');
                                     }
+                                    console.log(`[permanent-display drop] banished length after: ${this.banished.length}`);
                                 }
 
                                 if (removedCard) {
+                                    console.log(`[permanent-display drop] calling placeCardInZone and updateDeckCounts`);
                                     this.placeCardInZone(removedCard, zoneName);
                                     this.updateDeckCounts();
+                                } else {
+                                    console.warn(`[permanent-display drop] No card was removed! displayType: ${data.displayType}, cardIndex: ${cardIndex}`);
                                 }
                             } else if (data.source === 'mini-list') {
                                 // Remove from mini list source (EX deck, graveyard, banished)
