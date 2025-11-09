@@ -1819,49 +1819,43 @@
 
             <!-- Top Section: Field, Monster Zones, Banished & Graveyard -->
             <div class="field-top-section">
-                <div class="row g-0">
+                <div style="display: flex; gap: 0;">
                     <!-- Left: Field -->
-                    <div class="col-2">
+                    <div style="flex: 1 1 0; min-width: 0;">
                         <div class="card-zone field-zone" data-zone="field">
                             <div class="zone-label">フィールド</div>
                         </div>
                     </div>
 
                     <!-- Center: Monster Zones (5) -->
-                    <div class="col-8">
-                        <div class="row g-0">
-                            <div class="col">
-                                <div class="card-zone monster-zone" data-zone="monster-1"></div>
-                            </div>
-                            <div class="col">
-                                <div class="card-zone monster-zone" data-zone="monster-2"></div>
-                            </div>
-                            <div class="col">
-                                <div class="card-zone monster-zone" data-zone="monster-3"></div>
-                            </div>
-                            <div class="col">
-                                <div class="card-zone monster-zone" data-zone="monster-4"></div>
-                            </div>
-                            <div class="col">
-                                <div class="card-zone monster-zone" data-zone="monster-5"></div>
-                            </div>
-                        </div>
+                    <div style="flex: 1 1 0; min-width: 0;">
+                        <div class="card-zone monster-zone" data-zone="monster-1"></div>
+                    </div>
+                    <div style="flex: 1 1 0; min-width: 0;">
+                        <div class="card-zone monster-zone" data-zone="monster-2"></div>
+                    </div>
+                    <div style="flex: 1 1 0; min-width: 0;">
+                        <div class="card-zone monster-zone" data-zone="monster-3"></div>
+                    </div>
+                    <div style="flex: 1 1 0; min-width: 0;">
+                        <div class="card-zone monster-zone" data-zone="monster-4"></div>
+                    </div>
+                    <div style="flex: 1 1 0; min-width: 0;">
+                        <div class="card-zone monster-zone" data-zone="monster-5"></div>
                     </div>
 
                     <!-- Right: Banished (top) & Graveyard (bottom) -->
-                    <div class="col-2">
-                        <div class="row g-0">
-                            <div class="col-12">
-                                <div class="card-zone banish-zone" data-zone="banished">
-                                    <div class="zone-label">除外</div>
-                                    <div class="zone-count" id="banish-count">0</div>
-                                </div>
+                    <div style="flex: 1 1 0; min-width: 0; display: flex; flex-direction: column; gap: 0;">
+                        <div style="flex: 1 1 0; min-height: 0;">
+                            <div class="card-zone banish-zone" data-zone="banished" style="height: 100%;">
+                                <div class="zone-label">除外</div>
+                                <div class="zone-count" id="banish-count">0</div>
                             </div>
-                            <div class="col-12">
-                                <div class="card-zone grave-zone" data-zone="graveyard">
-                                    <div class="zone-label">墓地</div>
-                                    <div class="zone-count" id="grave-count">0</div>
-                                </div>
+                        </div>
+                        <div style="flex: 1 1 0; min-height: 0;">
+                            <div class="card-zone grave-zone" data-zone="graveyard" style="height: 100%;">
+                                <div class="zone-label">墓地</div>
+                                <div class="zone-count" id="grave-count">0</div>
                             </div>
                         </div>
                     </div>
@@ -1870,9 +1864,9 @@
 
             <!-- Middle Section: EX Deck, Spell/Trap Zones, Main Deck -->
             <div class="field-middle-section">
-                <div class="row g-0">
+                <div style="display: flex; gap: 0;">
                     <!-- Left: Extra Deck -->
-                    <div class="col-2">
+                    <div style="flex: 1 1 0; min-width: 0;">
                         <div class="card-zone deck-zone" data-zone="extra-deck">
                             <div class="zone-label">EXデッキ</div>
                             <div class="zone-count" id="extra-deck-count">0</div>
@@ -1880,28 +1874,24 @@
                     </div>
 
                     <!-- Center: Spell/Trap Zones (5) -->
-                    <div class="col-8">
-                        <div class="row g-0">
-                            <div class="col">
-                                <div class="card-zone spell-trap-zone" data-zone="spell-trap-1"></div>
-                            </div>
-                            <div class="col">
-                                <div class="card-zone spell-trap-zone" data-zone="spell-trap-2"></div>
-                            </div>
-                            <div class="col">
-                                <div class="card-zone spell-trap-zone" data-zone="spell-trap-3"></div>
-                            </div>
-                            <div class="col">
-                                <div class="card-zone spell-trap-zone" data-zone="spell-trap-4"></div>
-                            </div>
-                            <div class="col">
-                                <div class="card-zone spell-trap-zone" data-zone="spell-trap-5"></div>
-                            </div>
-                        </div>
+                    <div style="flex: 1 1 0; min-width: 0;">
+                        <div class="card-zone spell-trap-zone" data-zone="spell-trap-1"></div>
+                    </div>
+                    <div style="flex: 1 1 0; min-width: 0;">
+                        <div class="card-zone spell-trap-zone" data-zone="spell-trap-2"></div>
+                    </div>
+                    <div style="flex: 1 1 0; min-width: 0;">
+                        <div class="card-zone spell-trap-zone" data-zone="spell-trap-3"></div>
+                    </div>
+                    <div style="flex: 1 1 0; min-width: 0;">
+                        <div class="card-zone spell-trap-zone" data-zone="spell-trap-4"></div>
+                    </div>
+                    <div style="flex: 1 1 0; min-width: 0;">
+                        <div class="card-zone spell-trap-zone" data-zone="spell-trap-5"></div>
                     </div>
 
                     <!-- Right: Main Deck -->
-                    <div class="col-2">
+                    <div style="flex: 1 1 0; min-width: 0;">
                         <div class="card-zone deck-zone" data-zone="main-deck">
                             <div class="zone-label">デッキ</div>
                             <div class="zone-count" id="main-deck-count">0</div>
@@ -4909,15 +4899,17 @@
 
                 // Get image from cache
                 const cacheKey = card.selectedCiid ? `${card.cardId}_${card.selectedCiid}` : `${card.cardId}_1`;
+                console.log(`[addCardToDeckViewer] Fetching image for:`, card.name, 'Cache key:', cacheKey);
 
                 try {
                     const imageData = await imageCacheManager.fetchAndCache(cacheKey, card.cardId, card.selectedCiid || '1');
+                    console.log(`[addCardToDeckViewer] Image loaded for:`, card.name, 'Data length:', imageData?.length);
                     cardDiv.innerHTML = `
                         <img src="${imageData}" alt="${card.name}">
                         <div class="card-name">${card.name}</div>
                     `;
                 } catch (error) {
-                    console.error('Error loading card image:', error);
+                    console.error('[addCardToDeckViewer] Error loading card image:', error, 'Card:', card.name);
                     cardDiv.innerHTML = `<div class="card-name">${card.name}</div>`;
                 }
 
@@ -4933,6 +4925,7 @@
 
                 // Click to add to hand
                 cardDiv.addEventListener('click', () => {
+                    console.log('[addCardToDeckViewer] Adding card to hand:', card.name);
                     this.hand.push(card);
                     this.renderHand();
                 });
@@ -5023,7 +5016,11 @@
                 const handContainer = document.getElementById('hand-cards');
                 handContainer.innerHTML = '';
 
+                console.log('[renderHand] Rendering hand with', this.hand.length, 'cards');
+
                 this.hand.forEach((card, index) => {
+                    console.log(`[renderHand] Processing card ${index}:`, card.name, 'ID:', card.cardId, 'CIID:', card.selectedCiid);
+
                     const handCard = document.createElement('div');
                     handCard.className = 'hand-card';
                     handCard.draggable = true;
@@ -5048,12 +5045,15 @@
 
                     // Then load image asynchronously
                     const cacheKey = card.selectedCiid ? `${card.cardId}_${card.selectedCiid}` : `${card.cardId}_1`;
+                    console.log(`[renderHand] Fetching image for cache key:`, cacheKey);
+
                     imageCacheManager.fetchAndCache(cacheKey, card.cardId, card.selectedCiid || '1')
                         .then(imageData => {
+                            console.log(`[renderHand] Image loaded successfully for:`, card.name, 'Data length:', imageData?.length);
                             handCard.innerHTML = `<img src="${imageData}" alt="${card.name}">`;
                         })
                         .catch(error => {
-                            console.error('Error loading card image:', error);
+                            console.error('[renderHand] Error loading card image:', error, 'Card:', card.name);
                             handCard.innerHTML = `<div style="background: #ddd; width: 100%; height: 100%; display: flex; align-items: center; justify-content: center; font-size: 0.6rem; text-align: center; padding: 5px;">${card.name}</div>`;
                         });
                 });
