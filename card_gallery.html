@@ -1116,6 +1116,10 @@
             margin-bottom: 0px;
         }
 
+        .ex-monster-row > div {
+            min-height: 180px;
+        }
+
         .field-top-section {
             margin-bottom: 0px;
         }
@@ -5340,16 +5344,38 @@
 
                     // Click to add to hand
                     cardDiv.addEventListener('click', () => {
-                        this.moveFromZoneToHand(source, index);
+                        // Find current index of this card object in the array
+                        let currentIndex = -1;
+                        if (source === 'extra-deck') {
+                            currentIndex = this.extraDeck.indexOf(card);
+                        } else if (source === 'graveyard') {
+                            currentIndex = this.graveyard.indexOf(card);
+                        } else if (source === 'banished') {
+                            currentIndex = this.banished.indexOf(card);
+                        }
+
+                        if (currentIndex !== -1) {
+                            this.moveFromZoneToHand(source, currentIndex);
+                        }
                     });
 
                     // Drag events
                     cardDiv.addEventListener('dragstart', (e) => {
+                        // Find current index of this card object in the array
+                        let currentIndex = -1;
+                        if (source === 'extra-deck') {
+                            currentIndex = this.extraDeck.indexOf(card);
+                        } else if (source === 'graveyard') {
+                            currentIndex = this.graveyard.indexOf(card);
+                        } else if (source === 'banished') {
+                            currentIndex = this.banished.indexOf(card);
+                        }
+
                         const dragData = {
                             source: 'mini-list',
                             zoneType: source,
                             card: card,
-                            index: index
+                            index: currentIndex
                         };
                         e.dataTransfer.setData('text/plain', JSON.stringify(dragData));
                         cardDiv.style.opacity = '0.5';
