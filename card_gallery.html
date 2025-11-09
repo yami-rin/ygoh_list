@@ -13,12 +13,136 @@
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
         }
 
+        /* Navigation bar */
+        .navbar-custom {
+            background: rgba(255, 255, 255, 0.98);
+            backdrop-filter: blur(10px);
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            padding: 0.75rem 0;
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+            transition: all 0.3s ease;
+        }
+
+        .navbar-custom.scrolled {
+            box-shadow: 0 4px 20px rgba(0,0,0,0.15);
+        }
+
+        .navbar-brand {
+            font-weight: 700;
+            font-size: 1.3rem;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .navbar-brand i {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            font-size: 1.5rem;
+        }
+
+        .nav-link-custom {
+            color: #2c3e50;
+            font-weight: 500;
+            padding: 0.5rem 1rem;
+            margin: 0 0.25rem;
+            border-radius: 8px;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .nav-link-custom:hover {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            transform: translateY(-2px);
+        }
+
+        .nav-link-custom.active {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            font-weight: 600;
+        }
+
+        .nav-link-custom i {
+            font-size: 1.1rem;
+        }
+
         .header-section {
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             color: white;
-            padding: 2rem 0;
+            padding: 3rem 0 2.5rem 0;
             margin-bottom: 2rem;
             box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .header-section::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1440 320"><path fill="rgba(255,255,255,0.1)" d="M0,96L48,112C96,128,192,160,288,160C384,160,480,128,576,122.7C672,117,768,139,864,138.7C960,139,1056,117,1152,101.3C1248,85,1344,75,1392,69.3L1440,64L1440,320L1392,320C1344,320,1248,320,1152,320C1056,320,960,320,864,320C768,320,672,320,576,320C480,320,384,320,288,320C192,320,96,320,48,320L0,320Z"></path></svg>');
+            background-size: cover;
+            background-position: bottom;
+            opacity: 0.3;
+            animation: wave 15s ease-in-out infinite;
+        }
+
+        @keyframes wave {
+            0%, 100% { transform: translateX(0); }
+            50% { transform: translateX(-50px); }
+        }
+
+        .header-section h1 {
+            position: relative;
+            z-index: 1;
+            font-size: 2.5rem;
+            font-weight: 800;
+            text-shadow: 0 2px 10px rgba(0,0,0,0.2);
+            margin-bottom: 0.5rem;
+            animation: fadeInDown 0.6s ease-out;
+        }
+
+        .header-subtitle {
+            position: relative;
+            z-index: 1;
+            font-size: 1.1rem;
+            opacity: 0.95;
+            font-weight: 300;
+            animation: fadeInUp 0.6s ease-out 0.2s both;
+        }
+
+        @keyframes fadeInDown {
+            from {
+                opacity: 0;
+                transform: translateY(-20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
         }
 
         .controls-bar {
@@ -707,11 +831,20 @@
 
         .deck-card-item {
             cursor: grab;
+            position: relative;
         }
 
         .deck-card-item.dragging {
             opacity: 0.5;
             cursor: grabbing;
+        }
+
+        .deck-card-item.drag-over-left {
+            border-left: 3px solid #667eea;
+        }
+
+        .deck-card-item.drag-over-right {
+            border-right: 3px solid #667eea;
         }
 
         /* Context menu */
@@ -947,12 +1080,56 @@
         </div>
     </div>
 
+    <!-- Navigation Bar -->
+    <nav class="navbar navbar-expand-lg navbar-custom">
+        <div class="container">
+            <a class="navbar-brand" href="index.html">
+                <i class="bi bi-layers-fill"></i>
+                Card Manager
+            </a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav ms-auto">
+                    <li class="nav-item">
+                        <a class="nav-link-custom" href="index.html">
+                            <i class="bi bi-house-door-fill"></i>
+                            ホーム
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link-custom" href="card_list.html">
+                            <i class="bi bi-list-ul"></i>
+                            カード管理
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link-custom active" href="card_gallery.html">
+                            <i class="bi bi-grid-3x3-gap-fill"></i>
+                            ギャラリー
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link-custom" href="battle_records.html">
+                            <i class="bi bi-trophy-fill"></i>
+                            対戦記録
+                        </a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
     <!-- Header -->
     <div class="header-section">
-        <div class="container">
-            <h1 class="mb-2">
-                <i class="bi bi-grid-3x3-gap"></i> カードギャラリー
+        <div class="container text-center">
+            <h1>
+                <i class="bi bi-grid-3x3-gap-fill"></i> カードギャラリー
             </h1>
+            <p class="header-subtitle">
+                <i class="bi bi-collection-fill"></i> あなたのコレクションを美しく表示
+            </p>
         </div>
     </div>
 
@@ -3364,16 +3541,74 @@
                     grid.querySelectorAll('.deck-card-item').forEach(cardItem => {
                         cardItem.addEventListener('dragstart', (e) => {
                             const cardIndex = parseInt(cardItem.dataset.cardIndex);
+                            const copyIndex = parseInt(cardItem.dataset.copyIndex);
                             const sourceDeckType = cardItem.dataset.deckType;
                             draggedDeckCard = {
                                 card: cards[cardIndex],
-                                sourceDeckType: sourceDeckType
+                                cardIndex: cardIndex,
+                                copyIndex: copyIndex,
+                                sourceDeckType: sourceDeckType,
+                                element: cardItem
                             };
                             cardItem.classList.add('dragging');
+                            e.dataTransfer.effectAllowed = 'move';
                         });
 
                         cardItem.addEventListener('dragend', (e) => {
                             cardItem.classList.remove('dragging');
+                        });
+
+                        // Reordering within same deck
+                        cardItem.addEventListener('dragover', (e) => {
+                            e.preventDefault();
+                            e.dataTransfer.dropEffect = 'move';
+
+                            if (draggedDeckCard && draggedDeckCard.sourceDeckType === deckType &&
+                                draggedDeckCard.element !== cardItem) {
+                                const rect = cardItem.getBoundingClientRect();
+                                const midpoint = rect.left + rect.width / 2;
+
+                                if (e.clientX < midpoint) {
+                                    cardItem.style.borderLeft = '3px solid #667eea';
+                                    cardItem.style.borderRight = '';
+                                } else {
+                                    cardItem.style.borderRight = '3px solid #667eea';
+                                    cardItem.style.borderLeft = '';
+                                }
+                            }
+                        });
+
+                        cardItem.addEventListener('dragleave', (e) => {
+                            cardItem.style.borderLeft = '';
+                            cardItem.style.borderRight = '';
+                        });
+
+                        cardItem.addEventListener('drop', async (e) => {
+                            e.preventDefault();
+                            cardItem.style.borderLeft = '';
+                            cardItem.style.borderRight = '';
+
+                            if (!draggedDeckCard || draggedDeckCard.sourceDeckType !== deckType) {
+                                return;
+                            }
+
+                            const targetCardIndex = parseInt(cardItem.dataset.cardIndex);
+                            const targetCopyIndex = parseInt(cardItem.dataset.copyIndex);
+
+                            // Calculate positions in the flat array
+                            const sourcePosition = cards.slice(0, draggedDeckCard.cardIndex).reduce((sum, c) => sum + c.quantity, 0) + draggedDeckCard.copyIndex;
+                            const targetPosition = cards.slice(0, targetCardIndex).reduce((sum, c) => sum + c.quantity, 0) + targetCopyIndex;
+
+                            if (sourcePosition === targetPosition) return;
+
+                            // Determine insert position based on mouse position
+                            const rect = cardItem.getBoundingClientRect();
+                            const midpoint = rect.left + rect.width / 2;
+                            const insertBefore = e.clientX < midpoint;
+                            const finalTargetPosition = insertBefore ? targetPosition : targetPosition + 1;
+
+                            // Reorder the cards
+                            await reorderDeckCards(deckType, sourcePosition, finalTargetPosition);
                         });
                     });
                 }
@@ -3383,6 +3618,94 @@
             await renderDeckSection('main', currentDeck.mainDeck || [], 'mainDeckCardsList', 'mainDeckCount');
             await renderDeckSection('extra', currentDeck.extraDeck || [], 'extraDeckCardsList', 'extraDeckCount');
             await renderDeckSection('side', currentDeck.sideDeck || [], 'sideDeckCardsList', 'sideDeckCount');
+        };
+
+        // Reorder cards within a deck
+        const reorderDeckCards = async (deckType, sourcePosition, targetPosition) => {
+            if (!currentDeck || sourcePosition === targetPosition) return;
+
+            const deckKey = deckType === 'main' ? 'mainDeck' :
+                          deckType === 'extra' ? 'extraDeck' : 'sideDeck';
+
+            const deck = currentDeck[deckKey] || [];
+
+            // Convert cards with quantities to flat array
+            const flatCards = [];
+            deck.forEach((card, cardIndex) => {
+                for (let i = 0; i < card.quantity; i++) {
+                    flatCards.push({
+                        ...card,
+                        originalCardIndex: cardIndex,
+                        copyIndex: i
+                    });
+                }
+            });
+
+            // Adjust target position if moving forward
+            const adjustedTargetPosition = sourcePosition < targetPosition ? targetPosition - 1 : targetPosition;
+
+            // Move the card
+            const [movedCard] = flatCards.splice(sourcePosition, 1);
+            flatCards.splice(adjustedTargetPosition, 0, movedCard);
+
+            // Rebuild deck array from flat cards
+            const newDeck = [];
+            const cardMap = new Map();
+
+            flatCards.forEach(flatCard => {
+                const key = flatCard.cardId;
+                if (!cardMap.has(key)) {
+                    cardMap.set(key, {
+                        cardId: flatCard.cardId,
+                        name: flatCard.name,
+                        code: flatCard.code,
+                        rarity: flatCard.rarity,
+                        selectedCiid: flatCard.selectedCiid,
+                        quantity: 0,
+                        positions: []
+                    });
+                }
+                const entry = cardMap.get(key);
+                entry.quantity++;
+                entry.positions.push(newDeck.length);
+            });
+
+            // Build final array maintaining new order
+            flatCards.forEach(flatCard => {
+                const existingIndex = newDeck.findIndex(c =>
+                    c.cardId === flatCard.cardId &&
+                    c.quantity < cardMap.get(flatCard.cardId).quantity
+                );
+
+                if (existingIndex === -1) {
+                    // Create new entry
+                    newDeck.push({
+                        cardId: flatCard.cardId,
+                        name: flatCard.name,
+                        code: flatCard.code,
+                        rarity: flatCard.rarity,
+                        selectedCiid: flatCard.selectedCiid,
+                        quantity: 1
+                    });
+                } else {
+                    // Increment quantity of existing entry
+                    newDeck[existingIndex].quantity++;
+                }
+            });
+
+            // Merge consecutive same cards
+            const mergedDeck = [];
+            for (let i = 0; i < newDeck.length; i++) {
+                if (mergedDeck.length > 0 &&
+                    mergedDeck[mergedDeck.length - 1].cardId === newDeck[i].cardId) {
+                    mergedDeck[mergedDeck.length - 1].quantity += newDeck[i].quantity;
+                } else {
+                    mergedDeck.push(newDeck[i]);
+                }
+            }
+
+            currentDeck[deckKey] = mergedDeck;
+            await renderDeckCards();
         };
 
         // Add card to deck
@@ -3688,6 +4011,19 @@
         };
 
         init();
+    </script>
+
+    <!-- Navbar Scroll Effect -->
+    <script>
+        // Add scroll effect to navbar
+        window.addEventListener('scroll', function() {
+            const navbar = document.querySelector('.navbar-custom');
+            if (window.scrollY > 50) {
+                navbar.classList.add('scrolled');
+            } else {
+                navbar.classList.remove('scrolled');
+            }
+        });
     </script>
 
     <!-- Context Menu -->
