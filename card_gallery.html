@@ -1401,53 +1401,6 @@
             }
         }
 
-        /* Deck Viewer Styles */
-        .deck-viewer-cards {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 5px;
-            margin-top: 10px;
-            max-height: 300px;
-            overflow-y: auto;
-        }
-
-        .deck-viewer-card {
-            width: 60px;
-            aspect-ratio: 421/614;
-            border-radius: 4px;
-            overflow: hidden;
-            cursor: pointer;
-            transition: transform 0.2s ease;
-            position: relative;
-            border: 2px solid #ddd;
-        }
-
-        .deck-viewer-card img {
-            width: 100%;
-            height: 100%;
-            object-fit: cover;
-        }
-
-        .deck-viewer-card:hover {
-            transform: scale(1.1);
-            z-index: 10;
-        }
-
-        .deck-viewer-card .card-name {
-            position: absolute;
-            bottom: 0;
-            left: 0;
-            right: 0;
-            background: rgba(0, 0, 0, 0.7);
-            color: white;
-            font-size: 0.6rem;
-            padding: 2px;
-            text-align: center;
-            white-space: nowrap;
-            overflow: hidden;
-            text-overflow: ellipsis;
-        }
-
         /* Permanent Cards Display Section */
         .permanent-cards-section {
             background: rgba(0, 0, 0, 0.3);
@@ -1857,35 +1810,6 @@
                     </div>
                 </div>
             </div>
-
-            <!-- Deck Viewer Section -->
-            <div class="deck-viewer-section mb-3" style="display: none;" id="deck-viewer-section">
-                <div class="bg-white p-3 rounded">
-                    <h6 class="mb-2">
-                        <i class="bi bi-box-seam"></i> デッキ内容
-                        <button class="btn btn-sm btn-outline-secondary float-end" id="toggle-deck-viewer">
-                            <i class="bi bi-chevron-up"></i> 閉じる
-                        </button>
-                    </h6>
-                    <div id="deck-viewer-content">
-                        <div class="row g-2">
-                            <div class="col-md-4">
-                                <strong>メインデッキ:</strong>
-                                <div class="deck-viewer-cards" id="main-deck-viewer"></div>
-                            </div>
-                            <div class="col-md-4">
-                                <strong>エクストラデッキ:</strong>
-                                <div class="deck-viewer-cards" id="extra-deck-viewer"></div>
-                            </div>
-                            <div class="col-md-4">
-                                <strong>サイドデッキ:</strong>
-                                <div class="deck-viewer-cards" id="side-deck-viewer"></div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
             <!-- EX Monster Zone Row -->
             <div class="ex-monster-row mb-0">
                 <div style="display: flex; gap: 0;">
@@ -2027,9 +1951,6 @@
                             </div>
                             <div class="counter-label">カウンター</div>
                         </div>
-                        <button class="btn btn-sm btn-info w-100" id="open-deck-viewer-btn">
-                            <i class="bi bi-box-seam"></i> デッキを見る
-                        </button>
                     </div>
 
                     <!-- Center: Hand Zone -->
@@ -5026,99 +4947,11 @@
                     // Clear field and hand (this calls updateDeckCounts internally)
                     this.clearField();
 
-                    // Render deck viewer
-                    this.renderDeckViewer(deckData);
-
                     alert(`デッキ「${deckData.name}」を読み込みました！`);
                 } catch (error) {
                     console.error('Error loading deck:', error);
                     alert('デッキの読み込みに失敗しました。');
                 }
-            },
-
-            // Render deck viewer
-            async renderDeckViewer(deckData) {
-                const mainDeckViewer = document.getElementById('main-deck-viewer');
-                const extraDeckViewer = document.getElementById('extra-deck-viewer');
-                const sideDeckViewer = document.getElementById('side-deck-viewer');
-
-                mainDeckViewer.innerHTML = '';
-                extraDeckViewer.innerHTML = '';
-                sideDeckViewer.innerHTML = '';
-
-                // Render main deck
-                for (const deckCard of (deckData.mainDeck || [])) {
-                    for (let i = 0; i < deckCard.quantity; i++) {
-                        await this.addCardToDeckViewer(mainDeckViewer, deckCard);
-                    }
-                }
-
-                // Render extra deck
-                for (const deckCard of (deckData.extraDeck || [])) {
-                    for (let i = 0; i < deckCard.quantity; i++) {
-                        await this.addCardToDeckViewer(extraDeckViewer, deckCard);
-                    }
-                }
-
-                // Render side deck
-                for (const deckCard of (deckData.sideDeck || [])) {
-                    for (let i = 0; i < deckCard.quantity; i++) {
-                        await this.addCardToDeckViewer(sideDeckViewer, deckCard);
-                    }
-                }
-            },
-
-            // Add card to deck viewer
-            async addCardToDeckViewer(container, card) {
-                const cardDiv = document.createElement('div');
-                cardDiv.className = 'deck-viewer-card';
-                cardDiv.draggable = true;
-                cardDiv.dataset.cardId = card.cardId;
-
-                // Get actual card ID from cardDetailsMap using card name
-                const cardDetails = window.cardDetailsMap?.get(card.name);
-                if (!cardDetails || !cardDetails.cardId) {
-                    console.warn(`[addCardToDeckViewer] No card details found for:`, card.name);
-                    cardDiv.innerHTML = `<div class="card-name">${card.name}</div>`;
-                    container.appendChild(cardDiv);
-                    return;
-                }
-
-                const actualCardId = cardDetails.cardId;
-                const ciid = card.selectedCiid || '1';
-                const cacheKey = `${actualCardId}_${ciid}`;
-                console.log(`[addCardToDeckViewer] Fetching image for:`, card.name, 'Actual card ID:', actualCardId, 'Cache key:', cacheKey);
-
-                try {
-                    const imageData = await imageCacheManager.fetchAndCache(cacheKey, actualCardId, ciid);
-                    console.log(`[addCardToDeckViewer] Image loaded for:`, card.name, 'Data length:', imageData?.length);
-                    cardDiv.innerHTML = `
-                        <img src="${imageData}" alt="${card.name}">
-                        <div class="card-name">${card.name}</div>
-                    `;
-                } catch (error) {
-                    console.error('[addCardToDeckViewer] Error loading card image:', error, 'Card:', card.name);
-                    cardDiv.innerHTML = `<div class="card-name">${card.name}</div>`;
-                }
-
-                // Drag event to add to hand
-                cardDiv.addEventListener('dragstart', (e) => {
-                    e.dataTransfer.setData('text/plain', JSON.stringify({ source: 'deck-viewer', card }));
-                    cardDiv.style.opacity = '0.5';
-                });
-
-                cardDiv.addEventListener('dragend', () => {
-                    cardDiv.style.opacity = '1';
-                });
-
-                // Click to add to hand
-                cardDiv.addEventListener('click', () => {
-                    console.log('[addCardToDeckViewer] Adding card to hand:', card.name);
-                    this.hand.push(card);
-                    this.renderHand();
-                });
-
-                container.appendChild(cardDiv);
             },
 
             // Expand deck cards by quantity
@@ -6102,21 +5935,6 @@
                         this.counter--;
                         document.getElementById('counter-number').textContent = this.counter;
                     }
-                });
-
-                // Open deck viewer button
-                document.getElementById('open-deck-viewer-btn').addEventListener('click', () => {
-                    const deckViewerSection = document.getElementById('deck-viewer-section');
-                    if (deckViewerSection.style.display === 'none') {
-                        deckViewerSection.style.display = 'block';
-                    } else {
-                        deckViewerSection.style.display = 'none';
-                    }
-                });
-
-                // Toggle deck viewer button
-                document.getElementById('toggle-deck-viewer').addEventListener('click', () => {
-                    document.getElementById('deck-viewer-section').style.display = 'none';
                 });
 
                 // Setup drag and drop
