@@ -4778,7 +4778,15 @@
             currentDeck: null,
             mainDeck: [],
             extraDeck: [],
-            field: {},
+            field: {
+                'field': [],
+                'monster-1': [], 'monster-2': [], 'monster-3': [], 'monster-4': [], 'monster-5': [],
+                'spell-trap-1': [], 'spell-trap-2': [], 'spell-trap-3': [], 'spell-trap-4': [], 'spell-trap-5': [],
+                'graveyard': [],
+                'banished': [],
+                'extra-deck': [],
+                'main-deck': []
+            },
             hand: [],
             graveyard: [],
             banished: [],
@@ -4984,13 +4992,16 @@
 
             // Clear field
             clearField() {
-                this.field = {};
+                // Clear all zone arrays
+                Object.keys(this.field).forEach(key => {
+                    this.field[key] = [];
+                });
                 this.hand = [];
                 this.graveyard = [];
                 this.banished = [];
                 this.counter = 1;
 
-                // Clear all card zones
+                // Clear all card zones visually
                 document.querySelectorAll('.card-zone').forEach(zone => {
                     const labelEl = zone.querySelector('.zone-label');
                     const countEl = zone.querySelector('.zone-count');
@@ -5123,7 +5134,7 @@
 
                             if (!zoneName) return;
 
-                            // Handle special zones
+                            // Handle special zones (graveyard and banished)
                             if (zoneName === 'graveyard') {
                                 this.moveToGraveyard(data);
                                 return;
@@ -5134,9 +5145,15 @@
                                 return;
                             }
 
-                            // Place card in zone
+                            // Place card in zone based on source
                             if (data.source === 'hand') {
                                 this.placeCardInZone(data.card, zoneName, data.index);
+                            } else if (data.source === 'field') {
+                                // Moving from another zone
+                                this.placeCardInZone(data.card, zoneName, undefined, data.zoneName, data.cardIndex);
+                            } else if (data.source === 'deck-viewer') {
+                                // Adding from deck viewer
+                                this.placeCardInZone(data.card, zoneName);
                             }
                         } catch (error) {
                             console.error('Error handling drop:', error);
@@ -5159,102 +5176,224 @@
             },
 
             // Place card in zone
-            placeCardInZone(card, zoneName, handIndex) {
-                // Remove from hand
-                if (handIndex !== undefined) {
+            placeCardInZone(card, zoneName, handIndex, sourceZone = null, sourceIndex = null) {
+                // Remove from source
+                if (sourceZone && sourceIndex !== null) {
+                    // Moving from another zone
+                    this.field[sourceZone].splice(sourceIndex, 1);
+                    this.renderZone(sourceZone);
+                } else if (handIndex !== undefined) {
+                    // Moving from hand
                     this.hand.splice(handIndex, 1);
                     this.renderHand();
                 }
 
-                // Add to field
-                this.field[zoneName] = card;
+                // Add to target zone
+                if (!this.field[zoneName]) {
+                    this.field[zoneName] = [];
+                }
+                this.field[zoneName].push(card);
 
-                // Get actual card ID from cardDetailsMap using card name
-                const cardDetails = window.cardDetailsMap?.get(card.name);
-                if (!cardDetails || !cardDetails.cardId) {
-                    console.warn(`[placeCardInZone] No card details found for:`, card.name);
-                    const zone = document.querySelector(`[data-zone="${zoneName}"]`);
-                    zone.innerHTML = `<div style="font-size: 0.7rem; color: white;">${card.name}</div>`;
-                    zone.classList.add('has-card');
+                // Render the zone with all cards
+                this.renderZone(zoneName);
+            },
+
+            // Render all cards in a zone (stacked display)
+            renderZone(zoneName) {
+                const zone = document.querySelector(`[data-zone="${zoneName}"]`);
+                if (!zone) return;
+
+                const cards = this.field[zoneName] || [];
+
+                // Preserve labels and counts
+                const labelEl = zone.querySelector('.zone-label');
+                const countEl = zone.querySelector('.zone-count');
+
+                // Clear zone
+                zone.innerHTML = '';
+                if (labelEl) zone.appendChild(labelEl.cloneNode(true));
+                if (countEl) zone.appendChild(countEl.cloneNode(true));
+
+                if (cards.length === 0) {
+                    zone.classList.remove('has-card');
                     return;
                 }
 
-                // Render card in zone
-                const zone = document.querySelector(`[data-zone="${zoneName}"]`);
+                zone.classList.add('has-card');
+
+                // Create container for stacked cards
+                const stackContainer = document.createElement('div');
+                stackContainer.className = 'card-stack-container';
+                stackContainer.style.cssText = 'position: relative; width: 100%; height: 100%;';
+
+                // Show card count badge if multiple cards
+                if (cards.length > 1) {
+                    const countBadge = document.createElement('div');
+                    countBadge.className = 'stack-count-badge';
+                    countBadge.textContent = cards.length;
+                    countBadge.style.cssText = 'position: absolute; top: 5px; right: 5px; background: rgba(0, 0, 0, 0.8); color: white; padding: 2px 8px; border-radius: 12px; font-size: 0.75rem; font-weight: bold; z-index: 100;';
+                    stackContainer.appendChild(countBadge);
+                }
+
+                // Render cards (show last 3 cards stacked)
+                const visibleCards = cards.slice(-3);
+                visibleCards.forEach((card, index) => {
+                    const cardIndex = cards.length - 3 + index;
+                    const actualIndex = cardIndex < 0 ? 0 : cardIndex;
+                    this.renderFieldCard(stackContainer, card, zoneName, actualIndex, index * 3);
+                });
+
+                // Click to view all cards
+                if (cards.length > 1) {
+                    stackContainer.style.cursor = 'pointer';
+                    stackContainer.addEventListener('click', (e) => {
+                        if (!e.target.closest('.card-control-btn')) {
+                            this.showZoneCards(zoneName);
+                        }
+                    });
+                }
+
+                zone.appendChild(stackContainer);
+            },
+
+            // Render individual field card
+            async renderFieldCard(container, card, zoneName, cardIndex, offsetY = 0) {
+                const cardDetails = window.cardDetailsMap?.get(card.name);
+                if (!cardDetails || !cardDetails.cardId) {
+                    console.warn(`[renderFieldCard] No card details found for:`, card.name);
+                    return;
+                }
+
                 const actualCardId = cardDetails.cardId;
                 const ciid = card.selectedCiid || '1';
                 const cacheKey = `${actualCardId}_${ciid}`;
 
-                console.log(`[placeCardInZone] Placing card:`, card.name, 'Actual card ID:', actualCardId, 'in zone:', zoneName);
+                try {
+                    const imageData = await imageCacheManager.fetchAndCache(cacheKey, actualCardId, ciid);
 
-                imageCacheManager.fetchAndCache(cacheKey, actualCardId, ciid)
-                    .then(imageData => {
-                        const wrapper = document.createElement('div');
-                        wrapper.className = 'field-card-wrapper';
-                        wrapper.innerHTML = `
-                            <div class="card-controls">
-                                <button class="card-control-btn" onclick="duelSimulator.rotateCard('${zoneName}')">↻</button>
-                                <button class="card-control-btn" onclick="duelSimulator.removeCard('${zoneName}')">×</button>
-                            </div>
-                            <img src="${imageData}" class="field-card" alt="${card.name}">
-                        `;
+                    const wrapper = document.createElement('div');
+                    wrapper.className = 'field-card-wrapper' + (card.rotated ? ' rotated' : '');
+                    wrapper.style.cssText = `position: absolute; width: 100%; height: 100%; top: ${offsetY}px; left: 0;`;
+                    wrapper.draggable = true;
+                    wrapper.dataset.zoneName = zoneName;
+                    wrapper.dataset.cardIndex = cardIndex;
 
-                        zone.innerHTML = '';
-                        zone.appendChild(wrapper);
-                        zone.classList.add('has-card');
-                    })
-                    .catch(error => {
-                        console.error('[placeCardInZone] Error loading card image:', error, 'Card:', card.name);
-                        zone.innerHTML = `<div style="font-size: 0.7rem; color: white;">${card.name}</div>`;
-                        zone.classList.add('has-card');
+                    wrapper.innerHTML = `
+                        <div class="card-controls">
+                            <button class="card-control-btn" onclick="duelSimulator.rotateCard('${zoneName}', ${cardIndex}); event.stopPropagation();">↻</button>
+                            <button class="card-control-btn" onclick="duelSimulator.removeCardFromZone('${zoneName}', ${cardIndex}); event.stopPropagation();">×</button>
+                        </div>
+                        <img src="${imageData}" class="field-card" alt="${card.name}" draggable="false">
+                    `;
+
+                    // Add drag events
+                    wrapper.addEventListener('dragstart', (e) => {
+                        e.stopPropagation();
+                        const dragData = {
+                            source: 'field',
+                            zoneName: zoneName,
+                            cardIndex: cardIndex,
+                            card: card
+                        };
+                        e.dataTransfer.setData('text/plain', JSON.stringify(dragData));
+                        wrapper.style.opacity = '0.5';
                     });
+
+                    wrapper.addEventListener('dragend', () => {
+                        wrapper.style.opacity = '1';
+                    });
+
+                    container.appendChild(wrapper);
+                } catch (error) {
+                    console.error('[renderFieldCard] Error loading card image:', error, 'Card:', card.name);
+                }
+            },
+
+            // Show all cards in a zone (modal)
+            showZoneCards(zoneName) {
+                const cards = this.field[zoneName] || [];
+                if (cards.length === 0) return;
+
+                const cardNames = cards.map((c, i) => `${i + 1}. ${c.name}`).join('\n');
+                alert(`${zoneName}のカード (${cards.length}枚):\n\n${cardNames}`);
             },
 
             // Rotate card in zone
-            rotateCard(zoneName) {
-                const zone = document.querySelector(`[data-zone="${zoneName}"]`);
-                const wrapper = zone.querySelector('.field-card-wrapper');
-                if (wrapper) {
-                    wrapper.classList.toggle('rotated');
-                }
+            rotateCard(zoneName, cardIndex) {
+                const cards = this.field[zoneName];
+                if (!cards || !cards[cardIndex]) return;
+
+                // Toggle rotation state on card object
+                cards[cardIndex].rotated = !cards[cardIndex].rotated;
+
+                // Re-render zone to apply rotation
+                this.renderZone(zoneName);
             },
 
-            // Remove card from zone
+            // Remove specific card from zone (move to hand)
+            removeCardFromZone(zoneName, cardIndex) {
+                const cards = this.field[zoneName];
+                if (!cards || !cards[cardIndex]) return;
+
+                const card = cards.splice(cardIndex, 1)[0];
+                this.hand.push(card);
+
+                this.renderZone(zoneName);
+                this.renderHand();
+            },
+
+            // Legacy remove card function (removes last card from zone)
             removeCard(zoneName) {
-                const card = this.field[zoneName];
-                if (card) {
-                    this.hand.push(card);
-                    delete this.field[zoneName];
+                const cards = this.field[zoneName];
+                if (!cards || cards.length === 0) return;
 
-                    const zone = document.querySelector(`[data-zone="${zoneName}"]`);
-                    const labelEl = zone.querySelector('.zone-label');
-                    const countEl = zone.querySelector('.zone-count');
+                const card = cards.pop();
+                this.hand.push(card);
 
-                    zone.innerHTML = '';
-                    if (labelEl) zone.appendChild(labelEl.cloneNode(true));
-                    if (countEl) zone.appendChild(countEl.cloneNode(true));
-                    zone.classList.remove('has-card');
-
-                    this.renderHand();
-                }
+                this.renderZone(zoneName);
+                this.renderHand();
             },
 
             // Move to graveyard
             moveToGraveyard(data) {
+                let card;
                 if (data.source === 'hand') {
-                    const card = this.hand.splice(data.index, 1)[0];
-                    this.graveyard.push(card);
+                    card = this.hand.splice(data.index, 1)[0];
                     this.renderHand();
+                } else if (data.source === 'field') {
+                    const cards = this.field[data.zoneName];
+                    if (cards && cards[data.cardIndex]) {
+                        card = cards.splice(data.cardIndex, 1)[0];
+                        this.renderZone(data.zoneName);
+                    }
+                }
+
+                if (card) {
+                    this.graveyard.push(card);
+                    this.field.graveyard.push(card);
+                    this.renderZone('graveyard');
                     this.updateDeckCounts();
                 }
             },
 
             // Move to banished
             moveToBanished(data) {
+                let card;
                 if (data.source === 'hand') {
-                    const card = this.hand.splice(data.index, 1)[0];
-                    this.banished.push(card);
+                    card = this.hand.splice(data.index, 1)[0];
                     this.renderHand();
+                } else if (data.source === 'field') {
+                    const cards = this.field[data.zoneName];
+                    if (cards && cards[data.cardIndex]) {
+                        card = cards.splice(data.cardIndex, 1)[0];
+                        this.renderZone(data.zoneName);
+                    }
+                }
+
+                if (card) {
+                    this.banished.push(card);
+                    this.field.banished.push(card);
+                    this.renderZone('banished');
                     this.updateDeckCounts();
                 }
             },
