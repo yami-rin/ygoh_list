@@ -1202,9 +1202,9 @@
             border-color: rgba(239, 68, 68, 0.4);
         }
 
-        .pendulum-zone {
-            background: rgba(16, 185, 129, 0.1);
-            border-color: rgba(16, 185, 129, 0.4);
+        .ex-monster-zone {
+            background: rgba(168, 85, 247, 0.1);
+            border-color: rgba(168, 85, 247, 0.4);
         }
 
         .hand-zone {
@@ -1882,14 +1882,14 @@
                         </div>
                     </div>
 
-                    <!-- Center: Monster Zones (5) with Pendulum Zones above 2 & 4 -->
+                    <!-- Center: Monster Zones (5) with EX Monster Zones above 2 & 4 -->
                     <div style="flex: 1 1 0; min-width: 0;">
                         <div class="card-zone monster-zone" data-zone="monster-1"></div>
                     </div>
                     <div style="flex: 1 1 0; min-width: 0; display: flex; flex-direction: column; gap: 0;">
                         <div style="flex: 1 1 0; min-height: 0;">
-                            <div class="card-zone pendulum-zone" data-zone="pendulum-left" style="height: 100%;">
-                                <div class="zone-label">P左</div>
+                            <div class="card-zone ex-monster-zone" data-zone="ex-monster-left" style="height: 100%;">
+                                <div class="zone-label">EX左</div>
                             </div>
                         </div>
                         <div style="flex: 1 1 0; min-height: 0;">
@@ -1901,8 +1901,8 @@
                     </div>
                     <div style="flex: 1 1 0; min-width: 0; display: flex; flex-direction: column; gap: 0;">
                         <div style="flex: 1 1 0; min-height: 0;">
-                            <div class="card-zone pendulum-zone" data-zone="pendulum-right" style="height: 100%;">
-                                <div class="zone-label">P右</div>
+                            <div class="card-zone ex-monster-zone" data-zone="ex-monster-right" style="height: 100%;">
+                                <div class="zone-label">EX右</div>
                             </div>
                         </div>
                         <div style="flex: 1 1 0; min-height: 0;">
@@ -4895,8 +4895,8 @@
             field: {
                 'field': [],
                 'monster-1': [], 'monster-2': [], 'monster-3': [], 'monster-4': [], 'monster-5': [],
+                'ex-monster-left': [], 'ex-monster-right': [],
                 'spell-trap-1': [], 'spell-trap-2': [], 'spell-trap-3': [], 'spell-trap-4': [], 'spell-trap-5': [],
-                'pendulum-left': [], 'pendulum-right': [],
                 'graveyard': [],
                 'banished': [],
                 'extra-deck': [],
