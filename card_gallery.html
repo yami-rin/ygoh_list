@@ -5559,7 +5559,7 @@
 
                             if (!zoneName) return;
 
-                            // Handle special zones (graveyard and banished)
+                            // Handle special zones (graveyard, banished, extra-deck)
                             if (zoneName === 'graveyard') {
                                 this.moveToGraveyard(data);
                                 return;
@@ -5567,6 +5567,11 @@
 
                             if (zoneName === 'banished') {
                                 this.moveToBanished(data);
+                                return;
+                            }
+
+                            if (zoneName === 'extra-deck') {
+                                this.moveToExtraDeck(data);
                                 return;
                             }
 
@@ -5893,6 +5898,69 @@
                     this.banished.push(card);
                     this.field.banished.push(card);
                     this.renderZone('banished');
+                    this.updateDeckCounts();
+                }
+            },
+
+            // Move to extra deck
+            moveToExtraDeck(data) {
+                let card;
+                if (data.source === 'hand') {
+                    card = this.hand.splice(data.index, 1)[0];
+                    this.renderHand();
+                } else if (data.source === 'field') {
+                    const cards = this.field[data.zoneName];
+                    if (cards && cards[data.cardIndex]) {
+                        card = cards.splice(data.cardIndex, 1)[0];
+                        this.renderZone(data.zoneName);
+                    }
+                } else if (data.source === 'permanent-display') {
+                    // Handle from permanent display (graveyard, banished, main deck)
+                    if (data.displayType === 'graveyard') {
+                        const cardIndex = this.graveyard.findIndex(c => c === data.card || (c.name === data.card.name && c.selectedCiid === data.card.selectedCiid));
+                        if (cardIndex !== -1) {
+                            card = this.graveyard.splice(cardIndex, 1)[0];
+                            const fieldIndex = this.field.graveyard.findIndex(c => c === card);
+                            if (fieldIndex !== -1) this.field.graveyard.splice(fieldIndex, 1);
+                            this.renderZone('graveyard');
+                        }
+                    } else if (data.displayType === 'banished') {
+                        const cardIndex = this.banished.findIndex(c => c === data.card || (c.name === data.card.name && c.selectedCiid === data.card.selectedCiid));
+                        if (cardIndex !== -1) {
+                            card = this.banished.splice(cardIndex, 1)[0];
+                            const fieldIndex = this.field.banished.findIndex(c => c === card);
+                            if (fieldIndex !== -1) this.field.banished.splice(fieldIndex, 1);
+                            this.renderZone('banished');
+                        }
+                    } else if (data.displayType === 'main-deck') {
+                        const cardIndex = this.mainDeck.findIndex(c => c === data.card || (c.name === data.card.name && c.selectedCiid === data.card.selectedCiid));
+                        if (cardIndex !== -1) {
+                            card = this.mainDeck.splice(cardIndex, 1)[0];
+                        }
+                    }
+                } else if (data.source === 'mini-list') {
+                    // Handle from mini lists
+                    if (data.zoneType === 'graveyard') {
+                        if (data.index < this.graveyard.length) {
+                            card = this.graveyard.splice(data.index, 1)[0];
+                            const fieldIndex = this.field.graveyard.indexOf(card);
+                            if (fieldIndex !== -1) this.field.graveyard.splice(fieldIndex, 1);
+                            this.renderZone('graveyard');
+                        }
+                    } else if (data.zoneType === 'banished') {
+                        if (data.index < this.banished.length) {
+                            card = this.banished.splice(data.index, 1)[0];
+                            const fieldIndex = this.field.banished.indexOf(card);
+                            if (fieldIndex !== -1) this.field.banished.splice(fieldIndex, 1);
+                            this.renderZone('banished');
+                        }
+                    }
+                }
+
+                if (card) {
+                    this.extraDeck.push(card);
+                    this.field['extra-deck'].push(card);
+                    this.renderZone('extra-deck');
                     this.updateDeckCounts();
                 }
             },
