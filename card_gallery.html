@@ -1880,12 +1880,12 @@
             <div class="ex-monster-row mb-0">
                 <div style="display: flex; gap: 0;">
                     <!-- Left: EX Deck List -->
-                    <div style="flex: 2 1 0; min-width: 0; padding: 5px;">
-                        <div class="zone-mini-list" style="background: rgba(168, 85, 247, 0.05); border: 1px solid rgba(168, 85, 247, 0.3); border-radius: 5px; padding: 5px; height: 100%; overflow-y: auto; max-height: 150px;">
-                            <div style="font-size: 0.7rem; font-weight: bold; color: #a855f7; margin-bottom: 3px; text-align: center;">
+                    <div style="flex: 3 1 0; min-width: 0; padding: 5px;">
+                        <div class="zone-mini-list" style="background: rgba(168, 85, 247, 0.05); border: 1px solid rgba(168, 85, 247, 0.3); border-radius: 5px; padding: 8px; height: 100%; overflow-y: auto; max-height: 200px;">
+                            <div style="font-size: 0.8rem; font-weight: bold; color: #a855f7; margin-bottom: 5px; text-align: center;">
                                 EXデッキ (<span id="ex-list-count">0</span>)
                             </div>
-                            <div id="ex-deck-mini-list" class="mini-card-list" style="display: flex; flex-wrap: wrap; gap: 2px; justify-content: center;"></div>
+                            <div id="ex-deck-mini-list" class="mini-card-list" style="display: flex; flex-wrap: wrap; gap: 3px; justify-content: center;"></div>
                         </div>
                     </div>
                     <!-- EX Monster Left (above monster-2) -->
@@ -1902,20 +1902,20 @@
                         </div>
                     </div>
                     <!-- Right: Graveyard & Banished Lists -->
-                    <div style="flex: 2 1 0; min-width: 0; padding: 5px; display: flex; flex-direction: column; gap: 5px;">
+                    <div style="flex: 3 1 0; min-width: 0; padding: 5px; display: flex; flex-direction: column; gap: 5px;">
                         <!-- Graveyard List -->
-                        <div class="zone-mini-list" style="background: rgba(139, 92, 246, 0.05); border: 1px solid rgba(139, 92, 246, 0.3); border-radius: 5px; padding: 5px; flex: 1; overflow-y: auto; max-height: 70px;">
-                            <div style="font-size: 0.7rem; font-weight: bold; color: #8b5cf6; margin-bottom: 3px; text-align: center;">
+                        <div class="zone-mini-list" style="background: rgba(139, 92, 246, 0.05); border: 1px solid rgba(139, 92, 246, 0.3); border-radius: 5px; padding: 6px; flex: 1; overflow-y: auto; max-height: 95px;">
+                            <div style="font-size: 0.75rem; font-weight: bold; color: #8b5cf6; margin-bottom: 4px; text-align: center;">
                                 墓地 (<span id="grave-list-count">0</span>)
                             </div>
-                            <div id="graveyard-mini-list" class="mini-card-list" style="display: flex; flex-wrap: wrap; gap: 2px; justify-content: center;"></div>
+                            <div id="graveyard-mini-list" class="mini-card-list" style="display: flex; flex-wrap: wrap; gap: 3px; justify-content: center;"></div>
                         </div>
                         <!-- Banished List -->
-                        <div class="zone-mini-list" style="background: rgba(234, 88, 12, 0.05); border: 1px solid rgba(234, 88, 12, 0.3); border-radius: 5px; padding: 5px; flex: 1; overflow-y: auto; max-height: 70px;">
-                            <div style="font-size: 0.7rem; font-weight: bold; color: #ea580c; margin-bottom: 3px; text-align: center;">
+                        <div class="zone-mini-list" style="background: rgba(234, 88, 12, 0.05); border: 1px solid rgba(234, 88, 12, 0.3); border-radius: 5px; padding: 6px; flex: 1; overflow-y: auto; max-height: 95px;">
+                            <div style="font-size: 0.75rem; font-weight: bold; color: #ea580c; margin-bottom: 4px; text-align: center;">
                                 除外 (<span id="banish-list-count">0</span>)
                             </div>
-                            <div id="banished-mini-list" class="mini-card-list" style="display: flex; flex-wrap: wrap; gap: 2px; justify-content: center;"></div>
+                            <div id="banished-mini-list" class="mini-card-list" style="display: flex; flex-wrap: wrap; gap: 3px; justify-content: center;"></div>
                         </div>
                     </div>
                 </div>
@@ -5325,7 +5325,7 @@
                     const cardDiv = document.createElement('div');
                     cardDiv.className = 'mini-card-item';
                     cardDiv.draggable = true;
-                    cardDiv.style.cssText = 'width: 30px; height: 44px; border-radius: 2px; overflow: hidden; cursor: pointer; transition: transform 0.2s; border: 1px solid rgba(0,0,0,0.1);';
+                    cardDiv.style.cssText = 'width: 35px; height: 51px; border-radius: 2px; overflow: hidden; cursor: pointer; transition: transform 0.2s; border: 1px solid rgba(0,0,0,0.1);';
                     cardDiv.innerHTML = `<img src="${imageData}" alt="${card.name}" style="width: 100%; height: 100%; object-fit: cover;" draggable="false">`;
 
                     // Hover effect
@@ -5582,6 +5582,40 @@
                                         removedCard = this.banished.splice(cardIndex, 1)[0];
                                         const fieldIndex = this.field.banished.findIndex(c => c === removedCard || (c.name === removedCard.name && c.selectedCiid === removedCard.selectedCiid));
                                         if (fieldIndex !== -1) this.field.banished.splice(fieldIndex, 1);
+                                        this.renderZone('banished');
+                                    }
+                                }
+
+                                if (removedCard) {
+                                    this.placeCardInZone(removedCard, zoneName);
+                                    this.updateDeckCounts();
+                                }
+                            } else if (data.source === 'mini-list') {
+                                // Remove from mini list source (EX deck, graveyard, banished)
+                                let removedCard;
+
+                                if (data.zoneType === 'extra-deck') {
+                                    if (data.index < this.extraDeck.length) {
+                                        removedCard = this.extraDeck.splice(data.index, 1)[0];
+                                    }
+                                } else if (data.zoneType === 'graveyard') {
+                                    if (data.index < this.graveyard.length) {
+                                        removedCard = this.graveyard.splice(data.index, 1)[0];
+                                        // Also remove from field.graveyard using object reference
+                                        const fieldIndex = this.field.graveyard.indexOf(removedCard);
+                                        if (fieldIndex !== -1) {
+                                            this.field.graveyard.splice(fieldIndex, 1);
+                                        }
+                                        this.renderZone('graveyard');
+                                    }
+                                } else if (data.zoneType === 'banished') {
+                                    if (data.index < this.banished.length) {
+                                        removedCard = this.banished.splice(data.index, 1)[0];
+                                        // Also remove from field.banished using object reference
+                                        const fieldIndex = this.field.banished.indexOf(removedCard);
+                                        if (fieldIndex !== -1) {
+                                            this.field.banished.splice(fieldIndex, 1);
+                                        }
                                         this.renderZone('banished');
                                     }
                                 }
