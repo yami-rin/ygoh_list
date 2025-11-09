@@ -5387,6 +5387,7 @@
                     cardDiv.addEventListener('dragstart', (e) => {
                         // Use the render index directly for accurate card removal
                         // This ensures the exact card being dragged is removed, even if there are duplicates
+                        console.log(`[dragstart] source: ${source}, index: ${index}, card: ${card.name}`);
                         const dragData = {
                             source: 'mini-list',
                             zoneType: source,
@@ -5654,35 +5655,57 @@
                                 // Remove from mini list source (EX deck, graveyard, banished)
                                 let removedCard;
 
+                                console.log(`[mini-list drop] zoneType: ${data.zoneType}, index: ${data.index}`);
+
                                 if (data.zoneType === 'extra-deck') {
-                                    if (data.index < this.extraDeck.length) {
+                                    console.log(`[mini-list drop] extraDeck length before: ${this.extraDeck.length}`);
+                                    if (data.index !== -1 && data.index < this.extraDeck.length) {
                                         removedCard = this.extraDeck.splice(data.index, 1)[0];
+                                        console.log(`[mini-list drop] Removed from extraDeck: ${removedCard?.name}`);
                                     }
                                 } else if (data.zoneType === 'graveyard') {
-                                    if (data.index < this.graveyard.length) {
+                                    console.log(`[mini-list drop] graveyard length before: ${this.graveyard.length}`);
+                                    if (data.index !== -1 && data.index < this.graveyard.length) {
                                         removedCard = this.graveyard.splice(data.index, 1)[0];
-                                        // Also remove from field.graveyard using object reference
-                                        const fieldIndex = this.field.graveyard.indexOf(removedCard);
+                                        console.log(`[mini-list drop] Removed from graveyard: ${removedCard?.name}`);
+
+                                        // Also remove from field.graveyard using name/ciid matching
+                                        const fieldIndex = this.field.graveyard.findIndex(c =>
+                                            c.name === removedCard.name &&
+                                            (c.selectedCiid || '1') === (removedCard.selectedCiid || '1')
+                                        );
                                         if (fieldIndex !== -1) {
                                             this.field.graveyard.splice(fieldIndex, 1);
+                                            console.log(`[mini-list drop] Removed from field.graveyard at index ${fieldIndex}`);
                                         }
                                         this.renderZone('graveyard');
                                     }
+                                    console.log(`[mini-list drop] graveyard length after: ${this.graveyard.length}`);
                                 } else if (data.zoneType === 'banished') {
-                                    if (data.index < this.banished.length) {
+                                    console.log(`[mini-list drop] banished length before: ${this.banished.length}`);
+                                    if (data.index !== -1 && data.index < this.banished.length) {
                                         removedCard = this.banished.splice(data.index, 1)[0];
-                                        // Also remove from field.banished using object reference
-                                        const fieldIndex = this.field.banished.indexOf(removedCard);
+                                        console.log(`[mini-list drop] Removed from banished: ${removedCard?.name}`);
+
+                                        // Also remove from field.banished using name/ciid matching
+                                        const fieldIndex = this.field.banished.findIndex(c =>
+                                            c.name === removedCard.name &&
+                                            (c.selectedCiid || '1') === (removedCard.selectedCiid || '1')
+                                        );
                                         if (fieldIndex !== -1) {
                                             this.field.banished.splice(fieldIndex, 1);
+                                            console.log(`[mini-list drop] Removed from field.banished at index ${fieldIndex}`);
                                         }
                                         this.renderZone('banished');
                                     }
+                                    console.log(`[mini-list drop] banished length after: ${this.banished.length}`);
                                 }
 
                                 if (removedCard) {
                                     this.placeCardInZone(removedCard, zoneName);
                                     this.updateDeckCounts();
+                                } else {
+                                    console.warn(`[mini-list drop] No card was removed! index: ${data.index}`);
                                 }
                             }
                         } catch (error) {
