@@ -11,14 +11,28 @@
 
 const express = require('express');
 const fetch = require('node-fetch');
+const fs = require('fs');
+const path = require('path');
 const app = express();
 const PORT = process.env.PORT || 3000;
+
+// Data directory for user data storage
+const DATA_DIR = path.join(__dirname, 'user_data');
+if (!fs.existsSync(DATA_DIR)) {
+    fs.mkdirSync(DATA_DIR, { recursive: true });
+}
+
+// JSON body parser
+app.use(express.json({ limit: '50mb' }));
 
 // CORS middleware
 app.use((req, res, next) => {
     res.header('Access-Control-Allow-Origin', '*');
-    res.header('Access-Control-Allow-Methods', 'GET');
+    res.header('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS');
     res.header('Access-Control-Allow-Headers', 'Content-Type');
+    if (req.method === 'OPTIONS') {
+        return res.sendStatus(200);
+    }
     next();
 });
 
@@ -390,6 +404,65 @@ app.get('/card-list', async (req, res) => {
     }
 });
 
+// ==========================================
+// User Data Storage API
+// ==========================================
+
+// Get user data
+app.get('/data/:userId', (req, res) => {
+    const userId = req.params.userId;
+
+    // Validate userId format (UUID)
+    if (!userId || !/^[a-f0-9-]{36}$/i.test(userId)) {
+        return res.status(400).json({ error: 'Invalid user ID format' });
+    }
+
+    const filePath = path.join(DATA_DIR, `${userId}.json`);
+
+    try {
+        if (fs.existsSync(filePath)) {
+            const data = fs.readFileSync(filePath, 'utf8');
+            console.log(`📖 Loaded data for user: ${userId}`);
+            res.json(JSON.parse(data));
+        } else {
+            console.log(`📭 No data found for user: ${userId}`);
+            res.json({ cardCollection: [], wishlistCollection: [], recentCardsHistory: [] });
+        }
+    } catch (error) {
+        console.error(`Error reading data for user ${userId}:`, error);
+        res.status(500).json({ error: 'Failed to read data' });
+    }
+});
+
+// Save user data
+app.post('/data/:userId', (req, res) => {
+    const userId = req.params.userId;
+
+    // Validate userId format (UUID)
+    if (!userId || !/^[a-f0-9-]{36}$/i.test(userId)) {
+        return res.status(400).json({ error: 'Invalid user ID format' });
+    }
+
+    const filePath = path.join(DATA_DIR, `${userId}.json`);
+
+    try {
+        const data = {
+            cardCollection: req.body.cardCollection || [],
+            wishlistCollection: req.body.wishlistCollection || [],
+            recentCardsHistory: req.body.recentCardsHistory || [],
+            tagsOrder: req.body.tagsOrder || [],
+            updatedAt: new Date().toISOString()
+        };
+
+        fs.writeFileSync(filePath, JSON.stringify(data, null, 2), 'utf8');
+        console.log(`💾 Saved data for user: ${userId} (collection: ${data.cardCollection.length}, wishlist: ${data.wishlistCollection.length})`);
+        res.json({ success: true, message: 'Data saved successfully' });
+    } catch (error) {
+        console.error(`Error saving data for user ${userId}:`, error);
+        res.status(500).json({ error: 'Failed to save data' });
+    }
+});
+
 // Health check
 app.get('/health', (req, res) => {
     res.json({ status: 'OK', message: 'Image proxy server is running' });
@@ -400,5 +473,6 @@ app.listen(PORT, () => {
     console.log(`📡 ポート: ${PORT}`);
     console.log(`🔗 画像取得: http://localhost:${PORT}/image?cid=7315`);
     console.log(`🔗 カード詳細: http://localhost:${PORT}/card-detail?cid=7315`);
+    console.log(`🔗 データAPI: http://localhost:${PORT}/data/:userId`);
     console.log(`🔗 ヘルスチェック: http://localhost:${PORT}/health`);
 });

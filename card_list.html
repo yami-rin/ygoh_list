@@ -3187,7 +3187,75 @@
         let itemsPerPage = window.innerWidth <= 768 ? 20 : 50;
         let filteredCardCollection = [];
         let allTags = [];
-        
+
+        // ==========================================
+        // Server Data Storage API for Local Users
+        // ==========================================
+        const DATA_SERVER_URL = 'https://ygoh-list.onrender.com';
+
+        // Get or generate unique user ID for local storage
+        const getLocalUserId = () => {
+            let userId = localStorage.getItem('localUserId');
+            if (\!userId) {
+                // Generate UUID v4
+                userId = 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function(c) {
+                    const r = Math.random() * 16 | 0;
+                    const v = c === 'x' ? r : (r & 0x3 | 0x8);
+                    return v.toString(16);
+                });
+                localStorage.setItem('localUserId', userId);
+                console.log('📝 Generated new local user ID:', userId);
+            }
+            return userId;
+        };
+
+        // Load data from server for local users
+        const loadDataFromServer = async () => {
+            const userId = getLocalUserId();
+            try {
+                const response = await fetch(\);
+                if (response.ok) {
+                    const data = await response.json();
+                    console.log('📥 Loaded data from server:', data);
+                    return data;
+                }
+            } catch (error) {
+                console.error('Error loading data from server:', error);
+            }
+            return { cardCollection: [], wishlistCollection: [], recentCardsHistory: [], tagsOrder: [] };
+        };
+
+        // Save data to server for local users (debounced)
+        let saveTimeout = null;
+        const saveDataToServer = async () => {
+            if (\!currentUser || currentUser.uid \!== 'local_user') return;
+
+            // Clear existing timeout
+            if (saveTimeout) clearTimeout(saveTimeout);
+
+            // Debounce: wait 1 second before saving
+            saveTimeout = setTimeout(async () => {
+                const userId = getLocalUserId();
+                try {
+                    const response = await fetch(\, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({
+                            cardCollection: cardCollection.map(c => c.data),
+                            wishlistCollection: wishlistCollection.map(c => c.data),
+                            recentCardsHistory: JSON.parse(localStorage.getItem('recentCardsHistory') || '[]'),
+                            tagsOrder: allTags
+                        })
+                    });
+                    if (response.ok) {
+                        console.log('💾 Data saved to server');
+                    }
+                } catch (error) {
+                    console.error('Error saving data to server:', error);
+                }
+            }, 1000);
+        };
+
         // Gamification data - will be synced with Firebase
         let gamificationData = {
             userPoints: 0,
@@ -4640,13 +4708,9 @@
                     }
                 }
 
-                // Save to localStorage if local user
+                // Save to server if local user
                 if (!currentUser || currentUser.uid === 'local_user') {
-                    if (listType === 'wishlist') {
-                        localStorage.setItem('wishlistCollection', JSON.stringify(wishlistCollection.map(c => c.data)));
-                    } else {
-                        localStorage.setItem('cardCollection', JSON.stringify(cardCollection.map(c => c.data)));
-                    }
+                    saveDataToServer();
                 }
 
                 // Refresh the display
@@ -6294,7 +6358,7 @@
                             if (collectionRef) {
                                 await updateDoc(doc(collectionRef, card.id), { tags: updatedTags });
                             } else {
-                                localStorage.setItem('cardCollection', JSON.stringify(cardCollection));
+                                saveDataToServer();
                             }
                         }
                     }
@@ -6308,7 +6372,7 @@
                             if (wishlistRef) {
                                 await updateDoc(doc(wishlistRef, card.id), { tags: updatedTags });
                             } else {
-                                localStorage.setItem('wishlistCollection', JSON.stringify(wishlistCollection));
+                                saveDataToServer();
                             }
                         }
                     }
@@ -6398,8 +6462,31 @@
                 loadCollectionFromFirestore();
                 loadAllTags();
             } else {
-                cardCollection = [];
-                wishlistCollection = [];
+                // Load data from server for local users
+                showLoading(true);
+                try {
+                    const serverData = await loadDataFromServer();
+                    cardCollection = (serverData.cardCollection || []).map((data, i) => ({
+                        id: 'local_' + i,
+                        data: data
+                    }));
+                    wishlistCollection = (serverData.wishlistCollection || []).map((data, i) => ({
+                        id: 'wishlist_' + i,
+                        data: data
+                    }));
+                    if (serverData.recentCardsHistory) {
+                        localStorage.setItem('recentCardsHistory', JSON.stringify(serverData.recentCardsHistory));
+                    }
+                    if (serverData.tagsOrder) {
+                        allTags = serverData.tagsOrder;
+                    }
+                    console.log('📥 Loaded from server - Collection:', cardCollection.length, 'Wishlist:', wishlistCollection.length);
+                } catch (error) {
+                    console.error('Error loading from server:', error);
+                    cardCollection = [];
+                    wishlistCollection = [];
+                }
+                showLoading(false);
                 updateTotalCounts(); // Update stats for local mode
                 applySearchAndFilter();
                 loadAllTags(); // ローカルモードでもタグをロード・初期化
@@ -7741,6 +7828,12 @@ Firebase Consoleで確認すべき項目:
                 renderTagChoices('tag-choices-container', currentCardTags);
                 renderSelectedTags('card-tags-container', currentCardTags);
                 document.getElementById('set-rarity-choices').innerHTML = '';
+                
+                // Save to server if local user
+                if (currentUser?.uid === 'local_user') {
+                    saveDataToServer();
+                }
+                
                 showLoading(false);
                 
             } catch (error) {
@@ -7780,6 +7873,10 @@ Firebase Consoleで確認すべき項目:
                         cardCollection = cardCollection.filter(c => c.id !== cardId);
                     } else {
                         wishlistCollection = wishlistCollection.filter(c => c.id !== cardId);
+                    }
+                    // Save to server if local user
+                    if (currentUser?.uid === 'local_user') {
+                        saveDataToServer();
                     }
                     updateTotalCounts(); // Update stats after deletion
                     applySearchAndFilter();
@@ -7833,6 +7930,11 @@ Firebase Consoleで確認すべき項目:
                         saveGamificationData();
                     }
                     
+                    // Save to server if local user
+                    if (currentUser?.uid === 'local_user') {
+                        saveDataToServer();
+                    }
+                    
                     // Add points for moving card from wishlist to collection
                     const cardQuantity = card.data.枚数 || 1;
                     const pointsToAdd = cardQuantity * 5;
@@ -7870,6 +7972,10 @@ Firebase Consoleで確認すべき項目:
             if(localCard) {
                 localCard.data.枚数 = updatedData.枚数;
                 localCard.data.tags = updatedData.tags;
+            }
+            // Save to server if local user
+            if (currentUser?.uid === 'local_user') {
+                saveDataToServer();
             }
             updateTotalCounts(); // Update stats after editing
             applySearchAndFilter();
@@ -8234,6 +8340,10 @@ Firebase Consoleで確認すべき項目:
                     await loadCollectionFromFirestore();
                 } else {
                     applySearchAndFilter();
+                    // Save to server for local users
+                    if (currentUser?.uid === 'local_user') {
+                        saveDataToServer();
+                    }
                 }
 
                 showLoading(false);
@@ -8361,10 +8471,9 @@ Firebase Consoleで確認すべき項目:
                     }
                 }
 
-                // Save to local storage if local user
+                // Save to server if local user
                 if (currentUser?.uid === 'local_user') {
-                    localStorage.setItem('cardCollection', JSON.stringify(cardCollection.map(c => c.data)));
-                    localStorage.setItem('wishlistCollection', JSON.stringify(wishlistCollection.map(c => c.data)));
+                    saveDataToServer();
                 }
 
                 showLoading(false);
@@ -8462,9 +8571,8 @@ Firebase Consoleで確認すべき項目:
                         console.log('Auto saving...');
                         // The data is already being saved when cards are added/modified
                     } else {
-                        // Save to localStorage
-                        localStorage.setItem('cardCollection', JSON.stringify(cardCollection.map(c => c.data)));
-                        localStorage.setItem('wishlistCollection', JSON.stringify(wishlistCollection.map(c => c.data)));
+                        // Save to server
+                        saveDataToServer();
                     }
                 }, 300000); // 5 minutes
             } else {
@@ -8737,10 +8845,9 @@ Firebase Consoleで確認すべき項目:
                         }
                     }
 
-                    // Save to localStorage if not using Firebase
+                    // Save to server if not using Firebase
                     if (!currentUser || currentUser.uid === 'local_user') {
-                        localStorage.setItem('cardCollection', JSON.stringify(cardCollection));
-                        localStorage.setItem('wishlistCollection', JSON.stringify(wishlistCollection));
+                        saveDataToServer();
                     }
 
                     alert(`${cleanupCount}枚のカードから存在しないタグを削除しました。`);
