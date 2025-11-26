@@ -1,12 +1,5 @@
 /**
- * 遊戯王カード画像プロキシサーバー (Node.js)
- * CORS制限を回避するためのローカルプロキシサーバー
- *
- * 使用方法:
- * 1. Node.jsをインストール
- * 2. npm install express node-fetch
- * 3. node image_proxy_server.js
- * 4. http://localhost:3000/image?cid=7315 でアクセス
+ * h
  */
 
 const express = require('express');
