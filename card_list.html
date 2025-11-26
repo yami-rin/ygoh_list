@@ -3204,6 +3204,7 @@
             lastMilestoneReached: 0,
             cardAdditionDates: {},
             hasReceivedFirstLoginBonus: false, // Track first login bonus in Firebase
+            recentCardsHistory: [], // Recent card addition history for analysis
             // Profile data
             profile: {
                 nickname: '',
@@ -3262,6 +3263,12 @@
                 } else {
                     // Initialize new user data
                     await saveGamificationData();
+                }
+                
+                // Sync recentCardsHistory from Firebase to localStorage
+                if (gamificationData.recentCardsHistory && gamificationData.recentCardsHistory.length > 0) {
+                    localStorage.setItem('recentCardsHistory', JSON.stringify(gamificationData.recentCardsHistory));
+                    console.log('📥 Synced recentCardsHistory from Firebase:', gamificationData.recentCardsHistory.length, 'entries');
                 }
                 
                 // Track today's usage
@@ -4635,6 +4642,12 @@
                               item.name === name &&
                               item.listType === listType));
                         localStorage.setItem('recentCardsHistory', JSON.stringify(recentHistory));
+                        
+                        // Save to Firebase for logged-in users
+                        if (currentUser && currentUser.uid !== 'local_user') {
+                            gamificationData.recentCardsHistory = recentHistory;
+                            saveGamificationData();
+                        }
                     } catch(e) {
                         console.error('Error updating recent history:', e);
                     }
@@ -7724,6 +7737,12 @@ Firebase Consoleで確認すべき項目:
                 // Keep only the latest 100 entries
                 recentHistory = recentHistory.slice(0, 100);
                 localStorage.setItem('recentCardsHistory', JSON.stringify(recentHistory));
+                
+                // Save to Firebase for logged-in users
+                if (currentUser && currentUser.uid !== 'local_user') {
+                    gamificationData.recentCardsHistory = recentHistory;
+                    saveGamificationData();
+                }
 
                 // Add points for card addition (5 points per card)
                 const cardQuantity = newCard.枚数 || 1;
@@ -9610,6 +9629,20 @@ Firebase Consoleで確認すべき項目:
                     } catch (error) {
                         console.error(`Failed to register ${card.name}:`, error);
                         failCount++;
+                    }
+                }
+
+
+                // Save recentCardsHistory to Firebase
+                if (currentUser && currentUser.uid !== 'local_user') {
+                    try {
+                        const currentHistory = localStorage.getItem('recentCardsHistory');
+                        if (currentHistory) {
+                            gamificationData.recentCardsHistory = JSON.parse(currentHistory);
+                            await saveGamificationData();
+                        }
+                    } catch (e) {
+                        console.error('Error saving recentCardsHistory to Firebase:', e);
                     }
                 }
 
