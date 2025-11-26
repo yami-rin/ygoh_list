@@ -8395,7 +8395,7 @@ Firebase Consoleで確認すべき項目:
                         };
 
                         if (currentUser?.uid !== 'local_user') {
-                            const wishRef = getWishlistRef();
+                            const wishRef = getCollectionRef('wishlist');
                             await updateDoc(doc(wishRef, card.id), updatedData);
                         } else {
                             card.data = updatedData;
