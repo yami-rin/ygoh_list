@@ -1662,6 +1662,23 @@
                                 <button type="button" class="btn btn-sm btn-outline-primary card-type-btn" data-type="罠">罠</button>
                             </div>
                         </div>
+                        <!-- Card Type NOT -->
+                        <div class="col-12">
+                            <label class="form-label small fw-bold mb-2" style="color: #dc3545;">NOT検索（除外）</label>
+                            <div class="d-flex flex-wrap gap-1">
+                                <button type="button" class="btn btn-sm btn-outline-danger card-type-not-btn" data-type="通常">通常</button>
+                                <button type="button" class="btn btn-sm btn-outline-danger card-type-not-btn" data-type="効果">効果</button>
+                                <button type="button" class="btn btn-sm btn-outline-danger card-type-not-btn" data-type="融合">融合</button>
+                                <button type="button" class="btn btn-sm btn-outline-danger card-type-not-btn" data-type="シンクロ">シンクロ</button>
+                                <button type="button" class="btn btn-sm btn-outline-danger card-type-not-btn" data-type="エクシーズ">エクシーズ</button>
+                                <button type="button" class="btn btn-sm btn-outline-danger card-type-not-btn" data-type="リンク">リンク</button>
+                                <button type="button" class="btn btn-sm btn-outline-danger card-type-not-btn" data-type="ペンデュラム">ペンデュラム</button>
+                                <button type="button" class="btn btn-sm btn-outline-danger card-type-not-btn" data-type="儀式">儀式</button>
+                                <button type="button" class="btn btn-sm btn-outline-danger card-type-not-btn" data-type="チューナー">チューナー</button>
+                                <button type="button" class="btn btn-sm btn-outline-danger card-type-not-btn" data-type="魔法">魔法</button>
+                                <button type="button" class="btn btn-sm btn-outline-danger card-type-not-btn" data-type="罠">罠</button>
+                            </div>
+                        </div>
                         <!-- Race -->
                         <div class="col-12">
                             <label class="form-label small fw-bold">種族</label>
@@ -2288,6 +2305,7 @@
         let selectedAttribute = '';
         let selectedRace = '';
         let selectedCardTypes = []; // Array for multiple card types
+        let selectedNotCardTypes = []; // Array for NOT card types (exclusion)
         let cardTypeSearchMode = 'and'; // 'and' or 'or'
 
         // Deck system state
@@ -2503,6 +2521,7 @@
             const levelFilter = selectedLevel;
             const attributeFilter = selectedAttribute;
             const cardTypeFilters = selectedCardTypes; // Array of selected card types
+            const notCardTypeFilters = selectedNotCardTypes; // Array of NOT card types
             const raceFilter = selectedRace;
             const attackFilter = document.getElementById('attack-filter') ? document.getElementById('attack-filter').value.trim() : '';
             const defenseFilter = document.getElementById('defense-filter') ? document.getElementById('defense-filter').value.trim() : '';
@@ -2596,11 +2615,19 @@
                     }
                 }
 
+                // NOT card type filter (exclusion)
+                let matchesNotCardType = true;
+                if (notCardTypeFilters.length > 0) {
+                    const cardType = details.cardType || '';
+                    // Exclude cards that have ANY of the NOT selected types
+                    matchesNotCardType = !notCardTypeFilters.some(type => cardType.includes(type));
+                }
+
                 const matchesRace = !raceFilter || details.race === raceFilter;
                 const matchesAttack = !attackFilter || (details.attack && details.attack.toString() === attackFilter);
                 const matchesDefense = !defenseFilter || (details.defense && details.defense.toString() === defenseFilter);
 
-                return matchesNameSearch && matchesCodeSearch && matchesRarity && matchesTag && matchesLevel && matchesAttribute && matchesCardType && matchesRace && matchesAttack && matchesDefense;
+                return matchesNameSearch && matchesCodeSearch && matchesRarity && matchesTag && matchesLevel && matchesAttribute && matchesCardType && matchesNotCardType && matchesRace && matchesAttack && matchesDefense;
             });
 
             console.log('Filtered cards count:', filteredCards.length);
@@ -3434,6 +3461,10 @@
             selectedCardTypes = [];
             document.querySelectorAll('.card-type-btn').forEach(btn => btn.classList.remove('active'));
 
+            // Clear NOT card type filter
+            selectedNotCardTypes = [];
+            document.querySelectorAll('.card-type-not-btn').forEach(btn => btn.classList.remove('active'));
+
             // Reset card type mode to AND
             if (document.getElementById('card-type-and')) {
                 document.getElementById('card-type-and').checked = true;
@@ -3506,6 +3537,27 @@
                     applyFilters();
                     renderCards();
                 }
+            });
+        });
+
+        // Card type NOT filter buttons
+        document.querySelectorAll('.card-type-not-btn').forEach(btn => {
+            btn.addEventListener('click', () => {
+                const type = btn.dataset.type;
+                const index = selectedNotCardTypes.indexOf(type);
+
+                if (index > -1) {
+                    // Deselect
+                    selectedNotCardTypes.splice(index, 1);
+                    btn.classList.remove('active');
+                } else {
+                    // Select
+                    selectedNotCardTypes.push(type);
+                    btn.classList.add('active');
+                }
+
+                applyFilters();
+                renderCards();
             });
         });
 
