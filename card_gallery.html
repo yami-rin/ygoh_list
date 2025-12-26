@@ -2624,7 +2624,6 @@
                 const matchesTag = !tagFilter || (card.data.tags && card.data.tags.includes(tagFilter));
 
                 // Advanced filters - use cardDetailsMap for latest data (CSV may have been updated)
-                const cardName = card.data['名前'];
                 const details = cardDetailsMap.get(cardName) || card.data.linkedDetails || {};
                 const matchesLevel = !levelFilter || (details.level && details.level.toString() === levelFilter);
                 const matchesAttribute = !attributeFilter || details.attribute === attributeFilter;
