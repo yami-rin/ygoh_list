@@ -5891,12 +5891,11 @@
                 let advancedMatch = true;
                 let details = null;
 
-                // First check if card has linked details
-                if (d.linkedDetails) {
-                    details = d.linkedDetails;
-                } else if (cardDetailsMap.has(cardName)) {
-                    // Otherwise check master data
+                // Always use cardDetailsMap for latest data (CSV may have been updated)
+                if (cardDetailsMap.has(cardName)) {
                     details = cardDetailsMap.get(cardName);
+                } else if (d.linkedDetails) {
+                    details = d.linkedDetails;
                 }
 
                 if (details) {
