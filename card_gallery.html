@@ -1577,6 +1577,7 @@
                 <div class="col-md-2">
                     <select class="form-select" id="tag-filter">
                         <option value="">すべてのタグ</option>
+                        <option value="__no_tag__">タグ無し</option>
                     </select>
                 </div>
                 <div class="col-md-2">
@@ -1679,6 +1680,7 @@
                         <div class="col-12">
                             <label class="form-label small fw-bold mb-2" style="color: #dc3545;">NOT検索（除外）</label>
                             <div class="d-flex flex-wrap gap-1 mb-1">
+                                <button type="button" class="btn btn-sm btn-danger card-type-not-btn" data-type="EXモンスター">EXモンスター</button>
                                 <button type="button" class="btn btn-sm btn-outline-danger card-type-not-btn" data-type="通常">通常</button>
                                 <button type="button" class="btn btn-sm btn-outline-danger card-type-not-btn" data-type="効果">効果</button>
                                 <button type="button" class="btn btn-sm btn-outline-danger card-type-not-btn" data-type="融合">融合</button>
@@ -2621,7 +2623,13 @@
                 }
 
                 const matchesRarity = !rarityFilter || card.data['レアリティ'] === rarityFilter;
-                const matchesTag = !tagFilter || (card.data.tags && card.data.tags.includes(tagFilter));
+                // タグフィルター：__no_tag__の場合はタグ無しのカードを検索
+                let matchesTag = true;
+                if (tagFilter === '__no_tag__') {
+                    matchesTag = !card.data.tags || card.data.tags.length === 0;
+                } else if (tagFilter) {
+                    matchesTag = card.data.tags && card.data.tags.includes(tagFilter);
+                }
 
                 // Advanced filters - use cardDetailsMap for latest data (CSV may have been updated)
                 const details = cardDetailsMap.get(cardName) || card.data.linkedDetails || {};
@@ -2662,7 +2670,11 @@
                     const race = details.race || '';
 
                     const checkTypeMatch = (type) => {
-                        if (type === '魔法') {
+                        if (type === 'EXモンスター') {
+                            // EXモンスター = 融合、シンクロ、エクシーズ、リンク
+                            return cardType.includes('融合') || cardType.includes('シンクロ') ||
+                                   cardType.includes('エクシーズ') || cardType.includes('リンク');
+                        } else if (type === '魔法') {
                             return race === '魔法' || cardType.includes('魔法');
                         } else if (type === '罠') {
                             return race === '罠' || cardType.includes('罠');
