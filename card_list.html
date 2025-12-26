@@ -2873,14 +2873,45 @@
                                                             </div>
                                                         </div>
                                                         <div class="sub-type-group" data-category="spell" style="display: none;">
-                                                            <button type="button" class="btn btn-sm btn-success sub-type-btn" data-type="魔法">
-                                                                <i class="bi bi-book"></i> 魔法カード
-                                                            </button>
+                                                            <div class="d-flex flex-wrap gap-1">
+                                                                <button type="button" class="btn btn-sm btn-outline-secondary sub-type-btn active" data-type="all-spell">
+                                                                    全魔法
+                                                                </button>
+                                                                <button type="button" class="btn btn-sm btn-outline-success sub-type-btn" data-type="通常魔法">
+                                                                    <small>通常</small>
+                                                                </button>
+                                                                <button type="button" class="btn btn-sm btn-outline-success sub-type-btn" data-type="速攻魔法">
+                                                                    <small>速攻</small>
+                                                                </button>
+                                                                <button type="button" class="btn btn-sm btn-outline-success sub-type-btn" data-type="永続魔法">
+                                                                    <small>永続</small>
+                                                                </button>
+                                                                <button type="button" class="btn btn-sm btn-outline-success sub-type-btn" data-type="装備魔法">
+                                                                    <small>装備</small>
+                                                                </button>
+                                                                <button type="button" class="btn btn-sm btn-outline-success sub-type-btn" data-type="フィールド魔法">
+                                                                    <small>フィールド</small>
+                                                                </button>
+                                                                <button type="button" class="btn btn-sm btn-outline-success sub-type-btn" data-type="儀式魔法">
+                                                                    <small>儀式</small>
+                                                                </button>
+                                                            </div>
                                                         </div>
                                                         <div class="sub-type-group" data-category="trap" style="display: none;">
-                                                            <button type="button" class="btn btn-sm btn-danger sub-type-btn" data-type="罠">
-                                                                <i class="bi bi-exclamation-triangle"></i> 罠カード
-                                                            </button>
+                                                            <div class="d-flex flex-wrap gap-1">
+                                                                <button type="button" class="btn btn-sm btn-outline-secondary sub-type-btn active" data-type="all-trap">
+                                                                    全罠
+                                                                </button>
+                                                                <button type="button" class="btn btn-sm btn-outline-danger sub-type-btn" data-type="通常罠">
+                                                                    <small>通常</small>
+                                                                </button>
+                                                                <button type="button" class="btn btn-sm btn-outline-danger sub-type-btn" data-type="永続罠">
+                                                                    <small>永続</small>
+                                                                </button>
+                                                                <button type="button" class="btn btn-sm btn-outline-danger sub-type-btn" data-type="カウンター罠">
+                                                                    <small>カウンター</small>
+                                                                </button>
+                                                            </div>
                                                         </div>
                                                         <div class="sub-type-group" data-category="all">
                                                             <span class="text-muted small">すべてのカードを表示</span>
@@ -5757,9 +5788,22 @@
                 .map(btn => btn.dataset.race); // 族を含む完全な名前を使用（小文字化しない）
 
             // Get selected card types from active sub-type buttons
-            const sCardTypes = Array.from(document.querySelectorAll('.sub-type-btn.active'))
-                .filter(btn => btn.dataset.type !== 'all-monster')
-                .map(btn => btn.dataset.type);
+            const activeSubTypes = Array.from(document.querySelectorAll('.sub-type-btn.active'));
+            let sCardTypes = [];
+            activeSubTypes.forEach(btn => {
+                const type = btn.dataset.type;
+                if (type === 'all-monster') {
+                    // Skip - means all monsters (no filter)
+                } else if (type === 'all-spell') {
+                    // All spells - add '魔法' as filter (will match race)
+                    sCardTypes.push('魔法');
+                } else if (type === 'all-trap') {
+                    // All traps - add '罠' as filter (will match race)
+                    sCardTypes.push('罠');
+                } else {
+                    sCardTypes.push(type);
+                }
+            });
 
             const sAttack = document.querySelector('[name="search_attack"]')?.value?.trim();
             const sDefense = document.querySelector('[name="search_defense"]')?.value?.trim();
@@ -7933,17 +7977,21 @@ Firebase Consoleで確認すべき項目:
                     // Auto-apply search when monster tab is clicked
                     applySearchAndFilter();
                 } else if (category === 'spell') {
-                    // Activate spell button
+                    // Activate "all-spell" by default
                     subTypeButtons.forEach(btn => {
-                        if (btn.dataset.type === '魔法') {
+                        if (btn.dataset.type === 'all-spell') {
                             btn.classList.add('active');
+                        } else if (btn.parentElement.closest('[data-category="spell"]')) {
+                            btn.classList.remove('active');
                         }
                     });
                 } else if (category === 'trap') {
-                    // Activate trap button
+                    // Activate "all-trap" by default
                     subTypeButtons.forEach(btn => {
-                        if (btn.dataset.type === '罠') {
+                        if (btn.dataset.type === 'all-trap') {
                             btn.classList.add('active');
+                        } else if (btn.parentElement.closest('[data-category="trap"]')) {
+                            btn.classList.remove('active');
                         }
                     });
                 }
@@ -7958,23 +8006,23 @@ Firebase Consoleで確認すべき項目:
                 const type = this.dataset.type;
                 const parentGroup = this.closest('.sub-type-group');
 
-                if (type === 'all-monster') {
-                    // Clear all monster sub-type selections
+                if (type === 'all-monster' || type === 'all-spell' || type === 'all-trap') {
+                    // Clear all sub-type selections for this category
                     parentGroup.querySelectorAll('.sub-type-btn').forEach(btn => {
                         btn.classList.remove('active');
                     });
                     this.classList.add('active');
-                } else if (parentGroup.dataset.category === 'monster') {
-                    // Toggle selection for monster sub-types
-                    const allMonsterBtn = parentGroup.querySelector('[data-type="all-monster"]');
-                    allMonsterBtn.classList.remove('active');
+                } else if (parentGroup.dataset.category === 'monster' || parentGroup.dataset.category === 'spell' || parentGroup.dataset.category === 'trap') {
+                    // Toggle selection for sub-types
+                    const allBtn = parentGroup.querySelector('[data-type^="all-"]');
+                    if (allBtn) allBtn.classList.remove('active');
 
                     this.classList.toggle('active');
 
-                    // If no sub-types selected, activate "all-monster"
+                    // If no sub-types selected, activate the "all" button
                     const activeButtons = parentGroup.querySelectorAll('.sub-type-btn.active');
-                    if (activeButtons.length === 0) {
-                        allMonsterBtn.classList.add('active');
+                    if (activeButtons.length === 0 && allBtn) {
+                        allBtn.classList.add('active');
                     }
                 }
 
