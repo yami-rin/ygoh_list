@@ -2789,237 +2789,121 @@
                                                 </div>
                                             </div>
                                         </div>
-                                        <div class="row g-2">
-                                            <div class="col-md-3">
-                                                <label class="form-label small">レベル</label>
-                                                <input type="text" name="search_level" class="form-control form-control-sm">
-                                            </div>
-                                            <div class="col-md-3">
-                                                <label class="form-label small">属性</label>
-                                                <select name="search_attribute" class="form-select form-select-sm">
-                                                    <option value="">すべて</option>
-                                                    <option value="闇">闇</option>
-                                                    <option value="光">光</option>
-                                                    <option value="地">地</option>
-                                                    <option value="水">水</option>
-                                                    <option value="炎">炎</option>
-                                                    <option value="風">風</option>
-                                                    <option value="神">神</option>
-                                                </select>
-                                            </div>
-                                            <div class="col-md-12">
-                                                <label class="form-label small">カードタイプ</label>
-                                                <div class="card-type-selector">
-                                                    <!-- メインカテゴリータブ -->
-                                                    <ul class="nav nav-pills nav-fill mb-2" role="tablist">
-                                                        <li class="nav-item" role="presentation">
-                                                            <button class="nav-link active py-1 px-2 main-type-tab" data-category="all" type="button">
-                                                                <i class="bi bi-grid-3x3-gap"></i> すべて
-                                                            </button>
-                                                        </li>
-                                                        <li class="nav-item" role="presentation">
-                                                            <button class="nav-link py-1 px-2 main-type-tab" data-category="monster" type="button">
-                                                                <i class="bi bi-shield-fill"></i> モンスター
-                                                            </button>
-                                                        </li>
-                                                        <li class="nav-item" role="presentation">
-                                                            <button class="nav-link py-1 px-2 main-type-tab" data-category="spell" type="button">
-                                                                <i class="bi bi-book-fill"></i> 魔法
-                                                            </button>
-                                                        </li>
-                                                        <li class="nav-item" role="presentation">
-                                                            <button class="nav-link py-1 px-2 main-type-tab" data-category="trap" type="button">
-                                                                <i class="bi bi-exclamation-triangle-fill"></i> 罠
-                                                            </button>
-                                                        </li>
-                                                    </ul>
-                                                    <!-- サブカテゴリー選択 -->
-                                                    <div class="sub-type-container" style="min-height: 38px;">
-                                                        <div class="sub-type-group" data-category="monster" style="display: none;">
-                                                            <div class="d-flex flex-wrap gap-1">
-                                                                <button type="button" class="btn btn-sm btn-outline-secondary sub-type-btn active" data-type="all-monster">
-                                                                    全モンスター
-                                                                </button>
-                                                                <button type="button" class="btn btn-sm btn-outline-info sub-type-btn" data-type="通常">
-                                                                    <small>通常</small>
-                                                                </button>
-                                                                <button type="button" class="btn btn-sm btn-outline-success sub-type-btn" data-type="効果">
-                                                                    <small>効果</small>
-                                                                </button>
-                                                                <button type="button" class="btn btn-sm btn-outline-purple sub-type-btn" data-type="融合">
-                                                                    <small>融合</small>
-                                                                </button>
-                                                                <button type="button" class="btn btn-sm btn-outline-primary sub-type-btn" data-type="シンクロ">
-                                                                    <small>シンクロ</small>
-                                                                </button>
-                                                                <button type="button" class="btn btn-sm btn-outline-dark sub-type-btn" data-type="エクシーズ">
-                                                                    <small>エクシーズ</small>
-                                                                </button>
-                                                                <button type="button" class="btn btn-sm btn-outline-primary sub-type-btn" data-type="リンク">
-                                                                    <small>リンク</small>
-                                                                </button>
-                                                                <button type="button" class="btn btn-sm btn-outline-secondary sub-type-btn" data-type="ペンデュラム">
-                                                                    <small>ペンデュラム</small>
-                                                                </button>
-                                                                <button type="button" class="btn btn-sm btn-outline-info sub-type-btn" data-type="儀式">
-                                                                    <small>儀式</small>
-                                                                </button>
-                                                                <button type="button" class="btn btn-sm btn-outline-warning sub-type-btn" data-type="チューナー">
-                                                                    <small>チューナー</small>
-                                                                </button>
-                                                                <button type="button" class="btn btn-sm btn-outline-danger sub-type-btn" data-type="リバース">
-                                                                    <small>リバース</small>
-                                                                </button>
-                                                            </div>
-                                                        </div>
-                                                        <div class="sub-type-group" data-category="spell" style="display: none;">
-                                                            <div class="d-flex flex-wrap gap-1">
-                                                                <button type="button" class="btn btn-sm btn-outline-secondary sub-type-btn active" data-type="all-spell">
-                                                                    全魔法
-                                                                </button>
-                                                                <button type="button" class="btn btn-sm btn-outline-success sub-type-btn" data-type="通常魔法">
-                                                                    <small>通常</small>
-                                                                </button>
-                                                                <button type="button" class="btn btn-sm btn-outline-success sub-type-btn" data-type="速攻魔法">
-                                                                    <small>速攻</small>
-                                                                </button>
-                                                                <button type="button" class="btn btn-sm btn-outline-success sub-type-btn" data-type="永続魔法">
-                                                                    <small>永続</small>
-                                                                </button>
-                                                                <button type="button" class="btn btn-sm btn-outline-success sub-type-btn" data-type="装備魔法">
-                                                                    <small>装備</small>
-                                                                </button>
-                                                                <button type="button" class="btn btn-sm btn-outline-success sub-type-btn" data-type="フィールド魔法">
-                                                                    <small>フィールド</small>
-                                                                </button>
-                                                                <button type="button" class="btn btn-sm btn-outline-success sub-type-btn" data-type="儀式魔法">
-                                                                    <small>儀式</small>
-                                                                </button>
-                                                            </div>
-                                                        </div>
-                                                        <div class="sub-type-group" data-category="trap" style="display: none;">
-                                                            <div class="d-flex flex-wrap gap-1">
-                                                                <button type="button" class="btn btn-sm btn-outline-secondary sub-type-btn active" data-type="all-trap">
-                                                                    全罠
-                                                                </button>
-                                                                <button type="button" class="btn btn-sm btn-outline-danger sub-type-btn" data-type="通常罠">
-                                                                    <small>通常</small>
-                                                                </button>
-                                                                <button type="button" class="btn btn-sm btn-outline-danger sub-type-btn" data-type="永続罠">
-                                                                    <small>永続</small>
-                                                                </button>
-                                                                <button type="button" class="btn btn-sm btn-outline-danger sub-type-btn" data-type="カウンター罠">
-                                                                    <small>カウンター</small>
-                                                                </button>
-                                                            </div>
-                                                        </div>
-                                                        <div class="sub-type-group" data-category="all">
-                                                            <span class="text-muted small">すべてのカードを表示</span>
-                                                        </div>
-                                                    </div>
+                                        <!-- Level/Rank/Link -->
+                                        <div class="row g-2 mb-2">
+                                            <div class="col-12">
+                                                <label class="form-label small fw-bold">レベル・ランク・リンク</label>
+                                                <div class="d-flex flex-wrap gap-1">
+                                                    <button type="button" class="btn btn-sm btn-outline-secondary level-btn active" data-level="">すべて</button>
+                                                    <button type="button" class="btn btn-sm btn-outline-primary level-btn" data-level="0">0</button>
+                                                    <button type="button" class="btn btn-sm btn-outline-primary level-btn" data-level="1">1</button>
+                                                    <button type="button" class="btn btn-sm btn-outline-primary level-btn" data-level="2">2</button>
+                                                    <button type="button" class="btn btn-sm btn-outline-primary level-btn" data-level="3">3</button>
+                                                    <button type="button" class="btn btn-sm btn-outline-primary level-btn" data-level="4">4</button>
+                                                    <button type="button" class="btn btn-sm btn-outline-primary level-btn" data-level="5">5</button>
+                                                    <button type="button" class="btn btn-sm btn-outline-primary level-btn" data-level="6">6</button>
+                                                    <button type="button" class="btn btn-sm btn-outline-primary level-btn" data-level="7">7</button>
+                                                    <button type="button" class="btn btn-sm btn-outline-primary level-btn" data-level="8">8</button>
+                                                    <button type="button" class="btn btn-sm btn-outline-primary level-btn" data-level="9">9</button>
+                                                    <button type="button" class="btn btn-sm btn-outline-primary level-btn" data-level="10">10</button>
+                                                    <button type="button" class="btn btn-sm btn-outline-primary level-btn" data-level="11">11</button>
+                                                    <button type="button" class="btn btn-sm btn-outline-primary level-btn" data-level="12">12</button>
+                                                    <button type="button" class="btn btn-sm btn-outline-primary level-btn" data-level="13">13</button>
                                                 </div>
                                             </div>
                                         </div>
+                                        <!-- Attribute -->
                                         <div class="row g-2 mb-2">
-                                            <div class="col-md-12">
-                                                <label class="form-label small">種族</label>
-                                                <div class="race-selector">
-                                                    <div class="mb-2">
-                                                        <button type="button" class="btn btn-sm btn-outline-secondary clear-race-btn">
-                                                            <i class="bi bi-x-circle"></i> すべてクリア
-                                                        </button>
-                                                    </div>
-                                                    <div class="d-flex flex-wrap gap-1">
-                                                        <button type="button" class="btn btn-sm btn-outline-primary race-btn" data-race="ドラゴン族">
-                                                            <small>ドラゴン</small>
-                                                        </button>
-                                                        <button type="button" class="btn btn-sm btn-outline-primary race-btn" data-race="戦士族">
-                                                            <small>戦士</small>
-                                                        </button>
-                                                        <button type="button" class="btn btn-sm btn-outline-primary race-btn" data-race="獣戦士族">
-                                                            <small>獣戦士</small>
-                                                        </button>
-                                                        <button type="button" class="btn btn-sm btn-outline-primary race-btn" data-race="魔法使い族">
-                                                            <small>魔法使い</small>
-                                                        </button>
-                                                        <button type="button" class="btn btn-sm btn-outline-primary race-btn" data-race="天使族">
-                                                            <small>天使</small>
-                                                        </button>
-                                                        <button type="button" class="btn btn-sm btn-outline-primary race-btn" data-race="悪魔族">
-                                                            <small>悪魔</small>
-                                                        </button>
-                                                        <button type="button" class="btn btn-sm btn-outline-primary race-btn" data-race="アンデット族">
-                                                            <small>アンデット</small>
-                                                        </button>
-                                                        <button type="button" class="btn btn-sm btn-outline-primary race-btn" data-race="機械族">
-                                                            <small>機械</small>
-                                                        </button>
-                                                        <button type="button" class="btn btn-sm btn-outline-primary race-btn" data-race="獣族">
-                                                            <small>獣</small>
-                                                        </button>
-                                                        <button type="button" class="btn btn-sm btn-outline-primary race-btn" data-race="鳥獣族">
-                                                            <small>鳥獣</small>
-                                                        </button>
-                                                        <button type="button" class="btn btn-sm btn-outline-primary race-btn" data-race="植物族">
-                                                            <small>植物</small>
-                                                        </button>
-                                                        <button type="button" class="btn btn-sm btn-outline-primary race-btn" data-race="昆虫族">
-                                                            <small>昆虫</small>
-                                                        </button>
-                                                        <button type="button" class="btn btn-sm btn-outline-primary race-btn" data-race="水族">
-                                                            <small>水</small>
-                                                        </button>
-                                                        <button type="button" class="btn btn-sm btn-outline-primary race-btn" data-race="岩石族">
-                                                            <small>岩石</small>
-                                                        </button>
-                                                        <button type="button" class="btn btn-sm btn-outline-primary race-btn" data-race="炎族">
-                                                            <small>炎</small>
-                                                        </button>
-                                                        <button type="button" class="btn btn-sm btn-outline-primary race-btn" data-race="雷族">
-                                                            <small>雷</small>
-                                                        </button>
-                                                        <button type="button" class="btn btn-sm btn-outline-primary race-btn" data-race="恐竜族">
-                                                            <small>恐竜</small>
-                                                        </button>
-                                                        <button type="button" class="btn btn-sm btn-outline-primary race-btn" data-race="魚族">
-                                                            <small>魚</small>
-                                                        </button>
-                                                        <button type="button" class="btn btn-sm btn-outline-primary race-btn" data-race="海竜族">
-                                                            <small>海竜</small>
-                                                        </button>
-                                                        <button type="button" class="btn btn-sm btn-outline-primary race-btn" data-race="爬虫類族">
-                                                            <small>爬虫類</small>
-                                                        </button>
-                                                        <button type="button" class="btn btn-sm btn-outline-primary race-btn" data-race="サイキック族">
-                                                            <small>サイキック</small>
-                                                        </button>
-                                                        <button type="button" class="btn btn-sm btn-outline-primary race-btn" data-race="幻竜族">
-                                                            <small>幻竜</small>
-                                                        </button>
-                                                        <button type="button" class="btn btn-sm btn-outline-primary race-btn" data-race="サイバース族">
-                                                            <small>サイバース</small>
-                                                        </button>
-                                                        <button type="button" class="btn btn-sm btn-outline-primary race-btn" data-race="幻神獣族">
-                                                            <small>幻神獣</small>
-                                                        </button>
-                                                        <button type="button" class="btn btn-sm btn-outline-primary race-btn" data-race="創造神族">
-                                                            <small>創造神</small>
-                                                        </button>
-                                                        <button type="button" class="btn btn-sm btn-outline-primary race-btn" data-race="幻想魔族">
-                                                            <small>幻想魔</small>
-                                                        </button>
-                                                    </div>
+                                            <div class="col-12">
+                                                <label class="form-label small fw-bold">属性</label>
+                                                <div class="d-flex flex-wrap gap-1">
+                                                    <button type="button" class="btn btn-sm btn-outline-secondary attribute-btn active" data-attribute="">すべて</button>
+                                                    <button type="button" class="btn btn-sm btn-outline-primary attribute-btn" data-attribute="闇">闇</button>
+                                                    <button type="button" class="btn btn-sm btn-outline-primary attribute-btn" data-attribute="光">光</button>
+                                                    <button type="button" class="btn btn-sm btn-outline-primary attribute-btn" data-attribute="地">地</button>
+                                                    <button type="button" class="btn btn-sm btn-outline-primary attribute-btn" data-attribute="水">水</button>
+                                                    <button type="button" class="btn btn-sm btn-outline-primary attribute-btn" data-attribute="炎">炎</button>
+                                                    <button type="button" class="btn btn-sm btn-outline-primary attribute-btn" data-attribute="風">風</button>
+                                                    <button type="button" class="btn btn-sm btn-outline-primary attribute-btn" data-attribute="神">神</button>
                                                 </div>
                                             </div>
                                         </div>
+                                        <!-- Card Type -->
+                                        <div class="row g-2 mb-2">
+                                            <div class="col-12">
+                                                <label class="form-label small fw-bold">カードタイプ</label>
+                                                <div class="d-flex flex-wrap gap-1 mb-1">
+                                                    <button type="button" class="btn btn-sm btn-outline-primary card-type-btn" data-type="通常">通常</button>
+                                                    <button type="button" class="btn btn-sm btn-outline-primary card-type-btn" data-type="効果">効果</button>
+                                                    <button type="button" class="btn btn-sm btn-outline-primary card-type-btn" data-type="融合">融合</button>
+                                                    <button type="button" class="btn btn-sm btn-outline-primary card-type-btn" data-type="シンクロ">シンクロ</button>
+                                                    <button type="button" class="btn btn-sm btn-outline-primary card-type-btn" data-type="エクシーズ">エクシーズ</button>
+                                                    <button type="button" class="btn btn-sm btn-outline-primary card-type-btn" data-type="リンク">リンク</button>
+                                                    <button type="button" class="btn btn-sm btn-outline-primary card-type-btn" data-type="ペンデュラム">ペンデュラム</button>
+                                                    <button type="button" class="btn btn-sm btn-outline-primary card-type-btn" data-type="儀式">儀式</button>
+                                                    <button type="button" class="btn btn-sm btn-outline-primary card-type-btn" data-type="チューナー">チューナー</button>
+                                                </div>
+                                                <div class="d-flex flex-wrap gap-1 mb-1">
+                                                    <button type="button" class="btn btn-sm btn-outline-success card-type-btn" data-type="魔法">魔法(全)</button>
+                                                    <button type="button" class="btn btn-sm btn-outline-success card-type-btn" data-type="通常魔法">通常魔法</button>
+                                                    <button type="button" class="btn btn-sm btn-outline-success card-type-btn" data-type="速攻魔法">速攻魔法</button>
+                                                    <button type="button" class="btn btn-sm btn-outline-success card-type-btn" data-type="永続魔法">永続魔法</button>
+                                                    <button type="button" class="btn btn-sm btn-outline-success card-type-btn" data-type="装備魔法">装備魔法</button>
+                                                    <button type="button" class="btn btn-sm btn-outline-success card-type-btn" data-type="フィールド魔法">フィールド魔法</button>
+                                                    <button type="button" class="btn btn-sm btn-outline-success card-type-btn" data-type="儀式魔法">儀式魔法</button>
+                                                </div>
+                                                <div class="d-flex flex-wrap gap-1">
+                                                    <button type="button" class="btn btn-sm btn-outline-danger card-type-btn" data-type="罠">罠(全)</button>
+                                                    <button type="button" class="btn btn-sm btn-outline-danger card-type-btn" data-type="通常罠">通常罠</button>
+                                                    <button type="button" class="btn btn-sm btn-outline-danger card-type-btn" data-type="永続罠">永続罠</button>
+                                                    <button type="button" class="btn btn-sm btn-outline-danger card-type-btn" data-type="カウンター罠">カウンター罠</button>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <!-- Race -->
+                                        <div class="row g-2 mb-2">
+                                            <div class="col-12">
+                                                <label class="form-label small fw-bold">種族</label>
+                                                <div class="d-flex flex-wrap gap-1">
+                                                    <button type="button" class="btn btn-sm btn-outline-secondary race-btn active" data-race="">すべて</button>
+                                                    <button type="button" class="btn btn-sm btn-outline-primary race-btn" data-race="ドラゴン族">ドラゴン族</button>
+                                                    <button type="button" class="btn btn-sm btn-outline-primary race-btn" data-race="戦士族">戦士族</button>
+                                                    <button type="button" class="btn btn-sm btn-outline-primary race-btn" data-race="獣戦士族">獣戦士族</button>
+                                                    <button type="button" class="btn btn-sm btn-outline-primary race-btn" data-race="魔法使い族">魔法使い族</button>
+                                                    <button type="button" class="btn btn-sm btn-outline-primary race-btn" data-race="天使族">天使族</button>
+                                                    <button type="button" class="btn btn-sm btn-outline-primary race-btn" data-race="悪魔族">悪魔族</button>
+                                                    <button type="button" class="btn btn-sm btn-outline-primary race-btn" data-race="アンデット族">アンデット族</button>
+                                                    <button type="button" class="btn btn-sm btn-outline-primary race-btn" data-race="機械族">機械族</button>
+                                                    <button type="button" class="btn btn-sm btn-outline-primary race-btn" data-race="獣族">獣族</button>
+                                                    <button type="button" class="btn btn-sm btn-outline-primary race-btn" data-race="鳥獣族">鳥獣族</button>
+                                                    <button type="button" class="btn btn-sm btn-outline-primary race-btn" data-race="植物族">植物族</button>
+                                                    <button type="button" class="btn btn-sm btn-outline-primary race-btn" data-race="昆虫族">昆虫族</button>
+                                                    <button type="button" class="btn btn-sm btn-outline-primary race-btn" data-race="水族">水族</button>
+                                                    <button type="button" class="btn btn-sm btn-outline-primary race-btn" data-race="岩石族">岩石族</button>
+                                                    <button type="button" class="btn btn-sm btn-outline-primary race-btn" data-race="炎族">炎族</button>
+                                                    <button type="button" class="btn btn-sm btn-outline-primary race-btn" data-race="雷族">雷族</button>
+                                                    <button type="button" class="btn btn-sm btn-outline-primary race-btn" data-race="恐竜族">恐竜族</button>
+                                                    <button type="button" class="btn btn-sm btn-outline-primary race-btn" data-race="魚族">魚族</button>
+                                                    <button type="button" class="btn btn-sm btn-outline-primary race-btn" data-race="海竜族">海竜族</button>
+                                                    <button type="button" class="btn btn-sm btn-outline-primary race-btn" data-race="爬虫類族">爬虫類族</button>
+                                                    <button type="button" class="btn btn-sm btn-outline-primary race-btn" data-race="サイキック族">サイキック族</button>
+                                                    <button type="button" class="btn btn-sm btn-outline-primary race-btn" data-race="幻竜族">幻竜族</button>
+                                                    <button type="button" class="btn btn-sm btn-outline-primary race-btn" data-race="サイバース族">サイバース族</button>
+                                                    <button type="button" class="btn btn-sm btn-outline-primary race-btn" data-race="幻神獣族">幻神獣族</button>
+                                                    <button type="button" class="btn btn-sm btn-outline-primary race-btn" data-race="創造神族">創造神族</button>
+                                                    <button type="button" class="btn btn-sm btn-outline-primary race-btn" data-race="幻想魔族">幻想魔族</button>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <!-- Attack/Defense -->
                                         <div class="row g-2 mb-2">
                                             <div class="col-md-3">
-                                                <label class="form-label small">攻撃力</label>
-                                                <input type="text" name="search_attack" class="form-control form-control-sm">
+                                                <label class="form-label small fw-bold">攻撃力</label>
+                                                <input type="text" name="search_attack" class="form-control form-control-sm" placeholder="例: 2500, >=2000">
                                             </div>
                                             <div class="col-md-3">
-                                                <label class="form-label small">守備力</label>
-                                                <input type="text" name="search_defense" class="form-control form-control-sm">
+                                                <label class="form-label small fw-bold">守備力</label>
+                                                <input type="text" name="search_defense" class="form-control form-control-sm" placeholder="例: 2000, <=1500">
                                             </div>
                                         </div>
                                     </div>
@@ -5780,30 +5664,18 @@
             // Get search mode (AND/OR)
             const searchMode = document.querySelector('input[name="search_mode"]:checked')?.value || 'and';
 
-            // Get advanced search parameters
-            const sLevel = document.querySelector('[name="search_level"]')?.value?.trim();
-            const sAttribute = document.querySelector('[name="search_attribute"]')?.value;
+            // Get advanced search parameters from buttons
+            const sLevel = document.querySelector('.level-btn.active')?.dataset.level || '';
+            const sAttribute = document.querySelector('.attribute-btn.active')?.dataset.attribute || '';
+
             // Get selected races from active race buttons
             const sRaces = Array.from(document.querySelectorAll('.race-btn.active'))
-                .map(btn => btn.dataset.race); // 族を含む完全な名前を使用（小文字化しない）
+                .map(btn => btn.dataset.race)
+                .filter(race => race); // 空の値を除外
 
-            // Get selected card types from active sub-type buttons
-            const activeSubTypes = Array.from(document.querySelectorAll('.sub-type-btn.active'));
-            let sCardTypes = [];
-            activeSubTypes.forEach(btn => {
-                const type = btn.dataset.type;
-                if (type === 'all-monster') {
-                    // Skip - means all monsters (no filter)
-                } else if (type === 'all-spell') {
-                    // All spells - add '魔法' as filter (will match race)
-                    sCardTypes.push('魔法');
-                } else if (type === 'all-trap') {
-                    // All traps - add '罠' as filter (will match race)
-                    sCardTypes.push('罠');
-                } else {
-                    sCardTypes.push(type);
-                }
-            });
+            // Get selected card types from active card-type buttons
+            const sCardTypes = Array.from(document.querySelectorAll('.card-type-btn.active'))
+                .map(btn => btn.dataset.type);
 
             const sAttack = document.querySelector('[name="search_attack"]')?.value?.trim();
             const sDefense = document.querySelector('[name="search_defense"]')?.value?.trim();
@@ -7938,117 +7810,56 @@ Firebase Consoleで確認すべき項目:
             editCardModal.hide();
         });
 
-        // Handle card type selection with tabs
-        const mainTypeTabs = document.querySelectorAll('.main-type-tab');
-        const subTypeGroups = document.querySelectorAll('.sub-type-group');
-        const subTypeButtons = document.querySelectorAll('.sub-type-btn');
-
-        // Handle main category tab clicks
-        mainTypeTabs.forEach(tab => {
-            tab.addEventListener('click', function() {
-                // Update active tab
-                mainTypeTabs.forEach(t => t.classList.remove('active'));
+        // Handle level button clicks
+        document.querySelectorAll('.level-btn').forEach(btn => {
+            btn.addEventListener('click', function() {
+                document.querySelectorAll('.level-btn').forEach(b => b.classList.remove('active'));
                 this.classList.add('active');
-
-                // Show/hide sub-type groups
-                const category = this.dataset.category;
-                subTypeGroups.forEach(group => {
-                    if (group.dataset.category === category) {
-                        group.style.display = 'block';
-                    } else {
-                        group.style.display = 'none';
-                    }
-                });
-
-                // Reset sub-type selections for this category
-                if (category === 'all') {
-                    // Clear all sub-type selections
-                    subTypeButtons.forEach(btn => btn.classList.remove('active'));
-                } else if (category === 'monster') {
-                    // Activate "all-monster" by default
-                    subTypeButtons.forEach(btn => {
-                        if (btn.dataset.type === 'all-monster') {
-                            btn.classList.add('active');
-                        } else if (btn.parentElement.closest('[data-category="monster"]')) {
-                            btn.classList.remove('active');
-                        }
-                    });
-                    // Auto-apply search when monster tab is clicked
-                    applySearchAndFilter();
-                } else if (category === 'spell') {
-                    // Activate "all-spell" by default
-                    subTypeButtons.forEach(btn => {
-                        if (btn.dataset.type === 'all-spell') {
-                            btn.classList.add('active');
-                        } else if (btn.parentElement.closest('[data-category="spell"]')) {
-                            btn.classList.remove('active');
-                        }
-                    });
-                } else if (category === 'trap') {
-                    // Activate "all-trap" by default
-                    subTypeButtons.forEach(btn => {
-                        if (btn.dataset.type === 'all-trap') {
-                            btn.classList.add('active');
-                        } else if (btn.parentElement.closest('[data-category="trap"]')) {
-                            btn.classList.remove('active');
-                        }
-                    });
-                }
-
                 applySearchAndFilter();
             });
         });
 
-        // Handle sub-type button clicks
-        subTypeButtons.forEach(button => {
-            button.addEventListener('click', function() {
-                const type = this.dataset.type;
-                const parentGroup = this.closest('.sub-type-group');
+        // Handle attribute button clicks
+        document.querySelectorAll('.attribute-btn').forEach(btn => {
+            btn.addEventListener('click', function() {
+                document.querySelectorAll('.attribute-btn').forEach(b => b.classList.remove('active'));
+                this.classList.add('active');
+                applySearchAndFilter();
+            });
+        });
 
-                if (type === 'all-monster' || type === 'all-spell' || type === 'all-trap') {
-                    // Clear all sub-type selections for this category
-                    parentGroup.querySelectorAll('.sub-type-btn').forEach(btn => {
-                        btn.classList.remove('active');
-                    });
-                    this.classList.add('active');
-                } else if (parentGroup.dataset.category === 'monster' || parentGroup.dataset.category === 'spell' || parentGroup.dataset.category === 'trap') {
-                    // Toggle selection for sub-types
-                    const allBtn = parentGroup.querySelector('[data-type^="all-"]');
-                    if (allBtn) allBtn.classList.remove('active');
-
-                    this.classList.toggle('active');
-
-                    // If no sub-types selected, activate the "all" button
-                    const activeButtons = parentGroup.querySelectorAll('.sub-type-btn.active');
-                    if (activeButtons.length === 0 && allBtn) {
-                        allBtn.classList.add('active');
-                    }
-                }
-
+        // Handle card type button clicks
+        document.querySelectorAll('.card-type-btn').forEach(btn => {
+            btn.addEventListener('click', function() {
+                this.classList.toggle('active');
                 applySearchAndFilter();
             });
         });
 
         // Handle race selection
         const raceButtons = document.querySelectorAll('.race-btn');
-        const clearRaceBtn = document.querySelector('.clear-race-btn');
 
         // Handle race button clicks
         raceButtons.forEach(button => {
             button.addEventListener('click', function() {
-                // Toggle selection
-                this.classList.toggle('active');
+                const race = this.dataset.race;
+                if (race === '') {
+                    // 「すべて」ボタンがクリックされた場合
+                    raceButtons.forEach(btn => btn.classList.remove('active'));
+                    this.classList.add('active');
+                } else {
+                    // 他のボタンがクリックされた場合、「すべて」ボタンを非アクティブに
+                    document.querySelector('.race-btn[data-race=""]')?.classList.remove('active');
+                    this.classList.toggle('active');
+                    // もしすべてのボタンが非アクティブなら「すべて」をアクティブに
+                    const activeRaces = document.querySelectorAll('.race-btn.active');
+                    if (activeRaces.length === 0) {
+                        document.querySelector('.race-btn[data-race=""]')?.classList.add('active');
+                    }
+                }
                 applySearchAndFilter();
             });
         });
-
-        // Handle clear all races button
-        if (clearRaceBtn) {
-            clearRaceBtn.addEventListener('click', function() {
-                raceButtons.forEach(btn => btn.classList.remove('active'));
-                applySearchAndFilter();
-            });
-        }
 
         // Debounce function for search
         let searchDebounceTimer = null;
