@@ -124,41 +124,18 @@ app.get('/card-detail', async (req, res) => {
         const nameMatch = html.match(/<title>遊戯王OCGカードデータベース \| (.*?)《/) || html.match(/<h1[^>]*>([^<]+)<\/h1>/i);
         const cardName = nameMatch ? nameMatch[1].trim() : 'Unknown Card';
 
-        // Find all reprint boxes
-        const reprintBoxesPattern = /<div id="update_list_([\s\S]*?)<\/div>\s*<\/div>/g;
-        const reprintHtmls = html.match(reprintBoxesPattern) || [];
-
         const reprints = [];
+        const reprintBlockPattern = /<div class="card_number">([\s\S]*?)<\/div>[\s\S]*?<div class="rarity">[\s\S]*?<p>([\s\S]*?)<\/p>[\s\S]*?<\/div>/g;
         
-        reprintHtmls.forEach(reprintHtml => {
-            const setCodeMatch = reprintHtml.match(/<div class="card_number">([\s\S]*?)<\/div>/);
-            const rarityMatch = reprintHtml.match(/<div class="rarity">[\s\S]*?<p>([\s\S]*?)<\/p>/);
-            
-            if (setCodeMatch && rarityMatch) {
-                const setCode = setCodeMatch[1].trim();
-                const rarity = rarityMatch[1].trim();
-                if (setCode && rarity) {
-                     reprints.push({ setCode, rarity });
-                }
+        let match;
+        while ((match = reprintBlockPattern.exec(html)) !== null) {
+            const setCode = match[1].trim();
+            // The rarity might have extra html tags inside, so clean it.
+            const rarity = match[2].replace(/<[^>]*>/g, '').trim();
+            if (setCode && rarity) {
+                reprints.push({ setCode, rarity });
             }
-        });
-
-        // Fallback if the above pattern fails
-        if (reprints.length === 0) {
-             const setCodePattern = /<div class="card_number">([\s\S]*?)<\/div>/g;
-             const rarityPattern = /<p>([\s\S]*?)<\/p>/g; // Simplified rarity pattern
-
-             const setCodes = (html.match(setCodePattern) || []).map(s => s.replace(/<\/?div.*?>/g, '').trim());
-             const rarities = (html.match(rarityPattern) || []).map(r => r.replace(/<\/?p>/g, '').trim());
-             
-             setCodes.forEach((setCode, index) => {
-                 const rarity = rarities[index] || 'N/A';
-                 if(setCode) {
-                    reprints.push({ setCode, rarity });
-                 }
-             });
         }
-
 
         res.json({
             cardId,
