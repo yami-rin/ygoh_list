@@ -121,7 +121,7 @@ app.get('/card-detail', async (req, res) => {
         const html = await response.text();
 
         // Extract card name from the title or header
-        const nameMatch = html.match(/<title>遊戯王OCGカードデータベース \| (.*?)《/) || html.match(/<h1[^>]*>([^<]+)<\/h1>/i);
+        const nameMatch = html.match(/<span class="card_name"[^>]*>([^<]+)<\/span>/);
         const cardName = nameMatch ? nameMatch[1].trim() : 'Unknown Card';
 
         const reprints = [];
@@ -135,22 +135,12 @@ app.get('/card-detail', async (req, res) => {
                 reprints.push({ setCode, rarity });
             }
         }
-        
-        if (reprints.length === 0) {
-            // Parsing failed, return raw HTML for debugging
-            return res.json({
-                cardId,
-                cardName,
-                reprints: [],
-                error: 'Parsing failed on server',
-                html: html 
-            });
-        }
 
         res.json({
             cardId,
             cardName,
-            reprints
+            reprints,
+            _debug_html: html // Always include for debugging
         });
 
     } catch (error) {

@@ -9831,15 +9831,14 @@ Firebase Consoleで確認すべき項目:
                 if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
                 const data = await response.json();
 
-                if (data.error === 'Parsing failed on server') {
-                    console.log('--- RAW HTML FROM PROXY ---');
-                    console.log(data.html);
-                    console.log('---------------------------');
-                    throw new Error('サーバーでの解析に失敗しました。開発者コンソールでHTMLを確認してください。');
+                if (data._debug_html) {
+                    console.log('--- RAW HTML FROM PROXY (/card-detail) ---');
+                    console.log(data._debug_html);
+                    console.log('------------------------------------');
                 }
 
-                if (!data.cardName) {
-                    throw new Error("カード情報が見つかりません。");
+                if (!data.cardName || data.cardName === 'Unknown Card') {
+                    throw new Error("カード名が見つかりません。");
                 }
 
                 document.getElementById('name').value = data.cardName;
@@ -9891,14 +9890,13 @@ Firebase Consoleで確認すべき項目:
                 if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
                 const data = await response.json();
                 
-                if (data.error === 'Parsing failed on server') {
-                    console.log('--- RAW HTML FROM PROXY ---');
-                    console.log(data.html);
-                    console.log('---------------------------');
-                    throw new Error('サーバーでの解析に失敗しました。開発者コンソールでHTMLを確認してください。');
+                if (data._debug_html) {
+                    console.log('--- RAW HTML FROM PROXY (/card-detail) ---');
+                    console.log(data._debug_html);
+                    console.log('------------------------------------');
                 }
 
-                if (!data.cardName) {
+                if (!data.cardName || data.cardName === 'Unknown Card') {
                     throw new Error("カード情報が見つかりません。");
                 }
 
