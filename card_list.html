@@ -9826,32 +9826,30 @@ Firebase Consoleで確認すべき項目:
             try {
                 const response = await fetch(proxyUrl);
                 if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
-                const text = await response.text();
-                const parser = new DOMParser();
-                const doc = parser.parseFromString(text, 'text/html');
-                
-                const cardName = doc.querySelector('#card_image_1')?.alt || '';
-                if (!cardName) throw new Error("カード名が見つかりません。");
-                
-                document.getElementById('name').value = cardName;
-                const setCodes = Array.from(doc.querySelectorAll('div.card_number')).map(div => div.textContent.trim());
-                const rarities = Array.from(doc.querySelectorAll('div.rarity p')).map(p => p.textContent.trim());
-                
+                const data = await response.json();
+
+                if (!data.cards || data.cards.length === 0) {
+                    throw new Error("カード情報が見つかりません。");
+                }
+
+                const cardData = data.cards[0];
+                document.getElementById('name').value = cardData.name;
+
                 const choicesEl = document.getElementById('set-rarity-choices');
                 choicesEl.innerHTML = '';
-                
-                if (setCodes.length > 0) {
-                    // Create unique set-rarity combinations
+
+                if (cardData.rarities && cardData.rarities.length > 0) {
                     const uniqueSetRarities = new Map();
-                    setCodes.forEach((code, i) => {
-                        const rarity = rarities[i] || '';
-                        const key = `${code}_${rarity}`;
-                        if (!uniqueSetRarities.has(key)) {
-                            uniqueSetRarities.set(key, { set_code: code, rarity: rarity });
-                        }
+                    data.cards.forEach(card => {
+                        const set_code = card.number;
+                        card.rarities.forEach(rarity => {
+                            const key = `${set_code}_${rarity}`;
+                            if (!uniqueSetRarities.has(key)) {
+                                uniqueSetRarities.set(key, { set_code, rarity });
+                            }
+                        });
                     });
-                    
-                    // Create buttons for unique combinations
+
                     Array.from(uniqueSetRarities.values()).forEach(data => {
                         const btn = document.createElement('button');
                         btn.type = 'button';
@@ -9864,7 +9862,7 @@ Firebase Consoleで確認すべき項目:
                 } else {
                     choicesEl.textContent = '収録情報が見つかりません。';
                 }
-                
+
                 // Clear search results
                 document.getElementById('search-results').innerHTML = '';
                 document.getElementById('card-search').value = '';
@@ -9877,31 +9875,58 @@ Firebase Consoleで確認すべき項目:
         
         // --- Fetch from URL ---
         document.getElementById('fetch-btn').addEventListener('click', async () => {
+            const url = document.getElementById('url-input').value.trim();
+            if (!url) {
+                alert('URLを入力してください。');
+                return;
+            }
             const proxyUrl = `${window.PROXY_URL}/card-list?url=${encodeURIComponent(url)}`;
             showLoading(true);
             try {
                 const response = await fetch(proxyUrl);
                 if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
-                const text = await response.text();
-                const parser = new DOMParser();
-                const doc = parser.parseFromString(text, 'text/html');
-                const cardName = doc.querySelector('#card_image_1')?.alt || '';
-                if (!cardName) throw new Error("カード名が見つかりません。");
-                document.getElementById('name').value = cardName;
-                const setCodes = Array.from(doc.querySelectorAll('div.card_number')).map(div => div.textContent.trim());
-                const rarities = Array.from(doc.querySelectorAll('div.rarity p')).map(p => p.textContent.trim());
+                const data = await response.json();
+
+                if (!data.cards || data.cards.length === 0) {
+                    throw new Error("カード情報が見つかりません。");
+                }
+
+                const cardData = data.cards[0];
+                document.getElementById('name').value = cardData.name;
+
                 const choicesEl = document.getElementById('set-rarity-choices');
                 choicesEl.innerHTML = '';
-                if (setCodes.length > 0) {
-                    // Create unique set-rarity combinations
+
+                if (cardData.rarities && cardData.rarities.length > 0) {
                     const uniqueSetRarities = new Map();
-                    setCodes.forEach((code, i) => {
-                        const rarity = rarities[i] || '';
-                        const key = `${code}_${rarity}`;
-                        if (!uniqueSetRarities.has(key)) {
-                            uniqueSetRarities.set(key, { set_code: code, rarity: rarity });
-                        }
+                    data.cards.forEach(card => {
+                        const set_code = card.number;
+                        card.rarities.forEach(rarity => {
+                            const key = `${set_code}_${rarity}`;
+                            if (!uniqueSetRarities.has(key)) {
+                                uniqueSetRarities.set(key, { set_code, rarity });
+                            }
+                        });
                     });
+
+                    Array.from(uniqueSetRarities.values()).forEach(data => {
+                        const btn = document.createElement('button');
+                        btn.type = 'button';
+                        btn.className = 'btn btn-outline-primary btn-sm m-1 set-choice-btn';
+                        btn.dataset.setCode = data.set_code;
+                        btn.dataset.rarity = data.rarity;
+                        btn.textContent = `${data.set_code} (${data.rarity})`;
+                        choicesEl.appendChild(btn);
+                    });
+                } else {
+                    choicesEl.textContent = '収録情報が見つかりません。';
+                }
+            } catch (err) {
+                alert(`エラー: ${err.message}`);
+            } finally {
+                showLoading(false);
+            }
+        });
                     
                     // Create buttons for unique combinations
                     Array.from(uniqueSetRarities.values()).forEach(data => {
