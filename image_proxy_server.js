@@ -174,15 +174,17 @@ app.get('/card-list', async (req, res) => {
 
         let match;
         while ((match = cardPattern.exec(html)) !== null) {
-            // Sanitize the card name by removing the ruby (furigana) part and trimming whitespace
-            const rawName = match[1].replace(/<span class="card_ruby">[\s\S]*?<\/span>/g, '').trim();
+            const rawNameWithRuby = match[1];
             const cardId = match[2];
-            
-            if (cardId && rawName) {
-                cards.push({
-                    id: cardId,
-                    name: rawName,
-                });
+
+            if (cardId && rawNameWithRuby) {
+                const rawName = rawNameWithRuby.replace(/<span class="card_ruby">[\s\S]*?<\/span>/g, '').trim();
+                if (rawName) {
+                    cards.push({
+                        id: cardId,
+                        name: rawName,
+                    });
+                }
             }
         }
         

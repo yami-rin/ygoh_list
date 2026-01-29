@@ -9841,7 +9841,15 @@ Firebase Consoleで確認すべき項目:
                 choicesEl.innerHTML = '';
 
                 if (data.reprints && data.reprints.length > 0) {
+                    const uniqueReprints = new Map();
                     data.reprints.forEach(reprint => {
+                        const key = `${reprint.setCode}_${reprint.rarity}`;
+                        if (!uniqueReprints.has(key)) {
+                            uniqueReprints.set(key, reprint);
+                        }
+                    });
+
+                    uniqueReprints.forEach(reprint => {
                         const btn = document.createElement('button');
                         btn.type = 'button';
                         btn.className = 'btn btn-outline-primary btn-sm m-1 set-choice-btn';
@@ -9894,7 +9902,15 @@ Firebase Consoleで確認すべき項目:
                 choicesEl.innerHTML = '';
 
                 if (data.reprints && data.reprints.length > 0) {
+                    const uniqueReprints = new Map();
                     data.reprints.forEach(reprint => {
+                        const key = `${reprint.setCode}_${reprint.rarity}`;
+                        if (!uniqueReprints.has(key)) {
+                            uniqueReprints.set(key, reprint);
+                        }
+                    });
+
+                    uniqueReprints.forEach(reprint => {
                         const btn = document.createElement('button');
                         btn.type = 'button';
                         btn.className = 'btn btn-outline-primary btn-sm m-1 set-choice-btn';
