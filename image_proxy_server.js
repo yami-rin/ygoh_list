@@ -130,11 +130,21 @@ app.get('/card-detail', async (req, res) => {
         let match;
         while ((match = reprintBlockPattern.exec(html)) !== null) {
             const setCode = match[1].trim();
-            // The rarity might have extra html tags inside, so clean it.
             const rarity = match[2].replace(/<[^>]*>/g, '').trim();
             if (setCode && rarity) {
                 reprints.push({ setCode, rarity });
             }
+        }
+        
+        if (reprints.length === 0) {
+            // Parsing failed, return raw HTML for debugging
+            return res.json({
+                cardId,
+                cardName,
+                reprints: [],
+                error: 'Parsing failed on server',
+                html: html 
+            });
         }
 
         res.json({
