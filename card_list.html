@@ -9764,26 +9764,24 @@ Firebase Consoleで確認すべき項目:
             const proxyUrl = `${window.PROXY_URL}/card-list?url=${encodeURIComponent(searchUrl)}`;
             
             try {
+                console.log('Fetching from proxy:', proxyUrl);
                 const response = await fetch(proxyUrl);
+                console.log('Proxy response:', response);
                 if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
-                const text = await response.text();
-                const parser = new DOMParser();
-                const doc = parser.parseFromString(text, 'text/html');
                 
-                // Extract card names and URLs
-                const cardNames = Array.from(doc.querySelectorAll('span.card_name')).map(span => span.textContent.trim());
-                const cardLinks = Array.from(doc.querySelectorAll('input.link_value')).map(input => input.value);
+                const data = await response.json();
+                console.log('Parsed JSON data:', data);
                 
                 // Store search results
                 searchResultsData.cards = [];
-                cardNames.forEach((name, index) => {
-                    if (cardLinks[index]) {
+                if (data.cards) {
+                    data.cards.forEach(card => {
                         searchResultsData.cards.push({
-                            name: name,
-                            url: 'https://www.db.yugioh-card.com' + cardLinks[index]
+                            name: card.name,
+                            url: `https://www.db.yugioh-card.com/yugiohdb/card_search.action?ope=2&cid=${card.id}`
                         });
-                    }
-                });
+                    });
+                }
                 searchResultsData.currentPage = 1;
                 
                 // Render paginated results - append to existing local results if any
@@ -9811,6 +9809,7 @@ Firebase Consoleで確認すべき項目:
                     renderSearchResults();
                 }
             } catch (err) {
+                console.error('Search error:', err);
                 alert(`検索エラー: ${err.message}`);
             } finally {
                 showLoading(false);
