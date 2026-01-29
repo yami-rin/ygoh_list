@@ -121,17 +121,24 @@ app.get('/card-detail', async (req, res) => {
         const html = await response.text();
 
         // Extract card name from the title or header
-        const nameMatch = html.match(/<span class="card_name"[^>]*>([^<]+)<\/span>/);
+        const nameMatch = html.match(/<meta name="title" content="(.*?)\s*\|\s*カード詳細\s*\|\s*遊戯王ニューロン\(オフィシャルカードゲーム カードデータベース\)"\/>/);
         const cardName = nameMatch ? nameMatch[1].trim() : 'Unknown Card';
 
         const reprints = [];
-        const reprintBlockPattern = /<div class="card_number">([\s\S]*?)<\/div>[\s\S]*?<div class="rarity">[\s\S]*?<p>([\s\S]*?)<\/p>[\s\S]*?<\/div>/g;
         
-        let match;
-        while ((match = reprintBlockPattern.exec(html)) !== null) {
-            const setCode = match[1].trim();
-            const rarity = match[2].replace(/<[^>]*>/g, '').trim();
-            if (setCode && rarity) {
+        // Find all card numbers
+        const setCodeMatches = Array.from(html.matchAll(/<div class="card_number">([\s\S]*?)<\/div>/g));
+
+        // Find all rarity blocks
+        const rarityMatches = Array.from(html.matchAll(/<div class="icon rarity">[\s\S]*?<p>([\s\S]*?)<\/p>/g));
+        
+        for (let i = 0; i < setCodeMatches.length; i++) {
+            const setCode = setCodeMatches[i][1].trim();
+            let rarity = 'N/A';
+            if (rarityMatches[i]) {
+                rarity = rarityMatches[i][1].replace(/<[^>]*>/g, '').trim();
+            }
+            if (setCode) {
                 reprints.push({ setCode, rarity });
             }
         }
