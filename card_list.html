@@ -9927,20 +9927,6 @@ Firebase Consoleで確認すべき項目:
                 showLoading(false);
             }
         });
-                    
-                    // Create buttons for unique combinations
-                    Array.from(uniqueSetRarities.values()).forEach(data => {
-                        const btn = document.createElement('button');
-                        btn.type = 'button';
-                        btn.className = 'btn btn-outline-primary btn-sm m-1 set-choice-btn';
-                        btn.dataset.setCode = data.set_code; btn.dataset.rarity = data.rarity;
-                        btn.textContent = `${data.set_code} (${data.rarity})`;
-                        choicesEl.appendChild(btn);
-                    });
-                } else { choicesEl.textContent = '収録情報が見つかりません。'; }
-                document.getElementById('url').value = '';
-            } catch (err) { alert(`エラー: ${err.message}`); } finally { showLoading(false); }
-        });
         document.getElementById('set-rarity-choices').addEventListener('click', (e) => {
             if (e.target.classList.contains('set-choice-btn')) {
                 document.getElementById('set_code').value = e.target.dataset.setCode;
