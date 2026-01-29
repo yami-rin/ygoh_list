@@ -3,6 +3,10 @@
  * IndexedDBを使用してカード画像をカードIDと紐づけて保存・取得
  */
 
+const PROXY_URL = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1'
+    ? 'http://localhost:3000'
+    : 'https://ygoh-list.onrender.com';
+
 class ImageCacheManager {
     constructor() {
         this.dbName = 'YugiohImageCache';
@@ -294,7 +298,7 @@ class ImageCacheManager {
      * @param {string} ciid - イラストID (デフォルト: '1')
      * @param {string} proxyUrl - プロキシURL
      */
-    async fetchAndCache(cacheKey, cardId = null, ciid = '1', proxyUrl = null) {
+    async fetchAndCache(cacheKey, cardId = null, ciid = '1') {
         // Backward compatibility: if only one argument, treat as cardId
         if (arguments.length === 1) {
             cardId = cacheKey;
@@ -307,13 +311,6 @@ class ImageCacheManager {
             const parts = cacheKey.split('_');
             cardId = parts[0];
             ciid = parts[1] || '1';
-        }
-
-        // デフォルトプロキシURL（環境に応じて自動切り替え）
-        if (!proxyUrl) {
-            proxyUrl = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1'
-                ? 'http://localhost:3000'
-                : 'https://ygoh-list.onrender.com'; // ここにデプロイしたURLを設定
         }
 
         try {
@@ -329,7 +326,7 @@ class ImageCacheManager {
             console.log(`[fetchAndCache] Cache miss. Fetching image for card ID: ${cardId}, ciid: ${ciid}`);
 
             // カード詳細を取得
-            const detailUrl = `${proxyUrl}/card-detail?cid=${cardId}`;
+            const detailUrl = `${PROXY_URL}/card-detail?cid=${cardId}`;
             const detailResponse = await fetch(detailUrl);
             const cardDetail = await detailResponse.json();
 
@@ -378,13 +375,7 @@ class ImageCacheManager {
     /**
      * 複数の画像を一括取得してキャッシュ
      */
-    async fetchAndCacheBatch(cardIds, proxyUrl = null, onProgress = null) {
-        // デフォルトプロキシURL（環境に応じて自動切り替え）
-        if (!proxyUrl) {
-            proxyUrl = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1'
-                ? 'http://localhost:3000'
-                : 'https://ygoh-list.onrender.com'; // ここにデプロイしたURLを設定
-        }
+    async fetchAndCacheBatch(cardIds, onProgress = null) {
         const results = {
             success: [],
             failed: []
@@ -394,7 +385,7 @@ class ImageCacheManager {
             const cardId = cardIds[i];
 
             try {
-                await this.fetchAndCache(cardId, proxyUrl);
+                await this.fetchAndCache(cardId);
                 results.success.push(cardId);
             } catch (error) {
                 results.failed.push({ cardId, error: error.message });
@@ -489,6 +480,7 @@ const imageCacheManager = new ImageCacheManager();
 if (typeof window !== 'undefined') {
     window.ImageCacheManager = ImageCacheManager;
     window.imageCacheManager = imageCacheManager;
+    window.PROXY_URL = PROXY_URL;
 }
 
 // ES6モジュールとしてもエクスポート
