@@ -9831,14 +9831,6 @@ Firebase Consoleで確認すべき項目:
                 if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
                 const data = await response.json();
 
-                if (data._debug_html) {
-                    console.log('--- RAW HTML FROM PROXY (/card-detail) ---');
-                    console.log(data._debug_html);
-                    console.log('------------------------------------');
-                    // Throw a specific error to notify the user
-                    throw new Error('開発者コンソールを開き、表示されたHTMLを開発者に報告してください。');
-                }
-
                 if (!data.cardName || data.cardName === 'Unknown Card') {
                     throw new Error("カード名が見つかりません。");
                 }
@@ -9892,14 +9884,6 @@ Firebase Consoleで確認すべき項目:
                 if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
                 const data = await response.json();
                 
-                if (data._debug_html) {
-                    console.log('--- RAW HTML FROM PROXY (/card-detail) ---');
-                    console.log(data._debug_html);
-                    console.log('------------------------------------');
-                    // Throw a specific error to notify the user
-                    throw new Error('開発者コンソールを開き、表示されたHTMLを開発者に報告してください。');
-                }
-
                 if (!data.cardName || data.cardName === 'Unknown Card') {
                     throw new Error("カード名が見つかりません。");
                 }
