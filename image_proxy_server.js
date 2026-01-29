@@ -168,206 +168,30 @@ app.get('/card-list', async (req, res) => {
 
         const html = await response.text();
 
-        // Parse card list from HTML
         const cards = [];
+        // Use regex to find all cards in the list
+        const cardPattern = /<div class="t_row c_normal open">[\s\S]*?<span class="card_name">([\s\S]*?)<\/span>[\s\S]*?<input type="hidden" class="link_value" value="\/yugiohdb\/card_search\.action\?ope=2&cid=(\d+)">/g;
 
-        // Rarity code mapping
-        const rarityMap = {
-            'n': 'ノーマル',
-            'r': 'レア',
-            'sr': 'スーパーレア',
-            'ur': 'ウルトラレア',
-            'scr': 'シークレットレア',
-            'hr': 'ホログラフィックレア',
-            '20s': '20thシークレットレア',
-            'pscr': 'プリズマティックシークレットレア',
-            'mr': 'ミレニアムレア',
-            'pr': 'パラレルレア',
-            'npr': 'ノーマルパラレルレア',
-            'spr': 'スーパーパラレルレア',
-            'exs': 'エクストラシークレットレア',
-            'kc': 'KCレア',
-            'kcr': 'KCウルトラレア'
-        };
-
-        // Split HTML by card entries (using link_value as delimiter)
-        // Each card block contains: card_name, rarities, and link_value (cid)
-        const cardBlockPattern = /<input[^>]*class="link_value"[^>]*value="\/yugiohdb\/card_search\.action\?ope=2&(?:amp;)?cid=(\d+)"[^>]*>/g;
-
-        let lastIndex = 0;
         let match;
-        const cardBlocks = [];
-
-        while ((match = cardBlockPattern.exec(html)) !== null) {
-            const cardId = match[1];
-            const blockEnd = match.index;
-            const blockHtml = html.substring(lastIndex, blockEnd + match[0].length);
-            cardBlocks.push({ id: cardId, html: blockHtml });
-            lastIndex = blockEnd;
-        }
-
-        console.log(`Found ${cardBlocks.length} card blocks`);
-
-        // Parse each card block
-        cardBlocks.forEach((block, index) => {
-            // Extract card name
-            const nameMatch = block.html.match(/<span\s+class="card_name"[^>]*>([^<]+)<\/span>/);
-            const cardName = nameMatch ? nameMatch[1].trim() : `Card ${block.id}`;
-
-            // Extract ALL rarities for this card
-            // Look for <div class="lr_icon rid rid_X"> ... <p>SR</p>
-            const rarityPattern = /<div\s+class="lr_icon\s+rid\s+rid_\d+"[^>]*>[\s\S]*?<p>([^<]+)<\/p>/gi;
-            const cardRarities = [];
-            let rarityMatch;
-
-            while ((rarityMatch = rarityPattern.exec(block.html)) !== null) {
-                let rarityCode = rarityMatch[1].trim();
-
-                if (rarityCode && !cardRarities.includes(rarityCode)) {
-                    cardRarities.push(rarityCode);
-                }
-            }
-
-            // Fallback: if no lr_icon found, try the old pack_ method
-            if (cardRarities.length === 0) {
-                const packPattern = /<div\s+class="icon\s+rarity\s+pack_([a-z0-9]+)"[^>]*>/gi;
-                let packMatch;
-                while ((packMatch = packPattern.exec(block.html)) !== null) {
-                    const rarityCode = packMatch[1].toLowerCase();
-                    const mappedRarity = rarityMap[rarityCode] || 'その他';
-                    if (!cardRarities.includes(mappedRarity)) {
-                        cardRarities.push(mappedRarity);
-                    }
-                }
-            }
-
-            console.log(`Card ${index}: ${cardName} (ID: ${block.id}), Rarities: [${cardRarities.join(', ')}]`);
-
-            cardBlocks[index].name = cardName;
-            cardBlocks[index].rarities = cardRarities;
-        });
-
-        console.log(`Parsed ${cardBlocks.length} cards with rarities`);
-
-        // Extract release date from search results page
-        let releaseDate = '';
-        const releaseDateMatch = html.match(/<p\s+id="previewed"[^>]*>[\s\S]*?公開日\s*:\s*(\d{4})年(\d{2})月(\d{2})日[\s\S]*?<\/p>/);
-        if (releaseDateMatch) {
-            const year = releaseDateMatch[1];
-            const month = releaseDateMatch[2];
-            const day = releaseDateMatch[3];
-            releaseDate = `${year}-${month}-${day}`;
-            console.log(`Release date from search results: ${releaseDate}`);
-        } else {
-            console.log('No release date found in search results');
-        }
-
-        // Get card number (型番) from the first card's detail page
-        let baseCardNumber = '';
-        if (cardBlocks.length > 0) {
-            try {
-                const firstCardId = cardBlocks[0].id;
-                const detailUrl = `https://www.db.yugioh-card.com/yugiohdb/card_search.action?ope=2&cid=${firstCardId}`;
-
-                console.log(`Fetching first card details from: ${detailUrl}`);
-                const detailResponse = await fetch(detailUrl, {
-                    headers: {
-                        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36',
-                        'Referer': 'https://www.db.yugioh-card.com/',
-                        'Accept': 'text/html',
-                        'Accept-Language': 'ja,en-US;q=0.9,en;q=0.8'
-                    }
+        while ((match = cardPattern.exec(html)) !== null) {
+            // Sanitize the card name by removing the ruby (furigana) part and trimming whitespace
+            const rawName = match[1].replace(/<span class="card_ruby">[\s\S]*?<\/span>/g, '').trim();
+            const cardId = match[2];
+            
+            if (cardId && rawName) {
+                cards.push({
+                    id: cardId,
+                    name: rawName,
                 });
-
-                const detailHtml = await detailResponse.text();
-
-                // If release date is available, find card_number matching that date
-                if (releaseDate) {
-                    console.log(`Looking for card_number with matching release date: ${releaseDate}`);
-
-                    // Find all card_number and time pairs
-                    // Pattern: <div class="time">YYYY-MM-DD</div> ... <div class="card_number">XXX</div>
-                    const timePattern = /<div\s+class="time">\s*([0-9-]+)\s*<\/div>[\s\S]*?<div\s+class="card_number">\s*([^\s<]+)\s*<\/div>/g;
-                    let match;
-
-                    while ((match = timePattern.exec(detailHtml)) !== null) {
-                        const timeValue = match[1].trim();
-                        const cardNumber = match[2].trim();
-
-                        console.log(`Found card_number: ${cardNumber}, time: ${timeValue}`);
-
-                        if (timeValue === releaseDate) {
-                            baseCardNumber = cardNumber;
-                            console.log(`Matched! Using card number: ${baseCardNumber}`);
-                            break;
-                        }
-                    }
-
-                    // If no match found, fall back to first card_number
-                    if (!baseCardNumber) {
-                        console.log('No matching date found, falling back to first card_number');
-                        const cardNumberMatch = detailHtml.match(/<div\s+class="card_number">([^<]+)<\/div>/);
-                        if (cardNumberMatch) {
-                            baseCardNumber = cardNumberMatch[1].trim();
-                            console.log(`Fallback card number: ${baseCardNumber}`);
-                        }
-                    }
-                } else {
-                    // No release date available, use first card_number
-                    const cardNumberMatch = detailHtml.match(/<div\s+class="card_number">([^<]+)<\/div>/);
-                    if (cardNumberMatch) {
-                        baseCardNumber = cardNumberMatch[1].trim();
-                        console.log(`Base card number: ${baseCardNumber}`);
-                    }
-                }
-            } catch (error) {
-                console.error('Failed to fetch first card details:', error);
             }
         }
-
-        // Generate card numbers by incrementing the base number
-        const generateCardNumber = (baseNumber, index) => {
-            if (!baseNumber) return '';
-
-            // Extract prefix and number from base (e.g., "LB-01" -> "LB-" and "01")
-            const match = baseNumber.match(/^(.+?)(\d+)$/);
-            if (!match) return baseNumber;
-
-            const prefix = match[1];
-            const startNum = parseInt(match[2], 10);
-            const numLength = match[2].length; // Preserve leading zeros
-
-            const newNum = (startNum + index).toString().padStart(numLength, '0');
-            return prefix + newNum;
-        };
-
-        // Build final card list with all rarities
-        cardBlocks.forEach((block, index) => {
-            cards.push({
-                id: block.id,
-                name: block.name,
-                number: generateCardNumber(baseCardNumber, index),
-                rarities: block.rarities // Array of all rarities for this card
-            });
-        });
-
-        console.log(`Successfully parsed ${cards.length} cards`);
-
-        console.log(`Found ${cards.length} cards from search results`);
-
-        // Include HTML sample in response for debugging if no cards found
-        const debugInfo = cards.length === 0 ? {
-            htmlSample: html.substring(0, 3000),
-            cardImagePatterns: html.match(/\$\('#card_image_\d+_\d+'\).*?;/g)?.slice(0, 5) || [],
-            namePatterns: html.match(/.{0,100}(card_name|cardName).{0,100}/gi)?.slice(0, 10) || [],
-            strongTags: html.match(/<strong[^>]*>.*?<\/strong>/g)?.slice(0, 10) || []
-        } : undefined;
+        
+        console.log(`Successfully parsed ${cards.length} cards from search results`);
 
         res.json({
             success: true,
             count: cards.length,
-            cards: cards,
-            debug: debugInfo
+            cards: cards
         });
 
     } catch (error) {
