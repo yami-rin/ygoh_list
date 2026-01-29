@@ -9819,44 +9819,35 @@ Firebase Consoleで確認すべき項目:
         const renderSearchResultsToContainer = (containerId) => renderSearchResults(containerId);
         
         const fetchCardDetails = async (cardUrl) => {
-            const url = cardUrl + (cardUrl.includes('request_locale=ja') ? '' : (cardUrl.includes('?') ? '&request_locale=ja' : '?request_locale=ja'));
-            const proxyUrl = `${window.PROXY_URL}/card-list?url=${encodeURIComponent(url)}`;
             showLoading(true);
-            
             try {
+                const url = new URL(cardUrl);
+                const cid = url.searchParams.get('cid');
+                if (!cid) throw new Error('Card ID (cid) not found in URL');
+
+                const proxyUrl = `${window.PROXY_URL}/card-detail?cid=${cid}`;
+                
                 const response = await fetch(proxyUrl);
                 if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
                 const data = await response.json();
 
-                if (!data.cards || data.cards.length === 0) {
+                if (!data.cardName) {
                     throw new Error("カード情報が見つかりません。");
                 }
 
-                const cardData = data.cards[0];
-                document.getElementById('name').value = cardData.name;
+                document.getElementById('name').value = data.cardName;
 
                 const choicesEl = document.getElementById('set-rarity-choices');
                 choicesEl.innerHTML = '';
 
-                if (cardData.rarities && cardData.rarities.length > 0) {
-                    const uniqueSetRarities = new Map();
-                    data.cards.forEach(card => {
-                        const set_code = card.number;
-                        card.rarities.forEach(rarity => {
-                            const key = `${set_code}_${rarity}`;
-                            if (!uniqueSetRarities.has(key)) {
-                                uniqueSetRarities.set(key, { set_code, rarity });
-                            }
-                        });
-                    });
-
-                    Array.from(uniqueSetRarities.values()).forEach(data => {
+                if (data.reprints && data.reprints.length > 0) {
+                    data.reprints.forEach(reprint => {
                         const btn = document.createElement('button');
                         btn.type = 'button';
                         btn.className = 'btn btn-outline-primary btn-sm m-1 set-choice-btn';
-                        btn.dataset.setCode = data.set_code;
-                        btn.dataset.rarity = data.rarity;
-                        btn.textContent = `${data.set_code} (${data.rarity})`;
+                        btn.dataset.setCode = reprint.setCode;
+                        btn.dataset.rarity = reprint.rarity;
+                        btn.textContent = `${reprint.setCode} (${reprint.rarity})`;
                         choicesEl.appendChild(btn);
                     });
                 } else {
@@ -9867,6 +9858,7 @@ Firebase Consoleで確認すべき項目:
                 document.getElementById('search-results').innerHTML = '';
                 document.getElementById('card-search').value = '';
             } catch (err) {
+                console.error('Fetch card details error:', err);
                 alert(`エラー: ${err.message}`);
             } finally {
                 showLoading(false);
@@ -9875,53 +9867,47 @@ Firebase Consoleで確認すべき項目:
         
         // --- Fetch from URL ---
         document.getElementById('fetch-btn').addEventListener('click', async () => {
-            const url = document.getElementById('url-input').value.trim();
-            if (!url) {
+            const urlInput = document.getElementById('url-input').value.trim();
+            if (!urlInput) {
                 alert('URLを入力してください。');
                 return;
             }
-            const proxyUrl = `${window.PROXY_URL}/card-list?url=${encodeURIComponent(url)}`;
             showLoading(true);
             try {
+                const url = new URL(urlInput);
+                const cid = url.searchParams.get('cid');
+                if (!cid) throw new Error('Card ID (cid) not found in URL');
+
+                const proxyUrl = `${window.PROXY_URL}/card-detail?cid=${cid}`;
+
                 const response = await fetch(proxyUrl);
                 if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
                 const data = await response.json();
 
-                if (!data.cards || data.cards.length === 0) {
+                if (!data.cardName) {
                     throw new Error("カード情報が見つかりません。");
                 }
 
-                const cardData = data.cards[0];
-                document.getElementById('name').value = cardData.name;
+                document.getElementById('name').value = data.cardName;
 
                 const choicesEl = document.getElementById('set-rarity-choices');
                 choicesEl.innerHTML = '';
 
-                if (cardData.rarities && cardData.rarities.length > 0) {
-                    const uniqueSetRarities = new Map();
-                    data.cards.forEach(card => {
-                        const set_code = card.number;
-                        card.rarities.forEach(rarity => {
-                            const key = `${set_code}_${rarity}`;
-                            if (!uniqueSetRarities.has(key)) {
-                                uniqueSetRarities.set(key, { set_code, rarity });
-                            }
-                        });
-                    });
-
-                    Array.from(uniqueSetRarities.values()).forEach(data => {
+                if (data.reprints && data.reprints.length > 0) {
+                    data.reprints.forEach(reprint => {
                         const btn = document.createElement('button');
                         btn.type = 'button';
                         btn.className = 'btn btn-outline-primary btn-sm m-1 set-choice-btn';
-                        btn.dataset.setCode = data.set_code;
-                        btn.dataset.rarity = data.rarity;
-                        btn.textContent = `${data.set_code} (${data.rarity})`;
+                        btn.dataset.setCode = reprint.setCode;
+                        btn.dataset.rarity = reprint.rarity;
+                        btn.textContent = `${reprint.setCode} (${reprint.rarity})`;
                         choicesEl.appendChild(btn);
                     });
                 } else {
                     choicesEl.textContent = '収録情報が見つかりません。';
                 }
             } catch (err) {
+                console.error('Fetch from URL error:', err);
                 alert(`エラー: ${err.message}`);
             } finally {
                 showLoading(false);

@@ -103,7 +103,7 @@ app.get('/card-detail', async (req, res) => {
     }
 
     try {
-        const detailUrl = `https://www.db.yugioh-card.com/yugiohdb/card_search.action?ope=2&cid=${cardId}`;
+        const detailUrl = `https://www.db.yugioh-card.com/yugiohdb/card_search.action?ope=2&cid=${cardId}&request_locale=ja`;
 
         const response = await fetch(detailUrl, {
             headers: {
@@ -113,54 +113,57 @@ app.get('/card-detail', async (req, res) => {
                 'Accept-Language': 'ja,en-US;q=0.9,en;q=0.8'
             }
         });
+        
+        if (!response.ok) {
+            throw new Error(`Failed to fetch from yugioh-card.com: ${response.status}`);
+        }
 
         const html = await response.text();
 
-        // Extract card name
-        const nameMatch = html.match(/<h1[^>]*>([^<]+)<\/h1>/i);
-        const cardName = nameMatch ? nameMatch[1].trim() : null;
+        // Extract card name from the title or header
+        const nameMatch = html.match(/<title>遊戯王OCGカードデータベース \| (.*?)《/) || html.match(/<h1[^>]*>([^<]+)<\/h1>/i);
+        const cardName = nameMatch ? nameMatch[1].trim() : 'Unknown Card';
 
-        // Extract all card images with different illustrations (ciid)
-        // Pattern: get_image.action?type=2&cid=XXXX&ciid=Y&enc=ZZZZ
-        const imagePattern = /get_image\.action\?type=2&cid=\d+&ciid=(\d+)&enc=([a-zA-Z0-9_-]+)/g;
-        const illustrations = [];
-        let match;
+        // Find all reprint boxes
+        const reprintBoxesPattern = /<div id="update_list_([\s\S]*?)<\/div>\s*<\/div>/g;
+        const reprintHtmls = html.match(reprintBoxesPattern) || [];
 
-        while ((match = imagePattern.exec(html)) !== null) {
-            const ciid = match[1];
-            const encToken = match[2];
-
-            // Avoid duplicates
-            if (!illustrations.find(ill => ill.ciid === ciid)) {
-                illustrations.push({
-                    ciid: ciid,
-                    encToken: encToken
-                });
+        const reprints = [];
+        
+        reprintHtmls.forEach(reprintHtml => {
+            const setCodeMatch = reprintHtml.match(/<div class="card_number">([\s\S]*?)<\/div>/);
+            const rarityMatch = reprintHtml.match(/<div class="rarity">[\s\S]*?<p>([\s\S]*?)<\/p>/);
+            
+            if (setCodeMatch && rarityMatch) {
+                const setCode = setCodeMatch[1].trim();
+                const rarity = rarityMatch[1].trim();
+                if (setCode && rarity) {
+                     reprints.push({ setCode, rarity });
+                }
             }
+        });
+
+        // Fallback if the above pattern fails
+        if (reprints.length === 0) {
+             const setCodePattern = /<div class="card_number">([\s\S]*?)<\/div>/g;
+             const rarityPattern = /<p>([\s\S]*?)<\/p>/g; // Simplified rarity pattern
+
+             const setCodes = (html.match(setCodePattern) || []).map(s => s.replace(/<\/?div.*?>/g, '').trim());
+             const rarities = (html.match(rarityPattern) || []).map(r => r.replace(/<\/?p>/g, '').trim());
+             
+             setCodes.forEach((setCode, index) => {
+                 const rarity = rarities[index] || 'N/A';
+                 if(setCode) {
+                    reprints.push({ setCode, rarity });
+                 }
+             });
         }
 
-        console.log(`Found ${illustrations.length} illustration(s) for card ${cardId}`);
-
-        // Build base URL from request
-        const protocol = req.headers['x-forwarded-proto'] || req.protocol || 'https';
-        const host = req.headers['x-forwarded-host'] || req.headers.host || req.hostname;
-        const baseUrl = `${protocol}://${host}`;
-
-        // Default to first illustration if none found
-        const defaultIllustration = illustrations.length > 0 ? illustrations[0] : { ciid: '1', encToken: null };
 
         res.json({
             cardId,
             cardName,
-            encToken: defaultIllustration.encToken, // For backward compatibility
-            illustrations: illustrations.map(ill => ({
-                ciid: ill.ciid,
-                encToken: ill.encToken,
-                imageUrl: `${baseUrl}/image?cid=${cardId}&ciid=${ill.ciid}&enc=${ill.encToken}`
-            })),
-            imageUrl: defaultIllustration.encToken ?
-                `${baseUrl}/image?cid=${cardId}&ciid=${defaultIllustration.ciid}&enc=${defaultIllustration.encToken}` :
-                `${baseUrl}/image?cid=${cardId}`
+            reprints
         });
 
     } catch (error) {
