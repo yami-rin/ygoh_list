@@ -2671,6 +2671,7 @@
             firstCollectionDate: null,
             lastMilestoneReached: 0,
             cardAdditionDates: {},
+            cardAdditionHeatmap: {}, // { 'YYYY-MM-DD': count } for calendar heatmap
             hasReceivedFirstLoginBonus: false, // Track first login bonus in Firebase
             recentCardsHistory: [], // Recent card addition history for analysis
             // Profile data
@@ -5776,9 +5777,9 @@
 
         // Build card addition history from gamificationData (Firebase) with localStorage fallback
         const buildCardAdditionHistory = async () => {
-            // Primary source: gamificationData.cardAdditionDates (synced with Firebase)
-            if (gamificationData.cardAdditionDates && Object.keys(gamificationData.cardAdditionDates).length > 0) {
-                cardAdditionHistory = { ...gamificationData.cardAdditionDates };
+            // Primary source: gamificationData.cardAdditionHeatmap (synced with Firebase)
+            if (gamificationData.cardAdditionHeatmap && Object.keys(gamificationData.cardAdditionHeatmap).length > 0) {
+                cardAdditionHistory = { ...gamificationData.cardAdditionHeatmap };
                 console.log('📅 Loaded cardAdditionHistory from gamificationData:', Object.keys(cardAdditionHistory).length, 'dates');
                 return;
             }
@@ -5815,7 +5816,7 @@
 
             // Save rebuilt data to gamificationData for future persistence
             if (Object.keys(cardAdditionHistory).length > 0) {
-                gamificationData.cardAdditionDates = { ...cardAdditionHistory };
+                gamificationData.cardAdditionHeatmap = { ...cardAdditionHistory };
                 if (currentUser && currentUser.uid !== 'local_user') {
                     saveGamificationData();
                     console.log('📅 Saved rebuilt cardAdditionHistory to Firebase');
@@ -6721,12 +6722,12 @@ Firebase Consoleで確認すべき項目:
                 recentHistory = recentHistory.slice(0, 100);
                 localStorage.setItem('recentCardsHistory', JSON.stringify(recentHistory));
                 
-                // Update cardAdditionDates for heatmap (today's date with quantity)
+                // Update cardAdditionHeatmap for calendar heatmap (today's date with quantity)
                 const today = new Date().toISOString().split('T')[0];
                 const addedQuantity = parseInt(newCard['枚数']) || 1;
                 cardAdditionHistory[today] = (cardAdditionHistory[today] || 0) + addedQuantity;
-                gamificationData.cardAdditionDates = gamificationData.cardAdditionDates || {};
-                gamificationData.cardAdditionDates[today] = (gamificationData.cardAdditionDates[today] || 0) + addedQuantity;
+                gamificationData.cardAdditionHeatmap = gamificationData.cardAdditionHeatmap || {};
+                gamificationData.cardAdditionHeatmap[today] = (gamificationData.cardAdditionHeatmap[today] || 0) + addedQuantity;
 
                 // Save to Firebase for logged-in users
                 if (currentUser && currentUser.uid !== 'local_user') {
@@ -7202,8 +7203,8 @@ Firebase Consoleで確認すべき項目:
                 if (totalImported > 0) {
                     const today = new Date().toISOString().split('T')[0];
                     cardAdditionHistory[today] = (cardAdditionHistory[today] || 0) + totalImported;
-                    gamificationData.cardAdditionDates = gamificationData.cardAdditionDates || {};
-                    gamificationData.cardAdditionDates[today] = (gamificationData.cardAdditionDates[today] || 0) + totalImported;
+                    gamificationData.cardAdditionHeatmap = gamificationData.cardAdditionHeatmap || {};
+                    gamificationData.cardAdditionHeatmap[today] = (gamificationData.cardAdditionHeatmap[today] || 0) + totalImported;
                     if (currentUser && currentUser.uid !== 'local_user') {
                         saveGamificationData();
                     }
