@@ -2453,7 +2453,7 @@
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-app.js";
         import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-auth.js";
-        import { getFirestore, collection, getDocs, getDoc, doc, updateDoc, deleteDoc, addDoc, setDoc } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore.js";
+        import { getFirestore, collection, getDocs, getDoc, doc, updateDoc, deleteDoc, addDoc, setDoc, query, limit, orderBy } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore.js";
 
         // Firebase configuration
         const firebaseConfig = {
@@ -2489,7 +2489,9 @@
             collection: [],
             wishlist: [],
             decks: [],
-            profile: null
+            profile: null,
+            wishlistLoaded: false,
+            decksLoaded: false
         };
         let viewingCurrentType = 'collection';
         let viewingFilteredCards = [];
@@ -5118,14 +5120,16 @@
             }
         };
 
-        // Load public users list
+        // Load public users list (limited to 50 users to save reads)
         const loadPublicUsers = async () => {
             const userList = document.getElementById('user-list');
             userList.innerHTML = '<div class="text-center py-3"><div class="spinner-border spinner-border-sm" role="status"></div> 読み込み中...</div>';
 
             try {
+                // Limit to 50 users to reduce Firebase reads
                 const profilesRef = collection(db, 'publicProfiles');
-                const snapshot = await getDocs(profilesRef);
+                const q = query(profilesRef, orderBy('updatedAt', 'desc'), limit(50));
+                const snapshot = await getDocs(q);
 
                 publicUsers = [];
                 snapshot.docs.forEach(doc => {
@@ -5187,16 +5191,26 @@
             });
         };
 
-        // Load a specific user's collection
+        // Load a specific user's collection (lazy loading - only loads collection initially)
         const loadUserCollection = async (userId) => {
             if (!userId) return;
 
             viewingUserId = userId;
+            // Reset data for new user
+            viewingUserData = {
+                collection: [],
+                wishlist: [],
+                decks: [],
+                profile: null,
+                wishlistLoaded: false,
+                decksLoaded: false
+            };
+
             const viewingGrid = document.getElementById('viewing-card-grid');
             viewingGrid.innerHTML = '<div class="col-12 text-center py-5"><div class="spinner-border" role="status"></div><p class="mt-2">読み込み中...</p></div>';
 
             try {
-                // Load user's profile
+                // Load user's profile (1 read)
                 const profileRef = doc(db, 'publicProfiles', userId);
                 const profileSnap = await getDoc(profileRef);
                 viewingUserData.profile = profileSnap.exists() ? profileSnap.data() : null;
@@ -5207,20 +5221,10 @@
                     return;
                 }
 
-                // Load collection
+                // Load only collection initially (saves reads for wishlist/decks)
                 const collectionRef = collection(db, 'users', userId, 'cards');
                 const collectionSnap = await getDocs(collectionRef);
                 viewingUserData.collection = collectionSnap.docs.map(doc => ({ id: doc.id, data: doc.data() }));
-
-                // Load wishlist
-                const wishlistRef = collection(db, 'users', userId, 'wishlist');
-                const wishlistSnap = await getDocs(wishlistRef);
-                viewingUserData.wishlist = wishlistSnap.docs.map(doc => ({ id: doc.id, data: doc.data() }));
-
-                // Load decks
-                const decksRef = collection(db, 'users', userId, 'decks');
-                const decksSnap = await getDocs(decksRef);
-                viewingUserData.decks = decksSnap.docs.map(doc => ({ id: doc.id, data: doc.data() }));
 
                 // Update header and show UI
                 const userName = viewingUserData.profile?.displayName || 'Anonymous';
@@ -5229,10 +5233,14 @@
                 document.getElementById('viewing-user-tabs').style.display = 'flex';
                 document.getElementById('viewing-filters').style.display = 'flex';
 
-                // Update counts
+                // Update counts (wishlist/decks show "?" until loaded)
                 document.getElementById('view-collection-count').textContent = viewingUserData.collection.length;
-                document.getElementById('view-wishlist-count').textContent = viewingUserData.wishlist.length;
-                document.getElementById('view-decks-count').textContent = viewingUserData.decks.length;
+                document.getElementById('view-wishlist-count').textContent = '?';
+                document.getElementById('view-decks-count').textContent = '?';
+
+                // Reset tab state
+                document.querySelectorAll('#viewing-user-tabs .nav-link').forEach(t => t.classList.remove('active'));
+                document.querySelector('#viewing-user-tabs .nav-link[data-view-type="collection"]').classList.add('active');
 
                 // Populate rarity filter
                 populateViewingRarityFilter();
@@ -5246,6 +5254,37 @@
             } catch (error) {
                 console.error('Error loading user collection:', error);
                 viewingGrid.innerHTML = '<div class="col-12 text-center py-5 text-danger"><i class="bi bi-exclamation-circle" style="font-size: 3rem;"></i><p class="mt-2">読み込みに失敗しました</p></div>';
+            }
+        };
+
+        // Lazy load wishlist for viewing user
+        const loadViewingWishlist = async () => {
+            if (!viewingUserId || viewingUserData.wishlistLoaded) return;
+
+            try {
+                const wishlistRef = collection(db, 'users', viewingUserId, 'wishlist');
+                const wishlistSnap = await getDocs(wishlistRef);
+                viewingUserData.wishlist = wishlistSnap.docs.map(doc => ({ id: doc.id, data: doc.data() }));
+                viewingUserData.wishlistLoaded = true;
+                document.getElementById('view-wishlist-count').textContent = viewingUserData.wishlist.length;
+                populateViewingRarityFilter(); // Update filter with wishlist rarities
+            } catch (error) {
+                console.error('Error loading wishlist:', error);
+            }
+        };
+
+        // Lazy load decks for viewing user
+        const loadViewingDecks = async () => {
+            if (!viewingUserId || viewingUserData.decksLoaded) return;
+
+            try {
+                const decksRef = collection(db, 'users', viewingUserId, 'decks');
+                const decksSnap = await getDocs(decksRef);
+                viewingUserData.decks = decksSnap.docs.map(doc => ({ id: doc.id, data: doc.data() }));
+                viewingUserData.decksLoaded = true;
+                document.getElementById('view-decks-count').textContent = viewingUserData.decks.length;
+            } catch (error) {
+                console.error('Error loading decks:', error);
             }
         };
 
@@ -5461,13 +5500,25 @@
                 document.getElementById('viewing-pagination').style.display = 'none';
             });
 
-            // Viewing user tabs
+            // Viewing user tabs (with lazy loading)
             document.querySelectorAll('#viewing-user-tabs .nav-link').forEach(tab => {
-                tab.addEventListener('click', () => {
+                tab.addEventListener('click', async () => {
                     document.querySelectorAll('#viewing-user-tabs .nav-link').forEach(t => t.classList.remove('active'));
                     tab.classList.add('active');
                     viewingCurrentType = tab.dataset.viewType;
                     viewingCurrentPage = 1;
+
+                    // Lazy load data if needed
+                    if (viewingCurrentType === 'wishlist' && !viewingUserData.wishlistLoaded) {
+                        const grid = document.getElementById('viewing-card-grid');
+                        grid.innerHTML = '<div class="col-12 text-center py-3"><div class="spinner-border spinner-border-sm"></div> 読み込み中...</div>';
+                        await loadViewingWishlist();
+                    } else if (viewingCurrentType === 'decks' && !viewingUserData.decksLoaded) {
+                        const grid = document.getElementById('viewing-card-grid');
+                        grid.innerHTML = '<div class="col-12 text-center py-3"><div class="spinner-border spinner-border-sm"></div> 読み込み中...</div>';
+                        await loadViewingDecks();
+                    }
+
                     applyViewingFilters();
                     renderViewingCards();
                 });
