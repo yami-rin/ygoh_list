@@ -8747,10 +8747,7 @@ Firebase Consoleで確認すべき項目:
             // Save search keyword
             lastSearchKeyword = searchKeyword;
             updateSearchHistoryButton();
-            
-            // Track search action for missions
-            trackSearchAction();
-            
+
             // First check if we have matching cards in our collection
             const normalizedSearchKeyword = normalizeForSearch(searchKeyword);
             const searchKeyLower = searchKeyword.toLowerCase();
