@@ -7925,9 +7925,17 @@ Firebase Consoleで確認すべき項目:
 
         // --- Data Import / Export ---
         const exportAllData = () => {
+            // 必要な項目のみエクスポート: 名前, 型番, レアリティ, 枚数, タグ
+            const extractFields = (card) => ({
+                名前: card.data['名前'] || '',
+                型番: card.data['型番'] || '',
+                レアリティ: card.data['レアリティ'] || '',
+                枚数: card.data['枚数'] || 1,
+                tags: card.data.tags || []
+            });
             return {
-                collection: cardCollection.map(c => c.data),
-                wishlist: wishlistCollection.map(c => c.data)
+                collection: cardCollection.map(extractFields),
+                wishlist: wishlistCollection.map(extractFields)
             };
         };
         
