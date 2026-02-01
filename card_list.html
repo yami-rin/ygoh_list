@@ -4253,7 +4253,10 @@
             oneWeekAgo.setDate(oneWeekAgo.getDate() - 7);
             let recentCards = 0;
             
-            Object.entries(gamificationData.cardAdditionDates).forEach(([cardId, dateAdded]) => {
+            Object.entries(gamificationData.cardAdditionDates || {}).forEach(([cardId, dateAdded]) => {
+                // Skip invalid entries (e.g., heatmap data that was incorrectly stored here)
+                if (typeof dateAdded !== 'string' || !dateAdded.includes('T')) return;
+
                 if (new Date(dateAdded) >= oneWeekAgo) {
                     const card = cardCollection.find(c => c.id === cardId);
                     if (card) {
@@ -4419,7 +4422,10 @@
             
             let dailyAdditions = 0;
             let weeklyAdditions = 0;
-            Object.entries(gamificationData.cardAdditionDates).forEach(([cardId, dateStr]) => {
+            Object.entries(gamificationData.cardAdditionDates || {}).forEach(([cardId, dateStr]) => {
+                // Skip invalid entries (e.g., heatmap data that was incorrectly stored here)
+                if (typeof dateStr !== 'string' || !dateStr.includes('T')) return;
+
                 const date = new Date(dateStr);
                 const dateOnly = dateStr.split('T')[0];
                 if (dateOnly === todayStr) {
