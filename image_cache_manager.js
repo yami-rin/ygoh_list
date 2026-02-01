@@ -327,8 +327,10 @@ class ImageCacheManager {
 
             // カード詳細を取得
             const detailUrl = `${PROXY_URL}/card-detail?cid=${cardId}`;
+            console.log(`[fetchAndCache] Fetching card detail from: ${detailUrl}`);
             const detailResponse = await fetch(detailUrl);
             const cardDetail = await detailResponse.json();
+            console.log(`[fetchAndCache] Card detail response:`, JSON.stringify(cardDetail, null, 2));
 
             // Find the correct illustration
             let imageUrl;
