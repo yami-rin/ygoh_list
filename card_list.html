@@ -5691,18 +5691,22 @@
             const startPadding = firstDay.getDay();
             const daysInMonth = lastDay.getDate();
 
+            // Always show 6 rows (42 day cells) for consistent height
+            const totalDayCells = 42;
+            const endPadding = totalDayCells - startPadding - daysInMonth;
+
             // Days of week header
             const weekDays = ['日', '月', '火', '水', '木', '金', '土'];
-            let html = '<div style="display: grid; grid-template-columns: repeat(7, 1fr); gap: 3px; max-width: 400px; margin: 0 auto;">';
+            let html = '<div style="display: grid; grid-template-columns: repeat(7, 1fr); grid-template-rows: auto repeat(6, 1fr); gap: 3px; max-width: 400px; margin: 0 auto;">';
 
             // Add weekday headers
             weekDays.forEach(day => {
                 html += `<div style="text-align: center; font-size: 0.8rem; font-weight: bold; padding: 5px;">${day}</div>`;
             });
 
-            // Add empty cells for padding
+            // Add empty cells for start padding
             for (let i = 0; i < startPadding; i++) {
-                html += '<div></div>';
+                html += '<div style="aspect-ratio: 1;"></div>';
             }
 
             // Add days
@@ -5729,6 +5733,11 @@
                         <span style="font-size: 0.75rem; font-weight: ${count > 0 ? 'bold' : 'normal'};">${day}</span>
                     </div>
                 `;
+            }
+
+            // Add empty cells for end padding to fill 6 rows
+            for (let i = 0; i < endPadding; i++) {
+                html += '<div style="aspect-ratio: 1;"></div>';
             }
 
             html += '</div>';
@@ -5765,8 +5774,16 @@
             generateCalendarHeatmap(year, month);
         };
 
-        // Build card addition history from localStorage and Firebase
+        // Build card addition history from gamificationData (Firebase) with localStorage fallback
         const buildCardAdditionHistory = async () => {
+            // Primary source: gamificationData.cardAdditionDates (synced with Firebase)
+            if (gamificationData.cardAdditionDates && Object.keys(gamificationData.cardAdditionDates).length > 0) {
+                cardAdditionHistory = { ...gamificationData.cardAdditionDates };
+                console.log('📅 Loaded cardAdditionHistory from gamificationData:', Object.keys(cardAdditionHistory).length, 'dates');
+                return;
+            }
+
+            // Fallback: Build from recentCardsHistory and collection
             cardAdditionHistory = {};
 
             // Get recent history from localStorage
@@ -5795,6 +5812,15 @@
                     cardAdditionHistory[date] = (cardAdditionHistory[date] || 0) + quantity;
                 }
             });
+
+            // Save rebuilt data to gamificationData for future persistence
+            if (Object.keys(cardAdditionHistory).length > 0) {
+                gamificationData.cardAdditionDates = { ...cardAdditionHistory };
+                if (currentUser && currentUser.uid !== 'local_user') {
+                    saveGamificationData();
+                    console.log('📅 Saved rebuilt cardAdditionHistory to Firebase');
+                }
+            }
         };
 
         // Get estimated price for rarity
@@ -6695,6 +6721,13 @@ Firebase Consoleで確認すべき項目:
                 recentHistory = recentHistory.slice(0, 100);
                 localStorage.setItem('recentCardsHistory', JSON.stringify(recentHistory));
                 
+                // Update cardAdditionDates for heatmap (today's date with quantity)
+                const today = new Date().toISOString().split('T')[0];
+                const addedQuantity = parseInt(newCard['枚数']) || 1;
+                cardAdditionHistory[today] = (cardAdditionHistory[today] || 0) + addedQuantity;
+                gamificationData.cardAdditionDates = gamificationData.cardAdditionDates || {};
+                gamificationData.cardAdditionDates[today] = (gamificationData.cardAdditionDates[today] || 0) + addedQuantity;
+
                 // Save to Firebase for logged-in users
                 if (currentUser && currentUser.uid !== 'local_user') {
                     gamificationData.recentCardsHistory = recentHistory;
@@ -7163,12 +7196,25 @@ Firebase Consoleで確認すべき項目:
                     applySearchAndFilter();
                 }
 
+                // Update heatmap data for imported cards (count total imported quantity)
+                const totalImported = importedData.collection.reduce((sum, c) => sum + (c.枚数 || 1), 0) +
+                                      importedData.wishlist.reduce((sum, c) => sum + (c.枚数 || 1), 0);
+                if (totalImported > 0) {
+                    const today = new Date().toISOString().split('T')[0];
+                    cardAdditionHistory[today] = (cardAdditionHistory[today] || 0) + totalImported;
+                    gamificationData.cardAdditionDates = gamificationData.cardAdditionDates || {};
+                    gamificationData.cardAdditionDates[today] = (gamificationData.cardAdditionDates[today] || 0) + totalImported;
+                    if (currentUser && currentUser.uid !== 'local_user') {
+                        saveGamificationData();
+                    }
+                }
+
                 showLoading(false);
                 alert('インポートが完了しました。');
-            } catch (err) { 
-                showLoading(false); 
-                alert(`インポート中にエラーが発生しました: ${err.message}`); 
-                console.error(err); 
+            } catch (err) {
+                showLoading(false);
+                alert(`インポート中にエラーが発生しました: ${err.message}`);
+                console.error(err);
             }
         };
 
