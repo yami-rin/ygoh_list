@@ -1450,6 +1450,40 @@
             height: 100%;
             object-fit: cover;
         }
+
+        /* Community styles */
+        .user-item {
+            transition: background-color 0.2s ease;
+        }
+
+        .user-item:hover {
+            background-color: rgba(102, 126, 234, 0.1);
+        }
+
+        #viewing-card-grid .card {
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+        }
+
+        #viewing-card-grid .card:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+        }
+
+        #community-container .card-header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+
+        #community-container .card-header .btn-outline-primary,
+        #community-container .card-header .btn-outline-secondary {
+            color: white;
+            border-color: rgba(255,255,255,0.5);
+        }
+
+        #community-container .card-header .btn-outline-primary:hover,
+        #community-container .card-header .btn-outline-secondary:hover {
+            background-color: rgba(255,255,255,0.2);
+        }
     </style>
 </head>
 <body>
@@ -1534,6 +1568,11 @@
             <li class="nav-item" role="presentation">
                 <button class="nav-link" id="duel-simulator-tab" data-list-type="duel-simulator" type="button">
                     <i class="bi bi-grid-3x3"></i> デュエルシミュレーター
+                </button>
+            </li>
+            <li class="nav-item" role="presentation">
+                <button class="nav-link" id="community-tab" data-list-type="community" type="button">
+                    <i class="bi bi-people"></i> コミュニティ
                 </button>
             </li>
         </ul>
@@ -2077,6 +2116,126 @@
         </div>
     </div>
 
+    <!-- Community Section -->
+    <div class="container" id="community-container" style="display: none;">
+        <div class="row">
+            <!-- Left: User List -->
+            <div class="col-lg-4 mb-4">
+                <div class="card">
+                    <div class="card-header d-flex justify-content-between align-items-center">
+                        <span><i class="bi bi-people-fill"></i> ユーザー一覧</span>
+                        <button class="btn btn-sm btn-outline-primary" id="refresh-users-btn">
+                            <i class="bi bi-arrow-clockwise"></i>
+                        </button>
+                    </div>
+                    <div class="card-body">
+                        <input type="text" class="form-control mb-3" id="user-search-input" placeholder="ユーザーを検索...">
+                        <div id="user-list" style="max-height: 500px; overflow-y: auto;">
+                            <div class="text-center text-muted py-3">
+                                <i class="bi bi-arrow-up-circle"></i> 更新ボタンを押してユーザー一覧を読み込み
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- My Share Settings -->
+                <div class="card mt-3">
+                    <div class="card-header">
+                        <i class="bi bi-share"></i> 公開設定
+                    </div>
+                    <div class="card-body">
+                        <div class="form-check form-switch mb-3">
+                            <input class="form-check-input" type="checkbox" id="public-profile-toggle">
+                            <label class="form-check-label" for="public-profile-toggle">
+                                コレクションを公開する
+                            </label>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label small">共有リンク</label>
+                            <div class="input-group input-group-sm">
+                                <input type="text" class="form-control" id="share-link-input" readonly placeholder="公開設定をONにすると生成されます">
+                                <button class="btn btn-outline-secondary" type="button" id="copy-share-link-btn">
+                                    <i class="bi bi-clipboard"></i>
+                                </button>
+                            </div>
+                        </div>
+                        <div class="mb-2">
+                            <label class="form-label small">表示名</label>
+                            <input type="text" class="form-control form-control-sm" id="display-name-input" placeholder="ニックネーム">
+                        </div>
+                        <button class="btn btn-primary btn-sm w-100" id="save-profile-settings-btn">
+                            <i class="bi bi-check-lg"></i> 保存
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Right: Viewing User's Collection -->
+            <div class="col-lg-8">
+                <div class="card">
+                    <div class="card-header d-flex justify-content-between align-items-center">
+                        <span id="viewing-user-header">
+                            <i class="bi bi-collection"></i> ユーザーを選択してください
+                        </span>
+                        <button class="btn btn-sm btn-outline-secondary" id="back-to-my-collection-btn" style="display: none;">
+                            <i class="bi bi-arrow-left"></i> 自分のコレクションに戻る
+                        </button>
+                    </div>
+                    <div class="card-body">
+                        <!-- Tabs for viewing user's data -->
+                        <ul class="nav nav-pills nav-fill mb-3" id="viewing-user-tabs" style="display: none;">
+                            <li class="nav-item">
+                                <button class="nav-link active" data-view-type="collection">
+                                    <i class="bi bi-collection"></i> 所持 (<span id="view-collection-count">0</span>)
+                                </button>
+                            </li>
+                            <li class="nav-item">
+                                <button class="nav-link" data-view-type="wishlist">
+                                    <i class="bi bi-star"></i> ウィッシュ (<span id="view-wishlist-count">0</span>)
+                                </button>
+                            </li>
+                            <li class="nav-item">
+                                <button class="nav-link" data-view-type="decks">
+                                    <i class="bi bi-box"></i> デッキ (<span id="view-decks-count">0</span>)
+                                </button>
+                            </li>
+                        </ul>
+
+                        <!-- Search/Filter for viewing -->
+                        <div class="row g-2 mb-3" id="viewing-filters" style="display: none;">
+                            <div class="col-md-6">
+                                <input type="text" class="form-control form-control-sm" id="viewing-search-input" placeholder="カード名で検索...">
+                            </div>
+                            <div class="col-md-3">
+                                <select class="form-select form-select-sm" id="viewing-rarity-filter">
+                                    <option value="">全レアリティ</option>
+                                </select>
+                            </div>
+                            <div class="col-md-3">
+                                <select class="form-select form-select-sm" id="viewing-sort">
+                                    <option value="name">名前順</option>
+                                    <option value="quantity-desc">枚数(多い順)</option>
+                                    <option value="rarity">レアリティ順</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <!-- Card Grid for viewing -->
+                        <div id="viewing-card-grid" class="row g-2" style="min-height: 300px;">
+                            <div class="col-12 text-center text-muted py-5">
+                                <i class="bi bi-person-circle" style="font-size: 3rem;"></i>
+                                <p class="mt-2">左のユーザー一覧からユーザーを選択すると<br>そのユーザーのコレクションが表示されます</p>
+                            </div>
+                        </div>
+
+                        <!-- Pagination for viewing -->
+                        <div id="viewing-pagination" class="d-flex justify-content-center mt-3" style="display: none !important;"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <!-- Card Edit Side Panel -->
     <div class="edit-panel-overlay" id="editPanelOverlay"></div>
     <div class="edit-panel" id="editPanel">
@@ -2319,6 +2478,24 @@
         window.getDoc = getDoc;
         window.doc = doc;
 
+        // Admin UIDs (can view all users regardless of public setting)
+        const ADMIN_UIDS = ['tMyC2ohYVAgoDzmBs5Zx2VT8t6m1'];
+
+        // Community state
+        let isAdmin = false;
+        let publicUsers = [];
+        let viewingUserId = null;
+        let viewingUserData = {
+            collection: [],
+            wishlist: [],
+            decks: [],
+            profile: null
+        };
+        let viewingCurrentType = 'collection';
+        let viewingFilteredCards = [];
+        let viewingCurrentPage = 1;
+        const viewingItemsPerPage = 30;
+
         // State
         let collectionCards = [];
         let wishlistCards = [];
@@ -2489,8 +2666,9 @@
 
         // Switch between collection, wishlist, and bookmark
         const switchListType = (listType) => {
-            // Hide duel simulator and show card gallery
+            // Hide duel simulator and community, show card gallery
             document.getElementById('duel-simulator-container').style.display = 'none';
+            document.getElementById('community-container').style.display = 'none';
             document.querySelector('.container:has(#card-grid)').style.display = 'block';
 
             currentListType = listType;
@@ -3667,8 +3845,9 @@
         });
 
         document.getElementById('duel-simulator-tab').addEventListener('click', () => {
-            // Hide card gallery sections
+            // Hide card gallery and community sections
             document.querySelector('.container:has(#card-grid)').style.display = 'none';
+            document.getElementById('community-container').style.display = 'none';
 
             // Show duel simulator
             document.getElementById('duel-simulator-container').style.display = 'block';
@@ -4881,6 +5060,474 @@
 
         // ==================== END DECK SYSTEM ====================
 
+        // ==================== COMMUNITY SYSTEM ====================
+
+        // Load user's public profile settings
+        const loadPublicProfile = async () => {
+            if (!currentUser) return;
+
+            try {
+                const profileRef = doc(db, 'publicProfiles', currentUser.uid);
+                const profileSnap = await getDoc(profileRef);
+
+                if (profileSnap.exists()) {
+                    const data = profileSnap.data();
+                    document.getElementById('public-profile-toggle').checked = data.isPublic || false;
+                    document.getElementById('display-name-input').value = data.displayName || '';
+
+                    if (data.isPublic && data.shareToken) {
+                        const shareUrl = `${window.location.origin}${window.location.pathname}?view=${currentUser.uid}`;
+                        document.getElementById('share-link-input').value = shareUrl;
+                    }
+                }
+            } catch (error) {
+                console.error('Error loading public profile:', error);
+            }
+        };
+
+        // Save public profile settings
+        const savePublicProfile = async () => {
+            if (!currentUser) return;
+
+            const isPublic = document.getElementById('public-profile-toggle').checked;
+            const displayName = document.getElementById('display-name-input').value.trim();
+
+            try {
+                const profileRef = doc(db, 'publicProfiles', currentUser.uid);
+                const shareToken = crypto.randomUUID ? crypto.randomUUID() : Date.now().toString(36);
+
+                await setDoc(profileRef, {
+                    isPublic,
+                    displayName: displayName || currentUser.email?.split('@')[0] || 'Anonymous',
+                    shareToken,
+                    userId: currentUser.uid,
+                    updatedAt: new Date().toISOString()
+                }, { merge: true });
+
+                if (isPublic) {
+                    const shareUrl = `${window.location.origin}${window.location.pathname}?view=${currentUser.uid}`;
+                    document.getElementById('share-link-input').value = shareUrl;
+                } else {
+                    document.getElementById('share-link-input').value = '';
+                }
+
+                alert('公開設定を保存しました');
+            } catch (error) {
+                console.error('Error saving public profile:', error);
+                alert('保存に失敗しました');
+            }
+        };
+
+        // Load public users list
+        const loadPublicUsers = async () => {
+            const userList = document.getElementById('user-list');
+            userList.innerHTML = '<div class="text-center py-3"><div class="spinner-border spinner-border-sm" role="status"></div> 読み込み中...</div>';
+
+            try {
+                const profilesRef = collection(db, 'publicProfiles');
+                const snapshot = await getDocs(profilesRef);
+
+                publicUsers = [];
+                snapshot.docs.forEach(doc => {
+                    const data = doc.data();
+                    // Admin can see all users, others only see public profiles
+                    if (isAdmin || data.isPublic) {
+                        publicUsers.push({
+                            id: doc.id,
+                            ...data
+                        });
+                    }
+                });
+
+                renderUserList();
+            } catch (error) {
+                console.error('Error loading public users:', error);
+                userList.innerHTML = '<div class="text-danger text-center py-3"><i class="bi bi-exclamation-circle"></i> 読み込みに失敗しました</div>';
+            }
+        };
+
+        // Render user list
+        const renderUserList = () => {
+            const userList = document.getElementById('user-list');
+            const searchQuery = document.getElementById('user-search-input').value.toLowerCase();
+
+            const filtered = publicUsers.filter(user => {
+                if (!searchQuery) return true;
+                const name = (user.displayName || '').toLowerCase();
+                return name.includes(searchQuery);
+            });
+
+            if (filtered.length === 0) {
+                userList.innerHTML = '<div class="text-muted text-center py-3">ユーザーが見つかりません</div>';
+                return;
+            }
+
+            userList.innerHTML = filtered.map(user => `
+                <div class="user-item d-flex align-items-center p-2 border-bottom" style="cursor: pointer;" data-user-id="${user.id}">
+                    <div class="me-2">
+                        <i class="bi bi-person-circle" style="font-size: 1.5rem;"></i>
+                    </div>
+                    <div class="flex-grow-1">
+                        <div class="fw-bold">${escapeHtml(user.displayName || 'Anonymous')}</div>
+                        <small class="text-muted">
+                            ${user.isPublic ? '<span class="badge bg-success">公開</span>' : '<span class="badge bg-secondary">非公開</span>'}
+                            ${user.id === currentUser?.uid ? '<span class="badge bg-primary">自分</span>' : ''}
+                        </small>
+                    </div>
+                    <i class="bi bi-chevron-right"></i>
+                </div>
+            `).join('');
+
+            // Add click handlers
+            userList.querySelectorAll('.user-item').forEach(item => {
+                item.addEventListener('click', () => {
+                    const userId = item.dataset.userId;
+                    loadUserCollection(userId);
+                });
+            });
+        };
+
+        // Load a specific user's collection
+        const loadUserCollection = async (userId) => {
+            if (!userId) return;
+
+            viewingUserId = userId;
+            const viewingGrid = document.getElementById('viewing-card-grid');
+            viewingGrid.innerHTML = '<div class="col-12 text-center py-5"><div class="spinner-border" role="status"></div><p class="mt-2">読み込み中...</p></div>';
+
+            try {
+                // Load user's profile
+                const profileRef = doc(db, 'publicProfiles', userId);
+                const profileSnap = await getDoc(profileRef);
+                viewingUserData.profile = profileSnap.exists() ? profileSnap.data() : null;
+
+                // Check access permission (admin can access all, others need public)
+                if (!isAdmin && (!viewingUserData.profile || !viewingUserData.profile.isPublic)) {
+                    viewingGrid.innerHTML = '<div class="col-12 text-center py-5 text-danger"><i class="bi bi-lock" style="font-size: 3rem;"></i><p class="mt-2">このユーザーのコレクションは非公開です</p></div>';
+                    return;
+                }
+
+                // Load collection
+                const collectionRef = collection(db, 'users', userId, 'cards');
+                const collectionSnap = await getDocs(collectionRef);
+                viewingUserData.collection = collectionSnap.docs.map(doc => ({ id: doc.id, data: doc.data() }));
+
+                // Load wishlist
+                const wishlistRef = collection(db, 'users', userId, 'wishlist');
+                const wishlistSnap = await getDocs(wishlistRef);
+                viewingUserData.wishlist = wishlistSnap.docs.map(doc => ({ id: doc.id, data: doc.data() }));
+
+                // Load decks
+                const decksRef = collection(db, 'users', userId, 'decks');
+                const decksSnap = await getDocs(decksRef);
+                viewingUserData.decks = decksSnap.docs.map(doc => ({ id: doc.id, data: doc.data() }));
+
+                // Update header and show UI
+                const userName = viewingUserData.profile?.displayName || 'Anonymous';
+                document.getElementById('viewing-user-header').innerHTML = `<i class="bi bi-collection"></i> ${escapeHtml(userName)} のコレクション`;
+                document.getElementById('back-to-my-collection-btn').style.display = 'inline-block';
+                document.getElementById('viewing-user-tabs').style.display = 'flex';
+                document.getElementById('viewing-filters').style.display = 'flex';
+
+                // Update counts
+                document.getElementById('view-collection-count').textContent = viewingUserData.collection.length;
+                document.getElementById('view-wishlist-count').textContent = viewingUserData.wishlist.length;
+                document.getElementById('view-decks-count').textContent = viewingUserData.decks.length;
+
+                // Populate rarity filter
+                populateViewingRarityFilter();
+
+                // Render cards
+                viewingCurrentType = 'collection';
+                viewingCurrentPage = 1;
+                applyViewingFilters();
+                renderViewingCards();
+
+            } catch (error) {
+                console.error('Error loading user collection:', error);
+                viewingGrid.innerHTML = '<div class="col-12 text-center py-5 text-danger"><i class="bi bi-exclamation-circle" style="font-size: 3rem;"></i><p class="mt-2">読み込みに失敗しました</p></div>';
+            }
+        };
+
+        // Populate rarity filter for viewing
+        const populateViewingRarityFilter = () => {
+            const filter = document.getElementById('viewing-rarity-filter');
+            const rarities = new Set();
+
+            viewingUserData.collection.forEach(card => {
+                if (card.data['レアリティ']) rarities.add(card.data['レアリティ']);
+            });
+            viewingUserData.wishlist.forEach(card => {
+                if (card.data['レアリティ']) rarities.add(card.data['レアリティ']);
+            });
+
+            filter.innerHTML = '<option value="">全レアリティ</option>' +
+                Array.from(rarities).sort().map(r => `<option value="${escapeHtml(r)}">${escapeHtml(r)}</option>`).join('');
+        };
+
+        // Apply filters for viewing
+        const applyViewingFilters = () => {
+            const searchQuery = document.getElementById('viewing-search-input')?.value.toLowerCase() || '';
+            const rarityFilter = document.getElementById('viewing-rarity-filter')?.value || '';
+            const sortBy = document.getElementById('viewing-sort')?.value || 'name';
+
+            let cards = viewingCurrentType === 'collection' ? viewingUserData.collection :
+                        viewingCurrentType === 'wishlist' ? viewingUserData.wishlist : [];
+
+            // Filter
+            viewingFilteredCards = cards.filter(card => {
+                const name = (card.data['名前'] || '').toLowerCase();
+                const rarity = card.data['レアリティ'] || '';
+
+                if (searchQuery && !name.includes(searchQuery)) return false;
+                if (rarityFilter && rarity !== rarityFilter) return false;
+                return true;
+            });
+
+            // Sort
+            viewingFilteredCards.sort((a, b) => {
+                if (sortBy === 'name') {
+                    return (a.data['名前'] || '').localeCompare(b.data['名前'] || '');
+                } else if (sortBy === 'quantity-desc') {
+                    return (b.data['枚数'] || 0) - (a.data['枚数'] || 0);
+                } else if (sortBy === 'rarity') {
+                    return (a.data['レアリティ'] || '').localeCompare(b.data['レアリティ'] || '');
+                }
+                return 0;
+            });
+        };
+
+        // Render viewing cards
+        const renderViewingCards = () => {
+            const grid = document.getElementById('viewing-card-grid');
+
+            if (viewingCurrentType === 'decks') {
+                // Render decks list
+                if (viewingUserData.decks.length === 0) {
+                    grid.innerHTML = '<div class="col-12 text-center text-muted py-5">デッキがありません</div>';
+                    return;
+                }
+
+                grid.innerHTML = viewingUserData.decks.map(deck => `
+                    <div class="col-md-6 col-lg-4">
+                        <div class="card">
+                            <div class="card-body">
+                                <h5 class="card-title"><i class="bi bi-box"></i> ${escapeHtml(deck.data.name || '無題のデッキ')}</h5>
+                                <p class="card-text small text-muted">
+                                    メイン: ${(deck.data.mainDeck || []).length}枚 /
+                                    EX: ${(deck.data.extraDeck || []).length}枚 /
+                                    サイド: ${(deck.data.sideDeck || []).length}枚
+                                </p>
+                                ${deck.data.memo ? `<p class="card-text small">${escapeHtml(deck.data.memo)}</p>` : ''}
+                            </div>
+                        </div>
+                    </div>
+                `).join('');
+                return;
+            }
+
+            // Render cards
+            const start = (viewingCurrentPage - 1) * viewingItemsPerPage;
+            const pageCards = viewingFilteredCards.slice(start, start + viewingItemsPerPage);
+
+            if (pageCards.length === 0) {
+                grid.innerHTML = '<div class="col-12 text-center text-muted py-5">カードがありません</div>';
+                document.getElementById('viewing-pagination').style.display = 'none';
+                return;
+            }
+
+            grid.innerHTML = pageCards.map(card => {
+                const cardId = cardDetailsMap.get(card.data['名前'])?.cardId || '';
+                return `
+                    <div class="col-6 col-md-4 col-lg-3">
+                        <div class="card h-100">
+                            <div class="card-img-wrapper" style="position: relative; padding-top: 145%; background: #f0f0f0;">
+                                <img src="" data-card-id="${cardId}" data-ciid="${card.data.ciid || '1'}"
+                                     class="view-card-img" alt="${escapeHtml(card.data['名前'] || '')}"
+                                     style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; object-fit: cover;"
+                                     loading="lazy">
+                            </div>
+                            <div class="card-body p-2">
+                                <p class="card-title small mb-1 text-truncate" title="${escapeHtml(card.data['名前'] || '')}">
+                                    ${escapeHtml(card.data['名前'] || '不明')}
+                                </p>
+                                <small class="text-muted">
+                                    ${escapeHtml(card.data['型番'] || '')} |
+                                    ${escapeHtml(card.data['レアリティ'] || '')} |
+                                    ×${card.data['枚数'] || 1}
+                                </small>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+
+            // Load images
+            grid.querySelectorAll('.view-card-img').forEach(async img => {
+                const cardId = img.dataset.cardId;
+                const ciid = img.dataset.ciid || '1';
+                if (cardId) {
+                    try {
+                        const cacheKey = `${cardId}_${ciid}`;
+                        const cachedImage = await imageCacheManager.getImage(cacheKey);
+                        if (cachedImage) {
+                            img.src = cachedImage;
+                        } else {
+                            img.src = `${PROXY_URL}/image?cid=${cardId}&ciid=${ciid}`;
+                        }
+                    } catch (e) {
+                        img.src = `${PROXY_URL}/image?cid=${cardId}`;
+                    }
+                }
+            });
+
+            // Render pagination
+            renderViewingPagination();
+        };
+
+        // Render viewing pagination
+        const renderViewingPagination = () => {
+            const totalPages = Math.ceil(viewingFilteredCards.length / viewingItemsPerPage);
+            const paginationEl = document.getElementById('viewing-pagination');
+
+            if (totalPages <= 1) {
+                paginationEl.style.display = 'none';
+                return;
+            }
+
+            paginationEl.style.display = 'flex';
+            paginationEl.innerHTML = `
+                <nav>
+                    <ul class="pagination pagination-sm mb-0">
+                        <li class="page-item ${viewingCurrentPage === 1 ? 'disabled' : ''}">
+                            <a class="page-link" href="#" data-page="${viewingCurrentPage - 1}">前へ</a>
+                        </li>
+                        <li class="page-item disabled">
+                            <span class="page-link">${viewingCurrentPage} / ${totalPages}</span>
+                        </li>
+                        <li class="page-item ${viewingCurrentPage === totalPages ? 'disabled' : ''}">
+                            <a class="page-link" href="#" data-page="${viewingCurrentPage + 1}">次へ</a>
+                        </li>
+                    </ul>
+                </nav>
+            `;
+
+            paginationEl.querySelectorAll('.page-link[data-page]').forEach(link => {
+                link.addEventListener('click', (e) => {
+                    e.preventDefault();
+                    const page = parseInt(link.dataset.page);
+                    if (page >= 1 && page <= totalPages) {
+                        viewingCurrentPage = page;
+                        renderViewingCards();
+                    }
+                });
+            });
+        };
+
+        // Initialize community event handlers
+        const initializeCommunity = () => {
+            // Refresh users button
+            document.getElementById('refresh-users-btn').addEventListener('click', loadPublicUsers);
+
+            // User search
+            document.getElementById('user-search-input').addEventListener('input', renderUserList);
+
+            // Save profile settings
+            document.getElementById('save-profile-settings-btn').addEventListener('click', savePublicProfile);
+
+            // Copy share link
+            document.getElementById('copy-share-link-btn').addEventListener('click', () => {
+                const input = document.getElementById('share-link-input');
+                if (input.value) {
+                    navigator.clipboard.writeText(input.value).then(() => {
+                        alert('リンクをコピーしました');
+                    });
+                }
+            });
+
+            // Back to my collection
+            document.getElementById('back-to-my-collection-btn').addEventListener('click', () => {
+                viewingUserId = null;
+                document.getElementById('viewing-user-header').innerHTML = '<i class="bi bi-collection"></i> ユーザーを選択してください';
+                document.getElementById('back-to-my-collection-btn').style.display = 'none';
+                document.getElementById('viewing-user-tabs').style.display = 'none';
+                document.getElementById('viewing-filters').style.display = 'none';
+                document.getElementById('viewing-card-grid').innerHTML = `
+                    <div class="col-12 text-center text-muted py-5">
+                        <i class="bi bi-person-circle" style="font-size: 3rem;"></i>
+                        <p class="mt-2">左のユーザー一覧からユーザーを選択すると<br>そのユーザーのコレクションが表示されます</p>
+                    </div>
+                `;
+                document.getElementById('viewing-pagination').style.display = 'none';
+            });
+
+            // Viewing user tabs
+            document.querySelectorAll('#viewing-user-tabs .nav-link').forEach(tab => {
+                tab.addEventListener('click', () => {
+                    document.querySelectorAll('#viewing-user-tabs .nav-link').forEach(t => t.classList.remove('active'));
+                    tab.classList.add('active');
+                    viewingCurrentType = tab.dataset.viewType;
+                    viewingCurrentPage = 1;
+                    applyViewingFilters();
+                    renderViewingCards();
+                });
+            });
+
+            // Viewing filters
+            document.getElementById('viewing-search-input')?.addEventListener('input', () => {
+                viewingCurrentPage = 1;
+                applyViewingFilters();
+                renderViewingCards();
+            });
+            document.getElementById('viewing-rarity-filter')?.addEventListener('change', () => {
+                viewingCurrentPage = 1;
+                applyViewingFilters();
+                renderViewingCards();
+            });
+            document.getElementById('viewing-sort')?.addEventListener('change', () => {
+                viewingCurrentPage = 1;
+                applyViewingFilters();
+                renderViewingCards();
+            });
+
+            // Community tab click
+            document.getElementById('community-tab').addEventListener('click', () => {
+                switchToCommunity();
+            });
+
+            // Check URL for direct view parameter
+            const urlParams = new URLSearchParams(window.location.search);
+            const viewUserId = urlParams.get('view');
+            if (viewUserId) {
+                // Auto-switch to community and load the user
+                setTimeout(() => {
+                    switchToCommunity();
+                    loadUserCollection(viewUserId);
+                }, 500);
+            }
+        };
+
+        // Switch to community view
+        const switchToCommunity = () => {
+            // Hide other containers
+            document.getElementById('duel-simulator-container').style.display = 'none';
+            document.querySelector('.container:has(#card-grid)').style.display = 'none';
+
+            // Show community container
+            document.getElementById('community-container').style.display = 'block';
+
+            // Update tab active state
+            document.querySelectorAll('.nav-link').forEach(tab => tab.classList.remove('active'));
+            document.getElementById('community-tab').classList.add('active');
+
+            // Load users if not loaded
+            if (publicUsers.length === 0) {
+                loadPublicUsers();
+            }
+        };
+
+        // ==================== END COMMUNITY SYSTEM ====================
+
         // Initialize
         const init = async () => {
             showLoading(true);
@@ -4921,7 +5568,12 @@
 
                     // User is VIP, proceed with loading
                     currentUser = user;
+                    isAdmin = ADMIN_UIDS.includes(user.uid);
+                    console.log('Admin status:', isAdmin);
+
                     loadAllData(user.uid);
+                    loadPublicProfile(); // Load user's public settings
+                    initializeCommunity(); // Initialize community features
 
                     // Load saved grid size
                     const savedSize = localStorage.getItem('galleryGridSize');
