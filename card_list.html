@@ -2209,6 +2209,12 @@
                             </button>
                         </div>
                         <div class="d-inline-block">
+                            <button class="btn btn-outline-success btn-sm" id="sync-btn" title="サーバーと同期">
+                                <i class="bi bi-arrow-repeat"></i>
+                                <span class="d-none d-sm-inline"> 同期</span>
+                            </button>
+                        </div>
+                        <div class="d-inline-block">
                             <button class="btn btn-outline-secondary btn-sm" id="settings-btn">
                                 <i class="bi bi-gear"></i>
                                 <span class="d-none d-sm-inline"> 設定</span>
@@ -5353,17 +5359,153 @@
             return null;
         };
 
+        // ==================== LOCAL CACHE SYSTEM ====================
+
+        // Get cache key for current user
+        const getCacheKey = (type) => `cardCache_${currentUser?.uid}_${type}`;
+
+        // Save collection data to localStorage cache
+        const saveToCache = () => {
+            if (!currentUser || currentUser.uid === 'local_user') return;
+
+            try {
+                const cacheData = {
+                    collection: cardCollection,
+                    wishlist: wishlistCollection,
+                    cachedAt: Date.now()
+                };
+                localStorage.setItem(getCacheKey('data'), JSON.stringify(cacheData));
+                console.log('💾 Saved to local cache:', cardCollection.length, 'cards,', wishlistCollection.length, 'wishlist');
+            } catch (e) {
+                console.error('Failed to save cache:', e);
+                // If storage is full, clear old cache
+                if (e.name === 'QuotaExceededError') {
+                    localStorage.removeItem(getCacheKey('data'));
+                }
+            }
+        };
+
+        // Load collection data from localStorage cache
+        const loadFromCache = () => {
+            if (!currentUser || currentUser.uid === 'local_user') return null;
+
+            try {
+                const cached = localStorage.getItem(getCacheKey('data'));
+                if (cached) {
+                    const data = JSON.parse(cached);
+                    console.log('📂 Loaded from cache:', data.collection?.length, 'cards,', data.wishlist?.length, 'wishlist');
+                    return data;
+                }
+            } catch (e) {
+                console.error('Failed to load cache:', e);
+            }
+            return null;
+        };
+
+        // Update metadata timestamp in Firebase (called after any data change)
+        const updateMetadataTimestamp = async () => {
+            if (!currentUser || currentUser.uid === 'local_user') return;
+
+            try {
+                const metadataRef = doc(db, 'users', currentUser.uid, 'metadata', 'sync');
+                await setDoc(metadataRef, { updatedAt: Date.now() }, { merge: true });
+            } catch (e) {
+                console.error('Failed to update metadata:', e);
+            }
+        };
+
+        // Check if remote data is newer than cache (1 Firebase read)
+        const isRemoteNewer = async (cachedAt) => {
+            if (!currentUser || currentUser.uid === 'local_user') return true;
+
+            try {
+                const metadataRef = doc(db, 'users', currentUser.uid, 'metadata', 'sync');
+                const metadataSnap = await getDoc(metadataRef);
+
+                if (!metadataSnap.exists()) {
+                    // No metadata yet, create it and return true to fetch data
+                    await setDoc(metadataRef, { updatedAt: Date.now() });
+                    return true;
+                }
+
+                const remoteUpdatedAt = metadataSnap.data().updatedAt || 0;
+                const isNewer = remoteUpdatedAt > cachedAt;
+                console.log(`🔍 Cache check: cached=${new Date(cachedAt).toLocaleString()}, remote=${new Date(remoteUpdatedAt).toLocaleString()}, needsSync=${isNewer}`);
+                return isNewer;
+            } catch (e) {
+                console.error('Failed to check metadata:', e);
+                return true; // On error, fetch from Firebase to be safe
+            }
+        };
+
+        // Force sync from Firebase (ignores cache)
+        const forceSyncFromFirebase = async () => {
+            if (!currentUser || currentUser.uid === 'local_user') return;
+
+            showLoading(true);
+            console.log('🔄 Force syncing from Firebase...');
+
+            try {
+                const cardSnapshot = await getDocs(query(getCollectionRef('collection')));
+                cardCollection = cardSnapshot.docs.map(doc => ({ id: doc.id, data: doc.data() }));
+
+                const wishlistSnapshot = await getDocs(query(getCollectionRef('wishlist')));
+                wishlistCollection = wishlistSnapshot.docs.map(doc => ({ id: doc.id, data: doc.data() }));
+
+                // Save to cache
+                saveToCache();
+
+                updateTotalCounts();
+                applySearchAndFilter();
+                console.log('✅ Sync complete:', cardCollection.length, 'cards,', wishlistCollection.length, 'wishlist');
+            } catch (error) {
+                console.error('Sync failed:', error);
+                alert('同期に失敗しました。');
+            } finally {
+                showLoading(false);
+            }
+        };
+
+        // Expose for manual sync button
+        window.forceSyncFromFirebase = forceSyncFromFirebase;
+
+        // ==================== END LOCAL CACHE SYSTEM ====================
+
         const loadCollectionFromFirestore = async () => {
             if (!currentUser) return;
             showLoading(true);
-            
+
+            // Try to load from cache first
+            const cached = loadFromCache();
+
+            if (cached && cached.cachedAt) {
+                // Check if remote data is newer (only 1 Firebase read)
+                const needsSync = await isRemoteNewer(cached.cachedAt);
+
+                if (!needsSync) {
+                    // Use cached data
+                    cardCollection = cached.collection || [];
+                    wishlistCollection = cached.wishlist || [];
+                    updateTotalCounts();
+                    applySearchAndFilter();
+                    showLoading(false);
+                    console.log('✅ Using cached data (no sync needed)');
+                    return;
+                }
+                console.log('⚠️ Remote data is newer, fetching from Firebase...');
+            }
+
+            // Fetch from Firebase
             const cardSnapshot = await getDocs(query(getCollectionRef('collection')));
             cardCollection = cardSnapshot.docs.map(doc => ({ id: doc.id, data: doc.data() }));
-            
+
             const wishlistSnapshot = await getDocs(query(getCollectionRef('wishlist')));
             wishlistCollection = wishlistSnapshot.docs.map(doc => ({ id: doc.id, data: doc.data() }));
-            
-            updateTotalCounts(); // Update stats
+
+            // Save to cache for next time
+            saveToCache();
+
+            updateTotalCounts();
             applySearchAndFilter();
             showLoading(false);
         };
@@ -6758,7 +6900,11 @@ Firebase Consoleで確認すべき項目:
                 renderSelectedTags('card-tags-container', currentCardTags);
                 document.getElementById('set-rarity-choices').innerHTML = '';
                 showLoading(false);
-                
+
+                // Update cache and metadata
+                saveToCache();
+                updateMetadataTimestamp();
+
             } catch (error) {
                 showLoading(false);
                 
@@ -6799,6 +6945,10 @@ Firebase Consoleで確認すべき項目:
                     }
                     updateTotalCounts(); // Update stats after deletion
                     applySearchAndFilter();
+
+                    // Update cache and metadata
+                    saveToCache();
+                    updateMetadataTimestamp();
                 }
             } else if (target.classList.contains('edit-btn')) {
                 const cardId = target.dataset.id;
@@ -6862,9 +7012,13 @@ Firebase Consoleで確認すべき項目:
                         card.data.レアリティ.toUpperCase().includes('UR')
                     );
                     trackCardAddition(card.data, false, isRare);
-                    
+
                     updateTotalCounts(); // Update stats after moving card
                     applySearchAndFilter();
+
+                    // Update cache and metadata
+                    saveToCache();
+                    updateMetadataTimestamp();
                 }
             }
         });
@@ -6890,6 +7044,10 @@ Firebase Consoleで確認すべき項目:
             updateTotalCounts(); // Update stats after editing
             applySearchAndFilter();
             editCardModal.hide();
+
+            // Update cache and metadata
+            saveToCache();
+            updateMetadataTimestamp();
         });
 
         // Handle level button clicks
@@ -7199,6 +7357,8 @@ Firebase Consoleで確認すべき項目:
                 // Reload if using Firebase, otherwise just refresh display
                 if (getCollectionRef()) {
                     await loadCollectionFromFirestore();
+                    // Update metadata timestamp after import
+                    updateMetadataTimestamp();
                 } else {
                     applySearchAndFilter();
                 }
@@ -7419,6 +7579,14 @@ Firebase Consoleで確認すべき項目:
         // --- Settings ---
         document.getElementById('how-to-use-btn').addEventListener('click', () => howToUseModal.show());
         document.getElementById('settings-btn').addEventListener('click', () => settingsModal.show());
+
+        // Sync button
+        document.getElementById('sync-btn').addEventListener('click', async () => {
+            if (confirm('サーバーからデータを再取得しますか？\n（通常はページ読み込み時に自動で最新データを取得します）')) {
+                await forceSyncFromFirebase();
+                alert('同期が完了しました。');
+            }
+        });
 
         darkModeToggle.addEventListener('change', (e) => {
             const theme = e.target.checked ? 'dark' : 'light';
