@@ -325,14 +325,26 @@ class ImageCacheManager {
 
             console.log(`[fetchAndCache] Cache miss. Fetching image for card ID: ${cardId}, ciid: ${ciid}`);
 
-            // プロキシ経由で画像を直接取得
-            const imageUrl = `${PROXY_URL}/image?cid=${cardId}&ciid=${ciid}`;
-            const imageResponse = await fetch(imageUrl);
+            // カード詳細を取得
+            const detailUrl = `${PROXY_URL}/card-detail?cid=${cardId}`;
+            const detailResponse = await fetch(detailUrl);
+            const cardDetail = await detailResponse.json();
 
-            if (!imageResponse.ok) {
-                throw new Error(`Failed to fetch image: ${imageResponse.status}`);
+            // Find the correct illustration
+            let imageUrl;
+            if (cardDetail.illustrations && cardDetail.illustrations.length > 0) {
+                const illustration = cardDetail.illustrations.find(ill => ill.ciid === ciid);
+                imageUrl = illustration ? illustration.imageUrl : cardDetail.imageUrl;
+            } else {
+                imageUrl = cardDetail.imageUrl;
             }
 
+            if (!imageUrl) {
+                throw new Error('Image URL not found');
+            }
+
+            // 画像を取得
+            const imageResponse = await fetch(imageUrl);
             const blob = await imageResponse.blob();
 
             // BlobをBase64データURLに変換
@@ -346,6 +358,8 @@ class ImageCacheManager {
             // キャッシュに保存
             console.log(`[fetchAndCache] Saving to cache. Key: ${cacheKey}, dataUrl length: ${dataUrl.length}`);
             await this.saveImage(cacheKey, dataUrl, {
+                cardName: cardDetail.cardName,
+                encToken: cardDetail.encToken,
                 ciid: ciid
             });
 

@@ -123,14 +123,43 @@ app.get('/card-detail', async (req, res) => {
         const nameMatch = html.match(/<meta name="title" content="(.*?)\s*\|\s*カード詳細/);
         const cardName = nameMatch ? nameMatch[1].trim() : 'Unknown Card';
 
+        // Extract all card images with different illustrations (ciid)
+        // Pattern: get_image.action?type=2&cid=XXXX&ciid=Y&enc=ZZZZ
+        const imagePattern = /get_image\.action\?type=2&cid=\d+&ciid=(\d+)&enc=([a-zA-Z0-9_-]+)/g;
+        const illustrations = [];
+        let match;
+
+        while ((match = imagePattern.exec(html)) !== null) {
+            const ciid = match[1];
+            const encToken = match[2];
+
+            // Avoid duplicates
+            if (!illustrations.find(ill => ill.ciid === ciid)) {
+                illustrations.push({
+                    ciid: ciid,
+                    encToken: encToken
+                });
+            }
+        }
+
+        console.log(`Found ${illustrations.length} illustration(s) for card ${cardId}`);
+
+        // Build base URL from request
+        const protocol = req.headers['x-forwarded-proto'] || req.protocol || 'https';
+        const host = req.headers['x-forwarded-host'] || req.headers.host || req.hostname;
+        const baseUrl = `${protocol}://${host}`;
+
+        // Default to first illustration if none found
+        const defaultIllustration = illustrations.length > 0 ? illustrations[0] : { ciid: '1', encToken: null };
+
+        // Extract reprints
         const reprints = [];
         const reprintPattern = /<div class="t_row\s*">[\s\S]*?<div class="card_number">([\s\S]*?)<\/div>[\s\S]*?<div class="icon rarity">[\s\S]*?<p>([\s\S]*?)<\/p>[\s\S]*?<\/div>/g;
-        
-        let match;
-        while ((match = reprintPattern.exec(html)) !== null) {
-            // Trim whitespace and newlines from the captured groups
-            const setCode = match[1].replace(/\s/g, '');
-            const rarity = match[2].replace(/\s/g, '');
+
+        let reprintMatch;
+        while ((reprintMatch = reprintPattern.exec(html)) !== null) {
+            const setCode = reprintMatch[1].replace(/\s/g, '');
+            const rarity = reprintMatch[2].replace(/\s/g, '');
             if (setCode && rarity) {
                 reprints.push({ setCode, rarity });
             }
@@ -139,6 +168,15 @@ app.get('/card-detail', async (req, res) => {
         res.json({
             cardId,
             cardName,
+            encToken: defaultIllustration.encToken,
+            illustrations: illustrations.map(ill => ({
+                ciid: ill.ciid,
+                encToken: ill.encToken,
+                imageUrl: `${baseUrl}/image?cid=${cardId}&ciid=${ill.ciid}&enc=${ill.encToken}`
+            })),
+            imageUrl: defaultIllustration.encToken ?
+                `${baseUrl}/image?cid=${cardId}&ciid=${defaultIllustration.ciid}&enc=${defaultIllustration.encToken}` :
+                `${baseUrl}/image?cid=${cardId}`,
             reprints
         });
 
