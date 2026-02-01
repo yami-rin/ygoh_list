@@ -384,342 +384,7 @@
             height: 20px;
             cursor: pointer;
         }
-        
-        /* Custom theme styles */
-        body.theme-light-blue {
-            background: linear-gradient(135deg, #e3f2fd 0%, #bbdefb 100%);
-        }
-        body.theme-mint {
-            background: linear-gradient(135deg, #c8e6c9 0%, #81c784 100%);
-        }
-        body.theme-peach {
-            background: linear-gradient(135deg, #ffccbc 0%, #ffab91 100%);
-        }
-        body.theme-ocean {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-        }
-        body.theme-forest {
-            background: linear-gradient(135deg, #0ba360 0%, #3cba92 100%);
-        }
-        body.theme-sunset {
-            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
-        }
-        body.theme-galaxy {
-            background: linear-gradient(135deg, #4776E6 0%, #8E54E9 100%);
-        }
-        body.theme-cherry {
-            background: linear-gradient(135deg, #ffecd2 0%, #fcb69f 100%);
-        }
-        body.theme-midnight {
-            background: linear-gradient(135deg, #0f0c29 0%, #302b63 50%, #24243e 100%);
-            color: #e0e0e0;
-        }
-        body.theme-sakura {
-            background: linear-gradient(135deg, #fbc2eb 0%, #a6c1ee 100%);
-        }
-        body.theme-fire {
-            background: linear-gradient(135deg, #ff9a56 0%, #ff6a88 50%, #ff2d55 100%);
-        }
-        body.theme-aurora {
-            background: linear-gradient(135deg, #00d2ff 0%, #3a7bd5 50%, #00d2ff 100%);
-        }
-        body.theme-neon {
-            background: linear-gradient(135deg, #f953c6 0%, #b91d73 100%);
-            color: #fff;
-        }
-        body.theme-cosmic {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 50%, #f953c6 100%);
-        }
-        body.theme-rainbow {
-            background: linear-gradient(135deg, #ff0000 0%, #ff7f00 17%, #ffff00 33%, #00ff00 50%, #0000ff 67%, #4b0082 83%, #9400d3 100%);
-        }
-        body.theme-holographic {
-            background: linear-gradient(135deg, #a8edea 0%, #fed6e3 25%, #ffeaa7 50%, #dfe6e9 75%, #a8edea 100%);
-            background-size: 400% 400%;
-            animation: holographic-shift 8s ease infinite;
-        }
-        body.theme-dragon-soul {
-            background: linear-gradient(135deg, #f83600 0%, #f9d423 50%, #f83600 100%);
-            background-size: 200% 200%;
-            animation: dragon-pulse 5s ease infinite;
-        }
-        body.theme-legendary {
-            background: linear-gradient(135deg, #ffd700 0%, #ff6347 25%, #ff1493 50%, #00ced1 75%, #ffd700 100%);
-            background-size: 300% 300%;
-            animation: legendary-shift 10s ease infinite;
-        }
-        
-        @keyframes holographic-shift {
-            0% { background-position: 0% 50%; }
-            50% { background-position: 100% 50%; }
-            100% { background-position: 0% 50%; }
-        }
-        @keyframes dragon-pulse {
-            0% { background-position: 0% 50%; }
-            50% { background-position: 100% 50%; }
-            100% { background-position: 0% 50%; }
-        }
-        @keyframes legendary-shift {
-            0% { background-position: 0% 50%; }
-            33% { background-position: 100% 50%; }
-            66% { background-position: 50% 100%; }
-            100% { background-position: 0% 50%; }
-        }
-        
-        /* Frame Effects */
-        body.frame-gold .card {
-            border: 3px solid gold !important;
-            box-shadow: 0 0 15px rgba(255, 215, 0, 0.5);
-        }
-        body.frame-rainbow .card {
-            border: 3px solid transparent !important;
-            background: linear-gradient(white, white) padding-box,
-                       linear-gradient(45deg, red, orange, yellow, green, blue, indigo, violet) border-box;
-            animation: rainbow-border 3s linear infinite;
-        }
-        body.frame-diamond .card {
-            border: 3px solid silver !important;
-            box-shadow: 0 0 20px rgba(192, 192, 192, 0.8);
-            position: relative;
-        }
-        body.frame-fire .card {
-            border: 3px solid #ff4500 !important;
-            box-shadow: 0 0 20px rgba(255, 69, 0, 0.6);
-            animation: fire-glow 2s ease-in-out infinite;
-        }
-        body.frame-ice .card {
-            border: 3px solid #00bfff !important;
-            box-shadow: 0 0 20px rgba(0, 191, 255, 0.6);
-        }
-        body.frame-electric .card {
-            border: 3px solid #ffff00 !important;
-            box-shadow: 0 0 15px rgba(255, 255, 0, 0.8);
-            animation: electric-pulse 1s linear infinite;
-        }
-        
-        /* Additional Frame Styles */
-        body.frame-simple .card {
-            border: 2px solid #333 !important;
-        }
-        body.frame-bold .card {
-            border: 4px solid #000 !important;
-        }
-        body.frame-dotted .card {
-            border: 3px dotted #666 !important;
-        }
-        body.frame-silver .card {
-            border: 3px solid #C0C0C0 !important;
-            box-shadow: 0 0 10px rgba(192, 192, 192, 0.5);
-        }
-        body.frame-nature .card {
-            border: 3px solid #228B22 !important;
-            box-shadow: 0 0 15px rgba(34, 139, 34, 0.4);
-        }
-        body.frame-plasma .card {
-            border: 3px solid #8A2BE2 !important;
-            box-shadow: 0 0 20px rgba(138, 43, 226, 0.6);
-            animation: plasma-glow 2s ease-in-out infinite;
-        }
-        body.frame-crystal .card {
-            border: 3px solid #87CEEB !important;
-            box-shadow: 0 0 25px rgba(135, 206, 235, 0.7), inset 0 0 10px rgba(255, 255, 255, 0.3);
-        }
-        body.frame-legendary .card {
-            border: 4px solid transparent !important;
-            background: linear-gradient(white, white) padding-box,
-                       linear-gradient(45deg, gold, #ff6347, #ff1493, gold) border-box;
-            box-shadow: 0 0 30px rgba(255, 215, 0, 0.8);
-            animation: legendary-shimmer 3s linear infinite;
-        }
-        body.frame-mythic .card {
-            border: 4px solid transparent !important;
-            background: linear-gradient(white, white) padding-box,
-                       linear-gradient(90deg, #9400D3, #4B0082, #0000FF, #00FFFF, #0000FF, #4B0082, #9400D3) border-box;
-            box-shadow: 0 0 35px rgba(148, 0, 211, 0.8);
-            animation: mythic-pulse 4s ease-in-out infinite;
-        }
-        
-        /* Background Patterns */
-        body.bg-stars::before {
-            content: '';
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background-image: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><circle cx="10" cy="10" r="1" fill="white" opacity="0.5"/><circle cx="30" cy="20" r="1" fill="white" opacity="0.7"/><circle cx="50" cy="15" r="1.5" fill="white" opacity="0.6"/><circle cx="70" cy="25" r="1" fill="white" opacity="0.8"/><circle cx="90" cy="10" r="1" fill="white" opacity="0.5"/></svg>');
-            background-repeat: repeat;
-            pointer-events: none;
-            z-index: -1;
-            opacity: 0.3;
-        }
-        body.bg-clouds {
-            background-image: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 100"><ellipse cx="50" cy="50" rx="40" ry="20" fill="white" opacity="0.2"/><ellipse cx="150" cy="30" rx="50" ry="25" fill="white" opacity="0.15"/></svg>');
-            background-size: 200px 100px;
-            background-repeat: repeat;
-        }
-        body.bg-geometric::after {
-            content: '';
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background-image: repeating-linear-gradient(45deg, transparent, transparent 35px, rgba(255,255,255,.1) 35px, rgba(255,255,255,.1) 70px);
-            pointer-events: none;
-            z-index: -1;
-        }
-        body.bg-gradient {
-            background: linear-gradient(270deg, #a8edea, #fed6e3, #ffd3b6, #ffaaa5);
-            background-size: 800% 800%;
-            animation: gradient-shift 15s ease infinite;
-        }
-        body.bg-particles {
-            position: relative;
-            overflow: hidden;
-        }
-        body.bg-waves::before {
-            content: '';
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background-image: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1440 320"><path fill="%230099ff" fill-opacity="0.1" d="M0,32L48,53.3C96,75,192,117,288,122.7C384,128,480,96,576,90.7C672,85,768,107,864,128C960,149,1056,171,1152,165.3C1248,160,1344,128,1392,112L1440,96L1440,320L1392,320C1344,320,1248,320,1152,320C1056,320,960,320,864,320C768,320,672,320,576,320C480,320,384,320,288,320C192,320,96,320,48,320L0,320Z"></path></svg>');
-            background-repeat: repeat-x;
-            background-position: bottom;
-            pointer-events: none;
-            z-index: -1;
-        }
-        
-        /* Animations */
-        @keyframes rainbow-border {
-            0% { filter: hue-rotate(0deg); }
-            100% { filter: hue-rotate(360deg); }
-        }
-        @keyframes fire-glow {
-            0%, 100% { box-shadow: 0 0 20px rgba(255, 69, 0, 0.6); }
-            50% { box-shadow: 0 0 30px rgba(255, 140, 0, 0.8); }
-        }
-        @keyframes electric-pulse {
-            0%, 100% { box-shadow: 0 0 15px rgba(255, 255, 0, 0.8); }
-            50% { box-shadow: 0 0 25px rgba(255, 255, 0, 1); }
-        }
-        @keyframes gradient-shift {
-            0% { background-position: 0% 50%; }
-            50% { background-position: 100% 50%; }
-            100% { background-position: 0% 50%; }
-        }
-        
-        /* Additional Background Styles */
-        body.bg-dots {
-            background-image: radial-gradient(circle, #333 1px, transparent 1px);
-            background-size: 20px 20px;
-        }
-        body.bg-stripes {
-            background-image: repeating-linear-gradient(
-                45deg,
-                transparent,
-                transparent 10px,
-                rgba(255, 255, 255, 0.1) 10px,
-                rgba(255, 255, 255, 0.1) 20px
-            );
-        }
-        body.bg-checker {
-            background-image: 
-                linear-gradient(45deg, #ccc 25%, transparent 25%), 
-                linear-gradient(-45deg, #ccc 25%, transparent 25%), 
-                linear-gradient(45deg, transparent 75%, #ccc 75%), 
-                linear-gradient(-45deg, transparent 75%, #ccc 75%);
-            background-size: 20px 20px;
-            background-position: 0 0, 0 10px, 10px -10px, -10px 0px;
-        }
-        body.bg-hexagon {
-            background-image: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><polygon points="50,10 90,30 90,70 50,90 10,70 10,30" fill="none" stroke="rgba(255,255,255,0.1)" stroke-width="1"/></svg>');
-            background-size: 100px 100px;
-        }
-        body.bg-circuit {
-            background-image: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><path d="M10,10 L30,10 L30,30 L50,30 M70,30 L90,30 L90,50 M10,70 L30,70 L30,90 L50,90" fill="none" stroke="rgba(255,255,255,0.1)" stroke-width="1"/><circle cx="50" cy="30" r="3" fill="rgba(255,255,255,0.2)"/><circle cx="50" cy="90" r="3" fill="rgba(255,255,255,0.2)"/></svg>');
-            background-size: 100px 100px;
-        }
-        body.bg-galaxy {
-            background: radial-gradient(ellipse at center, #1e3c72 0%, #2a5298 50%, #0e1538 100%);
-        }
-        body.bg-aurora {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 25%, #f093fb 50%, #667eea 75%, #764ba2 100%);
-            background-size: 400% 400%;
-            animation: aurora-shift 10s ease infinite;
-        }
-        body.bg-crystal {
-            background: linear-gradient(135deg, #667eea 0%, rgba(118, 75, 162, 0.5) 50%, #667eea 100%),
-                        repeating-linear-gradient(45deg, transparent, transparent 35px, rgba(255,255,255,.05) 35px, rgba(255,255,255,.05) 70px);
-        }
-        body.bg-matrix {
-            background: #000;
-            background-image: repeating-linear-gradient(
-                0deg,
-                transparent,
-                transparent 2px,
-                #0F0 2px,
-                #0F0 3px
-            );
-            background-size: 100% 20px;
-            animation: matrix-rain 5s linear infinite;
-        }
-        body.bg-nebula {
-            background: radial-gradient(ellipse at top left, #ff00ff 0%, transparent 50%),
-                        radial-gradient(ellipse at bottom right, #00ffff 0%, transparent 50%),
-                        radial-gradient(ellipse at center, #1e3c72 0%, #0e1538 100%);
-        }
-        body.bg-dimension {
-            background: linear-gradient(45deg, #1e3c72, #2a5298, #7e8aa2, #2a5298, #1e3c72);
-            background-size: 500% 500%;
-            animation: dimension-shift 20s ease infinite;
-        }
-        body.bg-void {
-            background: radial-gradient(circle at center, #0a0a0a 0%, #000 50%, #000 100%);
-        }
-        body.bg-infinity {
-            background: conic-gradient(from 0deg at 50% 50%, #667eea, #764ba2, #f093fb, #f5576c, #667eea);
-            animation: infinity-rotate 10s linear infinite;
-        }
-        
-        /* Additional animations for backgrounds and frames */
-        @keyframes aurora-shift {
-            0% { background-position: 0% 0%; }
-            50% { background-position: 100% 100%; }
-            100% { background-position: 0% 0%; }
-        }
-        @keyframes matrix-rain {
-            0% { background-position: 0 0; }
-            100% { background-position: 0 20px; }
-        }
-        @keyframes dimension-shift {
-            0% { background-position: 0% 50%; }
-            25% { background-position: 100% 50%; }
-            50% { background-position: 100% 100%; }
-            75% { background-position: 0% 100%; }
-            100% { background-position: 0% 50%; }
-        }
-        @keyframes infinity-rotate {
-            0% { transform: rotate(0deg); }
-            100% { transform: rotate(360deg); }
-        }
-        @keyframes plasma-glow {
-            0% { box-shadow: 0 0 20px rgba(138, 43, 226, 0.6); }
-            50% { box-shadow: 0 0 30px rgba(138, 43, 226, 0.9), 0 0 50px rgba(138, 43, 226, 0.4); }
-            100% { box-shadow: 0 0 20px rgba(138, 43, 226, 0.6); }
-        }
-        @keyframes legendary-shimmer {
-            0% { background-position: 0% 50%; }
-            100% { background-position: 200% 50%; }
-        }
-        @keyframes mythic-pulse {
-            0% { box-shadow: 0 0 35px rgba(148, 0, 211, 0.8); }
-            50% { box-shadow: 0 0 50px rgba(148, 0, 211, 1), 0 0 70px rgba(0, 255, 255, 0.5); }
-            100% { box-shadow: 0 0 35px rgba(148, 0, 211, 0.8); }
-        }
-        
+
         /* Icon Styles */
         body.icon-crown .collector-rank::after {
             content: '👑';
@@ -1423,13 +1088,6 @@
 
                 <h5 class="mt-4 mb-3" id="guide-gamification"><i class="bi bi-5-circle-fill text-primary"></i> ゲーミフィケーション機能</h5>
                 <div class="ms-3">
-                    <h6><i class="bi bi-stars"></i> 今日のチャレンジ</h6>
-                    <ul>
-                        <li><strong>デイリーミッション</strong>：毎日更新されるミッションをクリアしてポイント獲得</li>
-                        <li><strong>連続登録</strong>：毎日カードを登録して連続記録を伸ばそう</li>
-                        <li><strong>週間目標</strong>：目標枚数を設定して達成を目指そう（クリックで変更可）</li>
-                    </ul>
-
                     <h6><i class="bi bi-trophy"></i> ランキングシステム</h6>
                     <ul>
                         <li>所持カード数で他のユーザーと競争</li>
@@ -1446,9 +1104,8 @@
 
                     <h6><i class="bi bi-shop"></i> ポイントショップ</h6>
                     <ul>
-                        <li>獲得したポイントでテーマやフレームを購入</li>
-                        <li>画面のカスタマイズが可能</li>
-                        <li>特殊エフェクトや背景を適用</li>
+                        <li>獲得したポイントでアイコンを購入</li>
+                        <li>ガチャで限定アイコンを入手</li>
                     </ul>
                 </div>
 
@@ -1770,69 +1427,32 @@
         <div class="modal-dialog modal-lg modal-dialog-centered modal-dialog-scrollable">
             <div class="modal-content">
                 <div class="modal-header bg-warning text-dark">
-                    <h5 class="modal-title"><i class="bi bi-palette"></i> テーマショップ</h5>
+                    <h5 class="modal-title"><i class="bi bi-shop"></i> ショップ</h5>
                     <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
                 </div>
                 <div class="modal-body">
                     <div class="alert alert-info">
                         <i class="bi bi-coin"></i> 現在のポイント: <strong id="shop-current-points">0</strong> pt
                     </div>
-                    
+
                     <!-- Shop Tabs -->
                     <ul class="nav nav-tabs mb-3" role="tablist">
                         <li class="nav-item" role="presentation">
-                            <button class="nav-link active" data-bs-toggle="tab" data-bs-target="#themes-tab" type="button">
-                                <i class="bi bi-palette"></i> テーマ
-                            </button>
-                        </li>
-                        <li class="nav-item" role="presentation">
-                            <button class="nav-link" data-bs-toggle="tab" data-bs-target="#frames-tab" type="button">
-                                <i class="bi bi-border-all"></i> フレーム
-                            </button>
-                        </li>
-                        <li class="nav-item" role="presentation">
-                            <button class="nav-link" data-bs-toggle="tab" data-bs-target="#backgrounds-tab" type="button">
-                                <i class="bi bi-image"></i> 背景
-                            </button>
-                        </li>
-                        <li class="nav-item" role="presentation">
-                            <button class="nav-link" data-bs-toggle="tab" data-bs-target="#icons-tab" type="button">
+                            <button class="nav-link active" data-bs-toggle="tab" data-bs-target="#icons-tab" type="button">
                                 <i class="bi bi-award"></i> アイコン
                             </button>
                         </li>
                         <li class="nav-item" role="presentation">
                             <button class="nav-link" data-bs-toggle="tab" data-bs-target="#gacha-tab" type="button">
                                 <i class="bi bi-gift"></i> ガチャ
-                                <span class="badge bg-danger">NEW</span>
                             </button>
                         </li>
                     </ul>
-                    
+
                     <!-- Shop Tab Content -->
                     <div class="tab-content">
-                        <!-- Themes Tab -->
-                        <div class="tab-pane fade show active" id="themes-tab" role="tabpanel">
-                            <div class="row g-3" id="theme-shop-items">
-                                <!-- Theme items will be populated here -->
-                            </div>
-                        </div>
-                        
-                        <!-- Frames Tab -->
-                        <div class="tab-pane fade" id="frames-tab" role="tabpanel">
-                            <div class="row g-3" id="frame-shop-items">
-                                <!-- Frame items will be populated here -->
-                            </div>
-                        </div>
-                        
-                        <!-- Backgrounds Tab -->
-                        <div class="tab-pane fade" id="backgrounds-tab" role="tabpanel">
-                            <div class="row g-3" id="background-shop-items">
-                                <!-- Background items will be populated here -->
-                            </div>
-                        </div>
-                        
                         <!-- Icons Tab -->
-                        <div class="tab-pane fade" id="icons-tab" role="tabpanel">
+                        <div class="tab-pane fade show active" id="icons-tab" role="tabpanel">
                             <div class="row g-3" id="icon-shop-items">
                                 <!-- Icon items will be populated here -->
                             </div>
@@ -1842,8 +1462,8 @@
                         <div class="tab-pane fade" id="gacha-tab" role="tabpanel">
                             <div class="alert alert-warning">
                                 <h5><i class="bi bi-gift"></i> ガチャで限定アイコンを手に入れよう！</h5>
-                                <p>ショップで購入可能なアイテムや、<strong>ガチャ限定のレアアイコン</strong>が手に入るチャンス！</p>
-                                <p class="mb-0"><small><i class="bi bi-info-circle"></i> 既に持っているアイテムが出た場合はポイントに変換されます</small></p>
+                                <p>ショップで購入可能なアイコンや、<strong>ガチャ限定のレアアイコン</strong>が手に入るチャンス！</p>
+                                <p class="mb-0"><small><i class="bi bi-info-circle"></i> 既に持っているアイコンが出た場合はポイントに変換されます</small></p>
                             </div>
 
                             <div class="row mb-4">
@@ -1898,17 +1518,17 @@
                                                     <tr>
                                                         <td><span class="badge bg-secondary">Common</span></td>
                                                         <td>60%</td>
-                                                        <td>50-200pt アイテム</td>
+                                                        <td>50-200pt アイコン</td>
                                                     </tr>
                                                     <tr>
                                                         <td><span class="badge bg-primary">Uncommon</span></td>
                                                         <td>25%</td>
-                                                        <td>250-500pt アイテム</td>
+                                                        <td>250-500pt アイコン</td>
                                                     </tr>
                                                     <tr>
                                                         <td><span class="badge bg-success">Rare</span></td>
                                                         <td>10%</td>
-                                                        <td>600-1000pt アイテム</td>
+                                                        <td>600-800pt アイコン</td>
                                                     </tr>
                                                     <tr>
                                                         <td><span class="badge bg-warning">Ultra Rare</span></td>
@@ -2039,11 +1659,6 @@
                     <input class="form-check-input" type="checkbox" role="switch" id="hide-stats-toggle">
                     <label class="form-check-label" for="hide-stats-toggle">コレクション統計を非表示</label>
                 </div>
-                <div class="form-check form-switch mb-3">
-                    <input class="form-check-input" type="checkbox" role="switch" id="show-daily-challenges-toggle">
-                    <label class="form-check-label" for="show-daily-challenges-toggle">今日のチャレンジを表示</label>
-                </div>
-
                 <hr>
                 <h6 class="mb-3"><i class="bi bi-clock-history"></i> 履歴・操作設定</h6>
                 <div class="form-check form-switch mb-3">
@@ -2671,72 +2286,6 @@
                             </form>
                         </div>
                     </div>
-                    
-                    <!-- Fun Dashboard -->
-                    <div class="card mt-3" id="daily-challenges-card">
-                        <div class="card-header bg-gradient" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white;">
-                            <div class="d-flex justify-content-between align-items-center">
-                                <div>
-                                    <i class="bi bi-stars"></i> 今日のチャレンジ
-                                </div>
-                                <div class="d-flex align-items-center gap-2">
-                                    <button class="btn btn-sm btn-light" onclick="toggleDailyChallenges()" title="表示/非表示">
-                                        <i class="bi bi-eye-slash" id="daily-challenges-toggle-icon"></i>
-                                    </button>
-                                    <div id="current-time" class="small"></div>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="card-body" id="daily-challenges-body">
-                            <!-- Daily Missions -->
-                            <div class="mb-3">
-                                <h6 class="d-flex align-items-center mb-2">
-                                    <i class="bi bi-flag-fill text-primary me-2"></i>
-                                    デイリーミッション
-                                </h6>
-                                <div id="daily-missions" class="list-group list-group-flush">
-                                    <!-- Missions will be populated here -->
-                                </div>
-                            </div>
-                            
-                            <!-- Registration Streak -->
-                            <div class="mb-3">
-                                <h6 class="d-flex align-items-center mb-2">
-                                    <i class="bi bi-fire text-danger me-2"></i>
-                                    登録ストリーク
-                                </h6>
-                                <div class="d-flex align-items-center">
-                                    <div class="flex-grow-1">
-                                        <div class="d-flex align-items-baseline">
-                                            <span class="fs-2 fw-bold text-warning" id="streak-count">0</span>
-                                            <span class="ms-2 text-muted">日連続</span>
-                                        </div>
-                                        <div class="progress mt-2" style="height: 10px;">
-                                            <div class="progress-bar bg-warning" id="streak-progress" role="progressbar" style="width: 0%"></div>
-                                        </div>
-                                        <small class="text-muted" id="streak-message"></small>
-                                    </div>
-                                    <div class="ms-3" id="streak-badge" style="font-size: 3rem;"></div>
-                                </div>
-                            </div>
-                            
-                            <!-- Quick Stats -->
-                            <div class="row g-2 text-center">
-                                <div class="col-6">
-                                    <div class="p-2 bg-light rounded">
-                                        <div class="fs-4 fw-bold text-primary" id="today-added">0</div>
-                                        <small class="text-muted">今日追加</small>
-                                    </div>
-                                </div>
-                                <div class="col-6">
-                                    <div class="p-2 bg-light rounded" style="cursor: pointer;" onclick="showWeeklyGoalSetting()" title="クリックして目標を変更">
-                                        <div class="fs-4 fw-bold text-success" id="week-goal-progress">0%</div>
-                                        <small class="text-muted">週間目標 (<span id="week-goal-target">50</span>枚)</small>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
                 </div>
 
                 <!-- Right Column: Search/List and Stats -->
@@ -3108,14 +2657,10 @@
         let gamificationData = {
             userPoints: 0,
             purchasedItems: {},
-            activeTheme: 'default',
-            activeFrame: '',
-            activeBackground: '',
             activeIcon: '',
             registrationStreak: { count: 0, lastDate: null },
             weeklyGoalData: { weekStart: null, count: 0, goal: 50 },
             todayAdditions: { date: null, count: 0 },
-            dailyMissionProgress: {},
             firstCollectionDate: null,
             lastMilestoneReached: 0,
             cardAdditionDates: {},
@@ -3792,17 +3337,6 @@
             return 1;
         };
         
-        // Track card addition dates - now in gamificationData
-        
-        // Fun Dashboard Features
-        const DAILY_MISSIONS = [
-            { id: 'add3', text: '3枚のカードを追加', target: 3, type: 'add' },
-            { id: 'addRare', text: 'レア以上のカードを1枚追加', target: 1, type: 'rare' },
-            { id: 'addTag', text: 'タグ付きカードを追加', target: 1, type: 'tag' },
-            { id: 'search5', text: '5回検索を実行', target: 5, type: 'search' },
-            { id: 'unique2', text: '2種類の異なるカードを追加', target: 2, type: 'unique' }
-        ];
-        
         // Point System - now in gamificationData
         
         const POINT_REWARDS = {
@@ -3814,87 +3348,6 @@
         };
         
         const SHOP_ITEMS = {
-            themes: [
-                // Basic themes (50-100pt)
-                { id: 'theme-light-blue', name: 'ライトブルー', class: 'theme-light-blue', cost: 50, preview: 'linear-gradient(135deg, #e3f2fd 0%, #bbdefb 100%)' },
-                { id: 'theme-mint', name: 'ミント', class: 'theme-mint', cost: 80, preview: 'linear-gradient(135deg, #c8e6c9 0%, #81c784 100%)' },
-                { id: 'theme-peach', name: 'ピーチ', class: 'theme-peach', cost: 80, preview: 'linear-gradient(135deg, #ffccbc 0%, #ffab91 100%)' },
-                
-                // Mid-tier themes (100-200pt)
-                { id: 'theme-ocean', name: 'オーシャン', class: 'theme-ocean', cost: 150, preview: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)' },
-                { id: 'theme-forest', name: 'フォレスト', class: 'theme-forest', cost: 120, preview: 'linear-gradient(135deg, #0ba360 0%, #3cba92 100%)' },
-                { id: 'theme-sunset', name: 'サンセット', class: 'theme-sunset', cost: 180, preview: 'linear-gradient(135deg, #f093fb 0%, #f5576c 100%)' },
-                { id: 'theme-cherry', name: 'チェリー', class: 'theme-cherry', cost: 150, preview: 'linear-gradient(135deg, #ffecd2 0%, #fcb69f 100%)' },
-                { id: 'theme-sakura', name: '桜', class: 'theme-sakura', cost: 200, preview: 'linear-gradient(135deg, #fbc2eb 0%, #a6c1ee 100%)' },
-                
-                // Premium themes (250-500pt)
-                { id: 'theme-galaxy', name: 'ギャラクシー', class: 'theme-galaxy', cost: 300, preview: 'linear-gradient(135deg, #4776E6 0%, #8E54E9 100%)' },
-                { id: 'theme-midnight', name: 'ミッドナイト', class: 'theme-midnight', cost: 350, preview: 'linear-gradient(135deg, #0f0c29 0%, #302b63 50%, #24243e 100%)' },
-                { id: 'theme-fire', name: 'ファイア', class: 'theme-fire', cost: 400, preview: 'linear-gradient(135deg, #ff9a56 0%, #ff6a88 50%, #ff2d55 100%)' },
-                { id: 'theme-aurora', name: 'オーロラ', class: 'theme-aurora', cost: 450, preview: 'linear-gradient(135deg, #00d2ff 0%, #3a7bd5 50%, #00d2ff 100%)' },
-                { id: 'theme-neon', name: 'ネオン', class: 'theme-neon', cost: 500, preview: 'linear-gradient(135deg, #f953c6 0%, #b91d73 100%)' },
-                
-                // Ultra premium themes (600-1000pt)
-                { id: 'theme-cosmic', name: 'コズミック', class: 'theme-cosmic', cost: 600, preview: 'linear-gradient(135deg, #667eea 0%, #764ba2 50%, #f953c6 100%)' },
-                { id: 'theme-rainbow', name: 'レインボー', class: 'theme-rainbow', cost: 800, preview: 'linear-gradient(135deg, #ff0000 0%, #ff7f00 17%, #ffff00 33%, #00ff00 50%, #0000ff 67%, #4b0082 83%, #9400d3 100%)' },
-                { id: 'theme-holographic', name: 'ホログラフィック', class: 'theme-holographic', cost: 900, preview: 'linear-gradient(135deg, #a8edea 0%, #fed6e3 25%, #ffeaa7 50%, #dfe6e9 75%, #a8edea 100%)' },
-                { id: 'theme-dragon-soul', name: 'ドラゴンソウル', class: 'theme-dragon-soul', cost: 1200, preview: 'linear-gradient(135deg, #f83600 0%, #f9d423 50%, #f83600 100%)' },
-                { id: 'theme-legendary', name: 'レジェンダリー', class: 'theme-legendary', cost: 1500, preview: 'linear-gradient(135deg, #ffd700 0%, #ff6347 25%, #ff1493 50%, #00ced1 75%, #ffd700 100%)' },
-            ],
-            frames: [
-                // Basic frames (50-100pt)
-                { id: 'frame-simple', name: 'シンプル', cost: 50, description: 'シンプルな枠線', class: 'frame-simple' },
-                { id: 'frame-bold', name: 'ボールド', cost: 80, description: '太い枠線', class: 'frame-bold' },
-                { id: 'frame-dotted', name: 'ドット', cost: 60, description: '点線の枠', class: 'frame-dotted' },
-                
-                // Mid-tier frames (120-250pt)
-                { id: 'frame-silver', name: 'シルバー', cost: 120, description: '銀色の枠線', class: 'frame-silver' },
-                { id: 'frame-gold', name: 'ゴールド', cost: 200, description: 'カードに金色の枠線', class: 'frame-gold' },
-                { id: 'frame-fire', name: '炎', cost: 250, description: '燃え上がるフレーム', class: 'frame-fire' },
-                { id: 'frame-ice', name: '氷', cost: 250, description: '冷たく輝くフレーム', class: 'frame-ice' },
-                { id: 'frame-nature', name: '自然', cost: 180, description: '葉っぱで飾られた枠', class: 'frame-nature' },
-                
-                // Premium frames (300-500pt)
-                { id: 'frame-rainbow', name: 'レインボー', cost: 350, description: '虹色に輝く枠線', class: 'frame-rainbow' },
-                { id: 'frame-electric', name: '電気', cost: 320, description: '電撃が走るフレーム', class: 'frame-electric' },
-                { id: 'frame-diamond', name: 'ダイヤモンド', cost: 400, description: 'キラキラ光る高級フレーム', class: 'frame-diamond' },
-                { id: 'frame-plasma', name: 'プラズマ', cost: 450, description: 'プラズマが流れる枠', class: 'frame-plasma' },
-                { id: 'frame-crystal', name: 'クリスタル', cost: 500, description: '水晶のような透明感', class: 'frame-crystal' },
-                
-                // Ultra premium frames (600-1500pt)
-                { id: 'frame-legendary', name: 'レジェンダリー', cost: 700, description: '伝説級の豪華な枠', class: 'frame-legendary' },
-                { id: 'frame-mythic', name: 'ミシック', cost: 900, description: '神話級の神秘的な枠', class: 'frame-mythic' },
-                { id: 'frame-ultimate', name: 'アルティメット', cost: 1100, description: '究極の装飾枠', class: 'frame-ultimate' },
-                { id: 'frame-god', name: 'ゴッド', cost: 1500, description: '神々しい光の枠', class: 'frame-god' },
-            ],
-            backgrounds: [
-                // Basic backgrounds (50-100pt)
-                { id: 'bg-gradient', name: 'グラデーション', cost: 50, description: '美しい色の変化', class: 'bg-gradient' },
-                { id: 'bg-dots', name: 'ドット', cost: 60, description: 'かわいいドットパターン', class: 'bg-dots' },
-                { id: 'bg-stripes', name: 'ストライプ', cost: 60, description: '縞模様の背景', class: 'bg-stripes' },
-                { id: 'bg-checker', name: 'チェッカー', cost: 80, description: '市松模様', class: 'bg-checker' },
-                
-                // Mid-tier backgrounds (120-250pt)
-                { id: 'bg-clouds', name: '雲', cost: 120, description: 'ふわふわ雲', class: 'bg-clouds' },
-                { id: 'bg-waves', name: '波', cost: 150, description: '優雅な波のパターン', class: 'bg-waves' },
-                { id: 'bg-geometric', name: '幾何学', cost: 180, description: 'モダンな幾何学パターン', class: 'bg-geometric' },
-                { id: 'bg-hexagon', name: 'ヘキサゴン', cost: 200, description: '六角形パターン', class: 'bg-hexagon' },
-                { id: 'bg-circuit', name: '回路', cost: 220, description: 'サイバー回路パターン', class: 'bg-circuit' },
-                
-                // Premium backgrounds (250-500pt)
-                { id: 'bg-stars', name: '星空', cost: 300, description: 'きらめく星空', class: 'bg-stars' },
-                { id: 'bg-particles', name: 'パーティクル', cost: 350, description: '動く粒子エフェクト', class: 'bg-particles' },
-                { id: 'bg-galaxy', name: '銀河', cost: 400, description: '壮大な銀河の背景', class: 'bg-galaxy' },
-                { id: 'bg-aurora', name: 'オーロラ', cost: 450, description: '美しいオーロラの背景', class: 'bg-aurora' },
-                { id: 'bg-crystal', name: 'クリスタル', cost: 500, description: 'クリスタルの輝き', class: 'bg-crystal' },
-                
-                // Ultra premium backgrounds (600-1500pt)
-                { id: 'bg-matrix', name: 'マトリックス', cost: 600, description: 'デジタルマトリックス', class: 'bg-matrix' },
-                { id: 'bg-nebula', name: 'ネビュラ', cost: 800, description: '宇宙の星雲', class: 'bg-nebula' },
-                { id: 'bg-dimension', name: '次元', cost: 1000, description: '多次元空間の背景', class: 'bg-dimension' },
-                { id: 'bg-void', name: 'ヴォイド', cost: 1200, description: '虚空の深淵', class: 'bg-void' },
-                { id: 'bg-infinity', name: 'インフィニティ', cost: 1500, description: '無限の彼方', class: 'bg-infinity' },
-            ],
             icons: [
                 // Basic icons (50-150pt)
                 { id: 'icon-star', name: 'スター', cost: 50, class: 'icon-star', emoji: '✨' },
@@ -4013,103 +3466,6 @@
             legendary: 1     // 1% - レジェンダリー（ガチャ限定）
         };
 
-        // Initialize daily mission progress
-        const initializeDailyMissions = () => {
-            const today = new Date().toDateString();
-            
-            // Reset missions if it's a new day
-            if (!gamificationData.dailyMissionProgress || gamificationData.dailyMissionProgress.date !== today) {
-                gamificationData.dailyMissionProgress = {
-                    date: today,
-                    missions: {},
-                    searchCount: 0,
-                    addedCards: [],
-                    addedRare: 0,
-                    addedWithTag: 0
-                };
-                saveGamificationData();
-            }
-        };
-        
-        // Update time display
-        const updateTimeDisplay = () => {
-            const now = new Date();
-            const timeStr = now.toLocaleTimeString('ja-JP', { hour: '2-digit', minute: '2-digit' });
-            const dateStr = now.toLocaleDateString('ja-JP', { month: 'long', day: 'numeric', weekday: 'long' });
-            const timeEl = document.getElementById('current-time');
-            if (timeEl) {
-                timeEl.textContent = `${dateStr} ${timeStr}`;
-            }
-        };
-        
-        // Update daily missions display
-        const updateDailyMissions = () => {
-            const container = document.getElementById('daily-missions');
-            if (!container) return;
-            
-            container.innerHTML = '';
-            DAILY_MISSIONS.forEach(mission => {
-                const completed = gamificationData.dailyMissionProgress.missions[mission.id] || false;
-                let progress = 0;
-                
-                switch (mission.type) {
-                    case 'add':
-                        progress = gamificationData.dailyMissionProgress.addedCards.length;
-                        break;
-                    case 'rare':
-                        progress = gamificationData.dailyMissionProgress.addedRare;
-                        break;
-                    case 'tag':
-                        progress = gamificationData.dailyMissionProgress.addedWithTag;
-                        break;
-                    case 'search':
-                        progress = gamificationData.dailyMissionProgress.searchCount;
-                        break;
-                    case 'unique':
-                        progress = new Set(gamificationData.dailyMissionProgress.addedCards.map(c => c.name)).size;
-                        break;
-                }
-                
-                const missionEl = document.createElement('div');
-                missionEl.className = `list-group-item d-flex align-items-center mission-item ${completed ? 'completed' : ''}`;
-                missionEl.innerHTML = `
-                    <input type="checkbox" class="mission-checkbox me-3" ${completed ? 'checked' : ''} disabled>
-                    <div class="flex-grow-1">
-                        <div>${mission.text}</div>
-                        <small class="text-muted">進捗: ${Math.min(progress, mission.target)}/${mission.target}</small>
-                    </div>
-                    ${completed ? '<span class="badge bg-success">完了!</span>' : '<span class="badge bg-secondary">未完了</span>'}
-                `;
-                container.appendChild(missionEl);
-                
-                // Auto complete mission when target reached
-                if (!completed && progress >= mission.target) {
-                    gamificationData.dailyMissionProgress.missions[mission.id] = true;
-                    saveGamificationData();
-                    showMissionCompleteNotification(mission.text);
-                    addPoints(POINT_REWARDS.completeMission, 'ミッション完了');
-                }
-            });
-        };
-        
-        // Show mission complete notification
-        const showMissionCompleteNotification = (missionText) => {
-            const notification = document.createElement('div');
-            notification.className = 'position-fixed top-0 start-50 translate-middle-x mt-3';
-            notification.style.zIndex = '9999';
-            notification.innerHTML = `
-                <div class="alert alert-success shadow-lg">
-                    <i class="bi bi-check-circle-fill me-2"></i>
-                    <strong>ミッション達成！</strong> ${missionText}
-                </div>
-            `;
-            document.body.appendChild(notification);
-            
-            setTimeout(() => {
-                notification.remove();
-            }, 3000);
-        };
-        
         // Update registration streak
         const updateRegistrationStreak = () => {
             const streakData = gamificationData.registrationStreak;
@@ -4263,18 +3619,20 @@
         
         // Initialize shop
         const initializeShop = () => {
-            // Display exclusive icons in gacha info
+            // Display exclusive icons in gacha info with ownership status
             const exclusiveIconsDisplay = document.getElementById('exclusive-icons-display');
             if (exclusiveIconsDisplay) {
                 let html = '<h6><span class="badge bg-warning">Ultra Rare (4%)</span></h6><div class="row g-2 mb-3">';
 
                 SHOP_ITEMS.exclusiveIcons.filter(i => i.rarity === 'ultra-rare').forEach(icon => {
+                    const isOwned = gamificationData.purchasedItems[icon.id];
                     html += `
                         <div class="col-4 col-md-3 text-center">
-                            <div class="card">
+                            <div class="card ${isOwned ? 'border-success' : ''}" style="${!isOwned ? 'opacity: 0.5;' : ''}">
                                 <div class="card-body p-2">
                                     <div style="font-size: 2rem;">${icon.emoji}</div>
                                     <small>${icon.name}</small>
+                                    ${isOwned ? '<div><span class="badge bg-success" style="font-size: 0.6rem;">所持</span></div>' : '<div><span class="badge bg-secondary" style="font-size: 0.6rem;">未所持</span></div>'}
                                 </div>
                             </div>
                         </div>
@@ -4284,12 +3642,14 @@
                 html += '</div><h6><span class="badge bg-danger">Legendary (1%)</span></h6><div class="row g-2">';
 
                 SHOP_ITEMS.exclusiveIcons.filter(i => i.rarity === 'legendary').forEach(icon => {
+                    const isOwned = gamificationData.purchasedItems[icon.id];
                     html += `
                         <div class="col-4 col-md-3 text-center">
-                            <div class="card" style="background: linear-gradient(135deg, #ffd700, #ff6347);">
+                            <div class="card ${isOwned ? 'border-success' : ''}" style="background: linear-gradient(135deg, #ffd700, #ff6347); ${!isOwned ? 'opacity: 0.5;' : ''}">
                                 <div class="card-body p-2 text-white">
                                     <div style="font-size: 2rem;">${icon.emoji}</div>
                                     <small>${icon.name}</small>
+                                    ${isOwned ? '<div><span class="badge bg-success" style="font-size: 0.6rem;">所持</span></div>' : '<div><span class="badge bg-dark" style="font-size: 0.6rem;">未所持</span></div>'}
                                 </div>
                             </div>
                         </div>
@@ -4299,122 +3659,7 @@
                 html += '</div>';
                 exclusiveIconsDisplay.innerHTML = html;
             }
-            // Populate themes
-            const themeContainer = document.getElementById('theme-shop-items');
-            if (themeContainer) {
-                themeContainer.innerHTML = '';
-                SHOP_ITEMS.themes.forEach(theme => {
-                    const isPurchased = gamificationData.purchasedItems[theme.id];
-                    const isActive = gamificationData.activeTheme === theme.class;
-                    
-                    const itemEl = document.createElement('div');
-                    itemEl.className = 'col-md-6';
-                    itemEl.innerHTML = `
-                        <div class="card shop-item ${isPurchased ? 'purchased' : ''} ${isActive ? 'active' : ''} ${!isPurchased && gamificationData.userPoints < theme.cost ? 'locked' : ''}">
-                            <div class="card-body">
-                                <div style="height: 60px; background: ${theme.preview}; border-radius: 5px; margin-bottom: 10px;"></div>
-                                <h6>${theme.name}</h6>
-                                <div class="d-flex justify-content-between align-items-center">
-                                    <span class="badge bg-warning">${theme.cost} pt</span>
-                                    ${isPurchased ? 
-                                        (isActive ? 
-                                            '<div class="btn-group btn-group-sm">' +
-                                            '<button class="btn btn-primary" disabled>適用中</button>' +
-                                            '<button class="btn btn-outline-secondary" onclick="applyTheme(\'default\')" title="外す"><i class="bi bi-x"></i></button>' +
-                                            '</div>' : 
-                                            `<button class="btn btn-sm btn-success" onclick="applyTheme('${theme.class}')">適用</button>`) :
-                                        `<button class="btn btn-sm btn-warning" onclick="purchaseItem('${theme.id}', ${theme.cost}, 'theme')">購入</button>`
-                                    }
-                                </div>
-                            </div>
-                        </div>
-                    `;
-                    themeContainer.appendChild(itemEl);
-                });
-            }
-            
-            // Populate frames
-            const frameContainer = document.getElementById('frame-shop-items');
-            if (frameContainer) {
-                frameContainer.innerHTML = '';
-                SHOP_ITEMS.frames.forEach(frame => {
-                    const isPurchased = gamificationData.purchasedItems[frame.id];
-                    const isActive = gamificationData.activeFrame === frame.class;
-                    
-                    const itemEl = document.createElement('div');
-                    itemEl.className = 'col-md-6';
-                    itemEl.innerHTML = `
-                        <div class="card shop-item ${isPurchased ? 'purchased' : ''} ${isActive ? 'active' : ''} ${!isPurchased && gamificationData.userPoints < frame.cost ? 'locked' : ''}">
-                            <div class="card-body">
-                                <h6><i class="bi bi-border-all"></i> ${frame.name}</h6>
-                                <p class="small text-muted">${frame.description}</p>
-                                <div class="d-flex justify-content-between align-items-center mt-2">
-                                    <span class="badge bg-warning">${frame.cost} pt</span>
-                                    <div>
-                                        ${!isPurchased && !isActive ? 
-                                            `<button class="btn btn-sm btn-outline-info me-1" onclick="previewFrame('${frame.class}')" title="プレビュー">
-                                                <i class="bi bi-eye"></i> 試す
-                                            </button>` : ''
-                                        }
-                                        ${isPurchased ? 
-                                            (isActive ? 
-                                                '<div class="btn-group btn-group-sm">' +
-                                                '<button class="btn btn-primary" disabled>適用中</button>' +
-                                                '<button class="btn btn-outline-secondary" onclick="applyFrame(\'\')" title="外す"><i class="bi bi-x"></i></button>' +
-                                                '</div>' : 
-                                                `<button class="btn btn-sm btn-success" onclick="applyFrame('${frame.class}')">適用</button>`) :
-                                            `<button class="btn btn-sm btn-warning" onclick="purchaseItem('${frame.id}', ${frame.cost}, 'frame')">購入</button>`
-                                        }
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    `;
-                    frameContainer.appendChild(itemEl);
-                });
-            }
-            
-            // Populate backgrounds
-            const bgContainer = document.getElementById('background-shop-items');
-            if (bgContainer) {
-                bgContainer.innerHTML = '';
-                SHOP_ITEMS.backgrounds.forEach(bg => {
-                    const isPurchased = gamificationData.purchasedItems[bg.id];
-                    const isActive = gamificationData.activeBackground === bg.class;
-                    
-                    const itemEl = document.createElement('div');
-                    itemEl.className = 'col-md-6';
-                    itemEl.innerHTML = `
-                        <div class="card shop-item ${isPurchased ? 'purchased' : ''} ${isActive ? 'active' : ''} ${!isPurchased && gamificationData.userPoints < bg.cost ? 'locked' : ''}">
-                            <div class="card-body">
-                                <h6><i class="bi bi-image"></i> ${bg.name}</h6>
-                                <p class="small text-muted">${bg.description}</p>
-                                <div class="d-flex justify-content-between align-items-center mt-2">
-                                    <span class="badge bg-warning">${bg.cost} pt</span>
-                                    <div>
-                                        ${!isPurchased && !isActive ? 
-                                            `<button class="btn btn-sm btn-outline-info me-1" onclick="previewBackground('${bg.class}')" title="プレビュー">
-                                                <i class="bi bi-eye"></i> 試す
-                                            </button>` : ''
-                                        }
-                                        ${isPurchased ? 
-                                            (isActive ? 
-                                                '<div class="btn-group btn-group-sm">' +
-                                                '<button class="btn btn-primary" disabled>適用中</button>' +
-                                                '<button class="btn btn-outline-secondary" onclick="applyBackground(\'\')" title="外す"><i class="bi bi-x"></i></button>' +
-                                                '</div>' : 
-                                                `<button class="btn btn-sm btn-success" onclick="applyBackground('${bg.class}')">適用</button>`) :
-                                            `<button class="btn btn-sm btn-warning" onclick="purchaseItem('${bg.id}', ${bg.cost}, 'background')">購入</button>`
-                                        }
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    `;
-                    bgContainer.appendChild(itemEl);
-                });
-            }
-            
+
             // Populate icons
             const iconContainer = document.getElementById('icon-shop-items');
             if (iconContainer) {
@@ -4467,22 +3712,6 @@
             }
         };
 
-        window.toggleDailyChallenges = () => {
-            const body = document.getElementById('daily-challenges-body');
-            const icon = document.getElementById('daily-challenges-toggle-icon');
-            const isHidden = body.style.display === 'none';
-            
-            if (isHidden) {
-                body.style.display = '';
-                icon.className = 'bi bi-eye-slash';
-                localStorage.setItem('hideDailyChallenges', 'false');
-            } else {
-                body.style.display = 'none';
-                icon.className = 'bi bi-eye';
-                localStorage.setItem('hideDailyChallenges', 'true');
-            }
-        };
-        
         // Undo recent card addition
         window.undoRecentAddition = async (name, setCode, rarity, quantity, listType, timestamp) => {
             if (!confirm(`「${name}」の追加を取り消しますか？\n\n注意: この操作により、該当するカードがリストから削除されます。`)) {
@@ -4714,50 +3943,19 @@
 
                     const rarityBadge = getRarityBadge(result.rarity);
 
-                    // アイテムタイプに応じた絵文字を設定
-                    let displayEmoji = result.emoji;
-                    if (!displayEmoji) {
-                        switch(result.type) {
-                            case 'theme':
-                                displayEmoji = '🎨'; // パレット
-                                break;
-                            case 'frame':
-                                displayEmoji = '🖼️'; // フレーム
-                                break;
-                            case 'background':
-                                displayEmoji = '🌄'; // 背景
-                                break;
-                            case 'icon':
-                                displayEmoji = '🎆'; // アイコンのデフォルト
-                                break;
-                            default:
-                                displayEmoji = '🎆';
-                        }
-                    }
+                    // 絵文字を設定
+                    const displayEmoji = result.emoji || '🎆';
 
                     // 特殊レアリティの場合のテキスト色
                     const textColorClass = (result.rarity === 'legendary' || result.rarity === 'ultra-rare') ? 'text-white' : '';
 
-                    // アイテムタイプの表示名を取得
-                    const getItemTypeLabel = (type) => {
-                        switch(type) {
-                            case 'theme': return 'テーマ';
-                            case 'frame': return 'フレーム';
-                            case 'background': return '背景';
-                            case 'icon': return 'アイコン';
-                            default: return 'アイテム';
-                        }
-                    };
-
                     resultsHTML += `
                         <div class="col-6 col-md-4">
-                            <div class="card ${isNew ? 'border-warning' : convertedToPoints ? 'border-info' : ''}" style="${result.rarity === 'legendary' ? 'background: linear-gradient(135deg, #ffd700, #ff6347);' : result.rarity === 'ultra-rare' ? 'background: linear-gradient(135deg, #f093fb, #f5576c);' : ''}">
+                            <div class="card ${convertedToPoints ? 'border-info' : ''}" style="${result.rarity === 'legendary' ? 'background: linear-gradient(135deg, #ffd700, #ff6347);' : result.rarity === 'ultra-rare' ? 'background: linear-gradient(135deg, #f093fb, #f5576c);' : ''}">
                                 <div class="card-body text-center p-2 ${textColorClass}">
-                                    ${isNew ? '<span class="badge bg-warning position-absolute top-0 start-0">NEW!</span>' :
-                                      convertedToPoints ? `<span class="badge bg-info position-absolute top-0 start-0">+${pointsAwarded}pt</span>` : ''}
+                                    ${convertedToPoints ? `<span class="badge bg-info position-absolute top-0 start-0">+${pointsAwarded}pt</span>` : ''}
                                     <div style="font-size: 2rem;">${displayEmoji}</div>
                                     <small class="d-block">${result.name}</small>
-                                    <small class="d-block text-muted" style="opacity: 0.8;">${getItemTypeLabel(result.type)}</small>
                                     ${rarityBadge}
                                     ${convertedToPoints ? '<small class="d-block mt-1" style="opacity: 0.8;">重複→ポイント変換</small>' : ''}
                                 </div>
@@ -4769,13 +3967,13 @@
                 resultsHTML += '</div>';
 
                 if (hasNewItem) {
-                    resultsHTML += '<div class="alert alert-success mt-3"><i class="bi bi-check-circle"></i> 新しいアイテムを獲得しました！</div>';
+                    resultsHTML += '<div class="alert alert-success mt-3"><i class="bi bi-check-circle"></i> 新しいアイコンを獲得しました！</div>';
                 }
 
                 if (duplicatePoints > 0) {
                     // 重複ポイントを追加
                     gamificationData.userPoints += duplicatePoints;
-                    resultsHTML += `<div class="alert alert-info mt-3"><i class="bi bi-coin"></i> 重複アイテムが <strong>${duplicatePoints}pt</strong> に変換されました！</div>`;
+                    resultsHTML += `<div class="alert alert-info mt-3"><i class="bi bi-coin"></i> 重複アイコンが <strong>${duplicatePoints}pt</strong> に変換されました！</div>`;
                 }
 
                 // データを保存
@@ -4812,41 +4010,17 @@
                 const exclusiveItems = SHOP_ITEMS.exclusiveIcons.filter(i => i.rarity === rarity);
                 item = exclusiveItems[Math.floor(Math.random() * exclusiveItems.length)];
             } else {
-                // 通常アイテムから選択
-                const allItems = [];
-
-                // コストに基づいてアイテムをフィルタ
+                // 通常アイコンから選択
                 const costRange = {
                     common: [50, 200],
                     uncommon: [250, 500],
-                    rare: [600, 1500]
+                    rare: [600, 800]
                 };
 
                 const range = costRange[rarity];
-
-                // 全カテゴリからアイテムを収集
-                SHOP_ITEMS.themes.forEach(t => {
-                    if (t.cost >= range[0] && t.cost <= range[1]) {
-                        allItems.push({...t, type: 'theme', rarity});
-                    }
-                });
-                SHOP_ITEMS.frames.forEach(f => {
-                    if (f.cost >= range[0] && f.cost <= range[1]) {
-                        allItems.push({...f, type: 'frame', rarity});
-                    }
-                });
-                SHOP_ITEMS.backgrounds.forEach(b => {
-                    if (b.cost >= range[0] && b.cost <= range[1]) {
-                        allItems.push({...b, type: 'background', rarity});
-                    }
-                });
-                SHOP_ITEMS.icons.forEach(i => {
-                    if (i.cost >= range[0] && i.cost <= range[1]) {
-                        allItems.push({...i, type: 'icon', rarity});
-                    }
-                });
-
-                item = allItems[Math.floor(Math.random() * allItems.length)];
+                const filteredIcons = SHOP_ITEMS.icons.filter(i => i.cost >= range[0] && i.cost <= range[1]);
+                const selectedIcon = filteredIcons[Math.floor(Math.random() * filteredIcons.length)];
+                item = {...selectedIcon, type: 'icon', rarity};
             }
 
             return item;
@@ -4877,51 +4051,6 @@
             initializeShop();
         };
 
-        // Apply theme
-        window.applyTheme = (themeClass) => {
-            // Remove all theme classes
-            const allThemeClasses = SHOP_ITEMS.themes.map(t => t.class);
-            document.body.classList.remove(...allThemeClasses);
-            
-            if (themeClass !== 'default') {
-                document.body.classList.add(themeClass);
-            }
-            
-            gamificationData.activeTheme = themeClass;
-            saveGamificationData();
-            initializeShop();
-        };
-        
-        // Apply frame
-        window.applyFrame = (frameClass) => {
-            // Remove all frame classes
-            const allFrameClasses = SHOP_ITEMS.frames.map(f => f.class);
-            document.body.classList.remove(...allFrameClasses);
-            
-            if (frameClass && frameClass !== 'none') {
-                document.body.classList.add(frameClass);
-            }
-            
-            gamificationData.activeFrame = frameClass;
-            saveGamificationData();
-            initializeShop();
-        };
-        
-        // Apply background
-        window.applyBackground = (bgClass) => {
-            // Remove all background classes
-            const allBgClasses = SHOP_ITEMS.backgrounds.map(b => b.class);
-            document.body.classList.remove(...allBgClasses);
-            
-            if (bgClass && bgClass !== 'none') {
-                document.body.classList.add(bgClass);
-            }
-            
-            gamificationData.activeBackground = bgClass;
-            saveGamificationData();
-            initializeShop();
-        };
-        
         // Apply icon
         window.applyIcon = (iconClass) => {
             // Remove all icon classes
@@ -4961,83 +4090,19 @@
                 notification.remove();
             }, 3000);
         };
-        
-        // Preview frame (temporary application)
-        window.previewFrame = (frameClass) => {
-            // First store the current frame
-            const currentFrame = gamificationData.activeFrame;
-            
-            // Apply the preview frame
-            const allFrameClasses = SHOP_ITEMS.frames.map(f => f.class);
-            document.body.classList.remove(...allFrameClasses);
-            
-            if (frameClass && frameClass !== 'none') {
-                document.body.classList.add(frameClass);
-            }
-            
-            // Show a notification
-            showNotification('プレビュー中... 5秒後に元に戻ります', 'info');
-            
-            // Revert after 5 seconds
-            setTimeout(() => {
-                document.body.classList.remove(...allFrameClasses);
-                if (currentFrame && currentFrame !== 'none') {
-                    document.body.classList.add(currentFrame);
-                }
-                showNotification('プレビュー終了', 'secondary');
-            }, 5000);
-        };
-        
-        // Preview background (temporary application)
-        window.previewBackground = (bgClass) => {
-            // First store the current background
-            const currentBg = gamificationData.activeBackground;
-            
-            // Apply the preview background
-            const allBgClasses = SHOP_ITEMS.backgrounds.map(b => b.class);
-            document.body.classList.remove(...allBgClasses);
-            
-            if (bgClass && bgClass !== 'none') {
-                document.body.classList.add(bgClass);
-            }
-            
-            // Show a notification
-            showNotification('プレビュー中... 5秒後に元に戻ります', 'info');
-            
-            // Revert after 5 seconds
-            setTimeout(() => {
-                document.body.classList.remove(...allBgClasses);
-                if (currentBg && currentBg !== 'none') {
-                    document.body.classList.add(currentBg);
-                }
-                showNotification('プレビュー終了', 'secondary');
-            }, 5000);
-        };
-        
+
         // Initialize fun dashboard
         const initializeFunDashboard = () => {
-            updateTimeDisplay();
-            updateDailyMissions();
             updateRegistrationStreak();
             updateTodayStats();
             updatePointsDisplay();
-            
-            // Update time every minute
-            setInterval(updateTimeDisplay, 60000);
         };
         
         // Track when card is added
         const trackCardAddition = (cardData, hasTag, isRare) => {
             const today = new Date().toDateString();
             const cardCount = cardData.枚数 || 1;
-            
-            // Update daily mission progress
-            gamificationData.dailyMissionProgress.addedCards.push({ name: cardData.名前, time: Date.now() });
-            if (hasTag) gamificationData.dailyMissionProgress.addedWithTag++;
-            if (isRare) gamificationData.dailyMissionProgress.addedRare++;
-            
-            saveGamificationData();
-            
+
             // Update today's additions
             if (gamificationData.todayAdditions.date !== today) {
                 gamificationData.todayAdditions = { date: today, count: 0 };
@@ -5067,18 +4132,10 @@
             }
             
             saveGamificationData();
-            
+
             // Update displays
-            updateDailyMissions();
             updateRegistrationStreak();
             updateTodayStats();
-        };
-        
-        // Track search action
-        const trackSearchAction = () => {
-            gamificationData.dailyMissionProgress.searchCount++;
-            saveGamificationData();
-            updateDailyMissions();
         };
         
         // Reset first login bonus (for testing or special cases)
@@ -6341,41 +5398,18 @@
                     vipMenuContainer.classList.add('d-none');
                 }
             }
-            applyTheme();
-            
             // Initialize gamification features with loaded data
-            initializeDailyMissions();
             initializeFunDashboard(); // Initialize fun features
             initializeShop(); // Initialize shop
             updatePointsDisplay();
             updateRegistrationStreak();
             updateTodayStats();
-            updateDailyMissions();
             
-            // Apply saved daily challenges visibility preference
-            const hideDailyChallenges = localStorage.getItem('hideDailyChallenges') === 'true';
-            if (hideDailyChallenges) {
-                document.getElementById('daily-challenges-body').style.display = 'none';
-                document.getElementById('daily-challenges-toggle-icon').className = 'bi bi-eye';
-            }
-            
-            // Apply saved customizations from Firebase data
-            if (gamificationData.activeTheme && gamificationData.activeTheme !== 'default') {
-                window.applyTheme(gamificationData.activeTheme);
-            }
-            
-            if (gamificationData.activeFrame) {
-                window.applyFrame(gamificationData.activeFrame);
-            }
-            
-            if (gamificationData.activeBackground) {
-                window.applyBackground(gamificationData.activeBackground);
-            }
-            
+            // Apply saved icon customization
             if (gamificationData.activeIcon) {
                 window.applyIcon(gamificationData.activeIcon);
             }
-            
+
             // Apply all purchased effects
             if (gamificationData.purchasedItems) {
                 Object.keys(gamificationData.purchasedItems).forEach(itemId => {
@@ -8349,17 +7383,6 @@ Firebase Consoleで確認すべき項目:
             updateCollectionStats(); // Update immediately
         });
         
-        // Daily challenges toggle
-        const showDailyChallengesToggle = document.getElementById('show-daily-challenges-toggle');
-        showDailyChallengesToggle.addEventListener('change', (e) => {
-            const show = e.target.checked;
-            localStorage.setItem('showDailyChallenges', show);
-            const dailyChallengesCard = document.getElementById('daily-challenges-card');
-            if (dailyChallengesCard) {
-                dailyChallengesCard.style.display = show ? 'block' : 'none';
-            }
-        });
-
         // Auto save toggle
         const autoSaveToggle = document.getElementById('auto-save-toggle');
         let autoSaveInterval = null;
@@ -8398,17 +7421,8 @@ Firebase Consoleで確認すべき項目:
         // Initialize settings
         hideEmailToggle.checked = localStorage.getItem('hideEmail') === 'true';
         hideStatsToggle.checked = localStorage.getItem('hideStats') === 'true';
-        showDailyChallengesToggle.checked = localStorage.getItem('showDailyChallenges') !== 'false'; // Default true
         autoSaveToggle.checked = localStorage.getItem('autoSave') === 'true';
         tableRowsPerPage.value = localStorage.getItem('tableRowsPerPage') || '100';
-
-        // Apply initial settings
-        if (localStorage.getItem('showDailyChallenges') === 'false') {
-            const dailyChallengesCard = document.getElementById('daily-challenges-card');
-            if (dailyChallengesCard) {
-                dailyChallengesCard.style.display = 'none';
-            }
-        }
 
         if (autoSaveToggle.checked) {
             // Start auto save if enabled
