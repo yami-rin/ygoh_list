@@ -5081,6 +5081,18 @@
                         const shareUrl = `${window.location.origin}${window.location.pathname}?view=${currentUser.uid}`;
                         document.getElementById('share-link-input').value = shareUrl;
                     }
+                } else {
+                    // Initialize profile for new users (private by default, no localStorage impact)
+                    const defaultDisplayName = currentUser.email?.split('@')[0] || 'Anonymous';
+                    await setDoc(profileRef, {
+                        isPublic: false,
+                        displayName: defaultDisplayName,
+                        shareToken: crypto.randomUUID ? crypto.randomUUID() : Date.now().toString(36),
+                        userId: currentUser.uid,
+                        updatedAt: new Date().toISOString()
+                    });
+                    document.getElementById('display-name-input').value = defaultDisplayName;
+                    console.log('Initialized public profile for new user (private by default)');
                 }
             } catch (error) {
                 console.error('Error loading public profile:', error);
@@ -5162,7 +5174,18 @@
             });
 
             if (filtered.length === 0) {
-                userList.innerHTML = '<div class="text-muted text-center py-3">ユーザーが見つかりません</div>';
+                if (publicUsers.length === 0) {
+                    // No public profiles exist yet
+                    userList.innerHTML = `
+                        <div class="text-muted text-center py-3">
+                            <i class="bi bi-people" style="font-size: 2rem;"></i>
+                            <p class="mt-2 mb-1">公開プロファイルがありません</p>
+                            <small>自分のプロファイルを公開するには、上の設定で「プロファイルを公開」をオンにしてください。</small>
+                        </div>`;
+                } else {
+                    // Search returned no results
+                    userList.innerHTML = '<div class="text-muted text-center py-3">検索条件に一致するユーザーがいません</div>';
+                }
                 return;
             }
 
