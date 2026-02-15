@@ -2625,10 +2625,154 @@
             }
         };
 
+        // ==================== LOCAL CACHE SYSTEM ====================
+
+        // Get cache key for current user
+        const getGalleryCacheKey = (type) => `galleryCache_${currentUser?.uid}_${type}`;
+
+        // Save all data to localStorage cache
+        const saveGalleryToCache = () => {
+            if (!currentUser) return;
+
+            try {
+                const cacheData = {
+                    collection: collectionCards,
+                    wishlist: wishlistCards,
+                    bookmarks: bookmarkCards,
+                    decks: decks,
+                    cachedAt: Date.now()
+                };
+                localStorage.setItem(getGalleryCacheKey('data'), JSON.stringify(cacheData));
+                console.log('💾 Gallery cache saved:', collectionCards.length, 'collection,', wishlistCards.length, 'wishlist,', bookmarkCards.length, 'bookmarks,', decks.length, 'decks');
+            } catch (e) {
+                console.error('Failed to save gallery cache:', e);
+                if (e.name === 'QuotaExceededError') {
+                    localStorage.removeItem(getGalleryCacheKey('data'));
+                }
+            }
+        };
+
+        // Load data from localStorage cache
+        const loadGalleryFromCache = () => {
+            if (!currentUser) return null;
+
+            try {
+                const cached = localStorage.getItem(getGalleryCacheKey('data'));
+                if (cached) {
+                    const data = JSON.parse(cached);
+                    console.log('📂 Gallery loaded from cache');
+                    return data;
+                }
+            } catch (e) {
+                console.error('Failed to load gallery cache:', e);
+            }
+            return null;
+        };
+
+        // Check if remote data is newer than cache (reuses metadata from card_list)
+        const isGalleryRemoteNewer = async (cachedAt) => {
+            if (!currentUser) return true;
+
+            try {
+                const metadataRef = doc(db, 'users', currentUser.uid, 'metadata', 'sync');
+                const metadataSnap = await getDoc(metadataRef);
+
+                if (!metadataSnap.exists()) {
+                    // No metadata yet, need to fetch from Firebase
+                    return true;
+                }
+
+                const remoteUpdatedAt = metadataSnap.data().updatedAt || 0;
+                const isNewer = remoteUpdatedAt > cachedAt;
+                console.log(`🔍 Gallery cache check: cached=${new Date(cachedAt).toLocaleString()}, remote=${new Date(remoteUpdatedAt).toLocaleString()}, needsSync=${isNewer}`);
+                return isNewer;
+            } catch (e) {
+                console.error('Failed to check metadata:', e);
+                return true; // On error, fetch from Firebase to be safe
+            }
+        };
+
+        // Update metadata timestamp (called after any data change)
+        const updateGalleryMetadata = async () => {
+            if (!currentUser) return;
+
+            try {
+                const metadataRef = doc(db, 'users', currentUser.uid, 'metadata', 'sync');
+                await setDoc(metadataRef, { updatedAt: Date.now() }, { merge: true });
+            } catch (e) {
+                console.error('Failed to update metadata:', e);
+            }
+        };
+
+        // Force sync from Firebase (manual refresh)
+        const forceGallerySync = async () => {
+            if (!currentUser) return;
+
+            showLoading(true);
+            console.log('🔄 Force syncing gallery from Firebase...');
+
+            try {
+                const userId = currentUser.uid;
+
+                const collectionRef = collection(db, 'users', userId, 'cards');
+                const collectionSnapshot = await getDocs(collectionRef);
+                collectionCards = collectionSnapshot.docs.map(doc => ({ id: doc.id, data: doc.data() }));
+
+                const wishlistRef = collection(db, 'users', userId, 'wishlist');
+                const wishlistSnapshot = await getDocs(wishlistRef);
+                wishlistCards = wishlistSnapshot.docs.map(doc => ({ id: doc.id, data: doc.data() }));
+
+                const bookmarkRef = collection(db, 'users', userId, 'bookmarks');
+                const bookmarkSnapshot = await getDocs(bookmarkRef);
+                bookmarkCards = bookmarkSnapshot.docs.map(doc => ({ id: doc.id, data: doc.data() }));
+
+                const decksRef = collection(db, 'users', userId, 'decks');
+                const decksSnapshot = await getDocs(decksRef);
+                decks = decksSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+
+                saveGalleryToCache();
+                switchListType(currentListType);
+
+                console.log('✅ Gallery sync complete');
+            } catch (error) {
+                console.error('Gallery sync failed:', error);
+                alert('同期に失敗しました。');
+            } finally {
+                showLoading(false);
+            }
+        };
+
+        // Expose for manual sync
+        window.forceGallerySync = forceGallerySync;
+
+        // ==================== END LOCAL CACHE SYSTEM ====================
+
         // Load user's card collection and wishlist
         const loadAllData = async (userId) => {
             showLoading(true);
             try {
+                // Try to load from cache first
+                const cached = loadGalleryFromCache();
+
+                if (cached && cached.cachedAt) {
+                    // Check if remote data is newer (only 1 Firebase read instead of 4)
+                    const needsSync = await isGalleryRemoteNewer(cached.cachedAt);
+
+                    if (!needsSync) {
+                        // Use cached data
+                        collectionCards = cached.collection || [];
+                        wishlistCards = cached.wishlist || [];
+                        bookmarkCards = cached.bookmarks || [];
+                        decks = cached.decks || [];
+                        console.log('✅ Using cached gallery data');
+                        switchListType(currentListType);
+                        return;
+                    }
+                }
+
+                // Cache miss or stale - fetch from Firebase
+                console.log('📥 Fetching gallery data from Firebase...');
+
                 // Load collection cards from subcollection: users/{userId}/cards
                 const collectionRef = collection(db, 'users', userId, 'cards');
                 const collectionSnapshot = await getDocs(collectionRef);
@@ -2655,6 +2799,9 @@
 
                 // Load decks to calculate card usage
                 await loadDecks();
+
+                // Save to cache for next time
+                saveGalleryToCache();
 
                 // Set initial data based on current list type
                 switchListType(currentListType);
@@ -3451,6 +3598,9 @@
                                         selectedCiid: ill.ciid
                                     }).then(() => {
                                         console.log('Selected ciid saved to Firestore');
+                                        // Update cache and metadata
+                                        saveGalleryToCache();
+                                        updateGalleryMetadata();
                                     }).catch(error => {
                                         console.error('Error saving selectedCiid to Firestore:', error);
                                     });
@@ -3494,8 +3644,7 @@
             if (!currentUser) return;
 
             try {
-                const bookmarkRef = doc(db, 'users', currentUser.uid, 'bookmarks', cardData.id);
-                await setDoc(bookmarkRef, {
+                const bookmarkData = {
                     名前: cardData.data['名前'],
                     型番: cardData.data['型番'],
                     レアリティ: cardData.data['レアリティ'],
@@ -3503,12 +3652,27 @@
                     tags: cardData.data.tags || [],
                     selectedCiid: cardData.data.selectedCiid,
                     addedAt: new Date().toISOString()
-                });
+                };
+
+                const bookmarkRef = doc(db, 'users', currentUser.uid, 'bookmarks', cardData.id);
+                await setDoc(bookmarkRef, bookmarkData);
 
                 console.log('Added to bookmarks:', cardData.id);
 
-                // Reload bookmarks
-                await loadAllData(currentUser.uid);
+                // Update local data directly (no Firebase re-read)
+                bookmarkCards.push({ id: cardData.id, data: bookmarkData });
+
+                // Update cache and metadata
+                saveGalleryToCache();
+                await updateGalleryMetadata();
+
+                // Re-render if on bookmarks tab
+                if (currentListType === 'bookmark') {
+                    allCards = bookmarkCards;
+                    applyFilters();
+                    renderCards();
+                    updateStats();
+                }
 
                 alert('ブックマークに追加しました');
             } catch (error) {
@@ -3529,8 +3693,20 @@
 
                 console.log('Removed from bookmarks:', cardId);
 
-                // Reload bookmarks
-                await loadAllData(currentUser.uid);
+                // Update local data directly (no Firebase re-read)
+                bookmarkCards = bookmarkCards.filter(c => c.id !== cardId);
+
+                // Update cache and metadata
+                saveGalleryToCache();
+                await updateGalleryMetadata();
+
+                // Re-render if on bookmarks tab
+                if (currentListType === 'bookmark') {
+                    allCards = bookmarkCards;
+                    applyFilters();
+                    renderCards();
+                    updateStats();
+                }
 
                 alert('ブックマークから削除しました');
             } catch (error) {
@@ -3892,6 +4068,10 @@
                 currentEditingCard.data['枚数'] = newQuantity;
                 currentEditingCard.data.tags = newTags;
 
+                // Update cache and metadata
+                saveGalleryToCache();
+                await updateGalleryMetadata();
+
                 // Close panel
                 closeEditPanel();
 
@@ -3928,6 +4108,10 @@
                     wishlistCards = wishlistCards.filter(c => c.id !== currentEditingCard.id);
                 }
                 allCards = currentListType === 'collection' ? collectionCards : wishlistCards;
+
+                // Update cache and metadata
+                saveGalleryToCache();
+                await updateGalleryMetadata();
 
                 // Close panel
                 closeEditPanel();
@@ -4152,10 +4336,37 @@
 
                 // Reload data to reflect wishlist changes
                 if (unownedCardsToAdd.length > 0) {
-                    await loadAllData(currentUser.uid);
-                } else {
-                    await loadDecks();
+                    // Add to local wishlist data
+                    for (const card of unownedCardsToAdd) {
+                        const wishlistData = {
+                            名前: card.name || '',
+                            型番: card.code || '',
+                            レアリティ: card.rarity || '',
+                            枚数: 1,
+                            tags: [],
+                            addedAt: new Date().toISOString()
+                        };
+                        if (card.selectedCiid) {
+                            wishlistData.selectedCiid = card.selectedCiid;
+                        }
+                        wishlistCards.push({ id: card.cardId, data: wishlistData });
+                    }
                 }
+
+                // Update local deck data
+                if (currentDeck.id) {
+                    const existingDeckIndex = decks.findIndex(d => d.id === currentDeck.id);
+                    if (existingDeckIndex >= 0) {
+                        decks[existingDeckIndex] = { id: currentDeck.id, ...deckData };
+                    }
+                } else {
+                    decks.push({ id: currentDeck.id, ...deckData });
+                }
+
+                // Update cache and metadata
+                saveGalleryToCache();
+                await updateGalleryMetadata();
+
                 renderDeckList();
                 renderCards(); // Re-render cards to update stock badges
             } catch (error) {
@@ -4173,9 +4384,16 @@
             try {
                 const deckRef = doc(db, 'users', currentUser.uid, 'decks', currentDeck.id);
                 await deleteDoc(deckRef);
+
+                // Remove from local data
+                decks = decks.filter(d => d.id !== currentDeck.id);
+
+                // Update cache and metadata
+                saveGalleryToCache();
+                await updateGalleryMetadata();
+
                 alert('デッキを削除しました');
                 closeDeckBuilder();
-                await loadDecks();
                 renderDeckList();
                 renderCards(); // Re-render cards to update stock badges
             } catch (error) {
@@ -4292,8 +4510,12 @@
 
                 // Remove from local array
                 decks = decks.filter(d => d.id !== deckId);
-                renderDeckList();
 
+                // Update cache and metadata
+                saveGalleryToCache();
+                await updateGalleryMetadata();
+
+                renderDeckList();
                 alert('デッキを削除しました');
             } catch (error) {
                 console.error('Error deleting deck:', error);
