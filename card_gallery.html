@@ -2625,150 +2625,33 @@
             }
         };
 
-        // ==================== LOCAL CACHE SYSTEM ====================
-
-        // Get cache key for current user
-        const getGalleryCacheKey = (type) => `galleryCache_${currentUser?.uid}_${type}`;
-
-        // Save collection data to localStorage cache
-        const saveGalleryToCache = () => {
-            if (!currentUser || currentUser.uid === 'local_user') return;
-
-            try {
-                const cacheData = {
-                    collection: collectionCards,
-                    wishlist: wishlistCards,
-                    bookmarks: bookmarkCards,
-                    cachedAt: Date.now()
-                };
-                localStorage.setItem(getGalleryCacheKey('data'), JSON.stringify(cacheData));
-                console.log('💾 Gallery: Saved to cache:', collectionCards.length, 'cards,', wishlistCards.length, 'wishlist,', bookmarkCards.length, 'bookmarks');
-            } catch (e) {
-                console.error('Failed to save gallery cache:', e);
-                if (e.name === 'QuotaExceededError') {
-                    localStorage.removeItem(getGalleryCacheKey('data'));
-                }
-            }
-        };
-
-        // Load collection data from localStorage cache
-        const loadGalleryFromCache = () => {
-            if (!currentUser || currentUser.uid === 'local_user') return null;
-
-            try {
-                const cached = localStorage.getItem(getGalleryCacheKey('data'));
-                if (cached) {
-                    const data = JSON.parse(cached);
-                    console.log('📂 Gallery: Loaded from cache:', data.collection?.length, 'cards,', data.wishlist?.length, 'wishlist,', data.bookmarks?.length, 'bookmarks');
-                    return data;
-                }
-            } catch (e) {
-                console.error('Failed to load gallery cache:', e);
-            }
-            return null;
-        };
-
-        // Check if remote data is newer than cache (1 Firebase read)
-        const isGalleryRemoteNewer = async (cachedAt) => {
-            if (!currentUser || currentUser.uid === 'local_user') return true;
-
-            try {
-                const metadataRef = doc(db, 'users', currentUser.uid, 'metadata', 'sync');
-                const metadataSnap = await getDoc(metadataRef);
-
-                if (!metadataSnap.exists()) {
-                    // No metadata yet, fetch data
-                    return true;
-                }
-
-                const remoteUpdatedAt = metadataSnap.data().updatedAt || 0;
-                const isNewer = remoteUpdatedAt > cachedAt;
-                console.log(`🔍 Gallery cache check: cached=${new Date(cachedAt).toLocaleString()}, remote=${new Date(remoteUpdatedAt).toLocaleString()}, needsSync=${isNewer}`);
-                return isNewer;
-            } catch (e) {
-                console.error('Failed to check gallery metadata:', e);
-                return true; // On error, fetch from Firebase to be safe
-            }
-        };
-
-        // Update metadata timestamp in Firebase (called after any data change)
-        const updateGalleryMetadataTimestamp = async () => {
-            if (!currentUser || currentUser.uid === 'local_user') return;
-
-            try {
-                const metadataRef = doc(db, 'users', currentUser.uid, 'metadata', 'sync');
-                await setDoc(metadataRef, { updatedAt: Date.now() }, { merge: true });
-            } catch (e) {
-                console.error('Failed to update gallery metadata:', e);
-            }
-        };
-
-        // ==================== END LOCAL CACHE SYSTEM ====================
-
         // Load user's card collection and wishlist
         const loadAllData = async (userId) => {
             showLoading(true);
             try {
-                let usedCache = false;
+                // Load collection cards from subcollection: users/{userId}/cards
+                const collectionRef = collection(db, 'users', userId, 'cards');
+                const collectionSnapshot = await getDocs(collectionRef);
+                collectionCards = collectionSnapshot.docs.map(doc => ({
+                    id: doc.id,
+                    data: doc.data()
+                }));
 
-                // Try to load from cache first
-                try {
-                    const cached = loadGalleryFromCache();
+                // Load wishlist cards from subcollection: users/{userId}/wishlist
+                const wishlistRef = collection(db, 'users', userId, 'wishlist');
+                const wishlistSnapshot = await getDocs(wishlistRef);
+                wishlistCards = wishlistSnapshot.docs.map(doc => ({
+                    id: doc.id,
+                    data: doc.data()
+                }));
 
-                    if (cached && cached.cachedAt) {
-                        // Check if remote data is newer (only 1 Firebase read)
-                        let needsSync = true;
-                        try {
-                            needsSync = await isGalleryRemoteNewer(cached.cachedAt);
-                        } catch (e) {
-                            console.error('Error checking cache validity:', e);
-                            needsSync = true; // On error, fetch from Firebase
-                        }
-
-                        if (!needsSync) {
-                            // Use cached data
-                            collectionCards = cached.collection || [];
-                            wishlistCards = cached.wishlist || [];
-                            bookmarkCards = cached.bookmarks || [];
-                            console.log('✅ Gallery: Using cached data (no sync needed)');
-                            usedCache = true;
-                        } else {
-                            console.log('⚠️ Gallery: Remote data is newer, fetching from Firebase...');
-                        }
-                    }
-                } catch (cacheError) {
-                    console.error('Cache error, falling back to Firebase:', cacheError);
-                }
-
-                // If cache was not used, fetch from Firebase
-                if (!usedCache) {
-                    // Load collection cards from subcollection: users/{userId}/cards
-                    const collectionRef = collection(db, 'users', userId, 'cards');
-                    const collectionSnapshot = await getDocs(collectionRef);
-                    collectionCards = collectionSnapshot.docs.map(doc => ({
-                        id: doc.id,
-                        data: doc.data()
-                    }));
-
-                    // Load wishlist cards from subcollection: users/{userId}/wishlist
-                    const wishlistRef = collection(db, 'users', userId, 'wishlist');
-                    const wishlistSnapshot = await getDocs(wishlistRef);
-                    wishlistCards = wishlistSnapshot.docs.map(doc => ({
-                        id: doc.id,
-                        data: doc.data()
-                    }));
-
-                    // Load bookmark cards from subcollection: users/{userId}/bookmarks
-                    const bookmarkRef = collection(db, 'users', userId, 'bookmarks');
-                    const bookmarkSnapshot = await getDocs(bookmarkRef);
-                    bookmarkCards = bookmarkSnapshot.docs.map(doc => ({
-                        id: doc.id,
-                        data: doc.data()
-                    }));
-
-                    // Save to cache for next time
-                    saveGalleryToCache();
-                }
+                // Load bookmark cards from subcollection: users/{userId}/bookmarks
+                const bookmarkRef = collection(db, 'users', userId, 'bookmarks');
+                const bookmarkSnapshot = await getDocs(bookmarkRef);
+                bookmarkCards = bookmarkSnapshot.docs.map(doc => ({
+                    id: doc.id,
+                    data: doc.data()
+                }));
 
                 // Load decks to calculate card usage
                 await loadDecks();
@@ -3622,12 +3505,9 @@
                     addedAt: new Date().toISOString()
                 });
 
-                // Update metadata timestamp
-                await updateGalleryMetadataTimestamp();
-
                 console.log('Added to bookmarks:', cardData.id);
 
-                // Reload bookmarks (will fetch from Firebase due to updated timestamp)
+                // Reload bookmarks
                 await loadAllData(currentUser.uid);
 
                 alert('ブックマークに追加しました');
@@ -3647,12 +3527,9 @@
                 const bookmarkRef = doc(db, 'users', currentUser.uid, 'bookmarks', cardId);
                 await deleteDoc(bookmarkRef);
 
-                // Update metadata timestamp
-                await updateGalleryMetadataTimestamp();
-
                 console.log('Removed from bookmarks:', cardId);
 
-                // Reload bookmarks (will fetch from Firebase due to updated timestamp)
+                // Reload bookmarks
                 await loadAllData(currentUser.uid);
 
                 alert('ブックマークから削除しました');
@@ -4015,10 +3892,6 @@
                 currentEditingCard.data['枚数'] = newQuantity;
                 currentEditingCard.data.tags = newTags;
 
-                // Update cache and metadata timestamp
-                saveGalleryToCache();
-                await updateGalleryMetadataTimestamp();
-
                 // Close panel
                 closeEditPanel();
 
@@ -4055,10 +3928,6 @@
                     wishlistCards = wishlistCards.filter(c => c.id !== currentEditingCard.id);
                 }
                 allCards = currentListType === 'collection' ? collectionCards : wishlistCards;
-
-                // Update cache and metadata timestamp
-                saveGalleryToCache();
-                await updateGalleryMetadataTimestamp();
 
                 // Close panel
                 closeEditPanel();
@@ -4256,8 +4125,6 @@
                         console.log('Adding to wishlist:', card.cardId, wishlistData);
                         await setDoc(doc(wishlistRef, card.cardId), wishlistData);
                     }
-                    // Update metadata timestamp for wishlist changes
-                    await updateGalleryMetadataTimestamp();
                     console.log(`Added ${unownedCardsToAdd.length} unowned cards to wishlist`);
                 }
 
@@ -5214,18 +5081,6 @@
                         const shareUrl = `${window.location.origin}${window.location.pathname}?view=${currentUser.uid}`;
                         document.getElementById('share-link-input').value = shareUrl;
                     }
-                } else {
-                    // Initialize profile for new users (private by default)
-                    const defaultDisplayName = currentUser.email?.split('@')[0] || 'Anonymous';
-                    await setDoc(profileRef, {
-                        isPublic: false,
-                        displayName: defaultDisplayName,
-                        shareToken: crypto.randomUUID ? crypto.randomUUID() : Date.now().toString(36),
-                        userId: currentUser.uid,
-                        updatedAt: new Date().toISOString()
-                    });
-                    document.getElementById('display-name-input').value = defaultDisplayName;
-                    console.log('✅ Initialized public profile for new user');
                 }
             } catch (error) {
                 console.error('Error loading public profile:', error);
@@ -5307,16 +5162,7 @@
             });
 
             if (filtered.length === 0) {
-                if (publicUsers.length === 0) {
-                    userList.innerHTML = `
-                        <div class="text-muted text-center py-3">
-                            <i class="bi bi-people" style="font-size: 2rem;"></i><br>
-                            <p class="mt-2 mb-1">公開プロファイルがありません</p>
-                            <small>自分のプロファイルを公開するには上の設定を使用してください。</small>
-                        </div>`;
-                } else {
-                    userList.innerHTML = '<div class="text-muted text-center py-3">検索条件に一致するユーザーがいません</div>';
-                }
+                userList.innerHTML = '<div class="text-muted text-center py-3">ユーザーが見つかりません</div>';
                 return;
             }
 
