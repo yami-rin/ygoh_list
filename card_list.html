@@ -5537,14 +5537,14 @@
             await loadGamificationData();
             
             if (user.uid !== 'local_user') {
-                loadCollectionFromFirestore();
-                loadAllTags();
+                await loadCollectionFromFirestore();
+                await loadAllTags();
             } else {
                 cardCollection = [];
                 wishlistCollection = [];
                 updateTotalCounts(); // Update stats for local mode
                 applySearchAndFilter();
-                loadAllTags(); // ローカルモードでもタグをロード・初期化
+                await loadAllTags(); // ローカルモードでもタグをロード・初期化
                 document.getElementById('delete-account-btn').style.display = 'none';
 
                 // Hide VIP menu for guest users using Bootstrap classes
