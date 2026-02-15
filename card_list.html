@@ -5539,6 +5539,25 @@
             if (user.uid !== 'local_user') {
                 loadCollectionFromFirestore();
                 loadAllTags();
+
+                // Initialize publicProfiles for community feature (if not exists)
+                try {
+                    const profileRef = doc(db, 'publicProfiles', user.uid);
+                    const profileSnap = await getDoc(profileRef);
+                    if (!profileSnap.exists()) {
+                        const defaultDisplayName = user.email?.split('@')[0] || 'Anonymous';
+                        await setDoc(profileRef, {
+                            isPublic: false,
+                            displayName: defaultDisplayName,
+                            shareToken: crypto.randomUUID ? crypto.randomUUID() : Date.now().toString(36),
+                            userId: user.uid,
+                            updatedAt: new Date().toISOString()
+                        });
+                        console.log('Initialized publicProfile for community feature');
+                    }
+                } catch (e) {
+                    console.warn('Failed to initialize publicProfile:', e);
+                }
             } else {
                 cardCollection = [];
                 wishlistCollection = [];

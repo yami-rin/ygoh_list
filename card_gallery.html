@@ -2681,8 +2681,8 @@
             // Save to localStorage
             localStorage.setItem('galleryListType', listType);
 
-            // Update tab active state
-            document.querySelectorAll('.nav-link').forEach(tab => {
+            // Update tab active state (only main tabs, not other nav elements)
+            document.querySelectorAll('.nav-tabs > .nav-item > .nav-link').forEach(tab => {
                 tab.classList.remove('active');
             });
             document.getElementById(`${listType}-tab`).classList.add('active');
@@ -3854,8 +3854,8 @@
             // Show duel simulator
             document.getElementById('duel-simulator-container').style.display = 'block';
 
-            // Update tab active state
-            document.querySelectorAll('.nav-link').forEach(tab => {
+            // Update tab active state (only main tabs, not other nav elements)
+            document.querySelectorAll('.nav-tabs > .nav-item > .nav-link').forEach(tab => {
                 tab.classList.remove('active');
             });
             document.getElementById('duel-simulator-tab').classList.add('active');
@@ -5579,6 +5579,40 @@
                     loadUserCollection(viewUserId);
                 }, 500);
             }
+
+            // Admin: Add direct user ID input feature
+            if (isAdmin) {
+                const userSearchInput = document.getElementById('user-search-input');
+                const adminInputDiv = document.createElement('div');
+                adminInputDiv.className = 'mb-3 p-2 border border-warning rounded bg-warning bg-opacity-10';
+                adminInputDiv.innerHTML = `
+                    <label class="form-label small text-warning fw-bold"><i class="bi bi-shield-check"></i> Admin: ユーザーID直接入力</label>
+                    <div class="input-group input-group-sm">
+                        <input type="text" class="form-control" id="admin-uid-input" placeholder="ユーザーID (uid)">
+                        <button class="btn btn-warning" type="button" id="admin-uid-load-btn">
+                            <i class="bi bi-arrow-right-circle"></i> 表示
+                        </button>
+                    </div>
+                    <small class="text-muted">publicProfilesに登録されていないユーザーも表示可能</small>
+                `;
+                userSearchInput.parentNode.insertBefore(adminInputDiv, userSearchInput);
+
+                document.getElementById('admin-uid-load-btn').addEventListener('click', () => {
+                    const uid = document.getElementById('admin-uid-input').value.trim();
+                    if (uid) {
+                        loadUserCollection(uid);
+                    }
+                });
+
+                document.getElementById('admin-uid-input').addEventListener('keypress', (e) => {
+                    if (e.key === 'Enter') {
+                        const uid = e.target.value.trim();
+                        if (uid) {
+                            loadUserCollection(uid);
+                        }
+                    }
+                });
+            }
         };
 
         // Switch to community view
@@ -5590,8 +5624,8 @@
             // Show community container
             document.getElementById('community-container').style.display = 'block';
 
-            // Update tab active state
-            document.querySelectorAll('.nav-link').forEach(tab => tab.classList.remove('active'));
+            // Update tab active state (only main tabs, not other nav elements)
+            document.querySelectorAll('.nav-tabs > .nav-item > .nav-link').forEach(tab => tab.classList.remove('active'));
             document.getElementById('community-tab').classList.add('active');
 
             // Load users if not loaded
