@@ -2709,55 +2709,66 @@
         const loadAllData = async (userId) => {
             showLoading(true);
             try {
+                let usedCache = false;
+
                 // Try to load from cache first
-                const cached = loadGalleryFromCache();
+                try {
+                    const cached = loadGalleryFromCache();
 
-                if (cached && cached.cachedAt) {
-                    // Check if remote data is newer (only 1 Firebase read)
-                    const needsSync = await isGalleryRemoteNewer(cached.cachedAt);
+                    if (cached && cached.cachedAt) {
+                        // Check if remote data is newer (only 1 Firebase read)
+                        let needsSync = true;
+                        try {
+                            needsSync = await isGalleryRemoteNewer(cached.cachedAt);
+                        } catch (e) {
+                            console.error('Error checking cache validity:', e);
+                            needsSync = true; // On error, fetch from Firebase
+                        }
 
-                    if (!needsSync) {
-                        // Use cached data
-                        collectionCards = cached.collection || [];
-                        wishlistCards = cached.wishlist || [];
-                        bookmarkCards = cached.bookmarks || [];
-                        console.log('✅ Gallery: Using cached data (no sync needed)');
-
-                        // Load decks (not cached yet)
-                        await loadDecks();
-                        switchListType(currentListType);
-                        showLoading(false);
-                        return;
+                        if (!needsSync) {
+                            // Use cached data
+                            collectionCards = cached.collection || [];
+                            wishlistCards = cached.wishlist || [];
+                            bookmarkCards = cached.bookmarks || [];
+                            console.log('✅ Gallery: Using cached data (no sync needed)');
+                            usedCache = true;
+                        } else {
+                            console.log('⚠️ Gallery: Remote data is newer, fetching from Firebase...');
+                        }
                     }
-                    console.log('⚠️ Gallery: Remote data is newer, fetching from Firebase...');
+                } catch (cacheError) {
+                    console.error('Cache error, falling back to Firebase:', cacheError);
                 }
 
-                // Load collection cards from subcollection: users/{userId}/cards
-                const collectionRef = collection(db, 'users', userId, 'cards');
-                const collectionSnapshot = await getDocs(collectionRef);
-                collectionCards = collectionSnapshot.docs.map(doc => ({
-                    id: doc.id,
-                    data: doc.data()
-                }));
+                // If cache was not used, fetch from Firebase
+                if (!usedCache) {
+                    // Load collection cards from subcollection: users/{userId}/cards
+                    const collectionRef = collection(db, 'users', userId, 'cards');
+                    const collectionSnapshot = await getDocs(collectionRef);
+                    collectionCards = collectionSnapshot.docs.map(doc => ({
+                        id: doc.id,
+                        data: doc.data()
+                    }));
 
-                // Load wishlist cards from subcollection: users/{userId}/wishlist
-                const wishlistRef = collection(db, 'users', userId, 'wishlist');
-                const wishlistSnapshot = await getDocs(wishlistRef);
-                wishlistCards = wishlistSnapshot.docs.map(doc => ({
-                    id: doc.id,
-                    data: doc.data()
-                }));
+                    // Load wishlist cards from subcollection: users/{userId}/wishlist
+                    const wishlistRef = collection(db, 'users', userId, 'wishlist');
+                    const wishlistSnapshot = await getDocs(wishlistRef);
+                    wishlistCards = wishlistSnapshot.docs.map(doc => ({
+                        id: doc.id,
+                        data: doc.data()
+                    }));
 
-                // Load bookmark cards from subcollection: users/{userId}/bookmarks
-                const bookmarkRef = collection(db, 'users', userId, 'bookmarks');
-                const bookmarkSnapshot = await getDocs(bookmarkRef);
-                bookmarkCards = bookmarkSnapshot.docs.map(doc => ({
-                    id: doc.id,
-                    data: doc.data()
-                }));
+                    // Load bookmark cards from subcollection: users/{userId}/bookmarks
+                    const bookmarkRef = collection(db, 'users', userId, 'bookmarks');
+                    const bookmarkSnapshot = await getDocs(bookmarkRef);
+                    bookmarkCards = bookmarkSnapshot.docs.map(doc => ({
+                        id: doc.id,
+                        data: doc.data()
+                    }));
 
-                // Save to cache for next time
-                saveGalleryToCache();
+                    // Save to cache for next time
+                    saveGalleryToCache();
+                }
 
                 // Load decks to calculate card usage
                 await loadDecks();
