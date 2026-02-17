@@ -6950,7 +6950,7 @@ Firebase Consoleで確認すべき項目:
 
             if (target.classList.contains('delete-btn')) {
                 const cardId = target.dataset.id;
-                const cardName = target.closest('tr').querySelector('td').textContent;
+                const cardName = target.closest('tr').querySelector('td:nth-child(2)').textContent;
                 const listName = currentListType === 'collection' ? '所持カード' : 'ウィッシュリスト';
                 if (confirm(`「${cardName}」を${listName}から削除しますか？`)) {
                     const collRef = getCollectionRef(currentListType);
@@ -8658,17 +8658,28 @@ Firebase Consoleで確認すべき項目:
             const rarityQuantityInputs = document.querySelectorAll('.bulk-card-rarity-quantity');
             console.log('Found rarity quantity inputs:', rarityQuantityInputs.length);
 
-            rarityQuantityInputs.forEach((input, forEachIndex) => {
+            for (const input of rarityQuantityInputs) {
                 try {
                     const index = parseInt(input.dataset.index);
                     const rarity = input.dataset.rarity;
                     const quantity = parseInt(input.value) || 0;
 
-                    console.log(`Processing input ${forEachIndex} - index: ${index}, rarity: ${rarity}, quantity: ${quantity}`);
-
                     if (quantity > 0) {
                         const cardData = bulkImportCards[index];
-                        console.log(`Adding card to selectedCards - bulkImportCards[${index}]:`, cardData);
+
+                        // If reprints not loaded yet, fetch card detail now
+                        if (!cardData.reprints) {
+                            try {
+                                const detailUrl = `https://ygoh-list.onrender.com/card-detail?cid=${cardData.id}`;
+                                const resp = await fetch(detailUrl);
+                                if (resp.ok) {
+                                    const detail = await resp.json();
+                                    cardData.reprints = detail.reprints || [];
+                                }
+                            } catch (e) {
+                                console.error(`Failed to fetch reprints for card ${cardData.id}:`, e);
+                            }
+                        }
 
                         // Look up set code from reprints matching the selected rarity
                         let number = '';
@@ -8676,6 +8687,9 @@ Firebase Consoleで確認すべき項目:
                             const matchingReprint = cardData.reprints.find(r => r.rarity === rarity);
                             if (matchingReprint) {
                                 number = matchingReprint.setCode;
+                            } else if (cardData.reprints.length > 0) {
+                                // Fallback: use first reprint's setCode
+                                number = cardData.reprints[0].setCode;
                             }
                         }
 
@@ -8687,9 +8701,9 @@ Firebase Consoleで確認すべき項目:
                         });
                     }
                 } catch (error) {
-                    console.error(`Error processing input ${forEachIndex}:`, error);
+                    console.error(`Error processing input for index ${input.dataset.index}:`, error);
                 }
-            });
+            }
 
             console.log('Selected cards:', selectedCards);
             console.log('Selected cards count:', selectedCards.length);
