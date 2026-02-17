@@ -8158,6 +8158,21 @@ Firebase Consoleで確認すべき項目:
             }
         });
 
+        // Console command to show serial input section
+        window.enableSerialInput = () => {
+            if (!currentUser || currentUser.uid === 'local_user') {
+                console.log('%c[ERROR] ログインが必要です。', 'color: red; font-weight: bold;');
+                return;
+            }
+            const serialSection = document.getElementById('serial-number-section');
+            const inputSection = document.getElementById('vip-serial-input-section');
+            if (serialSection) serialSection.style.display = 'block';
+            if (inputSection) inputSection.style.display = 'block';
+            const attempts = checkAttemptLimit();
+            updateAttempts(attempts.count);
+            console.log('%c[OK] シリアル入力が有効になりました。設定画面のシリアル番号欄から入力してください。', 'color: green; font-weight: bold;');
+        };
+
         // VIP Features Button
         document.getElementById('vip-features-btn').addEventListener('click', () => {
             const features = `
