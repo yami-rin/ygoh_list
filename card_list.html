@@ -9179,41 +9179,79 @@ Firebase Consoleで確認すべき項目:
                 // Show local cards first
                 const resultsDiv = document.getElementById('search-results');
                 resultsDiv.innerHTML = '';
-                
+
                 const localHeader = document.createElement('div');
                 localHeader.className = 'alert alert-success mb-2';
                 localHeader.innerHTML = `<strong>所持カードから見つかりました (${matchingCards.length}件)</strong>`;
                 resultsDiv.appendChild(localHeader);
-                
+
                 const localListGroup = document.createElement('div');
                 localListGroup.className = 'list-group mb-3';
-                
-                matchingCards.forEach(card => {
-                    const button = document.createElement('button');
-                    button.type = 'button';
-                    button.className = 'list-group-item list-group-item-action d-flex justify-content-between align-items-center';
-                    button.innerHTML = `
-                        <div>
-                            <strong>${escapeHtml(card.data['名前'])}</strong>
-                            ${card.data['型番'] ? `<small class="text-muted ms-2">${escapeHtml(card.data['型番'])}</small>` : ''}
-                            ${card.data['レアリティ'] ? `<span class="badge bg-secondary ms-2">${escapeHtml(card.data['レアリティ'])}</span>` : ''}
-                        </div>
-                        <span class="badge bg-primary">${card.data['枚数']}枚</span>
-                    `;
-                    button.onclick = () => {
-                        // Fill form with existing card data
-                        document.getElementById('name').value = card.data['名前'];
-                        document.getElementById('set_code').value = card.data['型番'] || '';
-                        document.getElementById('rarity').value = card.data['レアリティ'] || '';
-                        document.getElementById('quantity').value = 1;
-                        // Clear search results
-                        resultsDiv.innerHTML = '';
-                    };
-                    localListGroup.appendChild(button);
-                });
-                
+
+                const ITEMS_PER_PAGE = 10;
+                let localCardPage = 1;
+                const totalPages = Math.ceil(matchingCards.length / ITEMS_PER_PAGE);
+
+                const renderLocalPage = (page) => {
+                    localListGroup.innerHTML = '';
+                    const start = (page - 1) * ITEMS_PER_PAGE;
+                    const end = Math.min(start + ITEMS_PER_PAGE, matchingCards.length);
+                    const pageCards = matchingCards.slice(start, end);
+
+                    pageCards.forEach(card => {
+                        const tags = card.data.tags || [];
+                        const tagsHtml = tags.length > 0
+                            ? `<div class="mt-1">${tags.map(t => `<span class="badge bg-info text-dark me-1" style="font-size:0.7rem;">${escapeHtml(t)}</span>`).join('')}</div>`
+                            : '';
+
+                        const button = document.createElement('button');
+                        button.type = 'button';
+                        button.className = 'list-group-item list-group-item-action';
+                        button.innerHTML = `
+                            <div class="d-flex justify-content-between align-items-start">
+                                <div>
+                                    <strong>${escapeHtml(card.data['名前'])}</strong>
+                                    ${card.data['型番'] ? `<small class="text-muted ms-2">${escapeHtml(card.data['型番'])}</small>` : ''}
+                                    ${card.data['レアリティ'] ? `<span class="badge bg-secondary ms-2">${escapeHtml(card.data['レアリティ'])}</span>` : ''}
+                                    ${tagsHtml}
+                                </div>
+                                <span class="badge bg-primary mt-1">${card.data['枚数']}枚</span>
+                            </div>
+                        `;
+                        button.onclick = () => {
+                            document.getElementById('name').value = card.data['名前'];
+                            document.getElementById('set_code').value = card.data['型番'] || '';
+                            document.getElementById('rarity').value = card.data['レアリティ'] || '';
+                            document.getElementById('quantity').value = 1;
+                            resultsDiv.innerHTML = '';
+                        };
+                        localListGroup.appendChild(button);
+                    });
+
+                    // Pagination controls
+                    if (totalPages > 1) {
+                        const paginationDiv = document.createElement('div');
+                        paginationDiv.className = 'd-flex justify-content-center align-items-center gap-2 mt-2';
+                        paginationDiv.innerHTML = `
+                            <button class="btn btn-sm btn-outline-secondary local-page-prev" ${page <= 1 ? 'disabled' : ''}>&laquo; 前</button>
+                            <span class="text-muted" style="font-size:0.85rem;">${page} / ${totalPages}</span>
+                            <button class="btn btn-sm btn-outline-secondary local-page-next" ${page >= totalPages ? 'disabled' : ''}>次 &raquo;</button>
+                        `;
+                        localListGroup.appendChild(paginationDiv);
+                        paginationDiv.querySelector('.local-page-prev')?.addEventListener('click', (e) => {
+                            e.stopPropagation();
+                            if (localCardPage > 1) { localCardPage--; renderLocalPage(localCardPage); }
+                        });
+                        paginationDiv.querySelector('.local-page-next')?.addEventListener('click', (e) => {
+                            e.stopPropagation();
+                            if (localCardPage < totalPages) { localCardPage++; renderLocalPage(localCardPage); }
+                        });
+                    }
+                };
+
+                renderLocalPage(1);
                 resultsDiv.appendChild(localListGroup);
-                
+
                 // Add separator
                 const separator = document.createElement('div');
                 separator.className = 'alert alert-info mb-2';
