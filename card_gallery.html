@@ -2453,7 +2453,7 @@
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-app.js";
         import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-auth.js";
-        import { getFirestore, collection, getDocs, getDoc, doc, updateDoc, deleteDoc, addDoc, setDoc, query, limit, orderBy } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore.js";
+        import { getFirestore, collection, getDocs, getDoc, doc, updateDoc, deleteDoc, addDoc, setDoc, query, limit, orderBy, where, arrayUnion } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore.js";
 
         // Firebase configuration
         const firebaseConfig = {
@@ -2704,6 +2704,19 @@
             }
         };
 
+        // Track deleted card IDs in metadata for delta sync
+        const trackDeletedId = async (cardId, colName) => {
+            if (!currentUser) return;
+            try {
+                const metadataRef = doc(db, 'users', currentUser.uid, 'metadata', 'sync');
+                await setDoc(metadataRef, {
+                    deletedIds: arrayUnion({ id: cardId, col: colName, at: Date.now() })
+                }, { merge: true });
+            } catch (e) {
+                console.error('Failed to track deleted ID:', e);
+            }
+        };
+
         // Force sync from Firebase (manual refresh)
         const forceGallerySync = async () => {
             if (!currentUser) return;
@@ -2747,6 +2760,81 @@
 
         // ==================== END LOCAL CACHE SYSTEM ====================
 
+        // Delta sync: fetch only changed documents since last cache
+        const deltaSyncGallery = async (cached) => {
+            const userId = currentUser.uid;
+            const cachedAt = cached.cachedAt;
+            const metadataRef = doc(db, 'users', userId, 'metadata', 'sync');
+            const metadataSnap = await getDoc(metadataRef);
+            const metadata = metadataSnap.exists() ? metadataSnap.data() : {};
+
+            // Restore cached data
+            collectionCards = cached.collection || [];
+            wishlistCards = cached.wishlist || [];
+            bookmarkCards = cached.bookmarks || [];
+            decks = cached.decks || [];
+
+            let deltaCount = 0;
+
+            // Fetch changed documents per collection
+            const collections = [
+                { ref: 'cards', arr: () => collectionCards, set: (v) => { collectionCards = v; } },
+                { ref: 'wishlist', arr: () => wishlistCards, set: (v) => { wishlistCards = v; } },
+                { ref: 'bookmarks', arr: () => bookmarkCards, set: (v) => { bookmarkCards = v; } }
+            ];
+
+            for (const col of collections) {
+                const q = query(
+                    collection(db, 'users', userId, col.ref),
+                    where('updatedAt', '>', cachedAt)
+                );
+                const snapshot = await getDocs(q);
+                if (snapshot.size > 0) {
+                    const local = col.arr();
+                    snapshot.docs.forEach(d => {
+                        const idx = local.findIndex(c => c.id === d.id);
+                        if (idx >= 0) {
+                            local[idx] = { id: d.id, data: d.data() };
+                        } else {
+                            local.push({ id: d.id, data: d.data() });
+                        }
+                    });
+                    deltaCount += snapshot.size;
+                }
+            }
+
+            // Process deletions
+            const deletedIds = metadata.deletedIds || [];
+            let deleteCount = 0;
+            deletedIds.forEach(del => {
+                if (del.at > cachedAt) {
+                    if (del.col === 'cards') {
+                        const before = collectionCards.length;
+                        collectionCards = collectionCards.filter(c => c.id !== del.id);
+                        if (collectionCards.length < before) deleteCount++;
+                    } else if (del.col === 'wishlist') {
+                        const before = wishlistCards.length;
+                        wishlistCards = wishlistCards.filter(c => c.id !== del.id);
+                        if (wishlistCards.length < before) deleteCount++;
+                    } else if (del.col === 'bookmarks') {
+                        const before = bookmarkCards.length;
+                        bookmarkCards = bookmarkCards.filter(c => c.id !== del.id);
+                        if (bookmarkCards.length < before) deleteCount++;
+                    }
+                }
+            });
+
+            // Cleanup old deletedIds (older than 7 days)
+            const now = Date.now();
+            const cleanedDeletes = deletedIds.filter(d => now - d.at < 7 * 24 * 60 * 60 * 1000);
+            if (cleanedDeletes.length !== deletedIds.length) {
+                await setDoc(metadataRef, { deletedIds: cleanedDeletes }, { merge: true });
+            }
+
+            console.log(`⚡ Delta sync: ${deltaCount} updated, ${deleteCount} deleted`);
+            saveGalleryToCache();
+        };
+
         // Load user's card collection and wishlist
         const loadAllData = async (userId) => {
             showLoading(true);
@@ -2768,12 +2856,17 @@
                         switchListType(currentListType);
                         return;
                     }
+
+                    // Delta sync: fetch only changes since last cache
+                    console.log('⚡ Delta sync from Firebase...');
+                    await deltaSyncGallery(cached);
+                    switchListType(currentListType);
+                    return;
                 }
 
-                // Cache miss or stale - fetch from Firebase
-                console.log('📥 Fetching gallery data from Firebase...');
+                // No cache - full fetch from Firebase
+                console.log('📥 Full fetch from Firebase (no cache)...');
 
-                // Load collection cards from subcollection: users/{userId}/cards
                 const collectionRef = collection(db, 'users', userId, 'cards');
                 const collectionSnapshot = await getDocs(collectionRef);
                 collectionCards = collectionSnapshot.docs.map(doc => ({
@@ -2781,7 +2874,6 @@
                     data: doc.data()
                 }));
 
-                // Load wishlist cards from subcollection: users/{userId}/wishlist
                 const wishlistRef = collection(db, 'users', userId, 'wishlist');
                 const wishlistSnapshot = await getDocs(wishlistRef);
                 wishlistCards = wishlistSnapshot.docs.map(doc => ({
@@ -2789,7 +2881,6 @@
                     data: doc.data()
                 }));
 
-                // Load bookmark cards from subcollection: users/{userId}/bookmarks
                 const bookmarkRef = collection(db, 'users', userId, 'bookmarks');
                 const bookmarkSnapshot = await getDocs(bookmarkRef);
                 bookmarkCards = bookmarkSnapshot.docs.map(doc => ({
@@ -3595,7 +3686,8 @@
                                 if (currentUser) {
                                     const cardRef = doc(db, 'users', currentUser.uid, 'cards', currentEditingCard.id);
                                     updateDoc(cardRef, {
-                                        selectedCiid: ill.ciid
+                                        selectedCiid: ill.ciid,
+                                        updatedAt: Date.now()
                                     }).then(() => {
                                         console.log('Selected ciid saved to Firestore');
                                         // Update cache and metadata
@@ -3651,7 +3743,8 @@
                     枚数: cardData.data['枚数'] || 1,
                     tags: cardData.data.tags || [],
                     selectedCiid: cardData.data.selectedCiid,
-                    addedAt: new Date().toISOString()
+                    addedAt: new Date().toISOString(),
+                    updatedAt: Date.now()
                 };
 
                 const bookmarkRef = doc(db, 'users', currentUser.uid, 'bookmarks', cardData.id);
@@ -3690,6 +3783,7 @@
             try {
                 const bookmarkRef = doc(db, 'users', currentUser.uid, 'bookmarks', cardId);
                 await deleteDoc(bookmarkRef);
+                await trackDeletedId(cardId, 'bookmarks');
 
                 console.log('Removed from bookmarks:', cardId);
 
@@ -4061,7 +4155,8 @@
 
                 await updateDoc(cardRef, {
                     '枚数': newQuantity,
-                    'tags': newTags
+                    'tags': newTags,
+                    updatedAt: Date.now()
                 });
 
                 // Update local data
@@ -4100,6 +4195,7 @@
                 const cardRef = doc(db, 'users', currentUser.uid, collectionPath, currentEditingCard.id);
 
                 await deleteDoc(cardRef);
+                await trackDeletedId(currentEditingCard.id, collectionPath === 'cards' ? 'cards' : collectionPath === 'wishlist' ? 'wishlist' : 'bookmarks');
 
                 // Remove from local data
                 if (currentListType === 'collection') {
@@ -4300,7 +4396,8 @@
                             レアリティ: card.rarity || '',
                             枚数: 1,
                             tags: [],
-                            addedAt: new Date().toISOString()
+                            addedAt: new Date().toISOString(),
+                            updatedAt: Date.now()
                         };
                         // Only add selectedCiid if it exists
                         if (card.selectedCiid) {

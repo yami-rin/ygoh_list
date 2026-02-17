@@ -2637,7 +2637,7 @@
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-app.js";
         import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, onAuthStateChanged, signOut, deleteUser, setPersistence, browserLocalPersistence, sendEmailVerification, applyActionCode } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-auth.js";
-        import { getFirestore, collection, getDocs, addDoc, deleteDoc, doc, query, where, updateDoc, increment, writeBatch, getDoc, setDoc } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore.js";
+        import { getFirestore, collection, getDocs, addDoc, deleteDoc, doc, query, where, updateDoc, increment, writeBatch, getDoc, setDoc, arrayUnion } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore.js";
 
         const firebaseConfig = {
             apiKey: "AIzaSyAOYKalLUb2hbghrjQUS8AWzxpLExBT7aU",
@@ -3757,7 +3757,7 @@
                             card.data['枚数'] = cardQuantity - quantity;
 
                             if (collRef) {
-                                await updateDoc(doc(collRef, card.id), { '枚数': card.data['枚数'] });
+                                await updateDoc(doc(collRef, card.id), { '枚数': card.data['枚数'], updatedAt: Date.now() });
                             }
                             removedCount = quantity;
                             break;
@@ -3783,6 +3783,7 @@
                 for (const card of cardsToRemove) {
                     if (collRef) {
                         await deleteDoc(doc(collRef, card.id));
+                        await trackDeletedId(card.id, currentListType === 'collection' ? 'cards' : 'wishlist');
                     }
 
                     // Remove from local collection
@@ -5267,7 +5268,7 @@
                                 // Save card update
                                 const collRef = getCollectionRef(currentListType);
                                 if (collRef) {
-                                    await updateDoc(doc(collRef, card.id), { tags: card.data.tags });
+                                    await updateDoc(doc(collRef, card.id), { tags: card.data.tags, updatedAt: Date.now() });
                                 }
                             }
                         }
@@ -5301,7 +5302,7 @@
                             card.data.tags = updatedTags;
 
                             if (collectionRef) {
-                                await updateDoc(doc(collectionRef, card.id), { tags: updatedTags });
+                                await updateDoc(doc(collectionRef, card.id), { tags: updatedTags, updatedAt: Date.now() });
                             } else {
                                 localStorage.setItem('cardCollection', JSON.stringify(cardCollection));
                             }
@@ -5315,7 +5316,7 @@
                             card.data.tags = updatedTags;
 
                             if (wishlistRef) {
-                                await updateDoc(doc(wishlistRef, card.id), { tags: updatedTags });
+                                await updateDoc(doc(wishlistRef, card.id), { tags: updatedTags, updatedAt: Date.now() });
                             } else {
                                 localStorage.setItem('wishlistCollection', JSON.stringify(wishlistCollection));
                             }
@@ -5414,6 +5415,19 @@
                 await setDoc(metadataRef, { updatedAt: Date.now() }, { merge: true });
             } catch (e) {
                 console.error('Failed to update metadata:', e);
+            }
+        };
+
+        // Track deleted card IDs in metadata for delta sync
+        const trackDeletedId = async (cardId, colName) => {
+            if (!currentUser || currentUser.uid === 'local_user') return;
+            try {
+                const metadataRef = doc(db, 'users', currentUser.uid, 'metadata', 'sync');
+                await setDoc(metadataRef, {
+                    deletedIds: arrayUnion({ id: cardId, col: colName, at: Date.now() })
+                }, { merge: true });
+            } catch (e) {
+                console.error('Failed to track deleted ID:', e);
             }
         };
 
@@ -6590,11 +6604,11 @@ Firebase Consoleで確認すべき項目:
                         
                         const collRef = getCollectionRef(currentListType);
                         if (collRef) {
-                            await updateDoc(doc(collRef, cardId), { tags: updatedTags });
+                            await updateDoc(doc(collRef, cardId), { tags: updatedTags, updatedAt: Date.now() });
                         }
                         card.data.tags = updatedTags;
                     }
-                    
+
                     bulkTagModal.hide();
                     selectedCardIds.clear();
                     updateBulkEditControls();
@@ -6665,6 +6679,7 @@ Firebase Consoleで確認すべき項目:
                 for (const cardId of selectedCardIds) {
                     if (collRef) {
                         await deleteDoc(doc(collRef, cardId));
+                        await trackDeletedId(cardId, currentListType === 'collection' ? 'cards' : 'wishlist');
                     }
                     const index = collection.findIndex(c => c.id === cardId);
                     if (index > -1) {
@@ -6780,7 +6795,7 @@ Firebase Consoleで確認すべき項目:
 
                         // Update Firestore
                         if (collRef) {
-                            await updateDoc(doc(collRef, cardId), { '型番': setCode });
+                            await updateDoc(doc(collRef, cardId), { '型番': setCode, updatedAt: Date.now() });
                         }
                         // Update local data
                         card.data['型番'] = setCode;
@@ -6889,7 +6904,8 @@ Firebase Consoleで確認すべき項目:
                     '型番': formData.get('set_code'),
                     'レアリティ': formData.get('rarity'),
                     '枚数': parseInt(formData.get('quantity'), 10),
-                    'tags': [...currentCardTags] // タグを追加
+                    'tags': [...currentCardTags], // タグを追加
+                    updatedAt: Date.now()
                 };
             
             const setChoices = [];
@@ -6949,7 +6965,7 @@ Firebase Consoleで確認すべき項目:
                                 saveGamificationData();
                             }
                         } else {
-                            await updateDoc(exactMatch.ref, { 枚数: increment(newCard.枚数) });
+                            await updateDoc(exactMatch.ref, { 枚数: increment(newCard.枚数), updatedAt: Date.now() });
                             const localCard = targetCollection.find(c => c.id === exactMatch.id);
                             if(localCard) localCard.data.枚数 += newCard.枚数;
                         }
@@ -7127,6 +7143,7 @@ Firebase Consoleで確認すべき項目:
                     
                     if (collectionRef && wishlistRef) {
                         // Add to collection
+                        card.data.updatedAt = Date.now();
                         const docRef = await addDoc(collectionRef, card.data);
                         cardCollection.push({ id: docRef.id, data: card.data });
                         // Track card addition date
@@ -7135,6 +7152,7 @@ Firebase Consoleで確認すべき項目:
                         
                         // Remove from wishlist
                         await deleteDoc(doc(wishlistRef, cardId));
+                        await trackDeletedId(cardId, 'wishlist');
                         wishlistCollection = wishlistCollection.filter(c => c.id !== cardId);
                     } else {
                         // Local mode
@@ -7174,7 +7192,8 @@ Firebase Consoleで確認すべき項目:
             const cardId = document.getElementById('edit-card-id').value;
             const updatedData = {
                 枚数: parseInt(document.getElementById('edit-quantity').value, 10),
-                tags: [...currentCardTags]
+                tags: [...currentCardTags],
+                updatedAt: Date.now()
             };
 
             const collRef = getCollectionRef(currentListType);
@@ -7410,9 +7429,10 @@ Firebase Consoleで確認すべき項目:
                             }
 
                             if (!exactMatch) {
+                                card.updatedAt = Date.now();
                                 batch.set(doc(collRef), card);
                             } else {
-                                batch.update(exactMatch.ref, { 枚数: increment(card.枚数 || 1) });
+                                batch.update(exactMatch.ref, { 枚数: increment(card.枚数 || 1), updatedAt: Date.now() });
                             }
                         }
                         await batch.commit();
@@ -7469,9 +7489,10 @@ Firebase Consoleで確認すべき項目:
                             }
 
                             if (!exactMatch) {
+                                card.updatedAt = Date.now();
                                 batch.set(doc(wishRef), card);
                             } else {
-                                batch.update(exactMatch.ref, { 枚数: increment(card.枚数 || 1) });
+                                batch.update(exactMatch.ref, { 枚数: increment(card.枚数 || 1), updatedAt: Date.now() });
                             }
                         }
                         await batch.commit();
@@ -7625,7 +7646,8 @@ Firebase Consoleで確認すべき項目:
                                 attack: details.attack,
                                 defense: details.defense,
                                 cardText: details.cardText
-                            }
+                            },
+                            updatedAt: Date.now()
                         };
 
                         // Update the card in Firebase or local storage
@@ -7659,7 +7681,8 @@ Firebase Consoleで確認すべき項目:
                                 attack: details.attack,
                                 defense: details.defense,
                                 cardText: details.cardText
-                            }
+                            },
+                            updatedAt: Date.now()
                         };
 
                         if (currentUser?.uid !== 'local_user') {
@@ -8035,7 +8058,7 @@ Firebase Consoleで確認すべき項目:
                     for (const { card, listType } of updatedCards) {
                         const collRef = getCollectionRef(listType);
                         if (collRef) {
-                            await updateDoc(doc(collRef, card.id), { tags: card.data.tags });
+                            await updateDoc(doc(collRef, card.id), { tags: card.data.tags, updatedAt: Date.now() });
                         }
                     }
 
@@ -8887,7 +8910,8 @@ Firebase Consoleで確認すべき項目:
                         if (exactMatch) {
                             // Found exact match - use atomic increment (matching normal registration)
                             await updateDoc(exactMatch.ref, {
-                                '枚数': increment(card.quantity)
+                                '枚数': increment(card.quantity),
+                                updatedAt: Date.now()
                             });
                         } else {
                             // No exact match - add as new card
@@ -8896,7 +8920,8 @@ Firebase Consoleで確認すべき項目:
                                 '型番': cardNumber,
                                 'レアリティ': cardRarity,
                                 '枚数': card.quantity,
-                                'tags': cardTags
+                                'tags': cardTags,
+                                updatedAt: Date.now()
                             };
                             const docRef = await addDoc(cardsRef, newCard);
                             // Track card addition date
