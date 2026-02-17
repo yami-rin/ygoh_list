@@ -206,26 +206,53 @@ app.get('/card-list', async (req, res) => {
 
         const html = await response.text();
 
+        // Build rarity ID to name mapping from icon_sort section
+        // Format: <div id="1" class="t_rid_1 r_none" ...><p ...><span>N</span></p><span>ノーマル仕様</span></div>
+        const rarityMap = {};
+        const rarityPattern = /class="t_rid_(\d+)\s+r_none"[^>]*>[\s\S]*?<span>([^<]+)<\/span>/g;
+        let rarityMatch;
+        while ((rarityMatch = rarityPattern.exec(html)) !== null) {
+            if (!rarityMap[rarityMatch[1]]) {
+                rarityMap[rarityMatch[1]] = rarityMatch[2].trim();
+            }
+        }
+        console.log('Rarity map:', rarityMap);
+
         const cards = [];
-        // Use regex to find all cards in the list
-        const cardPattern = /<div class="t_row c_normal open">[\s\S]*?<span class="card_name">([\s\S]*?)<\/span>[\s\S]*?<input type="hidden" class="link_value" value="\/yugiohdb\/card_search\.action\?ope=2&cid=(\d+)">/g;
+        // Match t_row divs allowing additional classes (t_rid_X) after "open"
+        const cardPattern = /<div class="t_row c_normal open([^"]*)">([\s\S]*?)<input type="hidden" class="link_value" value="\/yugiohdb\/card_search\.action\?ope=2&cid=(\d+)">/g;
 
         let match;
         while ((match = cardPattern.exec(html)) !== null) {
-            const rawNameWithRuby = match[1];
-            const cardId = match[2];
+            const extraClasses = match[1];
+            const cardContent = match[2];
+            const cardId = match[3];
 
-            if (cardId && rawNameWithRuby) {
-                const rawName = rawNameWithRuby.replace(/<span class="card_ruby">[\s\S]*?<\/span>/g, '').trim();
-                if (rawName) {
-                    cards.push({
-                        id: cardId,
-                        name: rawName,
-                    });
+            // Extract card name
+            const nameMatch = cardContent.match(/<span class="card_name">([\s\S]*?)<\/span>/);
+            if (!cardId || !nameMatch) continue;
+
+            const rawName = nameMatch[1].replace(/<span class="card_ruby">[\s\S]*?<\/span>/g, '').trim();
+            if (!rawName) continue;
+
+            // Extract rarities from t_rid_X classes
+            const ridPattern = /t_rid_(\d+)/g;
+            const rarities = [];
+            let ridMatch;
+            while ((ridMatch = ridPattern.exec(extraClasses)) !== null) {
+                const rarityName = rarityMap[ridMatch[1]] || ridMatch[1];
+                if (!rarities.includes(rarityName)) {
+                    rarities.push(rarityName);
                 }
             }
+
+            cards.push({
+                id: cardId,
+                name: rawName,
+                rarities: rarities
+            });
         }
-        
+
         console.log(`Successfully parsed ${cards.length} cards from search results`);
 
         res.json({
