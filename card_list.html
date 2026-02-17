@@ -8673,66 +8673,79 @@ Firebase Consoleで確認すべき項目:
             showLoading(true);
             let successCount = 0;
             let failCount = 0;
+            let totalAddedQuantity = 0;
 
             try {
-                const cardsRef = collection(db, 'users', currentUser.uid, 'cards');
+                const cardsRef = getCollectionRef('collection');
 
                 for (const card of selectedCards) {
                     try {
-                        // Check if exact same card already exists (name + number + rarity + tags)
-                        // Query by name first to narrow down candidates
-                        const q = query(cardsRef, where('名前', '==', card.name));
-                        const querySnapshot = await getDocs(q);
-
-                        // Find exact match considering card number, rarity, and tags
-                        let exactMatch = null;
                         const cardNumber = card.number || '';
                         const cardRarity = card.rarity || '';
                         const cardTags = card.tags || [];
 
-                        for (const doc of querySnapshot.docs) {
-                            const data = doc.data();
-                            const docNumber = data['型番'] || '';
-                            const docRarity = data['レアリティ'] || '';
-                            const docTags = data.tags || [];
+                        // Query with name, number, rarity constraints (matching normal registration)
+                        const constraints = [where('名前', '==', card.name)];
+                        if (cardNumber) {
+                            constraints.push(where('型番', '==', cardNumber));
+                        }
+                        if (cardRarity) {
+                            constraints.push(where('レアリティ', '==', cardRarity));
+                        }
+                        const q = query(cardsRef, ...constraints);
+                        const querySnapshot = await getDocs(q);
 
-                            // Check if all fields match
-                            if (docNumber === cardNumber && docRarity === cardRarity) {
-                                // Check if tags match (same length and all elements present)
-                                if (docTags.length === cardTags.length) {
-                                    const tagsMatch = docTags.every(tag => cardTags.includes(tag)) &&
-                                                    cardTags.every(tag => docTags.includes(tag));
-                                    if (tagsMatch) {
-                                        exactMatch = doc;
-                                        break;
-                                    }
-                                }
+                        // Find exact match including tags
+                        let exactMatch = null;
+                        for (const docSnap of querySnapshot.docs) {
+                            const data = docSnap.data();
+                            const docTags = data.tags || [];
+                            if (docTags.length === cardTags.length &&
+                                docTags.every(tag => cardTags.includes(tag)) &&
+                                cardTags.every(tag => docTags.includes(tag))) {
+                                exactMatch = docSnap;
+                                break;
                             }
                         }
 
-                        const currentTimestamp = new Date().toISOString();
-                        const currentDate = currentTimestamp.split('T')[0];
-
                         if (exactMatch) {
-                            // Found exact match - add to existing quantity
-                            const existingQuantity = exactMatch.data()['枚数'] || 0;
+                            // Found exact match - use atomic increment (matching normal registration)
                             await updateDoc(exactMatch.ref, {
-                                '枚数': existingQuantity + card.quantity,
-                                '最終更新日': currentDate
+                                '枚数': increment(card.quantity)
                             });
                         } else {
-                            // No exact match - add as new card (separate stack)
-                            await addDoc(cardsRef, {
+                            // No exact match - add as new card
+                            const newCard = {
                                 '名前': card.name,
                                 '型番': cardNumber,
                                 'レアリティ': cardRarity,
                                 '枚数': card.quantity,
-                                'tags': cardTags,
-                                '登録日': currentDate,
-                                '最終更新日': currentDate,
-                                'createdAt': currentTimestamp
-                            });
+                                'tags': cardTags
+                            };
+                            const docRef = await addDoc(cardsRef, newCard);
+                            // Track card addition date
+                            gamificationData.cardAdditionDates[docRef.id] = new Date().toISOString();
                         }
+
+                        // Track gamification (matching normal registration)
+                        const isRare = cardRarity && (
+                            cardRarity.toLowerCase().includes('レア') ||
+                            cardRarity.toLowerCase().includes('rare') ||
+                            cardRarity.toUpperCase().includes('SR') ||
+                            cardRarity.toUpperCase().includes('UR')
+                        );
+                        const cardDataForTracking = { '枚数': card.quantity };
+                        trackCardAddition(cardDataForTracking, cardTags.length > 0, isRare);
+
+                        // Add points (matching normal registration)
+                        const pointsToAdd = card.quantity * 5;
+                        if (isRare) {
+                            addPoints(pointsToAdd + (card.quantity * 5), `レアカード ${card.quantity}枚追加`);
+                        } else {
+                            addPoints(pointsToAdd, `カード ${card.quantity}枚追加`);
+                        }
+
+                        totalAddedQuantity += card.quantity;
 
                         // Add to recent history for analysis
                         try {
@@ -8742,7 +8755,7 @@ Firebase Consoleで確認すべき項目:
                                 setCode: cardNumber,
                                 rarity: cardRarity,
                                 quantity: card.quantity,
-                                timestamp: currentTimestamp
+                                timestamp: new Date().toISOString()
                             });
                             // Keep only last 1000 entries
                             if (recentHistory.length > 1000) {
@@ -8760,17 +8773,22 @@ Firebase Consoleで確認すべき項目:
                     }
                 }
 
+                // Update card addition heatmap (matching normal registration)
+                const today = new Date().toISOString().split('T')[0];
+                cardAdditionHistory[today] = (cardAdditionHistory[today] || 0) + totalAddedQuantity;
+                gamificationData.cardAdditionHeatmap = gamificationData.cardAdditionHeatmap || {};
+                gamificationData.cardAdditionHeatmap[today] = (gamificationData.cardAdditionHeatmap[today] || 0) + totalAddedQuantity;
 
-                // Save recentCardsHistory to Firebase
+                // Save recentCardsHistory and gamification to Firebase
                 if (currentUser && currentUser.uid !== 'local_user') {
                     try {
                         const currentHistory = localStorage.getItem('recentCardsHistory');
                         if (currentHistory) {
                             gamificationData.recentCardsHistory = JSON.parse(currentHistory);
-                            await saveGamificationData();
                         }
+                        await saveGamificationData();
                     } catch (e) {
-                        console.error('Error saving recentCardsHistory to Firebase:', e);
+                        console.error('Error saving gamification data to Firebase:', e);
                     }
                 }
 
@@ -8778,6 +8796,8 @@ Firebase Consoleで確認すべき項目:
 
                 // Close modal and reload data
                 bootstrap.Modal.getInstance(document.getElementById('bulk-import-modal')).hide();
+                // Update metadata timestamp so cache system knows data changed
+                await updateMetadataTimestamp();
                 await loadCollectionFromFirestore();
 
             } catch (error) {
