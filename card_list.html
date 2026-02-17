@@ -2485,6 +2485,9 @@
                                     <button class="btn btn-sm btn-outline-warning" id="bulk-remove-tags-btn">
                                         <i class="bi bi-tags"></i> タグ削除
                                     </button>
+                                    <button class="btn btn-sm btn-outline-success" id="bulk-auto-setcode-btn">
+                                        <i class="bi bi-hash"></i> 型番自動設定
+                                    </button>
                                     <button class="btn btn-sm btn-outline-danger" id="bulk-delete-btn">
                                         <i class="bi bi-trash"></i> 一括削除
                                     </button>
@@ -6681,6 +6684,131 @@ Firebase Consoleで確認すべき項目:
             }
         });
         
+        // CSV master data cache
+        let csvCardMap = null; // Map: cardName → cardId
+
+        const loadCsvMaster = async () => {
+            if (csvCardMap) return csvCardMap;
+            const csvUrl = 'https://raw.githubusercontent.com/yami-rin/ygoh_list/main/yugioh_cards_master.csv';
+            const response = await fetch(csvUrl);
+            if (!response.ok) throw new Error('CSVマスターデータの取得に失敗しました');
+            const text = await response.text();
+            csvCardMap = new Map();
+            const lines = text.split('\n');
+            for (let i = 1; i < lines.length; i++) {
+                const line = lines[i].trim();
+                if (!line) continue;
+                // CSV parse: カードID,名前,... (名前 may be quoted)
+                let cardId, name;
+                if (line.startsWith('"') || line.indexOf(',"') !== -1) {
+                    // Handle quoted fields
+                    const match = line.match(/^(\d+),("(?:[^"]|"")*"|[^,]*)/);
+                    if (match) {
+                        cardId = match[1];
+                        name = match[2].replace(/^"|"$/g, '').replace(/""/g, '"');
+                    }
+                } else {
+                    const parts = line.split(',');
+                    cardId = parts[0];
+                    name = parts[1];
+                }
+                if (cardId && name) {
+                    csvCardMap.set(name, cardId);
+                }
+            }
+            console.log(`CSVマスターデータ読み込み完了: ${csvCardMap.size}件`);
+            return csvCardMap;
+        };
+
+        document.getElementById('bulk-auto-setcode-btn').addEventListener('click', async () => {
+            if (selectedCardIds.size === 0) {
+                alert('カードが選択されていません。');
+                return;
+            }
+
+            const btn = document.getElementById('bulk-auto-setcode-btn');
+            const originalHtml = btn.innerHTML;
+            btn.disabled = true;
+            btn.innerHTML = '<span class="spinner-border spinner-border-sm"></span> 処理中...';
+
+            try {
+                // Load CSV master
+                const masterMap = await loadCsvMaster();
+
+                const collection = getCurrentCollection();
+                let updated = 0;
+                let skipped = 0;
+                let notFound = 0;
+                const collRef = getCollectionRef(currentListType);
+
+                for (const cardId of selectedCardIds) {
+                    const card = collection.find(c => c.id === cardId);
+                    if (!card) { skipped++; continue; }
+
+                    const cardName = card.data['名前'];
+                    const cardRarity = card.data['レアリティ'] || '';
+
+                    // Look up cid from CSV
+                    const cid = masterMap.get(cardName);
+                    if (!cid) {
+                        console.log(`CSV未検出: ${cardName}`);
+                        notFound++;
+                        continue;
+                    }
+
+                    // Fetch card detail for reprints
+                    try {
+                        const detailResp = await fetch(`https://ygoh-list.onrender.com/card-detail?cid=${cid}`);
+                        if (!detailResp.ok) { skipped++; continue; }
+                        const detail = await detailResp.json();
+                        const reprints = detail.reprints || [];
+
+                        if (reprints.length === 0) { skipped++; continue; }
+
+                        // Match by rarity
+                        let setCode = '';
+                        if (cardRarity) {
+                            const match = reprints.find(r => r.rarity === cardRarity);
+                            if (match) {
+                                setCode = match.setCode;
+                            }
+                        }
+                        // Fallback: first reprint
+                        if (!setCode) {
+                            setCode = reprints[0].setCode;
+                        }
+
+                        // Update Firestore
+                        if (collRef) {
+                            await updateDoc(doc(collRef, cardId), { '型番': setCode });
+                        }
+                        // Update local data
+                        card.data['型番'] = setCode;
+                        updated++;
+                    } catch (e) {
+                        console.error(`型番取得エラー (${cardName}):`, e);
+                        skipped++;
+                    }
+                }
+
+                // Refresh UI
+                applySearchAndFilter();
+                saveToCache();
+                updateMetadataTimestamp();
+
+                let msg = `型番自動設定完了:\n  設定: ${updated}件`;
+                if (notFound > 0) msg += `\n  CSV未検出: ${notFound}件`;
+                if (skipped > 0) msg += `\n  スキップ: ${skipped}件`;
+                alert(msg);
+            } catch (error) {
+                console.error('型番自動設定エラー:', error);
+                alert('型番自動設定中にエラーが発生しました: ' + error.message);
+            } finally {
+                btn.disabled = false;
+                btn.innerHTML = originalHtml;
+            }
+        });
+
         document.getElementById('clear-selection-btn').addEventListener('click', () => {
             selectedCardIds.clear();
             document.querySelectorAll('.card-checkbox').forEach(checkbox => checkbox.checked = false);
