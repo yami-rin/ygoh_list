@@ -2620,8 +2620,8 @@
                 return imageData;
             } catch (error) {
                 console.error(`Error loading image for ${cardName}:`, error);
-                // Fallback to direct URL (will likely fail due to CORS, but worth trying)
-                return `https://www.db.yugioh-card.com/yugiohdb/card_image.action?cid=${cardId}&request_locale=ja`;
+                // Fallback to proxy URL (direct yugioh-card.com URL fails due to CORS)
+                return `${PROXY_URL}/image?cid=${cardId}&ciid=${ciid}`;
             }
         };
 
