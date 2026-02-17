@@ -8436,6 +8436,7 @@ Firebase Consoleで確認すべき項目:
                 cardGrid.innerHTML = '';
 
                 // Load images asynchronously with fetch to avoid CORS issues
+                // Returns detailData including reprints (setCode + rarity)
                 const loadCardImage = async (cardId, imgElement) => {
                     try {
                         console.log(`Loading image for card ${cardId}...`);
@@ -8470,6 +8471,8 @@ Firebase Consoleで確認すべき項目:
                         } else {
                             throw new Error(`Failed to load image: HTTP ${imageResponse.status}`);
                         }
+
+                        return detailData;
                     } catch (error) {
                         console.error(`Error loading image for card ${cardId}:`, error);
                         imgElement.src = "data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' width='200' height='290'><rect width='200' height='290' fill='%23ddd'/><text x='50%' y='50%' text-anchor='middle' dy='.3em' fill='%23999' font-size='14'>No Image</text></svg>";
@@ -8523,7 +8526,11 @@ Firebase Consoleで確認すべき項目:
                     const loadWithRetry = async (retries = 3, delay = 2000) => {
                         for (let i = 0; i < retries; i++) {
                             try {
-                                await loadCardImage(card.id, imgElement);
+                                const detailData = await loadCardImage(card.id, imgElement);
+                                // Store reprints for set code lookup during registration
+                                if (detailData && detailData.reprints) {
+                                    bulkImportCards[index].reprints = detailData.reprints;
+                                }
                                 return; // Success
                             } catch (error) {
                                 console.log(`Retry ${i + 1}/${retries} for card ${card.id}`);
@@ -8660,11 +8667,23 @@ Firebase Consoleで確認すべき項目:
                     console.log(`Processing input ${forEachIndex} - index: ${index}, rarity: ${rarity}, quantity: ${quantity}`);
 
                     if (quantity > 0) {
-                        console.log(`Adding card to selectedCards - bulkImportCards[${index}]:`, bulkImportCards[index]);
+                        const cardData = bulkImportCards[index];
+                        console.log(`Adding card to selectedCards - bulkImportCards[${index}]:`, cardData);
+
+                        // Look up set code from reprints matching the selected rarity
+                        let number = '';
+                        if (cardData.reprints && cardData.reprints.length > 0) {
+                            const matchingReprint = cardData.reprints.find(r => r.rarity === rarity);
+                            if (matchingReprint) {
+                                number = matchingReprint.setCode;
+                            }
+                        }
+
                         selectedCards.push({
-                            ...bulkImportCards[index],
+                            ...cardData,
                             quantity: quantity,
-                            rarity: rarity
+                            rarity: rarity,
+                            number: number
                         });
                     }
                 } catch (error) {
