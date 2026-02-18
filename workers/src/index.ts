@@ -1,5 +1,5 @@
 import { Hono } from 'hono';
-import { corsMiddleware } from './middleware/cors';
+import { cors } from 'hono/cors';
 import { authMiddleware } from './middleware/auth';
 import { cards } from './routes/cards';
 import { sync } from './routes/sync';
@@ -19,8 +19,19 @@ type Bindings = {
 
 const app = new Hono<{ Bindings: Bindings }>();
 
-// Global CORS middleware
-app.use('*', corsMiddleware);
+// CORS — must be first middleware
+app.use('*', cors({
+  origin: [
+    'https://yami-rin.github.io',
+    'http://localhost:3000',
+    'http://localhost:8787',
+    'http://127.0.0.1:5500',
+    'http://localhost:5500',
+  ],
+  allowMethods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+  allowHeaders: ['Content-Type', 'Authorization'],
+  maxAge: 86400,
+}));
 
 // Health check (no auth)
 app.get('/api/health', (c) => c.json({ status: 'ok' }));
