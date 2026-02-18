@@ -2501,6 +2501,8 @@
         let filteredCards = [];
         let cardDetailsMap = new Map();
         let cardReadingMap = new Map(); // Map for hiragana -> card names
+        let allAliases = [];
+        let userAliasMap = new Map(); // Map<alias, [cardName, ...]>
         let currentUser = null;
         let currentPage = 1;
         let itemsPerPage = 50;
@@ -2796,6 +2798,29 @@
             saveGalleryToCache();
         };
 
+        // ========== Alias Support ==========
+
+        const buildUserAliasMap = () => {
+            userAliasMap = new Map();
+            for (const a of allAliases) {
+                const key = a.alias.toLowerCase();
+                if (!userAliasMap.has(key)) {
+                    userAliasMap.set(key, []);
+                }
+                userAliasMap.get(key).push(a.cardName);
+            }
+        };
+
+        const loadAllAliases = async () => {
+            try {
+                allAliases = await api.getAliases();
+            } catch (e) {
+                console.warn('Failed to load aliases:', e);
+                allAliases = [];
+            }
+            buildUserAliasMap();
+        };
+
         // Load user's card collection and wishlist
         const loadAllData = async (userId) => {
             showLoading(true);
@@ -2966,6 +2991,17 @@
                         possibleCardNames.push(...cards);
                     }
                 }
+
+                // Check user-defined aliases
+                if (userAliasMap.has(searchTerm)) {
+                    possibleCardNames.push(...userAliasMap.get(searchTerm));
+                }
+                for (const [alias, cards] of userAliasMap) {
+                    if (alias.includes(searchTerm)) {
+                        possibleCardNames.push(...cards);
+                    }
+                }
+                possibleCardNames = [...new Set(possibleCardNames)];
             }
 
             // Normalize search term for card name matching
@@ -5903,7 +5939,10 @@
                     console.log('Admin status:', isAdmin);
 
                     // Set API auth token
-                    api.setAuth(user).then(() => loadAllData(user.uid));
+                    api.setAuth(user).then(() => {
+                        loadAllData(user.uid);
+                        loadAllAliases();
+                    });
                     loadPublicProfile(); // Load user's public settings
                     initializeCommunity(); // Initialize community features
 

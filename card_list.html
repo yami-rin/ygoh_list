@@ -1774,6 +1774,43 @@
         </div>
     </div>
     
+    <!-- Alias Management Modal -->
+    <div class="modal fade" id="alias-management-modal" tabindex="-1">
+        <div class="modal-dialog modal-lg modal-dialog-centered modal-dialog-scrollable">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title"><i class="bi bi-chat-quote"></i> 俗称管理</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <p class="text-muted small mb-3">カードの通称・俗称を登録すると、検索時にその俗称でカードがヒットするようになります。</p>
+                    <form id="add-alias-form" class="mb-3">
+                        <div class="row g-2 align-items-end">
+                            <div class="col-sm-4">
+                                <label for="new-alias-name" class="form-label small">俗称</label>
+                                <input type="text" id="new-alias-name" class="form-control" placeholder="例: うらら" required>
+                            </div>
+                            <div class="col-sm-5">
+                                <label for="new-alias-card-name" class="form-label small">カード名</label>
+                                <input type="text" id="new-alias-card-name" class="form-control" placeholder="例: 灰流うらら" list="alias-card-name-list" required>
+                                <datalist id="alias-card-name-list"></datalist>
+                            </div>
+                            <div class="col-sm-3">
+                                <button class="btn btn-primary w-100" type="submit">追加</button>
+                            </div>
+                        </div>
+                    </form>
+                    <hr>
+                    <h6>登録済みエイリアス一覧</h6>
+                    <div id="existing-aliases-list" class="mt-2"></div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">閉じる</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <!-- Bulk Tag Edit Modal -->
     <!-- Bulk Import Modal -->
     <div class="modal fade" id="bulk-import-modal" tabindex="-1">
@@ -2188,6 +2225,12 @@
                             <button class="btn btn-outline-secondary btn-sm" id="tag-management-btn">
                                 <i class="bi bi-tags"></i>
                                 <span class="d-none d-sm-inline"> タグ</span>
+                            </button>
+                        </div>
+                        <div class="d-inline-block">
+                            <button class="btn btn-outline-secondary btn-sm" id="alias-management-btn">
+                                <i class="bi bi-chat-quote"></i>
+                                <span class="d-none d-sm-inline"> 俗称</span>
                             </button>
                         </div>
                         <div class="d-inline-block">
@@ -2667,7 +2710,9 @@
         let itemsPerPage = window.innerWidth <= 768 ? 20 : 50;
         let filteredCardCollection = [];
         let allTags = [];
-        
+        let allAliases = [];
+        let userAliasMap = new Map(); // Map<alias, [cardName, ...]>
+
         // Gamification data - will be synced with Firebase
         let gamificationData = {
             userPoints: 0,
@@ -2907,6 +2952,7 @@
         const howToUseModal = new bootstrap.Modal(document.getElementById('how-to-use-modal'));
         const settingsModal = new bootstrap.Modal(document.getElementById('settings-modal'));
         const tagManagementModal = new bootstrap.Modal(document.getElementById('tag-management-modal'));
+        const aliasManagementModal = new bootstrap.Modal(document.getElementById('alias-management-modal'));
         const bulkTagModal = new bootstrap.Modal(document.getElementById('bulk-tag-modal'));
         const analysisModal = new bootstrap.Modal(document.getElementById('analysis-modal'));
 
@@ -2955,7 +3001,7 @@
         // Add show event listeners for all modals
         const modalElements = [
             'auth-modal', 'edit-card-modal', 'card-detail-modal',
-            'how-to-use-modal', 'settings-modal', 'tag-management-modal',
+            'how-to-use-modal', 'settings-modal', 'tag-management-modal', 'alias-management-modal',
             'bulk-tag-modal', 'analysis-modal', 'point-shop-modal',
             'profile-modal', 'ranking-modal', 'stats-info-modal',
             'gacha-result-modal'
@@ -4783,6 +4829,17 @@
                         possibleCardNames.push(...cards);
                     }
                 }
+
+                // Check user-defined aliases
+                if (userAliasMap.has(searchKey)) {
+                    possibleCardNames.push(...userAliasMap.get(searchKey));
+                }
+                for (const [alias, cards] of userAliasMap) {
+                    if (alias.includes(searchKey)) {
+                        possibleCardNames.push(...cards);
+                    }
+                }
+                possibleCardNames = [...new Set(possibleCardNames)];
             }
 
             // Helper function to check range values (e.g., "2000-3000" or "2500")
@@ -4880,6 +4937,144 @@
         };
 
         const isOnlineUser = () => currentUser?.uid && currentUser.uid !== 'local_user';
+
+        // ========== Alias Management ==========
+
+        const buildUserAliasMap = () => {
+            userAliasMap = new Map();
+            for (const a of allAliases) {
+                const key = a.alias.toLowerCase();
+                if (!userAliasMap.has(key)) {
+                    userAliasMap.set(key, []);
+                }
+                userAliasMap.get(key).push(a.cardName);
+            }
+        };
+
+        const loadAllAliases = async () => {
+            if (isOnlineUser()) {
+                try {
+                    allAliases = await api.getAliases();
+                } catch (e) {
+                    console.warn('Failed to load aliases:', e);
+                    allAliases = [];
+                }
+            } else {
+                const saved = localStorage.getItem('cardAliases');
+                if (saved) {
+                    try {
+                        allAliases = JSON.parse(saved);
+                    } catch (e) {
+                        allAliases = [];
+                    }
+                } else {
+                    allAliases = [];
+                }
+            }
+            buildUserAliasMap();
+        };
+
+        const renderAliasManagementList = () => {
+            const container = document.getElementById('existing-aliases-list');
+            if (allAliases.length === 0) {
+                container.innerHTML = '<p class="text-muted">登録されたエイリアスはありません。</p>';
+                return;
+            }
+            container.innerHTML = '';
+            allAliases.forEach(a => {
+                const div = document.createElement('div');
+                div.className = 'd-flex justify-content-between align-items-center mb-2 p-2 border rounded';
+                div.innerHTML = `
+                    <div>
+                        <span class="badge bg-secondary me-1">${escapeHtml(a.alias)}</span>
+                        <i class="bi bi-arrow-right mx-1"></i>
+                        <span>${escapeHtml(a.cardName)}</span>
+                    </div>
+                    <button class="btn btn-outline-danger btn-sm delete-alias-btn" data-id="${escapeHtml(a.id)}">削除</button>
+                `;
+                container.appendChild(div);
+            });
+        };
+
+        const populateAliasCardNameDatalist = () => {
+            const datalist = document.getElementById('alias-card-name-list');
+            datalist.innerHTML = '';
+            // Use unique card names from cardReadingMap values and current collection
+            const names = new Set();
+            for (const cards of cardReadingMap.values()) {
+                cards.forEach(n => names.add(n));
+            }
+            getCurrentCollection().forEach(c => {
+                if (c.data['名前']) names.add(c.data['名前']);
+            });
+            const sorted = [...names].sort();
+            // Limit to prevent huge datalists
+            sorted.slice(0, 2000).forEach(name => {
+                const option = document.createElement('option');
+                option.value = name;
+                datalist.appendChild(option);
+            });
+        };
+
+        document.getElementById('add-alias-form').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const aliasInput = document.getElementById('new-alias-name');
+            const cardNameInput = document.getElementById('new-alias-card-name');
+            const alias = aliasInput.value.trim();
+            const cardName = cardNameInput.value.trim();
+            if (!alias || !cardName) return;
+
+            // Check for duplicate alias
+            if (allAliases.some(a => a.alias === alias)) {
+                showToast(`エイリアス「${alias}」は既に登録されています。`, 'warning');
+                return;
+            }
+
+            try {
+                if (isOnlineUser()) {
+                    const created = await api.createAlias(alias, cardName);
+                    allAliases.push(created);
+                } else {
+                    const newAlias = { id: `local_${Date.now()}_${Math.random()}`, alias, cardName };
+                    allAliases.push(newAlias);
+                    localStorage.setItem('cardAliases', JSON.stringify(allAliases));
+                }
+                buildUserAliasMap();
+                renderAliasManagementList();
+                aliasInput.value = '';
+                cardNameInput.value = '';
+                showToast(`エイリアス「${alias}」→「${cardName}」を登録しました。`, 'success');
+            } catch (err) {
+                console.error('Failed to create alias:', err);
+                showToast('エイリアスの登録に失敗しました。', 'danger');
+            }
+        });
+
+        document.getElementById('existing-aliases-list').addEventListener('click', async (e) => {
+            const btn = e.target.closest('.delete-alias-btn');
+            if (!btn) return;
+            const aliasId = btn.dataset.id;
+            const alias = allAliases.find(a => a.id === aliasId);
+            if (!alias) return;
+
+            if (!confirm(`エイリアス「${alias.alias}」を削除しますか？`)) return;
+
+            try {
+                if (isOnlineUser()) {
+                    await api.deleteAlias(aliasId);
+                }
+                allAliases = allAliases.filter(a => a.id !== aliasId);
+                if (!isOnlineUser()) {
+                    localStorage.setItem('cardAliases', JSON.stringify(allAliases));
+                }
+                buildUserAliasMap();
+                renderAliasManagementList();
+                showToast('エイリアスを削除しました。', 'success');
+            } catch (err) {
+                console.error('Failed to delete alias:', err);
+                showToast('エイリアスの削除に失敗しました。', 'danger');
+            }
+        });
 
         const loadAllTags = async () => {
             if (isOnlineUser()) {
@@ -5348,6 +5543,7 @@
             if (user.uid !== 'local_user') {
                 loadCollectionFromFirestore();
                 loadAllTags();
+                loadAllAliases();
 
                 // Initialize publicProfiles for community feature (if not exists)
                 try {
@@ -5370,6 +5566,7 @@
                 updateTotalCounts(); // Update stats for local mode
                 applySearchAndFilter();
                 loadAllTags(); // ローカルモードでもタグをロード・初期化
+                loadAllAliases();
                 document.getElementById('delete-account-btn').style.display = 'none';
 
                 // Hide VIP menu for guest users using Bootstrap classes
@@ -6402,7 +6599,12 @@ Firebase Consoleで確認すべき項目:
         };
         
         document.getElementById('tag-management-btn').addEventListener('click', () => tagManagementModal.show());
-        
+        document.getElementById('alias-management-btn').addEventListener('click', () => {
+            renderAliasManagementList();
+            populateAliasCardNameDatalist();
+            aliasManagementModal.show();
+        });
+
         document.getElementById('select-all-checkbox').addEventListener('change', (e) => {
             const checkboxes = document.querySelectorAll('.card-checkbox');
             checkboxes.forEach(checkbox => {
@@ -8798,6 +9000,16 @@ Firebase Consoleで確認すべき項目:
             // Also check for partial matches in readings
             for (const [reading, cards] of cardReadingMap) {
                 if (reading.includes(searchKeyLower)) {
+                    possibleCardNames.push(...cards);
+                }
+            }
+
+            // Check user-defined aliases
+            if (userAliasMap.has(searchKeyLower)) {
+                possibleCardNames.push(...userAliasMap.get(searchKeyLower));
+            }
+            for (const [alias, cards] of userAliasMap) {
+                if (alias.includes(searchKeyLower)) {
                     possibleCardNames.push(...cards);
                 }
             }

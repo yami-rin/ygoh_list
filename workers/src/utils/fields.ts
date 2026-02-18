@@ -57,3 +57,13 @@ export function rowToTag(row: Record<string, unknown>) {
     order: row.sort_order as number,
   };
 }
+
+/** Convert an alias row from D1 to API response format */
+export function rowToAlias(row: Record<string, unknown>) {
+  return {
+    id: row.id as string,
+    alias: row.alias as string,
+    cardName: row.card_name as string,
+    createdAt: row.created_at as number,
+  };
+}

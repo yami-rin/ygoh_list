@@ -226,6 +226,25 @@ class CardManagerAPI {
         });
     }
 
+    // ========== Aliases ==========
+
+    async getAliases() {
+        const data = await this._fetch('/api/aliases');
+        return data.aliases;
+    }
+
+    async createAlias(alias, cardName) {
+        const data = await this._fetch('/api/aliases', {
+            method: 'POST',
+            body: JSON.stringify({ alias, cardName }),
+        });
+        return data.alias;
+    }
+
+    async deleteAlias(aliasId) {
+        return this._fetch(`/api/aliases/${aliasId}`, { method: 'DELETE' });
+    }
+
     // ========== Gamification ==========
 
     async getGamification() {
