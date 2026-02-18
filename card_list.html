@@ -9120,7 +9120,20 @@ Firebase Consoleで確認すべき項目:
             }
             
             showLoading(true);
-            const searchUrl = `https://www.db.yugioh-card.com/yugiohdb/card_search.action?ope=1&sess=1&rp=100&mode=&sort=1&keyword=${encodeURIComponent(searchKeyword)}&stype=1&ctype=&othercon=2&starfr=&starto=&pscaleto=&linkmarkerfr=&linkmarkerto=&link_m=2&atkfr=&atkto=&deffr=&defto=&releaseDStart=1&releaseMStart=1&releaseYStart=1999&releaseDEnd=&releaseMEnd=&releaseYEnd=`;
+            // Resolve alias to official card name for DB search
+            let dbSearchKeyword = searchKeyword;
+            const aliasKey = searchKeyword.toLowerCase();
+            if (userAliasMap.has(aliasKey)) {
+                const aliasNames = userAliasMap.get(aliasKey);
+                if (aliasNames.length === 1) {
+                    dbSearchKeyword = aliasNames[0];
+                }
+                // Multiple matches: use first one (exact alias match takes priority)
+                else if (aliasNames.length > 1) {
+                    dbSearchKeyword = aliasNames[0];
+                }
+            }
+            const searchUrl = `https://www.db.yugioh-card.com/yugiohdb/card_search.action?ope=1&sess=1&rp=100&mode=&sort=1&keyword=${encodeURIComponent(dbSearchKeyword)}&stype=1&ctype=&othercon=2&starfr=&starto=&pscaleto=&linkmarkerfr=&linkmarkerto=&link_m=2&atkfr=&atkto=&deffr=&defto=&releaseDStart=1&releaseMStart=1&releaseYStart=1999&releaseDEnd=&releaseMEnd=&releaseYEnd=`;
             const proxyUrl = `${window.PROXY_URL}/card-list?url=${encodeURIComponent(searchUrl)}`;
             
             try {
