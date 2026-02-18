@@ -5026,7 +5026,7 @@
 
             // Check for duplicate alias
             if (allAliases.some(a => a.alias === alias)) {
-                showToast(`エイリアス「${alias}」は既に登録されています。`, 'warning');
+                showNotification(`エイリアス「${alias}」は既に登録されています。`, 'warning');
                 return;
             }
 
@@ -5043,10 +5043,10 @@
                 renderAliasManagementList();
                 aliasInput.value = '';
                 cardNameInput.value = '';
-                showToast(`エイリアス「${alias}」→「${cardName}」を登録しました。`, 'success');
+                showNotification(`エイリアス「${alias}」→「${cardName}」を登録しました。`, 'success');
             } catch (err) {
                 console.error('Failed to create alias:', err);
-                showToast('エイリアスの登録に失敗しました。', 'danger');
+                showNotification('エイリアスの登録に失敗しました。', 'danger');
             }
         });
 
@@ -5069,10 +5069,10 @@
                 }
                 buildUserAliasMap();
                 renderAliasManagementList();
-                showToast('エイリアスを削除しました。', 'success');
+                showNotification('エイリアスを削除しました。', 'success');
             } catch (err) {
                 console.error('Failed to delete alias:', err);
-                showToast('エイリアスの削除に失敗しました。', 'danger');
+                showNotification('エイリアスの削除に失敗しました。', 'danger');
             }
         });
 
