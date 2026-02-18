@@ -1577,6 +1577,7 @@
             </li>
         </ul>
 
+        <div id="gallery-content">
         <!-- Stats bar -->
         <div class="stats-bar">
             <div class="row text-center">
@@ -1878,6 +1879,7 @@
 
         <!-- Pagination bottom -->
         <div class="pagination-controls" id="pagination-bottom"></div>
+        </div>
     </div>
 
     <!-- Duel Simulator -->
@@ -2883,7 +2885,7 @@
             // Hide duel simulator and community, show card gallery
             document.getElementById('duel-simulator-container').style.display = 'none';
             document.getElementById('community-container').style.display = 'none';
-            document.querySelector('.container:has(#card-grid)').style.display = 'block';
+            document.getElementById('gallery-content').style.display = 'block';
 
             currentListType = listType;
             allCards = listType === 'collection' ? collectionCards :
@@ -4098,7 +4100,7 @@
 
         document.getElementById('duel-simulator-tab').addEventListener('click', () => {
             // Hide card gallery and community sections
-            document.querySelector('.container:has(#card-grid)').style.display = 'none';
+            document.getElementById('gallery-content').style.display = 'none';
             document.getElementById('community-container').style.display = 'none';
 
             // Show duel simulator
@@ -5878,7 +5880,7 @@
         const switchToCommunity = () => {
             // Hide other containers
             document.getElementById('duel-simulator-container').style.display = 'none';
-            document.querySelector('.container:has(#card-grid)').style.display = 'none';
+            document.getElementById('gallery-content').style.display = 'none';
 
             // Show community container
             document.getElementById('community-container').style.display = 'block';
