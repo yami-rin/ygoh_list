@@ -2695,13 +2695,12 @@
             }
         };
         
-        // Save gamification data to Firebase
-        const saveGamificationData = async () => {
+        // Save gamification data to Firebase (debounced to reduce writes)
+        let _saveGamificationTimer = null;
+        const _doSaveGamification = async () => {
             if (!currentUser) return;
-            
             try {
                 const userDocRef = doc(db, 'userGamification', currentUser.uid);
-                // Convert Set to Array for Firebase storage
                 const dataToSave = {
                     ...gamificationData,
                     profile: {
@@ -2712,6 +2711,18 @@
                 await setDoc(userDocRef, dataToSave, { merge: true });
             } catch (error) {
                 console.error('Error saving gamification data:', error);
+            }
+        };
+        const saveGamificationData = async (immediate = false) => {
+            if (!currentUser) return;
+            if (_saveGamificationTimer) {
+                clearTimeout(_saveGamificationTimer);
+                _saveGamificationTimer = null;
+            }
+            if (immediate) {
+                await _doSaveGamification();
+            } else {
+                _saveGamificationTimer = setTimeout(_doSaveGamification, 300);
             }
         };
         
@@ -3101,11 +3112,6 @@
             updatePaginationControls();
             updateSortIcons();
             updateTotalCounts();
-            
-            // Update ranking data when collection changes
-            if (currentUser) {
-                updateUserRankingData();
-            }
         };
 
         const updatePaginationControls = () => {
@@ -4738,7 +4744,14 @@
 
             return text;
         };
-        
+
+        // Helper for card type matching in search
+        const matchCardType = (det, type) => {
+            if (type === '魔法') return det.race === '魔法' || det.cardType === '魔法';
+            if (type === '罠') return det.race === '罠' || det.cardType === '罠';
+            return det.cardType && det.cardType.includes(type);
+        };
+
         const applySearchAndFilter = () => {
             // Get basic search parameters
             const [sN,sC,sR,sT] = ['search_name','search_set_code','search_rarity','search_tags'].map(n=>normalizeForSearch(document.querySelector(`[name="${n}"]`).value));
@@ -4761,18 +4774,6 @@
 
             const sAttack = document.querySelector('[name="search_attack"]')?.value?.trim();
             const sDefense = document.querySelector('[name="search_defense"]')?.value?.trim();
-
-            // Debug logging
-            console.log('=== Search Debug ===');
-            console.log('Search Mode:', searchMode);
-            console.log('Advanced Criteria:', {
-                level: sLevel,
-                attribute: sAttribute,
-                races: sRaces,
-                cardTypes: sCardTypes,
-                attack: sAttack,
-                defense: sDefense
-            });
 
             // Get possible card names from hiragana reading
             let possibleCardNames = [];
@@ -4809,12 +4810,6 @@
                 // Handle single value
                 return value.toString() === rangeStr;
             };
-
-            let matchCount = 0;
-            let totalCards = getCurrentCollection().length;
-            let matchedCards = [];
-            let debugLogCount = 0;
-            const MAX_DEBUG_LOGS = 10;
 
             filteredCardCollection = getCurrentCollection().filter(c => {
                 const d = c.data;
@@ -4858,137 +4853,21 @@
 
                     // Only apply advanced filtering if criteria is specified
                     if (hasAdvancedCriteria) {
-                        if (searchMode === 'or') {
-                            // OR検索：いずれかの条件を満たせばOK
-                            let orMatch = false;
-                            const debugChecks = [];
-
-                            // Check level
-                            if (sLevel) {
-                                const levelCheck = checkRange(details.level, sLevel);
-                                debugChecks.push(`Level: ${details.level} vs ${sLevel} = ${levelCheck}`);
-                                if (levelCheck) orMatch = true;
-                            }
-
-                            // Check attribute
-                            if (sAttribute) {
-                                const attrCheck = details.attribute === sAttribute;
-                                debugChecks.push(`Attribute: ${details.attribute} vs ${sAttribute} = ${attrCheck}`);
-                                if (attrCheck) orMatch = true;
-                            }
-
-                            // Check races (multiple selection)
-                            if (sRaces.length > 0) {
-                                const hasMatchingRace = sRaces.some(race => {
-                                    if (!race) return false;
-                                    return details.race === race;
-                                });
-                                debugChecks.push(`Race: ${details.race} in [${sRaces.join(',')}] = ${hasMatchingRace}`);
-                                if (hasMatchingRace) orMatch = true;
-                            }
-
-                            // Check card types - OR: match ANY of the selected types
-                            if (sCardTypes.length > 0) {
-                                // OR検索：いずれかのカードタイプを含めばOK
-                                const hasMatchingType = sCardTypes.some(type => {
-                                    // For spell/trap cards, check race field (CSVでは魔法・罠は種族列に格納)
-                                    if (type === '魔法') {
-                                        return details.race === '魔法' || details.cardType === '魔法';
-                                    } else if (type === '罠') {
-                                        return details.race === '罠' || details.cardType === '罠';
-                                    } else {
-                                        return details.cardType && details.cardType.includes(type);
-                                    }
-                                });
-                                debugChecks.push(`CardType: ${details.cardType} matches ANY [${sCardTypes.join(',')}] = ${hasMatchingType}`);
-                                if (hasMatchingType) orMatch = true;
-                            }
-
-                            // Check attack
-                            if (sAttack) {
-                                const atkCheck = checkRange(details.attack, sAttack);
-                                debugChecks.push(`Attack: ${details.attack} vs ${sAttack} = ${atkCheck}`);
-                                if (atkCheck) orMatch = true;
-                            }
-
-                            // Check defense
-                            if (sDefense) {
-                                const defCheck = checkRange(details.defense, sDefense);
-                                debugChecks.push(`Defense: ${details.defense} vs ${sDefense} = ${defCheck}`);
-                                if (defCheck) orMatch = true;
-                            }
-
-                            if (debugChecks.length > 0 && !orMatch && debugLogCount < MAX_DEBUG_LOGS) {
-                                console.log(`[OR] Card: ${cardName} FAILED - ${debugChecks.join(', ')}`);
-                                debugLogCount++;
-                            }
-
-                            advancedMatch = orMatch;
-                        } else {
-                            // AND検索：すべての条件を満たす必要がある（デフォルト）
-                            const debugChecks = [];
-
-                            // Check level
-                            if (sLevel) {
-                                const levelCheck = checkRange(details.level, sLevel);
-                                debugChecks.push(`Level: ${details.level} vs ${sLevel} = ${levelCheck}`);
-                                advancedMatch = advancedMatch && levelCheck;
-                            }
-
-                            // Check attribute
-                            if (sAttribute) {
-                                const attrCheck = details.attribute === sAttribute;
-                                debugChecks.push(`Attribute: ${details.attribute} vs ${sAttribute} = ${attrCheck}`);
-                                advancedMatch = advancedMatch && attrCheck;
-                            }
-
-                            // Check races (multiple selection)
-                            // Note: カードは1つの種族しか持たないため、選択した種族のいずれかに一致すればOK
-                            if (sRaces.length > 0) {
-                                const hasMatchingRace = sRaces.some(race => {
-                                    if (!race) return false;
-                                    return details.race === race;
-                                });
-                                debugChecks.push(`Race: ${details.race} in [${sRaces.join(',')}] = ${hasMatchingRace}`);
-                                advancedMatch = advancedMatch && hasMatchingRace;
-                            }
-
-                            // Check card types - AND: must contain ALL selected types
-                            if (sCardTypes.length > 0) {
-                                // AND検索：すべてのカードタイプを含む必要がある
-                                const hasAllTypes = sCardTypes.every(type => {
-                                    // For spell/trap cards, check race field (CSVでは魔法・罠は種族列に格納)
-                                    if (type === '魔法') {
-                                        return details.race === '魔法' || details.cardType === '魔法';
-                                    } else if (type === '罠') {
-                                        return details.race === '罠' || details.cardType === '罠';
-                                    } else {
-                                        return details.cardType && details.cardType.includes(type);
-                                    }
-                                });
-                                debugChecks.push(`CardType: ${details.cardType} contains ALL [${sCardTypes.join(',')}] = ${hasAllTypes}`);
-                                advancedMatch = advancedMatch && hasAllTypes;
-                            }
-
-                            // Check attack
-                            if (sAttack) {
-                                const atkCheck = checkRange(details.attack, sAttack);
-                                debugChecks.push(`Attack: ${details.attack} vs ${sAttack} = ${atkCheck}`);
-                                advancedMatch = advancedMatch && atkCheck;
-                            }
-
-                            // Check defense
-                            if (sDefense) {
-                                const defCheck = checkRange(details.defense, sDefense);
-                                debugChecks.push(`Defense: ${details.defense} vs ${sDefense} = ${defCheck}`);
-                                advancedMatch = advancedMatch && defCheck;
-                            }
-
-                            if (debugChecks.length > 0 && !advancedMatch && debugLogCount < MAX_DEBUG_LOGS) {
-                                console.log(`[AND] Card: ${cardName} FAILED - ${debugChecks.join(', ')}`);
-                                debugLogCount++;
-                            }
+                        const results = [];
+                        if (sLevel) results.push(checkRange(details.level, sLevel));
+                        if (sAttribute) results.push(details.attribute === sAttribute);
+                        if (sRaces.length > 0) results.push(sRaces.some(race => race && details.race === race));
+                        if (sCardTypes.length > 0) {
+                            // OR: いずれかのタイプに一致, AND: すべてのタイプに一致
+                            const typeFn = searchMode === 'or' ? 'some' : 'every';
+                            results.push(sCardTypes[typeFn](type => matchCardType(details, type)));
                         }
+                        if (sAttack) results.push(checkRange(details.attack, sAttack));
+                        if (sDefense) results.push(checkRange(details.defense, sDefense));
+
+                        advancedMatch = results.length > 0
+                            ? (searchMode === 'or' ? results.some(r => r) : results.every(r => r))
+                            : true;
                     }
 
                 } else if (sLevel || sAttribute || sRaces.length > 0 || sCardTypes.length > 0 || sAttack || sDefense) {
@@ -4996,27 +4875,12 @@
                     advancedMatch = false;
                 }
 
-                const finalMatch = nameMatch &&
+                return nameMatch &&
                        (!sC || normalizeForSearch(d['型番']||'').includes(sC)) &&
                        (!sR || normalizeForSearch(d['レアリティ']||'').includes(sR)) &&
                        (!sT || normalizeForSearch((d.tags||[]).join(',')).includes(sT)) &&
                        advancedMatch;
-
-                if (finalMatch) {
-                    matchCount++;
-                    if (matchedCards.length < 5) {
-                        matchedCards.push(cardName);
-                    }
-                }
-
-                return finalMatch;
             });
-
-            console.log(`Search Results: ${matchCount}/${totalCards} cards matched`);
-            if (matchedCards.length > 0) {
-                console.log('First matched cards:', matchedCards.join(', '));
-            }
-            console.log('===================');
 
             currentPage = 1;
             renderTable();
@@ -5258,17 +5122,31 @@
                             localStorage.setItem('tagsOrder', JSON.stringify(allTags));
                         }
 
-                        // Update all cards with this tag
-                        const collection = getCurrentCollection();
-                        for (const card of collection) {
-                            if (card.data.tags && card.data.tags.includes(oldName)) {
-                                const tagIndex = card.data.tags.indexOf(oldName);
-                                card.data.tags[tagIndex] = trimmedName;
-
-                                // Save card update
-                                const collRef = getCollectionRef(currentListType);
-                                if (collRef) {
-                                    await updateDoc(doc(collRef, card.id), { tags: card.data.tags, updatedAt: Date.now() });
+                        // Update all cards with this tag (batched)
+                        const currentColl = getCurrentCollection();
+                        const collRef = getCollectionRef(currentListType);
+                        if (collRef) {
+                            let batch = writeBatch(db);
+                            let batchCount = 0;
+                            for (const card of currentColl) {
+                                if (card.data.tags && card.data.tags.includes(oldName)) {
+                                    const tIdx = card.data.tags.indexOf(oldName);
+                                    card.data.tags[tIdx] = trimmedName;
+                                    batch.update(doc(collRef, card.id), { tags: card.data.tags, updatedAt: Date.now() });
+                                    batchCount++;
+                                    if (batchCount >= 499) {
+                                        await batch.commit();
+                                        batch = writeBatch(db);
+                                        batchCount = 0;
+                                    }
+                                }
+                            }
+                            if (batchCount > 0) await batch.commit();
+                        } else {
+                            for (const card of currentColl) {
+                                if (card.data.tags && card.data.tags.includes(oldName)) {
+                                    const tIdx = card.data.tags.indexOf(oldName);
+                                    card.data.tags[tIdx] = trimmedName;
                                 }
                             }
                         }
@@ -5291,34 +5169,44 @@
 
                 showLoading(true);
                 try {
-                    // Delete tag from all cards
+                    // Delete tag from all cards (batched)
                     const collectionRef = getCollectionRef('collection');
                     const wishlistRef = getCollectionRef('wishlist');
 
-                    // Update collection cards
-                    for (const card of cardCollection) {
-                        if (card.data.tags && card.data.tags.includes(tagName)) {
-                            const updatedTags = card.data.tags.filter(t => t !== tagName);
-                            card.data.tags = updatedTags;
+                    if (collectionRef || wishlistRef) {
+                        let batch = writeBatch(db);
+                        let batchCount = 0;
 
-                            if (collectionRef) {
-                                await updateDoc(doc(collectionRef, card.id), { tags: updatedTags, updatedAt: Date.now() });
-                            } else {
-                                localStorage.setItem('cardCollection', JSON.stringify(cardCollection));
+                        const batchUpdateCards = async (cards, ref) => {
+                            for (const card of cards) {
+                                if (card.data.tags && card.data.tags.includes(tagName)) {
+                                    card.data.tags = card.data.tags.filter(t => t !== tagName);
+                                    if (ref) {
+                                        batch.update(doc(ref, card.id), { tags: card.data.tags, updatedAt: Date.now() });
+                                        batchCount++;
+                                        if (batchCount >= 499) {
+                                            await batch.commit();
+                                            batch = writeBatch(db);
+                                            batchCount = 0;
+                                        }
+                                    }
+                                }
+                            }
+                        };
+
+                        await batchUpdateCards(cardCollection, collectionRef);
+                        await batchUpdateCards(wishlistCollection, wishlistRef);
+                        if (batchCount > 0) await batch.commit();
+                    } else {
+                        // Local mode
+                        for (const card of cardCollection) {
+                            if (card.data.tags && card.data.tags.includes(tagName)) {
+                                card.data.tags = card.data.tags.filter(t => t !== tagName);
                             }
                         }
-                    }
-
-                    // Update wishlist cards
-                    for (const card of wishlistCollection) {
-                        if (card.data.tags && card.data.tags.includes(tagName)) {
-                            const updatedTags = card.data.tags.filter(t => t !== tagName);
-                            card.data.tags = updatedTags;
-
-                            if (wishlistRef) {
-                                await updateDoc(doc(wishlistRef, card.id), { tags: updatedTags, updatedAt: Date.now() });
-                            } else {
-                                localStorage.setItem('wishlistCollection', JSON.stringify(wishlistCollection));
+                        for (const card of wishlistCollection) {
+                            if (card.data.tags && card.data.tags.includes(tagName)) {
+                                card.data.tags = card.data.tags.filter(t => t !== tagName);
                             }
                         }
                     }
@@ -6880,10 +6768,11 @@ Firebase Consoleで確認すべき項目:
             }
         });
 
-        logoutBtn.addEventListener('click', () => {
+        logoutBtn.addEventListener('click', async () => {
             if (currentUser && currentUser.uid === 'local_user') {
                 window.location.reload();
             } else {
+                await saveGamificationData(true);
                 signOut(auth);
             }
         });
@@ -7067,10 +6956,11 @@ Firebase Consoleで確認すべき項目:
                 // Update cache and metadata
                 saveToCache();
                 updateMetadataTimestamp();
+                updateUserRankingData();
 
             } catch (error) {
                 showLoading(false);
-                
+
                 // Check error type
                 if (error.message === 'Operation timeout') {
                     alert('操作がタイムアウトしました。ネットワーク接続を確認してください。');
@@ -7099,7 +6989,7 @@ Firebase Consoleで確認すべき項目:
                 if (confirm(`「${cardName}」を${listName}から削除しますか？`)) {
                     const collRef = getCollectionRef(currentListType);
                     if (collRef) { // Firebaseモード
-                        deleteDoc(doc(collRef, cardId));
+                        await deleteDoc(doc(collRef, cardId));
                     }
                     if (currentListType === 'collection') {
                         cardCollection = cardCollection.filter(c => c.id !== cardId);
@@ -7112,6 +7002,7 @@ Firebase Consoleで確認すべき項目:
                     // Update cache and metadata
                     saveToCache();
                     updateMetadataTimestamp();
+                    updateUserRankingData();
                 }
             } else if (target.classList.contains('edit-btn')) {
                 const cardId = target.dataset.id;
@@ -7184,6 +7075,7 @@ Firebase Consoleで確認すべき項目:
                     // Update cache and metadata
                     saveToCache();
                     updateMetadataTimestamp();
+                    updateUserRankingData();
                 }
             }
         });
@@ -7214,6 +7106,7 @@ Firebase Consoleで確認すべき項目:
             // Update cache and metadata
             saveToCache();
             updateMetadataTimestamp();
+            updateUserRankingData();
         });
 
         // Handle level button clicks
@@ -7527,6 +7420,7 @@ Firebase Consoleで確認すべき項目:
                     await loadCollectionFromFirestore();
                     // Update metadata timestamp after import
                     updateMetadataTimestamp();
+                    updateUserRankingData();
                 } else {
                     applySearchAndFilter();
                 }
