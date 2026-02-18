@@ -2453,7 +2453,7 @@
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-app.js";
         import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-auth.js";
-        import { getFirestore, collection, getDocs, getDoc, doc, updateDoc, deleteDoc, addDoc, setDoc, query, limit, orderBy, where, arrayUnion } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore.js";
+        import { api } from './api-client.js';
 
         // Firebase configuration
         const firebaseConfig = {
@@ -2468,15 +2468,10 @@
 
         const app = initializeApp(firebaseConfig);
         const auth = getAuth(app);
-        const db = getFirestore(app);
 
-        // Make auth and db globally available for duel simulator
+        // Make auth and api globally available for duel simulator
         window.auth = auth;
-        window.db = db;
-        window.collection = collection;
-        window.getDocs = getDocs;
-        window.getDoc = getDoc;
-        window.doc = doc;
+        window.api = api;
 
         // Admin UIDs (can view all users regardless of public setting)
         const ADMIN_UIDS = ['tMyC2ohYVAgoDzmBs5Zx2VT8t6m1'];
@@ -2669,79 +2664,50 @@
             return null;
         };
 
-        // Check if remote data is newer than cache (reuses metadata from card_list)
+        // Check if remote data is newer than cache
         const isGalleryRemoteNewer = async (cachedAt) => {
             if (!currentUser) return true;
 
             try {
-                const metadataRef = doc(db, 'users', currentUser.uid, 'metadata', 'sync');
-                const metadataSnap = await getDoc(metadataRef);
-
-                if (!metadataSnap.exists()) {
-                    // No metadata yet, need to fetch from Firebase
-                    return true;
-                }
-
-                const remoteUpdatedAt = metadataSnap.data().updatedAt || 0;
+                const meta = await api.getSyncMetadata();
+                const remoteUpdatedAt = meta.updatedAt || 0;
                 const isNewer = remoteUpdatedAt > cachedAt;
-                console.log(`🔍 Gallery cache check: cached=${new Date(cachedAt).toLocaleString()}, remote=${new Date(remoteUpdatedAt).toLocaleString()}, needsSync=${isNewer}`);
+                console.log(`Gallery cache check: cached=${new Date(cachedAt).toLocaleString()}, remote=${new Date(remoteUpdatedAt).toLocaleString()}, needsSync=${isNewer}`);
                 return isNewer;
             } catch (e) {
                 console.error('Failed to check metadata:', e);
-                return true; // On error, fetch from Firebase to be safe
+                return true;
             }
         };
 
-        // Update metadata timestamp (called after any data change)
+        // Metadata updates handled server-side
         const updateGalleryMetadata = async () => {
-            if (!currentUser) return;
-
-            try {
-                const metadataRef = doc(db, 'users', currentUser.uid, 'metadata', 'sync');
-                await setDoc(metadataRef, { updatedAt: Date.now() }, { merge: true });
-            } catch (e) {
-                console.error('Failed to update metadata:', e);
-            }
+            // No-op: D1 API handles metadata updates
         };
 
-        // Track deleted card IDs in metadata for delta sync
+        // Deletion tracking handled server-side
         const trackDeletedId = async (cardId, colName) => {
-            if (!currentUser) return;
-            try {
-                const metadataRef = doc(db, 'users', currentUser.uid, 'metadata', 'sync');
-                await setDoc(metadataRef, {
-                    deletedIds: arrayUnion({ id: cardId, col: colName, at: Date.now() })
-                }, { merge: true });
-            } catch (e) {
-                console.error('Failed to track deleted ID:', e);
-            }
+            // No-op: D1 API handles deletion tracking
         };
 
-        // Force sync from Firebase (manual refresh)
+        // Force sync from API (manual refresh)
         const forceGallerySync = async () => {
             if (!currentUser) return;
 
             showLoading(true);
-            console.log('🔄 Force syncing gallery from Firebase...');
+            console.log('Force syncing gallery from API...');
 
             try {
-                const userId = currentUser.uid;
-
-                const collectionRef = collection(db, 'users', userId, 'cards');
-                const collectionSnapshot = await getDocs(collectionRef);
-                collectionCards = collectionSnapshot.docs.map(doc => ({ id: doc.id, data: doc.data() }));
-
-                const wishlistRef = collection(db, 'users', userId, 'wishlist');
-                const wishlistSnapshot = await getDocs(wishlistRef);
-                wishlistCards = wishlistSnapshot.docs.map(doc => ({ id: doc.id, data: doc.data() }));
-
-                const bookmarkRef = collection(db, 'users', userId, 'bookmarks');
-                const bookmarkSnapshot = await getDocs(bookmarkRef);
-                bookmarkCards = bookmarkSnapshot.docs.map(doc => ({ id: doc.id, data: doc.data() }));
-
-                const decksRef = collection(db, 'users', userId, 'decks');
-                const decksSnapshot = await getDocs(decksRef);
-                decks = decksSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+                const [cards, wishlist, bms, dks] = await Promise.all([
+                    api.getCards('collection'),
+                    api.getCards('wishlist'),
+                    api.getBookmarks(),
+                    api.getDecks(),
+                ]);
+                collectionCards = cards.map(c => ({ id: c.id, data: c }));
+                wishlistCards = wishlist.map(c => ({ id: c.id, data: c }));
+                bookmarkCards = bms.map(b => ({ id: b.id, data: b }));
+                decks = dks.map(d => ({ id: d.id, ...d }));
 
                 saveGalleryToCache();
                 switchListType(currentListType);
@@ -2760,13 +2726,9 @@
 
         // ==================== END LOCAL CACHE SYSTEM ====================
 
-        // Delta sync: fetch only changed documents since last cache
+        // Delta sync: unified API call for all changes since last cache
         const deltaSyncGallery = async (cached) => {
-            const userId = currentUser.uid;
             const cachedAt = cached.cachedAt;
-            const metadataRef = doc(db, 'users', userId, 'metadata', 'sync');
-            const metadataSnap = await getDoc(metadataRef);
-            const metadata = metadataSnap.exists() ? metadataSnap.data() : {};
 
             // Restore cached data
             collectionCards = cached.collection || [];
@@ -2774,64 +2736,63 @@
             bookmarkCards = cached.bookmarks || [];
             decks = cached.decks || [];
 
+            // Single API call for all changes
+            const delta = await api.deltaSync(cachedAt);
+
             let deltaCount = 0;
 
-            // Fetch changed documents per collection
-            const collections = [
-                { ref: 'cards', arr: () => collectionCards, set: (v) => { collectionCards = v; } },
-                { ref: 'wishlist', arr: () => wishlistCards, set: (v) => { wishlistCards = v; } },
-                { ref: 'bookmarks', arr: () => bookmarkCards, set: (v) => { bookmarkCards = v; } }
-            ];
-
-            for (const col of collections) {
-                const q = query(
-                    collection(db, 'users', userId, col.ref),
-                    where('updatedAt', '>', cachedAt)
-                );
-                const snapshot = await getDocs(q);
-                if (snapshot.size > 0) {
-                    const local = col.arr();
-                    snapshot.docs.forEach(d => {
-                        const idx = local.findIndex(c => c.id === d.id);
-                        if (idx >= 0) {
-                            local[idx] = { id: d.id, data: d.data() };
-                        } else {
-                            local.push({ id: d.id, data: d.data() });
-                        }
-                    });
-                    deltaCount += snapshot.size;
+            // Apply collection changes
+            for (const card of (delta.changes.collection || [])) {
+                const idx = collectionCards.findIndex(c => c.id === card.id);
+                if (idx >= 0) {
+                    collectionCards[idx] = { id: card.id, data: card };
+                } else {
+                    collectionCards.push({ id: card.id, data: card });
                 }
+                deltaCount++;
+            }
+
+            // Apply wishlist changes
+            for (const card of (delta.changes.wishlist || [])) {
+                const idx = wishlistCards.findIndex(c => c.id === card.id);
+                if (idx >= 0) {
+                    wishlistCards[idx] = { id: card.id, data: card };
+                } else {
+                    wishlistCards.push({ id: card.id, data: card });
+                }
+                deltaCount++;
+            }
+
+            // Apply bookmark changes
+            for (const bm of (delta.changes.bookmarks || [])) {
+                const idx = bookmarkCards.findIndex(c => c.id === bm.id);
+                if (idx >= 0) {
+                    bookmarkCards[idx] = { id: bm.id, data: bm };
+                } else {
+                    bookmarkCards.push({ id: bm.id, data: bm });
+                }
+                deltaCount++;
             }
 
             // Process deletions
-            const deletedIds = metadata.deletedIds || [];
             let deleteCount = 0;
-            deletedIds.forEach(del => {
-                if (del.at > cachedAt) {
-                    if (del.col === 'cards') {
-                        const before = collectionCards.length;
-                        collectionCards = collectionCards.filter(c => c.id !== del.id);
-                        if (collectionCards.length < before) deleteCount++;
-                    } else if (del.col === 'wishlist') {
-                        const before = wishlistCards.length;
-                        wishlistCards = wishlistCards.filter(c => c.id !== del.id);
-                        if (wishlistCards.length < before) deleteCount++;
-                    } else if (del.col === 'bookmarks') {
-                        const before = bookmarkCards.length;
-                        bookmarkCards = bookmarkCards.filter(c => c.id !== del.id);
-                        if (bookmarkCards.length < before) deleteCount++;
-                    }
+            for (const del of (delta.deletions || [])) {
+                if (del.col === 'cards') {
+                    const before = collectionCards.length;
+                    collectionCards = collectionCards.filter(c => c.id !== del.id);
+                    if (collectionCards.length < before) deleteCount++;
+                } else if (del.col === 'wishlist') {
+                    const before = wishlistCards.length;
+                    wishlistCards = wishlistCards.filter(c => c.id !== del.id);
+                    if (wishlistCards.length < before) deleteCount++;
+                } else if (del.col === 'bookmarks') {
+                    const before = bookmarkCards.length;
+                    bookmarkCards = bookmarkCards.filter(c => c.id !== del.id);
+                    if (bookmarkCards.length < before) deleteCount++;
                 }
-            });
-
-            // Cleanup old deletedIds (older than 7 days)
-            const now = Date.now();
-            const cleanedDeletes = deletedIds.filter(d => now - d.at < 7 * 24 * 60 * 60 * 1000);
-            if (cleanedDeletes.length !== deletedIds.length) {
-                await setDoc(metadataRef, { deletedIds: cleanedDeletes }, { merge: true });
             }
 
-            console.log(`⚡ Delta sync: ${deltaCount} updated, ${deleteCount} deleted`);
+            console.log(`Delta sync: ${deltaCount} updated, ${deleteCount} deleted`);
             saveGalleryToCache();
         };
 
@@ -2864,29 +2825,17 @@
                     return;
                 }
 
-                // No cache - full fetch from Firebase
-                console.log('📥 Full fetch from Firebase (no cache)...');
+                // No cache - full fetch from API
+                console.log('Full fetch from API (no cache)...');
 
-                const collectionRef = collection(db, 'users', userId, 'cards');
-                const collectionSnapshot = await getDocs(collectionRef);
-                collectionCards = collectionSnapshot.docs.map(doc => ({
-                    id: doc.id,
-                    data: doc.data()
-                }));
-
-                const wishlistRef = collection(db, 'users', userId, 'wishlist');
-                const wishlistSnapshot = await getDocs(wishlistRef);
-                wishlistCards = wishlistSnapshot.docs.map(doc => ({
-                    id: doc.id,
-                    data: doc.data()
-                }));
-
-                const bookmarkRef = collection(db, 'users', userId, 'bookmarks');
-                const bookmarkSnapshot = await getDocs(bookmarkRef);
-                bookmarkCards = bookmarkSnapshot.docs.map(doc => ({
-                    id: doc.id,
-                    data: doc.data()
-                }));
+                const [cards, wishlist, bms] = await Promise.all([
+                    api.getCards('collection'),
+                    api.getCards('wishlist'),
+                    api.getBookmarks(),
+                ]);
+                collectionCards = cards.map(c => ({ id: c.id, data: c }));
+                wishlistCards = wishlist.map(c => ({ id: c.id, data: c }));
+                bookmarkCards = bms.map(b => ({ id: b.id, data: b }));
 
                 // Load decks to calculate card usage
                 await loadDecks();
@@ -3682,14 +3631,12 @@
                                 currentEditingCard.data.selectedCiid = ill.ciid;
                                 console.log('Stored ciid in card data:', ill.ciid);
 
-                                // Save to Firestore
+                                // Save via API
                                 if (currentUser) {
-                                    const cardRef = doc(db, 'users', currentUser.uid, 'cards', currentEditingCard.id);
-                                    updateDoc(cardRef, {
+                                    api.updateCard(currentEditingCard.id, {
                                         selectedCiid: ill.ciid,
-                                        updatedAt: Date.now()
                                     }).then(() => {
-                                        console.log('Selected ciid saved to Firestore');
+                                        console.log('Selected ciid saved via API');
                                         // Update cache and metadata
                                         saveGalleryToCache();
                                         updateGalleryMetadata();
@@ -3747,13 +3694,12 @@
                     updatedAt: Date.now()
                 };
 
-                const bookmarkRef = doc(db, 'users', currentUser.uid, 'bookmarks', cardData.id);
-                await setDoc(bookmarkRef, bookmarkData);
+                const savedBookmark = await api.addBookmark(bookmarkData);
 
-                console.log('Added to bookmarks:', cardData.id);
+                console.log('Added to bookmarks:', savedBookmark.id);
 
-                // Update local data directly (no Firebase re-read)
-                bookmarkCards.push({ id: cardData.id, data: bookmarkData });
+                // Update local data directly
+                bookmarkCards.push({ id: savedBookmark.id, data: savedBookmark });
 
                 // Update cache and metadata
                 saveGalleryToCache();
@@ -3781,9 +3727,7 @@
             if (!currentUser) return;
 
             try {
-                const bookmarkRef = doc(db, 'users', currentUser.uid, 'bookmarks', cardId);
-                await deleteDoc(bookmarkRef);
-                await trackDeletedId(cardId, 'bookmarks');
+                await api.deleteBookmark(cardId);
 
                 console.log('Removed from bookmarks:', cardId);
 
@@ -4150,13 +4094,9 @@
 
             try {
                 // Determine collection path based on current list type
-                const collectionPath = currentListType === 'collection' ? 'cards' : 'wishlist';
-                const cardRef = doc(db, 'users', currentUser.uid, collectionPath, currentEditingCard.id);
-
-                await updateDoc(cardRef, {
+                await api.updateCard(currentEditingCard.id, {
                     '枚数': newQuantity,
-                    'tags': newTags,
-                    updatedAt: Date.now()
+                    tags: newTags,
                 });
 
                 // Update local data
@@ -4190,12 +4130,7 @@
             }
 
             try {
-                // Determine collection path based on current list type
-                const collectionPath = currentListType === 'collection' ? 'cards' : 'wishlist';
-                const cardRef = doc(db, 'users', currentUser.uid, collectionPath, currentEditingCard.id);
-
-                await deleteDoc(cardRef);
-                await trackDeletedId(currentEditingCard.id, collectionPath === 'cards' ? 'cards' : collectionPath === 'wishlist' ? 'wishlist' : 'bookmarks');
+                await api.deleteCard(currentEditingCard.id);
 
                 // Remove from local data
                 if (currentListType === 'collection') {
@@ -4261,16 +4196,12 @@
             return { usageMap, totalUsed };
         };
 
-        // Load all decks from Firestore
+        // Load all decks from API
         const loadDecks = async () => {
             if (!currentUser) return;
             try {
-                const decksRef = collection(db, 'users', currentUser.uid, 'decks');
-                const snapshot = await getDocs(decksRef);
-                decks = snapshot.docs.map(doc => ({
-                    id: doc.id,
-                    ...doc.data()
-                }));
+                const result = await api.getDecks();
+                decks = result.map(d => ({ id: d.id, ...d }));
                 console.log(`Loaded ${decks.length} decks`);
             } catch (error) {
                 console.error('Error loading decks:', error);
@@ -4386,33 +4317,26 @@
 
                 console.log('Unowned cards to add:', unownedCardsToAdd);
 
-                // Add unowned cards to wishlist
+                // Add unowned cards to wishlist via API
                 if (unownedCardsToAdd.length > 0) {
-                    const wishlistRef = collection(db, 'users', currentUser.uid, 'wishlist');
                     for (const card of unownedCardsToAdd) {
                         const wishlistData = {
-                            名前: card.name || '',
-                            型番: card.code || '',
-                            レアリティ: card.rarity || '',
-                            枚数: 1,
+                            '名前': card.name || '',
+                            '型番': card.code || '',
+                            'レアリティ': card.rarity || '',
+                            '枚数': 1,
                             tags: [],
-                            addedAt: new Date().toISOString(),
-                            updatedAt: Date.now()
+                            selectedCiid: card.selectedCiid || null,
                         };
-                        // Only add selectedCiid if it exists
-                        if (card.selectedCiid) {
-                            wishlistData.selectedCiid = card.selectedCiid;
-                        }
                         console.log('Adding to wishlist:', card.cardId, wishlistData);
-                        await setDoc(doc(wishlistRef, card.cardId), wishlistData);
+                        await api.addCard('wishlist', wishlistData);
                     }
                     console.log(`Added ${unownedCardsToAdd.length} unowned cards to wishlist`);
                 }
 
                 if (currentDeck.id) {
                     // Update existing deck
-                    const deckRef = doc(db, 'users', currentUser.uid, 'decks', currentDeck.id);
-                    await updateDoc(deckRef, deckData);
+                    await api.updateDeck(currentDeck.id, deckData);
                     if (unownedCardsToAdd.length > 0) {
                         alert(`デッキを保存しました\n未所持カード ${unownedCardsToAdd.length} 枚をウィッシュリストに追加しました`);
                     } else {
@@ -4421,9 +4345,8 @@
                 } else {
                     // Create new deck
                     deckData.createdAt = new Date().toISOString();
-                    const decksRef = collection(db, 'users', currentUser.uid, 'decks');
-                    const docRef = await addDoc(decksRef, deckData);
-                    currentDeck.id = docRef.id;
+                    const newDeck = await api.createDeck(deckData);
+                    currentDeck.id = newDeck.id;
                     if (unownedCardsToAdd.length > 0) {
                         alert(`デッキを作成しました\n未所持カード ${unownedCardsToAdd.length} 枚をウィッシュリストに追加しました`);
                     } else {
@@ -4479,8 +4402,7 @@
             if (!confirm('このデッキを削除しますか？')) return;
 
             try {
-                const deckRef = doc(db, 'users', currentUser.uid, 'decks', currentDeck.id);
-                await deleteDoc(deckRef);
+                await api.deleteDeck(currentDeck.id);
 
                 // Remove from local data
                 decks = decks.filter(d => d.id !== currentDeck.id);
@@ -4602,8 +4524,7 @@
             try {
                 if (!currentUser) return;
 
-                const deckRef = doc(db, 'users', currentUser.uid, 'decks', deckId);
-                await deleteDoc(deckRef);
+                await api.deleteDeck(deckId);
 
                 // Remove from local array
                 decks = decks.filter(d => d.id !== deckId);
@@ -5388,27 +5309,23 @@
             if (!currentUser) return;
 
             try {
-                const profileRef = doc(db, 'publicProfiles', currentUser.uid);
-                const profileSnap = await getDoc(profileRef);
+                const profile = await api.getProfile(currentUser.uid).catch(() => null);
 
-                if (profileSnap.exists()) {
-                    const data = profileSnap.data();
-                    document.getElementById('public-profile-toggle').checked = data.isPublic || false;
-                    document.getElementById('display-name-input').value = data.displayName || '';
+                if (profile) {
+                    document.getElementById('public-profile-toggle').checked = profile.isPublic || false;
+                    document.getElementById('display-name-input').value = profile.displayName || '';
 
-                    if (data.isPublic && data.shareToken) {
+                    if (profile.isPublic && profile.shareToken) {
                         const shareUrl = `${window.location.origin}${window.location.pathname}?view=${currentUser.uid}`;
                         document.getElementById('share-link-input').value = shareUrl;
                     }
                 } else {
-                    // Initialize profile for new users (private by default, no localStorage impact)
+                    // Initialize profile for new users
                     const defaultDisplayName = currentUser.email?.split('@')[0] || 'Anonymous';
-                    await setDoc(profileRef, {
+                    await api.updateProfile({
                         isPublic: false,
                         displayName: defaultDisplayName,
                         shareToken: crypto.randomUUID ? crypto.randomUUID() : Date.now().toString(36),
-                        userId: currentUser.uid,
-                        updatedAt: new Date().toISOString()
                     });
                     document.getElementById('display-name-input').value = defaultDisplayName;
                     console.log('Initialized public profile for new user (private by default)');
@@ -5426,16 +5343,13 @@
             const displayName = document.getElementById('display-name-input').value.trim();
 
             try {
-                const profileRef = doc(db, 'publicProfiles', currentUser.uid);
                 const shareToken = crypto.randomUUID ? crypto.randomUUID() : Date.now().toString(36);
 
-                await setDoc(profileRef, {
+                await api.updateProfile({
                     isPublic,
                     displayName: displayName || currentUser.email?.split('@')[0] || 'Anonymous',
                     shareToken,
-                    userId: currentUser.uid,
-                    updatedAt: new Date().toISOString()
-                }, { merge: true });
+                });
 
                 if (isPublic) {
                     const shareUrl = `${window.location.origin}${window.location.pathname}?view=${currentUser.uid}`;
@@ -5457,22 +5371,17 @@
             userList.innerHTML = '<div class="text-center py-3"><div class="spinner-border spinner-border-sm" role="status"></div> 読み込み中...</div>';
 
             try {
-                // Limit to 50 users to reduce Firebase reads
-                const profilesRef = collection(db, 'publicProfiles');
-                const q = query(profilesRef, orderBy('updatedAt', 'desc'), limit(50));
-                const snapshot = await getDocs(q);
+                const profiles = await api.getPublicProfiles();
 
                 publicUsers = [];
-                snapshot.docs.forEach(doc => {
-                    const data = doc.data();
-                    // Admin can see all users, others only see public profiles
+                for (const data of profiles) {
                     if (isAdmin || data.isPublic) {
                         publicUsers.push({
-                            id: doc.id,
+                            id: data.userId,
                             ...data
                         });
                     }
-                });
+                }
 
                 renderUserList();
             } catch (error) {
@@ -5552,21 +5461,18 @@
             viewingGrid.innerHTML = '<div class="col-12 text-center py-5"><div class="spinner-border" role="status"></div><p class="mt-2">読み込み中...</p></div>';
 
             try {
-                // Load user's profile (1 read)
-                const profileRef = doc(db, 'publicProfiles', userId);
-                const profileSnap = await getDoc(profileRef);
-                viewingUserData.profile = profileSnap.exists() ? profileSnap.data() : null;
+                // Load user's profile
+                viewingUserData.profile = await api.getProfile(userId).catch(() => null);
 
-                // Check access permission (admin can access all, others need public)
+                // Check access permission
                 if (!isAdmin && (!viewingUserData.profile || !viewingUserData.profile.isPublic)) {
                     viewingGrid.innerHTML = '<div class="col-12 text-center py-5 text-danger"><i class="bi bi-lock" style="font-size: 3rem;"></i><p class="mt-2">このユーザーのコレクションは非公開です</p></div>';
                     return;
                 }
 
-                // Load only collection initially (saves reads for wishlist/decks)
-                const collectionRef = collection(db, 'users', userId, 'cards');
-                const collectionSnap = await getDocs(collectionRef);
-                viewingUserData.collection = collectionSnap.docs.map(doc => ({ id: doc.id, data: doc.data() }));
+                // Load only collection initially
+                const communityCards = await api.getCommunityCards(userId);
+                viewingUserData.collection = communityCards.map(c => ({ id: c.id, data: c }));
 
                 // Update header and show UI
                 const userName = viewingUserData.profile?.displayName || 'Anonymous';
@@ -5604,9 +5510,8 @@
             if (!viewingUserId || viewingUserData.wishlistLoaded) return;
 
             try {
-                const wishlistRef = collection(db, 'users', viewingUserId, 'wishlist');
-                const wishlistSnap = await getDocs(wishlistRef);
-                viewingUserData.wishlist = wishlistSnap.docs.map(doc => ({ id: doc.id, data: doc.data() }));
+                const wishlistData = await api.getCommunityCards(viewingUserId);
+                viewingUserData.wishlist = wishlistData.map(c => ({ id: c.id, data: c }));
                 viewingUserData.wishlistLoaded = true;
                 document.getElementById('view-wishlist-count').textContent = viewingUserData.wishlist.length;
                 populateViewingRarityFilter(); // Update filter with wishlist rarities
@@ -5620,9 +5525,8 @@
             if (!viewingUserId || viewingUserData.decksLoaded) return;
 
             try {
-                const decksRef = collection(db, 'users', viewingUserId, 'decks');
-                const decksSnap = await getDocs(decksRef);
-                viewingUserData.decks = decksSnap.docs.map(doc => ({ id: doc.id, data: doc.data() }));
+                const communityDecks = await api.getCommunityDecks(viewingUserId);
+                viewingUserData.decks = communityDecks.map(d => ({ id: d.id, data: d }));
                 viewingUserData.decksLoaded = true;
                 document.getElementById('view-decks-count').textContent = viewingUserData.decks.length;
             } catch (error) {
@@ -5998,7 +5902,8 @@
                     isAdmin = ADMIN_UIDS.includes(user.uid);
                     console.log('Admin status:', isAdmin);
 
-                    loadAllData(user.uid);
+                    // Set API auth token
+                    api.setAuth(user).then(() => loadAllData(user.uid));
                     loadPublicProfile(); // Load user's public settings
                     initializeCommunity(); // Initialize community features
 
@@ -6086,19 +5991,17 @@
                         return;
                     }
 
-                    const decksRef = collection(db, `users/${auth.currentUser.uid}/decks`);
-                    const snapshot = await getDocs(decksRef);
+                    const decksList = await api.getDecks();
                     const deckSelect = document.getElementById('simulator-deck-select');
 
                     deckSelect.innerHTML = '<option value="">デッキを選択してください...</option>';
 
-                    snapshot.forEach(doc => {
-                        const deckData = doc.data();
+                    for (const deckData of decksList) {
                         const option = document.createElement('option');
-                        option.value = doc.id;
+                        option.value = deckData.id;
                         option.textContent = `${deckData.name} (メイン: ${(deckData.mainDeck || []).reduce((sum, c) => sum + (c.quantity || 0), 0)})`;
                         deckSelect.appendChild(option);
-                    });
+                    }
 
                     this.decksLoaded = true;
 
@@ -6123,13 +6026,14 @@
                         return;
                     }
 
-                    const deckDoc = await getDoc(doc(db, `users/${auth.currentUser.uid}/decks`, deckId));
-                    if (!deckDoc.exists()) {
+                    // Fetch all decks and find the selected one
+                    const allDecks = await api.getDecks();
+                    const deckData = allDecks.find(d => d.id === deckId);
+                    if (!deckData) {
                         alert('デッキが見つかりません。');
                         return;
                     }
 
-                    const deckData = deckDoc.data();
                     this.currentDeck = { id: deckId, ...deckData };
 
                     console.log('[loadDeck] Deck data loaded:', deckData.name);

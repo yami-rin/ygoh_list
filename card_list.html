@@ -2637,7 +2637,7 @@
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-app.js";
         import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, onAuthStateChanged, signOut, deleteUser, setPersistence, browserLocalPersistence, sendEmailVerification, applyActionCode } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-auth.js";
-        import { getFirestore, collection, getDocs, addDoc, deleteDoc, doc, query, where, updateDoc, increment, writeBatch, getDoc, setDoc, arrayUnion } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore.js";
+        import { api } from './api-client.js';
 
         const firebaseConfig = {
             apiKey: "AIzaSyAOYKalLUb2hbghrjQUS8AWzxpLExBT7aU",
@@ -2651,7 +2651,6 @@
 
         const app = initializeApp(firebaseConfig);
         const auth = getAuth(app);
-        const db = getFirestore(app);
         
         setPersistence(auth, browserLocalPersistence).catch((error) => {
         });
@@ -2700,7 +2699,6 @@
         const _doSaveGamification = async () => {
             if (!currentUser) return;
             try {
-                const userDocRef = doc(db, 'userGamification', currentUser.uid);
                 const dataToSave = {
                     ...gamificationData,
                     profile: {
@@ -2708,7 +2706,7 @@
                         usageDays: gamificationData.profile?.usageDays ? Array.from(gamificationData.profile.usageDays) : []
                     }
                 };
-                await setDoc(userDocRef, dataToSave, { merge: true });
+                await api.saveGamification(dataToSave);
             } catch (error) {
                 console.error('Error saving gamification data:', error);
             }
@@ -2729,13 +2727,11 @@
         // Load gamification data from Firebase
         const loadGamificationData = async () => {
             if (!currentUser) return;
-            
+
             try {
-                const userDocRef = doc(db, 'userGamification', currentUser.uid);
-                const docSnap = await getDoc(userDocRef);
-                
-                if (docSnap.exists()) {
-                    const data = docSnap.data();
+                const data = await api.getGamification();
+
+                if (data && Object.keys(data).length > 0) {
                     // Convert Array back to Set for usageDays
                     if (data.profile?.usageDays) {
                         data.profile.usageDays = new Set(data.profile.usageDays);
@@ -3744,8 +3740,6 @@
             showLoading(true);
             try {
                 const collection = listType === 'wishlist' ? wishlistCollection : cardCollection;
-                const collRef = getCollectionRef(listType);
-
                 // Find the matching card(s) to remove
                 let removedCount = 0;
                 const cardsToRemove = [];
@@ -3762,8 +3756,8 @@
                             // Reduce quantity
                             card.data['枚数'] = cardQuantity - quantity;
 
-                            if (collRef) {
-                                await updateDoc(doc(collRef, card.id), { '枚数': card.data['枚数'], updatedAt: Date.now() });
+                            if (isOnlineUser()) {
+                                await api.updateCard(card.id, { '枚数': card.data['枚数'] });
                             }
                             removedCount = quantity;
                             break;
@@ -3787,9 +3781,8 @@
 
                 // Remove cards that need to be deleted
                 for (const card of cardsToRemove) {
-                    if (collRef) {
-                        await deleteDoc(doc(collRef, card.id));
-                        await trackDeletedId(card.id, currentListType === 'collection' ? 'cards' : 'wishlist');
+                    if (isOnlineUser()) {
+                        await api.deleteCard(card.id);
                     }
 
                     // Remove from local collection
@@ -4886,18 +4879,17 @@
             renderTable();
         };
 
-        const getTagsCollectionRef = () => currentUser?.uid !== 'local_user' ? collection(db, "users", currentUser.uid, "tags") : null;
+        const isOnlineUser = () => currentUser?.uid && currentUser.uid !== 'local_user';
 
         const loadAllTags = async () => {
-            const tagsCollRef = getTagsCollectionRef();
-            if (tagsCollRef) {
-                const snapshot = await getDocs(query(tagsCollRef));
-                allTags = snapshot.docs.map((doc, index) => ({ 
-                    id: doc.id, 
-                    name: doc.data().name,
-                    order: doc.data().order !== undefined ? doc.data().order : index
+            if (isOnlineUser()) {
+                const tags = await api.getTags();
+                allTags = tags.map((tag, index) => ({
+                    id: tag.id,
+                    name: tag.name,
+                    order: tag.order !== undefined ? tag.order : index
                 }));
-                
+
                 let needsOrderUpdate = false;
                 allTags.forEach((tag, index) => {
                     if (tag.order === undefined || tag.order === 999) {
@@ -4905,7 +4897,7 @@
                         needsOrderUpdate = true;
                     }
                 });
-                
+
                 if (needsOrderUpdate) {
                     await saveTagsOrder();
                 }
@@ -5024,18 +5016,9 @@
         };
         
         const saveTagsOrder = async () => {
-            const tagsCollRef = getTagsCollectionRef();
-            if (tagsCollRef) {
+            if (isOnlineUser()) {
                 try {
-                    const batch = writeBatch(db);
-                    for (const tag of allTags) {
-                        const tagDoc = doc(tagsCollRef, tag.id);
-                        batch.set(tagDoc, { 
-                            name: tag.name,
-                            order: tag.order 
-                        }, { merge: true });
-                    }
-                    await batch.commit();
+                    await api.reorderTags(allTags.map(tag => ({ id: tag.id, order: tag.order })));
                 } catch (error) {
                 }
             } else {
@@ -5055,34 +5038,33 @@
                 return;
             }
             
-            const tagsCollRef = getTagsCollectionRef();
             const addedTags = [];
             const duplicateTags = [];
-            
+
             for (const newTagName of newTagNames) {
                 if (allTags.some(tag => tag.name === newTagName)) {
                     duplicateTags.push(newTagName);
                 } else {
                     const maxOrder = allTags.reduce((max, tag) => Math.max(max, tag.order || 0), -1);
                     const newOrder = maxOrder + 1;
-                    
-                    if (tagsCollRef) {
-                        const docRef = await addDoc(tagsCollRef, { name: newTagName, order: newOrder });
-                        allTags.push({ id: docRef.id, name: newTagName, order: newOrder });
+
+                    if (isOnlineUser()) {
+                        const tag = await api.createTag(newTagName, newOrder);
+                        allTags.push({ id: tag.id, name: tag.name, order: tag.order });
                     } else {
                         allTags.push({ id: `local_${Date.now()}_${Math.random()}`, name: newTagName, order: newOrder });
                     }
                     addedTags.push(newTagName);
                 }
             }
-            
+
             if (duplicateTags.length > 0) {
                 alert(`以下のタグは既に存在するためスキップされました: ${duplicateTags.join(', ')}`);
             }
-            
+
             if (addedTags.length > 0) {
                 document.getElementById('new-tag-name').value = '';
-                if (!tagsCollRef) {
+                if (!isOnlineUser()) {
                     localStorage.setItem('tagsOrder', JSON.stringify(allTags));
                 }
                 allTags.sort((a, b) => (a.order !== undefined ? a.order : 999) - (b.order !== undefined ? b.order : 999));
@@ -5114,40 +5096,20 @@
                     if (tagIndex !== -1) {
                         allTags[tagIndex].name = trimmedName;
 
-                        // Save to Firebase or localStorage
-                        const tagsCollRef = getTagsCollectionRef();
-                        if (tagsCollRef) {
-                            await updateDoc(doc(tagsCollRef, tagId), { name: trimmedName });
+                        // Save to API or localStorage
+                        if (isOnlineUser()) {
+                            // API handles renaming across all cards server-side
+                            await api.updateTag(tagId, { name: trimmedName });
                         } else {
                             localStorage.setItem('tagsOrder', JSON.stringify(allTags));
                         }
 
-                        // Update all cards with this tag (batched)
+                        // Update local card data
                         const currentColl = getCurrentCollection();
-                        const collRef = getCollectionRef(currentListType);
-                        if (collRef) {
-                            let batch = writeBatch(db);
-                            let batchCount = 0;
-                            for (const card of currentColl) {
-                                if (card.data.tags && card.data.tags.includes(oldName)) {
-                                    const tIdx = card.data.tags.indexOf(oldName);
-                                    card.data.tags[tIdx] = trimmedName;
-                                    batch.update(doc(collRef, card.id), { tags: card.data.tags, updatedAt: Date.now() });
-                                    batchCount++;
-                                    if (batchCount >= 499) {
-                                        await batch.commit();
-                                        batch = writeBatch(db);
-                                        batchCount = 0;
-                                    }
-                                }
-                            }
-                            if (batchCount > 0) await batch.commit();
-                        } else {
-                            for (const card of currentColl) {
-                                if (card.data.tags && card.data.tags.includes(oldName)) {
-                                    const tIdx = card.data.tags.indexOf(oldName);
-                                    card.data.tags[tIdx] = trimmedName;
-                                }
+                        for (const card of currentColl) {
+                            if (card.data.tags && card.data.tags.includes(oldName)) {
+                                const tIdx = card.data.tags.indexOf(oldName);
+                                card.data.tags[tIdx] = trimmedName;
                             }
                         }
 
@@ -5169,52 +5131,21 @@
 
                 showLoading(true);
                 try {
-                    // Delete tag from all cards (batched)
-                    const collectionRef = getCollectionRef('collection');
-                    const wishlistRef = getCollectionRef('wishlist');
-
-                    if (collectionRef || wishlistRef) {
-                        let batch = writeBatch(db);
-                        let batchCount = 0;
-
-                        const batchUpdateCards = async (cards, ref) => {
-                            for (const card of cards) {
-                                if (card.data.tags && card.data.tags.includes(tagName)) {
-                                    card.data.tags = card.data.tags.filter(t => t !== tagName);
-                                    if (ref) {
-                                        batch.update(doc(ref, card.id), { tags: card.data.tags, updatedAt: Date.now() });
-                                        batchCount++;
-                                        if (batchCount >= 499) {
-                                            await batch.commit();
-                                            batch = writeBatch(db);
-                                            batchCount = 0;
-                                        }
-                                    }
-                                }
-                            }
-                        };
-
-                        await batchUpdateCards(cardCollection, collectionRef);
-                        await batchUpdateCards(wishlistCollection, wishlistRef);
-                        if (batchCount > 0) await batch.commit();
-                    } else {
-                        // Local mode
-                        for (const card of cardCollection) {
-                            if (card.data.tags && card.data.tags.includes(tagName)) {
-                                card.data.tags = card.data.tags.filter(t => t !== tagName);
-                            }
-                        }
-                        for (const card of wishlistCollection) {
-                            if (card.data.tags && card.data.tags.includes(tagName)) {
-                                card.data.tags = card.data.tags.filter(t => t !== tagName);
-                            }
-                        }
+                    if (isOnlineUser()) {
+                        // API handles removing tag from all cards server-side
+                        await api.deleteTag(tagId);
                     }
 
-                    // Delete tag from tags collection
-                    const tagsCollRef = getTagsCollectionRef();
-                    if (tagsCollRef) {
-                        await deleteDoc(doc(tagsCollRef, tagId));
+                    // Update local card data
+                    for (const card of cardCollection) {
+                        if (card.data.tags && card.data.tags.includes(tagName)) {
+                            card.data.tags = card.data.tags.filter(t => t !== tagName);
+                        }
+                    }
+                    for (const card of wishlistCollection) {
+                        if (card.data.tags && card.data.tags.includes(tagName)) {
+                            card.data.tags = card.data.tags.filter(t => t !== tagName);
+                        }
                     }
 
                     allTags = allTags.filter(t => t.id !== tagId);
@@ -5243,13 +5174,8 @@
             }
         });
 
-        const getCollectionRef = (listType = 'collection') => {
-            if (currentUser && currentUser.uid !== 'local_user') {
-                const collectionName = listType === 'collection' ? "cards" : "wishlist";
-                return collection(db, "users", currentUser.uid, collectionName);
-            }
-            return null;
-        };
+        // listType helper (kept for local-mode branching)
+        const getListType = (listType = 'collection') => listType;
 
         // ==================== LOCAL CACHE SYSTEM ====================
 
@@ -5294,75 +5220,51 @@
             return null;
         };
 
-        // Update metadata timestamp in Firebase (called after any data change)
+        // Metadata updates are now handled server-side automatically
         const updateMetadataTimestamp = async () => {
-            if (!currentUser || currentUser.uid === 'local_user') return;
-
-            try {
-                const metadataRef = doc(db, 'users', currentUser.uid, 'metadata', 'sync');
-                await setDoc(metadataRef, { updatedAt: Date.now() }, { merge: true });
-            } catch (e) {
-                console.error('Failed to update metadata:', e);
-            }
+            // No-op: D1 API updates sync_metadata on every write
         };
 
-        // Track deleted card IDs in metadata for delta sync
+        // Deletion tracking is handled server-side
         const trackDeletedId = async (cardId, colName) => {
-            if (!currentUser || currentUser.uid === 'local_user') return;
-            try {
-                const metadataRef = doc(db, 'users', currentUser.uid, 'metadata', 'sync');
-                await setDoc(metadataRef, {
-                    deletedIds: arrayUnion({ id: cardId, col: colName, at: Date.now() })
-                }, { merge: true });
-            } catch (e) {
-                console.error('Failed to track deleted ID:', e);
-            }
+            // No-op: D1 API tracks deletions automatically
         };
 
-        // Check if remote data is newer than cache (1 Firebase read)
+        // Check if remote data is newer than cache
         const isRemoteNewer = async (cachedAt) => {
             if (!currentUser || currentUser.uid === 'local_user') return true;
 
             try {
-                const metadataRef = doc(db, 'users', currentUser.uid, 'metadata', 'sync');
-                const metadataSnap = await getDoc(metadataRef);
-
-                if (!metadataSnap.exists()) {
-                    // No metadata yet, create it and return true to fetch data
-                    await setDoc(metadataRef, { updatedAt: Date.now() });
-                    return true;
-                }
-
-                const remoteUpdatedAt = metadataSnap.data().updatedAt || 0;
+                const meta = await api.getSyncMetadata();
+                const remoteUpdatedAt = meta.updatedAt || 0;
                 const isNewer = remoteUpdatedAt > cachedAt;
-                console.log(`🔍 Cache check: cached=${new Date(cachedAt).toLocaleString()}, remote=${new Date(remoteUpdatedAt).toLocaleString()}, needsSync=${isNewer}`);
+                console.log(`Cache check: cached=${new Date(cachedAt).toLocaleString()}, remote=${new Date(remoteUpdatedAt).toLocaleString()}, needsSync=${isNewer}`);
                 return isNewer;
             } catch (e) {
                 console.error('Failed to check metadata:', e);
-                return true; // On error, fetch from Firebase to be safe
+                return true;
             }
         };
 
-        // Force sync from Firebase (ignores cache)
+        // Force sync from API (ignores cache)
         const forceSyncFromFirebase = async () => {
             if (!currentUser || currentUser.uid === 'local_user') return;
 
             showLoading(true);
-            console.log('🔄 Force syncing from Firebase...');
+            console.log('Force syncing from API...');
 
             try {
-                const cardSnapshot = await getDocs(query(getCollectionRef('collection')));
-                cardCollection = cardSnapshot.docs.map(doc => ({ id: doc.id, data: doc.data() }));
+                const [cards, wishlist] = await Promise.all([
+                    api.getCards('collection'),
+                    api.getCards('wishlist'),
+                ]);
+                cardCollection = cards.map(c => ({ id: c.id, data: c }));
+                wishlistCollection = wishlist.map(c => ({ id: c.id, data: c }));
 
-                const wishlistSnapshot = await getDocs(query(getCollectionRef('wishlist')));
-                wishlistCollection = wishlistSnapshot.docs.map(doc => ({ id: doc.id, data: doc.data() }));
-
-                // Save to cache
                 saveToCache();
-
                 updateTotalCounts();
                 applySearchAndFilter();
-                console.log('✅ Sync complete:', cardCollection.length, 'cards,', wishlistCollection.length, 'wishlist');
+                console.log('Sync complete:', cardCollection.length, 'cards,', wishlistCollection.length, 'wishlist');
             } catch (error) {
                 console.error('Sync failed:', error);
                 alert('同期に失敗しました。');
@@ -5384,32 +5286,29 @@
             const cached = loadFromCache();
 
             if (cached && cached.cachedAt) {
-                // Check if remote data is newer (only 1 Firebase read)
                 const needsSync = await isRemoteNewer(cached.cachedAt);
 
                 if (!needsSync) {
-                    // Use cached data
                     cardCollection = cached.collection || [];
                     wishlistCollection = cached.wishlist || [];
                     updateTotalCounts();
                     applySearchAndFilter();
                     showLoading(false);
-                    console.log('✅ Using cached data (no sync needed)');
+                    console.log('Using cached data (no sync needed)');
                     return;
                 }
-                console.log('⚠️ Remote data is newer, fetching from Firebase...');
+                console.log('Remote data is newer, fetching from API...');
             }
 
-            // Fetch from Firebase
-            const cardSnapshot = await getDocs(query(getCollectionRef('collection')));
-            cardCollection = cardSnapshot.docs.map(doc => ({ id: doc.id, data: doc.data() }));
+            // Fetch from API
+            const [cards, wishlist] = await Promise.all([
+                api.getCards('collection'),
+                api.getCards('wishlist'),
+            ]);
+            cardCollection = cards.map(c => ({ id: c.id, data: c }));
+            wishlistCollection = wishlist.map(c => ({ id: c.id, data: c }));
 
-            const wishlistSnapshot = await getDocs(query(getCollectionRef('wishlist')));
-            wishlistCollection = wishlistSnapshot.docs.map(doc => ({ id: doc.id, data: doc.data() }));
-
-            // Save to cache for next time
             saveToCache();
-
             updateTotalCounts();
             applySearchAndFilter();
             showLoading(false);
@@ -5438,25 +5337,27 @@
             appLoader.style.display = 'none';
             authModal.hide();
             
-            // Load gamification data from Firebase
+            // Set API auth token
+            if (user.uid !== 'local_user') {
+                await api.setAuth(user);
+            }
+
+            // Load gamification data
             await loadGamificationData();
-            
+
             if (user.uid !== 'local_user') {
                 loadCollectionFromFirestore();
                 loadAllTags();
 
                 // Initialize publicProfiles for community feature (if not exists)
                 try {
-                    const profileRef = doc(db, 'publicProfiles', user.uid);
-                    const profileSnap = await getDoc(profileRef);
-                    if (!profileSnap.exists()) {
+                    const profile = await api.getProfile(user.uid).catch(() => null);
+                    if (!profile) {
                         const defaultDisplayName = user.email?.split('@')[0] || 'Anonymous';
-                        await setDoc(profileRef, {
+                        await api.updateProfile({
                             isPublic: false,
                             displayName: defaultDisplayName,
                             shareToken: crypto.randomUUID ? crypto.randomUUID() : Date.now().toString(36),
-                            userId: user.uid,
-                            updatedAt: new Date().toISOString()
                         });
                         console.log('Initialized publicProfile for community feature');
                     }
@@ -6122,29 +6023,22 @@
                 if (totalCards === 0 && uniqueCards === 0 && currentStreak === 0 && totalPoints === 0) {
                     // Optionally delete existing ranking data if all values are 0
                     try {
-                        const rankingRef = doc(db, 'rankings', currentUser.uid);
-                        await deleteDoc(rankingRef);
+                        await api.updateRanking({ totalCards: 0, uniqueCards: 0, currentStreak: 0, totalPoints: 0 });
                     } catch (error) {
-                        // Ignore error if document doesn't exist
+                        // Ignore error
                     }
                     return;
                 }
-                
-                // Prepare ranking data
-                const rankingData = {
-                    uid: currentUser.uid,
+
+                // Save to rankings via API
+                await api.updateRanking({
                     nickname: gamificationData.profile?.nickname || '',
                     icon: gamificationData.profile?.icon || '👤',
                     totalCards: totalCards,
                     uniqueCards: uniqueCards,
                     currentStreak: currentStreak,
                     totalPoints: totalPoints,
-                    lastUpdated: new Date().toISOString()
-                };
-                
-                // Save to rankings collection
-                const rankingRef = doc(db, 'rankings', currentUser.uid);
-                await setDoc(rankingRef, rankingData);
+                });
             } catch (error) {
                 console.error('Error updating ranking data:', error);
             }
@@ -6153,12 +6047,7 @@
         // Load and display rankings
         const loadRankings = async () => {
             try {
-                const rankingsSnapshot = await getDocs(collection(db, 'rankings'));
-                const rankings = [];
-                
-                rankingsSnapshot.forEach(doc => {
-                    rankings.push(doc.data());
-                });
+                const rankings = await api.getRankings();
                 
                 // Sort rankings for each category (filter out users with 0 for relevant categories)
                 const totalCardsRanking = [...rankings]
@@ -6490,9 +6379,8 @@ Firebase Consoleで確認すべき項目:
                             updatedTags = updatedTags.filter(tag => !selectedTags.has(tag));
                         }
                         
-                        const collRef = getCollectionRef(currentListType);
-                        if (collRef) {
-                            await updateDoc(doc(collRef, cardId), { tags: updatedTags, updatedAt: Date.now() });
+                        if (isOnlineUser()) {
+                            await api.updateCard(cardId, { tags: updatedTags });
                         }
                         card.data.tags = updatedTags;
                     }
@@ -6562,13 +6450,11 @@ Firebase Consoleで確認すべき項目:
             
             showLoading(true);
             try {
-                const collRef = getCollectionRef(currentListType);
                 const collection = getCurrentCollection();
-                
+
                 for (const cardId of selectedCardIds) {
-                    if (collRef) {
-                        await deleteDoc(doc(collRef, cardId));
-                        await trackDeletedId(cardId, currentListType === 'collection' ? 'cards' : 'wishlist');
+                    if (isOnlineUser()) {
+                        await api.deleteCard(cardId);
                     }
                     const index = collection.findIndex(c => c.id === cardId);
                     if (index > -1) {
@@ -6644,7 +6530,6 @@ Firebase Consoleで確認すべき項目:
                 let updated = 0;
                 let skipped = 0;
                 let notFound = 0;
-                const collRef = getCollectionRef(currentListType);
 
                 for (const cardId of selectedCardIds) {
                     const card = collection.find(c => c.id === cardId);
@@ -6683,9 +6568,9 @@ Firebase Consoleで確認すべき項目:
                             setCode = reprints[0].setCode;
                         }
 
-                        // Update Firestore
-                        if (collRef) {
-                            await updateDoc(doc(collRef, cardId), { '型番': setCode, updatedAt: Date.now() });
+                        // Update via API
+                        if (isOnlineUser()) {
+                            await api.updateCard(cardId, { '型番': setCode });
                         }
                         // Update local data
                         card.data['型番'] = setCode;
@@ -6820,45 +6705,22 @@ Firebase Consoleで確認すべき項目:
             updateRegistrationHistoryButton();
 
                 const targetCollection = addType === 'collection' ? cardCollection : wishlistCollection;
-                const collRef = getCollectionRef(addType);
-                
+
                 const dbOperation = async () => {
-                    if (collRef) { // Firebaseモード
-                        const constraints = [where("名前", "==", newCard.名前)];
-                        if (newCard.型番) {
-                            constraints.push(where("型番", "==", newCard.型番));
-                        }
-                        if (newCard.レアリティ) {
-                            constraints.push(where("レアリティ", "==", newCard.レアリティ));
-                        }
-                        const q = query(collRef, ...constraints);
-                        const existingDocs = await getDocs(q);
-
-                        // タグも含めて完全一致するカードを探す
-                        let exactMatch = null;
-                        for (const doc of existingDocs.docs) {
-                            const docData = doc.data();
-                            const docTags = docData.tags || [];
-                            const newCardTags = newCard.tags || [];
-                            if (docTags.length === newCardTags.length &&
-                                docTags.every(tag => newCardTags.includes(tag))) {
-                                exactMatch = doc;
-                                break;
-                            }
-                        }
-
-                        if (!exactMatch) {
-                            const docRef = await addDoc(collRef, newCard);
-                            targetCollection.push({ id: docRef.id, data: newCard });
-                            // Track card addition date
+                    if (isOnlineUser()) {
+                        // Server-side dedup: API handles duplicate check + increment
+                        const result = await api.addCard(addType, newCard);
+                        if (result.merged) {
+                            // Was merged with existing card
+                            const localCard = targetCollection.find(c => c.id === result.card.id);
+                            if (localCard) localCard.data['枚数'] = result.card['枚数'];
+                        } else {
+                            // New card created
+                            targetCollection.push({ id: result.card.id, data: result.card });
                             if (currentListType === 'collection') {
-                                gamificationData.cardAdditionDates[docRef.id] = new Date().toISOString();
+                                gamificationData.cardAdditionDates[result.card.id] = new Date().toISOString();
                                 saveGamificationData();
                             }
-                        } else {
-                            await updateDoc(exactMatch.ref, { 枚数: increment(newCard.枚数), updatedAt: Date.now() });
-                            const localCard = targetCollection.find(c => c.id === exactMatch.id);
-                            if(localCard) localCard.data.枚数 += newCard.枚数;
                         }
                     } else { // ローカルモード
                         const existingCard = targetCollection.find(c => {
@@ -6989,9 +6851,8 @@ Firebase Consoleで確認すべき項目:
                 const cardName = target.closest('tr').querySelector('td:nth-child(2)').textContent;
                 const listName = currentListType === 'collection' ? '所持カード' : 'ウィッシュリスト';
                 if (confirm(`「${cardName}」を${listName}から削除しますか？`)) {
-                    const collRef = getCollectionRef(currentListType);
-                    if (collRef) { // Firebaseモード
-                        await deleteDoc(doc(collRef, cardId));
+                    if (isOnlineUser()) {
+                        await api.deleteCard(cardId);
                     }
                     if (currentListType === 'collection') {
                         cardCollection = cardCollection.filter(c => c.id !== cardId);
@@ -7030,22 +6891,16 @@ Firebase Consoleで確認すべき項目:
                 const cardId = target.dataset.id;
                 const card = wishlistCollection.find(c => c.id === cardId);
                 if (card && confirm(`「${card.data.名前}」を所持カードに移動しますか？`)) {
-                    // Move from wishlist to collection
-                    const wishlistRef = getCollectionRef('wishlist');
-                    const collectionRef = getCollectionRef('collection');
-                    
-                    if (collectionRef && wishlistRef) {
-                        // Add to collection
+                    if (isOnlineUser()) {
+                        // Add to collection via API
                         card.data.updatedAt = Date.now();
-                        const docRef = await addDoc(collectionRef, card.data);
-                        cardCollection.push({ id: docRef.id, data: card.data });
-                        // Track card addition date
-                        gamificationData.cardAdditionDates[docRef.id] = new Date().toISOString();
+                        const result = await api.addCard('collection', card.data);
+                        cardCollection.push({ id: result.card.id, data: result.card });
+                        gamificationData.cardAdditionDates[result.card.id] = new Date().toISOString();
                         saveGamificationData();
-                        
+
                         // Remove from wishlist
-                        await deleteDoc(doc(wishlistRef, cardId));
-                        await trackDeletedId(cardId, 'wishlist');
+                        await api.deleteCard(cardId);
                         wishlistCollection = wishlistCollection.filter(c => c.id !== cardId);
                     } else {
                         // Local mode
@@ -7090,9 +6945,8 @@ Firebase Consoleで確認すべき項目:
                 updatedAt: Date.now()
             };
 
-            const collRef = getCollectionRef(currentListType);
-            if (collRef) { // Firebaseモード
-                await updateDoc(doc(collRef, cardId), updatedData);
+            if (isOnlineUser()) {
+                await api.updateCard(cardId, { '枚数': updatedData.枚数, tags: updatedData.tags });
             }
 
             const targetCollection = currentListType === 'collection' ? cardCollection : wishlistCollection;
@@ -7298,39 +7152,17 @@ Firebase Consoleで確認すべき項目:
 
                 // Import collection
                 if (importedData.collection.length > 0) {
-                    const collRef = getCollectionRef('collection');
-                    if (collRef) { // Firebaseモード
-                        const batch = writeBatch(db);
-                        for (const card of importedData.collection) {
-                            // Parse tags if they're in semicolon format
+                    if (isOnlineUser()) {
+                        // Parse tags before sending
+                        const cardsToImport = importedData.collection.map(card => {
                             if (card.タグ && typeof card.タグ === 'string') {
                                 card.tags = card.タグ.split(';').filter(t => t.trim());
                                 delete card.タグ;
                             }
-                            const q = query(collRef, where("名前", "==", card.名前), where("型番", "==", card.型番), where("レアリティ", "==", card.レアリティ));
-                            const existingDocs = await getDocs(q);
-
-                            // タグも含めて完全一致するカードを探す
-                            let exactMatch = null;
-                            for (const doc of existingDocs.docs) {
-                                const docData = doc.data();
-                                const docTags = docData.tags || [];
-                                const cardTags = card.tags || [];
-                                if (docTags.length === cardTags.length &&
-                                    docTags.every(tag => cardTags.includes(tag))) {
-                                    exactMatch = doc;
-                                    break;
-                                }
-                            }
-
-                            if (!exactMatch) {
-                                card.updatedAt = Date.now();
-                                batch.set(doc(collRef), card);
-                            } else {
-                                batch.update(exactMatch.ref, { 枚数: increment(card.枚数 || 1), updatedAt: Date.now() });
-                            }
-                        }
-                        await batch.commit();
+                            return card;
+                        });
+                        // Server-side batch import with dedup
+                        await api.batchImportCards('collection', cardsToImport);
                     } else { // ローカルモード
                         for (const card of importedData.collection) {
                             if (card.タグ && typeof card.タグ === 'string') {
@@ -7359,38 +7191,15 @@ Firebase Consoleで確認すべき項目:
 
                 // Import wishlist
                 if (importedData.wishlist.length > 0) {
-                    const wishRef = getCollectionRef('wishlist');
-                    if (wishRef) { // Firebaseモード
-                        const batch = writeBatch(db);
-                        for (const card of importedData.wishlist) {
+                    if (isOnlineUser()) {
+                        const wishlistToImport = importedData.wishlist.map(card => {
                             if (card.タグ && typeof card.タグ === 'string') {
                                 card.tags = card.タグ.split(';').filter(t => t.trim());
                                 delete card.タグ;
                             }
-                            const q = query(wishRef, where("名前", "==", card.名前), where("型番", "==", card.型番), where("レアリティ", "==", card.レアリティ));
-                            const existingDocs = await getDocs(q);
-
-                            // タグも含めて完全一致するカードを探す
-                            let exactMatch = null;
-                            for (const doc of existingDocs.docs) {
-                                const docData = doc.data();
-                                const docTags = docData.tags || [];
-                                const cardTags = card.tags || [];
-                                if (docTags.length === cardTags.length &&
-                                    docTags.every(tag => cardTags.includes(tag))) {
-                                    exactMatch = doc;
-                                    break;
-                                }
-                            }
-
-                            if (!exactMatch) {
-                                card.updatedAt = Date.now();
-                                batch.set(doc(wishRef), card);
-                            } else {
-                                batch.update(exactMatch.ref, { 枚数: increment(card.枚数 || 1), updatedAt: Date.now() });
-                            }
-                        }
-                        await batch.commit();
+                            return card;
+                        });
+                        await api.batchImportCards('wishlist', wishlistToImport);
                     } else { // ローカルモード
                         for (const card of importedData.wishlist) {
                             if (card.タグ && typeof card.タグ === 'string') {
@@ -7417,11 +7226,9 @@ Firebase Consoleで確認すべき項目:
                     }
                 }
 
-                // Reload if using Firebase, otherwise just refresh display
-                if (getCollectionRef()) {
+                // Reload if using API, otherwise just refresh display
+                if (isOnlineUser()) {
                     await loadCollectionFromFirestore();
-                    // Update metadata timestamp after import
-                    updateMetadataTimestamp();
                     updateUserRankingData();
                 } else {
                     applySearchAndFilter();
@@ -7546,13 +7353,11 @@ Firebase Consoleで確認すべき項目:
                             updatedAt: Date.now()
                         };
 
-                        // Update the card in Firebase or local storage
-                        if (currentUser?.uid !== 'local_user') {
-                            const collRef = getCollectionRef();
-                            await updateDoc(doc(collRef, card.id), updatedData);
-                        } else {
-                            card.data = updatedData;
+                        // Update the card via API or local storage
+                        if (isOnlineUser()) {
+                            await api.updateCard(card.id, { linkedDetails: updatedData.linkedDetails });
                         }
+                        card.data = updatedData;
 
                         linkedCount++;
                     } else if (cardName) {
@@ -7581,12 +7386,10 @@ Firebase Consoleで確認すべき項目:
                             updatedAt: Date.now()
                         };
 
-                        if (currentUser?.uid !== 'local_user') {
-                            const wishRef = getCollectionRef('wishlist');
-                            await updateDoc(doc(wishRef, card.id), updatedData);
-                        } else {
-                            card.data = updatedData;
+                        if (isOnlineUser()) {
+                            await api.updateCard(card.id, { linkedDetails: updatedData.linkedDetails });
                         }
+                        card.data = updatedData;
 
                         linkedCount++;
                     } else if (cardName) {
@@ -7952,9 +7755,8 @@ Firebase Consoleで確認すべき項目:
 
                     // Update cards in Firebase
                     for (const { card, listType } of updatedCards) {
-                        const collRef = getCollectionRef(listType);
-                        if (collRef) {
-                            await updateDoc(doc(collRef, card.id), { tags: card.data.tags, updatedAt: Date.now() });
+                        if (isOnlineUser()) {
+                            await api.updateCard(card.id, { tags: card.data.tags });
                         }
                     }
 
@@ -8771,57 +8573,23 @@ Firebase Consoleで確認すべき項目:
             let totalAddedQuantity = 0;
 
             try {
-                const cardsRef = getCollectionRef('collection');
-
                 for (const card of selectedCards) {
                     try {
                         const cardNumber = card.number || '';
                         const cardRarity = card.rarity || '';
                         const cardTags = card.tags || [];
 
-                        // Query with name, number, rarity constraints (matching normal registration)
-                        const constraints = [where('名前', '==', card.name)];
-                        if (cardNumber) {
-                            constraints.push(where('型番', '==', cardNumber));
-                        }
-                        if (cardRarity) {
-                            constraints.push(where('レアリティ', '==', cardRarity));
-                        }
-                        const q = query(cardsRef, ...constraints);
-                        const querySnapshot = await getDocs(q);
-
-                        // Find exact match including tags
-                        let exactMatch = null;
-                        for (const docSnap of querySnapshot.docs) {
-                            const data = docSnap.data();
-                            const docTags = data.tags || [];
-                            if (docTags.length === cardTags.length &&
-                                docTags.every(tag => cardTags.includes(tag)) &&
-                                cardTags.every(tag => docTags.includes(tag))) {
-                                exactMatch = docSnap;
-                                break;
-                            }
-                        }
-
-                        if (exactMatch) {
-                            // Found exact match - use atomic increment (matching normal registration)
-                            await updateDoc(exactMatch.ref, {
-                                '枚数': increment(card.quantity),
-                                updatedAt: Date.now()
-                            });
-                        } else {
-                            // No exact match - add as new card
-                            const newCard = {
-                                '名前': card.name,
-                                '型番': cardNumber,
-                                'レアリティ': cardRarity,
-                                '枚数': card.quantity,
-                                'tags': cardTags,
-                                updatedAt: Date.now()
-                            };
-                            const docRef = await addDoc(cardsRef, newCard);
-                            // Track card addition date
-                            gamificationData.cardAdditionDates[docRef.id] = new Date().toISOString();
+                        // Server-side dedup via API
+                        const newCard = {
+                            '名前': card.name,
+                            '型番': cardNumber,
+                            'レアリティ': cardRarity,
+                            '枚数': card.quantity,
+                            tags: cardTags,
+                        };
+                        const result = await api.addCard('collection', newCard);
+                        if (!result.merged) {
+                            gamificationData.cardAdditionDates[result.card.id] = new Date().toISOString();
                         }
 
                         // Track gamification (matching normal registration)
@@ -8915,50 +8683,8 @@ Firebase Consoleで確認すべき項目:
             
             showLoading(true);
             try {
-                // 1. Delete all card data from Firestore
-                const userCardCollectionRef = getCollectionRef();
-                const snapshot = await getDocs(query(userCardCollectionRef));
-                const batch = writeBatch(db);
-                snapshot.docs.forEach(doc => batch.delete(doc.ref));
-                await batch.commit();
-
-                // 2. Delete ranking data
-                try {
-                    const rankingRef = doc(db, 'rankings', currentUser.uid);
-                    await deleteDoc(rankingRef);
-                } catch (rankingError) {
-                    console.error('Error deleting ranking data:', rankingError);
-                }
-
-                // 3. Delete gamification data (including profile)
-                try {
-                    const gamificationRef = doc(db, 'userGamification', currentUser.uid);
-                    await deleteDoc(gamificationRef);
-                } catch (gamificationError) {
-                    console.error('Error deleting gamification data:', gamificationError);
-                }
-
-                // 4. Delete wishlist data if exists
-                try {
-                    const wishlistRef = collection(db, 'users', currentUser.uid, 'wishlist');
-                    const wishlistSnapshot = await getDocs(wishlistRef);
-                    const wishlistBatch = writeBatch(db);
-                    wishlistSnapshot.docs.forEach(doc => wishlistBatch.delete(doc.ref));
-                    await wishlistBatch.commit();
-                } catch (wishlistError) {
-                    console.error('Error deleting wishlist data:', wishlistError);
-                }
-
-                // 5. Delete tags data if exists
-                try {
-                    const tagsRef = collection(db, 'users', currentUser.uid, 'tags');
-                    const tagsSnapshot = await getDocs(tagsRef);
-                    const tagsBatch = writeBatch(db);
-                    tagsSnapshot.docs.forEach(doc => tagsBatch.delete(doc.ref));
-                    await tagsBatch.commit();
-                } catch (tagsError) {
-                    console.error('Error deleting tags data:', tagsError);
-                }
+                // Delete all user data via single API call
+                await api.deleteAccount();
 
                 // 6. Delete the user account
                 await deleteUser(currentUser);

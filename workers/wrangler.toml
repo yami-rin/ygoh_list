@@ -1,0 +1,11 @@
+name = "card-manager-api"
+main = "src/index.ts"
+compatibility_date = "2024-12-01"
+
+[[d1_databases]]
+binding = "DB"
+database_name = "card-manager-db"
+database_id = "1a0f1ca4-54b7-4b39-890d-46e952fa13f1"
+
+[vars]
+FIREBASE_PROJECT_ID = "ygoh-9bcf6"
