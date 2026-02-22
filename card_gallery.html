@@ -1484,6 +1484,446 @@
         #community-container .card-header .btn-outline-secondary:hover {
             background-color: rgba(255,255,255,0.2);
         }
+
+        /* ==================== PACK OPENING SYSTEM ==================== */
+
+        /* FAB Button */
+        .pack-open-fab {
+            position: fixed;
+            bottom: 2rem;
+            right: 2rem;
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            border: none;
+            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+            color: white;
+            font-size: 1.5rem;
+            box-shadow: 0 4px 15px rgba(240, 147, 251, 0.4);
+            cursor: pointer;
+            z-index: 1040;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .pack-open-fab:hover {
+            transform: scale(1.1) translateY(-3px);
+            box-shadow: 0 8px 25px rgba(240, 147, 251, 0.6);
+        }
+
+        .pack-open-fab:active {
+            transform: scale(0.95);
+        }
+
+        /* Overlay */
+        .pack-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.92);
+            z-index: 2000;
+            display: none;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+            overflow-y: auto;
+        }
+
+        .pack-overlay.show {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .pack-overlay.visible {
+            opacity: 1;
+        }
+
+        .pack-overlay-content {
+            width: 100%;
+            max-width: 1000px;
+            padding: 2rem;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 2rem;
+        }
+
+        /* Pack Header */
+        .pack-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            width: 100%;
+            color: white;
+        }
+
+        .pack-header h3 {
+            margin: 0;
+            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            font-weight: 700;
+        }
+
+        .pack-close-btn {
+            background: none;
+            border: none;
+            color: white;
+            font-size: 1.5rem;
+            cursor: pointer;
+            opacity: 0.7;
+            transition: opacity 0.2s;
+        }
+
+        .pack-close-btn:hover {
+            opacity: 1;
+        }
+
+        /* Pack Footer */
+        .pack-footer {
+            display: flex;
+            gap: 1rem;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+
+        .pack-open-btn {
+            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+            color: white;
+            border: none;
+            border-radius: 12px;
+            padding: 0.75rem 2rem;
+            font-weight: 600;
+            font-size: 1.1rem;
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+
+        .pack-open-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(240, 147, 251, 0.4);
+            color: white;
+        }
+
+        .pack-again-btn {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            border-radius: 12px;
+            padding: 0.75rem 2rem;
+            font-weight: 600;
+            font-size: 1.1rem;
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+
+        .pack-again-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(102, 126, 234, 0.4);
+            color: white;
+        }
+
+        .pack-flipall-btn {
+            background: rgba(255, 255, 255, 0.15);
+            color: white;
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            border-radius: 12px;
+            padding: 0.75rem 2rem;
+            font-weight: 600;
+            font-size: 1.1rem;
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+
+        .pack-flipall-btn:hover {
+            background: rgba(255, 255, 255, 0.25);
+            color: white;
+        }
+
+        /* Pack Box (pre-opening) */
+        .pack-wrapper {
+            perspective: 800px;
+        }
+
+        .pack-box {
+            width: 200px;
+            height: 300px;
+            position: relative;
+            transform-style: preserve-3d;
+            animation: packFloat 3s ease-in-out infinite;
+        }
+
+        @keyframes packFloat {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-15px); }
+        }
+
+        .pack-box-front {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            border-radius: 12px;
+            background: linear-gradient(135deg, #f093fb 0%, #f5576c 50%, #667eea 100%);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 1rem;
+            color: white;
+            font-size: 3rem;
+            box-shadow: 0 8px 32px rgba(240, 147, 251, 0.5);
+        }
+
+        .pack-box-front span {
+            font-size: 0.9rem;
+            font-weight: 600;
+            opacity: 0.9;
+        }
+
+        @keyframes packExplode {
+            0% { transform: scale(1); opacity: 1; }
+            50% { transform: scale(1.2) rotate(5deg); }
+            100% { transform: scale(0) rotate(15deg); opacity: 0; }
+        }
+
+        .pack-box.opening {
+            animation: packExplode 0.6s ease-in forwards;
+        }
+
+        /* Card Slots */
+        .pack-cards-container {
+            display: flex;
+            gap: 1rem;
+            justify-content: center;
+            flex-wrap: wrap;
+            padding: 1rem 0;
+        }
+
+        .pack-card-slot {
+            width: 150px;
+            height: 219px;
+            perspective: 1000px;
+            cursor: pointer;
+            opacity: 0;
+            transform: translateY(50px) scale(0.8);
+        }
+
+        .pack-card-slot.dealt {
+            animation: cardDeal 0.4s ease-out forwards;
+        }
+
+        @keyframes cardDeal {
+            to { opacity: 1; transform: translateY(0) scale(1); }
+        }
+
+        .pack-card-inner {
+            position: relative;
+            width: 100%;
+            height: 100%;
+            transition: transform 0.6s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            transform-style: preserve-3d;
+        }
+
+        .pack-card-slot.flipped .pack-card-inner {
+            transform: rotateY(180deg);
+        }
+
+        .pack-card-back,
+        .pack-card-front {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            backface-visibility: hidden;
+            border-radius: 8px;
+            overflow: hidden;
+        }
+
+        .pack-card-back {
+            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border: 2px solid #334;
+        }
+
+        .card-back-design {
+            color: rgba(255, 255, 255, 0.3);
+            font-size: 3rem;
+        }
+
+        .pack-card-front {
+            transform: rotateY(180deg);
+            background: #1a1a2e;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .pack-card-image-container-inner {
+            flex: 1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+            overflow: hidden;
+            position: relative;
+        }
+
+        .pack-card-image-container-inner img {
+            width: 100%;
+            height: 100%;
+            object-fit: contain;
+        }
+
+        .pack-card-rarity-badge {
+            text-align: center;
+            padding: 4px 6px;
+            font-weight: 700;
+            font-size: 0.65rem;
+            color: white;
+            background: rgba(0, 0, 0, 0.8);
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .pack-card-name-label {
+            text-align: center;
+            padding: 2px 4px;
+            font-size: 0.6rem;
+            color: #ccc;
+            background: rgba(0, 0, 0, 0.9);
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        /* Rarity Effects - Uncommon (blue glow) */
+        .pack-card-slot.rarity-uncommon.flipped .pack-card-front {
+            box-shadow: 0 0 15px rgba(100, 149, 237, 0.6);
+            border: 2px solid #6495ed;
+        }
+
+        /* Rarity Effects - Rare (gold glow) */
+        .pack-card-slot.rarity-rare.flipped .pack-card-front {
+            box-shadow: 0 0 20px rgba(255, 215, 0, 0.7);
+            border: 2px solid #ffd700;
+        }
+
+        .pack-card-slot.rarity-rare.flipped {
+            animation: cardDeal 0.4s ease-out forwards, goldPulse 2s ease-in-out 0.6s infinite;
+        }
+
+        @keyframes goldPulse {
+            0%, 100% { filter: drop-shadow(0 0 8px rgba(255, 215, 0, 0.5)); }
+            50% { filter: drop-shadow(0 0 20px rgba(255, 215, 0, 0.8)); }
+        }
+
+        /* Rarity Effects - Super Rare (rainbow border) */
+        .pack-card-slot.rarity-super-rare.flipped .pack-card-front {
+            border: 3px solid transparent;
+            background-clip: padding-box;
+        }
+
+        .pack-card-slot.rarity-super-rare.flipped .pack-card-inner {
+            border-radius: 8px;
+            background: linear-gradient(45deg, #ff0000, #ff7700, #ffff00, #00ff00, #0000ff, #8b00ff, #ff0000);
+            background-size: 400% 400%;
+            animation: rainbowBorder 3s linear infinite;
+            padding: 3px;
+        }
+
+        @keyframes rainbowBorder {
+            0% { background-position: 0% 50%; }
+            100% { background-position: 400% 50%; }
+        }
+
+        /* Rarity Effects - Ultra Rare (holographic shimmer) */
+        .pack-card-slot.rarity-ultra-rare.flipped .pack-card-front {
+            border: 3px solid #ffd700;
+            box-shadow: 0 0 25px rgba(255, 215, 0, 0.6);
+        }
+
+        .pack-card-slot.rarity-ultra-rare.flipped .pack-card-image-container-inner::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 300%;
+            height: 100%;
+            background: linear-gradient(
+                105deg,
+                transparent 30%,
+                rgba(255, 255, 255, 0.2) 45%,
+                rgba(255, 255, 255, 0.5) 50%,
+                rgba(255, 255, 255, 0.2) 55%,
+                transparent 70%
+            );
+            animation: holoShimmer 3s ease-in-out infinite;
+        }
+
+        @keyframes holoShimmer {
+            0% { transform: translateX(-33%); }
+            100% { transform: translateX(33%); }
+        }
+
+        /* Rarity Effects - Secret (screen flash + golden shadow) */
+        .pack-card-slot.rarity-secret.flipped .pack-card-front {
+            border: 3px solid #ffd700;
+            box-shadow: 0 0 30px rgba(255, 215, 0, 0.8), 0 0 60px rgba(255, 100, 0, 0.4);
+        }
+
+        .pack-flash {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: white;
+            z-index: 2001;
+            opacity: 0;
+            pointer-events: none;
+            animation: flashEffect 0.6s ease-out forwards;
+        }
+
+        @keyframes flashEffect {
+            0% { opacity: 0.8; }
+            100% { opacity: 0; }
+        }
+
+        /* Rarity Badge Colors */
+        .pack-card-rarity-badge.rarity-common { background: #6c757d; }
+        .pack-card-rarity-badge.rarity-uncommon { background: #0d6efd; }
+        .pack-card-rarity-badge.rarity-rare { background: linear-gradient(135deg, #f5af19, #f12711); }
+        .pack-card-rarity-badge.rarity-super-rare { background: linear-gradient(135deg, #a855f7, #ec4899); }
+        .pack-card-rarity-badge.rarity-ultra-rare { background: linear-gradient(135deg, #ffd700, #ff6b00); color: #1a1a2e; }
+        .pack-card-rarity-badge.rarity-secret { background: linear-gradient(135deg, #ffd700, #ff0000, #ff00ff); background-size: 200% 200%; animation: rainbowBadge 2s linear infinite; }
+
+        @keyframes rainbowBadge {
+            0% { background-position: 0% 50%; }
+            100% { background-position: 200% 50%; }
+        }
+
+        /* Mobile Responsive */
+        @media (max-width: 768px) {
+            .pack-cards-container { gap: 0.5rem; }
+            .pack-card-slot { width: 100px; height: 146px; }
+            .pack-open-fab { bottom: 1rem; right: 1rem; width: 50px; height: 50px; font-size: 1.2rem; }
+            .pack-overlay-content { padding: 1rem; }
+            .pack-box { width: 150px; height: 225px; }
+            .pack-card-rarity-badge { font-size: 0.55rem; }
+            .pack-card-name-label { font-size: 0.5rem; }
+        }
+
+        @media (max-width: 480px) {
+            .pack-card-slot { width: 60px; height: 87px; }
+            .pack-card-rarity-badge { font-size: 0.5rem; padding: 2px; }
+            .pack-card-name-label { display: none; }
+            .card-back-design { font-size: 1.5rem; }
+        }
     </style>
 </head>
 <body>
@@ -5897,6 +6337,231 @@
 
         // ==================== END COMMUNITY SYSTEM ====================
 
+        // ==================== PACK OPENING SYSTEM ====================
+
+        const RARITY_ORDER = ['N','P','M','R','SR','M+SR','P+SR','UR','P+UR','UL','GR','PG','CR','HR','SE','GSE','EXSE','P+SE','PSE','QCSE','20th','10000th','GMR'];
+        const RARITY_WEIGHTS = {
+            'N': 1000, 'P': 800, 'M': 600, 'R': 400, 'SR': 200,
+            'M+SR': 150, 'P+SR': 120, 'UR': 100, 'P+UR': 80, 'UL': 60,
+            'GR': 40, 'PG': 30, 'CR': 20, 'HR': 15, 'SE': 10,
+            'GSE': 7, 'EXSE': 5, 'P+SE': 4, 'PSE': 3, 'QCSE': 2,
+            '20th': 1.5, '10000th': 1, 'GMR': 0.5
+        };
+        const PACK_DEFAULT_WEIGHT = 500;
+
+        let packOverlayOpen = false;
+        let packCards = [];
+        let packFlippedCount = 0;
+
+        function buildCardPool() {
+            const seen = new Set();
+            const pool = [];
+            for (const card of collectionCards) {
+                const name = card.data['名前'];
+                const rarity = card.data['レアリティ'] || '';
+                const key = `${name}|||${rarity}`;
+                if (!seen.has(key)) {
+                    seen.add(key);
+                    pool.push({
+                        name: name,
+                        rarity: rarity,
+                        selectedCiid: card.data.selectedCiid || '1',
+                        weight: RARITY_WEIGHTS[rarity] ?? PACK_DEFAULT_WEIGHT
+                    });
+                }
+            }
+            return pool;
+        }
+
+        function weightedRandomPick(pool) {
+            const totalWeight = pool.reduce((sum, c) => sum + c.weight, 0);
+            let rand = Math.random() * totalWeight;
+            for (const card of pool) {
+                rand -= card.weight;
+                if (rand <= 0) return card;
+            }
+            return pool[pool.length - 1];
+        }
+
+        function generatePack() {
+            const pool = buildCardPool();
+            if (pool.length === 0) return [];
+            const pack = [];
+            for (let i = 0; i < 5; i++) {
+                pack.push({ ...weightedRandomPick(pool) });
+            }
+            pack.sort((a, b) => {
+                const idxA = RARITY_ORDER.indexOf(a.rarity);
+                const idxB = RARITY_ORDER.indexOf(b.rarity);
+                return (idxA === -1 ? -1 : idxA) - (idxB === -1 ? -1 : idxB);
+            });
+            return pack;
+        }
+
+        function getRarityTier(rarity) {
+            const idx = RARITY_ORDER.indexOf(rarity);
+            if (idx < 0) return 'common';
+            if (idx <= 2) return 'common';
+            if (idx <= 6) return 'uncommon';
+            if (idx <= 9) return 'rare';
+            if (idx <= 13) return 'super-rare';
+            if (idx <= 19) return 'ultra-rare';
+            return 'secret';
+        }
+
+        function showPackOverlay() {
+            const overlay = document.getElementById('packOverlay');
+            overlay.style.display = 'flex';
+            overlay.offsetHeight; // force reflow
+            overlay.classList.add('show', 'visible');
+            packOverlayOpen = true;
+            resetPackState();
+        }
+
+        function hidePackOverlay() {
+            const overlay = document.getElementById('packOverlay');
+            overlay.classList.remove('visible');
+            setTimeout(() => {
+                overlay.classList.remove('show');
+                overlay.style.display = 'none';
+            }, 300);
+            packOverlayOpen = false;
+        }
+
+        function resetPackState() {
+            document.getElementById('packWrapper').style.display = 'block';
+            document.getElementById('packCardsContainer').style.display = 'none';
+            document.getElementById('packCardsContainer').innerHTML = '';
+            document.getElementById('packBox').classList.remove('opening');
+            document.getElementById('packOpenBtn').style.display = '';
+            document.getElementById('packFlipAllBtn').style.display = 'none';
+            document.getElementById('packAgainBtn').style.display = 'none';
+            packFlippedCount = 0;
+            packCards = [];
+        }
+
+        function executePackOpen() {
+            if (collectionCards.length === 0) {
+                alert('コレクションにカードがありません。カードを追加してからお試しください。');
+                return;
+            }
+
+            packCards = generatePack();
+            const packBox = document.getElementById('packBox');
+            packBox.classList.add('opening');
+
+            setTimeout(() => {
+                document.getElementById('packWrapper').style.display = 'none';
+                document.getElementById('packCardsContainer').style.display = 'flex';
+                document.getElementById('packOpenBtn').style.display = 'none';
+                document.getElementById('packFlipAllBtn').style.display = '';
+                document.getElementById('packAgainBtn').style.display = '';
+                renderPackCards(packCards);
+            }, 600);
+        }
+
+        function renderPackCards(cards) {
+            const container = document.getElementById('packCardsContainer');
+            container.innerHTML = '';
+            packFlippedCount = 0;
+
+            cards.forEach((card, index) => {
+                const tier = getRarityTier(card.rarity);
+                const slot = document.createElement('div');
+                slot.className = `pack-card-slot rarity-${tier}`;
+                slot.dataset.index = index;
+
+                slot.innerHTML = `
+                    <div class="pack-card-inner">
+                        <div class="pack-card-back">
+                            <div class="card-back-design">
+                                <i class="bi bi-question-circle"></i>
+                            </div>
+                        </div>
+                        <div class="pack-card-front">
+                            <div class="pack-card-image-container-inner">
+                                <i class="bi bi-card-image" style="font-size:2rem;color:rgba(0,0,0,0.1);"></i>
+                            </div>
+                            <div class="pack-card-rarity-badge rarity-${tier}">${escapeHtml(card.rarity || '?')}</div>
+                            <div class="pack-card-name-label">${escapeHtml(decodeHtmlEntities(card.name))}</div>
+                        </div>
+                    </div>
+                `;
+
+                slot.addEventListener('click', () => flipCard(slot, card, tier));
+                container.appendChild(slot);
+
+                setTimeout(() => slot.classList.add('dealt'), 100 * index);
+                loadPackCardImage(slot, card);
+            });
+        }
+
+        async function loadPackCardImage(slot, card) {
+            try {
+                const decodedName = decodeHtmlEntities(card.name);
+                const ciid = card.selectedCiid || '1';
+                const imageUrl = await getCardImageUrl(decodedName, ciid);
+                if (imageUrl) {
+                    const imgContainer = slot.querySelector('.pack-card-image-container-inner');
+                    const img = document.createElement('img');
+                    img.src = imageUrl;
+                    img.alt = decodedName;
+                    img.onload = () => {
+                        imgContainer.innerHTML = '';
+                        imgContainer.appendChild(img);
+                    };
+                }
+            } catch (error) {
+                console.error(`Pack card image load failed for ${card.name}:`, error);
+            }
+        }
+
+        function flipCard(slot, card, tier) {
+            if (slot.classList.contains('flipped')) return;
+            slot.classList.add('flipped');
+            packFlippedCount++;
+
+            if (tier === 'secret') {
+                const flash = document.createElement('div');
+                flash.className = 'pack-flash';
+                document.body.appendChild(flash);
+                setTimeout(() => flash.remove(), 600);
+            }
+
+            if (packFlippedCount >= 5) {
+                document.getElementById('packFlipAllBtn').style.display = 'none';
+            }
+        }
+
+        function flipAllCards() {
+            const slots = document.querySelectorAll('.pack-card-slot:not(.flipped)');
+            slots.forEach((slot, i) => {
+                setTimeout(() => {
+                    const index = parseInt(slot.dataset.index);
+                    const card = packCards[index];
+                    const tier = getRarityTier(card.rarity);
+                    flipCard(slot, card, tier);
+                }, 200 * i);
+            });
+        }
+
+        // Pack opening event listeners
+        document.getElementById('packOpenFab').addEventListener('click', showPackOverlay);
+        document.getElementById('packCloseBtn').addEventListener('click', hidePackOverlay);
+        document.getElementById('packOpenBtn').addEventListener('click', executePackOpen);
+        document.getElementById('packAgainBtn').addEventListener('click', () => {
+            resetPackState();
+        });
+        document.getElementById('packFlipAllBtn').addEventListener('click', flipAllCards);
+        document.getElementById('packOverlay').addEventListener('click', (e) => {
+            if (e.target.id === 'packOverlay') hidePackOverlay();
+        });
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape' && packOverlayOpen) hidePackOverlay();
+        });
+
+        // ==================== END PACK OPENING SYSTEM ====================
+
         // Initialize
         const init = async () => {
             showLoading(true);
@@ -7102,6 +7767,37 @@
 
     <!-- Context Menu -->
     <div id="contextMenu" class="context-menu"></div>
+
+    <!-- Pack Opening FAB -->
+    <button class="pack-open-fab" id="packOpenFab" title="パック開封">
+        <i class="bi bi-box2-heart-fill"></i>
+    </button>
+
+    <!-- Pack Opening Overlay -->
+    <div class="pack-overlay" id="packOverlay">
+        <div class="pack-overlay-content">
+            <div class="pack-header">
+                <h3><i class="bi bi-box2-heart-fill"></i> パック開封</h3>
+                <button class="pack-close-btn" id="packCloseBtn"><i class="bi bi-x-lg"></i></button>
+            </div>
+            <div class="pack-stage" id="packStage">
+                <div class="pack-wrapper" id="packWrapper">
+                    <div class="pack-box" id="packBox">
+                        <div class="pack-box-front">
+                            <i class="bi bi-box2-heart-fill"></i>
+                            <span>パックを開封しよう</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="pack-cards-container" id="packCardsContainer" style="display:none;"></div>
+            </div>
+            <div class="pack-footer" id="packFooter">
+                <button class="pack-open-btn" id="packOpenBtn"><i class="bi bi-box-arrow-up"></i> パックを開ける</button>
+                <button class="pack-flipall-btn" id="packFlipAllBtn" style="display:none;"><i class="bi bi-eye"></i> 全てめくる</button>
+                <button class="pack-again-btn" id="packAgainBtn" style="display:none;"><i class="bi bi-arrow-repeat"></i> もう一回</button>
+            </div>
+        </div>
+    </div>
 
 </body>
 </html>
