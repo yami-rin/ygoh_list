@@ -6386,10 +6386,23 @@
         function generatePack() {
             const pool = buildCardPool();
             if (pool.length === 0) return [];
+
+            // R以上のレアリティのみのプール（最右カード用）
+            const rRankIdx = RARITY_ORDER.indexOf('R');
+            const rarePool = pool.filter(c => {
+                const idx = RARITY_ORDER.indexOf(c.rarity);
+                return idx >= rRankIdx;
+            });
+
             const pack = [];
-            for (let i = 0; i < 5; i++) {
+            // 通常4枚
+            for (let i = 0; i < 4; i++) {
                 pack.push({ ...weightedRandomPick(pool) });
             }
+            // 5枚目はR以上確定（R以上のカードがなければ通常プールから）
+            const guaranteedPool = rarePool.length > 0 ? rarePool : pool;
+            pack.push({ ...weightedRandomPick(guaranteedPool) });
+
             pack.sort((a, b) => {
                 const idxA = RARITY_ORDER.indexOf(a.rarity);
                 const idxB = RARITY_ORDER.indexOf(b.rarity);
