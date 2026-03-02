@@ -2168,9 +2168,6 @@
                     </div>
                 </div>
                 <div class="modal-footer">
-                    <button type="button" class="btn btn-primary" id="refresh-analysis-btn">
-                        <i class="bi bi-arrow-clockwise"></i> データを更新
-                    </button>
                     <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">閉じる</button>
                 </div>
             </div>
@@ -3844,11 +3841,9 @@
                 if (recentCardsHistory) {
                     try {
                         recentHistory = JSON.parse(recentCardsHistory);
-                        // Remove the item from history
+                        // Remove the item from history (match by timestamp + name for reliable identification)
                         recentHistory = recentHistory.filter(item =>
-                            !(item.timestamp === timestamp &&
-                              item.name === name &&
-                              item.listType === listType));
+                            !(item.timestamp === timestamp && item.name === name));
                         localStorage.setItem('recentCardsHistory', JSON.stringify(recentHistory));
                         
                         // Save to Firebase for logged-in users
@@ -5831,17 +5826,9 @@
         // Initialize analysis functionality
         const initializeAnalysis = () => {
             const analysisBtn = document.getElementById('analysis-btn');
-            const refreshBtn = document.getElementById('refresh-analysis-btn');
 
             analysisBtn.addEventListener('click', async () => {
                 analysisModal.show();
-                await buildCardAdditionHistory();
-                updateAnalysisData();
-                updateCalendarDisplay();
-            });
-
-            // Add refresh button handler
-            refreshBtn.addEventListener('click', async () => {
                 await buildCardAdditionHistory();
                 updateAnalysisData();
                 updateCalendarDisplay();
@@ -8709,6 +8696,8 @@ Firebase Consoleで確認すべき項目:
             const rarityQuantityInputs = document.querySelectorAll('.bulk-card-rarity-quantity');
             console.log('Found rarity quantity inputs:', rarityQuantityInputs.length);
 
+            // Phase 1: Collect cards with quantity > 0 and ensure reprints are loaded
+            const pendingCards = [];
             for (const input of rarityQuantityInputs) {
                 try {
                     const index = parseInt(input.dataset.index);
@@ -8732,28 +8721,73 @@ Firebase Consoleで確認すべき項目:
                             }
                         }
 
-                        // Look up set code from reprints matching the selected rarity
-                        let number = '';
-                        if (cardData.reprints && cardData.reprints.length > 0) {
-                            const matchingReprint = cardData.reprints.find(r => r.rarity === rarity);
-                            if (matchingReprint) {
-                                number = matchingReprint.setCode;
-                            } else if (cardData.reprints.length > 0) {
-                                // Fallback: use first reprint's setCode
-                                number = cardData.reprints[0].setCode;
-                            }
-                        }
-
-                        selectedCards.push({
-                            ...cardData,
-                            quantity: quantity,
-                            rarity: rarity,
-                            number: number
-                        });
+                        pendingCards.push({ cardData, rarity, quantity });
                     }
                 } catch (error) {
                     console.error(`Error processing input for index ${input.dataset.index}:`, error);
                 }
+            }
+
+            // Phase 2: Detect the common set prefix from reprints
+            // When importing from a specific pack, most cards share a common set prefix (e.g. "AGOV")
+            const prefixCardCount = {};
+            for (const { cardData } of pendingCards) {
+                if (cardData.reprints) {
+                    const seenPrefixes = new Set();
+                    for (const r of cardData.reprints) {
+                        const prefix = r.setCode.split('-')[0];
+                        if (prefix && !seenPrefixes.has(prefix)) {
+                            seenPrefixes.add(prefix);
+                            prefixCardCount[prefix] = (prefixCardCount[prefix] || 0) + 1;
+                        }
+                    }
+                }
+            }
+            // Find the prefix that appears in the most cards
+            let targetSetPrefix = '';
+            let maxPrefixCount = 0;
+            for (const [prefix, count] of Object.entries(prefixCardCount)) {
+                if (count > maxPrefixCount) {
+                    maxPrefixCount = count;
+                    targetSetPrefix = prefix;
+                }
+            }
+            console.log(`Detected target set prefix: "${targetSetPrefix}" (appears in ${maxPrefixCount}/${pendingCards.length} cards)`);
+
+            // Phase 3: Build selectedCards with prioritized set code matching
+            for (const { cardData, rarity, quantity } of pendingCards) {
+                let number = '';
+                if (cardData.reprints && cardData.reprints.length > 0) {
+                    let match = null;
+                    if (targetSetPrefix) {
+                        // Priority 1: Same rarity + same set prefix
+                        match = cardData.reprints.find(r =>
+                            r.rarity === rarity && r.setCode.startsWith(targetSetPrefix + '-')
+                        );
+                        // Priority 2: Same set prefix, any rarity
+                        if (!match) {
+                            match = cardData.reprints.find(r =>
+                                r.setCode.startsWith(targetSetPrefix + '-')
+                            );
+                        }
+                    }
+                    // Priority 3: Same rarity, any set
+                    if (!match) {
+                        match = cardData.reprints.find(r => r.rarity === rarity);
+                    }
+                    // Priority 4: First reprint (last resort)
+                    if (!match) {
+                        match = cardData.reprints[0];
+                    }
+                    number = match.setCode;
+                }
+
+                selectedCards.push({
+                    ...cardData,
+                    quantity: quantity,
+                    rarity: rarity,
+                    number: number
+                });
             }
 
             console.log('Selected cards:', selectedCards);
@@ -8822,6 +8856,7 @@ Firebase Consoleで確認すべき項目:
                                 setCode: cardNumber,
                                 rarity: cardRarity,
                                 quantity: card.quantity,
+                                listType: 'collection',
                                 timestamp: new Date().toISOString()
                             });
                             // Keep only last 1000 entries
