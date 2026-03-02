@@ -3069,12 +3069,13 @@
         
         const renderTable = () => {
             const currentData = getCurrentCollection();
-            const customRarityOrder = JSON.parse(localStorage.getItem('customRarityOrder') || 'null');
+            const defaultRarityOrder = ['N','NR','P','M','R','SR','M+SR','P+SR','UR','P+UR','UL','GR','PG','CR','HR','SE','EXSE','GSE','P+SE','PSE','QCSE','20th','10000th','25SE','GMR'];
+            const customRarityOrder = JSON.parse(localStorage.getItem('customRarityOrder') || 'null') || defaultRarityOrder;
             filteredCardCollection.sort((a, b) => {
                 let [vA, vB] = [a.data[sortConfig.key], b.data[sortConfig.key]];
                 if (sortConfig.key === '枚数') {
                     [vA, vB] = [parseInt(vA, 10) || 0, parseInt(vB, 10) || 0];
-                } else if (sortConfig.key === 'レアリティ' && customRarityOrder) {
+                } else if (sortConfig.key === 'レアリティ') {
                     const idxA = customRarityOrder.indexOf(vA);
                     const idxB = customRarityOrder.indexOf(vB);
                     [vA, vB] = [idxA === -1 ? 9999 : idxA, idxB === -1 ? 9999 : idxB];
@@ -4628,7 +4629,8 @@
             barsContainer.innerHTML = '';
             
             // Define rarity order and colors (拡張可能)
-            const rarityOrder = ['N', 'NR', 'P', 'R', 'SR', 'P+SR', 'UR', 'P+UR', 'UL', 'GR', 'CR', 'HR', 'SE', 'EXSE', 'GSE', 'PSE', 'QCSE', '20SE', '25SE'];
+            const defaultChartRarityOrder = ['N', 'NR', 'P', 'M', 'R', 'SR', 'M+SR', 'P+SR', 'UR', 'P+UR', 'UL', 'GR', 'PG', 'CR', 'HR', 'SE', 'EXSE', 'GSE', 'P+SE', 'PSE', 'QCSE', '20th', '10000th', '20SE', '25SE', 'GMR'];
+            const rarityOrder = JSON.parse(localStorage.getItem('customRarityOrder') || 'null') || defaultChartRarityOrder;
             const rarityColors = {
                 'N': '#868e96',
                 'NR': '#95a8b1',
