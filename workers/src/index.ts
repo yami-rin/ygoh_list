@@ -38,6 +38,13 @@ app.use('*', cors({
 app.get('/api/health', (c) => c.json({ status: 'ok' }));
 
 // Public endpoints (no auth required)
+app.get('/api/rarities', async (c) => {
+  const rows = await c.env.DB.prepare(
+    'SELECT DISTINCT rarity FROM cards WHERE rarity != \'\' ORDER BY rarity'
+  ).all();
+  const rarities = rows.results.map(row => row.rarity as string);
+  return c.json({ rarities });
+});
 app.route('/api/rankings', rankings);
 app.get('/api/profiles/public', async (c) => {
   const rows = await c.env.DB.prepare(

@@ -4619,116 +4619,72 @@
         const updateRarityChart = (distribution, total) => {
             const container = document.getElementById('rarity-chart-container');
             const barsContainer = document.getElementById('rarity-bars');
-            
+
             if (Object.keys(distribution).length === 0) {
                 container.style.display = 'none';
                 return;
             }
-            
+
             container.style.display = 'block';
             barsContainer.innerHTML = '';
-            
-            // Define rarity order and colors (拡張可能)
+
+            // Rarity order from custom settings or default
             const defaultChartRarityOrder = ['N', 'NR', 'P', 'M', 'R', 'SR', 'M+SR', 'P+SR', 'UR', 'P+UR', 'UL', 'GR', 'PG', 'CR', 'HR', 'SE', 'EXSE', 'GSE', 'P+SE', 'PSE', 'QCSE', '20th', '10000th', '20SE', '25SE', 'GMR'];
             const rarityOrder = JSON.parse(localStorage.getItem('customRarityOrder') || 'null') || defaultChartRarityOrder;
             const rarityColors = {
-                'N': '#868e96',
-                'NR': '#95a8b1',
-                'P': '#339af0',
-                'R': '#51cf66',
-                'SR': '#ffd43b',
-                'P+SR': '#ff922b',
-                'UR': '#ff6b6b',
-                'P+UR': '#f06595',
-                'UL': '#cc5de8',
-                'GR': '#845ef7',
-                'CR': '#5c7cfa',
-                'HR': '#4c6ef5',
-                'SE': '#748ffc',
-                'EXSE': '#91a7ff',
-                'GSE': '#dbe4ff',
-                'PSE': '#e7f5ff',
-                'QCSE': '#a5d8ff',
-                '20SE': '#b197fc',  // 20周年SE
-                '25SE': '#ffa94d',  // 25周年SE
-                'default': '#868e96'
+                'N': '#868e96', 'NR': '#95a8b1', 'P': '#339af0', 'M': '#20c997',
+                'R': '#51cf66', 'SR': '#ffd43b', 'M+SR': '#fab005', 'P+SR': '#ff922b',
+                'UR': '#ff6b6b', 'P+UR': '#f06595', 'UL': '#cc5de8', 'GR': '#845ef7',
+                'PG': '#7950f2', 'CR': '#5c7cfa', 'HR': '#4c6ef5', 'SE': '#748ffc',
+                'EXSE': '#91a7ff', 'GSE': '#dbe4ff', 'PSE': '#e7f5ff', 'QCSE': '#a5d8ff',
+                '20th': '#b197fc', '10000th': '#e599f7', '20SE': '#b197fc', '25SE': '#ffa94d',
+                'GMR': '#ffd700', 'default': '#868e96'
             };
-            
-            // Get max count for percentage calculation
-            const maxCount = Math.max(...Object.values(distribution));
-
-            // Track which rarities have been displayed
-            const displayedRarities = new Set();
-
-            // Display in defined order (既知のレアリティ)
-            rarityOrder.forEach(rarityKey => {
-                // Check if this rarity exists in distribution
-                Object.entries(distribution).forEach(([rarity, count]) => {
-                    if (!displayedRarities.has(rarity) &&
-                        (rarity === rarityKey || rarity.toUpperCase() === rarityKey.toUpperCase())) {
-
-                        displayedRarities.add(rarity);
-                        const percentage = (count / maxCount) * 100;
-                        const color = rarityColors[rarityKey] || rarityColors.default;
-
-                        const bar = document.createElement('div');
-                        bar.className = 'rarity-bar';
-                        bar.style.setProperty('--bar-height', `${percentage}%`);
-                        bar.style.setProperty('--bar-color', color);
-                        bar.innerHTML = `
-                            <span class="rarity-bar-count">${count}</span>
-                            <span class="rarity-bar-label" title="${escapeHtml(rarity)}">${escapeHtml(rarity)}</span>
-                        `;
-                        barsContainer.appendChild(bar);
-                    }
-                });
-            });
-            
-            // Add any rarities not in the defined order
-            const newRarityColors = [
-                '#22b8cf', // シアン
-                '#15aabf', // ダークシアン
-                '#1098ad', // ディープシアン
-                '#0c8599', // ネイビーシアン
-                '#94d82d', // ライム
-                '#82c91e', // グリーンライム
-                '#74b816', // ダークライム
-                '#66a80f', // ディープライム
-                '#fab005', // ゴールド
-                '#fd7e14', // オレンジ
-                '#f76707', // ダークオレンジ
-                '#e8590c', // ディープオレンジ
+            const fallbackColors = [
+                '#22b8cf', '#15aabf', '#1098ad', '#0c8599',
+                '#94d82d', '#82c91e', '#74b816', '#66a80f',
+                '#fab005', '#fd7e14', '#f76707', '#e8590c',
             ];
-            let newColorIndex = 0;
-            const assignedColors = {};  // 新規レアリティの色を記憶
+            let fallbackIdx = 0;
 
-            Object.entries(distribution).forEach(([rarity, count]) => {
-                // 既に表示済みのレアリティはスキップ
-                if (displayedRarities.has(rarity)) {
-                    return;
-                }
+            // Build index map for fast lookup (case-insensitive)
+            const orderMap = new Map();
+            rarityOrder.forEach((r, i) => orderMap.set(r.toUpperCase(), i));
 
-                if (count > 0) {
-                    // 新規レアリティに色を割り当て（一度割り当てたら同じ色を使う）
-                    if (!assignedColors[rarity]) {
-                        assignedColors[rarity] = newRarityColors[newColorIndex % newRarityColors.length];
-                        newColorIndex++;
+            // Sort distribution entries by custom rarity order
+            const entries = Object.entries(distribution)
+                .filter(([, count]) => count > 0)
+                .sort((a, b) => {
+                    const idxA = orderMap.has(a[0].toUpperCase()) ? orderMap.get(a[0].toUpperCase()) : 9999;
+                    const idxB = orderMap.has(b[0].toUpperCase()) ? orderMap.get(b[0].toUpperCase()) : 9999;
+                    return idxA - idxB;
+                });
+
+            const maxCount = Math.max(...entries.map(([, c]) => c));
+
+            entries.forEach(([rarity, count]) => {
+                const percentage = (count / maxCount) * 100;
+                let color = rarityColors[rarity] || rarityColors[rarity.toUpperCase()];
+                if (!color) {
+                    // Try matching against order keys
+                    for (const [key, val] of Object.entries(rarityColors)) {
+                        if (key.toUpperCase() === rarity.toUpperCase()) { color = val; break; }
                     }
-
-                    const percentage = (count / maxCount) * 100;
-                    const bar = document.createElement('div');
-                    bar.className = 'rarity-bar';
-                    bar.style.setProperty('--bar-height', `${percentage}%`);
-                    bar.style.setProperty('--bar-color', assignedColors[rarity]);
-                    bar.innerHTML = `
-                        <span class="rarity-bar-count">${count}</span>
-                        <span class="rarity-bar-label" title="${escapeHtml(rarity)}">${escapeHtml(rarity.substring(0, 4))}</span>
-                    `;
-                    barsContainer.appendChild(bar);
-
-                    // 新規レアリティをコンソールに記録（デバッグ用）
-                    console.log(`新規レアリティ検出: ${rarity} (${count}枚)`);
                 }
+                if (!color) {
+                    color = fallbackColors[fallbackIdx % fallbackColors.length];
+                    fallbackIdx++;
+                }
+
+                const bar = document.createElement('div');
+                bar.className = 'rarity-bar';
+                bar.style.setProperty('--bar-height', `${percentage}%`);
+                bar.style.setProperty('--bar-color', color);
+                bar.innerHTML = `
+                    <span class="rarity-bar-count">${count}</span>
+                    <span class="rarity-bar-label" title="${escapeHtml(rarity)}">${escapeHtml(rarity)}</span>
+                `;
+                barsContainer.appendChild(bar);
             });
         };
         

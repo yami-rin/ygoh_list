@@ -260,6 +260,14 @@ class CardManagerAPI {
         return result.data;
     }
 
+    // ========== Rarities ==========
+
+    /** Get all distinct rarities across all users (public, no auth) */
+    async getAllRarities() {
+        const data = await this._fetch('/api/rarities');
+        return data.rarities;
+    }
+
     // ========== Rankings ==========
 
     async getRankings() {

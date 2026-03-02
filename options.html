@@ -353,7 +353,9 @@
     </div>
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-    <script>
+    <script type="module">
+        import { api } from './api-client.js';
+
         const DEFAULT_RARITY_ORDER = [
             'N','NR','P','M','R','SR','M+SR','P+SR','UR','P+UR','UL',
             'GR','PG','CR','HR','SE','EXSE','GSE','P+SE','PSE','QCSE',
@@ -391,7 +393,7 @@
         let currentOrder = [];
         let dragSrcIndex = null;
 
-        function loadOrder() {
+        async function loadOrder() {
             const saved = localStorage.getItem('customRarityOrder');
             if (saved) {
                 try {
@@ -403,6 +405,21 @@
                 currentOrder = [...DEFAULT_RARITY_ORDER];
             }
             renderList();
+
+            // Fetch all rarities from all users via API and add missing ones
+            try {
+                const allRarities = await api.getAllRarities();
+                let added = false;
+                for (const r of allRarities) {
+                    if (r && !currentOrder.includes(r)) {
+                        currentOrder.push(r);
+                        added = true;
+                    }
+                }
+                if (added) renderList();
+            } catch (e) {
+                console.warn('レアリティ一覧の取得に失敗:', e);
+            }
         }
 
         function renderList() {
@@ -559,8 +576,13 @@
 
         function resetOrder() {
             currentOrder = [...DEFAULT_RARITY_ORDER];
-            renderList();
+            // Re-fetch API rarities after reset so missing ones get re-added
+            loadOrder();
         }
+
+        // Expose to onclick handlers
+        window.saveOrder = saveOrder;
+        window.resetOrder = resetOrder;
 
         // Init
         loadOrder();
