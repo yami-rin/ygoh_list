@@ -1,0 +1,569 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>オプション - Card Manager</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css">
+    <link rel="stylesheet" href="mobile-responsive.css">
+    <style>
+        body {
+            background-color: #f8f9fa;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        /* Navigation bar */
+        .navbar-custom {
+            background: rgba(255, 255, 255, 0.98);
+            backdrop-filter: blur(10px);
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            padding: 0.75rem 0;
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+        }
+
+        .navbar-brand {
+            font-weight: 700;
+            font-size: 1.3rem;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .navbar-brand i {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            font-size: 1.5rem;
+        }
+
+        .nav-link-custom {
+            color: #2c3e50;
+            font-weight: 500;
+            padding: 0.5rem 1rem;
+            margin: 0 0.25rem;
+            border-radius: 8px;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .nav-link-custom:hover {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            transform: translateY(-2px);
+        }
+
+        .nav-link-custom.active {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            font-weight: 600;
+        }
+
+        .nav-link-custom i {
+            font-size: 1.1rem;
+        }
+
+        .header-section {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 3rem 0 2.5rem 0;
+            margin-bottom: 2rem;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .header-section::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: radial-gradient(circle, rgba(255,255,255,0.1) 0%, transparent 70%);
+            animation: pulse 4s ease-in-out infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); opacity: 0.5; }
+            50% { transform: scale(1.1); opacity: 0.8; }
+        }
+
+        .header-section h1 {
+            font-weight: 700;
+            font-size: 2rem;
+            position: relative;
+        }
+
+        .header-subtitle {
+            opacity: 0.9;
+            font-size: 1rem;
+            position: relative;
+        }
+
+        /* Settings card */
+        .settings-card {
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 2px 15px rgba(0,0,0,0.08);
+            padding: 2rem;
+            margin-bottom: 2rem;
+        }
+
+        .settings-card h5 {
+            font-weight: 700;
+            color: #2c3e50;
+            margin-bottom: 0.5rem;
+        }
+
+        .settings-card .section-desc {
+            color: #6c757d;
+            font-size: 0.9rem;
+            margin-bottom: 1.5rem;
+        }
+
+        /* Rarity list */
+        .rarity-list {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+        }
+
+        .rarity-item {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            padding: 0.65rem 1rem;
+            margin-bottom: 4px;
+            background: #f8f9fa;
+            border: 1px solid #e9ecef;
+            border-radius: 8px;
+            cursor: grab;
+            transition: background 0.15s, box-shadow 0.15s, transform 0.15s;
+            user-select: none;
+        }
+
+        .rarity-item:hover {
+            background: #e9ecef;
+        }
+
+        .rarity-item:active {
+            cursor: grabbing;
+        }
+
+        .rarity-item.dragging {
+            opacity: 0.4;
+            background: #dee2e6;
+        }
+
+        .rarity-item.drag-over {
+            border-top: 3px solid #667eea;
+            padding-top: calc(0.65rem - 2px);
+        }
+
+        .drag-handle {
+            color: #adb5bd;
+            font-size: 1.2rem;
+            flex-shrink: 0;
+        }
+
+        .rarity-rank {
+            width: 28px;
+            height: 28px;
+            border-radius: 50%;
+            background: #e9ecef;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.75rem;
+            font-weight: 700;
+            color: #495057;
+            flex-shrink: 0;
+        }
+
+        .rarity-badge {
+            display: inline-block;
+            padding: 0.25rem 0.75rem;
+            border-radius: 20px;
+            font-weight: 600;
+            font-size: 0.85rem;
+            color: white;
+            min-width: 60px;
+            text-align: center;
+        }
+
+        .rarity-label {
+            color: #495057;
+            font-size: 0.85rem;
+            margin-left: auto;
+        }
+
+        /* Buttons */
+        .btn-actions {
+            display: flex;
+            gap: 0.75rem;
+            margin-top: 1.5rem;
+            flex-wrap: wrap;
+        }
+
+        .btn-save {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            padding: 0.6rem 2rem;
+            border-radius: 8px;
+            font-weight: 600;
+            transition: all 0.3s ease;
+        }
+
+        .btn-save:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 15px rgba(102, 126, 234, 0.4);
+            color: white;
+        }
+
+        .btn-reset {
+            background: white;
+            color: #6c757d;
+            border: 1px solid #dee2e6;
+            padding: 0.6rem 1.5rem;
+            border-radius: 8px;
+            font-weight: 500;
+            transition: all 0.3s ease;
+        }
+
+        .btn-reset:hover {
+            background: #f8f9fa;
+            color: #495057;
+            border-color: #adb5bd;
+        }
+
+        /* Toast */
+        .toast-container {
+            position: fixed;
+            top: 80px;
+            right: 20px;
+            z-index: 9999;
+        }
+
+        .toast-success {
+            background: linear-gradient(135deg, #51cf66, #40c057);
+            color: white;
+            border: none;
+            border-radius: 10px;
+            box-shadow: 0 4px 15px rgba(81, 207, 102, 0.3);
+        }
+    </style>
+</head>
+<body>
+    <!-- Navigation -->
+    <nav class="navbar navbar-expand-lg navbar-custom">
+        <div class="container">
+            <a class="navbar-brand" href="index.html">
+                <i class="bi bi-layers-fill"></i>
+                Card Manager
+            </a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav ms-auto">
+                    <li class="nav-item">
+                        <a class="nav-link-custom" href="index.html">
+                            <i class="bi bi-house-door-fill"></i>
+                            ホーム
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link-custom" href="card_list.html">
+                            <i class="bi bi-list-ul"></i>
+                            カード管理
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link-custom" href="card_gallery.html">
+                            <i class="bi bi-grid-3x3-gap-fill"></i>
+                            ギャラリー
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link-custom" href="battle_records.html">
+                            <i class="bi bi-trophy-fill"></i>
+                            対戦記録
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link-custom active" href="options.html">
+                            <i class="bi bi-gear-fill"></i>
+                            オプション
+                        </a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Header -->
+    <div class="header-section">
+        <div class="container text-center">
+            <h1>
+                <i class="bi bi-gear-fill"></i> オプション
+            </h1>
+            <p class="header-subtitle">
+                <i class="bi bi-sliders"></i> 各種設定をカスタマイズ
+            </p>
+        </div>
+    </div>
+
+    <!-- Main Content -->
+    <div class="container" style="max-width: 700px;">
+        <div class="settings-card">
+            <h5><i class="bi bi-sort-numeric-down"></i> レアリティ順序設定</h5>
+            <p class="section-desc">
+                ドラッグ&ドロップでレアリティの並び順を変更できます。上が低レアリティ、下が高レアリティです。<br>
+                カード管理・ギャラリーのレアリティソートに反映されます。
+            </p>
+            <ul class="rarity-list" id="rarityList"></ul>
+            <div class="btn-actions">
+                <button class="btn btn-save" id="btnSave" onclick="saveOrder()">
+                    <i class="bi bi-check-lg"></i> 保存
+                </button>
+                <button class="btn btn-reset" onclick="resetOrder()">
+                    <i class="bi bi-arrow-counterclockwise"></i> デフォルトに戻す
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Toast -->
+    <div class="toast-container">
+        <div class="toast toast-success" id="saveToast" role="alert" aria-live="assertive" aria-atomic="true" data-bs-delay="2500">
+            <div class="toast-body d-flex align-items-center gap-2">
+                <i class="bi bi-check-circle-fill"></i>
+                <span>レアリティ順序を保存しました</span>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        const DEFAULT_RARITY_ORDER = [
+            'N','NR','P','M','R','SR','M+SR','P+SR','UR','P+UR','UL',
+            'GR','PG','CR','HR','SE','EXSE','GSE','P+SE','PSE','QCSE',
+            '20th','10000th','25SE','GMR'
+        ];
+
+        const RARITY_COLORS = {
+            'N': '#868e96',
+            'NR': '#95a8b1',
+            'P': '#339af0',
+            'M': '#20c997',
+            'R': '#51cf66',
+            'SR': '#ffd43b',
+            'M+SR': '#fab005',
+            'P+SR': '#ff922b',
+            'UR': '#ff6b6b',
+            'P+UR': '#f06595',
+            'UL': '#cc5de8',
+            'GR': '#845ef7',
+            'PG': '#7950f2',
+            'CR': '#5c7cfa',
+            'HR': '#4c6ef5',
+            'SE': '#748ffc',
+            'EXSE': '#91a7ff',
+            'GSE': '#dbe4ff',
+            'P+SE': '#a5d8ff',
+            'PSE': '#e7f5ff',
+            'QCSE': '#74c0fc',
+            '20th': '#b197fc',
+            '10000th': '#e599f7',
+            '25SE': '#ffa94d',
+            'GMR': '#ffd700'
+        };
+
+        let currentOrder = [];
+        let dragSrcIndex = null;
+
+        function loadOrder() {
+            const saved = localStorage.getItem('customRarityOrder');
+            if (saved) {
+                try {
+                    currentOrder = JSON.parse(saved);
+                } catch {
+                    currentOrder = [...DEFAULT_RARITY_ORDER];
+                }
+            } else {
+                currentOrder = [...DEFAULT_RARITY_ORDER];
+            }
+            renderList();
+        }
+
+        function renderList() {
+            const list = document.getElementById('rarityList');
+            list.innerHTML = '';
+            currentOrder.forEach((rarity, idx) => {
+                const li = document.createElement('li');
+                li.className = 'rarity-item';
+                li.draggable = true;
+                li.dataset.index = idx;
+
+                const color = RARITY_COLORS[rarity] || '#868e96';
+                // For very light badge colors, use dark text
+                const textColor = ['GSE','PSE','P+SE','E7F5FF'].includes(rarity) ? '#333' : '#fff';
+
+                li.innerHTML = `
+                    <span class="drag-handle"><i class="bi bi-grip-vertical"></i></span>
+                    <span class="rarity-rank">${idx + 1}</span>
+                    <span class="rarity-badge" style="background:${color};color:${textColor}">${rarity}</span>
+                `;
+
+                // Drag events
+                li.addEventListener('dragstart', handleDragStart);
+                li.addEventListener('dragover', handleDragOver);
+                li.addEventListener('dragenter', handleDragEnter);
+                li.addEventListener('dragleave', handleDragLeave);
+                li.addEventListener('drop', handleDrop);
+                li.addEventListener('dragend', handleDragEnd);
+
+                // Touch events for mobile
+                li.addEventListener('touchstart', handleTouchStart, { passive: false });
+                li.addEventListener('touchmove', handleTouchMove, { passive: false });
+                li.addEventListener('touchend', handleTouchEnd);
+
+                list.appendChild(li);
+            });
+        }
+
+        // ---- Drag & Drop (desktop) ----
+        function handleDragStart(e) {
+            dragSrcIndex = parseInt(this.dataset.index);
+            this.classList.add('dragging');
+            e.dataTransfer.effectAllowed = 'move';
+        }
+
+        function handleDragOver(e) {
+            e.preventDefault();
+            e.dataTransfer.dropEffect = 'move';
+        }
+
+        function handleDragEnter(e) {
+            e.preventDefault();
+            this.classList.add('drag-over');
+        }
+
+        function handleDragLeave() {
+            this.classList.remove('drag-over');
+        }
+
+        function handleDrop(e) {
+            e.preventDefault();
+            this.classList.remove('drag-over');
+            const targetIndex = parseInt(this.dataset.index);
+            if (dragSrcIndex !== null && dragSrcIndex !== targetIndex) {
+                const item = currentOrder.splice(dragSrcIndex, 1)[0];
+                currentOrder.splice(targetIndex, 0, item);
+                renderList();
+            }
+        }
+
+        function handleDragEnd() {
+            document.querySelectorAll('.rarity-item').forEach(el => {
+                el.classList.remove('dragging', 'drag-over');
+            });
+        }
+
+        // ---- Touch drag (mobile) ----
+        let touchSrcIndex = null;
+        let touchClone = null;
+        let touchStartY = 0;
+
+        function handleTouchStart(e) {
+            const touch = e.touches[0];
+            touchSrcIndex = parseInt(this.dataset.index);
+            touchStartY = touch.clientY;
+
+            // Create a floating clone
+            touchClone = this.cloneNode(true);
+            touchClone.style.position = 'fixed';
+            touchClone.style.left = this.getBoundingClientRect().left + 'px';
+            touchClone.style.top = touch.clientY - 20 + 'px';
+            touchClone.style.width = this.offsetWidth + 'px';
+            touchClone.style.opacity = '0.85';
+            touchClone.style.zIndex = '10000';
+            touchClone.style.pointerEvents = 'none';
+            touchClone.style.boxShadow = '0 4px 15px rgba(0,0,0,0.2)';
+            touchClone.style.transform = 'scale(1.02)';
+            document.body.appendChild(touchClone);
+
+            this.classList.add('dragging');
+        }
+
+        function handleTouchMove(e) {
+            e.preventDefault();
+            const touch = e.touches[0];
+            if (touchClone) {
+                touchClone.style.top = touch.clientY - 20 + 'px';
+            }
+
+            // Find target element under touch
+            const items = document.querySelectorAll('.rarity-item');
+            items.forEach(item => item.classList.remove('drag-over'));
+
+            const target = document.elementFromPoint(touch.clientX, touch.clientY);
+            if (target) {
+                const li = target.closest('.rarity-item');
+                if (li && parseInt(li.dataset.index) !== touchSrcIndex) {
+                    li.classList.add('drag-over');
+                }
+            }
+        }
+
+        function handleTouchEnd(e) {
+            if (touchClone) {
+                document.body.removeChild(touchClone);
+                touchClone = null;
+            }
+
+            const items = document.querySelectorAll('.rarity-item');
+            let targetIndex = null;
+            items.forEach(item => {
+                if (item.classList.contains('drag-over')) {
+                    targetIndex = parseInt(item.dataset.index);
+                }
+                item.classList.remove('dragging', 'drag-over');
+            });
+
+            if (touchSrcIndex !== null && targetIndex !== null && touchSrcIndex !== targetIndex) {
+                const item = currentOrder.splice(touchSrcIndex, 1)[0];
+                currentOrder.splice(targetIndex, 0, item);
+                renderList();
+            } else {
+                items.forEach(item => item.classList.remove('dragging'));
+            }
+            touchSrcIndex = null;
+        }
+
+        // ---- Save / Reset ----
+        function saveOrder() {
+            localStorage.setItem('customRarityOrder', JSON.stringify(currentOrder));
+            const toast = new bootstrap.Toast(document.getElementById('saveToast'));
+            toast.show();
+        }
+
+        function resetOrder() {
+            currentOrder = [...DEFAULT_RARITY_ORDER];
+            renderList();
+        }
+
+        // Init
+        loadOrder();
+    </script>
+</body>
+</html>

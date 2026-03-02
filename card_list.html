@@ -3069,10 +3069,15 @@
         
         const renderTable = () => {
             const currentData = getCurrentCollection();
+            const customRarityOrder = JSON.parse(localStorage.getItem('customRarityOrder') || 'null');
             filteredCardCollection.sort((a, b) => {
                 let [vA, vB] = [a.data[sortConfig.key], b.data[sortConfig.key]];
                 if (sortConfig.key === '枚数') {
                     [vA, vB] = [parseInt(vA, 10) || 0, parseInt(vB, 10) || 0];
+                } else if (sortConfig.key === 'レアリティ' && customRarityOrder) {
+                    const idxA = customRarityOrder.indexOf(vA);
+                    const idxB = customRarityOrder.indexOf(vB);
+                    [vA, vB] = [idxA === -1 ? 9999 : idxA, idxB === -1 ? 9999 : idxB];
                 } else {
                     [vA, vB] = [String(vA || '').toLowerCase(), String(vB || '').toLowerCase()];
                 }
