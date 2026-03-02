@@ -4719,6 +4719,9 @@
         const normalizeForSearch = (text) => {
             if (!text) return '';
 
+            // Decode HTML entities (e.g., &ldquo; → ", &rdquo; → ")
+            text = decodeHtmlEntities(text);
+
             // Convert to lowercase
             text = text.toLowerCase();
 
@@ -9061,6 +9064,7 @@ Firebase Consoleで確認すべき項目:
                     pageCards.forEach(card => {
                         const tags = card.data.tags || [];
                         const tagsHtml = tags.map(t => `<span class="badge bg-info text-dark me-1" style="font-size:0.7rem;">${escapeHtml(t)}</span>`).join('');
+                        const decodedName = decodeHtmlEntities(card.data['名前']);
 
                         const button = document.createElement('button');
                         button.type = 'button';
@@ -9068,7 +9072,7 @@ Firebase Consoleで確認すべき項目:
                         button.innerHTML = `
                             <div class="d-flex justify-content-between align-items-center">
                                 <div>
-                                    <strong>${escapeHtml(card.data['名前'])}</strong>
+                                    <strong>${escapeHtml(decodedName)}</strong>
                                     ${card.data['型番'] ? `<small class="text-muted ms-2">${escapeHtml(card.data['型番'])}</small>` : ''}
                                     ${card.data['レアリティ'] ? `<span class="badge bg-secondary ms-2">${escapeHtml(card.data['レアリティ'])}</span>` : ''}
                                     ${tagsHtml}
@@ -9077,7 +9081,7 @@ Firebase Consoleで確認すべき項目:
                             </div>
                         `;
                         button.onclick = () => {
-                            document.getElementById('name').value = card.data['名前'];
+                            document.getElementById('name').value = decodedName;
                             document.getElementById('set_code').value = card.data['型番'] || '';
                             document.getElementById('rarity').value = card.data['レアリティ'] || '';
                             document.getElementById('quantity').value = 1;

@@ -6116,13 +6116,13 @@
                         <div class="card h-100">
                             <div class="card-img-wrapper" style="position: relative; padding-top: 145%; background: #f0f0f0;">
                                 <img src="" data-card-id="${cardId}" data-ciid="${card.data.ciid || '1'}"
-                                     class="view-card-img" alt="${escapeHtml(card.data['名前'] || '')}"
+                                     class="view-card-img" alt="${escapeHtml(decodeHtmlEntities(card.data['名前'] || ''))}"
                                      style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; object-fit: cover;"
                                      loading="lazy">
                             </div>
                             <div class="card-body p-2">
-                                <p class="card-title small mb-1 text-truncate" title="${escapeHtml(card.data['名前'] || '')}">
-                                    ${escapeHtml(card.data['名前'] || '不明')}
+                                <p class="card-title small mb-1 text-truncate" title="${escapeHtml(decodeHtmlEntities(card.data['名前'] || ''))}">
+                                    ${escapeHtml(decodeHtmlEntities(card.data['名前'] || '不明'))}
                                 </p>
                                 <small class="text-muted">
                                     ${escapeHtml(card.data['型番'] || '')} |
