@@ -1681,6 +1681,10 @@
                     <label class="form-check-label" for="use-tap-quantity-toggle">枚数入力をタップ式にする</label>
                 </div>
                 <div class="form-check form-switch mb-3">
+                    <input class="form-check-input" type="checkbox" role="switch" id="inline-qty-btn-toggle">
+                    <label class="form-check-label" for="inline-qty-btn-toggle">枚数の±ボタンを表示する</label>
+                </div>
+                <div class="form-check form-switch mb-3">
                     <input class="form-check-input" type="checkbox" role="switch" id="auto-save-toggle">
                     <label class="form-check-label" for="auto-save-toggle">データを自動保存する（5分ごと）</label>
                 </div>
@@ -3105,6 +3109,7 @@
         const showSearchHistoryToggle = document.getElementById('show-search-history-toggle');
         const showRegistrationHistoryToggle = document.getElementById('show-registration-history-toggle');
         const useTapQuantityToggle = document.getElementById('use-tap-quantity-toggle');
+        const inlineQtyBtnToggle = document.getElementById('inline-qty-btn-toggle');
 
         const showLoading = (show) => { loadingOverlay.style.display = show ? 'flex' : 'none'; };
         
@@ -3166,6 +3171,7 @@
             } else {
                 // Check if mobile for simplified view
                 const isMobile = window.innerWidth <= 768;
+                const showInlineQtyBtn = localStorage.getItem('inlineQtyBtn') !== 'false';
 
                 paginatedItems.forEach(card => {
                     const tr = document.createElement('tr');
@@ -3183,9 +3189,9 @@
                             <td>${escapeHtml(card.data['型番'])}</td>
                             <td>${escapeHtml(card.data['レアリティ'])}</td>
                             <td class="text-nowrap">
-                                <button class="btn btn-outline-secondary btn-sm qty-minus-btn" data-id="${escapeHtml(card.id)}" style="padding:0 0.4rem;line-height:1.2;">-</button>
-                                <span class="qty-display" data-id="${escapeHtml(card.id)}">${escapeHtml(String(card.data['枚数']))}</span>
-                                <button class="btn btn-outline-secondary btn-sm qty-plus-btn" data-id="${escapeHtml(card.id)}" style="padding:0 0.4rem;line-height:1.2;">+</button>
+                                ${showInlineQtyBtn ? `<button class="btn btn-outline-secondary btn-sm qty-minus-btn" data-id="${escapeHtml(card.id)}" style="padding:0 0.4rem;line-height:1.2;">-</button>` : ''}
+                                <span class="qty-display" data-id="${escapeHtml(card.id)}" style="display:inline-block;min-width:2.5em;text-align:center;">${escapeHtml(String(card.data['枚数']))}</span>
+                                ${showInlineQtyBtn ? `<button class="btn btn-outline-secondary btn-sm qty-plus-btn" data-id="${escapeHtml(card.id)}" style="padding:0 0.4rem;line-height:1.2;">+</button>` : ''}
                             </td>
                             <td>
                                 <button class="btn btn-sm btn-outline-info view-detail-btn" data-id="${escapeHtml(card.id)}" data-card-data='${JSON.stringify(card.data).replace(/'/g, "&#39;")}'>詳細</button>
@@ -3201,9 +3207,9 @@
                             <td>${escapeHtml(card.data['型番'])}</td>
                             <td>${escapeHtml(card.data['レアリティ'])}</td>
                             <td class="text-nowrap">
-                                <button class="btn btn-outline-secondary btn-sm qty-minus-btn" data-id="${escapeHtml(card.id)}" style="padding:0 0.4rem;line-height:1.2;">-</button>
-                                <span class="qty-display" data-id="${escapeHtml(card.id)}">${escapeHtml(String(card.data['枚数']))}</span>
-                                <button class="btn btn-outline-secondary btn-sm qty-plus-btn" data-id="${escapeHtml(card.id)}" style="padding:0 0.4rem;line-height:1.2;">+</button>
+                                ${showInlineQtyBtn ? `<button class="btn btn-outline-secondary btn-sm qty-minus-btn" data-id="${escapeHtml(card.id)}" style="padding:0 0.4rem;line-height:1.2;">-</button>` : ''}
+                                <span class="qty-display" data-id="${escapeHtml(card.id)}" style="display:inline-block;min-width:2.5em;text-align:center;">${escapeHtml(String(card.data['枚数']))}</span>
+                                ${showInlineQtyBtn ? `<button class="btn btn-outline-secondary btn-sm qty-plus-btn" data-id="${escapeHtml(card.id)}" style="padding:0 0.4rem;line-height:1.2;">+</button>` : ''}
                             </td>
                             <td class="tag-cell d-none d-sm-table-cell" title="${escapeHtml(tags)}">
                                 <span class="tags-display" data-card-id="${escapeHtml(card.id)}">${tags}</span>
@@ -7976,6 +7982,7 @@ Firebase Consoleで確認すべき項目:
         showSearchHistoryToggle.checked = localStorage.getItem('showSearchHistory') === 'true';
         showRegistrationHistoryToggle.checked = localStorage.getItem('showRegistrationHistory') === 'true';
         useTapQuantityToggle.checked = localStorage.getItem('useTapQuantity') === 'true';
+        inlineQtyBtnToggle.checked = localStorage.getItem('inlineQtyBtn') !== 'false';
 
         showSearchHistoryToggle.addEventListener('change', (e) => {
             localStorage.setItem('showSearchHistory', e.target.checked);
@@ -7990,6 +7997,11 @@ Firebase Consoleで確認すべき項目:
         useTapQuantityToggle.addEventListener('change', (e) => {
             localStorage.setItem('useTapQuantity', e.target.checked);
             updateQuantityInputMode();
+        });
+
+        inlineQtyBtnToggle.addEventListener('change', (e) => {
+            localStorage.setItem('inlineQtyBtn', e.target.checked);
+            renderTable();
         });
         
         // Previous search button
