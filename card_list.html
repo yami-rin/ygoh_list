@@ -3079,6 +3079,10 @@
                     const idxA = customRarityOrder.indexOf(vA);
                     const idxB = customRarityOrder.indexOf(vB);
                     [vA, vB] = [idxA === -1 ? 9999 : idxA, idxB === -1 ? 9999 : idxB];
+                } else if (sortConfig.key === '名前') {
+                    vA = (cardDetailsMap.get(String(vA || ''))?.reading) || String(vA || '');
+                    vB = (cardDetailsMap.get(String(vB || ''))?.reading) || String(vB || '');
+                    [vA, vB] = [vA.toLowerCase(), vB.toLowerCase()];
                 } else {
                     [vA, vB] = [String(vA || '').toLowerCase(), String(vB || '').toLowerCase()];
                 }
@@ -9048,8 +9052,12 @@ Firebase Consoleで確認すべき項目:
                 const localListGroup = document.createElement('div');
                 localListGroup.className = 'list-group mb-3';
 
-                // Sort by name (50音順)
-                matchingCards.sort((a, b) => (a.data['名前'] || '').localeCompare(b.data['名前'] || '', 'ja'));
+                // Sort by name (50音順) using reading from master CSV
+                matchingCards.sort((a, b) => {
+                    const readA = (cardDetailsMap.get(a.data['名前'] || '')?.reading) || a.data['名前'] || '';
+                    const readB = (cardDetailsMap.get(b.data['名前'] || '')?.reading) || b.data['名前'] || '';
+                    return readA.localeCompare(readB, 'ja');
+                });
 
                 const ITEMS_PER_PAGE = 10;
                 let localCardPage = 1;

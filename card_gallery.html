@@ -3621,8 +3621,8 @@
 
                 switch (field) {
                     case 'name':
-                        valA = a.data['名前'] || '';
-                        valB = b.data['名前'] || '';
+                        valA = (cardDetailsMap.get(a.data['名前'])?.reading) || a.data['名前'] || '';
+                        valB = (cardDetailsMap.get(b.data['名前'])?.reading) || b.data['名前'] || '';
                         break;
                     case 'code':
                         valA = a.data['型番'] || '';
@@ -6060,7 +6060,9 @@
             // Sort
             viewingFilteredCards.sort((a, b) => {
                 if (sortBy === 'name') {
-                    return (a.data['名前'] || '').localeCompare(b.data['名前'] || '');
+                    const readA = (cardDetailsMap.get(a.data['名前'])?.reading) || a.data['名前'] || '';
+                    const readB = (cardDetailsMap.get(b.data['名前'])?.reading) || b.data['名前'] || '';
+                    return readA.localeCompare(readB, 'ja');
                 } else if (sortBy === 'quantity-desc') {
                     return (b.data['枚数'] || 0) - (a.data['枚数'] || 0);
                 } else if (sortBy === 'rarity') {
