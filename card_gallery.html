@@ -2305,6 +2305,9 @@
                 </div>
 
                 <div class="ms-auto d-flex gap-2">
+                    <button class="btn btn-success btn-sm" id="save-grid-image-btn" title="現在の検索結果を画像で保存">
+                        <i class="bi bi-camera"></i> 画像保存
+                    </button>
                     <button class="btn btn-warning btn-sm" id="deck-manager-btn">
                         <i class="bi bi-stack"></i> デッキ管理
                     </button>
@@ -3661,9 +3664,12 @@
             });
         };
 
+        // 末尾0のとき表示枚数を+5にするヘルパー（表記はそのまま）
+        const getActualItemsPerPage = () => itemsPerPage % 10 === 0 ? itemsPerPage + 5 : itemsPerPage;
+
         // Handle drag start for cards
         window.handleDragStart = (event, index) => {
-            const startIndex = (currentPage - 1) * itemsPerPage;
+            const startIndex = (currentPage - 1) * getActualItemsPerPage();
             const cardIndex = startIndex + index;
             draggedCard = filteredCards[cardIndex];
             event.dataTransfer.effectAllowed = 'copy';
@@ -3679,8 +3685,8 @@
             const grid = document.getElementById('card-grid');
             grid.className = `card-grid size-${currentGridSize}`;
 
-            const startIndex = (currentPage - 1) * itemsPerPage;
-            const endIndex = startIndex + itemsPerPage;
+            const startIndex = (currentPage - 1) * getActualItemsPerPage();
+            const endIndex = startIndex + getActualItemsPerPage();
             const pageCards = filteredCards.slice(startIndex, endIndex);
 
             if (pageCards.length === 0) {
@@ -3871,7 +3877,7 @@
                     touchMoved = false;
 
                     // Set dragged card
-                    const startIndex = (currentPage - 1) * itemsPerPage;
+                    const startIndex = (currentPage - 1) * getActualItemsPerPage();
                     const cardIndex = startIndex + index;
                     draggedCard = filteredCards[cardIndex];
                 }, { passive: true });
@@ -3903,7 +3909,7 @@
 
         // Update pagination
         const updatePagination = () => {
-            const totalPages = Math.ceil(filteredCards.length / itemsPerPage);
+            const totalPages = Math.ceil(filteredCards.length / getActualItemsPerPage());
             const paginationHtml = `
                 <button class="btn btn-outline-primary btn-sm" ${currentPage <= 1 ? 'disabled' : ''} onclick="changePage(${currentPage - 1})">
                     <i class="bi bi-chevron-left"></i> 前へ
@@ -3925,7 +3931,7 @@
             const totalQuantity = allCards.reduce((sum, card) => sum + (parseInt(card.data['枚数']) || 0), 0);
             const uniqueCount = allCards.length;
             const filteredCount = filteredCards.length;
-            const totalPages = Math.ceil(filteredCards.length / itemsPerPage);
+            const totalPages = Math.ceil(filteredCards.length / getActualItemsPerPage());
 
             document.getElementById('total-cards').textContent = totalQuantity;
             document.getElementById('unique-cards').textContent = uniqueCount;
@@ -5215,6 +5221,38 @@
                 // Restore original width
                 content.style.width = originalWidth;
                 content.style.maxWidth = originalMaxWidth;
+            }
+        });
+
+        // Save card grid as image
+        document.getElementById('save-grid-image-btn').addEventListener('click', async () => {
+            const btn = document.getElementById('save-grid-image-btn');
+            const originalHtml = btn.innerHTML;
+            btn.disabled = true;
+            btn.innerHTML = '<span class="spinner-border spinner-border-sm"></span>';
+            const grid = document.getElementById('card-grid');
+            try {
+                const canvas = await html2canvas(grid, {
+                    backgroundColor: getComputedStyle(document.documentElement).getPropertyValue('--bs-body-bg') || '#ffffff',
+                    logging: false,
+                    useCORS: true,
+                    scale: 2
+                });
+                const date = new Date().toISOString().slice(0, 10).replace(/-/g, '');
+                canvas.toBlob((blob) => {
+                    const url = URL.createObjectURL(blob);
+                    const a = document.createElement('a');
+                    a.href = url;
+                    a.download = `cards_${date}.png`;
+                    a.click();
+                    URL.revokeObjectURL(url);
+                });
+            } catch (err) {
+                console.error('画像保存エラー:', err);
+                alert('画像の保存に失敗しました。');
+            } finally {
+                btn.disabled = false;
+                btn.innerHTML = originalHtml;
             }
         });
 
