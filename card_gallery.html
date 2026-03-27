@@ -3664,8 +3664,8 @@
             });
         };
 
-        // 末尾0のとき表示枚数を+5にするヘルパー（表記はそのまま）
-        const getActualItemsPerPage = () => itemsPerPage % 10 === 0 ? itemsPerPage + 5 : itemsPerPage;
+        // 末尾0のとき表示枚数を+6にするヘルパー（表記はそのまま）
+        const getActualItemsPerPage = () => itemsPerPage % 10 === 0 ? itemsPerPage + 6 : itemsPerPage;
 
         // Handle drag start for cards
         window.handleDragStart = (event, index) => {
@@ -5236,17 +5236,29 @@
                     backgroundColor: getComputedStyle(document.documentElement).getPropertyValue('--bs-body-bg') || '#ffffff',
                     logging: false,
                     useCORS: true,
-                    scale: 2
+                    scale: 1
                 });
                 const date = new Date().toISOString().slice(0, 10).replace(/-/g, '');
-                canvas.toBlob((blob) => {
-                    const url = URL.createObjectURL(blob);
-                    const a = document.createElement('a');
-                    a.href = url;
-                    a.download = `cards_${date}.png`;
-                    a.click();
-                    URL.revokeObjectURL(url);
+                const MAX_BYTES = 10 * 1024 * 1024;
+                // PNG を試し、超えたら JPEG で品質を落としていく
+                const tryExport = (format, quality) => new Promise((resolve) => {
+                    canvas.toBlob((blob) => resolve(blob), format, quality);
                 });
+                let blob = await tryExport('image/png');
+                let ext = 'png';
+                if (blob.size > MAX_BYTES) {
+                    for (const q of [0.9, 0.75, 0.6]) {
+                        blob = await tryExport('image/jpeg', q);
+                        ext = 'jpg';
+                        if (blob.size <= MAX_BYTES) break;
+                    }
+                }
+                const url = URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = `cards_${date}.${ext}`;
+                a.click();
+                URL.revokeObjectURL(url);
             } catch (err) {
                 console.error('画像保存エラー:', err);
                 alert('画像の保存に失敗しました。');
