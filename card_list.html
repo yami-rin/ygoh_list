@@ -1733,6 +1733,12 @@
                 </div>
 
                 <hr>
+                <h6>データ修正</h6>
+                <p class="text-muted small">カード名・型番・レアリティに <code>&amp;delta;</code> や <code>&amp;forall;</code> などのHTMLエンティティが含まれている場合、元の文字（δ、∀ など）に変換します。</p>
+                <button class="btn btn-warning" id="fix-html-entities-btn">HTMLエンティティを修正する</button>
+                <span id="fix-html-entities-result" class="ms-2 small"></span>
+
+                <hr>
                 <h6>アカウント削除</h6>
                 <p class="text-muted small">この操作は元に戻せません。アカウントに紐づく全てのカードデータが完全に削除されます。</p>
                 <button class="btn btn-danger" id="delete-account-btn">アカウントを削除する</button>
@@ -6837,9 +6843,9 @@ Firebase Consoleで確認すべき項目:
                 const formData = new FormData(addForm);
                 const addType = document.querySelector('input[name="add-type"]:checked').value;
                 const newCard = {
-                    '名前': formData.get('name'),
-                    '型番': formData.get('set_code'),
-                    'レアリティ': formData.get('rarity'),
+                    '名前': decodeHtmlEntities(formData.get('name')),
+                    '型番': decodeHtmlEntities(formData.get('set_code')),
+                    'レアリティ': decodeHtmlEntities(formData.get('rarity')),
                     '枚数': parseInt(formData.get('quantity'), 10),
                     'tags': [...currentCardTags], // タグを追加
                     updatedAt: Date.now()
@@ -7124,6 +7130,51 @@ Firebase Consoleで確認すべき項目:
             saveToCache();
             updateMetadataTimestamp();
             updateUserRankingData();
+        });
+
+        // Fix HTML entities in existing card data
+        document.getElementById('fix-html-entities-btn').addEventListener('click', async () => {
+            const STRING_FIELDS = ['名前', '型番', 'レアリティ'];
+            const allCollections = [
+                { list: cardCollection, type: 'collection' },
+                { list: wishlistCollection, type: 'wishlist' }
+            ];
+            let fixedCount = 0;
+            const resultEl = document.getElementById('fix-html-entities-result');
+            resultEl.textContent = '修正中...';
+
+            for (const { list, type } of allCollections) {
+                for (const card of list) {
+                    const updates = {};
+                    for (const field of STRING_FIELDS) {
+                        const original = card.data[field];
+                        if (typeof original === 'string') {
+                            const decoded = decodeHtmlEntities(original);
+                            if (decoded !== original) {
+                                updates[field] = decoded;
+                            }
+                        }
+                    }
+                    if (Object.keys(updates).length > 0) {
+                        Object.assign(card.data, updates);
+                        if (isOnlineUser()) {
+                            try {
+                                await api.updateCard(card.id, updates);
+                            } catch (e) {
+                                console.error('Failed to update card', card.id, e);
+                            }
+                        }
+                        fixedCount++;
+                    }
+                }
+            }
+
+            if (fixedCount > 0) {
+                saveToCache();
+                updateMetadataTimestamp();
+                applySearchAndFilter();
+            }
+            resultEl.textContent = fixedCount > 0 ? `${fixedCount}件修正しました` : '修正対象なし';
         });
 
         // Handle level button clicks
