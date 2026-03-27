@@ -3664,8 +3664,22 @@
             });
         };
 
-        // 末尾0のとき表示枚数を+6にするヘルパー（表記はそのまま）
-        const getActualItemsPerPage = () => itemsPerPage % 10 === 0 ? itemsPerPage + 6 : itemsPerPage;
+        // グリッドの実際の列数から itemsPerPage を列数の倍数に丸め上げるヘルパー
+        const getActualItemsPerPage = () => {
+            const grid = document.getElementById('card-grid');
+            if (!grid) return itemsPerPage;
+            // モバイル size-small は固定5列
+            if (currentGridSize === 'small' && window.innerWidth <= 768) {
+                return Math.ceil(itemsPerPage / 5) * 5;
+            }
+            // サイズ別の minmax 最小幅（モバイルオーバーライドも考慮）
+            const isMobile = window.innerWidth <= 768;
+            const minWidths = { small: 150, medium: isMobile ? 150 : 200, large: isMobile ? 200 : 280 };
+            const minW = minWidths[currentGridSize] || 200;
+            const gap = 16; // 1rem
+            const cols = Math.max(1, Math.floor((grid.offsetWidth + gap) / (minW + gap)));
+            return Math.ceil(itemsPerPage / cols) * cols;
+        };
 
         // Handle drag start for cards
         window.handleDragStart = (event, index) => {
