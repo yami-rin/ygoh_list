@@ -2949,6 +2949,10 @@
         let filteredCards = [];
         let cardDetailsMap = new Map();
         let cardReadingMap = new Map(); // Map for hiragana -> card names
+        const getReadingForSort = (name) => {
+            const reading = (cardDetailsMap.get(name)?.reading) || name || '';
+            return reading.replace(/^["\u201C\u201D\u300C\u300D\u300E\u300F]+/, '');
+        };
         let allAliases = [];
         let userAliasMap = new Map(); // Map<alias, [cardName, ...]>
         let currentUser = null;
@@ -3621,8 +3625,8 @@
 
                 switch (field) {
                     case 'name':
-                        valA = (cardDetailsMap.get(a.data['名前'])?.reading) || a.data['名前'] || '';
-                        valB = (cardDetailsMap.get(b.data['名前'])?.reading) || b.data['名前'] || '';
+                        valA = getReadingForSort(a.data['名前']);
+                        valB = getReadingForSort(b.data['名前']);
                         break;
                     case 'code':
                         valA = a.data['型番'] || '';
@@ -6060,9 +6064,7 @@
             // Sort
             viewingFilteredCards.sort((a, b) => {
                 if (sortBy === 'name') {
-                    const readA = (cardDetailsMap.get(a.data['名前'])?.reading) || a.data['名前'] || '';
-                    const readB = (cardDetailsMap.get(b.data['名前'])?.reading) || b.data['名前'] || '';
-                    return readA.localeCompare(readB, 'ja');
+                    return getReadingForSort(a.data['名前']).localeCompare(getReadingForSort(b.data['名前']), 'ja');
                 } else if (sortBy === 'quantity-desc') {
                     return (b.data['枚数'] || 0) - (a.data['枚数'] || 0);
                 } else if (sortBy === 'rarity') {

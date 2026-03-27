@@ -2703,6 +2703,10 @@
         let currentPage = 1;
         let cardReadingMap = new Map(); // Map for hiragana -> card names
         let cardDetailsMap = new Map(); // Map for card details (level, attribute, etc.)
+        const getReadingForSort = (name) => {
+            const reading = (cardDetailsMap.get(name)?.reading) || name || '';
+            return reading.replace(/^["\u201C\u201D\u300C\u300D\u300E\u300F]+/, '');
+        };
         // Set smaller initial page size for mobile devices
         let itemsPerPage = window.innerWidth <= 768 ? 20 : 50;
         let filteredCardCollection = [];
@@ -3080,9 +3084,7 @@
                     const idxB = customRarityOrder.indexOf(vB);
                     [vA, vB] = [idxA === -1 ? 9999 : idxA, idxB === -1 ? 9999 : idxB];
                 } else if (sortConfig.key === '名前') {
-                    vA = (cardDetailsMap.get(String(vA || ''))?.reading) || String(vA || '');
-                    vB = (cardDetailsMap.get(String(vB || ''))?.reading) || String(vB || '');
-                    [vA, vB] = [vA.toLowerCase(), vB.toLowerCase()];
+                    [vA, vB] = [getReadingForSort(String(vA || '')).toLowerCase(), getReadingForSort(String(vB || '')).toLowerCase()];
                 } else {
                     [vA, vB] = [String(vA || '').toLowerCase(), String(vB || '').toLowerCase()];
                 }
@@ -9053,11 +9055,9 @@ Firebase Consoleで確認すべき項目:
                 localListGroup.className = 'list-group mb-3';
 
                 // Sort by name (50音順) using reading from master CSV
-                matchingCards.sort((a, b) => {
-                    const readA = (cardDetailsMap.get(a.data['名前'] || '')?.reading) || a.data['名前'] || '';
-                    const readB = (cardDetailsMap.get(b.data['名前'] || '')?.reading) || b.data['名前'] || '';
-                    return readA.localeCompare(readB, 'ja');
-                });
+                matchingCards.sort((a, b) =>
+                    getReadingForSort(a.data['名前'] || '').localeCompare(getReadingForSort(b.data['名前'] || ''), 'ja')
+                );
 
                 const ITEMS_PER_PAGE = 10;
                 let localCardPage = 1;
