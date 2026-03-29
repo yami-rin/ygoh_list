@@ -3824,17 +3824,28 @@
                         return 0;
                 }
 
-
+                let cmp = 0;
                 if (typeof valA === 'string') {
-                    const cmp = valA.localeCompare(valB, 'ja');
+                    cmp = valA.localeCompare(valB, 'ja');
+                } else {
+                    cmp = valA > valB ? 1 : valA < valB ? -1 : 0;
+                }
+
+                if (cmp !== 0) {
                     return direction === 'asc' ? cmp : -cmp;
                 }
 
-                if (direction === 'asc') {
-                    return valA > valB ? 1 : valA < valB ? -1 : 0;
-                } else {
-                    return valA < valB ? 1 : valA > valB ? -1 : 0;
+                // Tie-breaker: If values are equal, sort by rarity (highest first)
+                if (field !== 'rarity') {
+                    const order = JSON.parse(localStorage.getItem('customRarityOrder') || 'null') || RARITY_ORDER;
+                    const idxA = order.indexOf(a.data['レアリティ'] || '');
+                    const idxB = order.indexOf(b.data['レアリティ'] || '');
+                    const rareValA = idxA === -1 ? 9999 : idxA;
+                    const rareValB = idxB === -1 ? 9999 : idxB;
+                    return rareValA - rareValB; // Ascending index means higher rarity first
                 }
+
+                return 0;
             });
         };
 
