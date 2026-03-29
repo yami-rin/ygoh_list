@@ -425,6 +425,33 @@
             box-shadow: 0 2px 4px rgba(0,0,0,0.1);
         }
 
+        /* Tag exclude button styles */
+        .tag-exclude-btn {
+            font-size: 0.8rem;
+            padding: 0.2rem 0.6rem;
+            border-radius: 12px;
+            border: 1px solid #dc3545;
+            background: white;
+            color: #dc3545;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            white-space: nowrap;
+        }
+
+        .tag-exclude-btn:hover {
+            background: #fff5f5;
+        }
+
+        .tag-exclude-btn.active {
+            background: #dc3545;
+            color: white;
+            border-color: #dc3545;
+        }
+
+        .tag-exclude-btn.active:hover {
+            background: #c82333;
+        }
+
         .filter-section .form-control,
         .filter-section .form-select {
             font-size: 0.9rem;
@@ -2063,7 +2090,7 @@
                 <div class="col-md-2">
                     <select class="form-select" id="tag-filter">
                         <option value="">すべてのタグ</option>
-                        <option value="__no_tag__">タグ無し</option>
+                        <option value="__no_tag__">タグ無しのみ</option>
                     </select>
                 </div>
                 <div class="col-md-2">
@@ -2075,6 +2102,18 @@
                     <button class="btn btn-outline-secondary w-100" id="clear-filters">
                         <i class="bi bi-x-circle"></i> クリア
                     </button>
+                </div>
+            </div>
+            <!-- Tag Exclude Filter -->
+            <div class="mt-2" id="tag-exclude-section" style="display: none;">
+                <div class="d-flex align-items-center gap-2 mb-2">
+                    <label class="form-label small fw-bold mb-0" style="color: #dc3545; white-space: nowrap;">
+                        <i class="bi bi-tag-fill"></i> タグ除外
+                    </label>
+                    <small class="text-muted">選択したタグを持つカードを除外します</small>
+                </div>
+                <div class="d-flex flex-wrap gap-1" id="tag-exclude-buttons">
+                    <!-- Tag exclude buttons will be populated dynamically -->
                 </div>
             </div>
             <!-- Advanced Search (Collapsible) -->
@@ -2974,6 +3013,7 @@
         let selectedCardTypes = []; // Array for multiple card types
         let selectedNotCardTypes = []; // Array for NOT card types (exclusion)
         let cardTypeSearchMode = 'and'; // 'and' or 'or'
+        let selectedExcludeTags = []; // Array for excluded tags
 
         // Deck system state
         let decks = []; // All user's decks
@@ -3489,12 +3529,19 @@
                 }
 
                 const matchesRarity = !rarityFilter || card.data['レアリティ'] === rarityFilter;
-                // タグフィルター：__no_tag__の場合はタグ無しのカードを検索
+                // タグフィルター：__no_tag__の場合はタグ無しのカードのみを表示
                 let matchesTag = true;
                 if (tagFilter === '__no_tag__') {
                     matchesTag = !card.data.tags || card.data.tags.length === 0;
                 } else if (tagFilter) {
                     matchesTag = card.data.tags && card.data.tags.includes(tagFilter);
+                }
+
+                // タグ除外フィルター：選択したタグを持つカードを除外
+                let matchesExcludeTag = true;
+                if (selectedExcludeTags.length > 0 && card.data.tags && card.data.tags.length > 0) {
+                    // 除外タグのいずれかを持っているカードを除外
+                    matchesExcludeTag = !selectedExcludeTags.some(tag => card.data.tags.includes(tag));
                 }
 
                 // Advanced filters - use cardDetailsMap for latest data (CSV may have been updated)
@@ -3557,7 +3604,7 @@
                 const matchesAttack = !attackFilter || (details.attack && details.attack.toString() === attackFilter);
                 const matchesDefense = !defenseFilter || (details.defense && details.defense.toString() === defenseFilter);
 
-                return matchesNameSearch && matchesCodeSearch && matchesRarity && matchesTag && matchesLevel && matchesAttribute && matchesCardType && matchesNotCardType && matchesRace && matchesAttack && matchesDefense;
+                return matchesNameSearch && matchesCodeSearch && matchesRarity && matchesTag && matchesExcludeTag && matchesLevel && matchesAttribute && matchesCardType && matchesNotCardType && matchesRace && matchesAttack && matchesDefense;
             });
 
             console.log('Filtered cards count:', filteredCards.length);
@@ -3965,7 +4012,41 @@
             const tags = [...new Set(allCards.flatMap(card => card.data.tags || []))].sort();
             const tagSelect = document.getElementById('tag-filter');
             tagSelect.innerHTML = '<option value="">すべてのタグ</option>' +
+                '<option value="__no_tag__">タグ無しのみ</option>' +
                 tags.map(t => `<option value="${escapeHtml(t)}">${escapeHtml(t)}</option>`).join('');
+
+            // Tag exclude buttons
+            const tagExcludeSection = document.getElementById('tag-exclude-section');
+            const tagExcludeContainer = document.getElementById('tag-exclude-buttons');
+            if (tags.length > 0) {
+                tagExcludeSection.style.display = 'block';
+                tagExcludeContainer.innerHTML = tags.map(t => {
+                    const isActive = selectedExcludeTags.includes(t) ? ' active' : '';
+                    return `<button type="button" class="tag-exclude-btn${isActive}" data-tag="${escapeHtml(t)}">
+                        <i class="bi bi-x-circle"></i> ${escapeHtml(t)}
+                    </button>`;
+                }).join('');
+
+                // Attach event listeners to tag exclude buttons
+                tagExcludeContainer.querySelectorAll('.tag-exclude-btn').forEach(btn => {
+                    btn.addEventListener('click', () => {
+                        const tag = btn.dataset.tag;
+                        const index = selectedExcludeTags.indexOf(tag);
+                        if (index > -1) {
+                            selectedExcludeTags.splice(index, 1);
+                            btn.classList.remove('active');
+                        } else {
+                            selectedExcludeTags.push(tag);
+                            btn.classList.add('active');
+                        }
+                        applyFilters();
+                        renderCards();
+                    });
+                });
+            } else {
+                tagExcludeSection.style.display = 'none';
+                tagExcludeContainer.innerHTML = '';
+            }
         };
 
         // Utility functions
@@ -4442,6 +4523,10 @@
             // Clear NOT card type filter
             selectedNotCardTypes = [];
             document.querySelectorAll('.card-type-not-btn').forEach(btn => btn.classList.remove('active'));
+
+            // Clear tag exclude filter
+            selectedExcludeTags = [];
+            document.querySelectorAll('.tag-exclude-btn').forEach(btn => btn.classList.remove('active'));
 
             // Reset card type mode to AND
             if (document.getElementById('card-type-and')) {
