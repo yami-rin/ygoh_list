@@ -3075,7 +3075,17 @@
         let cardDetailsMap = new Map();
         let cardReadingMap = new Map(); // Map for hiragana -> card names
         const getReadingForSort = (name) => {
-            const reading = (cardDetailsMap.get(name)?.reading) || name || '';
+            // Try direct lookup first, then decode HTML entities and retry
+            let details = cardDetailsMap.get(name);
+            if (!details && name) {
+                const ta = document.createElement('textarea');
+                ta.innerHTML = name;
+                const decoded = ta.value;
+                if (decoded !== name) {
+                    details = cardDetailsMap.get(decoded);
+                }
+            }
+            const reading = (details?.reading) || name || '';
             return reading.replace(/^["\u201C\u201D\u300C\u300D\u300E\u300F]+/, '');
         };
         let allAliases = [];
@@ -3814,9 +3824,10 @@
                         return 0;
                 }
 
+
                 if (typeof valA === 'string') {
-                    valA = valA.toLowerCase();
-                    valB = valB.toLowerCase();
+                    const cmp = valA.localeCompare(valB, 'ja');
+                    return direction === 'asc' ? cmp : -cmp;
                 }
 
                 if (direction === 'asc') {
