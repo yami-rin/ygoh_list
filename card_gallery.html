@@ -3941,9 +3941,11 @@
                             </div>
                             <div class="card-info">
                                 <div class="card-name">${escapeHtml(decodedName)}</div>
-                                <div class="card-code">${escapeHtml(card.data['型番'])}</div>
-                                <div class="card-rarity">
-                                    <span class="badge bg-info">${escapeHtml(card.data['レアリティ'])}</span>
+                                <div class="d-flex align-items-center mb-1 gap-2">
+                                    <div class="card-code mb-0">${escapeHtml(card.data['型番'])}</div>
+                                    <div class="card-rarity mb-0">
+                                        <span class="badge bg-info">${escapeHtml(card.data['レアリティ'])}</span>
+                                    </div>
                                 </div>
                                 <div class="card-tags">
                                     ${tags || '<span class="text-muted" style="font-size: 0.7rem;">タグなし</span>'}
