@@ -2127,13 +2127,18 @@
         <!-- Filter section -->
         <div class="filter-section">
             <div class="row g-2">
-                <div class="col-md-4">
+                <div class="col-md-3">
                     <input type="text" class="form-control" id="search-input" placeholder="カード名で検索...">
                 </div>
                 <div class="col-md-3">
                     <input type="text" class="form-control" id="code-search-input" placeholder="型番で検索...">
                 </div>
-                <div class="col-md-3">
+                <div class="col-md-2">
+                    <button class="btn btn-outline-primary w-100" type="button" data-bs-toggle="collapse" data-bs-target="#tag-rarity-filters" id="tag-rarity-toggle-btn">
+                        <i class="bi bi-tags"></i> タグ・レアリティ <span class="badge bg-primary ms-1" id="tag-rarity-filter-count" style="display:none;">0</span>
+                    </button>
+                </div>
+                <div class="col-md-2">
                     <button class="btn btn-outline-info w-100" type="button" data-bs-toggle="collapse" data-bs-target="#advanced-search">
                         <i class="bi bi-funnel"></i> 詳細検索
                     </button>
@@ -2144,52 +2149,54 @@
                     </button>
                 </div>
             </div>
-            <!-- Tag Filter (inclusion) -->
-            <div class="mt-2" id="tag-filter-section" style="display: none;">
-                <div class="d-flex align-items-center gap-2 mb-2">
-                    <label class="form-label small fw-bold mb-0" style="color: #0d6efd; white-space: nowrap;">
-                        <i class="bi bi-tag-fill"></i> タグ絞り込み
-                    </label>
-                    <small class="text-muted">選択したタグを持つカードのみ表示（複数選択可）</small>
-                </div>
-                <div class="d-flex flex-wrap gap-1" id="tag-filter-buttons">
-                    <!-- Tag filter buttons will be populated dynamically -->
-                </div>
-            </div>
-            <!-- Tag Exclude Filter -->
-            <div class="mt-2" id="tag-exclude-section" style="display: none;">
-                <div class="d-flex align-items-center gap-2 mb-2">
-                    <label class="form-label small fw-bold mb-0" style="color: #dc3545; white-space: nowrap;">
-                        <i class="bi bi-tag-fill"></i> タグ除外
-                    </label>
-                    <small class="text-muted">選択したタグを持つカードを除外します（複数選択可）</small>
-                </div>
-                <div class="d-flex flex-wrap gap-1" id="tag-exclude-buttons">
-                    <!-- Tag exclude buttons will be populated dynamically -->
-                </div>
-            </div>
-            <!-- Rarity Filter (inclusion) -->
-            <div class="mt-2" id="rarity-filter-section" style="display: none;">
-                <div class="d-flex align-items-center gap-2 mb-2">
-                    <label class="form-label small fw-bold mb-0" style="color: #0d6efd; white-space: nowrap;">
-                        <i class="bi bi-gem"></i> レアリティ絞り込み
-                    </label>
-                    <small class="text-muted">選択したレアリティのカードのみ表示（複数選択可）</small>
-                </div>
-                <div class="d-flex flex-wrap gap-1" id="rarity-filter-buttons">
-                    <!-- Rarity filter buttons will be populated dynamically -->
-                </div>
-            </div>
-            <!-- Rarity Exclude Filter -->
-            <div class="mt-2" id="rarity-exclude-section" style="display: none;">
-                <div class="d-flex align-items-center gap-2 mb-2">
-                    <label class="form-label small fw-bold mb-0" style="color: #dc3545; white-space: nowrap;">
-                        <i class="bi bi-gem"></i> レアリティ除外
-                    </label>
-                    <small class="text-muted">選択したレアリティのカードを除外します（複数選択可）</small>
-                </div>
-                <div class="d-flex flex-wrap gap-1" id="rarity-exclude-buttons">
-                    <!-- Rarity exclude buttons will be populated dynamically -->
+            <!-- Tag & Rarity Filters (Collapsible) -->
+            <div class="collapse mt-3" id="tag-rarity-filters">
+                <div class="card card-body bg-light">
+                    <!-- Tag Filter (inclusion) -->
+                    <div class="mb-3" id="tag-filter-section" style="display: none;">
+                        <div class="d-flex align-items-center gap-2 mb-2">
+                            <label class="form-label small fw-bold mb-0" style="color: #0d6efd; white-space: nowrap;">
+                                <i class="bi bi-tag-fill"></i> タグ絞り込み
+                            </label>
+                            <small class="text-muted">選択したタグを持つカードのみ表示（複数選択可）</small>
+                        </div>
+                        <div class="d-flex flex-wrap gap-1" id="tag-filter-buttons">
+                        </div>
+                    </div>
+                    <!-- Tag Exclude Filter -->
+                    <div class="mb-3" id="tag-exclude-section" style="display: none;">
+                        <div class="d-flex align-items-center gap-2 mb-2">
+                            <label class="form-label small fw-bold mb-0" style="color: #dc3545; white-space: nowrap;">
+                                <i class="bi bi-tag-fill"></i> タグ除外
+                            </label>
+                            <small class="text-muted">選択したタグを持つカードを除外します（複数選択可）</small>
+                        </div>
+                        <div class="d-flex flex-wrap gap-1" id="tag-exclude-buttons">
+                        </div>
+                    </div>
+                    <hr class="my-2">
+                    <!-- Rarity Filter (inclusion) -->
+                    <div class="mb-3" id="rarity-filter-section" style="display: none;">
+                        <div class="d-flex align-items-center gap-2 mb-2">
+                            <label class="form-label small fw-bold mb-0" style="color: #0d6efd; white-space: nowrap;">
+                                <i class="bi bi-gem"></i> レアリティ絞り込み
+                            </label>
+                            <small class="text-muted">選択したレアリティのカードのみ表示（複数選択可）</small>
+                        </div>
+                        <div class="d-flex flex-wrap gap-1" id="rarity-filter-buttons">
+                        </div>
+                    </div>
+                    <!-- Rarity Exclude Filter -->
+                    <div class="mb-0" id="rarity-exclude-section" style="display: none;">
+                        <div class="d-flex align-items-center gap-2 mb-2">
+                            <label class="form-label small fw-bold mb-0" style="color: #dc3545; white-space: nowrap;">
+                                <i class="bi bi-gem"></i> レアリティ除外
+                            </label>
+                            <small class="text-muted">選択したレアリティのカードを除外します（複数選択可）</small>
+                        </div>
+                        <div class="d-flex flex-wrap gap-1" id="rarity-exclude-buttons">
+                        </div>
+                    </div>
                 </div>
             </div>
             <!-- Advanced Search (Collapsible) -->
@@ -3511,9 +3518,23 @@
 
             return text;
         };
+        // Update the active filter count badge on the tag/rarity toggle button
+        const updateTagRarityBadge = () => {
+            const count = selectedFilterTags.length + selectedExcludeTags.length + selectedFilterRarities.length + selectedExcludeRarities.length + (filterNoTagOnly ? 1 : 0);
+            const badge = document.getElementById('tag-rarity-filter-count');
+            if (badge) {
+                if (count > 0) {
+                    badge.textContent = count;
+                    badge.style.display = 'inline';
+                } else {
+                    badge.style.display = 'none';
+                }
+            }
+        };
 
         // Apply filters
         const applyFilters = () => {
+            updateTagRarityBadge();
             const searchTerm = document.getElementById('search-input').value.toLowerCase();
             const codeSearchTerm = document.getElementById('code-search-input').value.toLowerCase();
             const showUnowned = document.getElementById('show-unowned-cards').checked;
