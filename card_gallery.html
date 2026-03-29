@@ -4704,6 +4704,7 @@
 
         document.getElementById('sort-select').addEventListener('change', (e) => {
             currentSort = e.target.value;
+            localStorage.setItem('gallerySortOrder', currentSort);
             applyFilters();
             renderCards();
         });
@@ -7048,6 +7049,16 @@
                     const savedListType = localStorage.getItem('galleryListType');
                     if (savedListType && (savedListType === 'collection' || savedListType === 'wishlist' || savedListType === 'bookmark')) {
                         currentListType = savedListType;
+                    }
+
+                    // Load saved sort order
+                    const savedSortOrder = localStorage.getItem('gallerySortOrder');
+                    if (savedSortOrder) {
+                        currentSort = savedSortOrder;
+                        const sortSelect = document.getElementById('sort-select');
+                        if (sortSelect) {
+                            sortSelect.value = savedSortOrder;
+                        }
                     }
 
                     // Load saved card details visibility preference
