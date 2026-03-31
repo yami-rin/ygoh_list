@@ -10,8 +10,8 @@
         *, *::before, *::after { box-sizing: border-box; }
 
         body {
-            background: #0f0f1a;
-            color: #e0e0e0;
+            background: #f8f9fa;
+            color: #212529;
             min-height: 100vh;
             font-family: 'Segoe UI', 'Hiragino Sans', sans-serif;
         }
@@ -69,8 +69,8 @@
 
         /* ---- Supply card ---- */
         .playmat-card {
-            background: #1e2035;
-            border: 1px solid #2a2d4a;
+            background: #fff;
+            border: 1px solid #dee2e6;
             border-radius: 10px;
             overflow: hidden;
             cursor: pointer;
@@ -78,13 +78,13 @@
         }
         .playmat-card:hover {
             transform: translateY(-3px);
-            border-color: #4a5080;
-            box-shadow: 0 4px 16px rgba(0,0,0,.4);
+            border-color: #adb5bd;
+            box-shadow: 0 4px 16px rgba(0,0,0,.15);
         }
         .playmat-thumb {
             width: 100%;
             aspect-ratio: 16 / 9;
-            background: #2a2d4a;
+            background: #f0f0f0;
             display: flex;
             align-items: center;
             justify-content: center;
@@ -95,6 +95,7 @@
         .playmat-name {
             font-weight: 600;
             font-size: 0.92rem;
+            color: #212529;
             white-space: nowrap;
             overflow: hidden;
             text-overflow: ellipsis;
@@ -102,7 +103,7 @@
         }
         .playmat-desc {
             font-size: 0.78rem;
-            color: #999;
+            color: #6c757d;
             display: -webkit-box;
             -webkit-line-clamp: 2;
             -webkit-box-orient: vertical;
@@ -113,32 +114,19 @@
 
         /* ---- Modal ---- */
         .modal-content {
-            background: #1e2035;
-            border: 1px solid #3a3d5a;
-            color: #e0e0e0;
+            background: #fff;
+            border: 1px solid #dee2e6;
+            color: #212529;
         }
-        .modal-header, .modal-footer { border-color: #3a3d5a; }
-        .btn-close-white { filter: invert(1) grayscale(100%) brightness(200%); }
-        .form-control, .form-select, textarea {
-            background: #2a2d4a;
-            border-color: #3a3d5a;
-            color: #e0e0e0;
-        }
-        .form-control:focus, .form-select:focus, textarea:focus {
-            background: #2a2d4a;
-            border-color: #5a6090;
-            color: #e0e0e0;
-            box-shadow: 0 0 0 0.2rem rgba(90,96,144,.25);
-        }
-        .form-control::placeholder, textarea::placeholder { color: #555; }
+        .modal-header, .modal-footer { border-color: #dee2e6; }
         .form-control.is-invalid { border-color: #dc3545; }
 
         /* ---- Image preview ---- */
         .image-preview-area {
             width: 100%;
             aspect-ratio: 16 / 9;
-            background: #2a2d4a;
-            border: 2px dashed #3a3d5a;
+            background: #f0f0f0;
+            border: 2px dashed #ced4da;
             border-radius: 8px;
             display: flex;
             align-items: center;
@@ -147,11 +135,11 @@
             overflow: hidden;
             transition: border-color 0.15s;
         }
-        .image-preview-area:hover { border-color: #5a6090; }
+        .image-preview-area:hover { border-color: #adb5bd; }
         .image-preview-area img { width: 100%; height: 100%; object-fit: contain; }
         .image-placeholder-text {
             text-align: center;
-            color: #555;
+            color: #adb5bd;
             font-size: 0.85rem;
             pointer-events: none;
         }
@@ -160,7 +148,7 @@
         .empty-state {
             text-align: center;
             padding: 72px 24px;
-            color: #555;
+            color: #adb5bd;
         }
 
         /* ---- Form switch ---- */
@@ -169,13 +157,13 @@
 
         /* ---- Tag management ---- */
         .draggable-tag {
-            background: #2a2d4a;
-            border: 1px solid #3a3d5a !important;
+            background: #f8f9fa;
+            border: 1px solid #dee2e6 !important;
             border-radius: 6px;
             transition: opacity .15s;
             user-select: none;
         }
-        .draggable-tag:hover { border-color: #5a6090 !important; }
+        .draggable-tag:hover { border-color: #adb5bd !important; }
         .draggable-tag.dragging { opacity: .35; }
         .draggable-tag.drag-over { border: 2px dashed #667eea !important; }
 
