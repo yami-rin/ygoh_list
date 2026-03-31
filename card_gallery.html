@@ -3245,7 +3245,7 @@
 
     <!-- Playmat Section -->
     <div class="container-fluid py-3 px-4" id="playmat-container" style="display: none;">
-        <div class="d-flex justify-content-between align-items-center mb-3">
+        <div class="d-flex justify-content-between align-items-center mb-2">
             <h5 class="mb-0">
                 <i class="bi bi-layout-wtf me-2"></i>サプライ一覧
                 <span class="badge bg-secondary ms-1 fw-normal fs-6" id="playmat-count-badge">0</span>
@@ -3253,6 +3253,20 @@
             <a href="supply_manager.html" class="btn btn-primary btn-sm">
                 <i class="bi bi-pencil-square"></i> 登録・編集
             </a>
+        </div>
+        <div class="d-flex gap-2 mb-3 flex-wrap">
+            <input type="text" id="pm-search" class="form-control form-control-sm" placeholder="名前で検索..." style="max-width:220px;">
+            <select id="pm-sort" class="form-select form-select-sm" style="max-width:180px;">
+                <option value="date-desc">登録日時 新→古</option>
+                <option value="date-asc">登録日時 古→新</option>
+                <option value="name-asc">名前順 (あ→わ)</option>
+                <option value="name-desc">名前順 (わ→あ)</option>
+            </select>
+            <select id="pm-sealed-filter" class="form-select form-select-sm" style="max-width:140px;">
+                <option value="all">すべて</option>
+                <option value="sealed">未開封のみ</option>
+                <option value="opened">開封済みのみ</option>
+            </select>
         </div>
         <div id="playmat-grid" class="row g-3"></div>
         <div id="playmat-empty" class="text-center py-5 text-muted" style="display:none;">
@@ -3265,20 +3279,21 @@
     <!-- Playmat Detail Modal -->
     <div class="modal fade" id="playmatDetailModal" tabindex="-1">
         <div class="modal-dialog modal-lg modal-dialog-centered">
-            <div class="modal-content" style="background:#1e2035; border:1px solid #3a3d5a; color:#e0e0e0;">
-                <div class="modal-header" style="border-color:#3a3d5a;">
+            <div class="modal-content">
+                <div class="modal-header">
                     <h5 class="modal-title" id="pm-detail-name"></h5>
-                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
                 </div>
                 <div class="modal-body">
-                    <img id="pm-detail-img" src="" alt="" class="w-100 mb-3 rounded" style="max-height:380px; object-fit:contain; display:none; background:#2a2d4a;">
-                    <div id="pm-detail-no-img" class="text-center text-muted py-4 mb-3 rounded" style="background:#2a2d4a; display:none;">
+                    <img id="pm-detail-img" src="" alt="" class="w-100 mb-3 rounded" style="max-height:380px; object-fit:contain; display:none; background:#f0f0f0;">
+                    <div id="pm-detail-no-img" class="text-center text-muted py-4 mb-3 rounded" style="background:#f0f0f0; display:none;">
                         <i class="bi bi-image" style="font-size:3rem;"></i>
                     </div>
                     <span id="pm-detail-badge" class="badge mb-2"></span>
-                    <p id="pm-detail-desc" class="mb-0" style="white-space:pre-wrap; color:#ccc;"></p>
+                    <p id="pm-detail-desc" class="mb-1" style="white-space:pre-wrap;"></p>
+                    <div id="pm-detail-tags" class="d-flex flex-wrap gap-1 mt-2"></div>
                 </div>
-                <div class="modal-footer" style="border-color:#3a3d5a;">
+                <div class="modal-footer">
                     <a href="supply_manager.html" class="btn btn-outline-primary btn-sm me-auto">
                         <i class="bi bi-pencil"></i> 編集
                     </a>
@@ -7306,6 +7321,9 @@
             document.getElementById('playmat-tab').addEventListener('click', () => {
                 switchToPlaymat();
             });
+            document.getElementById('pm-search').addEventListener('input', applyPlaymatFilter);
+            document.getElementById('pm-sort').addEventListener('change', applyPlaymatFilter);
+            document.getElementById('pm-sealed-filter').addEventListener('change', applyPlaymatFilter);
 
             // Check URL for direct view parameter
             const urlParams = new URLSearchParams(window.location.search);
@@ -7413,20 +7431,44 @@
         };
 
         async function renderPlaymats() {
-            const grid  = document.getElementById('playmat-grid');
-            const empty = document.getElementById('playmat-empty');
-            allPlaymats = (await PlaymatDB.getAll()).sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
+            const grid   = document.getElementById('playmat-grid');
+            const empty  = document.getElementById('playmat-empty');
+            allPlaymats  = await PlaymatDB.getAll();
             document.getElementById('playmat-count-badge').textContent = allPlaymats.length;
+            applyPlaymatFilter();
+        }
 
-            if (allPlaymats.length === 0) {
+        function applyPlaymatFilter() {
+            const grid    = document.getElementById('playmat-grid');
+            const empty   = document.getElementById('playmat-empty');
+            const query   = (document.getElementById('pm-search')?.value || '').trim().toLowerCase();
+            const sort    = document.getElementById('pm-sort')?.value || 'date-desc';
+            const sealed  = document.getElementById('pm-sealed-filter')?.value || 'all';
+
+            let list = [...allPlaymats];
+
+            // filter by name
+            if (query) list = list.filter(pm => pm.name.toLowerCase().includes(query));
+
+            // filter by sealed
+            if (sealed === 'sealed')  list = list.filter(pm => pm.sealed);
+            if (sealed === 'opened')  list = list.filter(pm => !pm.sealed);
+
+            // sort
+            if (sort === 'date-desc') list.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
+            if (sort === 'date-asc')  list.sort((a, b) => new Date(a.createdAt) - new Date(b.createdAt));
+            if (sort === 'name-asc')  list.sort((a, b) => a.name.localeCompare(b.name, 'ja'));
+            if (sort === 'name-desc') list.sort((a, b) => b.name.localeCompare(a.name, 'ja'));
+
+            if (list.length === 0) {
                 grid.innerHTML = '';
                 empty.style.display = '';
                 return;
             }
             empty.style.display = 'none';
-            grid.innerHTML = allPlaymats.map((pm, i) => `
+            grid.innerHTML = list.map((pm, i) => `
                 <div class="col-6 col-md-4 col-lg-3 col-xl-2">
-                    <div class="playmat-gallery-card" onclick="showPlaymatDetail(${i})" role="button">
+                    <div class="playmat-gallery-card" onclick="showPlaymatDetail(${allPlaymats.indexOf(pm)})" role="button">
                         <div class="playmat-gallery-thumb">
                             ${pm.imageDataUrl
                                 ? `<img src="${pm.imageDataUrl}" alt="${escapeHtml(pm.name)}">`
@@ -7463,8 +7505,12 @@
             }
             const badge = document.getElementById('pm-detail-badge');
             badge.textContent = pm.sealed ? '未開封' : '開封済み';
-            badge.className   = `badge ${pm.sealed ? 'bg-warning text-dark' : 'bg-success'}`;
+            badge.className   = `badge ${pm.sealed ? 'bg-success' : 'bg-warning text-dark'}`;
             document.getElementById('pm-detail-desc').textContent = pm.description || '';
+            const tagsEl = document.getElementById('pm-detail-tags');
+            tagsEl.innerHTML = pm.tags && pm.tags.length
+                ? pm.tags.map(t => `<span class="badge bg-secondary">${escapeHtml(t)}</span>`).join('')
+                : '';
             new bootstrap.Modal(document.getElementById('playmatDetailModal')).show();
         }
         // ==================== END PLAYMAT SYSTEM ====================
