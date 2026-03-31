@@ -1,0 +1,442 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>プレイマット管理</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css">
+    <style>
+        *, *::before, *::after { box-sizing: border-box; }
+
+        body {
+            background: #0f0f1a;
+            color: #e0e0e0;
+            min-height: 100vh;
+            font-family: 'Segoe UI', 'Hiragino Sans', sans-serif;
+        }
+
+        /* ---- Navbar ---- */
+        .top-navbar {
+            background: #161628;
+            border-bottom: 1px solid #2a2d4a;
+            padding: 12px 0;
+        }
+
+        /* ---- Playmat card ---- */
+        .playmat-card {
+            background: #1e2035;
+            border: 1px solid #2a2d4a;
+            border-radius: 10px;
+            overflow: hidden;
+            cursor: pointer;
+            transition: transform 0.15s, border-color 0.15s, box-shadow 0.15s;
+        }
+        .playmat-card:hover {
+            transform: translateY(-3px);
+            border-color: #4a5080;
+            box-shadow: 0 4px 16px rgba(0,0,0,.4);
+        }
+        .playmat-thumb {
+            width: 100%;
+            aspect-ratio: 16 / 9;
+            background: #2a2d4a;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            overflow: hidden;
+        }
+        .playmat-thumb img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+        .playmat-body { padding: 10px 12px 12px; }
+        .playmat-name {
+            font-weight: 600;
+            font-size: 0.92rem;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            margin-bottom: 4px;
+        }
+        .playmat-desc {
+            font-size: 0.78rem;
+            color: #999;
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+            min-height: 2.2em;
+        }
+
+        /* ---- Modal ---- */
+        .modal-content {
+            background: #1e2035;
+            border: 1px solid #3a3d5a;
+            color: #e0e0e0;
+        }
+        .modal-header, .modal-footer { border-color: #3a3d5a; }
+        .btn-close-white { filter: invert(1) grayscale(100%) brightness(200%); }
+        .form-control, .form-select, textarea {
+            background: #2a2d4a;
+            border-color: #3a3d5a;
+            color: #e0e0e0;
+        }
+        .form-control:focus, .form-select:focus, textarea:focus {
+            background: #2a2d4a;
+            border-color: #5a6090;
+            color: #e0e0e0;
+            box-shadow: 0 0 0 0.2rem rgba(90,96,144,.25);
+        }
+        .form-control::placeholder, textarea::placeholder { color: #555; }
+        .form-control.is-invalid { border-color: #dc3545; }
+
+        /* ---- Image preview ---- */
+        .image-preview-area {
+            width: 100%;
+            aspect-ratio: 16 / 9;
+            background: #2a2d4a;
+            border: 2px dashed #3a3d5a;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            overflow: hidden;
+            transition: border-color 0.15s;
+        }
+        .image-preview-area:hover { border-color: #5a6090; }
+        .image-preview-area img { width: 100%; height: 100%; object-fit: contain; }
+        .image-placeholder-text {
+            text-align: center;
+            color: #555;
+            font-size: 0.85rem;
+            pointer-events: none;
+        }
+
+        /* ---- Empty state ---- */
+        .empty-state {
+            text-align: center;
+            padding: 72px 24px;
+            color: #555;
+        }
+
+        /* ---- Form switch label ---- */
+        .form-check-input { cursor: pointer; }
+        .form-check-label { cursor: pointer; }
+    </style>
+</head>
+<body>
+
+    <nav class="top-navbar">
+        <div class="container d-flex justify-content-between align-items-center">
+            <span class="fw-bold fs-5">
+                <i class="bi bi-layout-wtf me-2"></i>プレイマット管理
+            </span>
+            <a href="card_gallery.html" class="btn btn-outline-secondary btn-sm">
+                <i class="bi bi-arrow-left"></i> ギャラリーに戻る
+            </a>
+        </div>
+    </nav>
+
+    <div class="container py-4">
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <h6 class="mb-0 text-muted">
+                登録済み: <span id="count-badge" class="text-light fw-bold">0</span> 枚
+            </h6>
+            <button class="btn btn-primary" onclick="openModal(null)">
+                <i class="bi bi-plus-lg"></i> 新規登録
+            </button>
+        </div>
+
+        <div id="playmat-list" class="row g-3"></div>
+
+        <div id="empty-state" class="empty-state" style="display:none;">
+            <i class="bi bi-layout-wtf" style="font-size:3.5rem; display:block; margin-bottom:16px; color:#3a3d5a;"></i>
+            プレイマットが登録されていません
+            <br>
+            <button class="btn btn-primary mt-3" onclick="openModal(null)">最初の1枚を登録する</button>
+        </div>
+    </div>
+
+    <!-- Add / Edit Modal -->
+    <div class="modal fade" id="playmatModal" tabindex="-1">
+        <div class="modal-dialog modal-lg modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="modal-title">プレイマットを登録</h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="row g-3">
+                        <!-- 左: 画像 -->
+                        <div class="col-md-6">
+                            <label class="form-label small text-muted mb-1">画像</label>
+                            <div class="image-preview-area" id="image-preview-area"
+                                 onclick="document.getElementById('image-input').click()">
+                                <div class="image-placeholder-text" id="image-placeholder">
+                                    <i class="bi bi-image" style="font-size:2.2rem; display:block; margin-bottom:8px;"></i>
+                                    クリックして画像を選択
+                                </div>
+                                <img id="image-preview" src="" style="display:none;" alt="preview">
+                            </div>
+                            <input type="file" id="image-input" accept="image/*"
+                                   style="display:none;" onchange="handleImageSelect(event)">
+                            <button class="btn btn-outline-secondary btn-sm mt-2 w-100"
+                                    id="clear-image-btn" onclick="clearImage()" style="display:none;">
+                                <i class="bi bi-x-circle"></i> 画像をクリア
+                            </button>
+                        </div>
+                        <!-- 右: フォーム -->
+                        <div class="col-md-6 d-flex flex-column gap-3">
+                            <div>
+                                <label class="form-label small text-muted mb-1">
+                                    名前 <span class="text-danger">*</span>
+                                </label>
+                                <input type="text" class="form-control" id="name-input"
+                                       placeholder="プレイマット名を入力">
+                                <div class="invalid-feedback">名前を入力してください</div>
+                            </div>
+                            <div>
+                                <label class="form-label small text-muted mb-1">詳細</label>
+                                <textarea class="form-control" id="desc-input" rows="4"
+                                          placeholder="詳細・メモ（任意）"></textarea>
+                            </div>
+                            <div>
+                                <label class="form-label small text-muted d-block mb-1">状態</label>
+                                <div class="form-check form-switch">
+                                    <input class="form-check-input" type="checkbox"
+                                           id="sealed-switch" checked>
+                                    <label class="form-check-label" for="sealed-switch"
+                                           id="sealed-label">未開封</label>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button class="btn btn-danger me-auto" id="delete-btn"
+                            onclick="deletePlaymat()" style="display:none;">
+                        <i class="bi bi-trash"></i> 削除
+                    </button>
+                    <button class="btn btn-secondary btn-sm" data-bs-dismiss="modal">キャンセル</button>
+                    <button class="btn btn-primary btn-sm" onclick="savePlaymat()">
+                        <i class="bi bi-check-lg"></i> 保存
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        // ================================================================
+        //  PlaymatDB — IndexedDB wrapper
+        // ================================================================
+        const PlaymatDB = (() => {
+            const DB_NAME = 'PlaymatDB', DB_VERSION = 1, STORE = 'playmats';
+            const open = () => new Promise((res, rej) => {
+                const req = indexedDB.open(DB_NAME, DB_VERSION);
+                req.onupgradeneeded = e => {
+                    const db = e.target.result;
+                    if (!db.objectStoreNames.contains(STORE))
+                        db.createObjectStore(STORE, { keyPath: 'id' });
+                };
+                req.onsuccess = e => res(e.target.result);
+                req.onerror = e => rej(e.target.error);
+            });
+            const tx = async (mode, fn) => {
+                const db = await open();
+                return new Promise((res, rej) => {
+                    const store = db.transaction(STORE, mode).objectStore(STORE);
+                    const req = fn(store);
+                    req.onsuccess = () => res(req.result);
+                    req.onerror = () => rej(req.error);
+                });
+            };
+            return {
+                getAll: () => tx('readonly',  s => s.getAll()),
+                save:   item => tx('readwrite', s => s.put(item)),
+                delete: id   => tx('readwrite', s => s.delete(id)),
+            };
+        })();
+
+        // ================================================================
+        //  State
+        // ================================================================
+        let playmats = [];
+        let editingId = null;
+        let currentImageDataUrl = null;
+        let bsModal = null;
+
+        // ================================================================
+        //  Init
+        // ================================================================
+        async function init() {
+            bsModal = new bootstrap.Modal(document.getElementById('playmatModal'));
+            playmats = await PlaymatDB.getAll();
+            playmats.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
+            render();
+        }
+
+        // ================================================================
+        //  Render list
+        // ================================================================
+        function render() {
+            document.getElementById('count-badge').textContent = playmats.length;
+            const list  = document.getElementById('playmat-list');
+            const empty = document.getElementById('empty-state');
+            if (playmats.length === 0) {
+                list.innerHTML = '';
+                empty.style.display = '';
+                return;
+            }
+            empty.style.display = 'none';
+            list.innerHTML = playmats.map(pm => `
+                <div class="col-6 col-md-4 col-lg-3">
+                    <div class="playmat-card" onclick="openModal('${pm.id}')">
+                        <div class="playmat-thumb">
+                            ${pm.imageDataUrl
+                                ? `<img src="${pm.imageDataUrl}" alt="${esc(pm.name)}">`
+                                : `<i class="bi bi-image" style="font-size:2.5rem;color:#3a3d5a;"></i>`}
+                        </div>
+                        <div class="playmat-body">
+                            <div class="mb-1">
+                                <span class="badge ${pm.sealed ? 'bg-warning text-dark' : 'bg-success'}"
+                                      style="font-size:.65rem;">
+                                    ${pm.sealed ? '未開封' : '開封済み'}
+                                </span>
+                            </div>
+                            <div class="playmat-name">${esc(pm.name)}</div>
+                            <div class="playmat-desc">${esc(pm.description || '')}</div>
+                        </div>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        // ================================================================
+        //  Modal — open
+        // ================================================================
+        function openModal(id) {
+            editingId = id;
+            const pm = id ? playmats.find(p => p.id === id) : null;
+
+            document.getElementById('modal-title').textContent =
+                pm ? 'プレイマットを編集' : 'プレイマットを登録';
+            document.getElementById('name-input').value = pm?.name ?? '';
+            document.getElementById('name-input').classList.remove('is-invalid');
+            document.getElementById('desc-input').value = pm?.description ?? '';
+
+            const sealed = pm?.sealed ?? true;
+            document.getElementById('sealed-switch').checked = sealed;
+            document.getElementById('sealed-label').textContent = sealed ? '未開封' : '開封済み';
+
+            document.getElementById('delete-btn').style.display = pm ? '' : 'none';
+
+            currentImageDataUrl = pm?.imageDataUrl ?? null;
+            setImagePreview(currentImageDataUrl);
+
+            bsModal.show();
+        }
+
+        // ================================================================
+        //  Image helpers
+        // ================================================================
+        function setImagePreview(dataUrl) {
+            const preview     = document.getElementById('image-preview');
+            const placeholder = document.getElementById('image-placeholder');
+            const clearBtn    = document.getElementById('clear-image-btn');
+            if (dataUrl) {
+                preview.src = dataUrl;
+                preview.style.display = '';
+                placeholder.style.display = 'none';
+                clearBtn.style.display = '';
+            } else {
+                preview.src = '';
+                preview.style.display = 'none';
+                placeholder.style.display = '';
+                clearBtn.style.display = 'none';
+            }
+        }
+
+        function handleImageSelect(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+            const reader = new FileReader();
+            reader.onload = e => {
+                currentImageDataUrl = e.target.result;
+                setImagePreview(currentImageDataUrl);
+            };
+            reader.readAsDataURL(file);
+            event.target.value = '';
+        }
+
+        function clearImage() {
+            currentImageDataUrl = null;
+            setImagePreview(null);
+        }
+
+        // Sealed switch label
+        document.getElementById('sealed-switch').addEventListener('change', function () {
+            document.getElementById('sealed-label').textContent = this.checked ? '未開封' : '開封済み';
+        });
+
+        // ================================================================
+        //  Save / Delete
+        // ================================================================
+        async function savePlaymat() {
+            const nameEl = document.getElementById('name-input');
+            const name = nameEl.value.trim();
+            if (!name) {
+                nameEl.classList.add('is-invalid');
+                return;
+            }
+            nameEl.classList.remove('is-invalid');
+
+            const now = new Date().toISOString();
+            const pm = {
+                id:           editingId ?? crypto.randomUUID(),
+                name,
+                description:  document.getElementById('desc-input').value.trim(),
+                sealed:       document.getElementById('sealed-switch').checked,
+                imageDataUrl: currentImageDataUrl,
+                createdAt:    editingId
+                                  ? (playmats.find(p => p.id === editingId)?.createdAt ?? now)
+                                  : now,
+                updatedAt:    now,
+            };
+
+            await PlaymatDB.save(pm);
+            bsModal.hide();
+            playmats = await PlaymatDB.getAll();
+            playmats.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
+            render();
+        }
+
+        async function deletePlaymat() {
+            if (!editingId) return;
+            if (!confirm('このプレイマットを削除しますか？')) return;
+            await PlaymatDB.delete(editingId);
+            bsModal.hide();
+            playmats = await PlaymatDB.getAll();
+            playmats.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
+            render();
+        }
+
+        // ================================================================
+        //  Util
+        // ================================================================
+        function esc(str) {
+            return String(str)
+                .replace(/&/g, '&amp;')
+                .replace(/</g, '&lt;')
+                .replace(/>/g, '&gt;')
+                .replace(/"/g, '&quot;');
+        }
+
+        init();
+    </script>
+</body>
+</html>
