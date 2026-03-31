@@ -223,123 +223,65 @@
         }
 
         /* ============================================================
-           レアリティ演出 — Outer effects (.card-item に適用)
-           outline = ボーダー系  /  animation = グロー系
-           box-shadow は outline と共存できる
+           レアリティ演出 — 枠・グロー系 (overlay div の inset box-shadow)
+           すべて .card-image-container 内の overlay div に適用
+           → イラストフレームのみに表示される
            ============================================================ */
 
-        /* ---- グロー系 ---- */
-        .card-item.rarity-fx-outer-silver-glow { animation: fx-silver-glow 2.5s ease-in-out infinite; }
-        @keyframes fx-silver-glow {
-            0%,100% { box-shadow: 0 1px 3px rgba(0,0,0,.12), 0 0 8px  2px rgba(180,200,220,.5); }
-            50%     { box-shadow: 0 1px 3px rgba(0,0,0,.12), 0 0 22px 7px rgba(200,225,255,.85); }
+        /* Silver Glow */
+        .rarity-fx-silver-glow { animation: fx-sv-glow-in 2.5s ease-in-out infinite; }
+        @keyframes fx-sv-glow-in {
+            0%,100% { box-shadow: inset 0 0 10px  3px rgba(180,200,220,.5); }
+            50%     { box-shadow: inset 0 0 24px  8px rgba(200,225,255,.85); }
         }
-        .card-item.rarity-fx-outer-gold-glow { animation: fx-gold-glow 2s ease-in-out infinite; }
-        @keyframes fx-gold-glow {
-            0%,100% { box-shadow: 0 1px 3px rgba(0,0,0,.12), 0 0 10px 3px rgba(220,170,0,.55); }
-            50%     { box-shadow: 0 1px 3px rgba(0,0,0,.12), 0 0 26px 9px rgba(255,215,0,.9); }
+        /* Gold Glow */
+        .rarity-fx-gold-glow { animation: fx-gd-glow-in 2s ease-in-out infinite; }
+        @keyframes fx-gd-glow-in {
+            0%,100% { box-shadow: inset 0 0 12px  4px rgba(220,170,0,.55); }
+            50%     { box-shadow: inset 0 0 28px 10px rgba(255,215,0,.85); }
         }
-        .card-item.rarity-fx-outer-prism-glow { animation: fx-prism-glow 3.6s linear infinite; }
-        @keyframes fx-prism-glow {
-            0%   { box-shadow: 0 1px 3px rgba(0,0,0,.12), 0 0 18px 5px rgba(255, 60, 60,.8); }
-            17%  { box-shadow: 0 1px 3px rgba(0,0,0,.12), 0 0 18px 5px rgba(255,160, 30,.8); }
-            33%  { box-shadow: 0 1px 3px rgba(0,0,0,.12), 0 0 18px 5px rgba(240,230, 20,.8); }
-            50%  { box-shadow: 0 1px 3px rgba(0,0,0,.12), 0 0 18px 5px rgba( 30,220, 60,.8); }
-            67%  { box-shadow: 0 1px 3px rgba(0,0,0,.12), 0 0 18px 5px rgba( 30,130,255,.8); }
-            83%  { box-shadow: 0 1px 3px rgba(0,0,0,.12), 0 0 18px 5px rgba(170, 30,255,.8); }
-            100% { box-shadow: 0 1px 3px rgba(0,0,0,.12), 0 0 18px 5px rgba(255, 60, 60,.8); }
+        /* Prism Glow */
+        .rarity-fx-prism-glow { animation: fx-prism-glow-in 3.6s linear infinite; }
+        @keyframes fx-prism-glow-in {
+            0%   { box-shadow: inset 0 0 18px 5px rgba(255, 60, 60,.8); }
+            17%  { box-shadow: inset 0 0 18px 5px rgba(255,160, 30,.8); }
+            33%  { box-shadow: inset 0 0 18px 5px rgba(240,230, 20,.8); }
+            50%  { box-shadow: inset 0 0 18px 5px rgba( 30,220, 60,.8); }
+            67%  { box-shadow: inset 0 0 18px 5px rgba( 30,130,255,.8); }
+            83%  { box-shadow: inset 0 0 18px 5px rgba(170, 30,255,.8); }
+            100% { box-shadow: inset 0 0 18px 5px rgba(255, 60, 60,.8); }
         }
-        .card-item.rarity-fx-outer-ghost   { animation: fx-ghost-aura  3s ease-in-out infinite; }
-        @keyframes fx-ghost-aura {
-            0%,100% { box-shadow: 0 1px 3px rgba(0,0,0,.12), 0 0 20px  8px rgba(210,225,255,.5); }
-            50%     { box-shadow: 0 1px 3px rgba(0,0,0,.12), 0 0 32px 14px rgba(230,240,255,.75); }
+        /* Gold Border */
+        .rarity-fx-gold-border {
+            box-shadow: inset 0 0 0 3px #ffd700, inset 0 0 8px 2px rgba(255,215,0,.35);
         }
-        .card-item.rarity-fx-outer-aurora  { animation: fx-aurora-glow 5s ease-in-out infinite; }
-        @keyframes fx-aurora-glow {
-            0%,100% { box-shadow: 0 1px 3px rgba(0,0,0,.12), 0 0 18px 5px rgba(  0,200,100,.4); }
-            35%     { box-shadow: 0 1px 3px rgba(0,0,0,.12), 0 0 22px 7px rgba(  0,110,255,.5); }
-            70%     { box-shadow: 0 1px 3px rgba(0,0,0,.12), 0 0 20px 6px rgba(160,  0,255,.4); }
+        /* Silver Border */
+        .rarity-fx-silver-border {
+            box-shadow: inset 0 0 0 3px #c8d8e8, inset 0 0 8px 2px rgba(192,210,230,.35);
         }
-        /* グロー小（outline と組み合わせ可） */
-        .card-item.rarity-fx-outer-holographic { box-shadow: 0 1px 3px rgba(0,0,0,.12), 0 0 12px 3px rgba(150,100,255,.35); }
-        .card-item.rarity-fx-outer-prismatic   { box-shadow: 0 1px 3px rgba(0,0,0,.12), 0 0 14px 4px rgba(200,150,255,.4); }
-        .card-item.rarity-fx-outer-starfoil    { box-shadow: 0 1px 3px rgba(0,0,0,.12), 0 0 10px 2px rgba(255,230,100,.4); }
-        .card-item.rarity-fx-outer-platinum    { box-shadow: 0 1px 3px rgba(0,0,0,.12), 0 0 12px 3px rgba(255,215,0,.35), 0 0 6px 2px rgba(192,192,192,.35); }
-        .card-item.rarity-fx-outer-diamond     { box-shadow: 0 1px 3px rgba(0,0,0,.12), 0 0 14px 4px rgba(200,240,255,.5); }
-
-        /* ---- ボーダー系 (outline は overflow:hidden に影響しない) ---- */
-        .card-item.rarity-fx-outer-gold-border {
-            outline: 2px solid #ffd700;
-            outline-offset: 1px;
-            box-shadow: 0 1px 3px rgba(0,0,0,.12), 0 0 6px 2px rgba(255,215,0,.35);
+        /* Rainbow Border */
+        .rarity-fx-rainbow-border { animation: fx-rb-inset 2s linear infinite; }
+        @keyframes fx-rb-inset {
+            0%   { box-shadow: inset 0 0 0 3px #ff0000, inset 0 0 8px rgba(255,  0,  0,.2); }
+            14%  { box-shadow: inset 0 0 0 3px #ff8800, inset 0 0 8px rgba(255,136,  0,.2); }
+            28%  { box-shadow: inset 0 0 0 3px #ffff00, inset 0 0 8px rgba(255,255,  0,.2); }
+            43%  { box-shadow: inset 0 0 0 3px #00ff88, inset 0 0 8px rgba(  0,255,136,.2); }
+            57%  { box-shadow: inset 0 0 0 3px #00ccff, inset 0 0 8px rgba(  0,204,255,.2); }
+            71%  { box-shadow: inset 0 0 0 3px #8800ff, inset 0 0 8px rgba(136,  0,255,.2); }
+            85%  { box-shadow: inset 0 0 0 3px #ff00aa, inset 0 0 8px rgba(255,  0,170,.2); }
+            100% { box-shadow: inset 0 0 0 3px #ff0000, inset 0 0 8px rgba(255,  0,  0,.2); }
         }
-        .card-item.rarity-fx-outer-silver-border {
-            outline: 2px solid #c8d8e8;
-            outline-offset: 1px;
-            box-shadow: 0 1px 3px rgba(0,0,0,.12), 0 0 6px 2px rgba(192,210,230,.35);
-        }
-        .card-item.rarity-fx-outer-rainbow-border {
-            outline: 3px solid #ff0000;
-            outline-offset: 2px;
-            animation: fx-rb-outline 2s linear infinite;
-        }
-        @keyframes fx-rb-outline {
-            0%   { outline-color: #ff0000; }
-            14%  { outline-color: #ff8800; }
-            28%  { outline-color: #ffff00; }
-            43%  { outline-color: #00ff88; }
-            57%  { outline-color: #00ccff; }
-            71%  { outline-color: #8800ff; }
-            85%  { outline-color: #ff00aa; }
-            100% { outline-color: #ff0000; }
-        }
-        .card-item.rarity-fx-outer-weak-rainbow {
-            outline: 2px solid rgba(255,80,80,.7);
-            outline-offset: 1px;
-            animation: fx-weak-rb-outline 5s linear infinite;
-        }
-        @keyframes fx-weak-rb-outline {
-            0%   { outline-color: rgba(255, 80, 80,.7); }
-            14%  { outline-color: rgba(255,160, 40,.7); }
-            28%  { outline-color: rgba(230,230, 60,.7); }
-            43%  { outline-color: rgba( 60,220,120,.7); }
-            57%  { outline-color: rgba( 60,160,255,.7); }
-            71%  { outline-color: rgba(150, 60,255,.7); }
-            85%  { outline-color: rgba(255, 60,180,.7); }
-            100% { outline-color: rgba(255, 80, 80,.7); }
-        }
-        .card-item.rarity-fx-outer-20th {
-            outline: 2px solid #cc0000;
-            outline-offset: 1px;
-            box-shadow: 0 1px 3px rgba(0,0,0,.12), 0 0 8px 3px rgba(200,0,0,.3);
-        }
-        .card-item.rarity-fx-outer-25th {
-            outline: 2px solid #c0c8d0;
-            outline-offset: 1px;
-            animation: fx-25th-outline 4s linear infinite;
-            box-shadow: 0 1px 3px rgba(0,0,0,.12), 0 0 10px 3px rgba(160,190,230,.4);
-        }
-        @keyframes fx-25th-outline {
-            0%,100% { outline-color: #c0c8d0; }
-            25%     { outline-color: #e8eeff; }
-            50%     { outline-color: #7090c0; }
-            75%     { outline-color: #ffffff; }
-        }
-        .card-item.rarity-fx-outer-collectors {
-            outline: 3px solid #ffd700;
-            outline-offset: 2px;
-            animation: fx-col-glow 1.8s ease-in-out infinite, fx-col-outline 1.8s linear infinite;
-        }
-        @keyframes fx-col-glow {
-            0%,100% { box-shadow: 0 1px 3px rgba(0,0,0,.12), 0 0 15px 5px rgba(255,215,0,.5); }
-            50%     { box-shadow: 0 1px 3px rgba(0,0,0,.12), 0 0 30px 10px rgba(255,80,0,.7); }
-        }
-        @keyframes fx-col-outline {
-            0%   { outline-color: #ffd700; }
-            25%  { outline-color: #ff4400; }
-            50%  { outline-color: #ff00cc; }
-            75%  { outline-color: #00ccff; }
-            100% { outline-color: #ffd700; }
+        /* Weak Rainbow */
+        .rarity-fx-weak-rainbow { animation: fx-weak-rb-inset 5s linear infinite; }
+        @keyframes fx-weak-rb-inset {
+            0%   { box-shadow: inset 0 0 0 2px rgba(255, 80, 80,.65); }
+            14%  { box-shadow: inset 0 0 0 2px rgba(255,160, 40,.65); }
+            28%  { box-shadow: inset 0 0 0 2px rgba(230,230, 60,.65); }
+            43%  { box-shadow: inset 0 0 0 2px rgba( 60,220,120,.65); }
+            57%  { box-shadow: inset 0 0 0 2px rgba( 60,160,255,.65); }
+            71%  { box-shadow: inset 0 0 0 2px rgba(150, 60,255,.65); }
+            85%  { box-shadow: inset 0 0 0 2px rgba(255, 60,180,.65); }
+            100% { box-shadow: inset 0 0 0 2px rgba(255, 80, 80,.65); }
         }
 
         /* ============================================================
@@ -388,6 +330,7 @@
         }
         /* Holographic */
         .rarity-fx-holographic {
+            box-shadow: inset 0 0 12px 3px rgba(150,100,255,.25);
             background: linear-gradient(135deg,
                 rgba(255,  0,  0,.16)  0%,
                 rgba(255,140,  0,.16) 14%,
@@ -407,6 +350,7 @@
         }
         /* Prismatic 帯 */
         .rarity-fx-prismatic {
+            box-shadow: inset 0 0 14px 4px rgba(200,150,255,.3);
             background: repeating-linear-gradient(-52deg,
                 rgba(255,  0,  0,.11)  0px,
                 rgba(255,140,  0,.11) 12px,
@@ -424,6 +368,9 @@
             100% { background-position: 120px 120px; }
         }
         /* Starfoil */
+        .rarity-fx-starfoil {
+            box-shadow: inset 0 0 10px 2px rgba(255,230,100,.3);
+        }
         .rarity-fx-starfoil::before,
         .rarity-fx-starfoil::after {
             content: '';
@@ -465,10 +412,13 @@
             animation: fx-ghost-inner 3s ease-in-out infinite;
         }
         @keyframes fx-ghost-inner {
-            0%,100% { opacity: .35; transform: scale(.97); }
-            50%     { opacity: .8;  transform: scale(1.03); }
+            0%,100% { opacity: .35; transform: scale(.97); box-shadow: inset 0 0 20px  8px rgba(210,225,255,.4); }
+            50%     { opacity: .8;  transform: scale(1.03); box-shadow: inset 0 0 32px 14px rgba(230,240,255,.65); }
         }
         /* Platinum */
+        .rarity-fx-platinum {
+            box-shadow: inset 0 0 12px 3px rgba(255,215,0,.28), inset 0 0 6px 2px rgba(192,192,192,.28);
+        }
         .rarity-fx-platinum::before {
             content: '';
             position: absolute;
@@ -490,6 +440,9 @@
             60%, 100% { background-position:  200% 0; }
         }
         /* Diamond */
+        .rarity-fx-diamond {
+            box-shadow: inset 0 0 14px 4px rgba(200,240,255,.4);
+        }
         .rarity-fx-diamond::before,
         .rarity-fx-diamond::after {
             content: '';
@@ -528,13 +481,28 @@
                 rgba(  0,255,200,.16) 82%,
                 rgba(  0,255,140,0)  100%);
             background-size: 100% 300%;
-            animation: fx-aurora-wave 5s ease-in-out infinite;
+            animation: fx-aurora-wave 5s ease-in-out infinite, fx-aurora-glow-in 5s ease-in-out infinite;
         }
         @keyframes fx-aurora-wave {
             0%,100% { background-position: 0%   0%; opacity: .65; }
             50%     { background-position: 0% 100%; opacity: 1;   }
         }
+        @keyframes fx-aurora-glow-in {
+            0%,100% { box-shadow: inset 0 0 18px 5px rgba(  0,200,100,.4); }
+            35%     { box-shadow: inset 0 0 22px 7px rgba(  0,110,255,.5); }
+            70%     { box-shadow: inset 0 0 20px 6px rgba(160,  0,255,.4); }
+        }
         /* Collectors inner */
+        .rarity-fx-collectors {
+            animation: fx-col-border-in 1.8s linear infinite;
+        }
+        @keyframes fx-col-border-in {
+            0%   { box-shadow: inset 0 0 0 3px #ffd700, inset 0 0 15px 5px rgba(255,215,0,.35); }
+            25%  { box-shadow: inset 0 0 0 3px #ff4400, inset 0 0 20px 7px rgba(255, 68,0,.4); }
+            50%  { box-shadow: inset 0 0 0 3px #ff00cc, inset 0 0 18px 6px rgba(255,  0,204,.35); }
+            75%  { box-shadow: inset 0 0 0 3px #00ccff, inset 0 0 18px 6px rgba(  0,204,255,.35); }
+            100% { box-shadow: inset 0 0 0 3px #ffd700, inset 0 0 15px 5px rgba(255,215,0,.35); }
+        }
         .rarity-fx-collectors::before,
         .rarity-fx-collectors::after {
             content: '';
@@ -565,30 +533,44 @@
             0%   { opacity: .3; }
             100% { opacity: .8; }
         }
-        /* 20th — 赤メタリック名前シマー */
-        .rarity-fx-20th::after {
-            content: 'カード名';
-            position: absolute;
-            top: 5%; left: 5%; right: 5%;
-            font-size: .62rem;
-            font-weight: bold;
-            letter-spacing: .04em;
-            background: linear-gradient(90deg,
-                #4a0000  0%, #aa0000 15%, #ff4040 30%,
-                #ffaaaa 45%, #ffffff 50%,
-                #ffaaaa 55%, #ff4040 70%, #aa0000 85%, #4a0000 100%);
-            background-size: 200% 100%;
-            -webkit-background-clip: text;
-            background-clip: text;
-            color: transparent;
-            animation: fx-red-name 2.5s linear infinite;
-            line-height: 1.2;
+        /* 20th — 赤フレーム + カード名エリアに赤シマーバンド */
+        .rarity-fx-20th {
+            box-shadow: inset 0 0 0 2px #cc0000, inset 0 0 8px 3px rgba(200,0,0,.25);
         }
-        @keyframes fx-red-name {
+        .rarity-fx-20th::after {
+            content: '';
+            position: absolute;
+            top: 4%; left: 3%; right: 3%;
+            height: 10%;
+            background: linear-gradient(90deg,
+                rgba(100,  0,  0,0)    0%,
+                rgba(180,  0,  0,.22) 15%,
+                rgba(255, 60, 60,.42) 30%,
+                rgba(255,180,180,.52) 45%,
+                rgba(255,255,255,.62) 50%,
+                rgba(255,180,180,.52) 55%,
+                rgba(255, 60, 60,.42) 70%,
+                rgba(180,  0,  0,.22) 85%,
+                rgba(100,  0,  0,0)  100%);
+            background-size: 200% 100%;
+            animation: fx-red-band 2.5s linear infinite;
+            border-radius: 3px;
+            mix-blend-mode: screen;
+        }
+        @keyframes fx-red-band {
             0%   { background-position:  100% 0; }
             100% { background-position: -100% 0; }
         }
-        /* 25th — 金メタリック名前シマー + 淡い縞 */
+        /* 25th — 銀青フレーム + 淡い縞 + 金シマーバンド */
+        .rarity-fx-25th {
+            animation: fx-25th-border-in 4s linear infinite;
+        }
+        @keyframes fx-25th-border-in {
+            0%,100% { box-shadow: inset 0 0 0 2px #c0c8d0, inset 0 0 10px 3px rgba(160,190,230,.35); }
+            25%     { box-shadow: inset 0 0 0 2px #e8eeff, inset 0 0 12px 4px rgba(200,220,255,.5); }
+            50%     { box-shadow: inset 0 0 0 2px #7090c0, inset 0 0  8px 2px rgba(100,130,200,.35); }
+            75%     { box-shadow: inset 0 0 0 2px #ffffff, inset 0 0 12px 4px rgba(200,220,255,.6); }
+        }
         .rarity-fx-25th::before {
             content: '';
             position: absolute;
@@ -604,24 +586,26 @@
             animation: fx-prismatic-scroll 2s linear infinite;
         }
         .rarity-fx-25th::after {
-            content: 'カード名';
+            content: '';
             position: absolute;
-            top: 5%; left: 5%; right: 5%;
-            font-size: .62rem;
-            font-weight: bold;
-            letter-spacing: .04em;
+            top: 4%; left: 3%; right: 3%;
+            height: 10%;
             background: linear-gradient(90deg,
-                #4a3000  0%, #a06800 15%, #ffc030 30%,
-                #fff0a0 45%, #ffffff 50%,
-                #fff0a0 55%, #ffc030 70%, #a06800 85%, #4a3000 100%);
+                rgba( 80, 50,  0,0)    0%,
+                rgba(160,100,  0,.22) 15%,
+                rgba(255,190, 40,.42) 30%,
+                rgba(255,240,150,.52) 45%,
+                rgba(255,255,255,.62) 50%,
+                rgba(255,240,150,.52) 55%,
+                rgba(255,190, 40,.42) 70%,
+                rgba(160,100,  0,.22) 85%,
+                rgba( 80, 50,  0,0)  100%);
             background-size: 200% 100%;
-            -webkit-background-clip: text;
-            background-clip: text;
-            color: transparent;
-            animation: fx-gold-name 2.5s linear infinite;
-            line-height: 1.2;
+            animation: fx-gold-band 2.5s linear infinite;
+            border-radius: 3px;
+            mix-blend-mode: screen;
         }
-        @keyframes fx-gold-name {
+        @keyframes fx-gold-band {
             0%   { background-position:  100% 0; }
             100% { background-position: -100% 0; }
         }
@@ -630,7 +614,7 @@
             position: absolute;
             pointer-events: none;
             z-index: 3;
-            bottom: 8%;
+            bottom: 20%;
             left: 0; right: 0;
             text-align: center;
             font-size: 1.4rem;
@@ -4346,9 +4330,9 @@
                             const availableStock = totalStock - totalUsed;
 
                             if (totalUsed > 0) {
-                                stockBadge = `<span class="stock-badge">在庫 ${availableStock}(${totalStock})枚</span>`;
+                                stockBadge = `<span class="stock-badge">${availableStock}(${totalStock})枚</span>`;
                             } else {
-                                stockBadge = `<span class="stock-badge">在庫 ${totalStock}枚</span>`;
+                                stockBadge = `<span class="stock-badge">${totalStock}枚</span>`;
                             }
                         }
                     }
@@ -4361,7 +4345,7 @@
                     const { outerClasses, overlayHtml } = buildEffectHtml(card.data['レアリティ'] || '');
 
                     return `
-                        <div class="card-item${unownedClass}${outerClasses ? ' ' + outerClasses : ''}" ${onclickAttr} ${draggableAttr} data-card-index="${index}" data-card-id="${card.id}">
+                        <div class="card-item${unownedClass}" ${onclickAttr} ${draggableAttr} data-card-index="${index}" data-card-id="${card.id}">
                             <div class="card-image-container" id="card-img-container-${index}" data-rendering-id="${thisRenderingId}">
                                 ${overlayHtml}
                                 ${stockBadge}
@@ -7190,19 +7174,8 @@
         const RARITY_ORDER = JSON.parse(localStorage.getItem('customRarityOrder') || 'null') || ['N','P','M','R','SR','M+SR','P+SR','UR','P+UR','UL','GR','PG','CR','HR','SE','GSE','EXSE','P+SE','PSE','QCSE','20th','10000th','GMR'];
 
         // ---- レアリティ演出設定 ----
-        // outer: box-shadow animation / outline で .card-item に適用
-        // inner: overlay div を .card-image-container 内に注入
-        const FX_OUTER = new Set([
-            'silver-glow','gold-glow','prism-glow','ghost','aurora','collectors',
-            'holographic','prismatic','starfoil','platinum','diamond',
-            'gold-border','silver-border','rainbow-border','weak-rainbow',
-            '20th','25th'
-        ]);
-        const FX_INNER = new Set([
-            'silver-shimmer','gold-shimmer','holographic','prismatic','starfoil',
-            'ghost','platinum','diamond','aurora','collectors','20th','25th'
-        ]);
-        // 透かし文字が必要なもの
+        // すべての効果を overlay div として .card-image-container 内に注入
+        // → イラストフレームのみに演出が表示される
         const FX_WATERMARK = { '20th': '20th', '25th': '25th' };
 
         let rarityEffectSettings = {};
@@ -7211,16 +7184,10 @@
         } catch { rarityEffectSettings = {}; }
 
         function buildEffectHtml(rarity) {
-            const effects = rarityEffectSettings[rarity] || [];
+            const effects = (rarityEffectSettings[rarity] || []).filter(e => e !== 'normal');
             if (effects.length === 0) return { outerClasses: '', overlayHtml: '' };
 
-            const outerClasses = effects
-                .filter(e => FX_OUTER.has(e))
-                .map(e => `rarity-fx-outer-${e}`)
-                .join(' ');
-
             const overlayDivs = effects
-                .filter(e => FX_INNER.has(e))
                 .map(e => `<div class="rarity-fx-overlay rarity-fx-${e}"></div>`)
                 .join('');
 
@@ -7229,7 +7196,7 @@
                 ? `<div class="rarity-fx-watermark wm-${wmEffect}">${FX_WATERMARK[wmEffect]}</div>`
                 : '';
 
-            return { outerClasses, overlayHtml: overlayDivs + watermarkDiv };
+            return { outerClasses: '', overlayHtml: overlayDivs + watermarkDiv };
         }
         const RARITY_WEIGHTS = {
             'N': 1000, 'P': 800, 'M': 600, 'R': 400, 'SR': 200,
