@@ -354,8 +354,8 @@
 
         /* ---- プレイマット一覧 ---- */
         .playmat-gallery-card {
-            background: #1e2035;
-            border: 1px solid #2a2d4a;
+            background: #fff;
+            border: 1px solid #dee2e6;
             border-radius: 10px;
             overflow: hidden;
             cursor: pointer;
@@ -363,13 +363,13 @@
         }
         .playmat-gallery-card:hover {
             transform: translateY(-3px);
-            border-color: #4a5080;
-            box-shadow: 0 4px 16px rgba(0,0,0,.4);
+            border-color: #adb5bd;
+            box-shadow: 0 4px 16px rgba(0,0,0,.15);
         }
         .playmat-gallery-thumb {
             width: 100%;
             aspect-ratio: 16 / 9;
-            background: #2a2d4a;
+            background: #f0f0f0;
             display: flex;
             align-items: center;
             justify-content: center;
@@ -380,6 +380,7 @@
         .playmat-gallery-name {
             font-weight: 600;
             font-size: .88rem;
+            color: #212529;
             white-space: nowrap;
             overflow: hidden;
             text-overflow: ellipsis;
@@ -387,12 +388,13 @@
         }
         .playmat-gallery-desc {
             font-size: .75rem;
-            color: #999;
+            color: #6c757d;
             display: -webkit-box;
             -webkit-line-clamp: 2;
             -webkit-box-orient: vertical;
             overflow: hidden;
         }
+        .playmat-gallery-tags { margin-top: 4px; display: flex; flex-wrap: wrap; gap: 3px; }
 
         .rarity-fx-overlay {
             position: absolute;
@@ -7428,16 +7430,17 @@
                         <div class="playmat-gallery-thumb">
                             ${pm.imageDataUrl
                                 ? `<img src="${pm.imageDataUrl}" alt="${escapeHtml(pm.name)}">`
-                                : `<i class="bi bi-image" style="font-size:2.5rem;color:#3a3d5a;"></i>`}
+                                : `<i class="bi bi-image" style="font-size:2.5rem;color:#adb5bd;"></i>`}
                         </div>
                         <div class="playmat-gallery-body">
                             <div class="mb-1">
-                                <span class="badge ${pm.sealed ? 'bg-warning text-dark' : 'bg-success'}" style="font-size:.62rem;">
+                                <span class="badge ${pm.sealed ? 'bg-success' : 'bg-warning text-dark'}" style="font-size:.62rem;">
                                     ${pm.sealed ? '未開封' : '開封済み'}
                                 </span>
                             </div>
                             <div class="playmat-gallery-name">${escapeHtml(pm.name)}</div>
                             ${pm.description ? `<div class="playmat-gallery-desc">${escapeHtml(pm.description)}</div>` : ''}
+                            ${pm.tags && pm.tags.length ? `<div class="playmat-gallery-tags">${pm.tags.map(t => `<span class="badge bg-secondary" style="font-size:.6rem;">${escapeHtml(t)}</span>`).join('')}</div>` : ''}
                         </div>
                     </div>
                 </div>
