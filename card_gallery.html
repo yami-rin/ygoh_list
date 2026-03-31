@@ -3254,19 +3254,36 @@
                 <i class="bi bi-pencil-square"></i> 登録・編集
             </a>
         </div>
-        <div class="d-flex gap-2 mb-3 flex-wrap">
-            <input type="text" id="pm-search" class="form-control form-control-sm" placeholder="名前で検索..." style="max-width:220px;">
-            <select id="pm-sort" class="form-select form-select-sm" style="max-width:180px;">
-                <option value="date-desc">登録日時 新→古</option>
-                <option value="date-asc">登録日時 古→新</option>
-                <option value="name-asc">名前順 (あ→わ)</option>
-                <option value="name-desc">名前順 (わ→あ)</option>
-            </select>
-            <select id="pm-sealed-filter" class="form-select form-select-sm" style="max-width:140px;">
-                <option value="all">すべて</option>
-                <option value="sealed">未開封のみ</option>
-                <option value="opened">開封済みのみ</option>
-            </select>
+        <div class="filter-section">
+            <div class="row g-2">
+                <div class="col-md-4">
+                    <input type="text" class="form-control" id="pm-search" placeholder="名前で検索...">
+                </div>
+                <div class="col-md-3">
+                    <select class="form-select" id="pm-sort">
+                        <option value="date-desc">登録日時 新→古</option>
+                        <option value="date-asc">登録日時 古→新</option>
+                    </select>
+                </div>
+                <div class="col-md-3">
+                    <select class="form-select" id="pm-sealed-filter">
+                        <option value="all">すべて</option>
+                        <option value="sealed">未開封のみ</option>
+                        <option value="opened">開封済みのみ</option>
+                    </select>
+                </div>
+                <div class="col-md-2">
+                    <button class="btn btn-outline-secondary w-100" id="pm-clear-filters">
+                        <i class="bi bi-x-circle"></i> クリア
+                    </button>
+                </div>
+            </div>
+            <div id="pm-tag-filter-section" class="mt-3" style="display:none;">
+                <label class="form-label small fw-bold mb-2" style="color:#0d6efd;">
+                    <i class="bi bi-tag-fill"></i> タグ絞り込み
+                </label>
+                <div class="d-flex flex-wrap gap-1" id="pm-tag-filter-buttons"></div>
+            </div>
         </div>
         <div id="playmat-grid" class="row g-3"></div>
         <div id="playmat-empty" class="text-center py-5 text-muted" style="display:none;">
@@ -7324,6 +7341,13 @@
             document.getElementById('pm-search').addEventListener('input', applyPlaymatFilter);
             document.getElementById('pm-sort').addEventListener('change', applyPlaymatFilter);
             document.getElementById('pm-sealed-filter').addEventListener('change', applyPlaymatFilter);
+            document.getElementById('pm-clear-filters').addEventListener('click', () => {
+                document.getElementById('pm-search').value = '';
+                document.getElementById('pm-sort').value = 'date-desc';
+                document.getElementById('pm-sealed-filter').value = 'all';
+                document.querySelectorAll('#pm-tag-filter-buttons .tag-filter-btn.active').forEach(b => b.classList.remove('active'));
+                applyPlaymatFilter();
+            });
 
             // Check URL for direct view parameter
             const urlParams = new URLSearchParams(window.location.search);
@@ -7431,12 +7455,28 @@
         };
 
         async function renderPlaymats() {
-            const grid   = document.getElementById('playmat-grid');
-            const empty  = document.getElementById('playmat-empty');
-            allPlaymats  = await PlaymatDB.getAll();
+            allPlaymats = await PlaymatDB.getAll();
             document.getElementById('playmat-count-badge').textContent = allPlaymats.length;
+            renderPlaymatTagFilters();
             applyPlaymatFilter();
         }
+
+        function renderPlaymatTagFilters() {
+            const tags = JSON.parse(localStorage.getItem('supplyTags') || '[]');
+            const section = document.getElementById('pm-tag-filter-section');
+            const container = document.getElementById('pm-tag-filter-buttons');
+            if (!tags.length) { section.style.display = 'none'; return; }
+            section.style.display = '';
+            container.innerHTML = tags
+                .sort((a, b) => (a.order || 0) - (b.order || 0))
+                .map(t => `<button class="tag-filter-btn" data-pm-tag="${escapeHtml(t.name)}" onclick="togglePmTag(this)">${escapeHtml(t.name)}</button>`)
+                .join('');
+        }
+
+        window.togglePmTag = (btn) => {
+            btn.classList.toggle('active');
+            applyPlaymatFilter();
+        };
 
         function applyPlaymatFilter() {
             const grid    = document.getElementById('playmat-grid');
@@ -7453,6 +7493,10 @@
             // filter by sealed
             if (sealed === 'sealed')  list = list.filter(pm => pm.sealed);
             if (sealed === 'opened')  list = list.filter(pm => !pm.sealed);
+
+            // filter by tags (OR: いずれかのタグを持つ)
+            const activeTags = [...document.querySelectorAll('#pm-tag-filter-buttons .tag-filter-btn.active')].map(b => b.dataset.pmTag);
+            if (activeTags.length) list = list.filter(pm => activeTags.some(t => pm.tags && pm.tags.includes(t)));
 
             // sort
             if (sort === 'date-desc') list.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
