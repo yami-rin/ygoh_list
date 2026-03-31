@@ -1,0 +1,1008 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>レアリティ演出サンプル</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      background: #12121e;
+      color: #e0e0e0;
+      font-family: 'Segoe UI', 'Hiragino Sans', sans-serif;
+      padding: 32px 24px;
+      min-height: 100vh;
+    }
+
+    h1 {
+      text-align: center;
+      font-size: 1.6rem;
+      margin-bottom: 8px;
+      letter-spacing: 0.05em;
+    }
+    .note {
+      text-align: center;
+      color: #888;
+      font-size: 0.85rem;
+      margin-bottom: 40px;
+      line-height: 1.6;
+    }
+
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+      gap: 32px 24px;
+      max-width: 1100px;
+      margin: 0 auto;
+    }
+
+    .effect-item {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 12px;
+    }
+
+    /* カード枠のラッパー（グローはここに乗せる） */
+    .card-outer {
+      border-radius: 8px;
+      line-height: 0;
+    }
+
+    /* overflow:hidden用の内側ラッパー（シマー・オーバーレイ用） */
+    .card-wrap {
+      position: relative;
+      width: 120px;
+      aspect-ratio: 59 / 86;
+      border-radius: 7px;
+      overflow: hidden;
+      display: block;
+    }
+
+    /* カードのプレースホルダー */
+    .card-face {
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(155deg, #1e2a4a 0%, #2d3f6e 30%, #6b3a7d 65%, #9c3a5a 100%);
+      border-radius: 7px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 3rem;
+      user-select: none;
+    }
+
+    .effect-label {
+      font-size: 0.8rem;
+      text-align: center;
+      line-height: 1.5;
+      color: #ccc;
+    }
+    .effect-label .sub {
+      font-size: 0.7rem;
+      color: #777;
+      display: block;
+    }
+    .effect-label .num {
+      font-weight: bold;
+      color: #aaa;
+    }
+
+    /* ============================================================
+       CSS @property (アニメーション用カスタムプロパティ)
+       ============================================================ */
+    @property --rb-angle {
+      syntax: '<angle>';
+      initial-value: 0deg;
+      inherits: false;
+    }
+    @property --col-angle {
+      syntax: '<angle>';
+      initial-value: 0deg;
+      inherits: false;
+    }
+
+    /* ============================================================
+       1. ノーマル — 演出なし
+       ============================================================ */
+    /* (特別なスタイルなし) */
+
+    /* ============================================================
+       2. シルバーシマー — 銀の光が左→右に流れる
+       ============================================================ */
+    .rarity-effect-silver-shimmer .card-wrap::before {
+      content: '';
+      position: absolute;
+      top: 0; left: -80%;
+      width: 60%;
+      height: 100%;
+      background: linear-gradient(
+        105deg,
+        transparent 30%,
+        rgba(180,200,220,0.4) 45%,
+        rgba(255,255,255,0.85) 50%,
+        rgba(180,200,220,0.4) 55%,
+        transparent 70%
+      );
+      animation: shine-sweep 2.8s linear infinite;
+      z-index: 2;
+      pointer-events: none;
+    }
+    @keyframes shine-sweep {
+      0%   { left: -80%; }
+      100% { left: 160%; }
+    }
+
+    /* ============================================================
+       3. ゴールドシマー — 金の光が流れる
+       ============================================================ */
+    .rarity-effect-gold-shimmer .card-wrap::before {
+      content: '';
+      position: absolute;
+      top: 0; left: -80%;
+      width: 60%;
+      height: 100%;
+      background: linear-gradient(
+        105deg,
+        transparent 30%,
+        rgba(220,170,30,0.45) 44%,
+        rgba(255,240,100,0.9) 50%,
+        rgba(220,170,30,0.45) 56%,
+        transparent 70%
+      );
+      animation: shine-sweep 2s linear infinite;
+      z-index: 2;
+      pointer-events: none;
+    }
+
+    /* ============================================================
+       4. シルバーグロー — 銀色の外周グローが脈動する
+       ============================================================ */
+    .rarity-effect-silver-glow .card-outer {
+      animation: silver-pulse 2.5s ease-in-out infinite;
+    }
+    @keyframes silver-pulse {
+      0%, 100% {
+        box-shadow: 0 0 8px 2px rgba(160,185,210,0.5);
+      }
+      50% {
+        box-shadow: 0 0 22px 7px rgba(200,225,255,0.85),
+                    0 0 45px 14px rgba(160,185,210,0.3);
+      }
+    }
+
+    /* ============================================================
+       5. ゴールドグロー — 金色のグローが脈動する
+       ============================================================ */
+    .rarity-effect-gold-glow .card-outer {
+      animation: gold-pulse 2s ease-in-out infinite;
+    }
+    @keyframes gold-pulse {
+      0%, 100% {
+        box-shadow: 0 0 10px 3px rgba(220,170,0,0.55);
+      }
+      50% {
+        box-shadow: 0 0 26px 9px rgba(255,215,0,0.9),
+                    0 0 52px 18px rgba(200,140,0,0.35);
+      }
+    }
+
+    /* ============================================================
+       6. プリズムグロー — RGB各色のグローが順番に切り替わる
+       ============================================================ */
+    .rarity-effect-prism-glow .card-outer {
+      animation: prism-glow 3.6s linear infinite;
+    }
+    @keyframes prism-glow {
+      0%   { box-shadow: 0 0 18px 5px rgba(255, 60, 60, 0.8); }
+      17%  { box-shadow: 0 0 18px 5px rgba(255,160, 30, 0.8); }
+      33%  { box-shadow: 0 0 18px 5px rgba(240,230, 20, 0.8); }
+      50%  { box-shadow: 0 0 18px 5px rgba( 30,220, 60, 0.8); }
+      67%  { box-shadow: 0 0 18px 5px rgba( 30,130,255, 0.8); }
+      83%  { box-shadow: 0 0 18px 5px rgba(170, 30,255, 0.8); }
+      100% { box-shadow: 0 0 18px 5px rgba(255, 60, 60, 0.8); }
+    }
+
+    /* ============================================================
+       7. ホログラフィック — 色相が全回転するオーバーレイ
+       ============================================================ */
+    .rarity-effect-holographic .card-wrap::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(
+        135deg,
+        rgba(255,  0,  0,0.18)  0%,
+        rgba(255,140,  0,0.18) 14%,
+        rgba(255,255,  0,0.18) 28%,
+        rgba(  0,255,  0,0.18) 42%,
+        rgba(  0,200,255,0.18) 57%,
+        rgba(120,  0,255,0.18) 71%,
+        rgba(255,  0,200,0.18) 85%,
+        rgba(255,  0,  0,0.18)100%
+      );
+      background-size: 200% 200%;
+      animation: holo-move 4s linear infinite;
+      z-index: 2;
+      pointer-events: none;
+      mix-blend-mode: color-dodge;
+    }
+    @keyframes holo-move {
+      0%   { background-position: 0%   0%;   filter: hue-rotate(0deg); }
+      100% { background-position: 100% 100%; filter: hue-rotate(360deg); }
+    }
+    .rarity-effect-holographic .card-outer {
+      box-shadow: 0 0 12px 3px rgba(150,100,255,0.4);
+    }
+
+    /* ============================================================
+       8. レインボーボーダー — 虹色ボーダーが回転する
+       ============================================================ */
+    .rarity-effect-rainbow-border .card-outer {
+      padding: 3px;
+      border-radius: 10px;
+      background:
+        linear-gradient(#12121e, #12121e) padding-box,
+        conic-gradient(
+          from var(--rb-angle),
+          #ff0000, #ff8800, #ffff00, #00ff88, #00ccff, #8800ff, #ff0088, #ff0000
+        ) border-box;
+      border: 3px solid transparent;
+      animation: rb-rotate 2s linear infinite;
+    }
+    @keyframes rb-rotate {
+      to { --rb-angle: 360deg; }
+    }
+
+    /* ============================================================
+       9. プリズマティック帯 — 斜め虹色縞が流れる（セクレット風）
+       ============================================================ */
+    .rarity-effect-prismatic .card-wrap::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: repeating-linear-gradient(
+        -52deg,
+        rgba(255,  0,  0,0.13)  0px,
+        rgba(255,140,  0,0.13) 12px,
+        rgba(255,255,  0,0.13) 24px,
+        rgba(  0,255,100,0.13) 36px,
+        rgba(  0,200,255,0.13) 48px,
+        rgba(130,  0,255,0.13) 60px,
+        rgba(255,  0,160,0.13) 72px,
+        rgba(255,  0,  0,0.13) 84px
+      );
+      background-size: 120px 120px;
+      animation: prismatic-scroll 1.2s linear infinite;
+      z-index: 2;
+      pointer-events: none;
+    }
+    .rarity-effect-prismatic .card-outer {
+      box-shadow: 0 0 14px 4px rgba(200,150,255,0.45);
+    }
+    @keyframes prismatic-scroll {
+      0%   { background-position: 0 0; }
+      100% { background-position: 120px 120px; }
+    }
+
+    /* ============================================================
+       10. スターフォイル — 星形のきらめきが点滅する
+       ============================================================ */
+    .rarity-effect-starfoil .card-wrap::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background:
+        radial-gradient(ellipse  5px 22px at 22% 28%, rgba(255,255,255,0.95) 0%, transparent 100%),
+        radial-gradient(ellipse 22px  5px at 22% 28%, rgba(255,255,255,0.95) 0%, transparent 100%),
+        radial-gradient(ellipse  4px 18px at 75% 18%, rgba(255,230,100,0.95) 0%, transparent 100%),
+        radial-gradient(ellipse 18px  4px at 75% 18%, rgba(255,230,100,0.95) 0%, transparent 100%),
+        radial-gradient(ellipse  4px 16px at 55% 72%, rgba(255,255,255,0.9)  0%, transparent 100%),
+        radial-gradient(ellipse 16px  4px at 55% 72%, rgba(255,255,255,0.9)  0%, transparent 100%),
+        radial-gradient(ellipse  3px 14px at 82% 78%, rgba(255,230,100,0.9)  0%, transparent 100%),
+        radial-gradient(ellipse 14px  3px at 82% 78%, rgba(255,230,100,0.9)  0%, transparent 100%);
+      animation: star-twinkle-a 1.8s ease-in-out infinite;
+      z-index: 2;
+      pointer-events: none;
+    }
+    .rarity-effect-starfoil .card-wrap::after {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background:
+        radial-gradient(ellipse  5px 20px at 40% 45%, rgba(200,240,255,0.9)  0%, transparent 100%),
+        radial-gradient(ellipse 20px  5px at 40% 45%, rgba(200,240,255,0.9)  0%, transparent 100%),
+        radial-gradient(ellipse  3px 14px at 65% 88%, rgba(255,255,180,0.85) 0%, transparent 100%),
+        radial-gradient(ellipse 14px  3px at 65% 88%, rgba(255,255,180,0.85) 0%, transparent 100%),
+        radial-gradient(ellipse  4px 16px at 15% 60%, rgba(255,255,255,0.85) 0%, transparent 100%),
+        radial-gradient(ellipse 16px  4px at 15% 60%, rgba(255,255,255,0.85) 0%, transparent 100%);
+      animation: star-twinkle-a 1.8s ease-in-out infinite 0.9s;
+      z-index: 2;
+      pointer-events: none;
+    }
+    @keyframes star-twinkle-a {
+      0%, 100% { opacity: 0.15; }
+      50%       { opacity: 1;    }
+    }
+    .rarity-effect-starfoil .card-outer {
+      box-shadow: 0 0 10px 2px rgba(255,230,100,0.4);
+    }
+
+    /* ============================================================
+       11. ゴーストレア — 白い幽玄なグローと脱彩色
+       ============================================================ */
+    .rarity-effect-ghost .card-face {
+      filter: brightness(1.25) saturate(0.25);
+    }
+    .rarity-effect-ghost .card-wrap::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: radial-gradient(
+        ellipse 80% 90% at 50% 40%,
+        rgba(255,255,255,0.35) 0%,
+        rgba(200,220,255,0.15) 50%,
+        transparent 100%
+      );
+      animation: ghost-shimmer 3s ease-in-out infinite;
+      z-index: 2;
+      pointer-events: none;
+    }
+    .rarity-effect-ghost .card-outer {
+      animation: ghost-aura 3s ease-in-out infinite;
+    }
+    @keyframes ghost-shimmer {
+      0%, 100% { opacity: 0.35; transform: scale(0.97); }
+      50%       { opacity: 0.85; transform: scale(1.03); }
+    }
+    @keyframes ghost-aura {
+      0%, 100% {
+        box-shadow: 0 0 20px  8px rgba(210,225,255,0.5),
+                    0 0 60px 20px rgba(200,215,255,0.15);
+      }
+      50% {
+        box-shadow: 0 0 32px 14px rgba(230,240,255,0.75),
+                    0 0 80px 30px rgba(210,225,255,0.25);
+      }
+    }
+
+    /* ============================================================
+       12. プラチナフォイル — 金と銀が交互に流れる
+       ============================================================ */
+    .rarity-effect-platinum .card-wrap::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(
+        118deg,
+        rgba(255,255,255,0)    0%,
+        rgba(210,210,190,0.30) 18%,
+        rgba(255,215,  0,0.50) 33%,
+        rgba(255,255,255,0.65) 42%,
+        rgba(192,192,192,0.55) 52%,
+        rgba(255,215,  0,0.45) 62%,
+        rgba(255,255,255,0.55) 72%,
+        rgba(255,255,255,0)   100%
+      );
+      background-size: 200% 100%;
+      animation: platinum-sweep 3s ease-in-out infinite;
+      z-index: 2;
+      pointer-events: none;
+    }
+    .rarity-effect-platinum .card-outer {
+      box-shadow: 0 0 12px 3px rgba(255,215,0,0.4),
+                  0 0  6px 2px rgba(192,192,192,0.4);
+    }
+    @keyframes platinum-sweep {
+      0%        { background-position: -100% 0; }
+      60%, 100% { background-position:  200% 0; }
+    }
+
+    /* ============================================================
+       13. ダイヤモンドスパーク — 十字形の輝きが複数点滅する
+       ============================================================ */
+    .rarity-effect-diamond .card-wrap::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background:
+        radial-gradient(ellipse  6px 28px at 25% 30%, rgba(255,255,255,0.95) 0%, transparent 100%),
+        radial-gradient(ellipse 28px  6px at 25% 30%, rgba(255,255,255,0.95) 0%, transparent 100%),
+        radial-gradient(ellipse  5px 22px at 72% 62%, rgba(180,225,255,0.95) 0%, transparent 100%),
+        radial-gradient(ellipse 22px  5px at 72% 62%, rgba(180,225,255,0.95) 0%, transparent 100%),
+        radial-gradient(ellipse  4px 18px at 48% 88%, rgba(255,255,255,0.9)  0%, transparent 100%),
+        radial-gradient(ellipse 18px  4px at 48% 88%, rgba(255,255,255,0.9)  0%, transparent 100%);
+      animation: diamond-flash 2.2s ease-in-out infinite;
+      z-index: 2;
+      pointer-events: none;
+    }
+    .rarity-effect-diamond .card-wrap::after {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background:
+        radial-gradient(ellipse  5px 22px at 62% 18%, rgba(200,245,255,0.9)  0%, transparent 100%),
+        radial-gradient(ellipse 22px  5px at 62% 18%, rgba(200,245,255,0.9)  0%, transparent 100%),
+        radial-gradient(ellipse  5px 20px at 30% 68%, rgba(255,255,180,0.85) 0%, transparent 100%),
+        radial-gradient(ellipse 20px  5px at 30% 68%, rgba(255,255,180,0.85) 0%, transparent 100%);
+      animation: diamond-flash 2.2s ease-in-out infinite 1.1s;
+      z-index: 2;
+      pointer-events: none;
+    }
+    @keyframes diamond-flash {
+      0%, 100% { opacity: 0.1; }
+      50%       { opacity: 1;   }
+    }
+    .rarity-effect-diamond .card-outer {
+      box-shadow: 0 0 14px 4px rgba(200,240,255,0.55);
+    }
+
+    /* ============================================================
+       14. オーロラ — 揺らめく緑青紫のオーロラ
+       ============================================================ */
+    .rarity-effect-aurora .card-wrap::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(
+        175deg,
+        rgba(  0,255,140,0)    0%,
+        rgba(  0,255,140,0.28) 22%,
+        rgba(  0,160,255,0.28) 44%,
+        rgba(160,  0,255,0.22) 66%,
+        rgba(  0,255,200,0.18) 82%,
+        rgba(  0,255,140,0)   100%
+      );
+      background-size: 100% 300%;
+      animation: aurora-wave 5s ease-in-out infinite;
+      z-index: 2;
+      pointer-events: none;
+    }
+    .rarity-effect-aurora .card-outer {
+      animation: aurora-glow 5s ease-in-out infinite;
+    }
+    @keyframes aurora-wave {
+      0%, 100% { background-position: 0%   0%; opacity: 0.65; }
+      50%       { background-position: 0% 100%; opacity: 1;    }
+    }
+    @keyframes aurora-glow {
+      0%, 100% { box-shadow: 0 0 18px 5px rgba(  0,200,100,0.45); }
+      35%       { box-shadow: 0 0 22px 7px rgba(  0,110,255,0.55); }
+      70%       { box-shadow: 0 0 20px 6px rgba(160,  0,255,0.45); }
+    }
+
+    /* ============================================================
+       16. ゴールドボーダー — 静的な金色縁取り
+       ============================================================ */
+    .rarity-effect-gold-border .card-outer {
+      box-shadow:
+        0 0  0 2px #b8860b,
+        0 0  0 3px #ffd700,
+        0 0  6px 3px rgba(255,215,0,0.5);
+    }
+
+    /* ============================================================
+       17. シルバーボーダー — 静的な銀色縁取り
+       ============================================================ */
+    .rarity-effect-silver-border .card-outer {
+      box-shadow:
+        0 0  0 2px #888,
+        0 0  0 3px #dde,
+        0 0  6px 3px rgba(192,210,230,0.5);
+    }
+
+    /* ============================================================
+       18. 弱虹ボーダー — 控えめな虹縁（ゆっくり回転）
+       ============================================================ */
+    @property --weak-rb-angle {
+      syntax: '<angle>';
+      initial-value: 0deg;
+      inherits: false;
+    }
+    .rarity-effect-weak-rainbow .card-outer {
+      padding: 2px;
+      border-radius: 9px;
+      background:
+        linear-gradient(#12121e, #12121e) padding-box,
+        conic-gradient(
+          from var(--weak-rb-angle),
+          rgba(255,80,80,0.7), rgba(255,180,0,0.7), rgba(255,255,80,0.7),
+          rgba(80,255,120,0.7), rgba(80,180,255,0.7), rgba(160,80,255,0.7),
+          rgba(255,80,200,0.7), rgba(255,80,80,0.7)
+        ) border-box;
+      border: 2px solid transparent;
+      animation: weak-rb-rotate 5s linear infinite;
+    }
+    @keyframes weak-rb-rotate {
+      to { --weak-rb-angle: 360deg; }
+    }
+
+    /* ============================================================
+       19. 20th — 金縁＋カード名エリアに赤メタリックシマー
+       ============================================================ */
+    .rarity-effect-20th .card-outer {
+      box-shadow:
+        0 0  0 2px #8b0000,
+        0 0  0 3px #e03030,
+        0 0  8px 3px rgba(200,0,0,0.4);
+    }
+    /* カード名エリア（上部帯）を赤メタリック文字で表現 */
+    .rarity-effect-20th .card-wrap::after {
+      content: 'カード名';
+      position: absolute;
+      top: 5%;
+      left: 5%; right: 5%;
+      font-size: 0.62rem;
+      font-weight: bold;
+      letter-spacing: 0.04em;
+      background: linear-gradient(
+        90deg,
+        #4a0000  0%,
+        #aa0000 15%,
+        #ff4040 30%,
+        #ffaaaa 45%,
+        #ffffff 50%,
+        #ffaaaa 55%,
+        #ff4040 70%,
+        #aa0000 85%,
+        #4a0000 100%
+      );
+      background-size: 200% 100%;
+      -webkit-background-clip: text;
+      background-clip: text;
+      color: transparent;
+      animation: red-name-shine 2.5s linear infinite;
+      z-index: 3;
+      pointer-events: none;
+      line-height: 1.2;
+    }
+    @keyframes red-name-shine {
+      0%   { background-position:  100% 0; }
+      100% { background-position: -100% 0; }
+    }
+    .rarity-effect-20th .card-watermark {
+      content: '';
+      position: absolute;
+      bottom: 8%;
+      left: 0; right: 0;
+      text-align: center;
+      font-size: 1.5rem;
+      font-weight: 900;
+      font-style: italic;
+      letter-spacing: 0.05em;
+      color: rgba(220,0,0,0.15);
+      text-shadow: 0 0 10px rgba(200,0,0,0.12);
+      z-index: 2;
+      pointer-events: none;
+      line-height: 1;
+    }
+
+    /* ============================================================
+       20. 25th — 銀青回転縁＋カード名エリアに金メタリックシマー
+       ============================================================ */
+    @property --25th-angle {
+      syntax: '<angle>';
+      initial-value: 0deg;
+      inherits: false;
+    }
+    .rarity-effect-25th .card-outer {
+      padding: 2px;
+      border-radius: 9px;
+      background:
+        linear-gradient(#12121e, #12121e) padding-box,
+        conic-gradient(
+          from var(--25th-angle),
+          #c0c8d0, #e8eeff, #7090c0, #ffffff, #9090b8, #e8eeff, #c0c8d0
+        ) border-box;
+      border: 2px solid transparent;
+      animation: angle-25th 4s linear infinite;
+      box-shadow: 0 0 10px 3px rgba(160,190,230,0.45);
+    }
+    @keyframes angle-25th {
+      to { --25th-angle: 360deg; }
+    }
+    .rarity-effect-25th .card-wrap::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: repeating-linear-gradient(
+        -52deg,
+        rgba(255,255,255,0.05)  0px,
+        rgba(160,200,255,0.05) 12px,
+        rgba(200,220,255,0.05) 24px,
+        rgba(255,255,255,0.05) 36px,
+        rgba(120,160,220,0.05) 48px,
+        rgba(255,255,255,0.05) 60px
+      );
+      background-size: 100px 100px;
+      animation: prismatic-scroll 2s linear infinite;
+      z-index: 2;
+      pointer-events: none;
+    }
+    /* カード名エリアを金メタリック文字で表現 */
+    .rarity-effect-25th .card-wrap::after {
+      content: 'カード名';
+      position: absolute;
+      top: 5%;
+      left: 5%; right: 5%;
+      font-size: 0.62rem;
+      font-weight: bold;
+      letter-spacing: 0.04em;
+      background: linear-gradient(
+        90deg,
+        #4a3000  0%,
+        #a06800 15%,
+        #ffc030 30%,
+        #fff0a0 45%,
+        #ffffff 50%,
+        #fff0a0 55%,
+        #ffc030 70%,
+        #a06800 85%,
+        #4a3000 100%
+      );
+      background-size: 200% 100%;
+      -webkit-background-clip: text;
+      background-clip: text;
+      color: transparent;
+      animation: gold-name-shine 2.5s linear infinite;
+      z-index: 3;
+      pointer-events: none;
+      line-height: 1.2;
+    }
+    @keyframes gold-name-shine {
+      0%   { background-position:  100% 0; }
+      100% { background-position: -100% 0; }
+    }
+    .rarity-effect-25th .card-watermark {
+      position: absolute;
+      bottom: 8%;
+      left: 0; right: 0;
+      text-align: center;
+      font-size: 1.5rem;
+      font-weight: 900;
+      font-style: italic;
+      letter-spacing: 0.05em;
+      color: rgba(200,160,0,0.15);
+      text-shadow: 0 0 10px rgba(180,140,0,0.12);
+      z-index: 2;
+      pointer-events: none;
+      line-height: 1;
+    }
+
+    /* ============================================================
+       15. コレクターズ — 強烈な多色スパーク＋回転金縁
+       ============================================================ */
+    .rarity-effect-collectors .card-outer {
+      padding: 3px;
+      border-radius: 10px;
+      background:
+        linear-gradient(#12121e, #12121e) padding-box,
+        conic-gradient(
+          from var(--col-angle),
+          #ffd700, #ff4400, #ff00cc, #00ccff, #00ff88, #ffd700
+        ) border-box;
+      border: 3px solid transparent;
+      animation: col-rotate 1.8s linear infinite, collectors-outer-glow 1.8s ease-in-out infinite;
+    }
+    @keyframes col-rotate {
+      to { --col-angle: 360deg; }
+    }
+    @keyframes collectors-outer-glow {
+      0%, 100% { filter: drop-shadow(0 0 8px rgba(255,200,0,0.6)); }
+      50%       { filter: drop-shadow(0 0 18px rgba(255,80,0,0.9)); }
+    }
+    .rarity-effect-collectors .card-wrap::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background:
+        radial-gradient(circle at 18% 20%, rgba(255,215,  0,0.65) 0%, transparent 22%),
+        radial-gradient(circle at 82% 25%, rgba(255,  0,200,0.50) 0%, transparent 18%),
+        radial-gradient(circle at 35% 82%, rgba(  0,220,255,0.50) 0%, transparent 18%),
+        radial-gradient(circle at 78% 75%, rgba(255,100,  0,0.50) 0%, transparent 18%),
+        radial-gradient(circle at 55% 50%, rgba(255,255,255,0.25) 0%, transparent 30%);
+      animation: collectors-flare 1.8s ease-in-out infinite alternate;
+      z-index: 2;
+      pointer-events: none;
+    }
+    @keyframes collectors-flare {
+      0%   { opacity: 0.3; }
+      100% { opacity: 0.85; }
+    }
+    /* 回転するプリズム帯も追加 */
+    .rarity-effect-collectors .card-wrap::after {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: repeating-linear-gradient(
+        -50deg,
+        rgba(255,215,0,0.10)   0px,
+        rgba(255,100,0,0.08)  10px,
+        rgba(255,0,200,0.08)  20px,
+        rgba(0,200,255,0.08)  30px,
+        rgba(0,255,100,0.08)  40px,
+        rgba(255,215,0,0.10)  50px
+      );
+      background-size: 80px 80px;
+      animation: prismatic-scroll 1s linear infinite;
+      z-index: 3;
+      pointer-events: none;
+      mix-blend-mode: screen;
+    }
+  </style>
+</head>
+<body>
+  <h1>レアリティ演出サンプル</h1>
+  <p class="note">
+    各演出はリアルタイムでアニメーションしています。<br>
+    どの演出をどのレアリティに割り当てるかをお知らせください。
+  </p>
+
+  <div class="grid">
+
+    <!-- 1. ノーマル -->
+    <div class="effect-item rarity-effect-normal">
+      <div class="card-outer">
+        <div class="card-wrap">
+          <div class="card-face">🃏</div>
+        </div>
+      </div>
+      <div class="effect-label">
+        <span class="num">1.</span> ノーマル
+        <span class="sub">演出なし</span>
+      </div>
+    </div>
+
+    <!-- 2. シルバーシマー -->
+    <div class="effect-item rarity-effect-silver-shimmer">
+      <div class="card-outer">
+        <div class="card-wrap">
+          <div class="card-face">🃏</div>
+        </div>
+      </div>
+      <div class="effect-label">
+        <span class="num">2.</span> シルバーシマー
+        <span class="sub">銀の光が流れる</span>
+      </div>
+    </div>
+
+    <!-- 3. ゴールドシマー -->
+    <div class="effect-item rarity-effect-gold-shimmer">
+      <div class="card-outer">
+        <div class="card-wrap">
+          <div class="card-face">🃏</div>
+        </div>
+      </div>
+      <div class="effect-label">
+        <span class="num">3.</span> ゴールドシマー
+        <span class="sub">金の光が流れる</span>
+      </div>
+    </div>
+
+    <!-- 4. シルバーグロー -->
+    <div class="effect-item rarity-effect-silver-glow">
+      <div class="card-outer">
+        <div class="card-wrap">
+          <div class="card-face">🃏</div>
+        </div>
+      </div>
+      <div class="effect-label">
+        <span class="num">4.</span> シルバーグロー
+        <span class="sub">銀の外周が脈動</span>
+      </div>
+    </div>
+
+    <!-- 5. ゴールドグロー -->
+    <div class="effect-item rarity-effect-gold-glow">
+      <div class="card-outer">
+        <div class="card-wrap">
+          <div class="card-face">🃏</div>
+        </div>
+      </div>
+      <div class="effect-label">
+        <span class="num">5.</span> ゴールドグロー
+        <span class="sub">金の外周が脈動</span>
+      </div>
+    </div>
+
+    <!-- 6. プリズムグロー -->
+    <div class="effect-item rarity-effect-prism-glow">
+      <div class="card-outer">
+        <div class="card-wrap">
+          <div class="card-face">🃏</div>
+        </div>
+      </div>
+      <div class="effect-label">
+        <span class="num">6.</span> プリズムグロー
+        <span class="sub">RGB色が順に切替</span>
+      </div>
+    </div>
+
+    <!-- 7. ホログラフィック -->
+    <div class="effect-item rarity-effect-holographic">
+      <div class="card-outer">
+        <div class="card-wrap">
+          <div class="card-face">🃏</div>
+        </div>
+      </div>
+      <div class="effect-label">
+        <span class="num">7.</span> ホログラフィック
+        <span class="sub">色相が全回転</span>
+      </div>
+    </div>
+
+    <!-- 8. レインボーボーダー -->
+    <div class="effect-item rarity-effect-rainbow-border">
+      <div class="card-outer">
+        <div class="card-wrap">
+          <div class="card-face">🃏</div>
+        </div>
+      </div>
+      <div class="effect-label">
+        <span class="num">8.</span> レインボーボーダー
+        <span class="sub">虹色縁が回転</span>
+      </div>
+    </div>
+
+    <!-- 9. プリズマティック帯 -->
+    <div class="effect-item rarity-effect-prismatic">
+      <div class="card-outer">
+        <div class="card-wrap">
+          <div class="card-face">🃏</div>
+        </div>
+      </div>
+      <div class="effect-label">
+        <span class="num">9.</span> プリズマティック帯
+        <span class="sub">斜め虹縞が流れる</span>
+      </div>
+    </div>
+
+    <!-- 10. スターフォイル -->
+    <div class="effect-item rarity-effect-starfoil">
+      <div class="card-outer">
+        <div class="card-wrap">
+          <div class="card-face">🃏</div>
+        </div>
+      </div>
+      <div class="effect-label">
+        <span class="num">10.</span> スターフォイル
+        <span class="sub">星形の輝きが点滅</span>
+      </div>
+    </div>
+
+    <!-- 11. ゴーストレア -->
+    <div class="effect-item rarity-effect-ghost">
+      <div class="card-outer">
+        <div class="card-wrap">
+          <div class="card-face">🃏</div>
+        </div>
+      </div>
+      <div class="effect-label">
+        <span class="num">11.</span> ゴーストレア
+        <span class="sub">白い幽玄なグロー</span>
+      </div>
+    </div>
+
+    <!-- 12. プラチナフォイル -->
+    <div class="effect-item rarity-effect-platinum">
+      <div class="card-outer">
+        <div class="card-wrap">
+          <div class="card-face">🃏</div>
+        </div>
+      </div>
+      <div class="effect-label">
+        <span class="num">12.</span> プラチナフォイル
+        <span class="sub">金銀交互に光が流れる</span>
+      </div>
+    </div>
+
+    <!-- 13. ダイヤモンドスパーク -->
+    <div class="effect-item rarity-effect-diamond">
+      <div class="card-outer">
+        <div class="card-wrap">
+          <div class="card-face">🃏</div>
+        </div>
+      </div>
+      <div class="effect-label">
+        <span class="num">13.</span> ダイヤモンドスパーク
+        <span class="sub">十字輝点が点滅</span>
+      </div>
+    </div>
+
+    <!-- 14. オーロラ -->
+    <div class="effect-item rarity-effect-aurora">
+      <div class="card-outer">
+        <div class="card-wrap">
+          <div class="card-face">🃏</div>
+        </div>
+      </div>
+      <div class="effect-label">
+        <span class="num">14.</span> オーロラ
+        <span class="sub">緑青紫が揺らめく</span>
+      </div>
+    </div>
+
+    <!-- 16. ゴールドボーダー -->
+    <div class="effect-item rarity-effect-gold-border">
+      <div class="card-outer">
+        <div class="card-wrap">
+          <div class="card-face">🃏</div>
+        </div>
+      </div>
+      <div class="effect-label">
+        <span class="num">16.</span> ゴールドボーダー
+        <span class="sub">静的な金縁取り</span>
+      </div>
+    </div>
+
+    <!-- 17. シルバーボーダー -->
+    <div class="effect-item rarity-effect-silver-border">
+      <div class="card-outer">
+        <div class="card-wrap">
+          <div class="card-face">🃏</div>
+        </div>
+      </div>
+      <div class="effect-label">
+        <span class="num">17.</span> シルバーボーダー
+        <span class="sub">静的な銀縁取り</span>
+      </div>
+    </div>
+
+    <!-- 18. 弱虹ボーダー -->
+    <div class="effect-item rarity-effect-weak-rainbow">
+      <div class="card-outer">
+        <div class="card-wrap">
+          <div class="card-face">🃏</div>
+        </div>
+      </div>
+      <div class="effect-label">
+        <span class="num">18.</span> 弱虹ボーダー
+        <span class="sub">控えめな虹縁（ゆっくり）</span>
+      </div>
+    </div>
+
+    <!-- 19. 20th -->
+    <div class="effect-item rarity-effect-20th">
+      <div class="card-outer">
+        <div class="card-wrap">
+          <div class="card-face">🃏</div>
+          <div class="card-watermark">20th</div>
+        </div>
+      </div>
+      <div class="effect-label">
+        <span class="num">19.</span> 20th
+        <span class="sub">金縁＋透かし文字</span>
+      </div>
+    </div>
+
+    <!-- 20. 25th -->
+    <div class="effect-item rarity-effect-25th">
+      <div class="card-outer">
+        <div class="card-wrap">
+          <div class="card-face">🃏</div>
+          <div class="card-watermark">25th</div>
+        </div>
+      </div>
+      <div class="effect-label">
+        <span class="num">20.</span> 25th
+        <span class="sub">銀青縁＋透かし文字</span>
+      </div>
+    </div>
+
+    <!-- 15. コレクターズ -->
+    <div class="effect-item rarity-effect-collectors">
+      <div class="card-outer">
+        <div class="card-wrap">
+          <div class="card-face">🃏</div>
+        </div>
+      </div>
+      <div class="effect-label">
+        <span class="num">15.</span> コレクターズ
+        <span class="sub">多色スパーク＋回転金縁</span>
+      </div>
+    </div>
+
+  </div>
+</body>
+</html>

@@ -245,6 +245,98 @@
             border-color: #adb5bd;
         }
 
+        /* ---- Rarity Effect Selector ---- */
+        .effect-row {
+            border: 1px solid #e9ecef;
+            border-radius: 8px;
+            margin-bottom: 4px;
+            overflow: hidden;
+        }
+
+        .effect-row-header {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            padding: 0.55rem 1rem;
+            background: #f8f9fa;
+            cursor: pointer;
+            user-select: none;
+            transition: background 0.15s;
+        }
+
+        .effect-row-header:hover { background: #e9ecef; }
+        .effect-row-header.has-effects { background: #f0f4ff; }
+
+        .effect-row-body {
+            display: none;
+            flex-wrap: wrap;
+            gap: 6px;
+            padding: 0.75rem 1rem;
+            background: white;
+            border-top: 1px solid #e9ecef;
+        }
+
+        .effect-chip {
+            font-size: 0.72rem;
+            padding: 3px 9px;
+            border-radius: 12px;
+            border: 1.5px solid #dee2e6;
+            background: white;
+            color: #495057;
+            cursor: pointer;
+            transition: all 0.15s;
+            line-height: 1.5;
+        }
+
+        .effect-chip:hover:not(.chip-disabled) {
+            border-color: #667eea;
+            color: #667eea;
+        }
+
+        .effect-chip.chip-selected {
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+            border-color: transparent;
+        }
+
+        .effect-chip.chip-disabled {
+            opacity: 0.35;
+            cursor: not-allowed;
+        }
+
+        .effect-count-badge {
+            margin-left: auto;
+            font-size: 0.72rem;
+            color: #adb5bd;
+            flex-shrink: 0;
+        }
+
+        .selected-effects-preview {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 4px;
+            flex: 1;
+            min-width: 0;
+        }
+
+        .preview-tag {
+            font-size: 0.65rem;
+            padding: 2px 7px;
+            border-radius: 10px;
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+            white-space: nowrap;
+        }
+
+        .chevron-icon {
+            font-size: 0.78rem;
+            color: #adb5bd;
+            flex-shrink: 0;
+            transition: transform 0.2s;
+        }
+
+        .chevron-icon.open { transform: rotate(180deg); }
+
         /* Toast */
         .toast-container {
             position: fixed;
@@ -340,6 +432,24 @@
                 </button>
             </div>
         </div>
+
+        <!-- Rarity Effect Settings -->
+        <div class="settings-card">
+            <h5><i class="bi bi-stars"></i> レアリティ演出設定</h5>
+            <p class="section-desc">
+                各レアリティに適用する光り方を最大3つまで選択できます。<br>
+                行をクリックして展開し、効果を選んでください。
+            </p>
+            <div id="effectRarityList"></div>
+            <div class="btn-actions">
+                <button class="btn btn-save" onclick="saveEffectSettings()">
+                    <i class="bi bi-check-lg"></i> 保存
+                </button>
+                <button class="btn btn-reset" onclick="resetEffectSettings()">
+                    <i class="bi bi-arrow-counterclockwise"></i> すべてリセット
+                </button>
+            </div>
+        </div>
     </div>
 
     <!-- Toast -->
@@ -348,6 +458,12 @@
             <div class="toast-body d-flex align-items-center gap-2">
                 <i class="bi bi-check-circle-fill"></i>
                 <span>レアリティ順序を保存しました</span>
+            </div>
+        </div>
+        <div class="toast toast-success" id="effectSaveToast" role="alert" aria-live="assertive" aria-atomic="true" data-bs-delay="2500">
+            <div class="toast-body d-flex align-items-center gap-2">
+                <i class="bi bi-stars"></i>
+                <span>演出設定を保存しました</span>
             </div>
         </div>
     </div>
@@ -425,6 +541,7 @@
         function renderList() {
             const list = document.getElementById('rarityList');
             list.innerHTML = '';
+            renderEffectList();
             currentOrder.forEach((rarity, idx) => {
                 const li = document.createElement('li');
                 li.className = 'rarity-item';
@@ -584,8 +701,143 @@
         window.saveOrder = saveOrder;
         window.resetOrder = resetOrder;
 
+        // ============================================================
+        // レアリティ演出設定
+        // ============================================================
+
+        const EFFECTS = [
+            { key: 'normal',         label: 'ノーマル' },
+            { key: 'silver-shimmer', label: 'シルバーシマー' },
+            { key: 'gold-shimmer',   label: 'ゴールドシマー' },
+            { key: 'silver-glow',    label: 'シルバーグロー' },
+            { key: 'gold-glow',      label: 'ゴールドグロー' },
+            { key: 'prism-glow',     label: 'プリズムグロー' },
+            { key: 'holographic',    label: 'ホログラフィック' },
+            { key: 'rainbow-border', label: 'レインボーボーダー' },
+            { key: 'prismatic',      label: 'プリズマティック帯' },
+            { key: 'starfoil',       label: 'スターフォイル' },
+            { key: 'ghost',          label: 'ゴーストレア' },
+            { key: 'platinum',       label: 'プラチナフォイル' },
+            { key: 'diamond',        label: 'ダイヤモンドスパーク' },
+            { key: 'aurora',         label: 'オーロラ' },
+            { key: 'collectors',     label: 'コレクターズ' },
+            { key: 'gold-border',    label: 'ゴールドボーダー' },
+            { key: 'silver-border',  label: 'シルバーボーダー' },
+            { key: 'weak-rainbow',   label: '弱虹ボーダー' },
+            { key: '20th',           label: '20th' },
+            { key: '25th',           label: '25th' },
+        ];
+
+        let effectSettings = {};
+
+        function loadEffectSettings() {
+            const saved = localStorage.getItem('rarityEffectSettings');
+            if (saved) {
+                try { effectSettings = JSON.parse(saved); } catch { effectSettings = {}; }
+            }
+            renderEffectList();
+        }
+
+        function renderEffectList() {
+            const container = document.getElementById('effectRarityList');
+            if (!container) return;
+            container.innerHTML = '';
+
+            currentOrder.forEach(rarity => {
+                const selected = effectSettings[rarity] || [];
+                const color = RARITY_COLORS[rarity] || '#868e96';
+                const textColor = ['GSE','PSE','P+SE'].includes(rarity) ? '#333' : '#fff';
+
+                const row = document.createElement('div');
+                row.className = 'effect-row';
+                row.dataset.rarity = rarity;
+
+                const previewHTML = selected.map(k => {
+                    const ef = EFFECTS.find(e => e.key === k);
+                    return ef ? `<span class="preview-tag">${ef.label}</span>` : '';
+                }).join('');
+
+                const chipsHTML = EFFECTS.map(ef => {
+                    const isSel = selected.includes(ef.key);
+                    const isDis = !isSel && selected.length >= 3;
+                    return `<button class="effect-chip${isSel ? ' chip-selected' : ''}${isDis ? ' chip-disabled' : ''}"
+                                data-rarity="${rarity}" data-effect="${ef.key}"
+                                onclick="toggleEffect(this)">${ef.label}</button>`;
+                }).join('');
+
+                row.innerHTML = `
+                    <div class="effect-row-header${selected.length > 0 ? ' has-effects' : ''}"
+                         onclick="toggleEffectRow(this)">
+                        <span class="rarity-badge" style="background:${color};color:${textColor}">${rarity}</span>
+                        <div class="selected-effects-preview">${previewHTML}</div>
+                        <span class="effect-count-badge">${selected.length}/3</span>
+                        <i class="bi bi-chevron-down chevron-icon"></i>
+                    </div>
+                    <div class="effect-row-body">${chipsHTML}</div>
+                `;
+
+                container.appendChild(row);
+            });
+        }
+
+        window.toggleEffectRow = function(header) {
+            const body = header.nextElementSibling;
+            const icon = header.querySelector('.chevron-icon');
+            const isOpen = body.style.display === 'flex';
+            body.style.display = isOpen ? 'none' : 'flex';
+            icon.classList.toggle('open', !isOpen);
+        };
+
+        window.toggleEffect = function(btn) {
+            if (btn.classList.contains('chip-disabled')) return;
+            const rarity = btn.dataset.rarity;
+            const effect = btn.dataset.effect;
+            if (!effectSettings[rarity]) effectSettings[rarity] = [];
+            const arr = effectSettings[rarity];
+
+            if (btn.classList.contains('chip-selected')) {
+                effectSettings[rarity] = arr.filter(e => e !== effect);
+            } else {
+                if (arr.length >= 3) return;
+                effectSettings[rarity] = [...arr, effect];
+            }
+
+            // 行内のチップ・ヘッダーだけ更新（全再描画しない）
+            const newSel = effectSettings[rarity];
+            const body = btn.closest('.effect-row-body');
+            const header = body.previousElementSibling;
+
+            body.querySelectorAll('.effect-chip').forEach(chip => {
+                const s = newSel.includes(chip.dataset.effect);
+                const d = !s && newSel.length >= 3;
+                chip.className = 'effect-chip' + (s ? ' chip-selected' : '') + (d ? ' chip-disabled' : '');
+            });
+
+            const preview = header.querySelector('.selected-effects-preview');
+            const countEl = header.querySelector('.effect-count-badge');
+            preview.innerHTML = newSel.map(k => {
+                const ef = EFFECTS.find(e => e.key === k);
+                return ef ? `<span class="preview-tag">${ef.label}</span>` : '';
+            }).join('');
+            countEl.textContent = `${newSel.length}/3`;
+            header.className = `effect-row-header${newSel.length > 0 ? ' has-effects' : ''}`;
+        };
+
+        function saveEffectSettings() {
+            localStorage.setItem('rarityEffectSettings', JSON.stringify(effectSettings));
+            new bootstrap.Toast(document.getElementById('effectSaveToast')).show();
+        }
+
+        function resetEffectSettings() {
+            effectSettings = {};
+            renderEffectList();
+        }
+
+        window.saveEffectSettings = saveEffectSettings;
+        window.resetEffectSettings = resetEffectSettings;
+
         // Init
-        loadOrder();
+        loadOrder().then(() => loadEffectSettings());
     </script>
 </body>
 </html>
