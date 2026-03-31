@@ -301,6 +301,33 @@ class CardManagerAPI {
         });
     }
 
+    // ========== Supplies ==========
+
+    async getSupplies() {
+        const data = await this._fetch('/api/supplies');
+        return data.supplies;
+    }
+
+    async createSupply(supplyData) {
+        const data = await this._fetch('/api/supplies', {
+            method: 'POST',
+            body: JSON.stringify(supplyData),
+        });
+        return data.supply;
+    }
+
+    async updateSupply(supplyId, updates) {
+        const data = await this._fetch(`/api/supplies/${supplyId}`, {
+            method: 'PUT',
+            body: JSON.stringify(updates),
+        });
+        return data.supply;
+    }
+
+    async deleteSupply(supplyId) {
+        return this._fetch(`/api/supplies/${supplyId}`, { method: 'DELETE' });
+    }
+
     // ========== Community ==========
 
     async getCommunityCards(userId) {

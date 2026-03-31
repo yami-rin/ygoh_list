@@ -12,6 +12,7 @@ import { decks } from './routes/decks';
 import { profiles } from './routes/profiles';
 import { community } from './routes/community';
 import { account } from './routes/account';
+import { supplies } from './routes/supplies';
 
 type Bindings = {
   DB: D1Database;
@@ -94,6 +95,8 @@ app.use('/api/decks', authMiddleware);
 app.use('/api/community/*', authMiddleware);
 app.use('/api/account/*', authMiddleware);
 app.use('/api/account', authMiddleware);
+app.use('/api/supplies/*', authMiddleware);
+app.use('/api/supplies', authMiddleware);
 
 // Rankings PUT needs auth (GET is public, already routed above)
 app.put('/api/rankings', authMiddleware, async (c) => {
@@ -165,6 +168,7 @@ app.route('/api/bookmarks', bookmarks);
 app.route('/api/decks', decks);
 app.route('/api/community', community);
 app.route('/api/account', account);
+app.route('/api/supplies', supplies);
 
 // 404 fallback
 app.notFound((c) => c.json({ error: 'Not found' }, 404));

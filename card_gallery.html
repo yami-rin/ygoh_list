@@ -7418,29 +7418,6 @@
         // ==================== END COMMUNITY SYSTEM ====================
 
         // ==================== PLAYMAT SYSTEM ====================
-        const PlaymatDB = (() => {
-            const DB_NAME = 'PlaymatDB', DB_VERSION = 1, STORE = 'playmats';
-            const open = () => new Promise((res, rej) => {
-                const req = indexedDB.open(DB_NAME, DB_VERSION);
-                req.onupgradeneeded = e => {
-                    const db = e.target.result;
-                    if (!db.objectStoreNames.contains(STORE))
-                        db.createObjectStore(STORE, { keyPath: 'id' });
-                };
-                req.onsuccess = e => res(e.target.result);
-                req.onerror = e => rej(e.target.error);
-            });
-            return {
-                getAll: async () => {
-                    const db = await open();
-                    return new Promise((res, rej) => {
-                        const req = db.transaction(STORE, 'readonly').objectStore(STORE).getAll();
-                        req.onsuccess = () => res(req.result);
-                        req.onerror = () => rej(req.error);
-                    });
-                }
-            };
-        })();
 
         let allPlaymats = [];
 
@@ -7455,7 +7432,7 @@
         };
 
         async function renderPlaymats() {
-            allPlaymats = await PlaymatDB.getAll();
+            allPlaymats = currentUser ? await api.getSupplies() : [];
             document.getElementById('playmat-count-badge').textContent = allPlaymats.length;
             renderPlaymatTagFilters();
             applyPlaymatFilter();
@@ -7514,8 +7491,8 @@
                 <div class="col-6 col-md-4 col-lg-3 col-xl-2">
                     <div class="playmat-gallery-card" onclick="showPlaymatDetail(${allPlaymats.indexOf(pm)})" role="button">
                         <div class="playmat-gallery-thumb">
-                            ${pm.imageDataUrl
-                                ? `<img src="${pm.imageDataUrl}" alt="${escapeHtml(pm.name)}">`
+                            ${pm.imageData
+                                ? `<img src="${pm.imageData}" alt="${escapeHtml(pm.name)}">`
                                 : `<i class="bi bi-image" style="font-size:2.5rem;color:#adb5bd;"></i>`}
                         </div>
                         <div class="playmat-gallery-body">
@@ -7539,8 +7516,8 @@
             document.getElementById('pm-detail-name').textContent = pm.name;
             const img   = document.getElementById('pm-detail-img');
             const noImg = document.getElementById('pm-detail-no-img');
-            if (pm.imageDataUrl) {
-                img.src = pm.imageDataUrl;
+            if (pm.imageData) {
+                img.src = pm.imageData;
                 img.style.display = '';
                 noImg.style.display = 'none';
             } else {
