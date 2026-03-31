@@ -284,6 +284,66 @@
             100% { box-shadow: inset 0 0 0 2px rgba(255, 80, 80,.65); }
         }
 
+        /* Silver Full Glow (全体シルバーグロー) */
+        .rarity-fx-silver-full-glow { animation: fx-sv-full-glow 2.5s ease-in-out infinite; }
+        @keyframes fx-sv-full-glow {
+            0%,100% { background: rgba(190,210,235,.1);  box-shadow: inset 0 0 20px 5px rgba(185,210,240,.3); }
+            50%     { background: rgba(210,228,252,.28); box-shadow: inset 0 0 35px 10px rgba(200,225,255,.55); }
+        }
+        /* Silver Border Sweep (フレームシルバー流れ) */
+        .rarity-fx-silver-border-sweep { animation: fx-sv-brd-sweep 3s linear infinite; }
+        @keyframes fx-sv-brd-sweep {
+            0%   { box-shadow: inset 5px  0   14px rgba(220,240,255,.9); }
+            25%  { box-shadow: inset 0    5px 14px rgba(220,240,255,.9); }
+            50%  { box-shadow: inset -5px 0   14px rgba(220,240,255,.9); }
+            75%  { box-shadow: inset 0   -5px 14px rgba(220,240,255,.9); }
+            100% { box-shadow: inset 5px  0   14px rgba(220,240,255,.9); }
+        }
+        /* Silver Full Sweep (全体シルバー流れ) */
+        .rarity-fx-silver-full-sweep::before {
+            content: '';
+            position: absolute;
+            top: 0; left: -100%;
+            width: 100%; height: 100%;
+            background: linear-gradient(105deg,
+                rgba(200,215,240,.05) 0%,
+                rgba(180,205,235,.35) 38%,
+                rgba(255,255,255,.8)  50%,
+                rgba(180,205,235,.35) 62%,
+                rgba(200,215,240,.05) 100%);
+            animation: fx-shine-sweep 3s linear infinite;
+        }
+        /* White Border (ホワイトボーダー) */
+        .rarity-fx-white-border { animation: fx-wh-brd 2.5s ease-in-out infinite; }
+        @keyframes fx-wh-brd {
+            0%,100% { box-shadow: inset 0 0 0 2px rgba(255,255,255,.75), inset 0 0  8px rgba(255,255,255,.2); }
+            50%     { box-shadow: inset 0 0 0 2px rgba(255,255,255,1.0), inset 0 0 14px rgba(255,255,255,.5); }
+        }
+        /* White Inner Sweep (内側ホワイト流れ — フレーム除外) */
+        .rarity-fx-white-inner-sweep {
+            -webkit-mask: linear-gradient(#000 0 0) 6% 6% / 88% 88% no-repeat;
+            mask: linear-gradient(#000 0 0) 6% 6% / 88% 88% no-repeat;
+        }
+        .rarity-fx-white-inner-sweep::before {
+            content: '';
+            position: absolute;
+            top: 0; left: -80%;
+            width: 60%; height: 100%;
+            background: linear-gradient(105deg,
+                transparent 30%,
+                rgba(235,240,255,.45) 44%,
+                rgba(255,255,255,.88) 50%,
+                rgba(235,240,255,.45) 56%,
+                transparent 70%);
+            animation: fx-shine-sweep 3s linear infinite;
+        }
+        /* Gold Full Glow (全体ゴールドグロー) */
+        .rarity-fx-gold-full-glow { animation: fx-gd-full-glow 2s ease-in-out infinite; }
+        @keyframes fx-gd-full-glow {
+            0%,100% { background: rgba(220,170,0,.12); box-shadow: inset 0 0 20px 5px rgba(220,170,0,.3); }
+            50%     { background: rgba(255,215,0,.28);  box-shadow: inset 0 0 35px 10px rgba(255,220,50,.55); }
+        }
+
         /* ============================================================
            レアリティ演出 — Inner effects (.rarity-fx-overlay に適用)
            .card-image-container 内に注入される position:absolute div
