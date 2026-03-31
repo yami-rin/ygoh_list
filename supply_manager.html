@@ -67,14 +67,14 @@
         }
         .nav-link-custom i { font-size: 1.1rem; }
 
-        /* ---- Playmat card ---- */
+        /* ---- Supply card ---- */
         .playmat-card {
             background: #1e2035;
             border: 1px solid #2a2d4a;
             border-radius: 10px;
             overflow: hidden;
             cursor: pointer;
-            transition: transform 0.15s, border-color 0.15s, box-shadow 0.15s;
+            transition: transform .15s, border-color .15s, box-shadow .15s;
         }
         .playmat-card:hover {
             transform: translateY(-3px);
@@ -90,11 +90,7 @@
             justify-content: center;
             overflow: hidden;
         }
-        .playmat-thumb img {
-            width: 100%;
-            height: 100%;
-            object-fit: cover;
-        }
+        .playmat-thumb img { width: 100%; height: 100%; object-fit: cover; }
         .playmat-body { padding: 10px 12px 12px; }
         .playmat-name {
             font-weight: 600;
@@ -113,6 +109,7 @@
             overflow: hidden;
             min-height: 2.2em;
         }
+        .playmat-tags { margin-top: 5px; display: flex; flex-wrap: wrap; gap: 3px; }
 
         /* ---- Modal ---- */
         .modal-content {
@@ -166,9 +163,31 @@
             color: #555;
         }
 
-        /* ---- Form switch label ---- */
+        /* ---- Form switch ---- */
         .form-check-input { cursor: pointer; }
         .form-check-label { cursor: pointer; }
+
+        /* ---- Tag management ---- */
+        .draggable-tag {
+            background: #2a2d4a;
+            border: 1px solid #3a3d5a !important;
+            border-radius: 6px;
+            transition: opacity .15s;
+            user-select: none;
+        }
+        .draggable-tag:hover { border-color: #5a6090 !important; }
+        .draggable-tag.dragging { opacity: .35; }
+        .draggable-tag.drag-over { border: 2px dashed #667eea !important; }
+
+        .tag-choice-btn {
+            font-size: .75rem;
+            padding: 2px 10px;
+            border-radius: 12px;
+        }
+        .selected-tag-badges .badge {
+            font-size: .7rem;
+            font-weight: 500;
+        }
     </style>
 </head>
 <body>
@@ -224,9 +243,14 @@
             <h6 class="mb-0 text-muted">
                 登録済み: <span id="count-badge" class="text-light fw-bold">0</span> 点
             </h6>
-            <button class="btn btn-primary" onclick="openModal(null)">
-                <i class="bi bi-plus-lg"></i> 新規登録
-            </button>
+            <div class="d-flex gap-2">
+                <button class="btn btn-outline-secondary btn-sm" id="tag-manage-btn">
+                    <i class="bi bi-tags"></i> タグ管理
+                </button>
+                <button class="btn btn-primary" onclick="openModal(null)">
+                    <i class="bi bi-plus-lg"></i> 新規登録
+                </button>
+            </div>
         </div>
 
         <div id="playmat-list" class="row g-3"></div>
@@ -239,7 +263,7 @@
         </div>
     </div>
 
-    <!-- Add / Edit Modal -->
+    <!-- ===================== Add / Edit Modal ===================== -->
     <div class="modal fade" id="playmatModal" tabindex="-1">
         <div class="modal-dialog modal-lg modal-dialog-centered">
             <div class="modal-content">
@@ -279,8 +303,16 @@
                             </div>
                             <div>
                                 <label class="form-label small text-muted mb-1">詳細</label>
-                                <textarea class="form-control" id="desc-input" rows="4"
+                                <textarea class="form-control" id="desc-input" rows="3"
                                           placeholder="詳細・メモ（任意）"></textarea>
+                            </div>
+                            <div>
+                                <label class="form-label small text-muted d-block mb-1">タグ</label>
+                                <div id="modal-selected-tags" class="selected-tag-badges mb-2 d-flex flex-wrap gap-1"></div>
+                                <div id="modal-tag-choices" class="d-flex flex-wrap gap-1"></div>
+                                <div id="modal-no-tags" class="text-muted" style="font-size:.78rem; display:none;">
+                                    タグがありません。「タグ管理」で追加してください。
+                                </div>
                             </div>
                             <div>
                                 <label class="form-label small text-muted d-block mb-1">状態</label>
@@ -303,6 +335,40 @@
                     <button class="btn btn-primary btn-sm" onclick="savePlaymat()">
                         <i class="bi bi-check-lg"></i> 保存
                     </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ===================== Tag Management Modal ===================== -->
+    <div class="modal fade" id="tagModal" tabindex="-1">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title"><i class="bi bi-tags me-2"></i>タグ管理</h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <h6 class="small text-muted mb-2">新しいタグを追加</h6>
+                    <form id="add-tag-form" class="input-group mb-3">
+                        <input type="text" id="new-tag-name" class="form-control"
+                               placeholder="タグ名（カンマ区切りで複数入力可）" required>
+                        <button class="btn btn-primary" type="submit">追加</button>
+                    </form>
+                    <hr style="border-color:#3a3d5a;">
+                    <div class="d-flex justify-content-between align-items-center mb-2">
+                        <div>
+                            <h6 class="small text-muted mb-0">登録済みタグ</h6>
+                            <small class="text-muted" style="font-size:.72rem;">ドラッグで並び替え可</small>
+                        </div>
+                        <button class="btn btn-outline-warning btn-sm" id="cleanup-tags-btn">
+                            <i class="bi bi-recycle"></i> 未使用をクリーンアップ
+                        </button>
+                    </div>
+                    <div id="existing-tags-list"></div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary btn-sm" data-bs-dismiss="modal">閉じる</button>
                 </div>
             </div>
         </div>
@@ -342,31 +408,215 @@
         })();
 
         // ================================================================
+        //  Supply Tags — localStorage wrapper (キー: supplyTags)
+        // ================================================================
+        const SupplyTags = {
+            STORAGE_KEY: 'supplyTags',
+            load() {
+                try { return JSON.parse(localStorage.getItem(this.STORAGE_KEY) || '[]'); }
+                catch { return []; }
+            },
+            save(tags) {
+                localStorage.setItem(this.STORAGE_KEY, JSON.stringify(tags));
+            },
+        };
+
+        // ================================================================
         //  State
         // ================================================================
         let playmats = [];
         let editingId = null;
         let currentImageDataUrl = null;
+        let currentItemTags = [];   // タグ（編集中アイテム用）
+        let allTags = [];           // 全タグ定義
         let bsModal = null;
+        let bsTagModal = null;
+        let draggedTag = null;
 
         // ================================================================
         //  Init
         // ================================================================
         async function init() {
-            bsModal = new bootstrap.Modal(document.getElementById('playmatModal'));
+            bsModal    = new bootstrap.Modal(document.getElementById('playmatModal'));
+            bsTagModal = new bootstrap.Modal(document.getElementById('tagModal'));
+
+            allTags = SupplyTags.load();
             playmats = await PlaymatDB.getAll();
             playmats.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
             render();
+
+            // Tag management button
+            document.getElementById('tag-manage-btn').addEventListener('click', () => {
+                renderTagManagementList();
+                bsTagModal.show();
+            });
+
+            // Add tag form
+            document.getElementById('add-tag-form').addEventListener('submit', e => {
+                e.preventDefault();
+                const val = document.getElementById('new-tag-name').value.trim();
+                if (!val) return;
+                const names = val.split(',').map(s => s.trim()).filter(Boolean);
+                const dups = [];
+                names.forEach(name => {
+                    if (allTags.some(t => t.name === name)) { dups.push(name); return; }
+                    const maxOrder = allTags.reduce((m, t) => Math.max(m, t.order ?? 0), -1);
+                    allTags.push({ id: `st_${Date.now()}_${Math.random().toString(36).slice(2)}`, name, order: maxOrder + 1 });
+                });
+                if (dups.length) alert(`既に存在するタグ: ${dups.join(', ')}`);
+                SupplyTags.save(allTags);
+                document.getElementById('new-tag-name').value = '';
+                renderTagManagementList();
+                renderTagChoices();
+            });
+
+            // Tag list event delegation (edit / delete)
+            document.getElementById('existing-tags-list').addEventListener('click', e => {
+                if (e.target.closest('.edit-tag-btn')) {
+                    const btn = e.target.closest('.edit-tag-btn');
+                    const id = btn.dataset.id, oldName = btn.dataset.name;
+                    const newName = prompt('新しいタグ名を入力してください:', oldName);
+                    if (!newName || !newName.trim() || newName.trim() === oldName) return;
+                    const trimmed = newName.trim();
+                    if (allTags.some(t => t.name === trimmed && t.id !== id)) {
+                        alert('このタグ名は既に存在します。');
+                        return;
+                    }
+                    const tag = allTags.find(t => t.id === id);
+                    if (tag) {
+                        tag.name = trimmed;
+                        // update saved supplies
+                        playmats.forEach(pm => {
+                            if (pm.tags?.includes(oldName)) {
+                                pm.tags[pm.tags.indexOf(oldName)] = trimmed;
+                                PlaymatDB.save(pm);
+                            }
+                        });
+                        SupplyTags.save(allTags);
+                        renderTagManagementList();
+                        renderTagChoices();
+                        render();
+                    }
+                    return;
+                }
+                if (e.target.closest('.delete-tag-btn')) {
+                    const btn = e.target.closest('.delete-tag-btn');
+                    const id = btn.dataset.id, name = btn.dataset.name;
+                    if (!confirm(`タグ「${name}」を削除しますか？\nすべてのサプライからも削除されます。`)) return;
+                    allTags = allTags.filter(t => t.id !== id);
+                    allTags.forEach((t, i) => t.order = i);
+                    playmats.forEach(pm => {
+                        if (pm.tags?.includes(name)) {
+                            pm.tags = pm.tags.filter(n => n !== name);
+                            PlaymatDB.save(pm);
+                        }
+                    });
+                    SupplyTags.save(allTags);
+                    renderTagManagementList();
+                    renderTagChoices();
+                    render();
+                }
+            });
+
+            // Cleanup unused tags
+            document.getElementById('cleanup-tags-btn').addEventListener('click', () => {
+                const used = new Set(playmats.flatMap(pm => pm.tags || []));
+                const removed = allTags.filter(t => !used.has(t.name)).map(t => t.name);
+                if (!removed.length) { alert('未使用タグはありません。'); return; }
+                if (!confirm(`以下のタグを削除しますか？\n${removed.join(', ')}`)) return;
+                allTags = allTags.filter(t => used.has(t.name));
+                allTags.forEach((t, i) => t.order = i);
+                SupplyTags.save(allTags);
+                renderTagManagementList();
+                renderTagChoices();
+            });
         }
 
         // ================================================================
-        //  Render list
+        //  Tag management list render + drag/drop
+        // ================================================================
+        function renderTagManagementList() {
+            const container = document.getElementById('existing-tags-list');
+            if (!allTags.length) {
+                container.innerHTML = '<p class="text-muted small">タグがありません。</p>';
+                return;
+            }
+            container.innerHTML = '';
+            allTags.forEach((tag, index) => {
+                const div = document.createElement('div');
+                div.className = 'd-flex justify-content-between align-items-center mb-2 p-2 draggable-tag';
+                div.draggable = true;
+                div.dataset.tagIndex = index;
+                div.innerHTML = `
+                    <div class="d-flex align-items-center gap-2">
+                        <i class="bi bi-grip-vertical text-muted" style="cursor:grab;"></i>
+                        <span>${esc(tag.name)}</span>
+                        <button class="btn btn-sm btn-link p-0 edit-tag-btn" data-id="${esc(tag.id)}" data-name="${esc(tag.name)}" title="名前を編集">
+                            <i class="bi bi-pencil-square"></i>
+                        </button>
+                    </div>
+                    <button class="btn btn-outline-danger btn-sm delete-tag-btn" data-id="${esc(tag.id)}" data-name="${esc(tag.name)}">削除</button>
+                `;
+                div.addEventListener('dragstart', e => { draggedTag = div; div.classList.add('dragging'); e.dataTransfer.effectAllowed = 'move'; });
+                div.addEventListener('dragend',   () => { div.classList.remove('dragging'); container.querySelectorAll('.draggable-tag').forEach(el => el.classList.remove('drag-over')); });
+                div.addEventListener('dragover',  e => { e.preventDefault(); e.dataTransfer.dropEffect = 'move'; });
+                div.addEventListener('dragenter', e => { if (draggedTag && div !== draggedTag) div.classList.add('drag-over'); });
+                div.addEventListener('dragleave', () => div.classList.remove('drag-over'));
+                div.addEventListener('drop', e => {
+                    e.stopPropagation();
+                    div.classList.remove('drag-over');
+                    if (!draggedTag || draggedTag === div) return;
+                    const from = parseInt(draggedTag.dataset.tagIndex);
+                    const to   = parseInt(div.dataset.tagIndex);
+                    const [item] = allTags.splice(from, 1);
+                    allTags.splice(to, 0, item);
+                    allTags.forEach((t, i) => t.order = i);
+                    SupplyTags.save(allTags);
+                    renderTagManagementList();
+                    renderTagChoices();
+                });
+                container.appendChild(div);
+            });
+        }
+
+        // ================================================================
+        //  Tag choices in add/edit modal
+        // ================================================================
+        function renderTagChoices() {
+            const choicesEl  = document.getElementById('modal-tag-choices');
+            const selectedEl = document.getElementById('modal-selected-tags');
+            const noTagsEl   = document.getElementById('modal-no-tags');
+            if (!allTags.length) {
+                choicesEl.innerHTML  = '';
+                selectedEl.innerHTML = '';
+                noTagsEl.style.display = '';
+                return;
+            }
+            noTagsEl.style.display = 'none';
+            choicesEl.innerHTML = allTags.map(tag =>
+                `<button type="button"
+                    class="btn tag-choice-btn ${currentItemTags.includes(tag.name) ? 'btn-primary' : 'btn-outline-secondary'}"
+                    onclick="toggleItemTag('${esc(tag.name)}')">${esc(tag.name)}</button>`
+            ).join('');
+            selectedEl.innerHTML = currentItemTags.map(name =>
+                `<span class="badge bg-primary">${esc(name)}</span>`
+            ).join('');
+        }
+
+        window.toggleItemTag = name => {
+            const i = currentItemTags.indexOf(name);
+            i > -1 ? currentItemTags.splice(i, 1) : currentItemTags.push(name);
+            renderTagChoices();
+        };
+
+        // ================================================================
+        //  Render supply list
         // ================================================================
         function render() {
             document.getElementById('count-badge').textContent = playmats.length;
             const list  = document.getElementById('playmat-list');
             const empty = document.getElementById('empty-state');
-            if (playmats.length === 0) {
+            if (!playmats.length) {
                 list.innerHTML = '';
                 empty.style.display = '';
                 return;
@@ -382,13 +632,15 @@
                         </div>
                         <div class="playmat-body">
                             <div class="mb-1">
-                                <span class="badge ${pm.sealed ? 'bg-warning text-dark' : 'bg-success'}"
-                                      style="font-size:.65rem;">
+                                <span class="badge ${pm.sealed ? 'bg-warning text-dark' : 'bg-success'}" style="font-size:.65rem;">
                                     ${pm.sealed ? '未開封' : '開封済み'}
                                 </span>
                             </div>
                             <div class="playmat-name">${esc(pm.name)}</div>
                             <div class="playmat-desc">${esc(pm.description || '')}</div>
+                            ${(pm.tags?.length)
+                                ? `<div class="playmat-tags">${pm.tags.map(t => `<span class="badge bg-secondary" style="font-size:.62rem;">${esc(t)}</span>`).join('')}</div>`
+                                : ''}
                         </div>
                     </div>
                 </div>
@@ -402,8 +654,7 @@
             editingId = id;
             const pm = id ? playmats.find(p => p.id === id) : null;
 
-            document.getElementById('modal-title').textContent =
-                pm ? 'サプライを編集' : 'サプライを登録';
+            document.getElementById('modal-title').textContent = pm ? 'サプライを編集' : 'サプライを登録';
             document.getElementById('name-input').value = pm?.name ?? '';
             document.getElementById('name-input').classList.remove('is-invalid');
             document.getElementById('desc-input').value = pm?.description ?? '';
@@ -411,11 +662,12 @@
             const sealed = pm?.sealed ?? true;
             document.getElementById('sealed-switch').checked = sealed;
             document.getElementById('sealed-label').textContent = sealed ? '未開封' : '開封済み';
-
             document.getElementById('delete-btn').style.display = pm ? '' : 'none';
 
+            currentItemTags = [...(pm?.tags ?? [])];
             currentImageDataUrl = pm?.imageDataUrl ?? null;
             setImagePreview(currentImageDataUrl);
+            renderTagChoices();
 
             bsModal.show();
         }
@@ -444,20 +696,13 @@
             const file = event.target.files[0];
             if (!file) return;
             const reader = new FileReader();
-            reader.onload = e => {
-                currentImageDataUrl = e.target.result;
-                setImagePreview(currentImageDataUrl);
-            };
+            reader.onload = e => { currentImageDataUrl = e.target.result; setImagePreview(currentImageDataUrl); };
             reader.readAsDataURL(file);
             event.target.value = '';
         }
 
-        function clearImage() {
-            currentImageDataUrl = null;
-            setImagePreview(null);
-        }
+        function clearImage() { currentImageDataUrl = null; setImagePreview(null); }
 
-        // Sealed switch label
         document.getElementById('sealed-switch').addEventListener('change', function () {
             document.getElementById('sealed-label').textContent = this.checked ? '未開封' : '開封済み';
         });
@@ -468,10 +713,7 @@
         async function savePlaymat() {
             const nameEl = document.getElementById('name-input');
             const name = nameEl.value.trim();
-            if (!name) {
-                nameEl.classList.add('is-invalid');
-                return;
-            }
+            if (!name) { nameEl.classList.add('is-invalid'); return; }
             nameEl.classList.remove('is-invalid');
 
             const now = new Date().toISOString();
@@ -480,10 +722,9 @@
                 name,
                 description:  document.getElementById('desc-input').value.trim(),
                 sealed:       document.getElementById('sealed-switch').checked,
+                tags:         [...currentItemTags],
                 imageDataUrl: currentImageDataUrl,
-                createdAt:    editingId
-                                  ? (playmats.find(p => p.id === editingId)?.createdAt ?? now)
-                                  : now,
+                createdAt:    editingId ? (playmats.find(p => p.id === editingId)?.createdAt ?? now) : now,
                 updatedAt:    now,
             };
 
