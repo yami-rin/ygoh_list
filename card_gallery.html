@@ -593,6 +593,73 @@
             0%   { opacity: .3; }
             100% { opacity: .8; }
         }
+        /* ---- コレクターズ派生 ---- */
+        @keyframes fx-col-gd-brd {
+            0%,100% { box-shadow: inset 0 0 0 3px #ffd700, inset 0 0 10px 3px rgba(255,215,0,.3); }
+            50%     { box-shadow: inset 0 0 0 3px #ffe566, inset 0 0 16px 5px rgba(255,230,80,.5); }
+        }
+        @keyframes fx-col-sv-brd {
+            0%,100% { box-shadow: inset 0 0 0 3px #c8d8e8, inset 0 0 10px 3px rgba(190,210,235,.3); }
+            50%     { box-shadow: inset 0 0 0 3px #dce8f5, inset 0 0 15px 5px rgba(200,225,255,.5); }
+        }
+        /* 銀シマー用 before/after（金フレーム×銀 と 銀フレーム×銀 で共有） */
+        .rarity-fx-col-gold-silver::before,
+        .rarity-fx-col-silver-silver::before {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background:
+                radial-gradient(circle at 18% 20%, rgba(200,220,255,.55) 0%, transparent 22%),
+                radial-gradient(circle at 82% 25%, rgba(220,235,255,.45) 0%, transparent 18%),
+                radial-gradient(circle at 35% 82%, rgba(180,205,235,.45) 0%, transparent 18%),
+                radial-gradient(circle at 78% 75%, rgba(210,225,250,.45) 0%, transparent 18%);
+            animation: fx-col-flare 1.8s ease-in-out infinite alternate;
+        }
+        .rarity-fx-col-gold-silver::after,
+        .rarity-fx-col-silver-silver::after {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background: repeating-linear-gradient(-50deg,
+                rgba(200,220,255,.08) 0px, rgba(180,205,240,.07) 10px,
+                rgba(220,235,255,.07) 20px, rgba(200,215,245,.07) 30px,
+                rgba(180,200,230,.07) 40px, rgba(200,220,255,.08) 50px);
+            background-size: 80px 80px;
+            animation: fx-prismatic-scroll 1s linear infinite;
+            mix-blend-mode: screen;
+        }
+        /* 金シマー用 before/after（金フレーム×金 と 銀フレーム×金 で共有） */
+        .rarity-fx-col-gold-gold::before,
+        .rarity-fx-col-silver-gold::before {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background:
+                radial-gradient(circle at 18% 20%, rgba(255,215,0,.65) 0%, transparent 22%),
+                radial-gradient(circle at 82% 25%, rgba(255,200,30,.50) 0%, transparent 18%),
+                radial-gradient(circle at 35% 82%, rgba(255,180,0,.50) 0%, transparent 18%),
+                radial-gradient(circle at 78% 75%, rgba(255,220,50,.50) 0%, transparent 18%);
+            animation: fx-col-flare 1.8s ease-in-out infinite alternate;
+        }
+        .rarity-fx-col-gold-gold::after,
+        .rarity-fx-col-silver-gold::after {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background: repeating-linear-gradient(-50deg,
+                rgba(255,215,0,.10) 0px, rgba(255,180,0,.08) 10px,
+                rgba(255,230,50,.08) 20px, rgba(255,200,0,.08) 30px,
+                rgba(255,170,0,.08) 40px, rgba(255,215,0,.10) 50px);
+            background-size: 80px 80px;
+            animation: fx-prismatic-scroll 1s linear infinite;
+            mix-blend-mode: screen;
+        }
+        /* フレーム色 */
+        .rarity-fx-col-gold-silver { animation: fx-col-gd-brd 2s ease-in-out infinite; }
+        .rarity-fx-col-silver-silver { animation: fx-col-sv-brd 3s ease-in-out infinite; }
+        .rarity-fx-col-gold-gold { animation: fx-col-gd-brd 2s ease-in-out infinite; }
+        .rarity-fx-col-silver-gold { animation: fx-col-sv-brd 3s ease-in-out infinite; }
+
         /* 20th — 赤フレーム */
         .rarity-fx-20th {
             box-shadow: inset 0 0 0 2px #cc0000, inset 0 0 8px 3px rgba(200,0,0,.25);
