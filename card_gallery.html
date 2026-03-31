@@ -348,6 +348,10 @@
            レアリティ演出 — Inner effects (.rarity-fx-overlay に適用)
            .card-image-container 内に注入される position:absolute div
            ============================================================ */
+        /* 演出オフ時 */
+        .fx-disabled .rarity-fx-overlay,
+        .fx-disabled .rarity-fx-watermark { display: none !important; }
+
         .rarity-fx-overlay {
             position: absolute;
             inset: 0;
@@ -2901,6 +2905,11 @@
                     </button>
                 </div>
 
+                <!-- 演出トグル -->
+                <button type="button" class="btn btn-outline-secondary btn-sm active" id="fx-toggle-btn" title="演出オン/オフ">
+                    <i class="bi bi-stars"></i> 演出
+                </button>
+
                 <!-- Sort selector -->
                 <div class="input-group" style="width: auto;">
                     <label class="input-group-text" for="sort-select">並び替え</label>
@@ -5213,6 +5222,15 @@
             localStorage.setItem('gallerySortOrder', currentSort);
             applyFilters();
             renderCards();
+        });
+
+        // 演出トグル
+        const fxToggleBtn = document.getElementById('fx-toggle-btn');
+        const cardGrid = document.getElementById('card-grid');
+        fxToggleBtn.addEventListener('click', () => {
+            const isOn = cardGrid.classList.toggle('fx-disabled');
+            fxToggleBtn.classList.toggle('active', !isOn);
+            localStorage.setItem('galleryFxEnabled', (!isOn).toString());
         });
 
         document.getElementById('search-input').addEventListener('input', () => {
@@ -7563,6 +7581,12 @@
                     });
                     loadPublicProfile(); // Load user's public settings
                     initializeCommunity(); // Initialize community features
+
+                    // 演出設定の復元
+                    if (localStorage.getItem('galleryFxEnabled') === 'false') {
+                        document.getElementById('card-grid').classList.add('fx-disabled');
+                        document.getElementById('fx-toggle-btn').classList.remove('active');
+                    }
 
                     // Load saved grid size
                     const savedSize = localStorage.getItem('galleryGridSize');
