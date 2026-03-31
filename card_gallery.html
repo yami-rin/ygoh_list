@@ -565,23 +565,24 @@
         .rarity-fx-watermark {
             position: absolute;
             pointer-events: none;
-            z-index: 5;
-            bottom: 30%;
+            z-index: 10;
+            bottom: 28%;
             left: 0; right: 0;
             text-align: center;
-            font-size: 1.4rem;
+            font-size: 1.6rem;
             font-weight: 900;
             font-style: italic;
-            letter-spacing: .05em;
+            letter-spacing: .08em;
             line-height: 1;
+            mix-blend-mode: normal;
         }
         .rarity-fx-watermark.wm-20th {
-            color: rgba(220,0,0,.32);
-            text-shadow: 0 0 12px rgba(200,0,0,.25);
+            color: rgba(220,0,0,.65);
+            text-shadow: 0 0 8px rgba(255,100,100,.5), 0 1px 0 rgba(0,0,0,.2);
         }
         .rarity-fx-watermark.wm-25th {
-            color: rgba(200,160,0,.32);
-            text-shadow: 0 0 12px rgba(180,140,0,.25);
+            color: rgba(200,160,0,.65);
+            text-shadow: 0 0 8px rgba(255,220,80,.5), 0 1px 0 rgba(0,0,0,.2);
         }
 
         .unowned-badge {
