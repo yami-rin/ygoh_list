@@ -730,6 +730,119 @@
       pointer-events: none;
       mix-blend-mode: screen;
     }
+    /* ============================================================
+       21. 全体シルバーグロー — 全体がふわふわ銀色に光る
+       ============================================================ */
+    .rarity-effect-silver-full-glow .card-wrap::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      border-radius: inherit;
+      pointer-events: none;
+      z-index: 2;
+      animation: sv-full-glow 2.5s ease-in-out infinite;
+    }
+    @keyframes sv-full-glow {
+      0%,100% { background: rgba(190,210,235,.1);  box-shadow: inset 0 0 20px 5px rgba(185,210,240,.3); }
+      50%     { background: rgba(210,228,252,.28); box-shadow: inset 0 0 35px 10px rgba(200,225,255,.55); }
+    }
+
+    /* ============================================================
+       22. フレームシルバー流れ — 銀の光がフレームを周回する
+       ============================================================ */
+    .rarity-effect-silver-border-sweep .card-wrap::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      border-radius: inherit;
+      pointer-events: none;
+      z-index: 2;
+      animation: sv-brd-sweep 3s linear infinite;
+    }
+    @keyframes sv-brd-sweep {
+      0%   { box-shadow: inset 5px  0   14px rgba(220,240,255,.9); }
+      25%  { box-shadow: inset 0    5px 14px rgba(220,240,255,.9); }
+      50%  { box-shadow: inset -5px 0   14px rgba(220,240,255,.9); }
+      75%  { box-shadow: inset 0   -5px 14px rgba(220,240,255,.9); }
+      100% { box-shadow: inset 5px  0   14px rgba(220,240,255,.9); }
+    }
+
+    /* ============================================================
+       23. 全体シルバー流れ — 全体に銀の光が流れる（太ビーム）
+       ============================================================ */
+    .rarity-effect-silver-full-sweep .card-wrap::before {
+      content: '';
+      position: absolute;
+      top: 0; left: -100%;
+      width: 100%; height: 100%;
+      background: linear-gradient(105deg,
+        rgba(200,215,240,.05) 0%,
+        rgba(180,205,235,.35) 38%,
+        rgba(255,255,255,.8)  50%,
+        rgba(180,205,235,.35) 62%,
+        rgba(200,215,240,.05) 100%);
+      animation: shine-sweep 3s linear infinite;
+      z-index: 2;
+      pointer-events: none;
+    }
+
+    /* ============================================================
+       24. ホワイトボーダー — 白い枠が脈動する
+       ============================================================ */
+    .rarity-effect-white-border .card-wrap::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      border-radius: inherit;
+      pointer-events: none;
+      z-index: 2;
+      animation: wh-brd 2.5s ease-in-out infinite;
+    }
+    @keyframes wh-brd {
+      0%,100% { box-shadow: inset 0 0 0 2px rgba(255,255,255,.75), inset 0 0  8px rgba(255,255,255,.2); }
+      50%     { box-shadow: inset 0 0 0 2px rgba(255,255,255,1.0), inset 0 0 14px rgba(255,255,255,.5); }
+    }
+
+    /* ============================================================
+       25. 内側ホワイト流れ — フレーム内側のみ白の光が流れる
+       ============================================================ */
+    .rarity-effect-white-inner-sweep .card-wrap {
+      -webkit-mask: linear-gradient(#000 0 0) 6% 6% / 88% 88% no-repeat;
+      mask: linear-gradient(#000 0 0) 6% 6% / 88% 88% no-repeat;
+    }
+    .rarity-effect-white-inner-sweep .card-wrap::before {
+      content: '';
+      position: absolute;
+      top: 0; left: -80%;
+      width: 60%; height: 100%;
+      background: linear-gradient(105deg,
+        transparent 30%,
+        rgba(235,240,255,.45) 44%,
+        rgba(255,255,255,.88) 50%,
+        rgba(235,240,255,.45) 56%,
+        transparent 70%);
+      animation: shine-sweep 3s linear infinite;
+      z-index: 2;
+      pointer-events: none;
+    }
+
+    /* ============================================================
+       26. 全体ゴールドグロー — 全体がふわふわ金色に光る
+       ============================================================ */
+    .rarity-effect-gold-full-glow .card-wrap::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      border-radius: inherit;
+      pointer-events: none;
+      z-index: 2;
+      animation: gd-full-glow 2s ease-in-out infinite;
+    }
+    @keyframes gd-full-glow {
+      0%,100% { background: rgba(220,170,0,.12); box-shadow: inset 0 0 20px 5px rgba(220,170,0,.3); }
+      50%     { background: rgba(255,215,0,.28);  box-shadow: inset 0 0 35px 10px rgba(255,220,50,.55); }
+    }
+
   </style>
 </head>
 <body>
@@ -1000,6 +1113,85 @@
       <div class="effect-label">
         <span class="num">15.</span> コレクターズ
         <span class="sub">多色スパーク＋回転金縁</span>
+      </div>
+    </div>
+
+
+    <!-- 21. 全体シルバーグロー -->
+    <div class="effect-item rarity-effect-silver-full-glow">
+      <div class="card-outer">
+        <div class="card-wrap">
+          <div class="card-face">🃏</div>
+        </div>
+      </div>
+      <div class="effect-label">
+        <span class="num">21.</span> 全体シルバーグロー
+        <span class="sub">全体がふわふわ銀色に光る</span>
+      </div>
+    </div>
+
+    <!-- 22. フレームシルバー流れ -->
+    <div class="effect-item rarity-effect-silver-border-sweep">
+      <div class="card-outer">
+        <div class="card-wrap">
+          <div class="card-face">🃏</div>
+        </div>
+      </div>
+      <div class="effect-label">
+        <span class="num">22.</span> フレームシルバー流れ
+        <span class="sub">銀の光がフレームを周回</span>
+      </div>
+    </div>
+
+    <!-- 23. 全体シルバー流れ -->
+    <div class="effect-item rarity-effect-silver-full-sweep">
+      <div class="card-outer">
+        <div class="card-wrap">
+          <div class="card-face">🃏</div>
+        </div>
+      </div>
+      <div class="effect-label">
+        <span class="num">23.</span> 全体シルバー流れ
+        <span class="sub">全体に銀の太ビームが流れる</span>
+      </div>
+    </div>
+
+    <!-- 24. ホワイトボーダー -->
+    <div class="effect-item rarity-effect-white-border">
+      <div class="card-outer">
+        <div class="card-wrap">
+          <div class="card-face">🃏</div>
+        </div>
+      </div>
+      <div class="effect-label">
+        <span class="num">24.</span> ホワイトボーダー
+        <span class="sub">白い枠が脈動</span>
+      </div>
+    </div>
+
+    <!-- 25. 内側ホワイト流れ -->
+    <div class="effect-item rarity-effect-white-inner-sweep">
+      <div class="card-outer">
+        <div class="card-wrap">
+          <div class="card-face">🃏</div>
+        </div>
+      </div>
+      <div class="effect-label">
+        <span class="num">25.</span> 内側ホワイト流れ
+        <span class="sub">フレーム除外・内側のみ白光が流れる</span>
+      </div>
+    </div>
+
+    <!-- 26. 全体ゴールドグロー -->
+    <div class="effect-item rarity-effect-gold-full-glow">
+      <div class="card-outer">
+        <div class="card-wrap">
+          <div class="card-face">🃏</div>
+        </div>
+      </div>
+      <div class="effect-label">
+        <span class="num">26.</span> 全体ゴールドグロー
+        <span class="sub">全体がふわふわ金色に光る</span>
       </div>
     </div>
 
