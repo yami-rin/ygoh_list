@@ -950,9 +950,37 @@
                 padding: 0.75rem;
             }
 
-            .view-controls {
-                font-size: 0.9rem;
+            /* タブを横スクロールに */
+            .nav-tabs {
+                flex-wrap: nowrap;
+                overflow-x: auto;
+                -webkit-overflow-scrolling: touch;
+                scrollbar-width: none;
+                padding-bottom: 2px;
             }
+            .nav-tabs::-webkit-scrollbar { display: none; }
+            .nav-tabs .nav-item { flex-shrink: 0; }
+            .nav-tabs .nav-link { white-space: nowrap; padding: 0.4rem 0.75rem; font-size: 0.85rem; }
+
+            /* controls-bar モバイル再構成 */
+            .view-controls {
+                font-size: 0.85rem;
+                gap: 0.5rem;
+            }
+            .view-controls .ms-auto {
+                width: 100%;
+                margin-left: 0 !important;
+                justify-content: stretch;
+            }
+            .view-controls .ms-auto .btn {
+                flex: 1;
+                font-size: 0.78rem;
+                padding: 0.3rem 0.4rem;
+                white-space: nowrap;
+            }
+
+            /* 未所持カードラベル */
+            .form-check-label { font-size: 0.82rem; }
         }
 
         .filter-section {
@@ -2685,12 +2713,12 @@
                         <i class="bi bi-tags"></i> タグ・レアリティ <span class="badge bg-primary ms-1" id="tag-rarity-filter-count" style="display:none;">0</span>
                     </button>
                 </div>
-                <div class="col-md-2">
+                <div class="col-6 col-md-2">
                     <button class="btn btn-outline-info w-100" type="button" data-bs-toggle="collapse" data-bs-target="#advanced-search">
                         <i class="bi bi-funnel"></i> 詳細検索
                     </button>
                 </div>
-                <div class="col-md-2">
+                <div class="col-6 col-md-2">
                     <button class="btn btn-outline-secondary w-100" id="clear-filters">
                         <i class="bi bi-x-circle"></i> クリア
                     </button>
@@ -2986,7 +3014,7 @@
                         <i class="bi bi-stack"></i> デッキ管理
                     </button>
                     <button class="btn btn-primary btn-sm" onclick="window.location.href='card_list.html'">
-                        <i class="bi bi-arrow-left"></i> リスト表示に戻る
+                        <i class="bi bi-arrow-left"></i> リスト表示
                     </button>
                 </div>
             </div>

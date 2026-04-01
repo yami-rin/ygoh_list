@@ -358,6 +358,7 @@
         @media (max-width: 768px) {
             .navbar-brand { font-size: 1rem; }
             .navbar-auth .user-badge { display: none; }
+            .navbar-auth { margin-left: 0; padding-left: 0; border-left: none; border-top: 1px solid #e9ecef; padding-top: 0.5rem; justify-content: center; }
             .header-section { padding: 2rem 0 1.5rem 0; }
             .header-section h1 { font-size: 1.6rem; }
             .header-subtitle { font-size: 0.9rem; }
@@ -837,8 +838,8 @@
                     <i class="bi bi-funnel-fill" style="color:#667eea;"></i>
                     <span class="fw-bold">統計フィルター</span>
                 </div>
-                <div class="row g-2">
-                    <div class="col-md-3 col-6">
+                <div class="row g-2 row-cols-2 row-cols-md-4">
+                    <div class="col">
                         <label class="form-label small text-muted mb-1">期間</label>
                         <select class="form-select form-select-sm" id="stat-period">
                             <option value="all">全期間</option>
@@ -848,19 +849,19 @@
                             <option value="year">今年</option>
                         </select>
                     </div>
-                    <div class="col-md-3 col-6">
+                    <div class="col">
                         <label class="form-label small text-muted mb-1">デッキ</label>
                         <select class="form-select form-select-sm" id="stat-deck">
                             <option value="">全デッキ</option>
                         </select>
                     </div>
-                    <div class="col-md-3 col-6">
+                    <div class="col">
                         <label class="form-label small text-muted mb-1">大会</label>
                         <select class="form-select form-select-sm" id="stat-tournament">
                             <option value="">全大会</option>
                         </select>
                     </div>
-                    <div class="col-md-3 col-6 d-flex align-items-end">
+                    <div class="col d-flex align-items-end">
                         <button class="btn btn-gradient btn-sm w-100" id="apply-stat-filter">
                             <i class="bi bi-funnel"></i> 適用
                         </button>
