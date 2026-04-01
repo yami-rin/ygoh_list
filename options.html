@@ -454,6 +454,13 @@
                 <button class="btn btn-reset" onclick="resetEffectSettings()">
                     <i class="bi bi-arrow-counterclockwise"></i> すべてリセット
                 </button>
+                <button class="btn btn-reset" onclick="exportEffectSettings()">
+                    <i class="bi bi-download"></i> エクスポート
+                </button>
+                <button class="btn btn-reset" onclick="document.getElementById('importEffectFile').click()">
+                    <i class="bi bi-upload"></i> インポート
+                </button>
+                <input type="file" id="importEffectFile" accept=".json" style="display:none" onchange="importEffectSettings(this)">
             </div>
         </div>
     </div>
@@ -851,6 +858,34 @@
 
         window.saveEffectSettings = saveEffectSettings;
         window.resetEffectSettings = resetEffectSettings;
+
+        window.exportEffectSettings = function() {
+            const blob = new Blob([JSON.stringify(effectSettings, null, 2)], { type: 'application/json' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = 'rarity-effect-settings.json';
+            a.click();
+            URL.revokeObjectURL(url);
+        };
+
+        window.importEffectSettings = function(input) {
+            const file = input.files[0];
+            if (!file) return;
+            const reader = new FileReader();
+            reader.onload = e => {
+                try {
+                    const data = JSON.parse(e.target.result);
+                    if (typeof data !== 'object' || Array.isArray(data)) throw new Error();
+                    effectSettings = data;
+                    renderEffectList();
+                } catch {
+                    alert('JSONファイルの形式が正しくありません。');
+                }
+                input.value = '';
+            };
+            reader.readAsText(file);
+        };
 
         // Init
         loadOrder().then(() => loadEffectSettings());
