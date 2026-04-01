@@ -368,7 +368,8 @@
             .table td, .table th { padding: 0.35rem 0.25rem; }
             .table td:first-child, .table th:first-child { white-space: nowrap; }
             .tournament-badge { white-space: nowrap; max-width: 80px; overflow: hidden; text-overflow: ellipsis; vertical-align: middle; }
-            .records-card .btn-sm { padding: 0.15rem 0.3rem; font-size: 0.7rem; line-height: 1.2; }
+            .records-card .btn-sm { padding: 0.15rem 0.3rem; font-size: 0.7rem; line-height: 1.2; vertical-align: middle; }
+            .table th, .table td { text-align: center; vertical-align: middle; }
             .mobile-hide { display: none !important; }
             .mobile-short { display: inline; }
             .mobile-full { display: none; }
@@ -902,11 +903,11 @@
                                     <option value="draw">引き分けのみ</option>
                                 </select>
                             </div>
-                            <div class="col-4 col-md-3 d-flex gap-1">
+                            <div class="col-4 col-md-3 d-flex align-items-stretch gap-1">
                                 <button type="submit" class="btn btn-sm btn-gradient flex-grow-1">
                                     <i class="bi bi-search"></i> <span class="d-none d-md-inline">検索</span>
                                 </button>
-                                <button type="button" class="btn btn-sm btn-outline-secondary flex-shrink-0" id="advanced-search-btn" title="詳細検索">
+                                <button type="button" class="btn btn-sm btn-outline-secondary" id="advanced-search-btn" title="詳細検索">
                                     <i class="bi bi-sliders"></i>
                                 </button>
                             </div>
