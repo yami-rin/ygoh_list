@@ -368,8 +368,9 @@
             .table td, .table th { padding: 0.35rem 0.25rem; }
             .table td:first-child, .table th:first-child { white-space: nowrap; }
             .tournament-badge { white-space: nowrap; max-width: 80px; overflow: hidden; text-overflow: ellipsis; vertical-align: middle; }
-            .records-card .btn-sm { padding: 0.15rem 0.3rem; font-size: 0.7rem; line-height: 1; display: inline-flex; align-items: center; justify-content: center; vertical-align: middle; }
+            .records-card .btn-sm { padding: 0.15rem 0.3rem; font-size: 0.7rem; }
             #filter-form .btn-sm { display: inline-flex; align-items: center; justify-content: center; vertical-align: middle; }
+            .action-btns { display: flex; align-items: center; gap: 0.2rem; flex-wrap: nowrap; }
             .table th, .table td { text-align: center; vertical-align: middle; }
             .mobile-hide { display: none !important; }
             .mobile-short { display: inline; }
@@ -3987,25 +3988,27 @@
                 }
                 
                 html += `
-                        <td style="white-space:nowrap;">
+                        <td>
+                            <div class="action-btns">
                             ${group.inProgress ? `
-                                <button class="btn btn-sm btn-success me-1" onclick="resumeTournament()" title="大会を再開">
+                                <button class="btn btn-sm btn-success" onclick="resumeTournament()" title="大会を再開">
                                     <i class="bi bi-play-fill"></i>
                                 </button>
                                 <button class="btn btn-sm btn-danger" onclick="deleteTournamentProgress()" title="大会を削除">
                                     <i class="bi bi-trash"></i>
                                 </button>
                             ` : `
-                                <button class="btn btn-sm btn-primary me-1" onclick="editTournament('${group.rounds[0]?.id}')" title="大会編集">
+                                <button class="btn btn-sm btn-primary" onclick="editTournament('${group.rounds[0]?.id}')" title="大会編集">
                                     <i class="bi bi-pencil"></i>
                                 </button>
-                                <button class="btn btn-sm btn-info me-1" onclick="tweetTournamentResult('${index}')" title="ツイート">
+                                <button class="btn btn-sm btn-info" onclick="tweetTournamentResult('${index}')" title="ツイート">
                                     <i class="bi bi-twitter"></i>
                                 </button>
                                 <button class="btn btn-sm btn-danger" onclick="deleteTournament('${group.rounds[0]?.tournament}', '${group.date}', '${group.myDeck}')" title="大会を削除">
                                     <i class="bi bi-trash"></i>
                                 </button>
                             `}
+                            </div>
                         </td>
                     </tr>
                 `;
@@ -4020,16 +4023,18 @@
                                 <td></td>
                                 <td>${record.opponentDeck || '-'}</td>
                                 <td>${resultBadge[record.result] || ''}</td>
-                                <td style="white-space:nowrap;">
-                                    <button class="btn btn-sm btn-info me-1" onclick="viewRecord('${record.id}')" title="詳細">
-                                        <i class="bi bi-eye"></i>
-                                    </button>
-                                    <button class="btn btn-sm btn-warning me-1" onclick="editRound('${record.id}')" title="編集">
-                                        <i class="bi bi-pencil-square"></i>
-                                    </button>
-                                    <button class="btn btn-sm btn-danger" onclick="deleteRecord('${record.id}')">
-                                        <i class="bi bi-trash"></i>
-                                    </button>
+                                <td>
+                                    <div class="action-btns">
+                                        <button class="btn btn-sm btn-info" onclick="viewRecord('${record.id}')" title="詳細">
+                                            <i class="bi bi-eye"></i>
+                                        </button>
+                                        <button class="btn btn-sm btn-warning" onclick="editRound('${record.id}')" title="編集">
+                                            <i class="bi bi-pencil-square"></i>
+                                        </button>
+                                        <button class="btn btn-sm btn-danger" onclick="deleteRecord('${record.id}')">
+                                            <i class="bi bi-trash"></i>
+                                        </button>
+                                    </div>
                                 </td>
                             </tr>
                         `;
@@ -4042,16 +4047,18 @@
                                 <td></td>
                                 <td>${record.opponentDeck || '-'}</td>
                                 <td>${resultBadge[record.result] || ''}</td>
-                                <td style="white-space:nowrap;">
-                                    <button class="btn btn-sm btn-info me-1" onclick="viewRecord('${record.id}')" title="詳細">
-                                        <i class="bi bi-eye"></i>
-                                    </button>
-                                    <button class="btn btn-sm btn-warning me-1" onclick="editRound('${record.id}')" title="編集">
-                                        <i class="bi bi-pencil-square"></i>
-                                    </button>
-                                    <button class="btn btn-sm btn-danger" onclick="deleteRecord('${record.id}')">
-                                        <i class="bi bi-trash"></i>
-                                    </button>
+                                <td>
+                                    <div class="action-btns">
+                                        <button class="btn btn-sm btn-info" onclick="viewRecord('${record.id}')" title="詳細">
+                                            <i class="bi bi-eye"></i>
+                                        </button>
+                                        <button class="btn btn-sm btn-warning" onclick="editRound('${record.id}')" title="編集">
+                                            <i class="bi bi-pencil-square"></i>
+                                        </button>
+                                        <button class="btn btn-sm btn-danger" onclick="deleteRecord('${record.id}')">
+                                            <i class="bi bi-trash"></i>
+                                        </button>
+                                    </div>
                                 </td>
                             </tr>
                         `;
@@ -4081,10 +4088,10 @@
                 
                 if (record.isMasterDuel) {
                     actionButtons = `
-                        <button class="btn btn-sm btn-info me-1" onclick="viewRecord('${id}')" title="詳細">
+                        <button class="btn btn-sm btn-info" onclick="viewRecord('${id}')" title="詳細">
                             <i class="bi bi-eye"></i>
                         </button>
-                        <button class="btn btn-sm btn-warning me-1" onclick="editMasterDuelRecord('${id}')" title="編集">
+                        <button class="btn btn-sm btn-warning" onclick="editMasterDuelRecord('${id}')" title="編集">
                             <i class="bi bi-pencil-square"></i>
                         </button>
                         <button class="btn btn-sm btn-danger" onclick="deleteRecord('${id}')">
@@ -4102,7 +4109,7 @@
                             <td><strong>${myDeck}</strong></td>
                             <td>${opponentDeck}</td>
                             <td>${resultBadge[result] || ''}</td>
-                            <td style="white-space:nowrap;">${actionButtons}</td>
+                            <td><div class="action-btns">${actionButtons}</div></td>
                         </tr>
                     `;
                 } else {
@@ -4114,7 +4121,7 @@
                             <td><strong>${myDeck}</strong></td>
                             <td>${opponentDeck}</td>
                             <td>${resultBadge[result] || ''}</td>
-                            <td style="white-space:nowrap;">${actionButtons}</td>
+                            <td><div class="action-btns">${actionButtons}</div></td>
                         </tr>
                     `;
                 }
