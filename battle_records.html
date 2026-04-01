@@ -54,14 +54,16 @@
         .nav-link-custom {
             color: #2c3e50;
             font-weight: 500;
-            padding: 0.5rem 1rem;
-            margin: 0 0.25rem;
+            padding: 0.4rem 0.65rem;
+            margin: 0 0.1rem;
             border-radius: 8px;
             transition: all 0.3s ease;
             display: flex;
             align-items: center;
-            gap: 0.5rem;
+            gap: 0.35rem;
             text-decoration: none;
+            white-space: nowrap;
+            font-size: 0.9rem;
         }
         .nav-link-custom:hover {
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
@@ -73,7 +75,39 @@
             color: white;
             font-weight: 600;
         }
-        .nav-link-custom i { font-size: 1.1rem; }
+        .nav-link-custom i { font-size: 1rem; }
+
+        /* Navbar auth zone */
+        .navbar-auth {
+            display: flex;
+            align-items: center;
+            gap: 0.4rem;
+            margin-left: 0.75rem;
+            padding-left: 0.75rem;
+            border-left: 1px solid #e9ecef;
+        }
+        .navbar-auth .user-badge {
+            font-size: 0.75rem;
+            color: #6c757d;
+            max-width: 110px;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+        .btn-navbar-icon {
+            width: 32px; height: 32px;
+            border-radius: 8px;
+            border: 1px solid #dee2e6;
+            background: white;
+            color: #495057;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 0.95rem;
+            cursor: pointer;
+            transition: all 0.2s;
+            padding: 0;
+        }
+        .btn-navbar-icon:hover { background: #f0f4ff; border-color: #667eea; color: #667eea; }
+        .btn-navbar-icon.danger:hover { background: #fff0f0; border-color: #f5576c; color: #f5576c; }
 
         /* ---- Header ---- */
         .header-section {
@@ -323,9 +357,14 @@
         /* ---- Mobile ---- */
         @media (max-width: 768px) {
             .navbar-brand { font-size: 1rem; }
-            .header-section h1 { font-size: 1.8rem; }
-            .stat-card { padding: 1rem; }
-            .stat-card h2 { font-size: 1.8rem; }
+            .navbar-auth .user-badge { display: none; }
+            .header-section { padding: 2rem 0 1.5rem 0; }
+            .header-section h1 { font-size: 1.6rem; }
+            .header-subtitle { font-size: 0.9rem; }
+            .stat-card { padding: 0.85rem 1rem; margin-bottom: 0.5rem; }
+            .stat-card h6 { font-size: 0.75rem; }
+            .stat-card h2 { font-size: 1.6rem; }
+            .stat-icon { font-size: 1.8rem; }
             .table { font-size: 0.75rem; }
             .table td, .table th { padding: 0.5rem 0.4rem; }
             .mobile-hide { display: none !important; }
@@ -335,6 +374,8 @@
             .controls-bar { padding: 0.75rem 1rem; }
             .modal-dialog { margin: 0.5rem; }
             .modal-content { font-size: 0.875rem; }
+            .filter-section { padding: 0.85rem 1rem; }
+            .records-card .card-header-bar { padding: 0.75rem 1rem; }
         }
         @media (min-width: 769px) {
             .mobile-short { display: none; }
@@ -682,7 +723,7 @@
 
         <!-- Navigation -->
         <nav class="navbar navbar-expand-lg navbar-custom">
-            <div class="container">
+            <div class="container-fluid px-3 px-lg-4">
                 <a class="navbar-brand" href="index.html">
                     <i class="bi bi-layers-fill"></i>
                     Card Manager
@@ -692,7 +733,7 @@
                     <span class="navbar-toggler-icon"></span>
                 </button>
                 <div class="collapse navbar-collapse" id="navbarNav">
-                    <ul class="navbar-nav ms-auto align-items-center">
+                    <ul class="navbar-nav mx-auto align-items-center">
                         <li class="nav-item">
                             <a class="nav-link-custom" href="index.html">
                                 <i class="bi bi-house-door-fill"></i> ホーム
@@ -723,19 +764,19 @@
                                 <i class="bi bi-gear-fill"></i> オプション
                             </a>
                         </li>
-                        <li class="nav-item ms-2 d-flex align-items-center gap-2">
-                            <span class="text-muted small" id="user-email" style="font-size:0.82rem;"></span>
-                            <button id="tournament-mgmt-btn" class="btn btn-sm btn-outline-primary" style="border-radius:8px;">
-                                <i class="bi bi-folder2-open"></i> 大会管理
-                            </button>
-                            <button id="settings-btn" class="btn btn-sm btn-outline-secondary" style="border-radius:8px;">
-                                <i class="bi bi-gear"></i>
-                            </button>
-                            <button id="logout-btn" class="btn btn-sm btn-outline-danger" style="border-radius:8px;">
-                                <i class="bi bi-box-arrow-right"></i>
-                            </button>
-                        </li>
                     </ul>
+                    <div class="navbar-auth">
+                        <span class="user-badge" id="user-email"></span>
+                        <button id="tournament-mgmt-btn" class="btn-navbar-icon" title="大会管理">
+                            <i class="bi bi-folder2-open"></i>
+                        </button>
+                        <button id="settings-btn" class="btn-navbar-icon" title="設定">
+                            <i class="bi bi-gear"></i>
+                        </button>
+                        <button id="logout-btn" class="btn-navbar-icon danger" title="ログアウト">
+                            <i class="bi bi-box-arrow-right"></i>
+                        </button>
+                    </div>
                 </div>
             </div>
         </nav>
@@ -759,29 +800,29 @@
             </div>
 
             <!-- Stat Cards -->
-            <div class="row mb-2">
-                <div class="col-md-3 col-6">
+            <div class="row g-3 row-cols-2 row-cols-md-4 mb-3">
+                <div class="col">
                     <div class="stat-card total">
                         <h6><i class="bi bi-collection"></i> 総対戦数</h6>
                         <h2 id="total-battles">0</h2>
                         <i class="bi bi-collection stat-icon"></i>
                     </div>
                 </div>
-                <div class="col-md-3 col-6">
+                <div class="col">
                     <div class="stat-card win">
                         <h6><i class="bi bi-hand-thumbs-up"></i> 勝利数</h6>
                         <h2 id="total-wins">0</h2>
                         <i class="bi bi-hand-thumbs-up stat-icon"></i>
                     </div>
                 </div>
-                <div class="col-md-3 col-6">
+                <div class="col">
                     <div class="stat-card lose">
                         <h6><i class="bi bi-hand-thumbs-down"></i> 敗北数</h6>
                         <h2 id="total-loses">0</h2>
                         <i class="bi bi-hand-thumbs-down stat-icon"></i>
                     </div>
                 </div>
-                <div class="col-md-3 col-6">
+                <div class="col">
                     <div class="stat-card rate">
                         <h6><i class="bi bi-percent"></i> 勝率</h6>
                         <h2 id="win-rate">0%</h2>
@@ -841,17 +882,17 @@
                 <div class="row g-2 align-items-end">
                     <div class="col-md-8">
                         <form id="filter-form" class="row g-2">
-                            <div class="col-md-3" style="position:relative;">
+                            <div class="col-6 col-md-3" style="position:relative;">
                                 <input type="text" class="form-control form-control-sm" id="filter-deck"
                                        placeholder="デッキ名で検索" autocomplete="off">
                                 <div id="deck-search-suggestions" class="autocomplete-suggestions" style="display:none;"></div>
                             </div>
-                            <div class="col-md-3" style="position:relative;">
+                            <div class="col-6 col-md-3" style="position:relative;">
                                 <input type="text" class="form-control form-control-sm" id="filter-tournament"
                                        placeholder="大会名で検索" autocomplete="off">
                                 <div id="tournament-search-suggestions" class="autocomplete-suggestions" style="display:none;"></div>
                             </div>
-                            <div class="col-md-3">
+                            <div class="col-8 col-md-3">
                                 <select class="form-select form-select-sm" id="filter-result">
                                     <option value="">全ての結果</option>
                                     <option value="win">勝利のみ</option>
@@ -859,12 +900,12 @@
                                     <option value="draw">引き分けのみ</option>
                                 </select>
                             </div>
-                            <div class="col-md-2">
+                            <div class="col-3 col-md-2">
                                 <button type="submit" class="btn btn-sm btn-gradient w-100">
-                                    <i class="bi bi-search"></i> 検索
+                                    <i class="bi bi-search"></i> <span class="d-none d-md-inline">検索</span>
                                 </button>
                             </div>
-                            <div class="col-md-1">
+                            <div class="col-1 col-md-1">
                                 <button type="button" class="btn btn-sm btn-outline-secondary w-100" id="advanced-search-btn" title="詳細検索">
                                     <i class="bi bi-sliders"></i>
                                 </button>
