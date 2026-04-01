@@ -9346,6 +9346,7 @@ Firebase Consoleで確認すべき項目:
             }
             
             showLoading(true);
+            document.getElementById('search-db-btn').disabled = true;
             // Resolve alias to official card name for DB search
             let dbSearchKeyword = searchKeyword;
             const aliasKey = searchKeyword.toLowerCase();
@@ -9412,9 +9413,10 @@ Firebase Consoleで確認すべき項目:
                 alert(`検索エラー: ${err.message}`);
             } finally {
                 showLoading(false);
+                document.getElementById('search-db-btn').disabled = false;
             }
         });
-        
+
         const renderSearchResultsToContainer = (containerId) => renderSearchResults(containerId);
         
         const fetchCardDetails = async (cardUrl) => {
