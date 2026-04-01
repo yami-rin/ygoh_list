@@ -352,6 +352,8 @@
             position: fixed; top: 80px; right: 20px; z-index: 9999;
         }
 
+        .table th, .table td { text-align: center; vertical-align: middle; }
+
         /* ---- Mobile ---- */
         @media (max-width: 768px) {
             .navbar-brand { font-size: 1rem; }
@@ -373,7 +375,6 @@
             .action-btns { white-space: nowrap; line-height: 0; }
             .action-btns .btn { display: inline-flex !important; align-items: center !important; justify-content: center !important; vertical-align: middle !important; height: 1.75rem !important; width: 1.75rem !important; padding: 0 !important; margin: 0 1px !important; box-sizing: border-box !important; }
             .action-btns .btn i { font-size: 0.8rem !important; line-height: 1 !important; }
-            .table th, .table td { text-align: center; vertical-align: middle; }
             .mobile-hide { display: none !important; }
             .mobile-short { display: inline; }
             .mobile-full { display: none; }
@@ -3982,7 +3983,7 @@
                             <td onclick="${group.inProgress ? '' : `toggleTournamentGroup('tournament-${index}')`}" style="cursor: pointer;">
                                 <span class="tournament-badge">${group.tournament}</span>${group.store ? '<small class="d-block text-muted">' + group.store + '</small>' : ''}
                             </td>
-                            <td class="mobile-hide" onclick="${group.inProgress ? '' : `toggleTournamentGroup('tournament-${index}')`}" style="cursor: pointer;">-</td>
+                            <td class="mobile-hide" onclick="${group.inProgress ? '' : `toggleTournamentGroup('tournament-${index}')`}" style="cursor: pointer;">${group.rounds.length > 0 ? group.rounds.length + 'R' : '-'}</td>
                             <td onclick="${group.inProgress ? '' : `toggleTournamentGroup('tournament-${index}')`}" style="cursor: pointer;"><strong>${group.myDeck}</strong></td>
                             <td onclick="${group.inProgress ? '' : `toggleTournamentGroup('tournament-${index}')`}" style="cursor: pointer;">-</td>
                             <td onclick="${group.inProgress ? '' : `toggleTournamentGroup('tournament-${index}')`}" style="cursor: pointer;">
@@ -4018,7 +4019,7 @@
                 `;
                 
                 // Add rounds (initially hidden)
-                group.rounds.forEach(record => {
+                group.rounds.forEach((record, roundIdx) => {
                     if (isMasterDuelMode) {
                         html += `
                             <tr class="record-row ${record.result} tournament-rounds tournament-${index}" style="display: none;">
@@ -4047,7 +4048,7 @@
                             <tr class="record-row ${record.result} tournament-rounds tournament-${index}" style="display: none;">
                                 <td></td>
                                 <td></td>
-                                <td class="mobile-hide">${record.round || '-'}</td>
+                                <td class="mobile-hide">${record.round || (roundIdx + 1) + 'R'}</td>
                                 <td></td>
                                 <td>${record.opponentDeck || '-'}</td>
                                 <td>${resultBadge[record.result] || ''}</td>
