@@ -5236,29 +5236,33 @@
 
             try {
                 await api.deleteBookmark(cardId);
-
-                console.log('Removed from bookmarks:', cardId);
-
-                // Update local data directly (no Firebase re-read)
-                bookmarkCards = bookmarkCards.filter(c => c.id !== cardId);
-
-                // Update cache and metadata
-                saveGalleryToCache();
-                await updateGalleryMetadata();
-
-                // Re-render if on bookmarks tab
-                if (currentListType === 'bookmark') {
-                    allCards = bookmarkCards;
-                    applyFilters();
-                    renderCards();
-                    updateStats();
-                }
-
-                alert('ブックマークから削除しました');
             } catch (error) {
-                console.error('Error removing from bookmarks:', error);
-                alert('ブックマークの削除に失敗しました');
+                if (!error.status || error.status !== 404) {
+                    console.error('Error removing from bookmarks:', error);
+                    alert('ブックマークの削除に失敗しました');
+                    return;
+                }
+                console.warn('Bookmark not found on server, removing from local cache:', cardId);
             }
+
+            console.log('Removed from bookmarks:', cardId);
+
+            // Update local data directly (no Firebase re-read)
+            bookmarkCards = bookmarkCards.filter(c => c.id !== cardId);
+
+            // Update cache and metadata
+            saveGalleryToCache();
+            await updateGalleryMetadata();
+
+            // Re-render if on bookmarks tab
+            if (currentListType === 'bookmark') {
+                allCards = bookmarkCards;
+                applyFilters();
+                renderCards();
+                updateStats();
+            }
+
+            alert('ブックマークから削除しました');
         };
 
         /**
@@ -5655,32 +5659,37 @@
 
             try {
                 await api.deleteCard(currentEditingCard.id);
-
-                // Remove from local data
-                if (currentListType === 'collection') {
-                    collectionCards = collectionCards.filter(c => c.id !== currentEditingCard.id);
-                } else {
-                    wishlistCards = wishlistCards.filter(c => c.id !== currentEditingCard.id);
-                }
-                allCards = currentListType === 'collection' ? collectionCards : wishlistCards;
-
-                // Update cache and metadata
-                saveGalleryToCache();
-                await updateGalleryMetadata();
-
-                // Close panel
-                closeEditPanel();
-
-                // Refresh display
-                applyFilters();
-                renderCards();
-                populateFilterOptions();
-
-                alert('カードを削除しました。');
             } catch (error) {
-                console.error('Error deleting card:', error);
-                alert('カードの削除に失敗しました。');
+                // 404 = already gone on server; still remove from local cache
+                if (!error.status || error.status !== 404) {
+                    console.error('Error deleting card:', error);
+                    alert('カードの削除に失敗しました。');
+                    return;
+                }
+                console.warn('Card not found on server, removing from local cache:', currentEditingCard.id);
             }
+
+            // Remove from local data
+            if (currentListType === 'collection') {
+                collectionCards = collectionCards.filter(c => c.id !== currentEditingCard.id);
+            } else {
+                wishlistCards = wishlistCards.filter(c => c.id !== currentEditingCard.id);
+            }
+            allCards = currentListType === 'collection' ? collectionCards : wishlistCards;
+
+            // Update cache and metadata
+            saveGalleryToCache();
+            await updateGalleryMetadata();
+
+            // Close panel
+            closeEditPanel();
+
+            // Refresh display
+            applyFilters();
+            renderCards();
+            populateFilterOptions();
+
+            alert('カードを削除しました。');
         });
 
         // ==================== DECK SYSTEM ====================

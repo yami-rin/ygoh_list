@@ -7,7 +7,12 @@
     "start": "node image_proxy_server.js",
     "dev": "nodemon image_proxy_server.js"
   },
-  "keywords": ["yugioh", "proxy", "image", "cors"],
+  "keywords": [
+    "yugioh",
+    "proxy",
+    "image",
+    "cors"
+  ],
   "author": "",
   "license": "MIT",
   "dependencies": {
@@ -15,6 +20,7 @@
     "node-fetch": "^2.6.7"
   },
   "devDependencies": {
-    "nodemon": "^2.0.20"
+    "nodemon": "^2.0.20",
+    "playwright": "^1.59.0"
   }
 }
