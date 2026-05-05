@@ -2771,6 +2771,7 @@
         let currentPage = 1;
         let cardReadingMap = new Map(); // Map for hiragana -> card names
         let cardDetailsMap = new Map(); // Map for card details (level, attribute, etc.)
+        let cardIdToDetailsMap = new Map(); // Reverse map: cardId → details
         const getReadingForSort = (name) => {
             const reading = (cardDetailsMap.get(name)?.reading) || name || '';
             return reading.replace(/^["\u201C\u201D\u300C\u300D\u300E\u300F]+/, '');
@@ -2955,7 +2956,7 @@
 
                     if (cardName) {
                         // Store card details
-                        cardDetailsMap.set(cardName, {
+                        const detailsObj = {
                             cardId: cardId || '',
                             reading: cardReading,
                             level: level,
@@ -2965,7 +2966,9 @@
                             attack: attack,
                             defense: defense,
                             cardText: cardText
-                        });
+                        };
+                        cardDetailsMap.set(cardName, detailsObj);
+                        if (cardId) cardIdToDetailsMap.set(cardId, detailsObj);
 
                         // Store reading mappings
                         if (cardReading) {
@@ -4850,6 +4853,17 @@
             return det.cardType && det.cardType.includes(type);
         };
 
+        // Resolve card details: customCardId → ID map → name map → linkedDetails
+        const resolveCardDetails = (d) => {
+            if (d.customCardId) {
+                const det = cardIdToDetailsMap.get(d.customCardId);
+                if (det) return det;
+            }
+            const cardName = d['名前'] || '';
+            if (cardDetailsMap.has(cardName)) return cardDetailsMap.get(cardName);
+            return d.linkedDetails || null;
+        };
+
         const applySearchAndFilter = () => {
             // Get basic search parameters
             const [sN,sC,sR,sT] = ['search_name','search_set_code','search_rarity','search_tags'].map(n=>normalizeForSearch(document.querySelector(`[name="${n}"]`).value));
@@ -4947,14 +4961,7 @@
 
                 // Check against card details from CSV or linked details
                 let advancedMatch = true;
-                let details = null;
-
-                // Always use cardDetailsMap for latest data (CSV may have been updated)
-                if (cardDetailsMap.has(cardName)) {
-                    details = cardDetailsMap.get(cardName);
-                } else if (d.linkedDetails) {
-                    details = d.linkedDetails;
-                }
+                const details = resolveCardDetails(d);
 
                 if (details) {
                     // Check if any advanced search criteria is specified
@@ -6144,16 +6151,7 @@
                 rarityDistribution[rarity] = (rarityDistribution[rarity] || 0) + quantity;
 
                 // Get card details for attribute, race, level, type
-                const cardName = card.data['名前'];
-                let details = null;
-
-                // First check if card has linkedDetails
-                if (card.data.linkedDetails) {
-                    details = card.data.linkedDetails;
-                } else if (cardDetailsMap.has(cardName)) {
-                    // Otherwise check master data
-                    details = cardDetailsMap.get(cardName);
-                }
+                const details = resolveCardDetails(card.data);
 
                 if (details) {
                     // Attribute distribution
@@ -8562,7 +8560,7 @@ Firebase Consoleで確認すべき項目:
 
             collection.forEach(card => {
                 const d = card.data;
-                const details = d.linkedDetails || cardDetailsMap.get(d['名前'] || '');
+                const details = resolveCardDetails(d);
 
                 const row = [
                     d['名前'] || '',
