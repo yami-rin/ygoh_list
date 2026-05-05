@@ -34,6 +34,7 @@ app.get('/image', async (req, res) => {
     const cardId = req.query.cid;
     const encToken = req.query.enc;
     const ciid = req.query.ciid || '1'; // Default to ciid=1 if not specified
+    const locale = req.query.locale || 'ja';
 
     // Always set CORS headers
     res.header('Access-Control-Allow-Origin', '*');
@@ -50,7 +51,7 @@ app.get('/image', async (req, res) => {
         if (encToken) {
             imageUrl = `https://www.db.yugioh-card.com/yugiohdb/get_image.action?type=2&cid=${cardId}&ciid=${ciid}&enc=${encToken}`;
         } else {
-            imageUrl = `https://www.db.yugioh-card.com/yugiohdb/card_image.action?cid=${cardId}&request_locale=ja`;
+            imageUrl = `https://www.db.yugioh-card.com/yugiohdb/card_image.action?cid=${cardId}&request_locale=${locale}`;
         }
 
         console.log(`Fetching image for card ${cardId} (ciid=${ciid}) from: ${imageUrl}`);
@@ -97,13 +98,14 @@ app.get('/image', async (req, res) => {
 // Card detail proxy endpoint
 app.get('/card-detail', async (req, res) => {
     const cardId = req.query.cid;
+    const locale = req.query.locale || 'ja';
 
     if (!cardId) {
         return res.status(400).json({ error: 'Card ID is required' });
     }
 
     try {
-        const detailUrl = `https://www.db.yugioh-card.com/yugiohdb/card_search.action?ope=2&cid=${cardId}&request_locale=ja`;
+        const detailUrl = `https://www.db.yugioh-card.com/yugiohdb/card_search.action?ope=2&cid=${cardId}&request_locale=${locale}`;
 
         const response = await fetch(detailUrl, {
             headers: {

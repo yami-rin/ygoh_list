@@ -3517,6 +3517,18 @@
                     </div>
 
                     <div class="mb-3">
+                        <label for="panelCardLang" class="form-label">
+                            <i class="bi bi-translate"></i> 言語
+                        </label>
+                        <select class="form-select" id="panelCardLang">
+                            <option value="ja">日本語</option>
+                            <option value="ko">한국어</option>
+                            <option value="ae">English (Asia)</option>
+                            <option value="cn">簡体字</option>
+                        </select>
+                    </div>
+
+                    <div class="mb-3">
                         <label class="form-label">
                             <i class="bi bi-upc"></i> 型番
                         </label>
@@ -3851,29 +3863,28 @@
         };
 
         // Get card image URL (with cache support)
-        const getCardImageUrl = async (cardName, ciid = '1', overrideCardId = null) => {
+        const getCardImageUrl = async (cardName, ciid = '1', overrideCardId = null, locale = 'ja') => {
             const cardId = overrideCardId || cardDetailsMap.get(cardName)?.cardId;
             if (!cardId) {
                 return null;
             }
-            const cacheKey = `${cardId}_${ciid}`; // Use cardId_ciid as cache key
+            const cacheKey = `${cardId}_${ciid}_${locale}`;
 
             try {
                 // Check cache first
                 const cachedImage = await imageCacheManager.getImage(cacheKey);
                 if (cachedImage) {
-                    console.log(`Using cached image for: ${cardName} (ID: ${cardId}, ciid: ${ciid})`);
+                    console.log(`Using cached image for: ${cardName} (ID: ${cardId}, ciid: ${ciid}, locale: ${locale})`);
                     return cachedImage;
                 }
 
                 // Cache miss - fetch from proxy and cache it
-                console.log(`Fetching image for: ${cardName} (ID: ${cardId}, ciid: ${ciid})`);
-                const imageData = await imageCacheManager.fetchAndCache(cacheKey, cardId, ciid);
+                console.log(`Fetching image for: ${cardName} (ID: ${cardId}, ciid: ${ciid}, locale: ${locale})`);
+                const imageData = await imageCacheManager.fetchAndCache(cacheKey, cardId, ciid, locale);
                 return imageData;
             } catch (error) {
                 console.error(`Error loading image for ${cardName}:`, error);
-                // Fallback to proxy URL (direct yugioh-card.com URL fails due to CORS)
-                return `${PROXY_URL}/image?cid=${cardId}&ciid=${ciid}`;
+                return `${PROXY_URL}/image?cid=${cardId}&ciid=${ciid}&locale=${locale}`;
             }
         };
 
@@ -4632,7 +4643,7 @@
                             // Decode HTML entities in card name before fetching image
                             const decodedCardName = decodeHtmlEntities(card.data['名前']);
                             const ciid = card.data.selectedCiid || '1';  // Use saved ciid if available
-                            const imageUrl = await getCardImageUrl(decodedCardName, ciid, card.data.customCardId || null);
+                            const imageUrl = await getCardImageUrl(decodedCardName, ciid, card.data.customCardId || null, card.data.cardLang || 'ja');
 
                             // Check if this rendering is still valid (page hasn't changed)
                             if (parseInt(container.dataset.renderingId) !== thisRenderingId) {
@@ -5011,6 +5022,7 @@
             document.getElementById('panelQuantity').value = card.data['枚数'] || 0;
             document.getElementById('panelTags').value = (card.data.tags || []).join(', ');
             document.getElementById('panelCustomCardId').value = card.data.customCardId || '';
+            document.getElementById('panelCardLang').value = card.data.cardLang || 'ja';
             document.getElementById('panelCode').textContent = card.data['型番'] || '-';
             document.getElementById('panelRarity').textContent = card.data['レアリティ'] || '-';
 
@@ -5041,11 +5053,12 @@
             const details = cardDetailsMap.get(decodedName);
             let currentCiid = card.data.selectedCiid || '1';  // Use saved ciid if available
             const customCardId = card.data.customCardId || null;
+            const cardLang = card.data.cardLang || 'ja';
 
             // Load image first (fast)
             const panelImage = document.getElementById('panelCardImage');
-            console.log(`Loading initial card image for: ${decodedName}, ciid: ${currentCiid}`);
-            getCardImageUrl(decodedName, currentCiid, customCardId).then(imageUrl => {
+            console.log(`Loading initial card image for: ${decodedName}, ciid: ${currentCiid}, locale: ${cardLang}`);
+            getCardImageUrl(decodedName, currentCiid, customCardId, cardLang).then(imageUrl => {
                 console.log('Initial image URL:', imageUrl);
                 if (imageUrl) {
                     panelImage.src = imageUrl;
@@ -5630,6 +5643,7 @@
             const newTags = tagsInput ? tagsInput.split(',').map(t => t.trim()).filter(t => t) : [];
             const customCardIdInput = document.getElementById('panelCustomCardId').value.trim();
             const newCustomCardId = customCardIdInput || null;
+            const newCardLang = document.getElementById('panelCardLang').value || 'ja';
 
             try {
                 // Determine collection path based on current list type
@@ -5637,12 +5651,14 @@
                     '枚数': newQuantity,
                     tags: newTags,
                     customCardId: newCustomCardId,
+                    cardLang: newCardLang,
                 });
 
                 // Update local data
                 currentEditingCard.data['枚数'] = newQuantity;
                 currentEditingCard.data.tags = newTags;
                 currentEditingCard.data.customCardId = newCustomCardId;
+                currentEditingCard.data.cardLang = newCardLang;
 
                 // Update cache and metadata
                 saveGalleryToCache();

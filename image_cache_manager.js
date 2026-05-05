@@ -298,11 +298,11 @@ class ImageCacheManager {
      * @param {string} ciid - イラストID (デフォルト: '1')
      * @param {string} proxyUrl - プロキシURL
      */
-    async fetchAndCache(cacheKey, cardId = null, ciid = '1') {
+    async fetchAndCache(cacheKey, cardId = null, ciid = '1', locale = 'ja') {
         // Backward compatibility: if only one argument, treat as cardId
         if (arguments.length === 1) {
             cardId = cacheKey;
-            cacheKey = `${cardId}_1`;
+            cacheKey = `${cardId}_1_ja`;
             ciid = '1';
         }
 
@@ -311,10 +311,11 @@ class ImageCacheManager {
             const parts = cacheKey.split('_');
             cardId = parts[0];
             ciid = parts[1] || '1';
+            locale = parts[2] || 'ja';
         }
 
         try {
-            console.log(`[fetchAndCache] Called with cacheKey: ${cacheKey}, cardId: ${cardId}, ciid: ${ciid}`);
+            console.log(`[fetchAndCache] Called with cacheKey: ${cacheKey}, cardId: ${cardId}, ciid: ${ciid}, locale: ${locale}`);
 
             // 既にキャッシュにあるかチェック
             const cachedImage = await this.getImage(cacheKey);
@@ -323,10 +324,10 @@ class ImageCacheManager {
                 return cachedImage;
             }
 
-            console.log(`[fetchAndCache] Cache miss. Fetching image for card ID: ${cardId}, ciid: ${ciid}`);
+            console.log(`[fetchAndCache] Cache miss. Fetching image for card ID: ${cardId}, ciid: ${ciid}, locale: ${locale}`);
 
             // カード詳細を取得
-            const detailUrl = `${PROXY_URL}/card-detail?cid=${cardId}`;
+            const detailUrl = `${PROXY_URL}/card-detail?cid=${cardId}&locale=${locale}`;
             const detailResponse = await fetch(detailUrl);
             const cardDetail = await detailResponse.json();
 

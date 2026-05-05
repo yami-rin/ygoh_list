@@ -15,6 +15,7 @@ export function rowToCard(row: Record<string, unknown>) {
     tags: JSON.parse((row.tags as string) || '[]'),
     selectedCiid: row.selected_ciid as string | null,
     customCardId: row.custom_card_id as string | null,
+    cardLang: (row.card_lang as string | null) || 'ja',
     linkedDetails: row.linked_details ? JSON.parse(row.linked_details as string) : null,
     updatedAt: row.updated_at as number,
     createdAt: row.created_at as number,

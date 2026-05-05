@@ -127,6 +127,7 @@ cards.put('/:id', async (c) => {
   if ('tags' in body) { sets.push('tags = ?'); values.push(JSON.stringify(body.tags)); }
   if ('selectedCiid' in body) { sets.push('selected_ciid = ?'); values.push(body.selectedCiid); }
   if ('customCardId' in body) { sets.push('custom_card_id = ?'); values.push(body.customCardId || null); }
+  if ('cardLang' in body) { sets.push('card_lang = ?'); values.push(body.cardLang || 'ja'); }
   if ('linkedDetails' in body) {
     sets.push('linked_details = ?');
     values.push(body.linkedDetails ? JSON.stringify(body.linkedDetails) : null);
