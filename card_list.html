@@ -4846,7 +4846,7 @@
         const matchCardType = (det, type) => {
             if (type === '魔法') return det.race === '魔法' || det.cardType === '魔法';
             if (type === '罠') return det.race === '罠' || det.cardType === '罠';
-            if (type === '通常') return det.cardType === '通常';
+            if (type === '通常') return det.cardType && det.cardType.split('／').includes('通常');
             return det.cardType && det.cardType.includes(type);
         };
 
