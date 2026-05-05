@@ -42,6 +42,8 @@ cards.post('/', async (c) => {
     tags?: string[];
     selectedCiid?: string;
     linkedDetails?: Record<string, unknown>;
+    customCardId?: string;
+    cardLang?: string;
   }>();
 
   const listType = body.listType || 'collection';
@@ -83,14 +85,16 @@ cards.post('/', async (c) => {
   // No duplicate — insert new
   const id = generateId();
   await c.env.DB.prepare(
-    `INSERT INTO cards (id, user_id, list_type, name, set_code, rarity, quantity, tags, selected_ciid, linked_details, updated_at, created_at)
-     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`
+    `INSERT INTO cards (id, user_id, list_type, name, set_code, rarity, quantity, tags, selected_ciid, linked_details, custom_card_id, card_lang, updated_at, created_at)
+     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`
   )
     .bind(
       id, userId, listType, name, setCode, rarity, quantity,
       JSON.stringify(tags),
       body.selectedCiid || null,
       body.linkedDetails ? JSON.stringify(body.linkedDetails) : null,
+      body.customCardId || null,
+      body.cardLang || 'ja',
       now, now
     )
     .run();

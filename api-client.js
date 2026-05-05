@@ -69,6 +69,8 @@ class CardManagerAPI {
             tags: cardData.tags || [],
             selectedCiid: cardData.selectedCiid || null,
             linkedDetails: cardData.linkedDetails || null,
+            customCardId: cardData.customCardId || null,
+            cardLang: cardData.cardLang || null,
         };
         const data = await this._fetch('/api/cards', {
             method: 'POST',

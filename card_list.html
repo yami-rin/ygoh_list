@@ -8595,6 +8595,7 @@ Firebase Consoleで確認すべき項目:
 
         // Bulk Import functionality
         let bulkImportCards = [];
+        let bulkImportLocale = 'ja';
 
         // Note: Bulk import button is now in VIP menu (vip-bulk-import-btn)
 
@@ -8615,6 +8616,13 @@ Firebase Consoleで確認すべき項目:
             if (!url.includes('yugioh-card.com')) {
                 alert('遊戯王公式DBのURLを入力してください。');
                 return;
+            }
+
+            // Extract locale from URL (e.g. request_locale=cn → 'cn')
+            try {
+                bulkImportLocale = new URL(url).searchParams.get('request_locale') || 'ja';
+            } catch (e) {
+                bulkImportLocale = 'ja';
             }
 
             const loadingDiv = document.getElementById('bulk-import-loading');
@@ -8670,12 +8678,12 @@ Firebase Consoleで確認すべき項目:
 
                 // Load images asynchronously with fetch to avoid CORS issues
                 // Returns detailData including reprints (setCode + rarity)
-                const loadCardImage = async (cardId, imgElement) => {
+                const loadCardImage = async (cardId, imgElement, locale = 'ja') => {
                     try {
-                        console.log(`Loading image for card ${cardId}...`);
+                        console.log(`Loading image for card ${cardId} (locale=${locale})...`);
 
                         // First, get card details to obtain the enc token
-                        const detailUrl = `https://ygoh-list.onrender.com/card-detail?cid=${cardId}`;
+                        const detailUrl = `https://ygoh-list.onrender.com/card-detail?cid=${cardId}&locale=${locale}`;
                         const detailResponse = await fetch(detailUrl);
 
                         if (!detailResponse.ok) {
@@ -8759,7 +8767,7 @@ Firebase Consoleで確認すべき項目:
                     const loadWithRetry = async (retries = 3, delay = 2000) => {
                         for (let i = 0; i < retries; i++) {
                             try {
-                                const detailData = await loadCardImage(card.id, imgElement);
+                                const detailData = await loadCardImage(card.id, imgElement, bulkImportLocale);
                                 // Store reprints for set code lookup during registration
                                 if (detailData && detailData.reprints) {
                                     bulkImportCards[index].reprints = detailData.reprints;
@@ -8905,7 +8913,7 @@ Firebase Consoleで確認すべき項目:
                         // If reprints not loaded yet, fetch card detail now
                         if (!cardData.reprints) {
                             try {
-                                const detailUrl = `https://ygoh-list.onrender.com/card-detail?cid=${cardData.id}`;
+                                const detailUrl = `https://ygoh-list.onrender.com/card-detail?cid=${cardData.id}&locale=${bulkImportLocale}`;
                                 const resp = await fetch(detailUrl);
                                 if (resp.ok) {
                                     const detail = await resp.json();
@@ -9021,6 +9029,8 @@ Firebase Consoleで確認すべき項目:
                             'レアリティ': cardRarity,
                             '枚数': card.quantity,
                             tags: cardTags,
+                            customCardId: card.id || null,
+                            cardLang: bulkImportLocale !== 'ja' ? bulkImportLocale : null,
                         };
                         const result = await api.addCard('collection', newCard);
                         if (!result.merged) {
