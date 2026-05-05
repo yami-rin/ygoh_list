@@ -79,20 +79,25 @@ app.get('/image', async (req, res) => {
 
         const contentType = response.headers.get('content-type') || 'image/jpeg';
 
-        // If response is not an image (e.g. HTML error page), return placeholder
-        if (!contentType.startsWith('image/')) {
+        // get_image.action returns application/octet-stream (binary image data)
+        // Reject only HTML/text responses (error pages)
+        const isImage = contentType.startsWith('image/') || contentType.startsWith('application/octet-stream');
+        if (!isImage) {
             console.error(`Non-image response for card ${cardId} locale=${locale}: content-type=${contentType}`);
             const placeholderSvg = `<svg xmlns="http://www.w3.org/2000/svg" width="200" height="290"><rect width="200" height="290" fill="#ddd"/><text x="50%" y="50%" text-anchor="middle" dy=".3em" fill="#999" font-size="12">No Image (${locale})</text></svg>`;
             res.status(200).set('Content-Type', 'image/svg+xml').set('Access-Control-Allow-Origin', '*').send(placeholderSvg);
             return;
         }
 
+        // Normalize octet-stream to jpeg for browser display
+        const sendContentType = contentType.startsWith('application/octet-stream') ? 'image/jpeg' : contentType;
+
         // Get image buffer
         const imageBuffer = await response.buffer();
         console.log(`card ${cardId} locale=${locale}: serving image, size=${imageBuffer.length}, content-type=${contentType}`);
 
         // Send image with CORS headers
-        res.set('Content-Type', contentType);
+        res.set('Content-Type', sendContentType);
         res.set('Access-Control-Allow-Origin', '*');
         res.send(imageBuffer);
 
@@ -334,31 +339,6 @@ app.post('/data/:userId', (req, res) => {
     } catch (error) {
         console.error(`Error saving data for user ${userId}:`, error);
         res.status(500).json({ error: 'Failed to save data' });
-    }
-});
-
-// Debug: check what yugioh-card.com returns for get_image.action
-app.get('/debug-image', async (req, res) => {
-    const cid = req.query.cid || '7315';
-    const enc = req.query.enc || '';
-    const locale = req.query.locale || 'ja';
-    const url = enc
-        ? `https://www.db.yugioh-card.com/yugiohdb/get_image.action?type=2&cid=${cid}&ciid=1&enc=${enc}${locale !== 'ja' ? `&request_locale=${locale}` : ''}`
-        : `https://www.db.yugioh-card.com/yugiohdb/get_image.action?type=2&cid=${cid}&ciid=1`;
-    try {
-        const r = await fetch(url, {
-            headers: {
-                'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36',
-                'Referer': 'https://www.db.yugioh-card.com/',
-                'Accept': 'image/webp,image/apng,image/*,*/*;q=0.8',
-                'Accept-Language': 'ja,en-US;q=0.9,en;q=0.8'
-            }
-        });
-        const buf = await r.buffer();
-        const ct = r.headers.get('content-type') || '';
-        res.json({ url, status: r.status, contentType: ct, size: buf.length, first200: buf.toString('utf8').substring(0, 200) });
-    } catch (e) {
-        res.json({ url, error: e.message });
     }
 });
 
