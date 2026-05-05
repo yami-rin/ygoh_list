@@ -302,7 +302,7 @@ class ImageCacheManager {
         // Backward compatibility: if only one argument, treat as cardId
         if (arguments.length === 1) {
             cardId = cacheKey;
-            cacheKey = `${cardId}_1_ja`;
+            cacheKey = `${cardId}_1`;
             ciid = '1';
         }
 

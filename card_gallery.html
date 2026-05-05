@@ -3868,7 +3868,8 @@
             if (!cardId) {
                 return null;
             }
-            const cacheKey = `${cardId}_${ciid}_${locale}`;
+            // ja は旧形式（後方互換）、非 ja はロケール付き形式
+            const cacheKey = locale === 'ja' ? `${cardId}_${ciid}` : `${cardId}_${ciid}_${locale}`;
 
             try {
                 // Check cache first
