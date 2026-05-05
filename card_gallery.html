@@ -4632,7 +4632,7 @@
                             // Decode HTML entities in card name before fetching image
                             const decodedCardName = decodeHtmlEntities(card.data['名前']);
                             const ciid = card.data.selectedCiid || '1';  // Use saved ciid if available
-                            const imageUrl = await getCardImageUrl(decodedCardName, ciid);
+                            const imageUrl = await getCardImageUrl(decodedCardName, ciid, card.data.customCardId || null);
 
                             // Check if this rendering is still valid (page hasn't changed)
                             if (parseInt(container.dataset.renderingId) !== thisRenderingId) {
