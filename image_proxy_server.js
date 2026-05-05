@@ -46,14 +46,14 @@ app.get('/image', async (req, res) => {
     }
 
     try {
-        // For ja + enc token: use get_image.action (supports ciid/illustration variants).
-        // For non-ja: use card_image.action with request_locale — get_image.action returns
-        // the same image regardless of locale.
+        // get_image.action supports request_locale for language-specific card images.
+        // For ja: no request_locale needed (default). For other locales: append request_locale.
         let imageUrl;
-        if (encToken && locale === 'ja') {
-            imageUrl = `https://www.db.yugioh-card.com/yugiohdb/get_image.action?type=2&cid=${cardId}&ciid=${ciid}&enc=${encToken}`;
+        if (encToken) {
+            const localeSuffix = locale !== 'ja' ? `&request_locale=${locale}` : '';
+            imageUrl = `https://www.db.yugioh-card.com/yugiohdb/get_image.action?type=2&cid=${cardId}&ciid=${ciid}&enc=${encToken}${localeSuffix}`;
         } else {
-            imageUrl = `https://www.db.yugioh-card.com/yugiohdb/card_image.action?cid=${cardId}&request_locale=${locale}`;
+            imageUrl = `https://www.db.yugioh-card.com/yugiohdb/get_image.action?type=2&cid=${cardId}&ciid=${ciid}`;
         }
 
         console.log(`Fetching image for card ${cardId} (ciid=${ciid}, locale=${locale}) from: ${imageUrl}`);
