@@ -46,17 +46,18 @@ app.get('/image', async (req, res) => {
     }
 
     try {
-        // Build image URL
-        // enc token (get_image.action) returns the same image regardless of locale.
-        // For non-ja locales, use card_image.action with request_locale to get the correct language image.
+        // Build image URL.
+        // enc token from /card-detail is locale-specific (fetched from locale page),
+        // so use it for all locales when available.
+        // Fall back to card_image.action only when no enc token.
         let imageUrl;
-        if (encToken && locale === 'ja') {
+        if (encToken) {
             imageUrl = `https://www.db.yugioh-card.com/yugiohdb/get_image.action?type=2&cid=${cardId}&ciid=${ciid}&enc=${encToken}`;
         } else {
             imageUrl = `https://www.db.yugioh-card.com/yugiohdb/card_image.action?cid=${cardId}&request_locale=${locale}`;
         }
 
-        console.log(`Fetching image for card ${cardId} (ciid=${ciid}) from: ${imageUrl}`);
+        console.log(`Fetching image for card ${cardId} (ciid=${ciid}, locale=${locale}) from: ${imageUrl}`);
 
         // Fetch image with proper headers
         const response = await fetch(imageUrl, {
@@ -72,16 +73,23 @@ app.get('/image', async (req, res) => {
 
         if (!response.ok) {
             console.error(`Failed to fetch image for card ${cardId}: HTTP ${response.status}`);
-            // Return a placeholder SVG instead of JSON error
             const placeholderSvg = `<svg xmlns="http://www.w3.org/2000/svg" width="200" height="290"><rect width="200" height="290" fill="#ddd"/><text x="50%" y="50%" text-anchor="middle" dy=".3em" fill="#999" font-size="14">Error ${response.status}</text></svg>`;
             res.status(200).set('Content-Type', 'image/svg+xml').send(placeholderSvg);
             return;
         }
 
-        // Get image buffer
-        const imageBuffer = await response.buffer();
         const contentType = response.headers.get('content-type') || 'image/jpeg';
 
+        // If response is not an image (e.g. HTML error page), return placeholder
+        if (!contentType.startsWith('image/')) {
+            console.error(`Non-image response for card ${cardId}: content-type=${contentType}`);
+            const placeholderSvg = `<svg xmlns="http://www.w3.org/2000/svg" width="200" height="290"><rect width="200" height="290" fill="#ddd"/><text x="50%" y="50%" text-anchor="middle" dy=".3em" fill="#999" font-size="12">No Image</text></svg>`;
+            res.status(200).set('Content-Type', 'image/svg+xml').set('Access-Control-Allow-Origin', '*').send(placeholderSvg);
+            return;
+        }
+
+        // Get image buffer
+        const imageBuffer = await response.buffer();
         console.log(`Successfully fetched image for card ${cardId}, content-type: ${contentType}`);
 
         // Send image with CORS headers

@@ -114,13 +114,21 @@ class ImageCacheManager {
 
             request.onsuccess = () => {
                 if (request.result) {
-                    // アクセス時刻を更新
                     const data = request.result;
+                    const imageData = data.imageData;
+
+                    // 非画像データ（HTMLなど）がキャッシュされていたら破棄して再取得させる
+                    if (!imageData || (!imageData.startsWith('data:image/') && !imageData.startsWith('data:application/octet-stream'))) {
+                        console.warn(`[getImage] Invalid cached data for key: ${cardId}, discarding`);
+                        objectStore.delete(String(cardId));
+                        resolve(null);
+                        return;
+                    }
+
                     data.lastAccessed = Date.now();
                     objectStore.put(data);
-
-                    console.log(`[getImage] Image retrieved for cache key: ${cardId}, data type: ${typeof request.result.imageData}, length: ${request.result.imageData?.length}`);
-                    resolve(request.result.imageData);
+                    console.log(`[getImage] Image retrieved for cache key: ${cardId}, length: ${imageData?.length}`);
+                    resolve(imageData);
                 } else {
                     console.log(`[getImage] No image found for cache key: ${cardId} (will fetch from server)`);
                     resolve(null);
