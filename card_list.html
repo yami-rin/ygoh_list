@@ -1872,6 +1872,14 @@
                                 </button>
                             </div>
                         </div>
+                        <div class="mb-3">
+                            <label for="bulk-import-tags" class="form-label small fw-bold">
+                                <i class="bi bi-tags"></i> 一括タグ（カンマ区切り）
+                            </label>
+                            <input type="text" class="form-control form-control-sm" id="bulk-import-tags"
+                                   placeholder="例: パック名, デッキ候補">
+                            <div class="form-text">ここに入力したタグが、登録する全カードに付与されます</div>
+                        </div>
 
                         <div id="bulk-import-card-grid" style="max-height: 600px; overflow-y: auto;">
                             <!-- Cards will be inserted here as grid -->
@@ -8987,6 +8995,10 @@ Firebase Consoleで確認すべき項目:
                 return;
             }
 
+            // Read bulk tags input
+            const bulkTagsInput = document.getElementById('bulk-import-tags').value;
+            const bulkTags = bulkTagsInput ? bulkTagsInput.split(',').map(t => t.trim()).filter(t => t) : [];
+
             // Note: confirm() doesn't work inside Bootstrap modal due to z-index/backdrop issues
             // User already clicked the register button, so we can proceed directly
             console.log(`Proceeding with registration of ${selectedCards.length} cards...`);
@@ -9001,7 +9013,7 @@ Firebase Consoleで確認すべき項目:
                     try {
                         const cardNumber = card.number || '';
                         const cardRarity = card.rarity || '';
-                        const cardTags = card.tags || [];
+                        const cardTags = [...new Set([...(card.tags || []), ...bulkTags])];
 
                         // Server-side dedup via API
                         const newCard = {
