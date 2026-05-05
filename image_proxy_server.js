@@ -47,8 +47,10 @@ app.get('/image', async (req, res) => {
 
     try {
         // Build image URL
+        // For non-ja locales, use card_image.action with request_locale to ensure correct language.
+        // get_image.action uses enc tokens which are language-agnostic and always return the ja image.
         let imageUrl;
-        if (encToken) {
+        if (encToken && locale === 'ja') {
             imageUrl = `https://www.db.yugioh-card.com/yugiohdb/get_image.action?type=2&cid=${cardId}&ciid=${ciid}&enc=${encToken}`;
         } else {
             imageUrl = `https://www.db.yugioh-card.com/yugiohdb/card_image.action?cid=${cardId}&request_locale=${locale}`;
@@ -174,11 +176,11 @@ app.get('/card-detail', async (req, res) => {
             illustrations: illustrations.map(ill => ({
                 ciid: ill.ciid,
                 encToken: ill.encToken,
-                imageUrl: `${baseUrl}/image?cid=${cardId}&ciid=${ill.ciid}&enc=${ill.encToken}`
+                imageUrl: `${baseUrl}/image?cid=${cardId}&ciid=${ill.ciid}&enc=${ill.encToken}&locale=${locale}`
             })),
             imageUrl: defaultIllustration.encToken ?
-                `${baseUrl}/image?cid=${cardId}&ciid=${defaultIllustration.ciid}&enc=${defaultIllustration.encToken}` :
-                `${baseUrl}/image?cid=${cardId}`,
+                `${baseUrl}/image?cid=${cardId}&ciid=${defaultIllustration.ciid}&enc=${defaultIllustration.encToken}&locale=${locale}` :
+                `${baseUrl}/image?cid=${cardId}&locale=${locale}`,
             reprints
         });
 

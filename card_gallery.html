@@ -5660,6 +5660,16 @@
                 currentEditingCard.data.customCardId = newCustomCardId;
                 currentEditingCard.data.cardLang = newCardLang;
 
+                // 言語が変わった場合、旧キャッシュを削除して次回再取得させる
+                const cardId = newCustomCardId || cardDetailsMap.get(decodeHtmlEntities(currentEditingCard.data['名前']))?.cardId;
+                if (cardId) {
+                    const ciid = currentEditingCard.data.selectedCiid || '1';
+                    // delete all locale variants for this card to force re-fetch
+                    for (const lang of ['ja', 'ko', 'ae', 'cn']) {
+                        await imageCacheManager.deleteImage(`${cardId}_${ciid}_${lang}`);
+                    }
+                }
+
                 // Update cache and metadata
                 saveGalleryToCache();
                 await updateGalleryMetadata();
