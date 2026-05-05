@@ -337,6 +337,31 @@ app.post('/data/:userId', (req, res) => {
     }
 });
 
+// Debug: check what yugioh-card.com returns for get_image.action
+app.get('/debug-image', async (req, res) => {
+    const cid = req.query.cid || '7315';
+    const enc = req.query.enc || '';
+    const locale = req.query.locale || 'ja';
+    const url = enc
+        ? `https://www.db.yugioh-card.com/yugiohdb/get_image.action?type=2&cid=${cid}&ciid=1&enc=${enc}${locale !== 'ja' ? `&request_locale=${locale}` : ''}`
+        : `https://www.db.yugioh-card.com/yugiohdb/get_image.action?type=2&cid=${cid}&ciid=1`;
+    try {
+        const r = await fetch(url, {
+            headers: {
+                'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36',
+                'Referer': 'https://www.db.yugioh-card.com/',
+                'Accept': 'image/webp,image/apng,image/*,*/*;q=0.8',
+                'Accept-Language': 'ja,en-US;q=0.9,en;q=0.8'
+            }
+        });
+        const buf = await r.buffer();
+        const ct = r.headers.get('content-type') || '';
+        res.json({ url, status: r.status, contentType: ct, size: buf.length, first200: buf.toString('utf8').substring(0, 200) });
+    } catch (e) {
+        res.json({ url, error: e.message });
+    }
+});
+
 // Health check
 app.get('/health', (req, res) => {
     res.json({ status: 'OK', message: 'Image proxy server is running' });
