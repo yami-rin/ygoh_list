@@ -3509,6 +3509,14 @@
                     </div>
 
                     <div class="mb-3">
+                        <label for="panelCustomCardId" class="form-label">
+                            <i class="bi bi-fingerprint"></i> カードID（手動設定）
+                        </label>
+                        <input type="text" class="form-control" id="panelCustomCardId" placeholder="例: 12345678">
+                        <div class="form-text">設定すると画像取得にこのIDを使用します</div>
+                    </div>
+
+                    <div class="mb-3">
                         <label class="form-label">
                             <i class="bi bi-upc"></i> 型番
                         </label>
@@ -3843,13 +3851,11 @@
         };
 
         // Get card image URL (with cache support)
-        const getCardImageUrl = async (cardName, ciid = '1') => {
-            const details = cardDetailsMap.get(cardName);
-            if (!details?.cardId) {
+        const getCardImageUrl = async (cardName, ciid = '1', overrideCardId = null) => {
+            const cardId = overrideCardId || cardDetailsMap.get(cardName)?.cardId;
+            if (!cardId) {
                 return null;
             }
-
-            const cardId = details.cardId;
             const cacheKey = `${cardId}_${ciid}`; // Use cardId_ciid as cache key
 
             try {
@@ -5004,6 +5010,7 @@
             document.getElementById('panelCardName').textContent = decodedName;
             document.getElementById('panelQuantity').value = card.data['枚数'] || 0;
             document.getElementById('panelTags').value = (card.data.tags || []).join(', ');
+            document.getElementById('panelCustomCardId').value = card.data.customCardId || '';
             document.getElementById('panelCode').textContent = card.data['型番'] || '-';
             document.getElementById('panelRarity').textContent = card.data['レアリティ'] || '-';
 
@@ -5033,11 +5040,12 @@
             // Load card image and illustrations asynchronously (don't block panel opening)
             const details = cardDetailsMap.get(decodedName);
             let currentCiid = card.data.selectedCiid || '1';  // Use saved ciid if available
+            const customCardId = card.data.customCardId || null;
 
             // Load image first (fast)
             const panelImage = document.getElementById('panelCardImage');
             console.log(`Loading initial card image for: ${decodedName}, ciid: ${currentCiid}`);
-            getCardImageUrl(decodedName, currentCiid).then(imageUrl => {
+            getCardImageUrl(decodedName, currentCiid, customCardId).then(imageUrl => {
                 console.log('Initial image URL:', imageUrl);
                 if (imageUrl) {
                     panelImage.src = imageUrl;
@@ -5051,14 +5059,15 @@
             });
 
             // Fetch illustrations in background (slower)
-            if (details?.cardId) {
-                console.log(`Fetching illustrations for card: ${decodedName}, cardId: ${details.cardId}`);
+            const effectiveCardId = customCardId || details?.cardId;
+            if (effectiveCardId) {
+                console.log(`Fetching illustrations for card: ${decodedName}, cardId: ${effectiveCardId}`);
 
                 const proxyUrl = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1'
                     ? 'http://localhost:3000'
                     : 'https://ygoh-list.onrender.com';
 
-                fetch(`${proxyUrl}/card-detail?cid=${details.cardId}`)
+                fetch(`${proxyUrl}/card-detail?cid=${effectiveCardId}`)
                     .then(response => response.json())
                     .then(cardDetail => {
                         console.log('Card detail response:', cardDetail);
@@ -5619,17 +5628,21 @@
             const newQuantity = parseInt(document.getElementById('panelQuantity').value) || 0;
             const tagsInput = document.getElementById('panelTags').value;
             const newTags = tagsInput ? tagsInput.split(',').map(t => t.trim()).filter(t => t) : [];
+            const customCardIdInput = document.getElementById('panelCustomCardId').value.trim();
+            const newCustomCardId = customCardIdInput || null;
 
             try {
                 // Determine collection path based on current list type
                 await api.updateCard(currentEditingCard.id, {
                     '枚数': newQuantity,
                     tags: newTags,
+                    customCardId: newCustomCardId,
                 });
 
                 // Update local data
                 currentEditingCard.data['枚数'] = newQuantity;
                 currentEditingCard.data.tags = newTags;
+                currentEditingCard.data.customCardId = newCustomCardId;
 
                 // Update cache and metadata
                 saveGalleryToCache();
