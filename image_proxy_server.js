@@ -47,8 +47,10 @@ app.get('/image', async (req, res) => {
 
     try {
         // Build image URL
+        // enc token (get_image.action) returns the same image regardless of locale.
+        // For non-ja locales, use card_image.action with request_locale to get the correct language image.
         let imageUrl;
-        if (encToken) {
+        if (encToken && locale === 'ja') {
             imageUrl = `https://www.db.yugioh-card.com/yugiohdb/get_image.action?type=2&cid=${cardId}&ciid=${ciid}&enc=${encToken}`;
         } else {
             imageUrl = `https://www.db.yugioh-card.com/yugiohdb/card_image.action?cid=${cardId}&request_locale=${locale}`;
