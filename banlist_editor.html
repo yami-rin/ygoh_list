@@ -15,8 +15,7 @@
             min-height: 100vh;
         }
 
-        /* ===== Main App ===== */
-
+        /* ===== Header ===== */
         .app-header {
             background: linear-gradient(135deg, #0f3460, #16213e);
             padding: 0.75rem 1.5rem;
@@ -35,6 +34,7 @@
             -webkit-text-fill-color: transparent;
         }
         .header-actions { display: flex; gap: 0.5rem; align-items: center; }
+
         .btn-sm {
             padding: 0.4rem 0.9rem;
             border: none;
@@ -44,9 +44,10 @@
             transition: opacity 0.2s;
         }
         .btn-sm:hover { opacity: 0.8; }
-        .btn-save   { background: #27ae60; color: white; }
-        .btn-reset  { background: #7f8c8d; color: white; }
-        .btn-export { background: #2980b9; color: white; }
+        .btn-save     { background: #27ae60; color: #fff; }
+        .btn-reset    { background: #7f8c8d; color: #fff; }
+        .btn-export   { background: #2980b9; color: #fff; }
+        .btn-settings { background: #34495e;  color: #fff; }
 
         /* ===== Tier Table ===== */
         .tier-container { padding: 1rem 1rem 0; }
@@ -65,15 +66,14 @@
             align-items: center;
             justify-content: center;
             font-weight: 700;
-            font-size: 1.05rem;
-            text-shadow: 0 1px 3px rgba(0,0,0,0.5);
+            font-size: 0.95rem;
+            text-shadow: 0 1px 3px rgba(0,0,0,0.4);
             user-select: none;
+            word-break: break-all;
+            text-align: center;
+            padding: 4px;
+            line-height: 1.25;
         }
-        .tier-label.kinshi  { background: #c0392b; }
-        .tier-label.seigen  { background: #e67e22; }
-        .tier-label.jun     { background: #f1c40f; color: #333; }
-        .tier-label.kanwa   { background: #27ae60; }
-
         .tier-cards {
             flex: 1;
             display: flex;
@@ -116,7 +116,6 @@
             height: 90px;
             border-radius: 3px;
             overflow: hidden;
-            position: relative;
         }
         .tier-card img {
             width: 100%;
@@ -163,7 +162,7 @@
             width: 16px;
             height: 16px;
             background: rgba(231,76,60,0.9);
-            color: white;
+            color: #fff;
             border: none;
             border-radius: 50%;
             font-size: 0.6rem;
@@ -195,7 +194,6 @@
             top: 50%;
             transform: translateY(-50%);
             color: #666;
-            font-size: 0.9rem;
             pointer-events: none;
         }
         .search-input {
@@ -211,12 +209,7 @@
         }
         .search-input:focus { border-color: #e94560; }
         .search-input::placeholder { color: #556; }
-
-        .search-stats {
-            font-size: 0.78rem;
-            color: #667;
-            white-space: nowrap;
-        }
+        .search-stats { font-size: 0.78rem; color: #667; white-space: nowrap; }
 
         #pool-cards {
             display: flex;
@@ -229,14 +222,9 @@
             min-height: 80px;
             transition: border-color 0.15s;
         }
-        #pool-cards.drag-over {
-            border-color: #27ae60;
-            background: #1f3540;
-        }
-        /* pool cards slightly larger */
-        #pool-cards .tier-card      { width: 68px; }
+        #pool-cards.drag-over { border-color: #27ae60; background: #1f3540; }
+        #pool-cards .tier-card        { width: 68px; height: 99px; }
         #pool-cards .tier-card .card-inner { height: 99px; }
-        #pool-cards .tier-card      { height: 99px; }
 
         .pool-empty {
             width: 100%;
@@ -259,7 +247,7 @@
             border: 1px solid #e94560;
             max-width: 260px;
             display: none;
-            z-index: 200;
+            z-index: 500;
         }
         .spin {
             display: inline-block;
@@ -273,70 +261,119 @@
         }
         @keyframes spin { to { transform: rotate(360deg); } }
 
-        /* ===== Export Modal ===== */
-        #export-modal {
+        /* ===== Modal base ===== */
+        .modal-overlay {
             display: none;
             position: fixed;
             inset: 0;
             background: rgba(0,0,0,0.85);
-            z-index: 300;
+            z-index: 400;
             align-items: center;
             justify-content: center;
         }
-        #export-modal.show { display: flex; }
-        .export-box {
+        .modal-overlay.show { display: flex; }
+        .modal-box {
             background: #0f3460;
             border: 1px solid #e94560;
             border-radius: 10px;
             padding: 1.5rem;
             max-width: 92vw;
-            width: 720px;
         }
-        .export-box h3 { margin-bottom: 1rem; font-size: 1rem; color: #f5a623; }
+        .modal-box h3 { margin-bottom: 1rem; font-size: 1rem; color: #f5a623; }
+        .modal-actions { display: flex; gap: 0.5rem; margin-top: 1rem; justify-content: flex-end; }
+        .btn-primary  { background: #e94560; color: #fff; }
+        .btn-dl       { background: #27ae60; color: #fff; }
+        .btn-close-modal { background: #555; color: #fff; }
+
+        /* ===== Export Modal ===== */
+        #export-modal .modal-box { width: 720px; }
         #export-canvas { display: block; max-width: 100%; border-radius: 4px; }
-        .export-actions { display: flex; gap: 0.5rem; margin-top: 0.75rem; justify-content: flex-end; }
-        .btn-dl         { background: #27ae60; color: white; }
-        .btn-close-modal{ background: #555; color: white; }
+
+        /* ===== Settings Modal ===== */
+        #settings-modal .modal-box { width: 480px; }
+
+        .tier-config-list { display: flex; flex-direction: column; gap: 6px; max-height: 60vh; overflow-y: auto; padding-right: 4px; }
+
+        .tier-config-row {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            background: #1a3055;
+            border-radius: 6px;
+            padding: 6px 8px;
+        }
+        .tier-config-row input[type="color"] {
+            width: 36px; height: 32px;
+            border: none; border-radius: 4px;
+            cursor: pointer; padding: 2px;
+            background: transparent;
+            flex-shrink: 0;
+        }
+        .tier-config-row input[type="text"] {
+            flex: 1;
+            background: #0f2340;
+            border: 1px solid #334;
+            border-radius: 4px;
+            color: #e0e0e0;
+            padding: 4px 8px;
+            font-size: 0.9rem;
+            outline: none;
+        }
+        .tier-config-row input[type="text"]:focus { border-color: #e94560; }
+
+        .icon-btn {
+            background: transparent;
+            border: 1px solid #445;
+            color: #aaa;
+            border-radius: 4px;
+            width: 28px; height: 28px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.8rem;
+            flex-shrink: 0;
+            transition: background 0.15s, color 0.15s;
+        }
+        .icon-btn:hover { background: #334; color: #eee; }
+        .icon-btn.danger:hover { background: #c0392b; border-color: #c0392b; color: #fff; }
+
+        .add-tier-btn {
+            margin-top: 8px;
+            width: 100%;
+            padding: 0.4rem;
+            background: #1a3055;
+            border: 1px dashed #446;
+            border-radius: 6px;
+            color: #778;
+            cursor: pointer;
+            font-size: 0.85rem;
+            transition: border-color 0.15s, color 0.15s;
+        }
+        .add-tier-btn:hover { border-color: #e94560; color: #e94560; }
+
+        .settings-note {
+            font-size: 0.75rem;
+            color: #667;
+            margin-top: 0.5rem;
+        }
     </style>
 </head>
 <body>
 
-<!-- Main App -->
 <div id="app">
     <div class="app-header">
         <h1>バンリストエディター</h1>
         <div class="header-actions">
-            <button class="btn-sm btn-save"   onclick="saveState()">保存</button>
-            <button class="btn-sm btn-export" onclick="openExport()">画像出力</button>
-            <button class="btn-sm btn-reset"  onclick="resetAll()">リセット</button>
+            <button class="btn-sm btn-save"     onclick="saveState()">保存</button>
+            <button class="btn-sm btn-export"   onclick="openExport()">画像出力</button>
+            <button class="btn-sm btn-settings" onclick="openSettings()">⚙ 設定</button>
+            <button class="btn-sm btn-reset"    onclick="resetAll()">リセット</button>
         </div>
     </div>
 
-    <!-- Tier Rows -->
-    <div class="tier-container">
-        <div class="tier-row">
-            <div class="tier-label kinshi">禁止</div>
-            <div class="tier-cards" data-tier="禁止" id="tier-禁止"
-                 ondragover="onDragOver(event)" ondragleave="onDragLeave(event)" ondrop="onDrop(event)"></div>
-        </div>
-        <div class="tier-row">
-            <div class="tier-label seigen">制限</div>
-            <div class="tier-cards" data-tier="制限" id="tier-制限"
-                 ondragover="onDragOver(event)" ondragleave="onDragLeave(event)" ondrop="onDrop(event)"></div>
-        </div>
-        <div class="tier-row">
-            <div class="tier-label jun">準制限</div>
-            <div class="tier-cards" data-tier="準制限" id="tier-準制限"
-                 ondragover="onDragOver(event)" ondragleave="onDragLeave(event)" ondrop="onDrop(event)"></div>
-        </div>
-        <div class="tier-row">
-            <div class="tier-label kanwa">緩和・解除</div>
-            <div class="tier-cards" data-tier="緩和・解除" id="tier-緩和・解除"
-                 ondragover="onDragOver(event)" ondragleave="onDragLeave(event)" ondrop="onDrop(event)"></div>
-        </div>
-    </div>
+    <div class="tier-container" id="tier-container"></div>
 
-    <!-- Pool / Search -->
     <div class="pool-section">
         <div class="search-bar">
             <div class="search-wrap">
@@ -354,30 +391,56 @@
     </div>
 </div>
 
-<!-- Status Bar -->
 <div id="status-bar"></div>
 
 <!-- Export Modal -->
-<div id="export-modal">
-    <div class="export-box">
+<div id="export-modal" class="modal-overlay">
+    <div class="modal-box">
         <h3>画像出力</h3>
         <canvas id="export-canvas"></canvas>
-        <div class="export-actions">
+        <div class="modal-actions">
             <button class="btn-sm btn-dl"          onclick="downloadExport()">ダウンロード</button>
             <button class="btn-sm btn-close-modal" onclick="closeExport()">閉じる</button>
         </div>
     </div>
 </div>
 
-<script type="module">
-    // ===== State =====
-    const cardMap = new Map();        // name -> { cardId, ciid, lang, imageUrl }
-    const cardReadingMap = new Map(); // reading -> [cardName, ...]
-    const tierState = { "禁止": [], "制限": [], "準制限": [], "緩和・解除": [] };
-    let dragItem = null;
-    const loadingSet = new Set();
+<!-- Settings Modal -->
+<div id="settings-modal" class="modal-overlay">
+    <div class="modal-box">
+        <h3>⚙ ティア設定</h3>
+        <div class="tier-config-list" id="tier-config-list"></div>
+        <button class="add-tier-btn" onclick="addTierRow()">＋ ティアを追加</button>
+        <p class="settings-note">カードが入ったティアを削除するとカードはプールに戻ります</p>
+        <div class="modal-actions">
+            <button class="btn-sm btn-primary"     onclick="applySettings()">適用</button>
+            <button class="btn-sm btn-close-modal" onclick="closeSettings()">キャンセル</button>
+        </div>
+    </div>
+</div>
 
-    const TIERS = ["禁止", "制限", "準制限", "緩和・解除"];
+<script type="module">
+    // ===== Default tier config =====
+    const DEFAULT_CONFIG = [
+        { name: "禁止",       color: "#c0392b" },
+        { name: "制限",       color: "#e67e22" },
+        { name: "制限・緩和", color: "#d47a10" },
+        { name: "準制限",     color: "#f1c40f" },
+        { name: "準制限・緩和", color: "#8fbd2a" },
+        { name: "解除",       color: "#27ae60" },
+    ];
+
+    // ===== App State =====
+    // tierConfig: [{ name, color }, ...]
+    // tierState:  [[cardName, ...], ...]  — index matches tierConfig
+    let tierConfig = [];
+    let tierState  = [];
+
+    const cardMap        = new Map(); // name -> { cardId, ciid, lang, imageUrl }
+    const cardReadingMap = new Map(); // reading -> [cardName, ...]
+    let dragItem         = null;      // { name, srcIdx: number|null }
+    const loadingSet     = new Set();
+
     const MAX_RESULTS = 80;
 
     // ===== Init =====
@@ -385,81 +448,61 @@
         showStatus('マスターデータを読み込み中…');
         await loadCSV();
         loadState();
-        renderTiers();
+        renderTierContainer();
         hideStatus();
     }
-
     init();
 
-    // ===== CSV loader (same logic as gallery) =====
+    // ===== CSV =====
     async function loadCSV() {
         try {
-            const res = await fetch('yugioh_cards_master.csv');
+            const res  = await fetch('yugioh_cards_master.csv');
             const text = await res.text();
-            const lines = text.split('\n');
-            for (let i = 1; i < lines.length; i++) {
-                const line = lines[i].trim();
-                if (!line) continue;
-                const values = line.split(',');
-                const cardId   = values[0]?.replace(/"/g, '');
-                const cardName = values[1]?.replace(/"/g, '');
-                const reading  = values[2]?.replace(/"/g, '');
-                if (!cardId || !cardName) continue;
+            for (const line of text.split('\n').slice(1)) {
+                const t = line.trim(); if (!t) continue;
+                const v       = t.split(',');
+                const cardId  = v[0]?.replace(/"/g, '');
+                const name    = v[1]?.replace(/"/g, '');
+                const reading = v[2]?.replace(/"/g, '');
+                if (!cardId || !name) continue;
 
-                cardMap.set(cardName, { cardId, ciid: '1', lang: 'ja', imageUrl: null });
+                cardMap.set(name, { cardId, ciid: '1', lang: 'ja', imageUrl: null });
 
                 if (reading) {
-                    const readingKey = reading.toLowerCase();
-                    if (!cardReadingMap.has(readingKey)) cardReadingMap.set(readingKey, []);
-                    cardReadingMap.get(readingKey).push(cardName);
-
-                    // also store hiragana version of katakana reading
-                    const hira = katakanaToHiragana(readingKey);
-                    if (hira !== readingKey) {
-                        if (!cardReadingMap.has(hira)) cardReadingMap.set(hira, []);
-                        cardReadingMap.get(hira).push(cardName);
-                    }
+                    const rk = reading.toLowerCase();
+                    addReading(rk, name);
+                    const hk = kata2hira(rk);
+                    if (hk !== rk) addReading(hk, name);
                 }
             }
-            console.log(`CSV: ${cardMap.size} cards, ${cardReadingMap.size} readings`);
-        } catch (e) {
-            console.error('CSV load failed:', e);
-        }
+        } catch (e) { console.error('CSV load failed:', e); }
     }
 
-    // ===== Search (same logic as gallery) =====
-    const normalizeForSearch = (text) => {
-        if (!text) return '';
-        text = text.toLowerCase();
-        // katakana -> hiragana
-        text = text.replace(/[ァ-ヶ]/g, (ch) => String.fromCharCode(ch.charCodeAt(0) - 0x60));
-        // remove middle dot
-        text = text.replace(/・/g, '');
-        return text;
-    };
+    function addReading(key, name) {
+        if (!cardReadingMap.has(key)) cardReadingMap.set(key, []);
+        cardReadingMap.get(key).push(name);
+    }
 
-    const katakanaToHiragana = (text) =>
-        text.replace(/[ァ-ヶ]/g, (ch) => String.fromCharCode(ch.charCodeAt(0) - 0x60));
+    // ===== Search helpers =====
+    const kata2hira = t => t.replace(/[ァ-ヶ]/g, c => String.fromCharCode(c.charCodeAt(0) - 0x60));
+    const normalize  = t => {
+        if (!t) return '';
+        return kata2hira(t.toLowerCase()).replace(/・/g, '');
+    };
 
     function searchCards(query) {
         if (!query) return [];
-        const q = query.toLowerCase();
-        const normQ = normalizeForSearch(q);
-
-        // Collect candidate names from reading map (exact + partial)
-        const readingHits = new Set();
-        if (cardReadingMap.has(q)) cardReadingMap.get(q).forEach(n => readingHits.add(n));
-        if (cardReadingMap.has(normQ)) cardReadingMap.get(normQ).forEach(n => readingHits.add(n));
-        for (const [reading, names] of cardReadingMap) {
-            if (reading.includes(q) || reading.includes(normQ)) {
-                names.forEach(n => readingHits.add(n));
-            }
+        const q     = query.toLowerCase();
+        const normQ = normalize(q);
+        const hits  = new Set();
+        if (cardReadingMap.has(q))     cardReadingMap.get(q).forEach(n => hits.add(n));
+        if (cardReadingMap.has(normQ)) cardReadingMap.get(normQ).forEach(n => hits.add(n));
+        for (const [r, ns] of cardReadingMap) {
+            if (r.includes(q) || r.includes(normQ)) ns.forEach(n => hits.add(n));
         }
-
         const results = [];
         for (const [name] of cardMap) {
-            const normName = normalizeForSearch(name);
-            if (normName.includes(normQ) || readingHits.has(name)) {
+            if (normalize(name).includes(normQ) || hits.has(name)) {
                 results.push(name);
                 if (results.length >= MAX_RESULTS) break;
             }
@@ -467,44 +510,83 @@
         return results;
     }
 
-    // ===== Search handler =====
     window.onSearch = function() {
-        const q = document.getElementById('search-input').value.trim();
-        renderPool(q);
+        renderPool(document.getElementById('search-input').value.trim());
     };
 
-    // ===== Render =====
-    function renderTiers() {
-        for (const tier of TIERS) renderTier(tier);
+    // ===== Tier label color (auto contrast) =====
+    function labelTextColor(hex) {
+        const r = parseInt(hex.slice(1,3), 16) / 255;
+        const g = parseInt(hex.slice(3,5), 16) / 255;
+        const b = parseInt(hex.slice(5,7), 16) / 255;
+        return (0.2126*r + 0.7152*g + 0.0722*b) > 0.42 ? '#222' : '#fff';
     }
 
-    function renderTier(tier) {
-        const el = document.getElementById(`tier-${tier}`);
+    // ===== Render tier rows =====
+    function renderTierContainer() {
+        const container = document.getElementById('tier-container');
+        container.innerHTML = '';
+        tierConfig.forEach((cfg, idx) => {
+            const row = document.createElement('div');
+            row.className = 'tier-row';
+
+            const label = document.createElement('div');
+            label.className = 'tier-label';
+            label.style.background = cfg.color;
+            label.style.color = labelTextColor(cfg.color);
+            label.textContent = cfg.name;
+
+            const cards = document.createElement('div');
+            cards.className = 'tier-cards';
+            cards.dataset.tierIdx = idx;
+            cards.addEventListener('dragover',  e => { e.preventDefault(); cards.classList.add('drag-over'); e.dataTransfer.dropEffect = 'move'; });
+            cards.addEventListener('dragleave', () => cards.classList.remove('drag-over'));
+            cards.addEventListener('drop', e => {
+                e.preventDefault();
+                cards.classList.remove('drag-over');
+                if (dragItem) moveCard(dragItem.name, dragItem.srcIdx, idx);
+            });
+
+            // Fill existing tier cards
+            for (const name of (tierState[idx] || [])) {
+                cards.appendChild(makeCard(name, idx));
+            }
+
+            row.appendChild(label);
+            row.appendChild(cards);
+            container.appendChild(row);
+        });
+
+        // Also refresh pool to hide newly-assigned cards
+        renderPool(document.getElementById('search-input').value.trim());
+    }
+
+    function renderTier(idx) {
+        const el = document.querySelector(`.tier-cards[data-tier-idx="${idx}"]`);
         if (!el) return;
         el.innerHTML = '';
-        for (const name of tierState[tier]) {
-            el.appendChild(makeCard(name, tier));
-        }
+        for (const name of (tierState[idx] || [])) el.appendChild(makeCard(name, idx));
     }
 
     function renderPool(query) {
-        const poolEl = document.getElementById('pool-cards');
+        const poolEl  = document.getElementById('pool-cards');
         const emptyEl = document.getElementById('pool-empty');
         const statsEl = document.getElementById('search-stats');
 
         poolEl.innerHTML = '';
-        poolEl.appendChild(emptyEl); // keep placeholder in DOM
+        poolEl.appendChild(emptyEl);
 
         if (!query) {
+            emptyEl.textContent = 'カード名を入力して検索してください';
             emptyEl.style.display = 'block';
             statsEl.textContent = '';
             return;
         }
 
-        const assigned = new Set(TIERS.flatMap(t => tierState[t]));
-        const hits = searchCards(query).filter(name => !assigned.has(name));
+        const assigned = new Set(tierState.flat());
+        const hits = searchCards(query).filter(n => !assigned.has(n));
 
-        if (hits.length === 0) {
+        if (!hits.length) {
             emptyEl.textContent = '該当するカードが見つかりませんでした';
             emptyEl.style.display = 'block';
             statsEl.textContent = '';
@@ -515,89 +597,69 @@
         statsEl.textContent = `${hits.length}件${hits.length >= MAX_RESULTS ? ' (上限)' : ''}`;
 
         const frag = document.createDocumentFragment();
-        for (const name of hits) {
-            frag.appendChild(makeCard(name, null));
-        }
+        hits.forEach(n => frag.appendChild(makeCard(n, null)));
         poolEl.appendChild(frag);
 
-        // kick off lazy image loads
-        poolEl.querySelectorAll('.tier-card[data-needs-img]').forEach(el => {
-            queueImageLoad(el.dataset.name);
-        });
+        poolEl.querySelectorAll('.tier-card[data-needs-img]').forEach(el => queueImg(el.dataset.name));
     }
 
-    function makeCard(name, tier) {
+    // ===== Card element factory =====
+    function makeCard(name, tierIdx) {
         const card = cardMap.get(name);
-        const div = document.createElement('div');
-        div.className = 'tier-card';
+        const div  = document.createElement('div');
+        div.className    = 'tier-card';
         div.dataset.name = name;
-        div.dataset.tier = tier || '';
-        div.draggable = true;
+        div.dataset.tierIdx = tierIdx ?? '';
+        div.draggable    = true;
 
         const inner = document.createElement('div');
         inner.className = 'card-inner';
 
         if (card?.imageUrl) {
             const img = document.createElement('img');
-            img.src = card.imageUrl;
-            img.alt = name;
+            img.src = card.imageUrl; img.alt = name;
             inner.appendChild(img);
         } else {
             const ph = document.createElement('div');
-            ph.className = 'card-ph';
-            ph.textContent = '🃏';
+            ph.className = 'card-ph'; ph.textContent = '🃏';
             inner.appendChild(ph);
             div.dataset.needsImg = '1';
         }
-
         div.appendChild(inner);
 
-        const tooltip = document.createElement('div');
-        tooltip.className = 'card-name-tooltip';
-        tooltip.textContent = name;
-        div.appendChild(tooltip);
+        const tip = document.createElement('div');
+        tip.className = 'card-name-tooltip'; tip.textContent = name;
+        div.appendChild(tip);
 
-        if (tier) {
+        if (tierIdx !== null) {
             const rm = document.createElement('button');
-            rm.className = 'remove-btn';
-            rm.textContent = '×';
-            rm.title = '未分類に戻す';
-            rm.addEventListener('click', (e) => {
-                e.stopPropagation();
-                moveCard(name, tier, null);
-            });
+            rm.className = 'remove-btn'; rm.textContent = '×'; rm.title = '未分類に戻す';
+            rm.addEventListener('click', e => { e.stopPropagation(); moveCard(name, tierIdx, null); });
             div.appendChild(rm);
         }
 
-        div.addEventListener('dragstart', (e) => {
-            dragItem = { name, srcTier: tier };
+        div.addEventListener('dragstart', e => {
+            dragItem = { name, srcIdx: tierIdx };
             div.classList.add('dragging');
             e.dataTransfer.effectAllowed = 'move';
         });
-        div.addEventListener('dragend', () => {
-            div.classList.remove('dragging');
-            dragItem = null;
-        });
+        div.addEventListener('dragend', () => { div.classList.remove('dragging'); dragItem = null; });
 
         return div;
     }
 
-    // ===== Move card between tiers/pool =====
-    function moveCard(name, srcTier, destTier) {
-        if (srcTier === destTier) return;
-        if (srcTier) tierState[srcTier] = tierState[srcTier].filter(n => n !== name);
-        if (destTier && !tierState[destTier].includes(name)) tierState[destTier].push(name);
+    // ===== Move card =====
+    function moveCard(name, srcIdx, destIdx) {
+        if (srcIdx === destIdx) return;
+        if (srcIdx !== null) tierState[srcIdx] = tierState[srcIdx].filter(n => n !== name);
+        if (destIdx !== null && !tierState[destIdx].includes(name)) tierState[destIdx].push(name);
 
-        if (srcTier) renderTier(srcTier);
-        if (destTier) renderTier(destTier);
-
-        // Re-render pool (assigned cards shouldn't show in results)
-        const q = document.getElementById('search-input').value.trim();
-        renderPool(q);
+        if (srcIdx  !== null) renderTier(srcIdx);
+        if (destIdx !== null) renderTier(destIdx);
+        renderPool(document.getElementById('search-input').value.trim());
     }
-    window.moveCard = moveCard;
 
-    // ===== Drag & Drop =====
+    // Pool drag-over (drop back to pool = srcIdx → null)
     window.onDragOver = function(e) {
         e.preventDefault();
         e.currentTarget.classList.add('drag-over');
@@ -607,90 +669,195 @@
     window.onDrop = function(e) {
         e.preventDefault();
         e.currentTarget.classList.remove('drag-over');
-        if (!dragItem) return;
-        const destTier = e.currentTarget.dataset.tier || null;
-        moveCard(dragItem.name, dragItem.srcTier, destTier);
+        if (dragItem) moveCard(dragItem.name, dragItem.srcIdx, null);
     };
 
     // ===== Save / Load =====
-    const saveKey = () => 'banlist_v2';
+    const SAVE_KEY   = 'banlist_v3';
+    const CONFIG_KEY = 'banlist_tier_config';
 
     window.saveState = function() {
-        const data = {};
-        for (const t of TIERS) data[t] = tierState[t].slice();
-        localStorage.setItem(saveKey(), JSON.stringify(data));
+        localStorage.setItem(SAVE_KEY,   JSON.stringify(tierState));
+        localStorage.setItem(CONFIG_KEY, JSON.stringify(tierConfig));
         showStatus('保存しました', 1500);
     };
 
     function loadState() {
         try {
-            const raw = localStorage.getItem(saveKey());
-            if (!raw) return;
-            const data = JSON.parse(raw);
-            for (const t of TIERS) {
-                if (data[t]) tierState[t] = data[t].filter(n => cardMap.has(n));
+            const cfg = localStorage.getItem(CONFIG_KEY);
+            tierConfig = cfg ? JSON.parse(cfg) : DEFAULT_CONFIG.map(c => ({ ...c }));
+        } catch { tierConfig = DEFAULT_CONFIG.map(c => ({ ...c })); }
+
+        // Ensure tierState length matches config
+        tierState = tierConfig.map(() => []);
+        try {
+            const raw = localStorage.getItem(SAVE_KEY);
+            if (raw) {
+                const saved = JSON.parse(raw);
+                saved.forEach((arr, i) => {
+                    if (i < tierState.length && Array.isArray(arr)) {
+                        tierState[i] = arr.filter(n => cardMap.has(n));
+                    }
+                });
             }
-        } catch (e) { console.warn('State load failed:', e); }
+        } catch { /* ignore */ }
     }
 
     window.resetAll = function() {
         if (!confirm('すべての分類をリセットしますか？')) return;
-        for (const t of TIERS) tierState[t] = [];
-        localStorage.removeItem(saveKey());
-        renderTiers();
-        onSearch();
+        tierState = tierConfig.map(() => []);
+        localStorage.removeItem(SAVE_KEY);
+        renderTierContainer();
+    };
+
+    // ===== Settings Modal =====
+    window.openSettings = function() {
+        renderSettingsRows();
+        document.getElementById('settings-modal').classList.add('show');
+    };
+    window.closeSettings = function() {
+        document.getElementById('settings-modal').classList.remove('show');
+    };
+
+    function renderSettingsRows() {
+        const list = document.getElementById('tier-config-list');
+        list.innerHTML = '';
+        tierConfig.forEach((cfg, i) => list.appendChild(makeSettingsRow(cfg, i)));
+    }
+
+    function makeSettingsRow(cfg, idx) {
+        const row = document.createElement('div');
+        row.className = 'tier-config-row';
+        row.dataset.idx = idx;
+
+        const colorInput = document.createElement('input');
+        colorInput.type  = 'color';
+        colorInput.value = cfg.color;
+        colorInput.title = '色を変更';
+
+        const nameInput = document.createElement('input');
+        nameInput.type  = 'text';
+        nameInput.value = cfg.name;
+        nameInput.maxLength = 12;
+        nameInput.placeholder = 'ティア名';
+
+        const upBtn = document.createElement('button');
+        upBtn.className = 'icon-btn'; upBtn.title = '上へ'; upBtn.textContent = '▲';
+        upBtn.addEventListener('click', () => moveRow(idx, -1));
+
+        const downBtn = document.createElement('button');
+        downBtn.className = 'icon-btn'; downBtn.title = '下へ'; downBtn.textContent = '▼';
+        downBtn.addEventListener('click', () => moveRow(idx, +1));
+
+        const delBtn = document.createElement('button');
+        delBtn.className = 'icon-btn danger'; delBtn.title = '削除'; delBtn.textContent = '✕';
+        delBtn.addEventListener('click', () => deleteRow(idx));
+
+        row.append(colorInput, nameInput, upBtn, downBtn, delBtn);
+        return row;
+    }
+
+    function getSettingsData() {
+        return [...document.querySelectorAll('#tier-config-list .tier-config-row')].map(row => ({
+            name:  row.querySelector('input[type="text"]').value.trim()  || '無題',
+            color: row.querySelector('input[type="color"]').value,
+        }));
+    }
+
+    function moveRow(idx, dir) {
+        const data = getSettingsData();
+        const target = idx + dir;
+        if (target < 0 || target >= data.length) return;
+        [data[idx], data[target]] = [data[target], data[idx]];
+        // Rebuild list
+        const list = document.getElementById('tier-config-list');
+        list.innerHTML = '';
+        data.forEach((cfg, i) => list.appendChild(makeSettingsRow(cfg, i)));
+    }
+
+    function deleteRow(idx) {
+        const data = getSettingsData();
+        data.splice(idx, 1);
+        const list = document.getElementById('tier-config-list');
+        list.innerHTML = '';
+        data.forEach((cfg, i) => list.appendChild(makeSettingsRow(cfg, i)));
+    }
+
+    window.addTierRow = function() {
+        const data = getSettingsData();
+        data.push({ name: '新しいティア', color: '#556b8e' });
+        const list = document.getElementById('tier-config-list');
+        list.innerHTML = '';
+        data.forEach((cfg, i) => list.appendChild(makeSettingsRow(cfg, i)));
+    };
+
+    window.applySettings = function() {
+        const newConfig = getSettingsData();
+        if (!newConfig.length) { alert('ティアは1つ以上必要です'); return; }
+
+        // Migrate tierState: match old names to new names by position
+        // Cards in removed tiers go back to the pool (dropped), in added tiers start empty
+        const oldConfig = tierConfig;
+        const oldState  = tierState;
+
+        const newState = newConfig.map((nc, ni) => {
+            // Find a matching old tier by name
+            const oldIdx = oldConfig.findIndex(oc => oc.name === nc.name);
+            if (oldIdx !== -1) return (oldState[oldIdx] || []).filter(n => cardMap.has(n));
+            // No name match: try positional (preserves order for recolors/renames)
+            if (ni < oldConfig.length) return (oldState[ni] || []).filter(n => cardMap.has(n));
+            return [];
+        });
+
+        tierConfig = newConfig;
+        tierState  = newState;
+
+        renderTierContainer();
+        closeSettings();
     };
 
     // ===== Lazy image loading =====
-    let imgQueueNames = [];
-    let imgWorking = false;
+    let imgQueue   = [];
+    let imgRunning = false;
 
-    function queueImageLoad(name) {
-        const card = cardMap.get(name);
-        if (!card || card.imageUrl || loadingSet.has(name)) return;
-        imgQueueNames.push(name);
-        if (!imgWorking) processImgQueue();
+    function queueImg(name) {
+        const c = cardMap.get(name);
+        if (!c || c.imageUrl || loadingSet.has(name)) return;
+        imgQueue.push(name);
+        if (!imgRunning) drainImgQueue();
     }
 
-    async function processImgQueue() {
-        imgWorking = true;
-        while (imgQueueNames.length > 0) {
-            const batch = imgQueueNames.splice(0, 6);
-            await Promise.all(batch.map(loadImg));
+    async function drainImgQueue() {
+        imgRunning = true;
+        while (imgQueue.length) {
+            const batch = imgQueue.splice(0, 6);
+            await Promise.all(batch.map(fetchImg));
         }
-        imgWorking = false;
+        imgRunning = false;
     }
 
-    async function loadImg(name) {
-        const card = cardMap.get(name);
-        if (!card || !card.cardId || card.imageUrl) return;
+    async function fetchImg(name) {
+        const c = cardMap.get(name);
+        if (!c || !c.cardId || c.imageUrl) return;
         loadingSet.add(name);
         try {
-            const cacheKey = `${card.cardId}_${card.ciid}`;
-            let url = await imageCacheManager.getImage(cacheKey);
-            if (!url) url = await imageCacheManager.fetchAndCache(cacheKey, card.cardId, card.ciid, card.lang);
-            if (url) {
-                card.imageUrl = url;
-                applyImageToCards(name, url);
-            }
-        } catch (e) {
-            // fallback to direct proxy URL
-            const url = `${PROXY_URL}/image?cid=${card.cardId}&ciid=${card.ciid}&locale=${card.lang}`;
-            card.imageUrl = url;
-            applyImageToCards(name, url);
-        } finally {
-            loadingSet.delete(name);
-        }
+            const key = `${c.cardId}_${c.ciid}`;
+            let url = await imageCacheManager.getImage(key);
+            if (!url) url = await imageCacheManager.fetchAndCache(key, c.cardId, c.ciid, c.lang);
+            if (url) { c.imageUrl = url; applyImg(name, url); }
+        } catch {
+            const url = `${PROXY_URL}/image?cid=${c.cardId}&ciid=${c.ciid}&locale=${c.lang}`;
+            c.imageUrl = url; applyImg(name, url);
+        } finally { loadingSet.delete(name); }
     }
 
-    function applyImageToCards(name, url) {
+    function applyImg(name, url) {
         document.querySelectorAll(`.tier-card[data-name="${CSS.escape(name)}"][data-needs-img]`).forEach(el => {
             const inner = el.querySelector('.card-inner');
             if (!inner) return;
             inner.innerHTML = '';
             const img = document.createElement('img');
-            img.src = url;
-            img.alt = name;
+            img.src = url; img.alt = name;
             inner.appendChild(img);
             delete el.dataset.needsImg;
         });
@@ -702,62 +869,57 @@
         document.getElementById('export-modal').classList.add('show');
 
         const canvas = document.getElementById('export-canvas');
-        const ctx = canvas.getContext('2d');
+        const ctx    = canvas.getContext('2d');
+        const LABEL_W = 110, CW = 62, CH = 90, GAP = 4, PAD = 6, W = 1200;
 
-        const COLORS = { "禁止": "#c0392b", "制限": "#e67e22", "準制限": "#d4ac0d", "緩和・解除": "#27ae60" };
-        const LABEL_W = 110;
-        const CW = 62, CH = 90, GAP = 4, PAD = 6;
-        const W = 1200;
-
-        const rowHeights = TIERS.map(t => {
+        const rowH = tierConfig.map((_, i) => {
             const cols = Math.floor((W - LABEL_W - PAD * 2 + GAP) / (CW + GAP));
-            const rows = Math.max(1, Math.ceil(tierState[t].length / cols));
+            const rows = Math.max(1, Math.ceil((tierState[i] || []).length / cols));
             return Math.max(CH + PAD * 2, rows * (CH + GAP) + PAD);
         });
+
         canvas.width  = W;
-        canvas.height = rowHeights.reduce((a, b) => a + b, 0) + (TIERS.length - 1) * 4 + 20;
+        canvas.height = rowH.reduce((a, b) => a + b, 0) + (tierConfig.length - 1) * GAP + 20;
 
         ctx.fillStyle = '#16213e';
-        ctx.fillRect(0, 0, canvas.width, canvas.height);
+        ctx.fillRect(0, 0, W, canvas.height);
 
         let y = 10;
-        for (let ri = 0; ri < TIERS.length; ri++) {
-            const tier = TIERS[ri];
-            const rh = rowHeights[ri];
-            const cards = tierState[tier];
+        for (let ri = 0; ri < tierConfig.length; ri++) {
+            const cfg   = tierConfig[ri];
+            const cards = tierState[ri] || [];
+            const rh    = rowH[ri];
+            const cols  = Math.floor((W - LABEL_W - PAD * 2 + GAP) / (CW + GAP));
 
-            ctx.fillStyle = COLORS[tier];
-            ctx.beginPath(); ctx.roundRect(0, y, LABEL_W, rh, [6, 0, 0, 6]); ctx.fill();
+            ctx.fillStyle = cfg.color;
+            ctx.beginPath(); ctx.roundRect(0, y, LABEL_W, rh, [6,0,0,6]); ctx.fill();
 
-            ctx.fillStyle = tier === '準制限' ? '#333' : '#fff';
-            ctx.font = 'bold 15px "Segoe UI", sans-serif';
+            ctx.fillStyle = labelTextColor(cfg.color);
+            ctx.font = 'bold 15px "Segoe UI",sans-serif';
             ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
-            ctx.fillText(tier, LABEL_W / 2, y + rh / 2);
+            ctx.fillText(cfg.name, LABEL_W / 2, y + rh / 2);
 
             ctx.fillStyle = '#1e2d4a';
-            ctx.beginPath(); ctx.roundRect(LABEL_W, y, W - LABEL_W, rh, [0, 6, 6, 0]); ctx.fill();
+            ctx.beginPath(); ctx.roundRect(LABEL_W, y, W - LABEL_W, rh, [0,6,6,0]); ctx.fill();
 
-            const cols = Math.floor((W - LABEL_W - PAD * 2 + GAP) / (CW + GAP));
             let cx = LABEL_W + PAD, cy = y + PAD;
             for (let i = 0; i < cards.length; i++) {
                 const card = cardMap.get(cards[i]);
                 if (card?.imageUrl) {
                     await new Promise(res => {
                         const img = new Image();
-                        img.onload = () => { ctx.drawImage(img, cx, cy, CW, CH); res(); };
+                        img.onload  = () => { ctx.drawImage(img, cx, cy, CW, CH); res(); };
                         img.onerror = () => { ctx.fillStyle = '#0a0a1a'; ctx.fillRect(cx, cy, CW, CH); res(); };
                         img.src = card.imageUrl;
                     });
                 } else {
-                    ctx.fillStyle = '#0a0a1a';
-                    ctx.fillRect(cx, cy, CW, CH);
+                    ctx.fillStyle = '#0a0a1a'; ctx.fillRect(cx, cy, CW, CH);
                 }
                 if ((i + 1) % cols === 0) { cx = LABEL_W + PAD; cy += CH + GAP; }
                 else cx += CW + GAP;
             }
-            y += rh + 4;
+            y += rh + GAP;
         }
-
         canvas.style.width = '100%';
         hideStatus();
     };
