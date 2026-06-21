@@ -24,14 +24,12 @@
             min-height: 100vh;
             gap: 1rem;
         }
-
         #auth-screen h1 {
             font-size: 1.8rem;
             background: linear-gradient(135deg, #e94560, #f5a623);
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
         }
-
         .auth-btn {
             background: linear-gradient(135deg, #e94560, #c0392b);
             color: white;
@@ -42,7 +40,6 @@
             cursor: pointer;
             transition: opacity 0.2s;
         }
-
         .auth-btn:hover { opacity: 0.85; }
 
         /* ===== Main App ===== */
@@ -59,20 +56,13 @@
             top: 0;
             z-index: 100;
         }
-
         .app-header h1 {
             font-size: 1.2rem;
             background: linear-gradient(135deg, #e94560, #f5a623);
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
         }
-
-        .header-actions {
-            display: flex;
-            gap: 0.5rem;
-            align-items: center;
-        }
-
+        .header-actions { display: flex; gap: 0.5rem; align-items: center; }
         .btn-sm {
             padding: 0.4rem 0.9rem;
             border: none;
@@ -81,26 +71,22 @@
             cursor: pointer;
             transition: opacity 0.2s;
         }
-
         .btn-sm:hover { opacity: 0.8; }
-        .btn-save { background: #27ae60; color: white; }
-        .btn-reset { background: #7f8c8d; color: white; }
+        .btn-save   { background: #27ae60; color: white; }
+        .btn-reset  { background: #7f8c8d; color: white; }
         .btn-export { background: #2980b9; color: white; }
         .btn-signout { background: transparent; color: #aaa; border: 1px solid #555; font-size: 0.75rem; }
 
         /* ===== Tier Table ===== */
-        .tier-container {
-            padding: 1rem 1rem 0;
-        }
+        .tier-container { padding: 1rem 1rem 0; }
 
         .tier-row {
             display: flex;
-            min-height: 100px;
+            min-height: 108px;
             margin-bottom: 4px;
             border-radius: 6px;
             overflow: hidden;
         }
-
         .tier-label {
             width: 90px;
             min-width: 90px;
@@ -108,12 +94,10 @@
             align-items: center;
             justify-content: center;
             font-weight: 700;
-            font-size: 1.1rem;
+            font-size: 1.05rem;
             text-shadow: 0 1px 3px rgba(0,0,0,0.5);
-            cursor: default;
             user-select: none;
         }
-
         .tier-label.kinshi  { background: #c0392b; }
         .tier-label.seigen  { background: #e67e22; }
         .tier-label.jun     { background: #f1c40f; color: #333; }
@@ -129,40 +113,40 @@
             background: #1e2d4a;
             border: 2px solid transparent;
             transition: border-color 0.15s, background 0.15s;
-            min-height: 100px;
+            min-height: 108px;
         }
-
         .tier-cards.drag-over {
             border-color: #e94560;
             background: #253655;
         }
 
-        /* ===== Card in Tier ===== */
+        /* ===== Card element ===== */
         .tier-card {
             width: 62px;
             height: 90px;
             position: relative;
             cursor: grab;
             border-radius: 3px;
-            overflow: hidden;
+            overflow: visible;
             background: #0a0a1a;
             border: 1px solid #333;
             flex-shrink: 0;
             transition: transform 0.1s, box-shadow 0.1s;
         }
-
         .tier-card:hover {
-            transform: scale(1.08);
-            box-shadow: 0 4px 12px rgba(0,0,0,0.6);
-            z-index: 10;
+            transform: scale(1.1);
+            box-shadow: 0 4px 14px rgba(0,0,0,0.7);
+            z-index: 20;
+        }
+        .tier-card.dragging { opacity: 0.35; cursor: grabbing; }
+
+        .tier-card .card-inner {
+            width: 100%;
+            height: 90px;
+            border-radius: 3px;
+            overflow: hidden;
             position: relative;
         }
-
-        .tier-card.dragging {
-            opacity: 0.4;
-            cursor: grabbing;
-        }
-
         .tier-card img {
             width: 100%;
             height: 100%;
@@ -170,94 +154,96 @@
             display: block;
             pointer-events: none;
         }
-
-        .tier-card .card-placeholder-icon {
+        .card-ph {
             width: 100%;
             height: 100%;
             display: flex;
             align-items: center;
             justify-content: center;
-            font-size: 1.4rem;
-            color: #555;
+            color: #444;
+            font-size: 1.5rem;
         }
-
-        .tier-card .card-name-tooltip {
+        .card-name-tooltip {
             position: absolute;
-            bottom: 0;
-            left: 0;
-            right: 0;
-            background: rgba(0,0,0,0.8);
-            color: white;
-            font-size: 0.55rem;
-            padding: 2px 3px;
-            text-align: center;
-            line-height: 1.2;
+            bottom: -1px;
+            left: 50%;
+            transform: translateX(-50%) translateY(100%);
+            background: rgba(10,10,30,0.95);
+            color: #eee;
+            font-size: 0.72rem;
+            padding: 3px 6px;
+            border-radius: 4px;
+            white-space: nowrap;
+            pointer-events: none;
             opacity: 0;
             transition: opacity 0.15s;
-            pointer-events: none;
-            white-space: nowrap;
+            z-index: 50;
+            max-width: 180px;
             overflow: hidden;
             text-overflow: ellipsis;
+            border: 1px solid #334;
         }
-
         .tier-card:hover .card-name-tooltip { opacity: 1; }
 
-        .tier-card .remove-btn {
+        .remove-btn {
             position: absolute;
             top: 1px;
             right: 1px;
             width: 16px;
             height: 16px;
-            background: rgba(231, 76, 60, 0.9);
+            background: rgba(231,76,60,0.9);
             color: white;
             border: none;
             border-radius: 50%;
-            font-size: 0.65rem;
+            font-size: 0.6rem;
             cursor: pointer;
             display: none;
             align-items: center;
             justify-content: center;
-            line-height: 1;
+            z-index: 30;
         }
-
         .tier-card:hover .remove-btn { display: flex; }
 
-        /* ===== Pool ===== */
-        .pool-section {
-            padding: 1rem;
-        }
+        /* ===== Pool / Search ===== */
+        .pool-section { padding: 1rem; }
 
-        .pool-header {
+        .search-bar {
             display: flex;
-            align-items: center;
-            justify-content: space-between;
+            gap: 0.5rem;
             margin-bottom: 0.75rem;
-            gap: 1rem;
+            align-items: center;
         }
-
-        .pool-title {
-            font-size: 0.95rem;
-            color: #aaa;
-            white-space: nowrap;
-        }
-
-        .pool-search {
+        .search-wrap {
+            position: relative;
             flex: 1;
-            max-width: 320px;
-            padding: 0.4rem 0.8rem;
+            max-width: 400px;
+        }
+        .search-wrap .search-icon {
+            position: absolute;
+            left: 10px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: #666;
+            font-size: 0.9rem;
+            pointer-events: none;
+        }
+        .search-input {
+            width: 100%;
+            padding: 0.5rem 0.8rem 0.5rem 2rem;
             background: #1e2d4a;
             border: 1px solid #334;
             border-radius: 6px;
             color: #e0e0e0;
-            font-size: 0.85rem;
+            font-size: 0.9rem;
             outline: none;
+            transition: border-color 0.15s;
         }
+        .search-input:focus { border-color: #e94560; }
+        .search-input::placeholder { color: #556; }
 
-        .pool-search:focus { border-color: #e94560; }
-
-        .pool-stats {
-            font-size: 0.8rem;
-            color: #777;
+        .search-stats {
+            font-size: 0.78rem;
+            color: #667;
             white-space: nowrap;
         }
 
@@ -269,22 +255,27 @@
             background: #1e2d4a;
             border-radius: 6px;
             border: 2px solid transparent;
-            min-height: 120px;
+            min-height: 80px;
             transition: border-color 0.15s;
         }
-
         #pool-cards.drag-over {
             border-color: #27ae60;
             background: #1f3540;
         }
+        /* pool cards slightly larger */
+        #pool-cards .tier-card      { width: 68px; }
+        #pool-cards .tier-card .card-inner { height: 99px; }
+        #pool-cards .tier-card      { height: 99px; }
 
-        /* Pool cards are slightly bigger */
-        #pool-cards .tier-card {
-            width: 68px;
-            height: 99px;
+        .pool-empty {
+            width: 100%;
+            text-align: center;
+            color: #445;
+            font-size: 0.9rem;
+            padding: 1.5rem 0;
         }
 
-        /* ===== Status / Loading ===== */
+        /* ===== Status Bar ===== */
         #status-bar {
             position: fixed;
             bottom: 1rem;
@@ -299,11 +290,9 @@
             display: none;
             z-index: 200;
         }
-
-        .loading-spinner {
+        .spin {
             display: inline-block;
-            width: 12px;
-            height: 12px;
+            width: 12px; height: 12px;
             border: 2px solid #555;
             border-top-color: #e94560;
             border-radius: 50%;
@@ -311,49 +300,32 @@
             margin-right: 6px;
             vertical-align: middle;
         }
-
         @keyframes spin { to { transform: rotate(360deg); } }
 
-        /* ===== Export overlay ===== */
+        /* ===== Export Modal ===== */
         #export-modal {
             display: none;
             position: fixed;
             inset: 0;
-            background: rgba(0,0,0,0.8);
+            background: rgba(0,0,0,0.85);
             z-index: 300;
             align-items: center;
             justify-content: center;
         }
-
         #export-modal.show { display: flex; }
-
         .export-box {
             background: #0f3460;
             border: 1px solid #e94560;
             border-radius: 10px;
             padding: 1.5rem;
             max-width: 92vw;
-            width: 700px;
+            width: 720px;
         }
-
         .export-box h3 { margin-bottom: 1rem; font-size: 1rem; color: #f5a623; }
-
-        #export-canvas {
-            display: block;
-            max-width: 100%;
-            border-radius: 4px;
-            background: #000;
-        }
-
-        .export-actions {
-            display: flex;
-            gap: 0.5rem;
-            margin-top: 0.75rem;
-            justify-content: flex-end;
-        }
-
-        .btn-dl { background: #27ae60; color: white; }
-        .btn-close-modal { background: #555; color: white; }
+        #export-canvas { display: block; max-width: 100%; border-radius: 4px; }
+        .export-actions { display: flex; gap: 0.5rem; margin-top: 0.75rem; justify-content: flex-end; }
+        .btn-dl         { background: #27ae60; color: white; }
+        .btn-close-modal{ background: #555; color: white; }
     </style>
 </head>
 <body>
@@ -361,7 +333,7 @@
 <!-- Auth Screen -->
 <div id="auth-screen">
     <h1>バンリストエディター</h1>
-    <p style="color:#888;font-size:0.9rem;">コレクションからカードを読み込みます</p>
+    <p style="color:#888;font-size:0.9rem;">マスターデータ全カードを対象に分類できます</p>
     <button class="auth-btn" id="signin-btn">Googleでサインイン</button>
     <div id="auth-status" style="color:#888;font-size:0.8rem;margin-top:0.5rem;"></div>
 </div>
@@ -371,50 +343,51 @@
     <div class="app-header">
         <h1>バンリストエディター</h1>
         <div class="header-actions">
-            <button class="btn-sm btn-save" onclick="saveState()">保存</button>
+            <button class="btn-sm btn-save"   onclick="saveState()">保存</button>
             <button class="btn-sm btn-export" onclick="openExport()">画像出力</button>
-            <button class="btn-sm btn-reset" onclick="resetAll()">リセット</button>
+            <button class="btn-sm btn-reset"  onclick="resetAll()">リセット</button>
             <button class="btn-sm btn-signout" id="signout-btn">サインアウト</button>
         </div>
     </div>
 
     <!-- Tier Rows -->
-    <div class="tier-container" id="tier-container">
+    <div class="tier-container">
         <div class="tier-row">
             <div class="tier-label kinshi">禁止</div>
             <div class="tier-cards" data-tier="禁止" id="tier-禁止"
-                 ondragover="onDragOver(event)" ondragleave="onDragLeave(event)" ondrop="onDrop(event)">
-            </div>
+                 ondragover="onDragOver(event)" ondragleave="onDragLeave(event)" ondrop="onDrop(event)"></div>
         </div>
         <div class="tier-row">
             <div class="tier-label seigen">制限</div>
             <div class="tier-cards" data-tier="制限" id="tier-制限"
-                 ondragover="onDragOver(event)" ondragleave="onDragLeave(event)" ondrop="onDrop(event)">
-            </div>
+                 ondragover="onDragOver(event)" ondragleave="onDragLeave(event)" ondrop="onDrop(event)"></div>
         </div>
         <div class="tier-row">
             <div class="tier-label jun">準制限</div>
             <div class="tier-cards" data-tier="準制限" id="tier-準制限"
-                 ondragover="onDragOver(event)" ondragleave="onDragLeave(event)" ondrop="onDrop(event)">
-            </div>
+                 ondragover="onDragOver(event)" ondragleave="onDragLeave(event)" ondrop="onDrop(event)"></div>
         </div>
         <div class="tier-row">
             <div class="tier-label kanwa">緩和・解除</div>
             <div class="tier-cards" data-tier="緩和・解除" id="tier-緩和・解除"
-                 ondragover="onDragOver(event)" ondragleave="onDragLeave(event)" ondrop="onDrop(event)">
-            </div>
+                 ondragover="onDragOver(event)" ondragleave="onDragLeave(event)" ondrop="onDrop(event)"></div>
         </div>
     </div>
 
-    <!-- Pool -->
+    <!-- Pool / Search -->
     <div class="pool-section">
-        <div class="pool-header">
-            <span class="pool-title">未分類</span>
-            <input type="search" class="pool-search" id="pool-search" placeholder="カード名で絞り込み…" oninput="filterPool()">
-            <span class="pool-stats" id="pool-stats"></span>
+        <div class="search-bar">
+            <div class="search-wrap">
+                <span class="search-icon">🔍</span>
+                <input type="search" class="search-input" id="search-input"
+                       placeholder="カード名・よみがなで検索…"
+                       oninput="onSearch()" autocomplete="off">
+            </div>
+            <span class="search-stats" id="search-stats"></span>
         </div>
         <div id="pool-cards"
              ondragover="onDragOver(event)" ondragleave="onDragLeave(event)" ondrop="onDrop(event)">
+            <div class="pool-empty" id="pool-empty">カード名を入力して検索してください</div>
         </div>
     </div>
 </div>
@@ -428,7 +401,7 @@
         <h3>画像出力</h3>
         <canvas id="export-canvas"></canvas>
         <div class="export-actions">
-            <button class="btn-sm btn-dl" onclick="downloadExport()">ダウンロード</button>
+            <button class="btn-sm btn-dl"          onclick="downloadExport()">ダウンロード</button>
             <button class="btn-sm btn-close-modal" onclick="closeExport()">閉じる</button>
         </div>
     </div>
@@ -438,7 +411,6 @@
     import { initializeApp } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-app.js";
     import { getAuth, onAuthStateChanged, GoogleAuthProvider, signInWithPopup, signOut }
         from "https://www.gstatic.com/firebasejs/9.23.0/firebase-auth.js";
-    import { api } from './api-client.js';
 
     const firebaseConfig = {
         apiKey: "AIzaSyAOYKalLUb2hbghrjQUS8AWzxpLExBT7aU",
@@ -453,24 +425,24 @@
     const auth = getAuth(app);
 
     // ===== State =====
-    let allCards = [];          // { id, name, cardId, ciid, lang }
-    let cardDetailsMap = new Map();
-    let tierState = { "禁止": [], "制限": [], "準制限": [], "緩和・解除": [] };
-    let dragItem = null;        // { cardId: string, srcTier: string|null }
+    // cardMap: name -> { cardId, ciid:'1', lang:'ja', imageUrl:null }
+    const cardMap = new Map();
+    const cardReadingMap = new Map(); // reading (hiragana) -> [cardName, ...]
+    const tierState = { "禁止": [], "制限": [], "準制限": [], "緩和・解除": [] };
+    let dragItem = null;   // { name, srcTier }
     let currentUser = null;
-    let imageQueue = [];
-    let isLoadingImages = false;
+    const imgCache = new Map(); // name -> data URL (in-memory, on top of IndexedDB)
+    const loadingSet = new Set();
+
+    const TIERS = ["禁止", "制限", "準制限", "緩和・解除"];
+    const MAX_RESULTS = 80;
 
     // ===== Auth =====
     document.getElementById('signin-btn').addEventListener('click', async () => {
         const provider = new GoogleAuthProvider();
-        try {
-            await signInWithPopup(auth, provider);
-        } catch (e) {
-            document.getElementById('auth-status').textContent = 'サインイン失敗: ' + e.message;
-        }
+        try { await signInWithPopup(auth, provider); }
+        catch (e) { document.getElementById('auth-status').textContent = 'サインイン失敗: ' + e.message; }
     });
-
     document.getElementById('signout-btn').addEventListener('click', () => signOut(auth));
 
     onAuthStateChanged(auth, async (user) => {
@@ -478,7 +450,6 @@
         if (user) {
             document.getElementById('auth-screen').style.display = 'none';
             document.getElementById('app').style.display = 'block';
-            await api.setAuth(user);
             await init();
         } else {
             document.getElementById('auth-screen').style.display = 'flex';
@@ -488,15 +459,14 @@
 
     // ===== Init =====
     async function init() {
-        showStatus('カードデータを読み込み中…');
+        showStatus('マスターデータを読み込み中…');
         await loadCSV();
-        showStatus('コレクションを読み込み中…');
-        await loadCollection();
         loadState();
-        renderAll();
+        renderTiers();
         hideStatus();
     }
 
+    // ===== CSV loader (same logic as gallery) =====
     async function loadCSV() {
         try {
             const res = await fetch('yugioh_cards_master.csv');
@@ -506,174 +476,176 @@
                 const line = lines[i].trim();
                 if (!line) continue;
                 const values = line.split(',');
-                const cardId = values[0]?.replace(/"/g, '');
+                const cardId   = values[0]?.replace(/"/g, '');
                 const cardName = values[1]?.replace(/"/g, '');
-                if (cardId && cardName) {
-                    cardDetailsMap.set(cardName, { cardId });
+                const reading  = values[2]?.replace(/"/g, '');
+                if (!cardId || !cardName) continue;
+
+                cardMap.set(cardName, { cardId, ciid: '1', lang: 'ja', imageUrl: null });
+
+                if (reading) {
+                    const readingKey = reading.toLowerCase();
+                    if (!cardReadingMap.has(readingKey)) cardReadingMap.set(readingKey, []);
+                    cardReadingMap.get(readingKey).push(cardName);
+
+                    // also store hiragana version of katakana reading
+                    const hira = katakanaToHiragana(readingKey);
+                    if (hira !== readingKey) {
+                        if (!cardReadingMap.has(hira)) cardReadingMap.set(hira, []);
+                        cardReadingMap.get(hira).push(cardName);
+                    }
                 }
             }
+            console.log(`CSV: ${cardMap.size} cards, ${cardReadingMap.size} readings`);
         } catch (e) {
-            console.warn('CSV load failed:', e);
+            console.error('CSV load failed:', e);
         }
     }
 
-    async function loadCollection() {
-        try {
-            const cards = await api.getCards('collection');
-            // Deduplicate by card name (keep first occurrence)
-            const seen = new Set();
-            allCards = [];
-            for (const card of cards) {
-                const raw = card['名前'] || card.data?.['名前'] || '';
-                const name = decodeHtmlEntities(raw);
-                const key = name;
-                if (seen.has(key)) continue;
-                seen.add(key);
+    // ===== Search (same logic as gallery) =====
+    const normalizeForSearch = (text) => {
+        if (!text) return '';
+        text = text.toLowerCase();
+        // katakana -> hiragana
+        text = text.replace(/[ァ-ヶ]/g, (ch) => String.fromCharCode(ch.charCodeAt(0) - 0x60));
+        // remove middle dot
+        text = text.replace(/・/g, '');
+        return text;
+    };
 
-                const data = card.data || card;
-                const overrideId = data.customCardId || null;
-                const ciid = data.selectedCiid || '1';
-                const lang = data.cardLang || 'ja';
-                const detailId = cardDetailsMap.get(name)?.cardId;
-                const cardId = overrideId || detailId || null;
+    const katakanaToHiragana = (text) =>
+        text.replace(/[ァ-ヶ]/g, (ch) => String.fromCharCode(ch.charCodeAt(0) - 0x60));
 
-                allCards.push({
-                    id: card.id || key,
-                    name,
-                    cardId,
-                    ciid,
-                    lang,
-                    imageUrl: null
-                });
+    function searchCards(query) {
+        if (!query) return [];
+        const q = query.toLowerCase();
+        const normQ = normalizeForSearch(q);
+
+        // Collect candidate names from reading map (exact + partial)
+        const readingHits = new Set();
+        if (cardReadingMap.has(q)) cardReadingMap.get(q).forEach(n => readingHits.add(n));
+        if (cardReadingMap.has(normQ)) cardReadingMap.get(normQ).forEach(n => readingHits.add(n));
+        for (const [reading, names] of cardReadingMap) {
+            if (reading.includes(q) || reading.includes(normQ)) {
+                names.forEach(n => readingHits.add(n));
             }
-            console.log(`Loaded ${allCards.length} unique cards`);
-        } catch (e) {
-            console.error('Collection load failed:', e);
-            showStatus('コレクションの読み込みに失敗しました');
         }
-    }
 
-    // ===== Save / Load (localStorage) =====
-    function getSaveKey() {
-        return `banlist_state_${currentUser?.uid || 'local'}`;
-    }
-
-    function saveState() {
-        const data = {};
-        for (const tier of Object.keys(tierState)) {
-            data[tier] = tierState[tier].slice();
-        }
-        localStorage.setItem(getSaveKey(), JSON.stringify(data));
-        showStatus('保存しました', 1500);
-    }
-
-    function loadState() {
-        try {
-            const raw = localStorage.getItem(getSaveKey());
-            if (!raw) return;
-            const data = JSON.parse(raw);
-            // Only restore entries that exist in current allCards
-            const validIds = new Set(allCards.map(c => c.id));
-            for (const tier of Object.keys(tierState)) {
-                if (data[tier]) {
-                    tierState[tier] = data[tier].filter(id => validIds.has(id));
-                }
+        const results = [];
+        for (const [name] of cardMap) {
+            const normName = normalizeForSearch(name);
+            if (normName.includes(normQ) || readingHits.has(name)) {
+                results.push(name);
+                if (results.length >= MAX_RESULTS) break;
             }
-        } catch (e) {
-            console.warn('State load failed:', e);
         }
+        return results;
     }
 
-    window.resetAll = function() {
-        if (!confirm('すべての分類をリセットしますか？')) return;
-        for (const tier of Object.keys(tierState)) {
-            tierState[tier] = [];
-        }
-        localStorage.removeItem(getSaveKey());
-        renderAll();
+    // ===== Search handler =====
+    window.onSearch = function() {
+        const q = document.getElementById('search-input').value.trim();
+        renderPool(q);
     };
 
     // ===== Render =====
-    function getPoolCards() {
-        const assigned = new Set(Object.values(tierState).flat());
-        return allCards.filter(c => !assigned.has(c.id));
-    }
-
-    function renderAll() {
-        for (const tier of Object.keys(tierState)) {
-            renderTier(tier);
-        }
-        renderPool();
+    function renderTiers() {
+        for (const tier of TIERS) renderTier(tier);
     }
 
     function renderTier(tier) {
         const el = document.getElementById(`tier-${tier}`);
         if (!el) return;
         el.innerHTML = '';
-        for (const cardId of tierState[tier]) {
-            const card = allCards.find(c => c.id === cardId);
-            if (card) el.appendChild(makeTierCardEl(card, tier));
+        for (const name of tierState[tier]) {
+            el.appendChild(makeCard(name, tier));
         }
     }
 
-    function renderPool() {
-        const query = document.getElementById('pool-search').value.toLowerCase();
-        const pool = getPoolCards();
-        const filtered = query ? pool.filter(c => c.name.toLowerCase().includes(query)) : pool;
+    function renderPool(query) {
+        const poolEl = document.getElementById('pool-cards');
+        const emptyEl = document.getElementById('pool-empty');
+        const statsEl = document.getElementById('search-stats');
 
-        const el = document.getElementById('pool-cards');
-        el.innerHTML = '';
-        for (const card of filtered) {
-            el.appendChild(makeTierCardEl(card, null));
+        poolEl.innerHTML = '';
+        poolEl.appendChild(emptyEl); // keep placeholder in DOM
+
+        if (!query) {
+            emptyEl.style.display = 'block';
+            statsEl.textContent = '';
+            return;
         }
 
-        const statsEl = document.getElementById('pool-stats');
-        statsEl.textContent = `${filtered.length} / ${pool.length} 枚`;
+        const assigned = new Set(TIERS.flatMap(t => tierState[t]));
+        const hits = searchCards(query).filter(name => !assigned.has(name));
 
-        // Lazy load images
-        scheduleImageLoad(el.querySelectorAll('.tier-card[data-needs-image]'));
+        if (hits.length === 0) {
+            emptyEl.textContent = '該当するカードが見つかりませんでした';
+            emptyEl.style.display = 'block';
+            statsEl.textContent = '';
+            return;
+        }
+
+        emptyEl.style.display = 'none';
+        statsEl.textContent = `${hits.length}件${hits.length >= MAX_RESULTS ? ' (上限)' : ''}`;
+
+        const frag = document.createDocumentFragment();
+        for (const name of hits) {
+            frag.appendChild(makeCard(name, null));
+        }
+        poolEl.appendChild(frag);
+
+        // kick off lazy image loads
+        poolEl.querySelectorAll('.tier-card[data-needs-img]').forEach(el => {
+            queueImageLoad(el.dataset.name);
+        });
     }
 
-    function makeTierCardEl(card, tier) {
+    function makeCard(name, tier) {
+        const card = cardMap.get(name);
         const div = document.createElement('div');
         div.className = 'tier-card';
-        div.dataset.cardId = card.id;
+        div.dataset.name = name;
         div.dataset.tier = tier || '';
         div.draggable = true;
 
-        // Placeholder
-        const ph = document.createElement('div');
-        ph.className = 'card-placeholder-icon';
-        ph.textContent = '🃏';
-        div.appendChild(ph);
+        const inner = document.createElement('div');
+        inner.className = 'card-inner';
 
-        // If image already loaded, show it
-        if (card.imageUrl) {
-            setCardImage(div, card.imageUrl, card.name);
+        if (card?.imageUrl) {
+            const img = document.createElement('img');
+            img.src = card.imageUrl;
+            img.alt = name;
+            inner.appendChild(img);
         } else {
-            div.dataset.needsImage = '1';
+            const ph = document.createElement('div');
+            ph.className = 'card-ph';
+            ph.textContent = '🃏';
+            inner.appendChild(ph);
+            div.dataset.needsImg = '1';
         }
 
-        // Name tooltip
+        div.appendChild(inner);
+
         const tooltip = document.createElement('div');
         tooltip.className = 'card-name-tooltip';
-        tooltip.textContent = card.name;
+        tooltip.textContent = name;
         div.appendChild(tooltip);
 
-        // Remove button
-        const rmBtn = document.createElement('button');
-        rmBtn.className = 'remove-btn';
-        rmBtn.textContent = '×';
-        rmBtn.title = '未分類に戻す';
-        rmBtn.addEventListener('click', (e) => {
-            e.stopPropagation();
-            removeFromTier(card.id, tier);
-        });
-        div.appendChild(rmBtn);
+        if (tier) {
+            const rm = document.createElement('button');
+            rm.className = 'remove-btn';
+            rm.textContent = '×';
+            rm.title = '未分類に戻す';
+            rm.addEventListener('click', (e) => {
+                e.stopPropagation();
+                moveCard(name, tier, null);
+            });
+            div.appendChild(rm);
+        }
 
-        // Drag events
         div.addEventListener('dragstart', (e) => {
-            dragItem = { cardId: card.id, srcTier: tier };
+            dragItem = { name, srcTier: tier };
             div.classList.add('dragging');
             e.dataTransfer.effectAllowed = 'move';
         });
@@ -685,74 +657,20 @@
         return div;
     }
 
-    function setCardImage(el, url, name) {
-        el.querySelector('.card-placeholder-icon')?.remove();
-        const existing = el.querySelector('img');
-        if (existing) return;
-        const img = document.createElement('img');
-        img.src = url;
-        img.alt = name;
-        img.loading = 'lazy';
-        img.onerror = () => img.remove();
-        el.insertBefore(img, el.firstChild);
-        delete el.dataset.needsImage;
-    }
+    // ===== Move card between tiers/pool =====
+    function moveCard(name, srcTier, destTier) {
+        if (srcTier === destTier) return;
+        if (srcTier) tierState[srcTier] = tierState[srcTier].filter(n => n !== name);
+        if (destTier && !tierState[destTier].includes(name)) tierState[destTier].push(name);
 
-    // ===== Image Loading =====
-    function scheduleImageLoad(elements) {
-        for (const el of elements) {
-            const cardId = el.dataset.cardId;
-            const card = allCards.find(c => c.id === cardId);
-            if (card && !card.imageUrl) {
-                imageQueue.push({ el, card });
-            }
-        }
-        if (!isLoadingImages) processImageQueue();
-    }
+        if (srcTier) renderTier(srcTier);
+        if (destTier) renderTier(destTier);
 
-    async function processImageQueue() {
-        isLoadingImages = true;
-        while (imageQueue.length > 0) {
-            // Process in batches of 5
-            const batch = imageQueue.splice(0, 5);
-            await Promise.all(batch.map(({ el, card }) => loadImageForCard(el, card)));
-        }
-        isLoadingImages = false;
+        // Re-render pool (assigned cards shouldn't show in results)
+        const q = document.getElementById('search-input').value.trim();
+        renderPool(q);
     }
-
-    async function loadImageForCard(el, card) {
-        if (card.imageUrl) {
-            // Already loaded, just set it if element still exists
-            if (el.isConnected) setCardImage(el, card.imageUrl, card.name);
-            return;
-        }
-        try {
-            const url = await getCardImageUrl(card);
-            if (url) {
-                card.imageUrl = url;
-                // Update all rendered instances of this card
-                document.querySelectorAll(`.tier-card[data-card-id="${CSS.escape(card.id)}"]`).forEach(node => {
-                    if (node.dataset.needsImage) setCardImage(node, url, card.name);
-                });
-            }
-        } catch (e) {
-            // silently ignore image errors
-        }
-    }
-
-    async function getCardImageUrl(card) {
-        if (!card.cardId) return null;
-        const cacheKey = card.lang === 'ja'
-            ? `${card.cardId}_${card.ciid}`
-            : `${card.cardId}_${card.ciid}_${card.lang}`;
-        try {
-            const cached = await imageCacheManager.getImage(cacheKey);
-            if (cached) return cached;
-            return await imageCacheManager.fetchAndCache(cacheKey, card.cardId, card.ciid, card.lang);
-        } catch (e) {
-            return `${PROXY_URL}/image?cid=${card.cardId}&ciid=${card.ciid}&locale=${card.lang}`;
-        }
-    }
+    window.moveCard = moveCard;
 
     // ===== Drag & Drop =====
     window.onDragOver = function(e) {
@@ -760,186 +678,180 @@
         e.currentTarget.classList.add('drag-over');
         e.dataTransfer.dropEffect = 'move';
     };
-
-    window.onDragLeave = function(e) {
-        e.currentTarget.classList.remove('drag-over');
-    };
-
+    window.onDragLeave = function(e) { e.currentTarget.classList.remove('drag-over'); };
     window.onDrop = function(e) {
         e.preventDefault();
         e.currentTarget.classList.remove('drag-over');
         if (!dragItem) return;
+        const destTier = e.currentTarget.dataset.tier || null;
+        moveCard(dragItem.name, dragItem.srcTier, destTier);
+    };
 
-        const destTier = e.currentTarget.dataset.tier || null; // null = pool
-        const { cardId, srcTier } = dragItem;
+    // ===== Save / Load =====
+    const saveKey = () => `banlist_v2_${currentUser?.uid || 'local'}`;
 
-        if (srcTier === destTier) return;
+    window.saveState = function() {
+        const data = {};
+        for (const t of TIERS) data[t] = tierState[t].slice();
+        localStorage.setItem(saveKey(), JSON.stringify(data));
+        showStatus('保存しました', 1500);
+    };
 
-        // Remove from source
-        if (srcTier !== null) {
-            tierState[srcTier] = tierState[srcTier].filter(id => id !== cardId);
-        }
-        // Add to destination
-        if (destTier !== null) {
-            if (!tierState[destTier].includes(cardId)) {
-                tierState[destTier].push(cardId);
+    function loadState() {
+        try {
+            const raw = localStorage.getItem(saveKey());
+            if (!raw) return;
+            const data = JSON.parse(raw);
+            for (const t of TIERS) {
+                if (data[t]) tierState[t] = data[t].filter(n => cardMap.has(n));
             }
+        } catch (e) { console.warn('State load failed:', e); }
+    }
+
+    window.resetAll = function() {
+        if (!confirm('すべての分類をリセットしますか？')) return;
+        for (const t of TIERS) tierState[t] = [];
+        localStorage.removeItem(saveKey());
+        renderTiers();
+        onSearch();
+    };
+
+    // ===== Lazy image loading =====
+    let imgQueueNames = [];
+    let imgWorking = false;
+
+    function queueImageLoad(name) {
+        const card = cardMap.get(name);
+        if (!card || card.imageUrl || loadingSet.has(name)) return;
+        imgQueueNames.push(name);
+        if (!imgWorking) processImgQueue();
+    }
+
+    async function processImgQueue() {
+        imgWorking = true;
+        while (imgQueueNames.length > 0) {
+            const batch = imgQueueNames.splice(0, 6);
+            await Promise.all(batch.map(loadImg));
         }
-
-        renderAll();
-        scheduleImageLoadForVisibleCards();
-    };
-
-    function removeFromTier(cardId, tier) {
-        if (!tier) return;
-        tierState[tier] = tierState[tier].filter(id => id !== cardId);
-        renderAll();
-        scheduleImageLoadForVisibleCards();
-    }
-    window.removeFromTier = removeFromTier;
-
-    function scheduleImageLoadForVisibleCards() {
-        const elements = document.querySelectorAll('.tier-card[data-needs-image]');
-        scheduleImageLoad(elements);
+        imgWorking = false;
     }
 
-    // ===== Filter Pool =====
-    window.filterPool = function() {
-        renderPool();
-        scheduleImageLoadForVisibleCards();
-    };
+    async function loadImg(name) {
+        const card = cardMap.get(name);
+        if (!card || !card.cardId || card.imageUrl) return;
+        loadingSet.add(name);
+        try {
+            const cacheKey = `${card.cardId}_${card.ciid}`;
+            let url = await imageCacheManager.getImage(cacheKey);
+            if (!url) url = await imageCacheManager.fetchAndCache(cacheKey, card.cardId, card.ciid, card.lang);
+            if (url) {
+                card.imageUrl = url;
+                applyImageToCards(name, url);
+            }
+        } catch (e) {
+            // fallback to direct proxy URL
+            const url = `${PROXY_URL}/image?cid=${card.cardId}&ciid=${card.ciid}&locale=${card.lang}`;
+            card.imageUrl = url;
+            applyImageToCards(name, url);
+        } finally {
+            loadingSet.delete(name);
+        }
+    }
 
-    // ===== Export to Canvas =====
+    function applyImageToCards(name, url) {
+        document.querySelectorAll(`.tier-card[data-name="${CSS.escape(name)}"][data-needs-img]`).forEach(el => {
+            const inner = el.querySelector('.card-inner');
+            if (!inner) return;
+            inner.innerHTML = '';
+            const img = document.createElement('img');
+            img.src = url;
+            img.alt = name;
+            inner.appendChild(img);
+            delete el.dataset.needsImg;
+        });
+    }
+
+    // ===== Export =====
     window.openExport = async function() {
         showStatus('画像を生成中…');
-        const modal = document.getElementById('export-modal');
-        modal.classList.add('show');
+        document.getElementById('export-modal').classList.add('show');
 
         const canvas = document.getElementById('export-canvas');
         const ctx = canvas.getContext('2d');
 
-        const TIERS = ["禁止", "制限", "準制限", "緩和・解除"];
         const COLORS = { "禁止": "#c0392b", "制限": "#e67e22", "準制限": "#d4ac0d", "緩和・解除": "#27ae60" };
-        const LABEL_W = 100;
-        const CARD_W = 68;
-        const CARD_H = 99;
-        const GAP = 4;
-        const ROW_PAD = 6;
-        const ROW_MIN_H = CARD_H + ROW_PAD * 2;
+        const LABEL_W = 110;
+        const CW = 62, CH = 90, GAP = 4, PAD = 6;
+        const W = 1200;
 
-        // Calculate canvas size
-        let maxCards = Math.max(...TIERS.map(t => tierState[t].length), 1);
-        const cardsPerRow = Math.max(1, maxCards);
-        const rowW = LABEL_W + ROW_PAD + cardsPerRow * (CARD_W + GAP) + ROW_PAD;
-        const W = Math.min(rowW, 1200);
-
-        canvas.width = W;
-        canvas.height = TIERS.length * (ROW_MIN_H + GAP) + 20;
+        const rowHeights = TIERS.map(t => {
+            const cols = Math.floor((W - LABEL_W - PAD * 2 + GAP) / (CW + GAP));
+            const rows = Math.max(1, Math.ceil(tierState[t].length / cols));
+            return Math.max(CH + PAD * 2, rows * (CH + GAP) + PAD);
+        });
+        canvas.width  = W;
+        canvas.height = rowHeights.reduce((a, b) => a + b, 0) + (TIERS.length - 1) * 4 + 20;
 
         ctx.fillStyle = '#16213e';
         ctx.fillRect(0, 0, canvas.width, canvas.height);
 
         let y = 10;
-        for (const tier of TIERS) {
+        for (let ri = 0; ri < TIERS.length; ri++) {
+            const tier = TIERS[ri];
+            const rh = rowHeights[ri];
             const cards = tierState[tier];
-            const rowH = Math.max(ROW_MIN_H, Math.ceil(cards.length / Math.floor((W - LABEL_W - ROW_PAD * 2) / (CARD_W + GAP))) * (CARD_H + GAP) + ROW_PAD);
 
-            // Label background
             ctx.fillStyle = COLORS[tier];
-            ctx.beginPath();
-            ctx.roundRect(0, y, LABEL_W, rowH, [6, 0, 0, 6]);
-            ctx.fill();
+            ctx.beginPath(); ctx.roundRect(0, y, LABEL_W, rh, [6, 0, 0, 6]); ctx.fill();
 
-            // Label text
             ctx.fillStyle = tier === '準制限' ? '#333' : '#fff';
-            ctx.font = 'bold 16px "Segoe UI", sans-serif';
-            ctx.textAlign = 'center';
-            ctx.textBaseline = 'middle';
-            ctx.fillText(tier, LABEL_W / 2, y + rowH / 2);
+            ctx.font = 'bold 15px "Segoe UI", sans-serif';
+            ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+            ctx.fillText(tier, LABEL_W / 2, y + rh / 2);
 
-            // Cards background
             ctx.fillStyle = '#1e2d4a';
-            ctx.beginPath();
-            ctx.roundRect(LABEL_W, y, W - LABEL_W, rowH, [0, 6, 6, 0]);
-            ctx.fill();
+            ctx.beginPath(); ctx.roundRect(LABEL_W, y, W - LABEL_W, rh, [0, 6, 6, 0]); ctx.fill();
 
-            // Draw card images
-            let cx = LABEL_W + ROW_PAD;
-            let cy = y + ROW_PAD;
-            for (const cardId of cards) {
-                const card = allCards.find(c => c.id === cardId);
+            const cols = Math.floor((W - LABEL_W - PAD * 2 + GAP) / (CW + GAP));
+            let cx = LABEL_W + PAD, cy = y + PAD;
+            for (let i = 0; i < cards.length; i++) {
+                const card = cardMap.get(cards[i]);
                 if (card?.imageUrl) {
-                    try {
-                        await new Promise((resolve) => {
-                            const img = new Image();
-                            img.onload = () => {
-                                ctx.drawImage(img, cx, cy, CARD_W, CARD_H);
-                                resolve();
-                            };
-                            img.onerror = () => {
-                                ctx.fillStyle = '#0a0a1a';
-                                ctx.fillRect(cx, cy, CARD_W, CARD_H);
-                                resolve();
-                            };
-                            img.src = card.imageUrl;
-                        });
-                    } catch {}
+                    await new Promise(res => {
+                        const img = new Image();
+                        img.onload = () => { ctx.drawImage(img, cx, cy, CW, CH); res(); };
+                        img.onerror = () => { ctx.fillStyle = '#0a0a1a'; ctx.fillRect(cx, cy, CW, CH); res(); };
+                        img.src = card.imageUrl;
+                    });
                 } else {
                     ctx.fillStyle = '#0a0a1a';
-                    ctx.fillRect(cx, cy, CARD_W, CARD_H);
+                    ctx.fillRect(cx, cy, CW, CH);
                 }
-
-                cx += CARD_W + GAP;
-                if (cx + CARD_W + GAP > W) {
-                    cx = LABEL_W + ROW_PAD;
-                    cy += CARD_H + GAP;
-                }
+                if ((i + 1) % cols === 0) { cx = LABEL_W + PAD; cy += CH + GAP; }
+                else cx += CW + GAP;
             }
-
-            y += rowH + GAP;
+            y += rh + 4;
         }
 
-        // Resize canvas display
         canvas.style.width = '100%';
         hideStatus();
     };
-
-    window.closeExport = function() {
-        document.getElementById('export-modal').classList.remove('show');
-    };
-
-    window.downloadExport = function() {
-        const canvas = document.getElementById('export-canvas');
+    window.closeExport    = () => document.getElementById('export-modal').classList.remove('show');
+    window.downloadExport = () => {
         const a = document.createElement('a');
         a.download = 'banlist.png';
-        a.href = canvas.toDataURL('image/png');
+        a.href = document.getElementById('export-canvas').toDataURL('image/png');
         a.click();
     };
 
     // ===== Util =====
-    function showStatus(msg, autoHideMs = 0) {
+    function showStatus(msg, ms = 0) {
         const el = document.getElementById('status-bar');
-        el.innerHTML = `<span class="loading-spinner"></span>${msg}`;
+        el.innerHTML = `<span class="spin"></span>${msg}`;
         el.style.display = 'block';
-        if (autoHideMs) setTimeout(hideStatus, autoHideMs);
+        if (ms) setTimeout(hideStatus, ms);
     }
-
-    function hideStatus() {
-        document.getElementById('status-bar').style.display = 'none';
-    }
-
-    function decodeHtmlEntities(str) {
-        if (!str) return '';
-        const txt = document.createElement('textarea');
-        txt.innerHTML = str;
-        return txt.value;
-    }
-
-    // Expose saveState
-    window.saveState = saveState;
-
-    // Kick off image loading for visible cards after first render
-    document.addEventListener('DOMContentLoaded', () => {});
+    function hideStatus() { document.getElementById('status-bar').style.display = 'none'; }
 </script>
 </body>
 </html>
