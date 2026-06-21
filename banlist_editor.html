@@ -15,35 +15,7 @@
             min-height: 100vh;
         }
 
-        /* ===== Auth Screen ===== */
-        #auth-screen {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            min-height: 100vh;
-            gap: 1rem;
-        }
-        #auth-screen h1 {
-            font-size: 1.8rem;
-            background: linear-gradient(135deg, #e94560, #f5a623);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-        }
-        .auth-btn {
-            background: linear-gradient(135deg, #e94560, #c0392b);
-            color: white;
-            border: none;
-            padding: 0.75rem 2rem;
-            border-radius: 8px;
-            font-size: 1rem;
-            cursor: pointer;
-            transition: opacity 0.2s;
-        }
-        .auth-btn:hover { opacity: 0.85; }
-
         /* ===== Main App ===== */
-        #app { display: none; }
 
         .app-header {
             background: linear-gradient(135deg, #0f3460, #16213e);
@@ -75,7 +47,6 @@
         .btn-save   { background: #27ae60; color: white; }
         .btn-reset  { background: #7f8c8d; color: white; }
         .btn-export { background: #2980b9; color: white; }
-        .btn-signout { background: transparent; color: #aaa; border: 1px solid #555; font-size: 0.75rem; }
 
         /* ===== Tier Table ===== */
         .tier-container { padding: 1rem 1rem 0; }
@@ -330,14 +301,6 @@
 </head>
 <body>
 
-<!-- Auth Screen -->
-<div id="auth-screen">
-    <h1>バンリストエディター</h1>
-    <p style="color:#888;font-size:0.9rem;">マスターデータ全カードを対象に分類できます</p>
-    <button class="auth-btn" id="signin-btn">Googleでサインイン</button>
-    <div id="auth-status" style="color:#888;font-size:0.8rem;margin-top:0.5rem;"></div>
-</div>
-
 <!-- Main App -->
 <div id="app">
     <div class="app-header">
@@ -346,7 +309,6 @@
             <button class="btn-sm btn-save"   onclick="saveState()">保存</button>
             <button class="btn-sm btn-export" onclick="openExport()">画像出力</button>
             <button class="btn-sm btn-reset"  onclick="resetAll()">リセット</button>
-            <button class="btn-sm btn-signout" id="signout-btn">サインアウト</button>
         </div>
     </div>
 
@@ -408,54 +370,15 @@
 </div>
 
 <script type="module">
-    import { initializeApp } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-app.js";
-    import { getAuth, onAuthStateChanged, GoogleAuthProvider, signInWithPopup, signOut }
-        from "https://www.gstatic.com/firebasejs/9.23.0/firebase-auth.js";
-
-    const firebaseConfig = {
-        apiKey: "AIzaSyAOYKalLUb2hbghrjQUS8AWzxpLExBT7aU",
-        authDomain: "ygoh-9bcf6.firebaseapp.com",
-        projectId: "ygoh-9bcf6",
-        storageBucket: "ygoh-9bcf6.firebasestorage.app",
-        messagingSenderId: "515041224138",
-        appId: "1:515041224138:web:8de47b38ed9cc1bb8afd37"
-    };
-
-    const app = initializeApp(firebaseConfig);
-    const auth = getAuth(app);
-
     // ===== State =====
-    // cardMap: name -> { cardId, ciid:'1', lang:'ja', imageUrl:null }
-    const cardMap = new Map();
-    const cardReadingMap = new Map(); // reading (hiragana) -> [cardName, ...]
+    const cardMap = new Map();        // name -> { cardId, ciid, lang, imageUrl }
+    const cardReadingMap = new Map(); // reading -> [cardName, ...]
     const tierState = { "禁止": [], "制限": [], "準制限": [], "緩和・解除": [] };
-    let dragItem = null;   // { name, srcTier }
-    let currentUser = null;
-    const imgCache = new Map(); // name -> data URL (in-memory, on top of IndexedDB)
+    let dragItem = null;
     const loadingSet = new Set();
 
     const TIERS = ["禁止", "制限", "準制限", "緩和・解除"];
     const MAX_RESULTS = 80;
-
-    // ===== Auth =====
-    document.getElementById('signin-btn').addEventListener('click', async () => {
-        const provider = new GoogleAuthProvider();
-        try { await signInWithPopup(auth, provider); }
-        catch (e) { document.getElementById('auth-status').textContent = 'サインイン失敗: ' + e.message; }
-    });
-    document.getElementById('signout-btn').addEventListener('click', () => signOut(auth));
-
-    onAuthStateChanged(auth, async (user) => {
-        currentUser = user;
-        if (user) {
-            document.getElementById('auth-screen').style.display = 'none';
-            document.getElementById('app').style.display = 'block';
-            await init();
-        } else {
-            document.getElementById('auth-screen').style.display = 'flex';
-            document.getElementById('app').style.display = 'none';
-        }
-    });
 
     // ===== Init =====
     async function init() {
@@ -465,6 +388,8 @@
         renderTiers();
         hideStatus();
     }
+
+    init();
 
     // ===== CSV loader (same logic as gallery) =====
     async function loadCSV() {
@@ -688,7 +613,7 @@
     };
 
     // ===== Save / Load =====
-    const saveKey = () => `banlist_v2_${currentUser?.uid || 'local'}`;
+    const saveKey = () => 'banlist_v2';
 
     window.saveState = function() {
         const data = {};
