@@ -1,0 +1,945 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>バンリストエディター</title>
+    <script src="image_cache_manager.js"></script>
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+
+        body {
+            background: #16213e;
+            color: #e0e0e0;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            min-height: 100vh;
+        }
+
+        /* ===== Auth Screen ===== */
+        #auth-screen {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            gap: 1rem;
+        }
+
+        #auth-screen h1 {
+            font-size: 1.8rem;
+            background: linear-gradient(135deg, #e94560, #f5a623);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .auth-btn {
+            background: linear-gradient(135deg, #e94560, #c0392b);
+            color: white;
+            border: none;
+            padding: 0.75rem 2rem;
+            border-radius: 8px;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: opacity 0.2s;
+        }
+
+        .auth-btn:hover { opacity: 0.85; }
+
+        /* ===== Main App ===== */
+        #app { display: none; }
+
+        .app-header {
+            background: linear-gradient(135deg, #0f3460, #16213e);
+            padding: 0.75rem 1.5rem;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            border-bottom: 2px solid #e94560;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+
+        .app-header h1 {
+            font-size: 1.2rem;
+            background: linear-gradient(135deg, #e94560, #f5a623);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .header-actions {
+            display: flex;
+            gap: 0.5rem;
+            align-items: center;
+        }
+
+        .btn-sm {
+            padding: 0.4rem 0.9rem;
+            border: none;
+            border-radius: 6px;
+            font-size: 0.85rem;
+            cursor: pointer;
+            transition: opacity 0.2s;
+        }
+
+        .btn-sm:hover { opacity: 0.8; }
+        .btn-save { background: #27ae60; color: white; }
+        .btn-reset { background: #7f8c8d; color: white; }
+        .btn-export { background: #2980b9; color: white; }
+        .btn-signout { background: transparent; color: #aaa; border: 1px solid #555; font-size: 0.75rem; }
+
+        /* ===== Tier Table ===== */
+        .tier-container {
+            padding: 1rem 1rem 0;
+        }
+
+        .tier-row {
+            display: flex;
+            min-height: 100px;
+            margin-bottom: 4px;
+            border-radius: 6px;
+            overflow: hidden;
+        }
+
+        .tier-label {
+            width: 90px;
+            min-width: 90px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+            font-size: 1.1rem;
+            text-shadow: 0 1px 3px rgba(0,0,0,0.5);
+            cursor: default;
+            user-select: none;
+        }
+
+        .tier-label.kinshi  { background: #c0392b; }
+        .tier-label.seigen  { background: #e67e22; }
+        .tier-label.jun     { background: #f1c40f; color: #333; }
+        .tier-label.kanwa   { background: #27ae60; }
+
+        .tier-cards {
+            flex: 1;
+            display: flex;
+            flex-wrap: wrap;
+            align-content: flex-start;
+            gap: 4px;
+            padding: 6px;
+            background: #1e2d4a;
+            border: 2px solid transparent;
+            transition: border-color 0.15s, background 0.15s;
+            min-height: 100px;
+        }
+
+        .tier-cards.drag-over {
+            border-color: #e94560;
+            background: #253655;
+        }
+
+        /* ===== Card in Tier ===== */
+        .tier-card {
+            width: 62px;
+            height: 90px;
+            position: relative;
+            cursor: grab;
+            border-radius: 3px;
+            overflow: hidden;
+            background: #0a0a1a;
+            border: 1px solid #333;
+            flex-shrink: 0;
+            transition: transform 0.1s, box-shadow 0.1s;
+        }
+
+        .tier-card:hover {
+            transform: scale(1.08);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.6);
+            z-index: 10;
+            position: relative;
+        }
+
+        .tier-card.dragging {
+            opacity: 0.4;
+            cursor: grabbing;
+        }
+
+        .tier-card img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            display: block;
+            pointer-events: none;
+        }
+
+        .tier-card .card-placeholder-icon {
+            width: 100%;
+            height: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.4rem;
+            color: #555;
+        }
+
+        .tier-card .card-name-tooltip {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: rgba(0,0,0,0.8);
+            color: white;
+            font-size: 0.55rem;
+            padding: 2px 3px;
+            text-align: center;
+            line-height: 1.2;
+            opacity: 0;
+            transition: opacity 0.15s;
+            pointer-events: none;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .tier-card:hover .card-name-tooltip { opacity: 1; }
+
+        .tier-card .remove-btn {
+            position: absolute;
+            top: 1px;
+            right: 1px;
+            width: 16px;
+            height: 16px;
+            background: rgba(231, 76, 60, 0.9);
+            color: white;
+            border: none;
+            border-radius: 50%;
+            font-size: 0.65rem;
+            cursor: pointer;
+            display: none;
+            align-items: center;
+            justify-content: center;
+            line-height: 1;
+        }
+
+        .tier-card:hover .remove-btn { display: flex; }
+
+        /* ===== Pool ===== */
+        .pool-section {
+            padding: 1rem;
+        }
+
+        .pool-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 0.75rem;
+            gap: 1rem;
+        }
+
+        .pool-title {
+            font-size: 0.95rem;
+            color: #aaa;
+            white-space: nowrap;
+        }
+
+        .pool-search {
+            flex: 1;
+            max-width: 320px;
+            padding: 0.4rem 0.8rem;
+            background: #1e2d4a;
+            border: 1px solid #334;
+            border-radius: 6px;
+            color: #e0e0e0;
+            font-size: 0.85rem;
+            outline: none;
+        }
+
+        .pool-search:focus { border-color: #e94560; }
+
+        .pool-stats {
+            font-size: 0.8rem;
+            color: #777;
+            white-space: nowrap;
+        }
+
+        #pool-cards {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 5px;
+            padding: 8px;
+            background: #1e2d4a;
+            border-radius: 6px;
+            border: 2px solid transparent;
+            min-height: 120px;
+            transition: border-color 0.15s;
+        }
+
+        #pool-cards.drag-over {
+            border-color: #27ae60;
+            background: #1f3540;
+        }
+
+        /* Pool cards are slightly bigger */
+        #pool-cards .tier-card {
+            width: 68px;
+            height: 99px;
+        }
+
+        /* ===== Status / Loading ===== */
+        #status-bar {
+            position: fixed;
+            bottom: 1rem;
+            right: 1rem;
+            background: #0f3460;
+            color: #e0e0e0;
+            padding: 0.5rem 1rem;
+            border-radius: 6px;
+            font-size: 0.8rem;
+            border: 1px solid #e94560;
+            max-width: 260px;
+            display: none;
+            z-index: 200;
+        }
+
+        .loading-spinner {
+            display: inline-block;
+            width: 12px;
+            height: 12px;
+            border: 2px solid #555;
+            border-top-color: #e94560;
+            border-radius: 50%;
+            animation: spin 0.7s linear infinite;
+            margin-right: 6px;
+            vertical-align: middle;
+        }
+
+        @keyframes spin { to { transform: rotate(360deg); } }
+
+        /* ===== Export overlay ===== */
+        #export-modal {
+            display: none;
+            position: fixed;
+            inset: 0;
+            background: rgba(0,0,0,0.8);
+            z-index: 300;
+            align-items: center;
+            justify-content: center;
+        }
+
+        #export-modal.show { display: flex; }
+
+        .export-box {
+            background: #0f3460;
+            border: 1px solid #e94560;
+            border-radius: 10px;
+            padding: 1.5rem;
+            max-width: 92vw;
+            width: 700px;
+        }
+
+        .export-box h3 { margin-bottom: 1rem; font-size: 1rem; color: #f5a623; }
+
+        #export-canvas {
+            display: block;
+            max-width: 100%;
+            border-radius: 4px;
+            background: #000;
+        }
+
+        .export-actions {
+            display: flex;
+            gap: 0.5rem;
+            margin-top: 0.75rem;
+            justify-content: flex-end;
+        }
+
+        .btn-dl { background: #27ae60; color: white; }
+        .btn-close-modal { background: #555; color: white; }
+    </style>
+</head>
+<body>
+
+<!-- Auth Screen -->
+<div id="auth-screen">
+    <h1>バンリストエディター</h1>
+    <p style="color:#888;font-size:0.9rem;">コレクションからカードを読み込みます</p>
+    <button class="auth-btn" id="signin-btn">Googleでサインイン</button>
+    <div id="auth-status" style="color:#888;font-size:0.8rem;margin-top:0.5rem;"></div>
+</div>
+
+<!-- Main App -->
+<div id="app">
+    <div class="app-header">
+        <h1>バンリストエディター</h1>
+        <div class="header-actions">
+            <button class="btn-sm btn-save" onclick="saveState()">保存</button>
+            <button class="btn-sm btn-export" onclick="openExport()">画像出力</button>
+            <button class="btn-sm btn-reset" onclick="resetAll()">リセット</button>
+            <button class="btn-sm btn-signout" id="signout-btn">サインアウト</button>
+        </div>
+    </div>
+
+    <!-- Tier Rows -->
+    <div class="tier-container" id="tier-container">
+        <div class="tier-row">
+            <div class="tier-label kinshi">禁止</div>
+            <div class="tier-cards" data-tier="禁止" id="tier-禁止"
+                 ondragover="onDragOver(event)" ondragleave="onDragLeave(event)" ondrop="onDrop(event)">
+            </div>
+        </div>
+        <div class="tier-row">
+            <div class="tier-label seigen">制限</div>
+            <div class="tier-cards" data-tier="制限" id="tier-制限"
+                 ondragover="onDragOver(event)" ondragleave="onDragLeave(event)" ondrop="onDrop(event)">
+            </div>
+        </div>
+        <div class="tier-row">
+            <div class="tier-label jun">準制限</div>
+            <div class="tier-cards" data-tier="準制限" id="tier-準制限"
+                 ondragover="onDragOver(event)" ondragleave="onDragLeave(event)" ondrop="onDrop(event)">
+            </div>
+        </div>
+        <div class="tier-row">
+            <div class="tier-label kanwa">緩和・解除</div>
+            <div class="tier-cards" data-tier="緩和・解除" id="tier-緩和・解除"
+                 ondragover="onDragOver(event)" ondragleave="onDragLeave(event)" ondrop="onDrop(event)">
+            </div>
+        </div>
+    </div>
+
+    <!-- Pool -->
+    <div class="pool-section">
+        <div class="pool-header">
+            <span class="pool-title">未分類</span>
+            <input type="search" class="pool-search" id="pool-search" placeholder="カード名で絞り込み…" oninput="filterPool()">
+            <span class="pool-stats" id="pool-stats"></span>
+        </div>
+        <div id="pool-cards"
+             ondragover="onDragOver(event)" ondragleave="onDragLeave(event)" ondrop="onDrop(event)">
+        </div>
+    </div>
+</div>
+
+<!-- Status Bar -->
+<div id="status-bar"></div>
+
+<!-- Export Modal -->
+<div id="export-modal">
+    <div class="export-box">
+        <h3>画像出力</h3>
+        <canvas id="export-canvas"></canvas>
+        <div class="export-actions">
+            <button class="btn-sm btn-dl" onclick="downloadExport()">ダウンロード</button>
+            <button class="btn-sm btn-close-modal" onclick="closeExport()">閉じる</button>
+        </div>
+    </div>
+</div>
+
+<script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-app.js";
+    import { getAuth, onAuthStateChanged, GoogleAuthProvider, signInWithPopup, signOut }
+        from "https://www.gstatic.com/firebasejs/9.23.0/firebase-auth.js";
+    import { api } from './api-client.js';
+
+    const firebaseConfig = {
+        apiKey: "AIzaSyAOYKalLUb2hbghrjQUS8AWzxpLExBT7aU",
+        authDomain: "ygoh-9bcf6.firebaseapp.com",
+        projectId: "ygoh-9bcf6",
+        storageBucket: "ygoh-9bcf6.firebasestorage.app",
+        messagingSenderId: "515041224138",
+        appId: "1:515041224138:web:8de47b38ed9cc1bb8afd37"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const auth = getAuth(app);
+
+    // ===== State =====
+    let allCards = [];          // { id, name, cardId, ciid, lang }
+    let cardDetailsMap = new Map();
+    let tierState = { "禁止": [], "制限": [], "準制限": [], "緩和・解除": [] };
+    let dragItem = null;        // { cardId: string, srcTier: string|null }
+    let currentUser = null;
+    let imageQueue = [];
+    let isLoadingImages = false;
+
+    // ===== Auth =====
+    document.getElementById('signin-btn').addEventListener('click', async () => {
+        const provider = new GoogleAuthProvider();
+        try {
+            await signInWithPopup(auth, provider);
+        } catch (e) {
+            document.getElementById('auth-status').textContent = 'サインイン失敗: ' + e.message;
+        }
+    });
+
+    document.getElementById('signout-btn').addEventListener('click', () => signOut(auth));
+
+    onAuthStateChanged(auth, async (user) => {
+        currentUser = user;
+        if (user) {
+            document.getElementById('auth-screen').style.display = 'none';
+            document.getElementById('app').style.display = 'block';
+            await api.setAuth(user);
+            await init();
+        } else {
+            document.getElementById('auth-screen').style.display = 'flex';
+            document.getElementById('app').style.display = 'none';
+        }
+    });
+
+    // ===== Init =====
+    async function init() {
+        showStatus('カードデータを読み込み中…');
+        await loadCSV();
+        showStatus('コレクションを読み込み中…');
+        await loadCollection();
+        loadState();
+        renderAll();
+        hideStatus();
+    }
+
+    async function loadCSV() {
+        try {
+            const res = await fetch('yugioh_cards_master.csv');
+            const text = await res.text();
+            const lines = text.split('\n');
+            for (let i = 1; i < lines.length; i++) {
+                const line = lines[i].trim();
+                if (!line) continue;
+                const values = line.split(',');
+                const cardId = values[0]?.replace(/"/g, '');
+                const cardName = values[1]?.replace(/"/g, '');
+                if (cardId && cardName) {
+                    cardDetailsMap.set(cardName, { cardId });
+                }
+            }
+        } catch (e) {
+            console.warn('CSV load failed:', e);
+        }
+    }
+
+    async function loadCollection() {
+        try {
+            const cards = await api.getCards('collection');
+            // Deduplicate by card name (keep first occurrence)
+            const seen = new Set();
+            allCards = [];
+            for (const card of cards) {
+                const raw = card['名前'] || card.data?.['名前'] || '';
+                const name = decodeHtmlEntities(raw);
+                const key = name;
+                if (seen.has(key)) continue;
+                seen.add(key);
+
+                const data = card.data || card;
+                const overrideId = data.customCardId || null;
+                const ciid = data.selectedCiid || '1';
+                const lang = data.cardLang || 'ja';
+                const detailId = cardDetailsMap.get(name)?.cardId;
+                const cardId = overrideId || detailId || null;
+
+                allCards.push({
+                    id: card.id || key,
+                    name,
+                    cardId,
+                    ciid,
+                    lang,
+                    imageUrl: null
+                });
+            }
+            console.log(`Loaded ${allCards.length} unique cards`);
+        } catch (e) {
+            console.error('Collection load failed:', e);
+            showStatus('コレクションの読み込みに失敗しました');
+        }
+    }
+
+    // ===== Save / Load (localStorage) =====
+    function getSaveKey() {
+        return `banlist_state_${currentUser?.uid || 'local'}`;
+    }
+
+    function saveState() {
+        const data = {};
+        for (const tier of Object.keys(tierState)) {
+            data[tier] = tierState[tier].slice();
+        }
+        localStorage.setItem(getSaveKey(), JSON.stringify(data));
+        showStatus('保存しました', 1500);
+    }
+
+    function loadState() {
+        try {
+            const raw = localStorage.getItem(getSaveKey());
+            if (!raw) return;
+            const data = JSON.parse(raw);
+            // Only restore entries that exist in current allCards
+            const validIds = new Set(allCards.map(c => c.id));
+            for (const tier of Object.keys(tierState)) {
+                if (data[tier]) {
+                    tierState[tier] = data[tier].filter(id => validIds.has(id));
+                }
+            }
+        } catch (e) {
+            console.warn('State load failed:', e);
+        }
+    }
+
+    window.resetAll = function() {
+        if (!confirm('すべての分類をリセットしますか？')) return;
+        for (const tier of Object.keys(tierState)) {
+            tierState[tier] = [];
+        }
+        localStorage.removeItem(getSaveKey());
+        renderAll();
+    };
+
+    // ===== Render =====
+    function getPoolCards() {
+        const assigned = new Set(Object.values(tierState).flat());
+        return allCards.filter(c => !assigned.has(c.id));
+    }
+
+    function renderAll() {
+        for (const tier of Object.keys(tierState)) {
+            renderTier(tier);
+        }
+        renderPool();
+    }
+
+    function renderTier(tier) {
+        const el = document.getElementById(`tier-${tier}`);
+        if (!el) return;
+        el.innerHTML = '';
+        for (const cardId of tierState[tier]) {
+            const card = allCards.find(c => c.id === cardId);
+            if (card) el.appendChild(makeTierCardEl(card, tier));
+        }
+    }
+
+    function renderPool() {
+        const query = document.getElementById('pool-search').value.toLowerCase();
+        const pool = getPoolCards();
+        const filtered = query ? pool.filter(c => c.name.toLowerCase().includes(query)) : pool;
+
+        const el = document.getElementById('pool-cards');
+        el.innerHTML = '';
+        for (const card of filtered) {
+            el.appendChild(makeTierCardEl(card, null));
+        }
+
+        const statsEl = document.getElementById('pool-stats');
+        statsEl.textContent = `${filtered.length} / ${pool.length} 枚`;
+
+        // Lazy load images
+        scheduleImageLoad(el.querySelectorAll('.tier-card[data-needs-image]'));
+    }
+
+    function makeTierCardEl(card, tier) {
+        const div = document.createElement('div');
+        div.className = 'tier-card';
+        div.dataset.cardId = card.id;
+        div.dataset.tier = tier || '';
+        div.draggable = true;
+
+        // Placeholder
+        const ph = document.createElement('div');
+        ph.className = 'card-placeholder-icon';
+        ph.textContent = '🃏';
+        div.appendChild(ph);
+
+        // If image already loaded, show it
+        if (card.imageUrl) {
+            setCardImage(div, card.imageUrl, card.name);
+        } else {
+            div.dataset.needsImage = '1';
+        }
+
+        // Name tooltip
+        const tooltip = document.createElement('div');
+        tooltip.className = 'card-name-tooltip';
+        tooltip.textContent = card.name;
+        div.appendChild(tooltip);
+
+        // Remove button
+        const rmBtn = document.createElement('button');
+        rmBtn.className = 'remove-btn';
+        rmBtn.textContent = '×';
+        rmBtn.title = '未分類に戻す';
+        rmBtn.addEventListener('click', (e) => {
+            e.stopPropagation();
+            removeFromTier(card.id, tier);
+        });
+        div.appendChild(rmBtn);
+
+        // Drag events
+        div.addEventListener('dragstart', (e) => {
+            dragItem = { cardId: card.id, srcTier: tier };
+            div.classList.add('dragging');
+            e.dataTransfer.effectAllowed = 'move';
+        });
+        div.addEventListener('dragend', () => {
+            div.classList.remove('dragging');
+            dragItem = null;
+        });
+
+        return div;
+    }
+
+    function setCardImage(el, url, name) {
+        el.querySelector('.card-placeholder-icon')?.remove();
+        const existing = el.querySelector('img');
+        if (existing) return;
+        const img = document.createElement('img');
+        img.src = url;
+        img.alt = name;
+        img.loading = 'lazy';
+        img.onerror = () => img.remove();
+        el.insertBefore(img, el.firstChild);
+        delete el.dataset.needsImage;
+    }
+
+    // ===== Image Loading =====
+    function scheduleImageLoad(elements) {
+        for (const el of elements) {
+            const cardId = el.dataset.cardId;
+            const card = allCards.find(c => c.id === cardId);
+            if (card && !card.imageUrl) {
+                imageQueue.push({ el, card });
+            }
+        }
+        if (!isLoadingImages) processImageQueue();
+    }
+
+    async function processImageQueue() {
+        isLoadingImages = true;
+        while (imageQueue.length > 0) {
+            // Process in batches of 5
+            const batch = imageQueue.splice(0, 5);
+            await Promise.all(batch.map(({ el, card }) => loadImageForCard(el, card)));
+        }
+        isLoadingImages = false;
+    }
+
+    async function loadImageForCard(el, card) {
+        if (card.imageUrl) {
+            // Already loaded, just set it if element still exists
+            if (el.isConnected) setCardImage(el, card.imageUrl, card.name);
+            return;
+        }
+        try {
+            const url = await getCardImageUrl(card);
+            if (url) {
+                card.imageUrl = url;
+                // Update all rendered instances of this card
+                document.querySelectorAll(`.tier-card[data-card-id="${CSS.escape(card.id)}"]`).forEach(node => {
+                    if (node.dataset.needsImage) setCardImage(node, url, card.name);
+                });
+            }
+        } catch (e) {
+            // silently ignore image errors
+        }
+    }
+
+    async function getCardImageUrl(card) {
+        if (!card.cardId) return null;
+        const cacheKey = card.lang === 'ja'
+            ? `${card.cardId}_${card.ciid}`
+            : `${card.cardId}_${card.ciid}_${card.lang}`;
+        try {
+            const cached = await imageCacheManager.getImage(cacheKey);
+            if (cached) return cached;
+            return await imageCacheManager.fetchAndCache(cacheKey, card.cardId, card.ciid, card.lang);
+        } catch (e) {
+            return `${PROXY_URL}/image?cid=${card.cardId}&ciid=${card.ciid}&locale=${card.lang}`;
+        }
+    }
+
+    // ===== Drag & Drop =====
+    window.onDragOver = function(e) {
+        e.preventDefault();
+        e.currentTarget.classList.add('drag-over');
+        e.dataTransfer.dropEffect = 'move';
+    };
+
+    window.onDragLeave = function(e) {
+        e.currentTarget.classList.remove('drag-over');
+    };
+
+    window.onDrop = function(e) {
+        e.preventDefault();
+        e.currentTarget.classList.remove('drag-over');
+        if (!dragItem) return;
+
+        const destTier = e.currentTarget.dataset.tier || null; // null = pool
+        const { cardId, srcTier } = dragItem;
+
+        if (srcTier === destTier) return;
+
+        // Remove from source
+        if (srcTier !== null) {
+            tierState[srcTier] = tierState[srcTier].filter(id => id !== cardId);
+        }
+        // Add to destination
+        if (destTier !== null) {
+            if (!tierState[destTier].includes(cardId)) {
+                tierState[destTier].push(cardId);
+            }
+        }
+
+        renderAll();
+        scheduleImageLoadForVisibleCards();
+    };
+
+    function removeFromTier(cardId, tier) {
+        if (!tier) return;
+        tierState[tier] = tierState[tier].filter(id => id !== cardId);
+        renderAll();
+        scheduleImageLoadForVisibleCards();
+    }
+    window.removeFromTier = removeFromTier;
+
+    function scheduleImageLoadForVisibleCards() {
+        const elements = document.querySelectorAll('.tier-card[data-needs-image]');
+        scheduleImageLoad(elements);
+    }
+
+    // ===== Filter Pool =====
+    window.filterPool = function() {
+        renderPool();
+        scheduleImageLoadForVisibleCards();
+    };
+
+    // ===== Export to Canvas =====
+    window.openExport = async function() {
+        showStatus('画像を生成中…');
+        const modal = document.getElementById('export-modal');
+        modal.classList.add('show');
+
+        const canvas = document.getElementById('export-canvas');
+        const ctx = canvas.getContext('2d');
+
+        const TIERS = ["禁止", "制限", "準制限", "緩和・解除"];
+        const COLORS = { "禁止": "#c0392b", "制限": "#e67e22", "準制限": "#d4ac0d", "緩和・解除": "#27ae60" };
+        const LABEL_W = 100;
+        const CARD_W = 68;
+        const CARD_H = 99;
+        const GAP = 4;
+        const ROW_PAD = 6;
+        const ROW_MIN_H = CARD_H + ROW_PAD * 2;
+
+        // Calculate canvas size
+        let maxCards = Math.max(...TIERS.map(t => tierState[t].length), 1);
+        const cardsPerRow = Math.max(1, maxCards);
+        const rowW = LABEL_W + ROW_PAD + cardsPerRow * (CARD_W + GAP) + ROW_PAD;
+        const W = Math.min(rowW, 1200);
+
+        canvas.width = W;
+        canvas.height = TIERS.length * (ROW_MIN_H + GAP) + 20;
+
+        ctx.fillStyle = '#16213e';
+        ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+        let y = 10;
+        for (const tier of TIERS) {
+            const cards = tierState[tier];
+            const rowH = Math.max(ROW_MIN_H, Math.ceil(cards.length / Math.floor((W - LABEL_W - ROW_PAD * 2) / (CARD_W + GAP))) * (CARD_H + GAP) + ROW_PAD);
+
+            // Label background
+            ctx.fillStyle = COLORS[tier];
+            ctx.beginPath();
+            ctx.roundRect(0, y, LABEL_W, rowH, [6, 0, 0, 6]);
+            ctx.fill();
+
+            // Label text
+            ctx.fillStyle = tier === '準制限' ? '#333' : '#fff';
+            ctx.font = 'bold 16px "Segoe UI", sans-serif';
+            ctx.textAlign = 'center';
+            ctx.textBaseline = 'middle';
+            ctx.fillText(tier, LABEL_W / 2, y + rowH / 2);
+
+            // Cards background
+            ctx.fillStyle = '#1e2d4a';
+            ctx.beginPath();
+            ctx.roundRect(LABEL_W, y, W - LABEL_W, rowH, [0, 6, 6, 0]);
+            ctx.fill();
+
+            // Draw card images
+            let cx = LABEL_W + ROW_PAD;
+            let cy = y + ROW_PAD;
+            for (const cardId of cards) {
+                const card = allCards.find(c => c.id === cardId);
+                if (card?.imageUrl) {
+                    try {
+                        await new Promise((resolve) => {
+                            const img = new Image();
+                            img.onload = () => {
+                                ctx.drawImage(img, cx, cy, CARD_W, CARD_H);
+                                resolve();
+                            };
+                            img.onerror = () => {
+                                ctx.fillStyle = '#0a0a1a';
+                                ctx.fillRect(cx, cy, CARD_W, CARD_H);
+                                resolve();
+                            };
+                            img.src = card.imageUrl;
+                        });
+                    } catch {}
+                } else {
+                    ctx.fillStyle = '#0a0a1a';
+                    ctx.fillRect(cx, cy, CARD_W, CARD_H);
+                }
+
+                cx += CARD_W + GAP;
+                if (cx + CARD_W + GAP > W) {
+                    cx = LABEL_W + ROW_PAD;
+                    cy += CARD_H + GAP;
+                }
+            }
+
+            y += rowH + GAP;
+        }
+
+        // Resize canvas display
+        canvas.style.width = '100%';
+        hideStatus();
+    };
+
+    window.closeExport = function() {
+        document.getElementById('export-modal').classList.remove('show');
+    };
+
+    window.downloadExport = function() {
+        const canvas = document.getElementById('export-canvas');
+        const a = document.createElement('a');
+        a.download = 'banlist.png';
+        a.href = canvas.toDataURL('image/png');
+        a.click();
+    };
+
+    // ===== Util =====
+    function showStatus(msg, autoHideMs = 0) {
+        const el = document.getElementById('status-bar');
+        el.innerHTML = `<span class="loading-spinner"></span>${msg}`;
+        el.style.display = 'block';
+        if (autoHideMs) setTimeout(hideStatus, autoHideMs);
+    }
+
+    function hideStatus() {
+        document.getElementById('status-bar').style.display = 'none';
+    }
+
+    function decodeHtmlEntities(str) {
+        if (!str) return '';
+        const txt = document.createElement('textarea');
+        txt.innerHTML = str;
+        return txt.value;
+    }
+
+    // Expose saveState
+    window.saveState = saveState;
+
+    // Kick off image loading for visible cards after first render
+    document.addEventListener('DOMContentLoaded', () => {});
+</script>
+</body>
+</html>
