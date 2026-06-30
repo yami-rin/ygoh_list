@@ -67,7 +67,10 @@
   .lists-wrap{display:flex;flex-direction:column;gap:8px;padding:8px;}
   .listcol{background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:8px;}
   .hscroll{display:flex;gap:4px;overflow-x:auto;overflow-y:hidden;padding-bottom:4px;min-height:74px;align-items:flex-start;flex-wrap:wrap;}
+  .hscroll.nowrap{flex-wrap:nowrap;min-height:0;}
   .hscroll .dcard{width:48px;flex:0 0 auto;}
+  .listcol.inline{background:transparent;border:0;padding:4px 0 0;}
+  .listcol.inline .side-title{margin-bottom:3px;}
   @media(max-width:560px){ .hscroll .dcard{width:40px;} }
   /* card */
   .dcard{position:relative;aspect-ratio:59/86;border-radius:5px;overflow:visible;cursor:grab;width:100%;height:100%;touch-action:none;}
@@ -334,11 +337,10 @@ function renderSide(side){
   const left=document.createElement('div'); left.className='side-left';
 
   const grid=document.createElement('div'); grid.className='slotgrid';
-  // EX row:    [EXデッキ][Field][EX-left][ ][EX-right][ ][ ]  — deck piles sit on-field, next to the zones (short drag)
+  // EX row: [spacer][Field][EX-left][ ][EX-right][ ][ ]
   const exrow=document.createElement('div'); exrow.className='row';
   for(let c=0;c<7;c++){
-    if(c===0){ exrow.appendChild(pileZone(side,{zone:'extra',cls:'extra',label:'EXデッキ'})); }
-    else if(c===1){ exrow.appendChild(slotZone(side,'field',0,'フィールド')); }
+    if(c===1){ exrow.appendChild(slotZone(side,'field',0,'フィールド')); }
     else if(c===2||c===4){ const idx=c===2?0:1; exrow.appendChild(slotZone(side,'exmon',idx,'EX')); }
     else exrow.appendChild(spacer());
   }
@@ -349,13 +351,19 @@ function renderSide(side){
   for(let i=0;i<5;i++) mrow.appendChild(slotZone(side,'monster',i,''));
   mrow.appendChild(spacer());
   grid.appendChild(mrow);
-  // spell row:  [デッキ][S1..S5][spacer]
+  // spell row: [spacer][S1..S5][spacer]
   const srow=document.createElement('div'); srow.className='row';
-  srow.appendChild(pileZone(side,{zone:'deck',cls:'deck',label:'デッキ'}));
+  srow.appendChild(spacer());
   for(let i=0;i<5;i++) srow.appendChild(slotZone(side,'spell',i,''));
   srow.appendChild(spacer());
   grid.appendChild(srow);
   left.appendChild(grid);
+
+  // always-visible EX / Deck lists, directly under the field (self only) — single scrollable row
+  if(side==='self'){
+    left.appendChild(buildList(side,'extra','EXデッキ','タップ=手札 / 長押し=フィールドへ / ドラッグ'));
+    left.appendChild(buildList(side,'deck','デッキ','タップ=手札 / ドラッグ=任意ゾーン'));
+  }
 
   // free zone == hand (free placement). The drawn cards land here.
   const fz=document.createElement('div'); fz.className='freezone handzone'; fz.dataset.drop=side+'.free';
@@ -383,6 +391,17 @@ function renderSide(side){
 }
 
 function spacer(){ const d=document.createElement('div'); return d; }
+
+// always-visible card list (single scrollable row) placed right under the field
+function buildList(side, zone, label, hint){
+  const col=document.createElement('div'); col.className='listcol inline';
+  const t=document.createElement('div'); t.className='side-title';
+  t.innerHTML=`${label} <span class="pill">${S[side][zone].length}</span> <span class="muted">${hint}</span>`;
+  const sc=document.createElement('div'); sc.className='hscroll nowrap'; sc.dataset.drop=`${side}.${zone}`;
+  S[side][zone].forEach((c,i)=>{ sc.appendChild(cardEl(c, `${side}.${zone}.${i}`, true, ()=>moveTo(`${side}.${zone}.${i}`, side+'.free'))); });
+  col.appendChild(t); col.appendChild(sc);
+  return col;
+}
 
 // vertical overlapping stack for graveyard / banished on the right rail
 function stackZone(side,zone,label,cls){
