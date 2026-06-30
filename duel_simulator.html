@@ -104,6 +104,8 @@
   .modal h3{margin:0 0 10px;font-size:1rem;}
   .listgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(64px,1fr));gap:6px;}
   .listgrid .dcard{width:100%;}
+  #matModalGrid .dcard{cursor:pointer;}
+  #matModalGrid .dcard.selected{outline:3px solid #e11d48;outline-offset:1px;border-radius:6px;}
   .savelist{display:flex;flex-direction:column;gap:6px;}
   .saveitem{display:flex;align-items:center;gap:8px;background:#222736;border:1px solid var(--line);border-radius:6px;padding:8px;}
   .saveitem .grow{flex:1 1 auto;min-width:0;}
@@ -160,6 +162,19 @@
     <h3 id="listModalTitle">ゾーン</h3>
     <div class="listgrid" id="listModalGrid"></div>
     <div style="margin-top:12px;text-align:right;"><button class="btn" data-close>閉じる</button></div>
+  </div>
+</div>
+
+<!-- Xyz material selection modal -->
+<div class="modal" id="matModal">
+  <div class="box">
+    <h3 id="matModalTitle">X素材</h3>
+    <div class="muted" style="margin-bottom:8px;">取り除く素材をタップで選択 → ボタンで墓地へ</div>
+    <div class="listgrid" id="matModalGrid"></div>
+    <div style="margin-top:12px;display:flex;gap:8px;justify-content:flex-end;">
+      <button class="btn warn" id="matRemoveBtn">選択した素材を墓地へ</button>
+      <button class="btn" data-close>閉じる</button>
+    </div>
   </div>
 </div>
 
@@ -412,18 +427,36 @@ function renderSide(side){
 
 function spacer(){ const d=document.createElement('div'); return d; }
 
-// spread each deck/EX list row to fill the full container width (no empty space on the right)
+// lay out deck/EX lists to fill the row width.
+// PC: shrink cards so all fit in one row, no overlap. Mobile: overlap rows of 15 to fill.
 function layoutLists(){
+  const pc = window.innerWidth>560;
   document.querySelectorAll('.listrows').forEach(box=>{
     const rows=[...box.querySelectorAll('.listrow')]; if(!rows.length) return;
     const avail=box.clientWidth; if(!avail) return;
-    const first=rows[0].firstElementChild; if(!first) return;
-    const cw=first.getBoundingClientRect().width||50;
-    const maxN=Math.max(...rows.map(r=>r.children.length)); // full rows fill exactly; shorter rows keep same spacing
-    const step = maxN>1 ? (avail-cw)/(maxN-1) : 0;
-    rows.forEach(row=>{ const cards=row.children; for(let i=0;i<cards.length;i++){ cards[i].style.marginLeft = i===0?'0':(step-cw)+'px'; } });
+    if(pc){
+      const maxW=54, gap=3;
+      rows.forEach(row=>{
+        const cards=row.children, n=cards.length; if(!n) return;
+        let cardW=(avail-(n-1)*gap)/n;
+        if(cardW>=maxW){ // fit at full size, spread to fill the width
+          cardW=maxW; const step=n>1?(avail-maxW)/(n-1):0;
+          for(let i=0;i<n;i++){ cards[i].style.width=maxW+'px'; cards[i].style.marginLeft=i?(step-maxW)+'px':'0'; }
+        } else { // shrink so all fit in one row without overlapping
+          for(let i=0;i<n;i++){ cards[i].style.width=cardW+'px'; cards[i].style.marginLeft=i?gap+'px':'0'; }
+        }
+      });
+    } else {
+      const first=rows[0].firstElementChild; if(!first) return;
+      const cw=first.getBoundingClientRect().width||48;
+      const maxN=Math.max(...rows.map(r=>r.children.length));
+      const step = maxN>1 ? (avail-cw)/(maxN-1) : 0;
+      rows.forEach(row=>{ const cards=row.children; for(let i=0;i<cards.length;i++){ cards[i].style.width=''; cards[i].style.marginLeft = i===0?'0':(step-cw)+'px'; } });
+    }
   });
 }
+let resizeTimer=null;
+window.addEventListener('resize',()=>{ clearTimeout(resizeTimer); resizeTimer=setTimeout(()=>{ if(!replayMode) render(); else layoutLists(); }, 160); });
 
 // always-visible card list: rows of 15 overlapping cards, placed under the field
 function buildList(side, zone, label, hint){
@@ -431,7 +464,8 @@ function buildList(side, zone, label, hint){
   const t=document.createElement('div'); t.className='side-title';
   t.innerHTML=`${label} <span class="pill">${S[side][zone].length}</span> <span class="muted">${hint}</span>`;
   const box=document.createElement('div'); box.className='listrows'; box.dataset.drop=`${side}.${zone}`;
-  const arr=S[side][zone]; const PER=15;
+  const arr=S[side][zone];
+  const PER = window.innerWidth>560 ? Math.max(1,arr.length) : 15; // PC: all in one row; mobile: 15 per row
   if(!arr.length) box.style.minHeight='30px';
   for(let r=0;r<arr.length;r+=PER){
     const row=document.createElement('div'); row.className='listrow';
@@ -501,6 +535,20 @@ function detachMaterial(loc, all){
   const taken = all ? card.materials.splice(0) : [card.materials.pop()];
   taken.forEach(m=>{ if(!m) return; m.faceDown=false; m.defense=false; m.counters=0; m.materials=[]; S[side].graveyard.push(m); });
   commit();
+}
+// choose specific Xyz materials to remove
+let matModalLoc=null; let matSelected=new Set();
+function openMatModal(loc){
+  const card=cardAt(loc); if(!card || !card.materials || !card.materials.length) return;
+  matModalLoc=loc; matSelected=new Set();
+  document.getElementById('matModalTitle').textContent=`X素材 (${card.materials.length}枚) — ${card.name}`;
+  const grid=document.getElementById('matModalGrid'); grid.innerHTML='';
+  card.materials.forEach((m,i)=>{
+    const el=cardEl(m, loc+':sel'+i, false);
+    el.addEventListener('click',()=>{ if(matSelected.has(i)){ matSelected.delete(i); el.classList.remove('selected'); } else { matSelected.add(i); el.classList.add('selected'); } });
+    grid.appendChild(el);
+  });
+  openModal(document.getElementById('matModal'));
 }
 
 function pileLabel(zone){ const p=PILES.find(x=>x.zone===zone); return p?p.label:zone; }
@@ -680,6 +728,7 @@ function openMenu(loc, x, y){
   if(card.materials && card.materials.length){
     items.push(['sep']);
     items.push(['mh','X素材 '+card.materials.length+'枚']);
+    items.push(['btn','X素材を選んで取り除く…', ()=>openMatModal(loc)]);
     items.push(['btn','X素材を1枚 墓地へ', ()=>detachMaterial(loc)]);
     items.push(['btn','X素材を全て 墓地へ', ()=>detachMaterial(loc, true)]);
   }
@@ -954,6 +1003,19 @@ document.getElementById('loginBtn').addEventListener('click',async()=>{
   try{ await fbSignInPopup(); }catch(e){ toast('ログインに失敗しました'); }
 });
 document.getElementById('deckChip').addEventListener('click',expandDeckPicker);
+document.getElementById('matRemoveBtn').addEventListener('click',()=>{
+  if(!matModalLoc){ closeModal(document.getElementById('matModal')); return; }
+  const card=cardAt(matModalLoc);
+  if(!card || !card.materials){ closeModal(document.getElementById('matModal')); return; }
+  if(!matSelected.size){ toast('取り除く素材を選択してください'); return; }
+  const {side}=parseLoc(matModalLoc);
+  [...matSelected].sort((a,b)=>b-a).forEach(i=>{ // splice from highest index first
+    const m=card.materials.splice(i,1)[0];
+    if(m){ m.faceDown=false; m.defense=false; m.counters=0; m.materials=[]; S[side].graveyard.push(m); }
+  });
+  matModalLoc=null; matSelected=new Set();
+  closeModal(document.getElementById('matModal')); commit();
+});
 // replay bar
 document.getElementById('rbPlay').addEventListener('click',replayPlay);
 document.getElementById('rbStepB').addEventListener('click',()=>{ stopReplayPlay(); showReplayFrame(replayIdx-1); });
@@ -965,7 +1027,7 @@ document.getElementById('rbExit').addEventListener('click',exitReplay);
 if(location.search.includes('test')){
   window.__sim = {
     get S(){ return S; }, get history(){ return history; }, render, commit, newCard, placeCard, makeSide,
-    enc, dec, curBoard, restoreBoard, startReplay, showReplayFrame, snapshot, doDraw, undo, moveTo, detachMaterial, isLinkMonster,
+    enc, dec, curBoard, restoreBoard, startReplay, showReplayFrame, snapshot, doDraw, undo, moveTo, detachMaterial, isLinkMonster, openMatModal,
     seed(){
       S.self.deck = Array.from({length:35},(_,i)=>newCard('デッキカード',null,'1'));
       S.self.extra = Array.from({length:8},(_,i)=>newCard('EXカード',null,'1'));
