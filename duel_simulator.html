@@ -289,7 +289,7 @@ function placeCard(loc, card, opts){
   }
   if(zone==='free'){
     if(opts && opts.x!=null){ card.x=opts.x; card.y=opts.y; }
-    else { const n=a.length; const cw=getSlotW()+6; card.x=6+(n%9)*cw; card.y=6+Math.floor(n/9)*(getSlotW()*1.46+8); }
+    else { const n=a.length; const cw=getSlotW()+6, ch=getSlotW()*1.458+8, cols=freeCols(side); card.x=6+(n%cols)*cw; card.y=6+Math.floor(n/cols)*ch; }
     a.push(card); return;
   }
   if(zone==='deck' && opts && opts.top){ a.unshift(card); return; }
@@ -303,6 +303,12 @@ const PILES = [
   {zone:'extra',cls:'extra',label:'EX'},
 ];
 function getSlotW(){ return parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--slot-w'))||60; }
+// number of columns the hand(free) zone can fit, measured from the rendered handzone width
+function freeCols(side){
+  const el=document.querySelector('.side'+(side==='opp'?'.opp':':not(.opp)')+' .handzone');
+  const w = el && el.clientWidth ? el.clientWidth : (window.innerWidth-180);
+  return Math.max(1, Math.floor((w-12)/(getSlotW()+6)));
+}
 
 function render(){
   document.documentElement.style.setProperty('--scale','1');
@@ -353,11 +359,15 @@ function renderSide(side){
   // free zone == hand (free placement). The drawn cards land here.
   const fz=document.createElement('div'); fz.className='freezone handzone'; fz.dataset.drop=side+'.free';
   const fl=document.createElement('div'); fl.className='fzlabel'; fl.textContent= side==='opp'?'相手手札':'手札（自由配置）'; fz.appendChild(fl);
+  const cardH=getSlotW()*1.458; let maxBottom=0;
   S[side].free.forEach((card,i)=>{
     const el=cardEl(card, side+'.free.'+i);
-    el.style.left=(card.x||8)+'px'; el.style.top=(card.y||22)+'px';
+    const x=card.x||8, y=card.y||22;
+    el.style.left=x+'px'; el.style.top=y+'px';
+    maxBottom=Math.max(maxBottom, y+cardH);
     fz.appendChild(el);
   });
+  fz.style.minHeight=Math.max(150, maxBottom+12)+'px'; // grow to contain all hand cards
   left.appendChild(fz);
 
   main.appendChild(left);
@@ -381,9 +391,11 @@ function stackZone(side,zone,label,cls){
   head.textContent=`${label} ${arr.length}`;
   const inner=document.createElement('div'); inner.className='stack-inner';
   const cardW=getSlotW(); const cardH=cardW*86/59;
-  const maxH=520;
-  const off = arr.length<=1 ? 0 : Math.min(cardH+4, (maxH-cardH)/(arr.length-1));
-  inner.style.height = (arr.length? (arr.length-1)*off + cardH : 24) + 'px';
+  // height grows until ~4 cards, then locks and cards overlap progressively
+  const cap=4, step=cardH*0.55;
+  const fixedH=(cap-1)*step + cardH;
+  const off = arr.length<=1 ? 0 : (arr.length<=cap ? step : (fixedH-cardH)/(arr.length-1));
+  inner.style.height = (arr.length ? (arr.length-1)*off + cardH : 22) + 'px';
   arr.forEach((c,i)=>{
     const el=cardEl(c, `${side}.${zone}.${i}`, true, ()=>moveTo(`${side}.${zone}.${i}`, side+'.free'));
     el.style.position='absolute'; el.style.top=(i*off)+'px'; el.style.left='0'; el.style.width=cardW+'px'; el.style.zIndex=i;
