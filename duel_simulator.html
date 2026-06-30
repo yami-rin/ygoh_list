@@ -38,18 +38,27 @@
   .zone.drophover{outline:2px solid var(--accent);outline-offset:1px;background:#15233a;}
   .zone .zlabel{position:absolute;bottom:2px;left:0;right:0;text-align:center;font-size:0.55rem;color:#566077;pointer-events:none;}
   .zone .zcount{position:absolute;top:2px;right:3px;font-size:0.6rem;background:#000a;border-radius:4px;padding:0 4px;color:#fff;pointer-events:none;}
-  .pilebar{display:grid;grid-template-columns:repeat(6,var(--slot-w));gap:6px;justify-content:center;margin-top:6px;}
+  .side-main{display:flex;gap:8px;align-items:flex-start;}
+  .side-left{flex:1 1 auto;min-width:0;}
+  .pilebar{display:grid;grid-template-columns:repeat(2,var(--slot-w));gap:6px;justify-content:center;margin-top:6px;}
   .pile{position:relative;aspect-ratio:59/86;border:1px solid var(--line);border-radius:5px;background:#0c0f17;display:flex;align-items:center;justify-content:center;cursor:pointer;overflow:hidden;}
   .pile .plabel{position:absolute;bottom:2px;left:0;right:0;text-align:center;font-size:0.55rem;color:#8a93a6;pointer-events:none;text-shadow:0 1px 2px #000;}
   .pile .pcount{position:absolute;top:2px;right:3px;font-size:0.62rem;background:#000c;border-radius:4px;padding:0 4px;pointer-events:none;}
   .pile.deck{border-color:var(--deck);} .pile.extra{border-color:var(--ex);}
-  .pile.graveyard{border-color:var(--grave);} .pile.banished{border-color:var(--banish);}
-  .pile.field{border-color:var(--field);}
+  /* right rail: graveyard / banished vertical overlapping stacks */
+  .rightrail{flex:0 0 auto;display:flex;gap:8px;align-items:flex-start;}
+  .stackzone{position:relative;width:calc(var(--slot-w) + 6px);background:#0c0f17;border:1px solid var(--line);border-radius:6px;padding:18px 3px 6px;min-height:120px;}
+  .stackzone.grave{border-color:var(--grave);}
+  .stackzone.banish{border-color:var(--banish);}
+  .stackzone.drophover{outline:2px solid var(--accent);}
+  .stack-label{position:absolute;top:2px;left:0;right:0;text-align:center;font-size:0.58rem;font-weight:bold;pointer-events:none;}
+  .stackzone.grave .stack-label{color:#c4b5fd;} .stackzone.banish .stack-label{color:#fdba74;}
+  .stack-inner{position:relative;width:var(--slot-w);margin:0 auto;}
+  .stack-inner .dcard{position:absolute;height:auto;}
   .freezone{position:relative;min-height:96px;margin-top:6px;border:1px dashed #2c3550;border-radius:6px;background:repeating-linear-gradient(45deg,#0c0f17,#0c0f17 10px,#0e121c 10px,#0e121c 20px);}
-  .freezone .fzlabel{position:absolute;top:3px;left:6px;font-size:0.6rem;color:#465069;pointer-events:none;}
-  .hand-wrap{background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:8px;}
-  .hand-wrap .side-title{margin-bottom:6px;}
-  .hand{display:flex;gap:6px;flex-wrap:wrap;min-height:104px;align-items:flex-start;}
+  .freezone.handzone{min-height:150px;border-color:var(--accent);border-style:solid;background:repeating-linear-gradient(45deg,#0d1422,#0d1422 10px,#101a2c 10px,#101a2c 20px);}
+  .freezone .fzlabel{position:absolute;top:3px;left:6px;font-size:0.62rem;color:#7f9bd0;pointer-events:none;z-index:0;}
+  .freezone .dcard{height:auto;}
   .lists-wrap{display:flex;flex-direction:column;gap:8px;padding:8px;}
   .listcol{background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:8px;}
   .hscroll{display:flex;gap:4px;overflow-x:auto;overflow-y:hidden;padding-bottom:4px;min-height:74px;align-items:flex-start;flex-wrap:wrap;}
@@ -119,11 +128,6 @@
 
 <div class="board" id="boardRoot"></div>
 
-<div class="hand-wrap">
-  <div class="side-title">手札 <span id="handCount" class="pill">0</span></div>
-  <div class="hand" id="selfHand" data-drop="self.hand"></div>
-</div>
-
 <div class="lists-wrap">
   <div class="listcol">
     <div class="side-title">デッキ（順番表示／タップ=手札・ドラッグ=任意ゾーン） <span id="deckListCount" class="pill">0</span></div>
@@ -132,14 +136,6 @@
   <div class="listcol">
     <div class="side-title">EXデッキ（タップ=手札・ドラッグ=任意ゾーン） <span id="extraListCount" class="pill">0</span></div>
     <div class="hscroll" id="extraList" data-drop="self.extra"></div>
-  </div>
-  <div class="listcol">
-    <div class="side-title" style="color:#a78bfa;">墓地（タップ=手札・ドラッグ=任意ゾーン） <span id="graveListCount" class="pill">0</span></div>
-    <div class="hscroll" id="graveList" data-drop="self.graveyard"></div>
-  </div>
-  <div class="listcol">
-    <div class="side-title" style="color:#fb923c;">除外（タップ=手札・ドラッグ=任意ゾーン） <span id="banishListCount" class="pill">0</span></div>
-    <div class="hscroll" id="banishList" data-drop="self.banished"></div>
   </div>
 </div>
 
@@ -291,7 +287,11 @@ function placeCard(loc, card, opts){
     }
     a[i]=card; return;
   }
-  if(zone==='free'){ if(opts){card.x=opts.x;card.y=opts.y;} S[side].free.push(card); return; }
+  if(zone==='free'){
+    if(opts && opts.x!=null){ card.x=opts.x; card.y=opts.y; }
+    else { const n=a.length; const cw=getSlotW()+6; card.x=6+(n%9)*cw; card.y=6+Math.floor(n/9)*(getSlotW()*1.46+8); }
+    a.push(card); return;
+  }
   if(zone==='deck' && opts && opts.top){ a.unshift(card); return; }
   a.push(card);
 }
@@ -301,17 +301,14 @@ const boardRoot = document.getElementById('boardRoot');
 const PILES = [
   {zone:'deck',cls:'deck',label:'デッキ'},
   {zone:'extra',cls:'extra',label:'EX'},
-  {zone:'graveyard',cls:'graveyard',label:'墓地'},
-  {zone:'banished',cls:'banished',label:'除外'},
-  {zone:'field',cls:'field',label:'フィールド'},
 ];
+function getSlotW(){ return parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--slot-w'))||60; }
 
 function render(){
   document.documentElement.style.setProperty('--scale','1');
   boardRoot.innerHTML='';
   if(S.showOpponent) boardRoot.appendChild(renderSide('opp'));
   boardRoot.appendChild(renderSide('self'));
-  renderHand();
   renderLists();
   updatePills();
 }
@@ -323,48 +320,78 @@ function renderSide(side){
   title.textContent = side==='opp'?'相手フィールド':'自分フィールド';
   wrap.appendChild(title);
 
+  const main=document.createElement('div'); main.className='side-main';
+  const left=document.createElement('div'); left.className='side-left';
+
   const grid=document.createElement('div'); grid.className='slotgrid';
-  // EX monster row (cols 3 and 5 under monster index1/3)
-  const exrow=document.createElement('div'); exrow.className='exrow';
+  // EX monster row: ex zones sit above monster index1 / index3 (grid cols 3 and 5)
+  const exrow=document.createElement('div'); exrow.className='row';
   for(let c=0;c<7;c++){
     if(c===2||c===4){ const idx=c===2?0:1; exrow.appendChild(slotZone(side,'exmon',idx,'EX')); }
     else exrow.appendChild(spacer());
   }
   grid.appendChild(exrow);
-  // monster row
+  // monster row: [Field][M1..M5][spacer]  (field spell now left of main monster zone)
   const mrow=document.createElement('div'); mrow.className='row';
-  mrow.appendChild(spacer());
+  mrow.appendChild(slotZone(side,'field',0,'フィールド'));
   for(let i=0;i<5;i++) mrow.appendChild(slotZone(side,'monster',i,''));
   mrow.appendChild(spacer());
   grid.appendChild(mrow);
-  // spell row
+  // spell row: [spacer][S1..S5][spacer]
   const srow=document.createElement('div'); srow.className='row';
   srow.appendChild(spacer());
   for(let i=0;i<5;i++) srow.appendChild(slotZone(side,'spell',i,''));
   srow.appendChild(spacer());
   grid.appendChild(srow);
-  wrap.appendChild(grid);
+  left.appendChild(grid);
 
-  // pile bar
+  // pile bar (deck + extra only)
   const pb=document.createElement('div'); pb.className='pilebar';
   for(const p of PILES) pb.appendChild(pileZone(side,p));
-  // 6th cell spacer
-  pb.appendChild(spacer());
-  wrap.appendChild(pb);
+  left.appendChild(pb);
 
-  // free zone
-  const fz=document.createElement('div'); fz.className='freezone'; fz.dataset.drop=side+'.free';
-  const fl=document.createElement('div'); fl.className='fzlabel'; fl.textContent='自由配置'; fz.appendChild(fl);
+  // free zone == hand (free placement). The drawn cards land here.
+  const fz=document.createElement('div'); fz.className='freezone handzone'; fz.dataset.drop=side+'.free';
+  const fl=document.createElement('div'); fl.className='fzlabel'; fl.textContent= side==='opp'?'相手手札':'手札（自由配置）'; fz.appendChild(fl);
   S[side].free.forEach((card,i)=>{
     const el=cardEl(card, side+'.free.'+i);
-    el.style.left=(card.x||8)+'px'; el.style.top=(card.y||20)+'px';
+    el.style.left=(card.x||8)+'px'; el.style.top=(card.y||22)+'px';
     fz.appendChild(el);
   });
-  wrap.appendChild(fz);
+  left.appendChild(fz);
+
+  main.appendChild(left);
+  // right rail: graveyard + banished vertical overlapping stacks
+  const rail=document.createElement('div'); rail.className='rightrail';
+  rail.appendChild(stackZone(side,'graveyard','墓地','grave'));
+  rail.appendChild(stackZone(side,'banished','除外','banish'));
+  main.appendChild(rail);
+
+  wrap.appendChild(main);
   return wrap;
 }
 
 function spacer(){ const d=document.createElement('div'); return d; }
+
+// vertical overlapping stack for graveyard / banished on the right rail
+function stackZone(side,zone,label,cls){
+  const z=document.createElement('div'); z.className='stackzone '+cls; z.dataset.drop=`${side}.${zone}`;
+  const head=document.createElement('div'); head.className='stack-label'; z.appendChild(head);
+  const arr=S[side][zone];
+  head.textContent=`${label} ${arr.length}`;
+  const inner=document.createElement('div'); inner.className='stack-inner';
+  const cardW=getSlotW(); const cardH=cardW*86/59;
+  const maxH=520;
+  const off = arr.length<=1 ? 0 : Math.min(cardH+4, (maxH-cardH)/(arr.length-1));
+  inner.style.height = (arr.length? (arr.length-1)*off + cardH : 24) + 'px';
+  arr.forEach((c,i)=>{
+    const el=cardEl(c, `${side}.${zone}.${i}`, true, ()=>moveTo(`${side}.${zone}.${i}`, side+'.free'));
+    el.style.position='absolute'; el.style.top=(i*off)+'px'; el.style.left='0'; el.style.width=cardW+'px'; el.style.zIndex=i;
+    inner.appendChild(el);
+  });
+  z.appendChild(inner);
+  return z;
+}
 
 function slotZone(side,zone,index,label){
   const z=document.createElement('div'); z.className='zone slot'; z.dataset.drop=`${side}.${zone}.${index}`;
@@ -426,25 +453,17 @@ function attachPilePointer(z, side, zone){
   z.addEventListener('contextmenu',(e)=>{ e.preventDefault(); if(replayMode) return; const arr=S[side][zone]; const ti=zone==='field'?0:arr.length-1; if(arr[ti]) openMenu(`${side}.${zone}.${ti}`, e.clientX, e.clientY); });
 }
 
-function renderHand(){
-  const h=document.getElementById('selfHand'); h.innerHTML='';
-  S.self.hand.forEach((card,i)=>{ h.appendChild(cardEl(card,'self.hand.'+i)); });
-  document.getElementById('handCount').textContent=S.self.hand.length;
-}
-
-// Always-visible Deck / EX / Graveyard / Banished lists (current array order)
-// tap=to hand, drag=anywhere (field/deck/etc), long-press/right-click=menu
+// Always-visible Deck / EX lists (current array order)
+// tap=to hand(free), drag=anywhere (field/deck/etc), long-press/right-click=menu
 function renderListInto(elId, zone, countId){
   const el=document.getElementById(elId); el.innerHTML='';
   const arr=S.self[zone];
-  arr.forEach((c,i)=>{ el.appendChild(cardEl(c,'self.'+zone+'.'+i,true,()=>moveTo('self.'+zone+'.'+i,'self.hand'))); });
+  arr.forEach((c,i)=>{ el.appendChild(cardEl(c,'self.'+zone+'.'+i,true,()=>moveTo('self.'+zone+'.'+i,'self.free'))); });
   document.getElementById(countId).textContent=arr.length;
 }
 function renderLists(){
   renderListInto('deckList','deck','deckListCount');
   renderListInto('extraList','extra','extraListCount');
-  renderListInto('graveList','graveyard','graveListCount');
-  renderListInto('banishList','banished','banishListCount');
 }
 
 function cardEl(card, loc, interactive=true, onTap=null){
@@ -569,7 +588,7 @@ function openMenu(loc, x, y){
   items.push(['btn','カウンター +1', ()=>op('counter',{loc,delta:1})]);
   items.push(['btn','カウンター -1', ()=>op('counter',{loc,delta:-1})]);
   items.push(['sep']);
-  items.push(['btn','手札へ', ()=>moveTo(loc, side+'.hand')]);
+  items.push(['btn','手札へ', ()=>moveTo(loc, side+'.free')]);
   items.push(['btn','墓地へ', ()=>moveTo(loc, side+'.graveyard')]);
   items.push(['btn','除外へ', ()=>moveTo(loc, side+'.banished')]);
   items.push(['btn','デッキトップへ', ()=>moveTo(loc, side+'.deck', {top:true})]);
@@ -597,8 +616,6 @@ document.addEventListener('pointerdown',(e)=>{ if(menu.style.display==='block' &
 function moveTo(fromLoc, toZone, opts){
   const card=removeCard(fromLoc); if(!card) return;
   // reset some flags when moving to hand/deck
-  const tz=toZone.split('.')[1];
-  if(tz==='hand'||tz==='deck'||tz==='extra'){ card.faceDown=false; card.defense=false; card.counters=0; }
   if(card.token){ commit(); return; } // token disappears when leaving field
   placeCard(toZone, card, opts);
   commit();
@@ -620,7 +637,7 @@ function op(type,p){
 function doDraw(n){
   const d=S.self.deck;
   if(d.length===0){ toast('デッキに残りがありません'); return; }
-  for(let i=0;i<n && d.length;i++){ S.self.hand.push(d.shift()); }
+  for(let i=0;i<n && d.length;i++){ placeCard('self.free', d.shift()); } // hand == free zone
   commit();
 }
 function shuffle(arr){ for(let i=arr.length-1;i>0;i--){ const j=Math.floor(Math.random()*(i+1)); [arr[i],arr[j]]=[arr[j],arr[i]]; } }
@@ -638,7 +655,7 @@ function resetDraw5(){
   S.self.field=[null]; S.self.monster=[null,null,null,null,null];
   S.self.spell=[null,null,null,null,null]; S.self.exmon=[null,null]; S.self.free=[];
   rebuildSelfDeck(true); // randomize for a fresh draw
-  for(let i=0;i<5 && S.self.deck.length;i++) S.self.hand.push(S.self.deck.shift());
+  for(let i=0;i<5 && S.self.deck.length;i++) placeCard('self.free', S.self.deck.shift());
   commit();
 }
 
@@ -687,7 +704,7 @@ function openListModal(side,zone,label){
   const grid=document.getElementById('listModalGrid'); grid.innerHTML='';
   arr.forEach((card,i)=>{
     const el=cardEl(card, `${side}.${zone}.${i}`);
-    el.addEventListener('dblclick',()=>{ moveTo(`${side}.${zone}.${i}`, side+'.hand'); closeModal(listModal); });
+    el.addEventListener('dblclick',()=>{ moveTo(`${side}.${zone}.${i}`, side+'.free'); closeModal(listModal); });
     grid.appendChild(el);
   });
   openModal(listModal);
@@ -824,15 +841,15 @@ if(location.search.includes('test')){
     seed(){
       S.self.deck = Array.from({length:35},(_,i)=>newCard('デッキカード',null,'1'));
       S.self.extra = Array.from({length:8},(_,i)=>newCard('EXカード',null,'1'));
-      S.self.hand = Array.from({length:5},(_,i)=>newCard('手札'+(i+1),null,'1'));
+      S.self.free = []; // hand == free zone
+      Array.from({length:5}).forEach((_,i)=>placeCard('self.free', newCard('手札'+(i+1),null,'1')));
       const m=newCard('モンスターA',null,'1'); S.self.monster[2]=m;
       const md=newCard('セット',null,'1'); md.faceDown=true; md.defense=true; S.self.monster[0]=md;
       const c=newCard('カウンター持ち',null,'1'); c.counters=3; S.self.spell[1]=c;
       const f=newCard('フィールド魔法',null,'1'); S.self.field[0]=f;
-      S.self.graveyard=[newCard('墓地1',null,'1'),newCard('墓地2',null,'1')];
-      S.self.banished=[newCard('除外1',null,'1')];
+      S.self.graveyard=Array.from({length:6},(_,i)=>newCard('墓地'+(i+1),null,'1'));
+      S.self.banished=Array.from({length:3},(_,i)=>newCard('除外'+(i+1),null,'1'));
       const tk=newCard('トークン',null,'1'); tk.token=true; S.self.monster[4]=tk;
-      const fr=newCard('自由配置',null,'1'); fr.x=20; fr.y=20; S.self.free=[fr];
       commit();
     }
   };
