@@ -66,12 +66,11 @@
   /* deck / EX lists: rows of fixed count, cards overlap to save space (no leading gap; first card flush) */
   .listrows{display:flex;flex-direction:column;gap:3px;}
   .listrow{display:flex;flex-wrap:nowrap;align-items:flex-start;}
-  .listrow .dcard{width:54px;flex:0 0 auto;margin-left:-24px;}
-  .listrow .dcard:first-child{margin-left:0;}
+  .listrow .dcard{width:54px;flex:0 0 auto;} /* margin-left set dynamically by layoutLists() to fill the row width */
   .listrow .dcard:hover,.listrow .dcard:active{z-index:20;}
   .listcol.inline{background:transparent;border:0;padding:4px 0 0;}
   .listcol.inline .side-title{margin-bottom:3px;}
-  @media(max-width:560px){ .listrow .dcard{width:48px;margin-left:-26px;} }
+  @media(max-width:560px){ .listrow .dcard{width:48px;} }
   /* card */
   .dcard{position:relative;aspect-ratio:59/86;border-radius:5px;overflow:visible;cursor:grab;width:100%;height:100%;touch-action:none;}
   .hand .dcard{width:var(--slot-w);height:auto;}
@@ -228,6 +227,14 @@ function lookupCardId(name){
   if(!d){ const dec=decodeEntities(name); if(dec!==name) d=cardDetailsMap.get(dec); }
   return d?.cardId || null;
 }
+function lookupDetails(name){
+  if(!name) return null;
+  let d = cardDetailsMap.get(name);
+  if(!d){ const dec=decodeEntities(name); if(dec!==name) d=cardDetailsMap.get(dec); }
+  return d || null;
+}
+// Link monsters can't be in defense position or face-down
+function isLinkMonster(card){ if(!card) return false; const d=lookupDetails(card.name); return !!(d && d.cardType && d.cardType.includes('リンク')); }
 async function loadCardData(){
   try{
     const res = await fetch('yugioh_cards_master.csv');
@@ -236,8 +243,8 @@ async function loadCardData(){
     for(let i=1;i<lines.length;i++){
       const line=lines[i].trim(); if(!line) continue;
       const v=line.split(',');
-      const id=v[0]?.replace(/"/g,''); const name=v[1]?.replace(/"/g,'');
-      if(name && id && !cardDetailsMap.has(name)) cardDetailsMap.set(name,{cardId:id});
+      const id=v[0]?.replace(/"/g,''); const name=v[1]?.replace(/"/g,''); const cardType=v[6]?.replace(/"/g,'')||'';
+      if(name && id && !cardDetailsMap.has(name)) cardDetailsMap.set(name,{cardId:id,cardType});
     }
     console.log('cardDetailsMap loaded:', cardDetailsMap.size);
   }catch(e){ console.error('CSV load failed',e); }
@@ -338,6 +345,7 @@ function render(){
   boardRoot.innerHTML='';
   if(S.showOpponent) boardRoot.appendChild(renderSide('opp'));
   boardRoot.appendChild(renderSide('self'));
+  layoutLists();
   updatePills();
 }
 
@@ -403,6 +411,19 @@ function renderSide(side){
 }
 
 function spacer(){ const d=document.createElement('div'); return d; }
+
+// spread each deck/EX list row to fill the full container width (no empty space on the right)
+function layoutLists(){
+  document.querySelectorAll('.listrows').forEach(box=>{
+    const rows=[...box.querySelectorAll('.listrow')]; if(!rows.length) return;
+    const avail=box.clientWidth; if(!avail) return;
+    const first=rows[0].firstElementChild; if(!first) return;
+    const cw=first.getBoundingClientRect().width||50;
+    const maxN=Math.max(...rows.map(r=>r.children.length)); // full rows fill exactly; shorter rows keep same spacing
+    const step = maxN>1 ? (avail-cw)/(maxN-1) : 0;
+    rows.forEach(row=>{ const cards=row.children; for(let i=0;i<cards.length;i++){ cards[i].style.marginLeft = i===0?'0':(step-cw)+'px'; } });
+  });
+}
 
 // always-visible card list: rows of 15 overlapping cards, placed under the field
 function buildList(side, zone, label, hint){
@@ -650,9 +671,11 @@ function openMenu(loc, x, y){
   const items=[];
   items.push(['mh','操作: '+(card.token?'トークン':card.name)]);
   if(!card.token){
-    items.push(['btn', card.faceDown?'表にする':'裏にする', ()=>op('flip',{loc})]);
-    items.push(['btn', card.defense?'攻撃表示にする':'守備表示にする', ()=>op('position',{loc})]);
-    if(isFixed(zone)) items.push(['btn','裏側守備でセット', ()=>op('set',{loc})]);
+    const link=isLinkMonster(card);
+    // Link monsters: no defense position, no face-down
+    if(!(link && !card.faceDown)) items.push(['btn', card.faceDown?'表にする':'裏にする', ()=>op('flip',{loc})]);
+    if(!link) items.push(['btn', card.defense?'攻撃表示にする':'守備表示にする', ()=>op('position',{loc})]);
+    if(isFixed(zone) && !link) items.push(['btn','裏側守備でセット', ()=>op('set',{loc})]);
   }
   if(card.materials && card.materials.length){
     items.push(['sep']);
@@ -706,10 +729,11 @@ function moveTo(fromLoc, toZone, opts){
 // ===== operations (mutate + commit) =====
 function op(type,p){
   const card = p.loc!=null ? cardAt(p.loc) : null;
+  const link = isLinkMonster(card);
   switch(type){
-    case 'flip': if(card) card.faceDown=!card.faceDown; break;
-    case 'position': if(card) card.defense=!card.defense; break;
-    case 'set': if(card){ card.faceDown=true; card.defense=true; } break;
+    case 'flip': if(card){ if(link && !card.faceDown){ toast('リンクモンスターは裏側にできません'); break; } card.faceDown=!card.faceDown; } break;
+    case 'position': if(card){ if(link){ toast('リンクモンスターは守備表示にできません'); break; } card.defense=!card.defense; } break;
+    case 'set': if(card){ if(link){ toast('リンクモンスターはセットできません'); break; } card.faceDown=true; card.defense=true; } break;
     case 'counter': if(card){ card.counters=Math.max(0,card.counters+p.delta); } break;
     case 'delete': removeCard(p.loc); break;
   }
@@ -941,7 +965,7 @@ document.getElementById('rbExit').addEventListener('click',exitReplay);
 if(location.search.includes('test')){
   window.__sim = {
     get S(){ return S; }, get history(){ return history; }, render, commit, newCard, placeCard, makeSide,
-    enc, dec, curBoard, restoreBoard, startReplay, showReplayFrame, snapshot, doDraw, undo, moveTo, detachMaterial,
+    enc, dec, curBoard, restoreBoard, startReplay, showReplayFrame, snapshot, doDraw, undo, moveTo, detachMaterial, isLinkMonster,
     seed(){
       S.self.deck = Array.from({length:35},(_,i)=>newCard('デッキカード',null,'1'));
       S.self.extra = Array.from({length:8},(_,i)=>newCard('EXカード',null,'1'));
