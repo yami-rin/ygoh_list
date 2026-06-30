@@ -332,16 +332,18 @@ function renderSide(side){
   const left=document.createElement('div'); left.className='side-left';
 
   const grid=document.createElement('div'); grid.className='slotgrid';
-  // EX monster row: ex zones sit above monster index1 / index3 (grid cols 3 and 5)
+  // EX monster row: [spacer][Field][EX-left][ ][EX-right][ ][ ]
+  // field spell sits immediately left of the left EX monster zone
   const exrow=document.createElement('div'); exrow.className='row';
   for(let c=0;c<7;c++){
-    if(c===2||c===4){ const idx=c===2?0:1; exrow.appendChild(slotZone(side,'exmon',idx,'EX')); }
+    if(c===1){ exrow.appendChild(slotZone(side,'field',0,'フィールド')); }
+    else if(c===2||c===4){ const idx=c===2?0:1; exrow.appendChild(slotZone(side,'exmon',idx,'EX')); }
     else exrow.appendChild(spacer());
   }
   grid.appendChild(exrow);
-  // monster row: [Field][M1..M5][spacer]  (field spell now left of main monster zone)
+  // monster row: [spacer][M1..M5][spacer]
   const mrow=document.createElement('div'); mrow.className='row';
-  mrow.appendChild(slotZone(side,'field',0,'フィールド'));
+  mrow.appendChild(spacer());
   for(let i=0;i<5;i++) mrow.appendChild(slotZone(side,'monster',i,''));
   mrow.appendChild(spacer());
   grid.appendChild(mrow);
