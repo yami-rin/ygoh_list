@@ -1,0 +1,803 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>デュエルシミュレーター</title>
+<script src="image_cache_manager.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/lz-string@1.5.0/libs/lz-string.min.js"></script>
+<style>
+  :root{
+    --bg:#0f1117; --panel:#1a1d27; --line:#2c3140; --accent:#4f8cff;
+    --grave:#8b5cf6; --banish:#ea580c; --ex:#a855f7; --deck:#22c55e; --field:#14b8a6;
+    --slot-w: 72px; /* base card slot width; scaled by JS for responsiveness */
+  }
+  *{box-sizing:border-box;}
+  html,body{margin:0;padding:0;background:var(--bg);color:#e7eaf0;font-family:"Segoe UI",system-ui,"Hiragino Kaku Gothic ProN","Meiryo",sans-serif;-webkit-user-select:none;user-select:none;touch-action:manipulation;overscroll-behavior:none;}
+  a{color:var(--accent);text-decoration:none;}
+  .topbar{display:flex;flex-wrap:wrap;align-items:center;gap:6px;padding:8px 10px;background:var(--panel);border-bottom:1px solid var(--line);position:sticky;top:0;z-index:50;}
+  .topbar .grow{flex:1 1 auto;}
+  select,button,input{font-family:inherit;}
+  .btn{background:#262b38;color:#e7eaf0;border:1px solid var(--line);border-radius:6px;padding:6px 10px;font-size:0.82rem;cursor:pointer;white-space:nowrap;}
+  .btn:hover{background:#30364a;}
+  .btn.primary{background:var(--accent);border-color:var(--accent);color:#fff;}
+  .btn.warn{background:#7a2c2c;border-color:#a13d3d;}
+  .btn:disabled{opacity:.45;cursor:not-allowed;}
+  select{background:#262b38;color:#e7eaf0;border:1px solid var(--line);border-radius:6px;padding:6px 8px;font-size:0.82rem;max-width:46vw;}
+  .pill{font-size:0.72rem;padding:3px 8px;border-radius:999px;background:#262b38;border:1px solid var(--line);}
+  .board{padding:8px;display:flex;flex-direction:column;gap:8px;}
+  .side{background:linear-gradient(180deg,#141823,#11141d);border:1px solid var(--line);border-radius:10px;padding:8px;}
+  .side.opp{border-color:#5a2b2b;}
+  .side-title{font-size:0.72rem;color:#8a93a6;margin:0 0 6px 2px;display:flex;align-items:center;gap:8px;}
+  .side.opp .side-title{color:#d98a8a;}
+  .slotgrid{display:flex;flex-direction:column;gap:6px;align-items:center;}
+  .row{display:grid;grid-template-columns:repeat(7,var(--slot-w));gap:6px;justify-content:center;}
+  .exrow{display:grid;grid-template-columns:repeat(7,var(--slot-w));gap:6px;justify-content:center;}
+  .zone{position:relative;aspect-ratio:59/86;border:1px dashed #394052;border-radius:5px;background:#0c0f17;display:flex;align-items:center;justify-content:center;}
+  .zone.slot{border:1px dashed #3a4258;}
+  .zone.drophover{outline:2px solid var(--accent);outline-offset:1px;background:#15233a;}
+  .zone .zlabel{position:absolute;bottom:2px;left:0;right:0;text-align:center;font-size:0.55rem;color:#566077;pointer-events:none;}
+  .zone .zcount{position:absolute;top:2px;right:3px;font-size:0.6rem;background:#000a;border-radius:4px;padding:0 4px;color:#fff;pointer-events:none;}
+  .pilebar{display:grid;grid-template-columns:repeat(6,var(--slot-w));gap:6px;justify-content:center;margin-top:6px;}
+  .pile{position:relative;aspect-ratio:59/86;border:1px solid var(--line);border-radius:5px;background:#0c0f17;display:flex;align-items:center;justify-content:center;cursor:pointer;overflow:hidden;}
+  .pile .plabel{position:absolute;bottom:2px;left:0;right:0;text-align:center;font-size:0.55rem;color:#8a93a6;pointer-events:none;text-shadow:0 1px 2px #000;}
+  .pile .pcount{position:absolute;top:2px;right:3px;font-size:0.62rem;background:#000c;border-radius:4px;padding:0 4px;pointer-events:none;}
+  .pile.deck{border-color:var(--deck);} .pile.extra{border-color:var(--ex);}
+  .pile.graveyard{border-color:var(--grave);} .pile.banished{border-color:var(--banish);}
+  .pile.field{border-color:var(--field);}
+  .freezone{position:relative;min-height:96px;margin-top:6px;border:1px dashed #2c3550;border-radius:6px;background:repeating-linear-gradient(45deg,#0c0f17,#0c0f17 10px,#0e121c 10px,#0e121c 20px);}
+  .freezone .fzlabel{position:absolute;top:3px;left:6px;font-size:0.6rem;color:#465069;pointer-events:none;}
+  .hand-wrap{background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:8px;}
+  .hand-wrap .side-title{margin-bottom:6px;}
+  .hand{display:flex;gap:6px;flex-wrap:wrap;min-height:104px;align-items:flex-start;}
+  /* card */
+  .dcard{position:relative;aspect-ratio:59/86;border-radius:5px;overflow:visible;cursor:grab;width:100%;height:100%;touch-action:none;}
+  .hand .dcard{width:var(--slot-w);height:auto;}
+  .freezone .dcard{position:absolute;width:var(--slot-w);}
+  .dcard img{width:100%;height:100%;object-fit:cover;border-radius:5px;display:block;pointer-events:none;box-shadow:0 1px 4px #000a;}
+  .dcard .ph{width:100%;aspect-ratio:59/86;background:#cdd3df;color:#222;font-size:0.55rem;display:flex;align-items:center;justify-content:center;text-align:center;padding:3px;border-radius:5px;}
+  .dcard.def{transform:rotate(90deg) scale(0.86);}
+  .dcard .back{width:100%;height:100%;aspect-ratio:59/86;border-radius:5px;background:linear-gradient(135deg,#6b4b9a,#3a2a5e);border:1px solid #2a1f44;display:flex;align-items:center;justify-content:center;}
+  .dcard .back::after{content:"";width:60%;height:60%;border-radius:50%;background:radial-gradient(circle,#d8b24a,#9c7a1e);opacity:.5;}
+  .dcard.token .ph{background:linear-gradient(135deg,#1f7a4d,#0e5132);color:#d6ffe6;}
+  .dcard .cbadge{position:absolute;top:-5px;left:-5px;min-width:18px;height:18px;border-radius:9px;background:#e11d48;color:#fff;font-size:0.66rem;font-weight:bold;display:flex;align-items:center;justify-content:center;padding:0 4px;z-index:5;box-shadow:0 1px 3px #000a;}
+  .dcard .stackn{position:absolute;bottom:-4px;right:-4px;background:#000c;color:#fff;font-size:0.62rem;border-radius:8px;padding:0 5px;z-index:5;}
+  /* drag ghost */
+  #ghost{position:fixed;z-index:9999;pointer-events:none;width:var(--slot-w);opacity:.9;filter:drop-shadow(0 4px 8px #000a);display:none;}
+  #ghost img,#ghost .ph,#ghost .back{width:100%;border-radius:5px;}
+  /* context menu */
+  #menu{position:fixed;z-index:10000;background:#1c2130;border:1px solid var(--line);border-radius:8px;padding:5px;min-width:168px;box-shadow:0 8px 24px #000a;display:none;}
+  #menu button{display:block;width:100%;text-align:left;background:none;border:none;color:#e7eaf0;padding:7px 10px;font-size:0.8rem;border-radius:5px;cursor:pointer;}
+  #menu button:hover{background:#2c3346;}
+  #menu .sep{height:1px;background:var(--line);margin:4px 2px;}
+  #menu .mh{font-size:0.66rem;color:#7b8499;padding:3px 8px;}
+  /* modal */
+  .modal{position:fixed;inset:0;background:#000a;z-index:10001;display:none;align-items:center;justify-content:center;padding:16px;}
+  .modal .box{background:var(--panel);border:1px solid var(--line);border-radius:12px;max-width:760px;width:100%;max-height:84vh;overflow:auto;padding:16px;}
+  .modal h3{margin:0 0 10px;font-size:1rem;}
+  .listgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(64px,1fr));gap:6px;}
+  .listgrid .dcard{width:100%;}
+  .savelist{display:flex;flex-direction:column;gap:6px;}
+  .saveitem{display:flex;align-items:center;gap:8px;background:#222736;border:1px solid var(--line);border-radius:6px;padding:8px;}
+  .saveitem .grow{flex:1 1 auto;min-width:0;}
+  .saveitem .t{font-size:0.84rem;}
+  .saveitem .d{font-size:0.68rem;color:#8a93a6;}
+  /* replay bar */
+  #replaybar{position:fixed;left:0;right:0;bottom:0;z-index:60;background:#11141dF2;border-top:1px solid var(--accent);padding:8px 12px;display:none;align-items:center;gap:10px;}
+  #replaybar input[type=range]{flex:1 1 auto;}
+  .muted{color:#8a93a6;font-size:0.74rem;}
+  @media(max-width:560px){
+    :root{--slot-w:46px;}
+    select{max-width:40vw;}
+    .btn{padding:5px 7px;font-size:0.74rem;}
+  }
+</style>
+</head>
+<body>
+<div class="topbar">
+  <a href="card_gallery.html" class="btn">&larr; ギャラリー</a>
+  <select id="deckSelect"><option value="">デッキを選択...</option></select>
+  <button class="btn primary" id="loadDeckBtn" disabled>ロード</button>
+  <button class="btn" id="draw1Btn">1ドロー</button>
+  <button class="btn" id="reset5Btn">リセット&5ドロー</button>
+  <button class="btn" id="shuffleBtn">シャッフル</button>
+  <button class="btn" id="tokenBtn">トークン生成</button>
+  <button class="btn" id="oppBtn">相手フィールド表示</button>
+  <span class="grow"></span>
+  <button class="btn" id="shareBtn">盤面共有</button>
+  <button class="btn" id="saveReplayBtn">リプレイ保存</button>
+  <button class="btn" id="savesBtn">保存一覧</button>
+  <button class="btn" id="clearBtn">クリア</button>
+  <span class="pill" id="authPill">未ログイン</span>
+  <button class="btn" id="loginBtn">ログイン</button>
+</div>
+
+<div class="board" id="boardRoot"></div>
+
+<div class="hand-wrap">
+  <div class="side-title">手札 <span id="handCount" class="pill">0</span></div>
+  <div class="hand" id="selfHand" data-drop="self.hand"></div>
+</div>
+
+<div id="ghost"></div>
+<div id="menu"></div>
+
+<!-- list modal -->
+<div class="modal" id="listModal">
+  <div class="box">
+    <h3 id="listModalTitle">ゾーン</h3>
+    <div class="listgrid" id="listModalGrid"></div>
+    <div style="margin-top:12px;text-align:right;"><button class="btn" data-close>閉じる</button></div>
+  </div>
+</div>
+
+<!-- saves modal -->
+<div class="modal" id="savesModal">
+  <div class="box">
+    <h3>保存した盤面・リプレイ</h3>
+    <div class="savelist" id="savesList"></div>
+    <div style="margin-top:12px;text-align:right;"><button class="btn" data-close>閉じる</button></div>
+  </div>
+</div>
+
+<!-- replay playback bar -->
+<div id="replaybar">
+  <button class="btn" id="rbPlay">▶</button>
+  <button class="btn" id="rbStepB">◀|</button>
+  <button class="btn" id="rbStepF">|▶</button>
+  <input type="range" id="rbSlider" min="0" max="0" value="0">
+  <span class="muted" id="rbInfo">0 / 0</span>
+  <select id="rbSpeed"><option value="1500">遅い</option><option value="900" selected>標準</option><option value="450">速い</option></select>
+  <button class="btn warn" id="rbExit">リプレイ終了</button>
+</div>
+
+<script type="module">
+import { api } from './api-client.js';
+
+const firebaseConfig = {
+  apiKey: "AIzaSyAOYKalLUb2hbghrjQUS8AWzxpLExBT7aU",
+  authDomain: "ygoh-9bcf6.firebaseapp.com",
+  projectId: "ygoh-9bcf6",
+  storageBucket: "ygoh-9bcf6.firebasestorage.app",
+  messagingSenderId: "515041224138",
+  appId: "1:515041224138:web:8de47b38ed9cc1bb8afd37",
+  measurementId: "G-ZGSRE8MHZ2"
+};
+// Firebase is loaded dynamically so the board still works offline / on shared URLs
+let auth=null, fbProvider=null, fbSignInPopup=null, fbSignOut=null;
+async function initAuth(){
+  try{
+    const [{ initializeApp }, authMod] = await Promise.all([
+      import("https://www.gstatic.com/firebasejs/9.23.0/firebase-app.js"),
+      import("https://www.gstatic.com/firebasejs/9.23.0/firebase-auth.js")
+    ]);
+    const app = initializeApp(firebaseConfig);
+    auth = authMod.getAuth(app);
+    fbProvider = new authMod.GoogleAuthProvider();
+    fbSignInPopup = ()=>authMod.signInWithPopup(auth, fbProvider);
+    fbSignOut = ()=>authMod.signOut(auth);
+    authMod.onAuthStateChanged(auth,(user)=>{
+      const pill=document.getElementById('authPill');
+      if(user){ pill.textContent=user.displayName||user.email||'ログイン中'; document.getElementById('loginBtn').textContent='ログアウト';
+        api.setAuth(user).then(()=>loadDeckList()); }
+      else { pill.textContent='未ログイン'; document.getElementById('loginBtn').textContent='ログイン'; }
+    });
+  }catch(e){
+    console.warn('Firebase auth unavailable:', e);
+    document.getElementById('authPill').textContent='認証利用不可';
+    document.getElementById('loginBtn').disabled=true;
+  }
+}
+
+// ===== card details (name -> cardId) from CSV =====
+const cardDetailsMap = new Map();
+function decodeEntities(s){ const ta=document.createElement('textarea'); ta.innerHTML=s; return ta.value; }
+function lookupCardId(name){
+  if(!name) return null;
+  let d = cardDetailsMap.get(name);
+  if(!d){ const dec=decodeEntities(name); if(dec!==name) d=cardDetailsMap.get(dec); }
+  return d?.cardId || null;
+}
+async function loadCardData(){
+  try{
+    const res = await fetch('yugioh_cards_master.csv');
+    const txt = await res.text();
+    const lines = txt.split('\n');
+    for(let i=1;i<lines.length;i++){
+      const line=lines[i].trim(); if(!line) continue;
+      const v=line.split(',');
+      const id=v[0]?.replace(/"/g,''); const name=v[1]?.replace(/"/g,'');
+      if(name && id && !cardDetailsMap.has(name)) cardDetailsMap.set(name,{cardId:id});
+    }
+    console.log('cardDetailsMap loaded:', cardDetailsMap.size);
+  }catch(e){ console.error('CSV load failed',e); }
+}
+
+// ===== image cache =====
+const imgDataCache = new Map();
+async function cardImage(card){
+  if(!card.cardId) return null;
+  const key = `${card.cardId}_${card.ciid||'1'}`;
+  if(imgDataCache.has(key)) return imgDataCache.get(key);
+  try{
+    const data = await imageCacheManager.fetchAndCache(key, card.cardId, card.ciid||'1');
+    imgDataCache.set(key, data);
+    return data;
+  }catch(e){ return null; }
+}
+
+// ===== state =====
+let uidSeq = 1;
+function newCard(name, cardId, ciid){
+  return { uid:uidSeq++, name, cardId:cardId||null, ciid:ciid||'1', faceDown:false, defense:false, counters:0, token:false };
+}
+function makeSide(){
+  return {
+    deck:[], extra:[], hand:[], graveyard:[], banished:[],
+    field:[null], monster:[null,null,null,null,null],
+    spell:[null,null,null,null,null], exmon:[null,null], free:[]
+  };
+}
+const S = { self: makeSide(), opp: makeSide(), showOpponent:false, deckName:'' };
+let originalMain = [];  // snapshot of names/ciids for reset
+let originalExtra = [];
+
+const FIXED = new Set(['field','monster','spell','exmon']);
+const isFixed = z => FIXED.has(z);
+
+function parseLoc(loc){ const p=loc.split('.'); return { side:p[0], zone:p[1], index:p[2]!=null?+p[2]:null }; }
+function zoneArr(side,zone){ return S[side][zone]; }
+function cardAt(loc){ const {side,zone,index}=parseLoc(loc); const a=zoneArr(side,zone); return index!=null?a[index]:null; }
+function removeCard(loc){
+  const {side,zone,index}=parseLoc(loc); const a=zoneArr(side,zone);
+  if(isFixed(zone)){ const c=a[index]; a[index]=null; return c; }
+  return a.splice(index,1)[0];
+}
+function placeCard(loc, card, opts){
+  const {side,zone,index}=parseLoc(loc); const a=zoneArr(side,zone);
+  if(isFixed(zone)){
+    let i = index;
+    if(i==null || a[i]!=null){ const e=a.findIndex(x=>x==null); i = (i!=null && a[i]==null)?i:(e!==-1?e:null); }
+    if(i==null){ // no empty slot -> fallback to free zone
+      S[side].free.push(card); return;
+    }
+    a[i]=card; return;
+  }
+  if(zone==='free'){ if(opts){card.x=opts.x;card.y=opts.y;} S[side].free.push(card); return; }
+  if(zone==='deck' && opts && opts.top){ a.unshift(card); return; }
+  a.push(card);
+}
+
+// ===== rendering =====
+const boardRoot = document.getElementById('boardRoot');
+const PILES = [
+  {zone:'deck',cls:'deck',label:'デッキ'},
+  {zone:'extra',cls:'extra',label:'EX'},
+  {zone:'graveyard',cls:'graveyard',label:'墓地'},
+  {zone:'banished',cls:'banished',label:'除外'},
+  {zone:'field',cls:'field',label:'フィールド'},
+];
+
+function render(){
+  document.documentElement.style.setProperty('--scale','1');
+  boardRoot.innerHTML='';
+  if(S.showOpponent) boardRoot.appendChild(renderSide('opp'));
+  boardRoot.appendChild(renderSide('self'));
+  renderHand();
+  updatePills();
+}
+
+function renderSide(side){
+  const wrap=document.createElement('div');
+  wrap.className='side'+(side==='opp'?' opp':'');
+  const title=document.createElement('div'); title.className='side-title';
+  title.textContent = side==='opp'?'相手フィールド':'自分フィールド';
+  wrap.appendChild(title);
+
+  const grid=document.createElement('div'); grid.className='slotgrid';
+  // EX monster row (cols 3 and 5 under monster index1/3)
+  const exrow=document.createElement('div'); exrow.className='exrow';
+  for(let c=0;c<7;c++){
+    if(c===2||c===4){ const idx=c===2?0:1; exrow.appendChild(slotZone(side,'exmon',idx,'EX')); }
+    else exrow.appendChild(spacer());
+  }
+  grid.appendChild(exrow);
+  // monster row
+  const mrow=document.createElement('div'); mrow.className='row';
+  mrow.appendChild(spacer());
+  for(let i=0;i<5;i++) mrow.appendChild(slotZone(side,'monster',i,''));
+  mrow.appendChild(spacer());
+  grid.appendChild(mrow);
+  // spell row
+  const srow=document.createElement('div'); srow.className='row';
+  srow.appendChild(spacer());
+  for(let i=0;i<5;i++) srow.appendChild(slotZone(side,'spell',i,''));
+  srow.appendChild(spacer());
+  grid.appendChild(srow);
+  wrap.appendChild(grid);
+
+  // pile bar
+  const pb=document.createElement('div'); pb.className='pilebar';
+  for(const p of PILES) pb.appendChild(pileZone(side,p));
+  // 6th cell spacer
+  pb.appendChild(spacer());
+  wrap.appendChild(pb);
+
+  // free zone
+  const fz=document.createElement('div'); fz.className='freezone'; fz.dataset.drop=side+'.free';
+  const fl=document.createElement('div'); fl.className='fzlabel'; fl.textContent='自由配置'; fz.appendChild(fl);
+  S[side].free.forEach((card,i)=>{
+    const el=cardEl(card, side+'.free.'+i);
+    el.style.left=(card.x||8)+'px'; el.style.top=(card.y||20)+'px';
+    fz.appendChild(el);
+  });
+  wrap.appendChild(fz);
+  return wrap;
+}
+
+function spacer(){ const d=document.createElement('div'); return d; }
+
+function slotZone(side,zone,index,label){
+  const z=document.createElement('div'); z.className='zone slot'; z.dataset.drop=`${side}.${zone}.${index}`;
+  const card=S[side][zone][index];
+  if(card){ z.appendChild(cardEl(card, `${side}.${zone}.${index}`)); }
+  else if(label){ const l=document.createElement('div'); l.className='zlabel'; l.textContent=label; z.appendChild(l); }
+  return z;
+}
+
+function pileLabel(zone){ const p=PILES.find(x=>x.zone===zone); return p?p.label:zone; }
+function pileZone(side,p){
+  const z=document.createElement('div'); z.className='pile '+p.cls; z.dataset.drop=`${side}.${p.zone}`;
+  const arr=S[side][p.zone];
+  const topIdx = p.zone==='field' ? 0 : arr.length-1;
+  const top = arr[topIdx];
+  const count = p.zone==='field' ? (arr[0]?1:0) : arr.length;
+  if(top){
+    if(p.zone==='deck' || p.zone==='extra'){ // hide pile contents -> show back
+      const bk=document.createElement('div'); bk.className='dcard'; bk.innerHTML='<div class="back"></div>'; z.appendChild(bk);
+    } else { z.appendChild(cardEl(top, `${side}.${p.zone}.${topIdx}`, false)); } // face-up preview
+  }
+  const lab=document.createElement('div'); lab.className='plabel'; lab.textContent=p.label; z.appendChild(lab);
+  const cnt=document.createElement('div'); cnt.className='pcount'; cnt.textContent=count; z.appendChild(cnt);
+  attachPilePointer(z, side, p.zone);
+  return z;
+}
+// pile gesture: tap = open list (deck self = draw1), drag = move top card, long-press/right = menu on top
+function attachPilePointer(z, side, zone){
+  z.addEventListener('pointerdown',(e)=>{
+    if(replayMode || e.button===2) return;
+    const arr=S[side][zone]; const topIdx = zone==='field'?0:arr.length-1; const card=arr[topIdx];
+    e.preventDefault();
+    const start={x:e.clientX,y:e.clientY,moved:false};
+    const loc = card ? `${side}.${zone}.${topIdx}` : null;
+    let lp=null;
+    if(card) lp=setTimeout(()=>{ if(!start.moved){ openMenu(loc,start.x,start.y); window.removeEventListener('pointermove',mv); window.removeEventListener('pointerup',up); } }, 500);
+    function mv(ev){
+      const d=Math.hypot(ev.clientX-start.x, ev.clientY-start.y);
+      if(card && !start.moved && d>8){ start.moved=true; draggingNow=true; clearTimeout(lp); startGhost(card); }
+      if(start.moved){ moveGhost(ev.clientX,ev.clientY); highlightDrop(ev.clientX,ev.clientY); }
+    }
+    function up(ev){
+      window.removeEventListener('pointermove',mv); clearTimeout(lp);
+      if(start.moved){
+        ghost.style.display='none'; clearHighlight();
+        const t=dropTargetAt(ev.clientX,ev.clientY); draggingNow=false;
+        if(card && t) performDrop(loc,t,ev.clientX,ev.clientY); else render();
+      } else {
+        draggingNow=false;
+        if(zone==='deck' && side==='self') doDraw(1);
+        else if(arr.length) openListModal(side,zone,pileLabel(zone));
+      }
+    }
+    window.addEventListener('pointermove',mv);
+    window.addEventListener('pointerup',up,{once:true});
+  });
+  z.addEventListener('contextmenu',(e)=>{ e.preventDefault(); if(replayMode) return; const arr=S[side][zone]; const ti=zone==='field'?0:arr.length-1; if(arr[ti]) openMenu(`${side}.${zone}.${ti}`, e.clientX, e.clientY); });
+}
+
+function renderHand(){
+  const h=document.getElementById('selfHand'); h.innerHTML='';
+  S.self.hand.forEach((card,i)=>{ h.appendChild(cardEl(card,'self.hand.'+i)); });
+  document.getElementById('handCount').textContent=S.self.hand.length;
+}
+
+function cardEl(card, loc, interactive=true){
+  const d=document.createElement('div');
+  d.className='dcard'+(card.defense?' def':'')+(card.faceDown?' down':'')+(card.token?' token':'');
+  d.dataset.uid=card.uid; d.dataset.loc=loc;
+  if(card.faceDown){ d.innerHTML='<div class="back"></div>'; }
+  else if(card.token){ d.innerHTML='<div class="ph">'+esc(card.name)+'</div>'; }
+  else {
+    d.innerHTML='<div class="ph">'+esc(card.name)+'</div>';
+    cardImage(card).then(u=>{ if(u && d.dataset.loc===loc) d.innerHTML='<img src="'+u+'" alt="'+esc(card.name)+'">'; });
+  }
+  if(card.counters>0){ const b=document.createElement('div'); b.className='cbadge'; b.textContent=card.counters; d.appendChild(b); }
+  if(interactive) attachPointer(d, loc);
+  return d;
+}
+function esc(s){ return (s||'').replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c])); }
+
+// ===== pointer-based drag & drop + longpress + contextmenu =====
+const ghost=document.getElementById('ghost');
+let dragState=null; // {loc, card, startX, startY, moved, lpTimer}
+let draggingNow=false;
+
+function attachPointer(el, loc){
+  el.addEventListener('pointerdown',(e)=>{
+    if(replayMode) return;
+    if(e.button===2) return; // right handled by contextmenu
+    const card=cardAt(loc); if(!card) return;
+    e.preventDefault();
+    dragState={loc,card,startX:e.clientX,startY:e.clientY,moved:false,pointerId:e.pointerId,el};
+    dragState.lpTimer=setTimeout(()=>{
+      if(dragState && !dragState.moved){ openMenu(loc, dragState.startX, dragState.startY); cancelDrag(); }
+    }, 500);
+    window.addEventListener('pointermove', onPointerMove);
+    window.addEventListener('pointerup', onPointerUp, {once:true});
+  });
+  el.addEventListener('contextmenu',(e)=>{ e.preventDefault(); if(replayMode) return; openMenu(loc, e.clientX, e.clientY); });
+}
+function onPointerMove(e){
+  if(!dragState) return;
+  const dx=e.clientX-dragState.startX, dy=e.clientY-dragState.startY;
+  if(!dragState.moved && Math.hypot(dx,dy)>8){
+    dragState.moved=true; draggingNow=true; clearTimeout(dragState.lpTimer);
+    startGhost(dragState.card);
+    if(dragState.el) dragState.el.style.opacity='0.35';
+  }
+  if(dragState.moved){
+    moveGhost(e.clientX,e.clientY);
+    highlightDrop(e.clientX,e.clientY);
+  }
+}
+function onPointerUp(e){
+  window.removeEventListener('pointermove', onPointerMove);
+  if(!dragState){ return; }
+  clearTimeout(dragState.lpTimer);
+  if(dragState.moved){
+    ghost.style.display='none';
+    clearHighlight();
+    const target=dropTargetAt(e.clientX,e.clientY);
+    if(dragState.el) dragState.el.style.opacity='1';
+    if(target){ performDrop(dragState.loc, target, e.clientX, e.clientY); }
+    else render();
+  }
+  draggingNow=false; dragState=null;
+}
+function cancelDrag(){
+  window.removeEventListener('pointermove', onPointerMove);
+  if(dragState && dragState.el) dragState.el.style.opacity='1';
+  ghost.style.display='none'; clearHighlight(); draggingNow=false; dragState=null;
+}
+function startGhost(card){
+  ghost.innerHTML='';
+  if(card.faceDown){ ghost.innerHTML='<div class="back"></div>'; }
+  else { const ph=document.createElement('div'); ph.className='ph'; ph.textContent=card.name; ghost.appendChild(ph);
+    cardImage(card).then(u=>{ if(u && draggingNow) ghost.innerHTML='<img src="'+u+'">'; }); }
+  ghost.style.display='block';
+}
+function moveGhost(x,y){ const w=ghost.offsetWidth, h=ghost.offsetHeight; ghost.style.left=(x-w/2)+'px'; ghost.style.top=(y-h/2)+'px'; }
+let lastHi=null;
+function highlightDrop(x,y){ const t=dropEl(x,y); if(lastHi&&lastHi!==t) lastHi.classList.remove('drophover'); if(t){t.classList.add('drophover'); lastHi=t;} }
+function clearHighlight(){ if(lastHi){lastHi.classList.remove('drophover'); lastHi=null;} }
+function dropEl(x,y){ ghost.style.display='none'; const el=document.elementFromPoint(x,y); if(draggingNow)ghost.style.display='block'; return el?el.closest('[data-drop]'):null; }
+function dropTargetAt(x,y){ const el=dropEl(x,y); return el?el.dataset.drop:null; }
+
+function performDrop(fromLoc, toDrop, x, y){
+  // determine free-zone coords
+  let opts=null;
+  if(toDrop.endsWith('.free')){
+    const {side}=parseLoc(toDrop+'.0');
+    const fz=document.querySelector(`.freezone[data-drop="${toDrop}"]`);
+    if(fz){ const r=fz.getBoundingClientRect(); const w=parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--slot-w'))||60;
+      opts={x:Math.max(2,Math.min(r.width-w, x-r.left-w/2)), y:Math.max(2,Math.min(r.height-w*1.45, y-r.top-w*0.72))}; }
+  }
+  const card=removeCard(fromLoc);
+  if(!card){ render(); return; }
+  // build a concrete target loc
+  let toLoc=toDrop;
+  const tp=toDrop.split('.');
+  if(tp.length===2 && isFixed(tp[1])===false){ /* pile or free zone, push */ }
+  placeCard(toLoc, card, opts);
+  commit();
+}
+
+// ===== context menu =====
+const menu=document.getElementById('menu');
+function openMenu(loc, x, y){
+  const card=cardAt(loc); if(!card){ closeMenu(); return; }
+  const {side,zone}=parseLoc(loc);
+  const items=[];
+  items.push(['mh','操作: '+(card.token?'トークン':card.name)]);
+  if(!card.token){
+    items.push(['btn', card.faceDown?'表にする':'裏にする', ()=>op('flip',{loc})]);
+    items.push(['btn', card.defense?'攻撃表示にする':'守備表示にする', ()=>op('position',{loc})]);
+    if(isFixed(zone)) items.push(['btn','裏側守備でセット', ()=>op('set',{loc})]);
+  }
+  items.push(['sep']);
+  items.push(['btn','カウンター +1', ()=>op('counter',{loc,delta:1})]);
+  items.push(['btn','カウンター -1', ()=>op('counter',{loc,delta:-1})]);
+  items.push(['sep']);
+  items.push(['btn','手札へ', ()=>moveTo(loc, side+'.hand')]);
+  items.push(['btn','墓地へ', ()=>moveTo(loc, side+'.graveyard')]);
+  items.push(['btn','除外へ', ()=>moveTo(loc, side+'.banished')]);
+  items.push(['btn','デッキトップへ', ()=>moveTo(loc, side+'.deck', {top:true})]);
+  items.push(['btn','デッキボトムへ', ()=>moveTo(loc, side+'.deck')]);
+  items.push(['btn','EXデッキへ', ()=>moveTo(loc, side+'.extra')]);
+  items.push(['sep']);
+  items.push(['btn', card.token?'トークン消滅':'このカードを削除', ()=>op('delete',{loc}), true]);
+
+  menu.innerHTML='';
+  for(const it of items){
+    if(it[0]==='sep'){ const s=document.createElement('div'); s.className='sep'; menu.appendChild(s); continue; }
+    if(it[0]==='mh'){ const h=document.createElement('div'); h.className='mh'; h.textContent=it[1]; menu.appendChild(h); continue; }
+    const b=document.createElement('button'); b.textContent=it[1]; if(it[3]) b.style.color='#ff8080';
+    b.addEventListener('click',()=>{ closeMenu(); it[2](); });
+    menu.appendChild(b);
+  }
+  menu.style.display='block';
+  const mw=menu.offsetWidth, mh=menu.offsetHeight;
+  menu.style.left=Math.min(x, innerWidth-mw-6)+'px';
+  menu.style.top=Math.min(y, innerHeight-mh-6)+'px';
+}
+function closeMenu(){ menu.style.display='none'; }
+document.addEventListener('pointerdown',(e)=>{ if(menu.style.display==='block' && !menu.contains(e.target)) closeMenu(); }, true);
+
+function moveTo(fromLoc, toZone, opts){
+  const card=removeCard(fromLoc); if(!card) return;
+  // reset some flags when moving to hand/deck
+  const tz=toZone.split('.')[1];
+  if(tz==='hand'||tz==='deck'||tz==='extra'){ card.faceDown=false; card.defense=false; card.counters=0; }
+  if(card.token){ commit(); return; } // token disappears when leaving field
+  placeCard(toZone, card, opts);
+  commit();
+}
+
+// ===== operations (mutate + commit) =====
+function op(type,p){
+  const card = p.loc!=null ? cardAt(p.loc) : null;
+  switch(type){
+    case 'flip': if(card) card.faceDown=!card.faceDown; break;
+    case 'position': if(card) card.defense=!card.defense; break;
+    case 'set': if(card){ card.faceDown=true; card.defense=true; } break;
+    case 'counter': if(card){ card.counters=Math.max(0,card.counters+p.delta); } break;
+    case 'delete': removeCard(p.loc); break;
+  }
+  commit();
+}
+
+function doDraw(n){
+  const d=S.self.deck;
+  if(d.length===0){ toast('デッキに残りがありません'); return; }
+  for(let i=0;i<n && d.length;i++){ S.self.hand.push(d.shift()); }
+  commit();
+}
+function shuffle(arr){ for(let i=arr.length-1;i>0;i--){ const j=Math.floor(Math.random()*(i+1)); [arr[i],arr[j]]=[arr[j],arr[i]]; } }
+function doShuffle(){ shuffle(S.self.deck); commit(); toast('デッキをシャッフルしました'); }
+function genToken(){ const t=newCard('トークン',null,'1'); t.token=true; placeCard('self.monster', t); commit(); }
+
+function rebuildSelfDeck(){
+  S.self.deck = originalMain.map(c=>newCard(c.name,c.cardId,c.ciid));
+  S.self.extra = originalExtra.map(c=>newCard(c.name,c.cardId,c.ciid));
+  shuffle(S.self.deck);
+}
+function resetDraw5(){
+  if(!originalMain.length){ toast('先にデッキをロードしてください'); return; }
+  S.self.hand=[]; S.self.graveyard=[]; S.self.banished=[];
+  S.self.field=[null]; S.self.monster=[null,null,null,null,null];
+  S.self.spell=[null,null,null,null,null]; S.self.exmon=[null,null]; S.self.free=[];
+  rebuildSelfDeck();
+  for(let i=0;i<5 && S.self.deck.length;i++) S.self.hand.push(S.self.deck.shift());
+  commit();
+}
+
+// ===== deck loading =====
+async function loadDeckList(){
+  if(!auth || !auth.currentUser){ toast('デッキ読込にはログインが必要です'); return; }
+  try{
+    const decks=await api.getDecks();
+    const sel=document.getElementById('deckSelect');
+    sel.innerHTML='<option value="">デッキを選択...</option>';
+    for(const d of decks){
+      const o=document.createElement('option'); o.value=d.id;
+      const cnt=(d.mainDeck||[]).reduce((s,c)=>s+(c.quantity||0),0);
+      o.textContent=`${d.name} (${cnt})`; sel.appendChild(o);
+    }
+  }catch(e){ console.error(e); toast('デッキ一覧の取得に失敗'); }
+}
+async function loadDeck(id){
+  try{
+    const decks=await api.getDecks();
+    const d=decks.find(x=>x.id===id); if(!d){ toast('デッキが見つかりません'); return; }
+    S.deckName=d.name;
+    originalMain = expand(d.mainDeck||[]);
+    originalExtra = expand(d.extraDeck||[]);
+    S.self = makeSide();
+    rebuildSelfDeck();
+    history=[]; recording=true;
+    commit();
+    toast(`「${d.name}」をロードしました`);
+  }catch(e){ console.error(e); toast('デッキの読込に失敗'); }
+}
+function expand(list){
+  const out=[];
+  for(const c of list){
+    const name=c.name; const cid=lookupCardId(name); const ciid=c.selectedCiid||'1';
+    for(let i=0;i<(c.quantity||1);i++) out.push({name,cardId:cid,ciid});
+  }
+  return out;
+}
+
+// ===== list modal =====
+const listModal=document.getElementById('listModal');
+function openListModal(side,zone,label){
+  const arr=S[side][zone]; if(!arr.length){ return; }
+  document.getElementById('listModalTitle').textContent=`${label} (${arr.length})`;
+  const grid=document.getElementById('listModalGrid'); grid.innerHTML='';
+  arr.forEach((card,i)=>{
+    const el=cardEl(card, `${side}.${zone}.${i}`);
+    el.addEventListener('dblclick',()=>{ moveTo(`${side}.${zone}.${i}`, side+'.hand'); closeModal(listModal); });
+    grid.appendChild(el);
+  });
+  openModal(listModal);
+}
+
+// ===== save / share (Phase4) =====
+const SAVE_KEY='duelsim_saves';
+function curBoard(){ return { self:S.self, opp:S.opp, showOpponent:S.showOpponent, deckName:S.deckName, uidSeq }; }
+function restoreBoard(st){
+  S.self=st.self; S.opp=st.opp||makeSide(); S.showOpponent=!!st.showOpponent; S.deckName=st.deckName||'';
+  if(st.uidSeq) uidSeq=st.uidSeq;
+  render();
+}
+function enc(obj){ return LZString.compressToEncodedURIComponent(JSON.stringify(obj)); }
+function dec(s){ try{ return JSON.parse(LZString.decompressFromEncodedURIComponent(s)); }catch(e){ return null; } }
+
+function shareBoard(){
+  const code=enc(curBoard());
+  const url=location.origin+location.pathname+'#b='+code;
+  copy(url); toast('盤面共有URLをコピーしました');
+  saveLocal('board', prompt('保存名（盤面）:', S.deckName||'盤面')||S.deckName||'盤面', curBoard());
+}
+function saveReplay(){
+  if(history.length<2){ toast('リプレイにする操作履歴がありません'); return; }
+  const title=prompt('保存名（リプレイ）:', (S.deckName||'リプレイ')+'_'+history.length+'手')||'リプレイ';
+  saveLocal('replay', title, {frames:history});
+  const code=enc({frames:history});
+  const url=location.origin+location.pathname+'#r='+code;
+  copy(url); toast('リプレイを保存＆URLをコピーしました');
+}
+function saveLocal(type,title,data){
+  const list=getSaves();
+  list.unshift({id:'s'+Date.now(), type, title, ts:Date.now(), data});
+  localStorage.setItem(SAVE_KEY, JSON.stringify(list.slice(0,50)));
+}
+function getSaves(){ try{ return JSON.parse(localStorage.getItem(SAVE_KEY)||'[]'); }catch(e){ return []; } }
+function openSaves(){
+  const list=getSaves(); const c=document.getElementById('savesList'); c.innerHTML='';
+  if(!list.length){ c.innerHTML='<div class="muted">保存はありません</div>'; }
+  for(const s of list){
+    const row=document.createElement('div'); row.className='saveitem';
+    const info=document.createElement('div'); info.className='grow';
+    info.innerHTML=`<div class="t">${esc(s.title)}</div><div class="d">${s.type==='replay'?'リプレイ':'盤面'} · ${new Date(s.ts).toLocaleString('ja-JP')}</div>`;
+    const open=document.createElement('button'); open.className='btn primary'; open.textContent='開く';
+    open.addEventListener('click',()=>{ closeModal(document.getElementById('savesModal')); if(s.type==='replay') startReplay(s.data.frames); else restoreBoard(s.data); });
+    const del=document.createElement('button'); del.className='btn warn'; del.textContent='削除';
+    del.addEventListener('click',()=>{ const l=getSaves().filter(x=>x.id!==s.id); localStorage.setItem(SAVE_KEY,JSON.stringify(l)); openSaves(); });
+    row.appendChild(info); row.appendChild(open); row.appendChild(del); c.appendChild(row);
+  }
+  openModal(document.getElementById('savesModal'));
+}
+
+// ===== replay (snapshot history playback) =====
+let history=[]; let recording=true;
+let replayMode=false; let replayFrames=[]; let replayIdx=0; let replayTimer=null;
+function snapshot(){ return JSON.parse(JSON.stringify({self:S.self,opp:S.opp,showOpponent:S.showOpponent,deckName:S.deckName,uidSeq})); }
+function commit(){ if(recording && !replayMode) history.push(snapshot()); render(); }
+
+function startReplay(frames){
+  if(!frames || frames.length<1){ toast('リプレイデータが空です'); return; }
+  replayMode=true; replayFrames=frames; replayIdx=0;
+  document.getElementById('replaybar').style.display='flex';
+  document.getElementById('rbSlider').max=frames.length-1;
+  showReplayFrame(0);
+}
+function showReplayFrame(i){
+  replayIdx=Math.max(0,Math.min(replayFrames.length-1,i));
+  const f=replayFrames[replayIdx];
+  S.self=JSON.parse(JSON.stringify(f.self)); S.opp=JSON.parse(JSON.stringify(f.opp||makeSide()));
+  S.showOpponent=!!f.showOpponent; S.deckName=f.deckName||'';
+  render();
+  document.getElementById('rbSlider').value=replayIdx;
+  document.getElementById('rbInfo').textContent=`${replayIdx+1} / ${replayFrames.length}`;
+}
+function replayPlay(){
+  if(replayTimer){ stopReplayPlay(); return; }
+  document.getElementById('rbPlay').textContent='⏸';
+  const speed=+document.getElementById('rbSpeed').value;
+  replayTimer=setInterval(()=>{
+    if(replayIdx>=replayFrames.length-1){ stopReplayPlay(); return; }
+    showReplayFrame(replayIdx+1);
+  }, speed);
+}
+function stopReplayPlay(){ if(replayTimer){ clearInterval(replayTimer); replayTimer=null; } document.getElementById('rbPlay').textContent='▶'; }
+function exitReplay(){ stopReplayPlay(); replayMode=false; document.getElementById('replaybar').style.display='none'; }
+
+// ===== misc UI =====
+function openModal(m){ m.style.display='flex'; }
+function closeModal(m){ m.style.display='none'; }
+document.querySelectorAll('[data-close]').forEach(b=>b.addEventListener('click',e=>closeModal(e.target.closest('.modal'))));
+document.querySelectorAll('.modal').forEach(m=>m.addEventListener('click',e=>{ if(e.target===m) closeModal(m); }));
+
+let toastTimer=null;
+function toast(msg){
+  let t=document.getElementById('toast');
+  if(!t){ t=document.createElement('div'); t.id='toast'; t.style.cssText='position:fixed;left:50%;bottom:18px;transform:translateX(-50%);background:#222a3aE6;border:1px solid #3a4258;color:#fff;padding:8px 14px;border-radius:8px;font-size:0.82rem;z-index:10005;'; document.body.appendChild(t); }
+  t.textContent=msg; t.style.display='block'; clearTimeout(toastTimer); toastTimer=setTimeout(()=>t.style.display='none',2200);
+}
+function copy(text){ try{ navigator.clipboard.writeText(text); }catch(e){ const ta=document.createElement('textarea'); ta.value=text; document.body.appendChild(ta); ta.select(); document.execCommand('copy'); ta.remove(); } }
+function updatePills(){
+  document.getElementById('oppBtn').textContent = S.showOpponent?'相手フィールド非表示':'相手フィールド表示';
+}
+
+// ===== events =====
+document.getElementById('deckSelect').addEventListener('change',e=>{ document.getElementById('loadDeckBtn').disabled=!e.target.value; });
+document.getElementById('loadDeckBtn').addEventListener('click',()=>{ const v=document.getElementById('deckSelect').value; if(v) loadDeck(v); });
+document.getElementById('draw1Btn').addEventListener('click',()=>doDraw(1));
+document.getElementById('reset5Btn').addEventListener('click',()=>{ if(confirm('盤面をリセットして5枚ドローしますか？')) resetDraw5(); });
+document.getElementById('shuffleBtn').addEventListener('click',doShuffle);
+document.getElementById('tokenBtn').addEventListener('click',genToken);
+document.getElementById('oppBtn').addEventListener('click',()=>{ S.showOpponent=!S.showOpponent; commit(); });
+document.getElementById('clearBtn').addEventListener('click',()=>{ if(confirm('盤面をクリアしますか？(デッキは保持)')) { resetDraw5Soft(); } });
+function resetDraw5Soft(){ S.self.hand=[]; S.self.graveyard=[]; S.self.banished=[]; S.self.field=[null]; S.self.monster=[null,null,null,null,null]; S.self.spell=[null,null,null,null,null]; S.self.exmon=[null,null]; S.self.free=[]; if(originalMain.length) rebuildSelfDeck(); commit(); }
+document.getElementById('shareBtn').addEventListener('click',shareBoard);
+document.getElementById('saveReplayBtn').addEventListener('click',saveReplay);
+document.getElementById('savesBtn').addEventListener('click',openSaves);
+document.getElementById('loginBtn').addEventListener('click',async()=>{
+  if(!auth){ toast('認証が利用できません'); return; }
+  if(auth.currentUser){ await fbSignOut(); }
+  else { try{ await fbSignInPopup(); }catch(e){ toast('ログインに失敗しました'); } }
+});
+// replay bar
+document.getElementById('rbPlay').addEventListener('click',replayPlay);
+document.getElementById('rbStepB').addEventListener('click',()=>{ stopReplayPlay(); showReplayFrame(replayIdx-1); });
+document.getElementById('rbStepF').addEventListener('click',()=>{ stopReplayPlay(); showReplayFrame(replayIdx+1); });
+document.getElementById('rbSlider').addEventListener('input',e=>{ stopReplayPlay(); showReplayFrame(+e.target.value); });
+document.getElementById('rbExit').addEventListener('click',exitReplay);
+
+// ===== test hook (only with ?test=1) =====
+if(location.search.includes('test')){
+  window.__sim = {
+    get S(){ return S; }, get history(){ return history; }, render, commit, newCard, placeCard, makeSide,
+    enc, dec, curBoard, restoreBoard, startReplay, showReplayFrame, snapshot, doDraw,
+    seed(){
+      S.self.deck = Array.from({length:35},(_,i)=>newCard('デッキカード',null,'1'));
+      S.self.extra = Array.from({length:8},(_,i)=>newCard('EXカード',null,'1'));
+      S.self.hand = Array.from({length:5},(_,i)=>newCard('手札'+(i+1),null,'1'));
+      const m=newCard('モンスターA',null,'1'); S.self.monster[2]=m;
+      const md=newCard('セット',null,'1'); md.faceDown=true; md.defense=true; S.self.monster[0]=md;
+      const c=newCard('カウンター持ち',null,'1'); c.counters=3; S.self.spell[1]=c;
+      const f=newCard('フィールド魔法',null,'1'); S.self.field[0]=f;
+      S.self.graveyard=[newCard('墓地1',null,'1'),newCard('墓地2',null,'1')];
+      S.self.banished=[newCard('除外1',null,'1')];
+      const tk=newCard('トークン',null,'1'); tk.token=true; S.self.monster[4]=tk;
+      const fr=newCard('自由配置',null,'1'); fr.x=20; fr.y=20; S.self.free=[fr];
+      commit();
+    }
+  };
+}
+
+// ===== init =====
+(async function init(){
+  try{ await imageCacheManager.init(); }catch(e){ console.warn('imgcache init',e); }
+  await loadCardData();
+  render();
+  // hash-based load (shared board/replay)
+  const h=location.hash;
+  if(h.startsWith('#b=')){ const st=dec(h.slice(3)); if(st) restoreBoard(st); }
+  else if(h.startsWith('#r=')){ const d=dec(h.slice(3)); if(d&&d.frames) startReplay(d.frames); }
+  initAuth(); // non-blocking; board already rendered
+})();
+</script>
+</body>
+</html>
