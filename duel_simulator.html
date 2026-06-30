@@ -85,7 +85,7 @@
   #ghost{position:fixed;z-index:9999;pointer-events:none;width:var(--slot-w);opacity:.9;filter:drop-shadow(0 4px 8px #000a);display:none;}
   #ghost img,#ghost .ph,#ghost .back{width:100%;border-radius:5px;}
   /* context menu */
-  #menu{position:fixed;z-index:10000;background:#1c2130;border:1px solid var(--line);border-radius:8px;padding:5px;min-width:168px;box-shadow:0 8px 24px #000a;display:none;}
+  #menu{position:fixed;z-index:10010;background:#1c2130;border:1px solid var(--line);border-radius:8px;padding:5px;min-width:168px;box-shadow:0 8px 24px #000a;display:none;}
   #menu button{display:block;width:100%;text-align:left;background:none;border:none;color:#e7eaf0;padding:7px 10px;font-size:0.8rem;border-radius:5px;cursor:pointer;}
   #menu button:hover{background:#2c3346;}
   #menu .sep{height:1px;background:var(--line);margin:4px 2px;}
@@ -142,16 +142,6 @@
 
 <div class="board" id="boardRoot"></div>
 
-<div class="lists-wrap">
-  <div class="listcol">
-    <div class="side-title">EXデッキ（タップ=手札／長押し=メニューでEXゾーンへ／ドラッグ=任意ゾーン） <span id="extraListCount" class="pill">0</span></div>
-    <div class="hscroll" id="extraList" data-drop="self.extra"></div>
-  </div>
-  <div class="listcol">
-    <div class="side-title">デッキ（順番表示／タップ=手札・ドラッグ=任意ゾーン） <span id="deckListCount" class="pill">0</span></div>
-    <div class="hscroll" id="deckList" data-drop="self.deck"></div>
-  </div>
-</div>
 
 <div id="ghost"></div>
 <div id="menu"></div>
@@ -330,7 +320,6 @@ function render(){
   boardRoot.innerHTML='';
   if(S.showOpponent) boardRoot.appendChild(renderSide('opp'));
   boardRoot.appendChild(renderSide('self'));
-  renderLists();
   updatePills();
 }
 
@@ -345,11 +334,11 @@ function renderSide(side){
   const left=document.createElement('div'); left.className='side-left';
 
   const grid=document.createElement('div'); grid.className='slotgrid';
-  // EX monster row: [spacer][Field][EX-left][ ][EX-right][ ][ ]
-  // field spell sits immediately left of the left EX monster zone
+  // EX row:    [EXデッキ][Field][EX-left][ ][EX-right][ ][ ]  — deck piles sit on-field, next to the zones (short drag)
   const exrow=document.createElement('div'); exrow.className='row';
   for(let c=0;c<7;c++){
-    if(c===1){ exrow.appendChild(slotZone(side,'field',0,'フィールド')); }
+    if(c===0){ exrow.appendChild(pileZone(side,{zone:'extra',cls:'extra',label:'EXデッキ'})); }
+    else if(c===1){ exrow.appendChild(slotZone(side,'field',0,'フィールド')); }
     else if(c===2||c===4){ const idx=c===2?0:1; exrow.appendChild(slotZone(side,'exmon',idx,'EX')); }
     else exrow.appendChild(spacer());
   }
@@ -360,9 +349,9 @@ function renderSide(side){
   for(let i=0;i<5;i++) mrow.appendChild(slotZone(side,'monster',i,''));
   mrow.appendChild(spacer());
   grid.appendChild(mrow);
-  // spell row: [spacer][S1..S5][spacer]
+  // spell row:  [デッキ][S1..S5][spacer]
   const srow=document.createElement('div'); srow.className='row';
-  srow.appendChild(spacer());
+  srow.appendChild(pileZone(side,{zone:'deck',cls:'deck',label:'デッキ'}));
   for(let i=0;i<5;i++) srow.appendChild(slotZone(side,'spell',i,''));
   srow.appendChild(spacer());
   grid.appendChild(srow);
@@ -451,7 +440,8 @@ function attachPilePointer(z, side, zone){
     const start={x:e.clientX,y:e.clientY,moved:false};
     const loc = card ? `${side}.${zone}.${topIdx}` : null;
     let lp=null;
-    if(card) lp=setTimeout(()=>{ if(!start.moved){ openMenu(loc,start.x,start.y); window.removeEventListener('pointermove',mv); window.removeEventListener('pointerup',up); } }, 500);
+    // long-press on a deck/EX pile opens its full list (to pick any card); deck tap draws, EX tap opens list
+    if(arr.length) lp=setTimeout(()=>{ if(!start.moved){ openListModal(side,zone,pileLabel(zone)); window.removeEventListener('pointermove',mv); window.removeEventListener('pointerup',up); } }, 500);
     function mv(ev){
       const d=Math.hypot(ev.clientX-start.x, ev.clientY-start.y);
       if(card && !start.moved && d>8){ start.moved=true; draggingNow=true; clearTimeout(lp); startGhost(card); }
@@ -477,18 +467,6 @@ function attachPilePointer(z, side, zone){
   z.addEventListener('contextmenu',(e)=>{ e.preventDefault(); if(replayMode) return; const arr=S[side][zone]; const ti=zone==='field'?0:arr.length-1; if(arr[ti]) openMenu(`${side}.${zone}.${ti}`, e.clientX, e.clientY); });
 }
 
-// Always-visible Deck / EX lists (current array order)
-// tap=to hand(free), drag=anywhere (field/deck/etc), long-press/right-click=menu
-function renderListInto(elId, zone, countId){
-  const el=document.getElementById(elId); el.innerHTML='';
-  const arr=S.self[zone];
-  arr.forEach((c,i)=>{ el.appendChild(cardEl(c,'self.'+zone+'.'+i,true,()=>moveTo('self.'+zone+'.'+i,'self.free'))); });
-  document.getElementById(countId).textContent=arr.length;
-}
-function renderLists(){
-  renderListInto('deckList','deck','deckListCount');
-  renderListInto('extraList','extra','extraListCount');
-}
 
 function cardEl(card, loc, interactive=true, onTap=null){
   const d=document.createElement('div');
@@ -632,7 +610,7 @@ function openMenu(loc, x, y){
     if(it[0]==='sep'){ const s=document.createElement('div'); s.className='sep'; menu.appendChild(s); continue; }
     if(it[0]==='mh'){ const h=document.createElement('div'); h.className='mh'; h.textContent=it[1]; menu.appendChild(h); continue; }
     const b=document.createElement('button'); b.textContent=it[1]; if(it[3]) b.style.color='#ff8080';
-    b.addEventListener('click',()=>{ closeMenu(); it[2](); });
+    b.addEventListener('click',()=>{ closeMenu(); closeModal(listModal); it[2](); });
     menu.appendChild(b);
   }
   menu.style.display='block';
@@ -733,8 +711,8 @@ function openListModal(side,zone,label){
   document.getElementById('listModalTitle').textContent=`${label} (${arr.length})`;
   const grid=document.getElementById('listModalGrid'); grid.innerHTML='';
   arr.forEach((card,i)=>{
-    const el=cardEl(card, `${side}.${zone}.${i}`);
-    el.addEventListener('dblclick',()=>{ moveTo(`${side}.${zone}.${i}`, side+'.free'); closeModal(listModal); });
+    // tap = to hand (close); long-press / right-click = menu with quick-place to field zones
+    const el=cardEl(card, `${side}.${zone}.${i}`, true, ()=>{ moveTo(`${side}.${zone}.${i}`, side+'.free'); closeModal(listModal); });
     grid.appendChild(el);
   });
   openModal(listModal);
