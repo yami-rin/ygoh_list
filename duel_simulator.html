@@ -108,13 +108,16 @@
   body.replaying{padding-bottom:96px;} /* keep bottom content reachable above the fixed replay bar */
   .muted{color:#8a93a6;font-size:0.74rem;}
   @media(max-width:560px){
-    :root{--slot-w:46px;--hand-w:42px;}
+    :root{--slot-w:34px;--hand-w:42px;} /* field shrinks so grid + grave/banish rail fit side by side */
     select{max-width:40vw;}
     .btn{padding:5px 7px;font-size:0.74rem;}
-    /* stack the field and the grave/banish rail vertically so lists/hand get full width */
-    .side-main{flex-direction:column;}
-    .rightrail{width:100%;flex-direction:row;justify-content:center;gap:14px;margin-top:6px;}
-    .stackzone{width:calc(var(--slot-w) + 6px);}
+    .board{padding:4px;}
+    .side{padding:6px;}
+    .row,.exrow{gap:4px;}
+    .side-main{gap:6px;}
+    .rightrail{gap:6px;}
+    /* lists & hand are full-width (below the field row), so keep them readable independent of the small field */
+    .hscroll .dcard{width:42px;}
   }
 </style>
 </head>
@@ -352,10 +355,18 @@ function renderSide(side){
   grid.appendChild(srow);
   left.appendChild(grid);
 
-  // always-visible EX / Deck lists, directly under the field (self only) — single scrollable row
+  main.appendChild(left);
+  // right rail: graveyard + banished vertical stacks — sits beside the FIELD GRID only
+  const rail=document.createElement('div'); rail.className='rightrail';
+  rail.appendChild(stackZone(side,'graveyard','墓地','grave'));
+  rail.appendChild(stackZone(side,'banished','除外','banish'));
+  main.appendChild(rail);
+  wrap.appendChild(main);
+
+  // below the field row (full width): EX/Deck lists (self only) + hand
   if(side==='self'){
-    left.appendChild(buildList(side,'extra','EXデッキ','タップ=手札 / 長押し=フィールドへ / ドラッグ'));
-    left.appendChild(buildList(side,'deck','デッキ','タップ=手札 / ドラッグ=任意ゾーン'));
+    wrap.appendChild(buildList(side,'extra','EXデッキ','タップ=手札 / 長押し=フィールドへ / ドラッグ'));
+    wrap.appendChild(buildList(side,'deck','デッキ','タップ=手札 / ドラッグ=任意ゾーン'));
   }
 
   // free zone == hand (free placement). The drawn cards land here.
@@ -370,16 +381,7 @@ function renderSide(side){
     fz.appendChild(el);
   });
   fz.style.minHeight=Math.max(cardH+24, maxBottom+10)+'px'; // ~1 row tall by default, grows only if needed
-  left.appendChild(fz);
-
-  main.appendChild(left);
-  // right rail: graveyard + banished vertical overlapping stacks
-  const rail=document.createElement('div'); rail.className='rightrail';
-  rail.appendChild(stackZone(side,'graveyard','墓地','grave'));
-  rail.appendChild(stackZone(side,'banished','除外','banish'));
-  main.appendChild(rail);
-
-  wrap.appendChild(main);
+  wrap.appendChild(fz);
   return wrap;
 }
 
