@@ -63,17 +63,15 @@
   .freezone .dcard{height:auto;}
   .lists-wrap{display:flex;flex-direction:column;gap:8px;padding:8px;}
   .listcol{background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:8px;}
-  .hscroll{display:flex;gap:4px;overflow-x:auto;overflow-y:hidden;padding-bottom:4px;min-height:74px;align-items:flex-start;flex-wrap:wrap;}
-  .hscroll.nowrap{flex-wrap:nowrap;min-height:0;}
-  .hscroll .dcard{width:54px;flex:0 0 auto;}
-  /* overlapping list: cards tuck under each other to save space; hover/active brings one forward */
-  .hscroll.overlap{gap:0;padding-left:22px;}
-  .hscroll.overlap .dcard{margin-left:-22px;}
-  .hscroll.overlap .dcard:first-child{margin-left:0;}
-  .hscroll.overlap .dcard:hover,.hscroll.overlap .dcard:active{z-index:20;}
+  /* deck / EX lists: rows of fixed count, cards overlap to save space (no leading gap; first card flush) */
+  .listrows{display:flex;flex-direction:column;gap:3px;}
+  .listrow{display:flex;flex-wrap:nowrap;align-items:flex-start;}
+  .listrow .dcard{width:54px;flex:0 0 auto;margin-left:-24px;}
+  .listrow .dcard:first-child{margin-left:0;}
+  .listrow .dcard:hover,.listrow .dcard:active{z-index:20;}
   .listcol.inline{background:transparent;border:0;padding:4px 0 0;}
   .listcol.inline .side-title{margin-bottom:3px;}
-  @media(max-width:560px){ .hscroll .dcard{width:48px;} .hscroll.overlap .dcard{margin-left:-20px;} }
+  @media(max-width:560px){ .listrow .dcard{width:48px;margin-left:-26px;} }
   /* card */
   .dcard{position:relative;aspect-ratio:59/86;border-radius:5px;overflow:visible;cursor:grab;width:100%;height:100%;touch-action:none;}
   .hand .dcard{width:var(--slot-w);height:auto;}
@@ -134,10 +132,10 @@
   <button class="btn" id="deckChip" style="display:none;" title="デッキを変更">デッキ ▼</button>
   <button class="btn" id="undoBtn" title="一手戻す (Ctrl+Z)">↶戻す</button>
   <button class="btn" id="draw1Btn">1ドロー</button>
-  <button class="btn" id="reset5Btn">リセット&5</button>
+  <button class="btn" id="reset5Btn">リセット&5ドロー</button>
   <button class="btn" id="shuffleBtn">シャッフル</button>
   <button class="btn" id="tokenBtn">トークン</button>
-  <button class="btn" id="oppBtn">相手盤面</button>
+  <button class="btn" id="oppBtn">相手フィールド表示</button>
   <button class="btn" id="clearBtn">クリア</button>
   <button class="btn" id="shareBtn">共有</button>
   <button class="btn" id="saveReplayBtn">リプレイ保存</button>
@@ -388,14 +386,23 @@ function renderSide(side){
 
 function spacer(){ const d=document.createElement('div'); return d; }
 
-// always-visible card list (single scrollable row) placed right under the field
+// always-visible card list: rows of 15 overlapping cards, placed under the field
 function buildList(side, zone, label, hint){
   const col=document.createElement('div'); col.className='listcol inline';
   const t=document.createElement('div'); t.className='side-title';
   t.innerHTML=`${label} <span class="pill">${S[side][zone].length}</span> <span class="muted">${hint}</span>`;
-  const sc=document.createElement('div'); sc.className='hscroll overlap'; sc.dataset.drop=`${side}.${zone}`;
-  S[side][zone].forEach((c,i)=>{ sc.appendChild(cardEl(c, `${side}.${zone}.${i}`, true, ()=>moveTo(`${side}.${zone}.${i}`, side+'.free'))); });
-  col.appendChild(t); col.appendChild(sc);
+  const box=document.createElement('div'); box.className='listrows'; box.dataset.drop=`${side}.${zone}`;
+  const arr=S[side][zone]; const PER=15;
+  if(!arr.length) box.style.minHeight='30px';
+  for(let r=0;r<arr.length;r+=PER){
+    const row=document.createElement('div'); row.className='listrow';
+    for(let i=r;i<Math.min(r+PER,arr.length);i++){
+      const idx=i;
+      row.appendChild(cardEl(arr[idx], `${side}.${zone}.${idx}`, true, ()=>moveTo(`${side}.${zone}.${idx}`, side+'.free')));
+    }
+    box.appendChild(row);
+  }
+  col.appendChild(t); col.appendChild(box);
   return col;
 }
 
@@ -407,11 +414,11 @@ function stackZone(side,zone,label,cls){
   head.textContent=`${label} ${arr.length}`;
   const inner=document.createElement('div'); inner.className='stack-inner';
   const cardW=getSlotW(); const cardH=cardW*86/59;
-  // height grows until ~4 cards, then locks and cards overlap progressively
+  // fixed full-size frame from the start; cards overlap within it (no resizing as cards are added)
   const cap=4, step=cardH*0.55;
   const fixedH=(cap-1)*step + cardH;
-  const off = arr.length<=1 ? 0 : (arr.length<=cap ? step : (fixedH-cardH)/(arr.length-1));
-  inner.style.height = (arr.length ? (arr.length-1)*off + cardH : 22) + 'px';
+  const off = arr.length<=1 ? step : (arr.length<=cap ? step : (fixedH-cardH)/(arr.length-1));
+  inner.style.height = fixedH + 'px';
   arr.forEach((c,i)=>{
     const el=cardEl(c, `${side}.${zone}.${i}`, true, ()=>moveTo(`${side}.${zone}.${i}`, side+'.free'));
     el.style.position='absolute'; el.style.top=(i*off)+'px'; el.style.left='0'; el.style.width=cardW+'px'; el.style.zIndex=i;
@@ -848,7 +855,7 @@ function toast(msg){
 }
 function copy(text){ try{ navigator.clipboard.writeText(text); }catch(e){ const ta=document.createElement('textarea'); ta.value=text; document.body.appendChild(ta); ta.select(); document.execCommand('copy'); ta.remove(); } }
 function updatePills(){
-  document.getElementById('oppBtn').textContent = S.showOpponent?'相手盤面✓':'相手盤面';
+  document.getElementById('oppBtn').textContent = S.showOpponent?'相手フィールド非表示':'相手フィールド表示';
 }
 
 // ===== events =====
