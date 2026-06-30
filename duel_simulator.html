@@ -50,6 +50,11 @@
   .hand-wrap{background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:8px;}
   .hand-wrap .side-title{margin-bottom:6px;}
   .hand{display:flex;gap:6px;flex-wrap:wrap;min-height:104px;align-items:flex-start;}
+  .lists-wrap{display:flex;flex-direction:column;gap:8px;padding:8px;}
+  .listcol{background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:8px;}
+  .hscroll{display:flex;gap:4px;overflow-x:auto;overflow-y:hidden;padding-bottom:4px;min-height:74px;align-items:flex-start;flex-wrap:wrap;}
+  .hscroll .dcard{width:48px;flex:0 0 auto;}
+  @media(max-width:560px){ .hscroll .dcard{width:40px;} }
   /* card */
   .dcard{position:relative;aspect-ratio:59/86;border-radius:5px;overflow:visible;cursor:grab;width:100%;height:100%;touch-action:none;}
   .hand .dcard{width:var(--slot-w);height:auto;}
@@ -117,6 +122,25 @@
 <div class="hand-wrap">
   <div class="side-title">手札 <span id="handCount" class="pill">0</span></div>
   <div class="hand" id="selfHand" data-drop="self.hand"></div>
+</div>
+
+<div class="lists-wrap">
+  <div class="listcol">
+    <div class="side-title">デッキ（順番表示／タップ=手札・ドラッグ=任意ゾーン） <span id="deckListCount" class="pill">0</span></div>
+    <div class="hscroll" id="deckList" data-drop="self.deck"></div>
+  </div>
+  <div class="listcol">
+    <div class="side-title">EXデッキ（タップ=手札・ドラッグ=任意ゾーン） <span id="extraListCount" class="pill">0</span></div>
+    <div class="hscroll" id="extraList" data-drop="self.extra"></div>
+  </div>
+  <div class="listcol">
+    <div class="side-title" style="color:#a78bfa;">墓地（タップ=手札・ドラッグ=任意ゾーン） <span id="graveListCount" class="pill">0</span></div>
+    <div class="hscroll" id="graveList" data-drop="self.graveyard"></div>
+  </div>
+  <div class="listcol">
+    <div class="side-title" style="color:#fb923c;">除外（タップ=手札・ドラッグ=任意ゾーン） <span id="banishListCount" class="pill">0</span></div>
+    <div class="hscroll" id="banishList" data-drop="self.banished"></div>
+  </div>
 </div>
 
 <div id="ghost"></div>
@@ -255,6 +279,10 @@ function removeCard(loc){
 }
 function placeCard(loc, card, opts){
   const {side,zone,index}=parseLoc(loc); const a=zoneArr(side,zone);
+  // non-field zones hold cards face-up, upright, no counters
+  if(zone==='deck'||zone==='extra'||zone==='hand'||zone==='graveyard'||zone==='banished'){
+    card.faceDown=false; card.defense=false; card.counters=0;
+  }
   if(isFixed(zone)){
     let i = index;
     if(i==null || a[i]!=null){ const e=a.findIndex(x=>x==null); i = (i!=null && a[i]==null)?i:(e!==-1?e:null); }
@@ -284,6 +312,7 @@ function render(){
   if(S.showOpponent) boardRoot.appendChild(renderSide('opp'));
   boardRoot.appendChild(renderSide('self'));
   renderHand();
+  renderLists();
   updatePills();
 }
 
@@ -380,8 +409,10 @@ function attachPilePointer(z, side, zone){
     function up(ev){
       window.removeEventListener('pointermove',mv); clearTimeout(lp);
       if(start.moved){
+        draggingNow=false; // before dropTargetAt so dropEl() won't re-show the ghost
         ghost.style.display='none'; clearHighlight();
-        const t=dropTargetAt(ev.clientX,ev.clientY); draggingNow=false;
+        const t=dropTargetAt(ev.clientX,ev.clientY);
+        ghost.style.display='none';
         if(card && t) performDrop(loc,t,ev.clientX,ev.clientY); else render();
       } else {
         draggingNow=false;
@@ -401,9 +432,25 @@ function renderHand(){
   document.getElementById('handCount').textContent=S.self.hand.length;
 }
 
-function cardEl(card, loc, interactive=true){
+// Always-visible Deck / EX / Graveyard / Banished lists (current array order)
+// tap=to hand, drag=anywhere (field/deck/etc), long-press/right-click=menu
+function renderListInto(elId, zone, countId){
+  const el=document.getElementById(elId); el.innerHTML='';
+  const arr=S.self[zone];
+  arr.forEach((c,i)=>{ el.appendChild(cardEl(c,'self.'+zone+'.'+i,true,()=>moveTo('self.'+zone+'.'+i,'self.hand'))); });
+  document.getElementById(countId).textContent=arr.length;
+}
+function renderLists(){
+  renderListInto('deckList','deck','deckListCount');
+  renderListInto('extraList','extra','extraListCount');
+  renderListInto('graveList','graveyard','graveListCount');
+  renderListInto('banishList','banished','banishListCount');
+}
+
+function cardEl(card, loc, interactive=true, onTap=null){
   const d=document.createElement('div');
   d.className='dcard'+(card.defense?' def':'')+(card.faceDown?' down':'')+(card.token?' token':'');
+  if(onTap) d._onTap=onTap;
   d.dataset.uid=card.uid; d.dataset.loc=loc;
   if(card.faceDown){ d.innerHTML='<div class="back"></div>'; }
   else if(card.token){ d.innerHTML='<div class="ph">'+esc(card.name)+'</div>'; }
@@ -455,12 +502,16 @@ function onPointerUp(e){
   if(!dragState){ return; }
   clearTimeout(dragState.lpTimer);
   if(dragState.moved){
+    draggingNow=false; // before dropTargetAt so dropEl() won't re-show the ghost (fixes double-card)
     ghost.style.display='none';
     clearHighlight();
     const target=dropTargetAt(e.clientX,e.clientY);
+    ghost.style.display='none';
     if(dragState.el) dragState.el.style.opacity='1';
     if(target){ performDrop(dragState.loc, target, e.clientX, e.clientY); }
     else render();
+  } else if(dragState.el && dragState.el._onTap){
+    dragState.el._onTap(); // tap action (e.g. deck/EX list card -> hand)
   }
   draggingNow=false; dragState=null;
 }
@@ -576,17 +627,17 @@ function shuffle(arr){ for(let i=arr.length-1;i>0;i--){ const j=Math.floor(Math.
 function doShuffle(){ shuffle(S.self.deck); commit(); toast('デッキをシャッフルしました'); }
 function genToken(){ const t=newCard('トークン',null,'1'); t.token=true; placeCard('self.monster', t); commit(); }
 
-function rebuildSelfDeck(){
+function rebuildSelfDeck(shuffleIt){
   S.self.deck = originalMain.map(c=>newCard(c.name,c.cardId,c.ciid));
   S.self.extra = originalExtra.map(c=>newCard(c.name,c.cardId,c.ciid));
-  shuffle(S.self.deck);
+  if(shuffleIt) shuffle(S.self.deck);
 }
 function resetDraw5(){
   if(!originalMain.length){ toast('先にデッキをロードしてください'); return; }
   S.self.hand=[]; S.self.graveyard=[]; S.self.banished=[];
   S.self.field=[null]; S.self.monster=[null,null,null,null,null];
   S.self.spell=[null,null,null,null,null]; S.self.exmon=[null,null]; S.self.free=[];
-  rebuildSelfDeck();
+  rebuildSelfDeck(true); // randomize for a fresh draw
   for(let i=0;i<5 && S.self.deck.length;i++) S.self.hand.push(S.self.deck.shift());
   commit();
 }
@@ -613,10 +664,10 @@ async function loadDeck(id){
     originalMain = expand(d.mainDeck||[]);
     originalExtra = expand(d.extraDeck||[]);
     S.self = makeSide();
-    rebuildSelfDeck();
+    rebuildSelfDeck(false); // initial = registered deck order (no shuffle)
     history=[]; recording=true;
     commit();
-    toast(`「${d.name}」をロードしました`);
+    toast(`「${d.name}」をロードしました（登録順）`);
   }catch(e){ console.error(e); toast('デッキの読込に失敗'); }
 }
 function expand(list){
@@ -749,7 +800,7 @@ document.getElementById('shuffleBtn').addEventListener('click',doShuffle);
 document.getElementById('tokenBtn').addEventListener('click',genToken);
 document.getElementById('oppBtn').addEventListener('click',()=>{ S.showOpponent=!S.showOpponent; commit(); });
 document.getElementById('clearBtn').addEventListener('click',()=>{ if(confirm('盤面をクリアしますか？(デッキは保持)')) { resetDraw5Soft(); } });
-function resetDraw5Soft(){ S.self.hand=[]; S.self.graveyard=[]; S.self.banished=[]; S.self.field=[null]; S.self.monster=[null,null,null,null,null]; S.self.spell=[null,null,null,null,null]; S.self.exmon=[null,null]; S.self.free=[]; if(originalMain.length) rebuildSelfDeck(); commit(); }
+function resetDraw5Soft(){ S.self.hand=[]; S.self.graveyard=[]; S.self.banished=[]; S.self.field=[null]; S.self.monster=[null,null,null,null,null]; S.self.spell=[null,null,null,null,null]; S.self.exmon=[null,null]; S.self.free=[]; if(originalMain.length) rebuildSelfDeck(false); commit(); }
 document.getElementById('shareBtn').addEventListener('click',shareBoard);
 document.getElementById('saveReplayBtn').addEventListener('click',saveReplay);
 document.getElementById('savesBtn').addEventListener('click',openSaves);
