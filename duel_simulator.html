@@ -83,6 +83,12 @@
   .dcard .back::after{content:"";width:60%;height:60%;border-radius:50%;background:radial-gradient(circle,#d8b24a,#9c7a1e);opacity:.5;}
   .dcard.token .ph{background:linear-gradient(135deg,#1f7a4d,#0e5132);color:#d6ffe6;}
   .dcard .cbadge{position:absolute;top:-5px;left:-5px;min-width:18px;height:18px;border-radius:9px;background:#e11d48;color:#fff;font-size:0.66rem;font-weight:bold;display:flex;align-items:center;justify-content:center;padding:0 4px;z-index:5;box-shadow:0 1px 3px #000a;}
+  /* Xyz material stack on a field slot */
+  .cardstack{position:relative;width:100%;height:100%;}
+  .cardstack .dcard{position:absolute;left:0;top:0;width:100%;height:100%;}
+  .cardstack .matcard{filter:brightness(0.78);}
+  .matbadge{position:absolute;bottom:1px;left:50%;transform:translateX(-50%);background:#0b7a3b;color:#fff;font-size:0.56rem;line-height:1.2;padding:1px 6px;border-radius:9px;z-index:60;cursor:pointer;white-space:nowrap;box-shadow:0 1px 3px #000a;border:1px solid #0e9b4d;}
+  .matbadge:hover{background:#0e9b4d;}
   .dcard .stackn{position:absolute;bottom:-4px;right:-4px;background:#000c;color:#fff;font-size:0.62rem;border-radius:8px;padding:0 5px;z-index:5;}
   /* drag ghost */
   #ghost{position:fixed;z-index:9999;pointer-events:none;width:var(--slot-w);opacity:.9;filter:drop-shadow(0 4px 8px #000a);display:none;}
@@ -279,14 +285,26 @@ function removeCard(loc){
 }
 function placeCard(loc, card, opts){
   const {side,zone,index}=parseLoc(loc); const a=zoneArr(side,zone);
-  // non-field zones hold cards face-up, upright, no counters
+  // non-field zones hold cards face-up, upright, no counters; any Xyz materials drop to graveyard
   if(zone==='deck'||zone==='extra'||zone==='hand'||zone==='graveyard'||zone==='banished'){
     card.faceDown=false; card.defense=false; card.counters=0;
+    if(card.materials && card.materials.length){
+      card.materials.forEach(m=>{ m.faceDown=false; m.defense=false; m.counters=0; m.materials=[]; S[side].graveyard.push(m); });
+      card.materials=[];
+    }
   }
   if(isFixed(zone)){
-    let i = index;
-    if(i==null || a[i]!=null){ const e=a.findIndex(x=>x==null); i = (i!=null && a[i]==null)?i:(e!==-1?e:null); }
-    if(i==null){ // no empty slot -> fallback to free zone
+    if(index!=null && a[index]!=null){
+      // drop onto an occupied field slot -> stack: dropped card becomes the top monster,
+      // the previous occupant (and its materials) become Xyz materials under it
+      const prev=a[index];
+      card.materials = card.materials || [];
+      card.materials.push(prev, ...(prev.materials||[]));
+      prev.materials = [];
+      a[index]=card; return;
+    }
+    let i = index!=null ? index : a.findIndex(x=>x==null);
+    if(i==null || i===-1){ // no empty slot -> fallback to free zone
       S[side].free.push(card); return;
     }
     a[i]=card; return;
@@ -431,9 +449,37 @@ function stackZone(side,zone,label,cls){
 function slotZone(side,zone,index,label){
   const z=document.createElement('div'); z.className='zone slot'; z.dataset.drop=`${side}.${zone}.${index}`;
   const card=S[side][zone][index];
-  if(card){ z.appendChild(cardEl(card, `${side}.${zone}.${index}`)); }
+  if(card){
+    const loc=`${side}.${zone}.${index}`;
+    const mats=card.materials||[];
+    if(mats.length){
+      const stack=document.createElement('div'); stack.className='cardstack';
+      mats.forEach((m,mi)=>{ // Xyz materials peek out behind the top monster
+        const mel=cardEl(m, loc+':m'+mi, false); mel.classList.add('matcard');
+        mel.style.left=((mi+1)*5)+'px'; mel.style.top=((mi+1)*5)+'px'; mel.style.zIndex=mi;
+        stack.appendChild(mel);
+      });
+      const topEl=cardEl(card, loc); topEl.style.zIndex='40'; stack.appendChild(topEl);
+      const b=document.createElement('div'); b.className='matbadge'; b.textContent='素材'+mats.length;
+      b.title='タップでX素材を1枚墓地へ';
+      b.addEventListener('pointerdown',e=>e.stopPropagation());
+      b.addEventListener('click',e=>{ e.stopPropagation(); detachMaterial(loc); });
+      stack.appendChild(b);
+      z.appendChild(stack);
+    } else {
+      z.appendChild(cardEl(card, loc));
+    }
+  }
   else if(label){ const l=document.createElement('div'); l.className='zlabel'; l.textContent=label; z.appendChild(l); }
   return z;
+}
+// detach Xyz materials to graveyard (all=true removes every material)
+function detachMaterial(loc, all){
+  const card=cardAt(loc); if(!card || !card.materials || !card.materials.length) return;
+  const {side}=parseLoc(loc);
+  const taken = all ? card.materials.splice(0) : [card.materials.pop()];
+  taken.forEach(m=>{ if(!m) return; m.faceDown=false; m.defense=false; m.counters=0; m.materials=[]; S[side].graveyard.push(m); });
+  commit();
 }
 
 function pileLabel(zone){ const p=PILES.find(x=>x.zone===zone); return p?p.label:zone; }
@@ -607,6 +653,12 @@ function openMenu(loc, x, y){
     items.push(['btn', card.faceDown?'表にする':'裏にする', ()=>op('flip',{loc})]);
     items.push(['btn', card.defense?'攻撃表示にする':'守備表示にする', ()=>op('position',{loc})]);
     if(isFixed(zone)) items.push(['btn','裏側守備でセット', ()=>op('set',{loc})]);
+  }
+  if(card.materials && card.materials.length){
+    items.push(['sep']);
+    items.push(['mh','X素材 '+card.materials.length+'枚']);
+    items.push(['btn','X素材を1枚 墓地へ', ()=>detachMaterial(loc)]);
+    items.push(['btn','X素材を全て 墓地へ', ()=>detachMaterial(loc, true)]);
   }
   // quick-place onto the field (auto into first empty slot) — makes EX/hand placement 1 tap
   items.push(['sep']);
@@ -889,7 +941,7 @@ document.getElementById('rbExit').addEventListener('click',exitReplay);
 if(location.search.includes('test')){
   window.__sim = {
     get S(){ return S; }, get history(){ return history; }, render, commit, newCard, placeCard, makeSide,
-    enc, dec, curBoard, restoreBoard, startReplay, showReplayFrame, snapshot, doDraw, undo, moveTo,
+    enc, dec, curBoard, restoreBoard, startReplay, showReplayFrame, snapshot, doDraw, undo, moveTo, detachMaterial,
     seed(){
       S.self.deck = Array.from({length:35},(_,i)=>newCard('デッキカード',null,'1'));
       S.self.extra = Array.from({length:8},(_,i)=>newCard('EXカード',null,'1'));
