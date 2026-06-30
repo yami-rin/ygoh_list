@@ -98,8 +98,10 @@
   .saveitem .t{font-size:0.84rem;}
   .saveitem .d{font-size:0.68rem;color:#8a93a6;}
   /* replay bar */
-  #replaybar{position:fixed;left:0;right:0;bottom:0;z-index:60;background:#11141dF2;border-top:1px solid var(--accent);padding:8px 12px;display:none;align-items:center;gap:10px;}
-  #replaybar input[type=range]{flex:1 1 auto;}
+  #replaybar{position:fixed;left:0;right:0;bottom:0;z-index:60;background:#11141dF2;border-top:1px solid var(--accent);padding:8px 12px;display:none;align-items:center;gap:8px;flex-wrap:wrap;box-sizing:border-box;}
+  #replaybar input[type=range]{flex:1 1 140px;min-width:100px;}
+  #replaybar .btn,#replaybar select{flex:0 0 auto;}
+  body.replaying{padding-bottom:96px;} /* keep bottom content reachable above the fixed replay bar */
   .muted{color:#8a93a6;font-size:0.74rem;}
   @media(max-width:560px){
     :root{--slot-w:46px;--hand-w:42px;}
@@ -113,6 +115,7 @@
   <a href="card_gallery.html" class="btn">&larr; ギャラリー</a>
   <select id="deckSelect"><option value="">デッキを選択...</option></select>
   <button class="btn primary" id="loadDeckBtn" disabled>ロード</button>
+  <button class="btn" id="undoBtn" title="一手戻す">↶ 戻す</button>
   <button class="btn" id="draw1Btn">1ドロー</button>
   <button class="btn" id="reset5Btn">リセット&5ドロー</button>
   <button class="btn" id="shuffleBtn">シャッフル</button>
@@ -773,11 +776,19 @@ let history=[]; let recording=true;
 let replayMode=false; let replayFrames=[]; let replayIdx=0; let replayTimer=null;
 function snapshot(){ return JSON.parse(JSON.stringify({self:S.self,opp:S.opp,showOpponent:S.showOpponent,deckName:S.deckName,uidSeq})); }
 function commit(){ if(recording && !replayMode) history.push(snapshot()); render(); }
+// undo: drop the latest state frame and restore the previous one
+function undo(){
+  if(replayMode) return;
+  if(history.length<2){ toast('戻せる操作がありません'); return; }
+  history.pop();                          // remove current state
+  restoreBoard(history[history.length-1]); // restore previous (does not push a new frame)
+}
 
 function startReplay(frames){
   if(!frames || frames.length<1){ toast('リプレイデータが空です'); return; }
   replayMode=true; replayFrames=frames; replayIdx=0;
   document.getElementById('replaybar').style.display='flex';
+  document.body.classList.add('replaying');
   document.getElementById('rbSlider').max=frames.length-1;
   showReplayFrame(0);
 }
@@ -800,7 +811,7 @@ function replayPlay(){
   }, speed);
 }
 function stopReplayPlay(){ if(replayTimer){ clearInterval(replayTimer); replayTimer=null; } document.getElementById('rbPlay').textContent='▶'; }
-function exitReplay(){ stopReplayPlay(); replayMode=false; document.getElementById('replaybar').style.display='none'; }
+function exitReplay(){ stopReplayPlay(); replayMode=false; document.getElementById('replaybar').style.display='none'; document.body.classList.remove('replaying'); }
 
 // ===== misc UI =====
 function openModal(m){ m.style.display='flex'; }
@@ -822,6 +833,8 @@ function updatePills(){
 // ===== events =====
 document.getElementById('deckSelect').addEventListener('change',e=>{ document.getElementById('loadDeckBtn').disabled=!e.target.value; });
 document.getElementById('loadDeckBtn').addEventListener('click',()=>{ const v=document.getElementById('deckSelect').value; if(v) loadDeck(v); });
+document.getElementById('undoBtn').addEventListener('click',undo);
+window.addEventListener('keydown',(e)=>{ if((e.ctrlKey||e.metaKey) && e.key==='z'){ e.preventDefault(); undo(); } });
 document.getElementById('draw1Btn').addEventListener('click',()=>doDraw(1));
 document.getElementById('reset5Btn').addEventListener('click',()=>{ if(confirm('盤面をリセットして5枚ドローしますか？')) resetDraw5(); });
 document.getElementById('shuffleBtn').addEventListener('click',doShuffle);
@@ -848,7 +861,7 @@ document.getElementById('rbExit').addEventListener('click',exitReplay);
 if(location.search.includes('test')){
   window.__sim = {
     get S(){ return S; }, get history(){ return history; }, render, commit, newCard, placeCard, makeSide,
-    enc, dec, curBoard, restoreBoard, startReplay, showReplayFrame, snapshot, doDraw,
+    enc, dec, curBoard, restoreBoard, startReplay, showReplayFrame, snapshot, doDraw, undo,
     seed(){
       S.self.deck = Array.from({length:35},(_,i)=>newCard('デッキカード',null,'1'));
       S.self.extra = Array.from({length:8},(_,i)=>newCard('EXカード',null,'1'));
