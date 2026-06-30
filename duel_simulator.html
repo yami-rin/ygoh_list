@@ -16,12 +16,9 @@
   *{box-sizing:border-box;}
   html,body{margin:0;padding:0;background:var(--bg);color:#e7eaf0;font-family:"Segoe UI",system-ui,"Hiragino Kaku Gothic ProN","Meiryo",sans-serif;-webkit-user-select:none;user-select:none;touch-action:manipulation;overscroll-behavior:none;}
   a{color:var(--accent);text-decoration:none;}
-  .topbar{display:flex;flex-wrap:wrap;align-items:center;gap:8px;padding:8px 10px;background:var(--panel);border-bottom:1px solid var(--line);position:sticky;top:0;z-index:50;}
+  .topbar{display:flex;flex-wrap:wrap;align-items:center;gap:5px;padding:6px 8px;background:var(--panel);border-bottom:1px solid var(--line);position:sticky;top:0;z-index:50;}
   .topbar .grow{flex:1 1 auto;}
-  .menugroup{display:flex;flex-wrap:wrap;align-items:center;gap:6px;padding:4px 8px;border:1px solid var(--line);border-radius:8px;background:#14171f;}
-  .menugroup.replay{border-color:#3a5a7a;background:#121a24;}
-  .grouplabel{font-size:0.62rem;color:#7b8499;letter-spacing:.04em;margin-right:2px;align-self:center;}
-  .menugroup.replay .grouplabel{color:#7fb0e0;}
+  #deckPicker{display:inline-flex;gap:5px;align-items:center;}
   select,button,input{font-family:inherit;}
   .btn{background:#262b38;color:#e7eaf0;border:1px solid var(--line);border-radius:6px;padding:6px 10px;font-size:0.82rem;cursor:pointer;white-space:nowrap;}
   .btn:hover{background:#30364a;}
@@ -119,28 +116,23 @@
 </head>
 <body>
 <div class="topbar">
-  <a href="card_gallery.html" class="btn">&larr; ギャラリー</a>
-  <div class="menugroup">
-    <span class="grouplabel">盤面操作</span>
+  <a href="card_gallery.html" class="btn" title="ギャラリーに戻る">&larr;</a>
+  <span id="deckPicker">
     <select id="deckSelect"><option value="">デッキを選択...</option></select>
     <button class="btn primary" id="loadDeckBtn" disabled>ロード</button>
-    <button class="btn" id="undoBtn" title="一手戻す (Ctrl+Z)">↶ 戻す</button>
-    <button class="btn" id="draw1Btn">1ドロー</button>
-    <button class="btn" id="reset5Btn">リセット&5ドロー</button>
-    <button class="btn" id="shuffleBtn">シャッフル</button>
-    <button class="btn" id="tokenBtn">トークン生成</button>
-    <button class="btn" id="oppBtn">相手フィールド表示</button>
-    <button class="btn" id="clearBtn">クリア</button>
-  </div>
-  <div class="menugroup replay">
-    <span class="grouplabel">リプレイ・共有</span>
-    <button class="btn" id="shareBtn">盤面共有</button>
-    <button class="btn" id="saveReplayBtn">リプレイ保存</button>
-    <button class="btn" id="savesBtn">保存一覧</button>
-  </div>
-  <span class="grow"></span>
-  <span class="pill" id="authPill">未ログイン</span>
-  <button class="btn" id="loginBtn">ログイン</button>
+  </span>
+  <button class="btn" id="deckChip" style="display:none;" title="デッキを変更">デッキ ▼</button>
+  <button class="btn" id="undoBtn" title="一手戻す (Ctrl+Z)">↶戻す</button>
+  <button class="btn" id="draw1Btn">1ドロー</button>
+  <button class="btn" id="reset5Btn">リセット&5</button>
+  <button class="btn" id="shuffleBtn">シャッフル</button>
+  <button class="btn" id="tokenBtn">トークン</button>
+  <button class="btn" id="oppBtn">相手盤面</button>
+  <button class="btn" id="clearBtn">クリア</button>
+  <button class="btn" id="shareBtn">共有</button>
+  <button class="btn" id="saveReplayBtn">リプレイ保存</button>
+  <button class="btn" id="savesBtn">保存一覧</button>
+  <button class="btn" id="loginBtn" style="display:none;">ログイン</button>
 </div>
 
 <div class="board" id="boardRoot"></div>
@@ -204,15 +196,12 @@ async function initAuth(){
     fbSignInPopup = ()=>authMod.signInWithPopup(auth, fbProvider);
     fbSignOut = ()=>authMod.signOut(auth);
     authMod.onAuthStateChanged(auth,(user)=>{
-      const pill=document.getElementById('authPill');
-      if(user){ pill.textContent=user.displayName||user.email||'ログイン中'; document.getElementById('loginBtn').textContent='ログアウト';
-        api.setAuth(user).then(()=>loadDeckList()); }
-      else { pill.textContent='未ログイン'; document.getElementById('loginBtn').textContent='ログイン'; }
+      // logged in: hide the login button entirely (no email/logout clutter). logged out: show login so decks can load
+      document.getElementById('loginBtn').style.display = user ? 'none' : '';
+      if(user){ api.setAuth(user).then(()=>loadDeckList()); }
     });
   }catch(e){
     console.warn('Firebase auth unavailable:', e);
-    document.getElementById('authPill').textContent='認証利用不可';
-    document.getElementById('loginBtn').disabled=true;
   }
 }
 
@@ -711,8 +700,20 @@ async function loadDeck(id){
     rebuildSelfDeck(false); // initial = registered deck order (no shuffle)
     history=[]; recording=true;
     commit();
+    collapseDeckPicker(d.name); // hide select+load, show compact chip
     toast(`「${d.name}」をロードしました（登録順）`);
   }catch(e){ console.error(e); toast('デッキの読込に失敗'); }
+}
+// collapse the deck selector after loading to save space; tap the chip to change deck
+function collapseDeckPicker(name){
+  document.getElementById('deckPicker').style.display='none';
+  const chip=document.getElementById('deckChip');
+  chip.textContent='デッキ: '+(name.length>8?name.slice(0,8)+'…':name)+' ▼';
+  chip.style.display='';
+}
+function expandDeckPicker(){
+  document.getElementById('deckPicker').style.display='';
+  document.getElementById('deckChip').style.display='none';
 }
 function expand(list){
   const out=[];
@@ -840,7 +841,7 @@ function toast(msg){
 }
 function copy(text){ try{ navigator.clipboard.writeText(text); }catch(e){ const ta=document.createElement('textarea'); ta.value=text; document.body.appendChild(ta); ta.select(); document.execCommand('copy'); ta.remove(); } }
 function updatePills(){
-  document.getElementById('oppBtn').textContent = S.showOpponent?'相手フィールド非表示':'相手フィールド表示';
+  document.getElementById('oppBtn').textContent = S.showOpponent?'相手盤面✓':'相手盤面';
 }
 
 // ===== events =====
@@ -860,9 +861,9 @@ document.getElementById('saveReplayBtn').addEventListener('click',saveReplay);
 document.getElementById('savesBtn').addEventListener('click',openSaves);
 document.getElementById('loginBtn').addEventListener('click',async()=>{
   if(!auth){ toast('認証が利用できません'); return; }
-  if(auth.currentUser){ await fbSignOut(); }
-  else { try{ await fbSignInPopup(); }catch(e){ toast('ログインに失敗しました'); } }
+  try{ await fbSignInPopup(); }catch(e){ toast('ログインに失敗しました'); }
 });
+document.getElementById('deckChip').addEventListener('click',expandDeckPicker);
 // replay bar
 document.getElementById('rbPlay').addEventListener('click',replayPlay);
 document.getElementById('rbStepB').addEventListener('click',()=>{ stopReplayPlay(); showReplayFrame(replayIdx-1); });
