@@ -33,8 +33,8 @@
   .side-title{font-size:0.72rem;color:#8a93a6;margin:0 0 6px 2px;display:flex;align-items:center;gap:8px;}
   .side.opp .side-title{color:#d98a8a;}
   .slotgrid{display:flex;flex-direction:column;gap:6px;align-items:center;}
-  .row{display:grid;grid-template-columns:repeat(7,var(--slot-w));gap:6px;justify-content:center;}
-  .exrow{display:grid;grid-template-columns:repeat(7,var(--slot-w));gap:6px;justify-content:center;}
+  .row{display:grid;grid-template-columns:repeat(6,var(--slot-w));gap:6px;justify-content:center;}
+  .exrow{display:grid;grid-template-columns:repeat(6,var(--slot-w));gap:6px;justify-content:center;}
   .zone{position:relative;aspect-ratio:59/86;border:1px dashed #394052;border-radius:5px;background:#0c0f17;display:flex;align-items:center;justify-content:center;}
   .zone.slot{border:1px dashed #3a4258;}
   .zone.drophover{outline:2px solid var(--accent);outline-offset:1px;background:#15233a;}
@@ -65,10 +65,15 @@
   .listcol{background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:8px;}
   .hscroll{display:flex;gap:4px;overflow-x:auto;overflow-y:hidden;padding-bottom:4px;min-height:74px;align-items:flex-start;flex-wrap:wrap;}
   .hscroll.nowrap{flex-wrap:nowrap;min-height:0;}
-  .hscroll .dcard{width:48px;flex:0 0 auto;}
+  .hscroll .dcard{width:54px;flex:0 0 auto;}
+  /* overlapping list: cards tuck under each other to save space; hover/active brings one forward */
+  .hscroll.overlap{gap:0;padding-left:22px;}
+  .hscroll.overlap .dcard{margin-left:-22px;}
+  .hscroll.overlap .dcard:first-child{margin-left:0;}
+  .hscroll.overlap .dcard:hover,.hscroll.overlap .dcard:active{z-index:20;}
   .listcol.inline{background:transparent;border:0;padding:4px 0 0;}
   .listcol.inline .side-title{margin-bottom:3px;}
-  @media(max-width:560px){ .hscroll .dcard{width:40px;} }
+  @media(max-width:560px){ .hscroll .dcard{width:48px;} .hscroll.overlap .dcard{margin-left:-20px;} }
   /* card */
   .dcard{position:relative;aspect-ratio:59/86;border-radius:5px;overflow:visible;cursor:grab;width:100%;height:100%;touch-action:none;}
   .hand .dcard{width:var(--slot-w);height:auto;}
@@ -108,7 +113,7 @@
   body.replaying{padding-bottom:96px;} /* keep bottom content reachable above the fixed replay bar */
   .muted{color:#8a93a6;font-size:0.74rem;}
   @media(max-width:560px){
-    :root{--slot-w:34px;--hand-w:42px;} /* field shrinks so grid + grave/banish rail fit side by side */
+    :root{--slot-w:40px;--hand-w:44px;} /* 6-col grid + grave/banish rail still fit, field is larger */
     select{max-width:40vw;}
     .btn{padding:5px 7px;font-size:0.74rem;}
     .board{padding:4px;}
@@ -116,8 +121,6 @@
     .row,.exrow{gap:4px;}
     .side-main{gap:6px;}
     .rightrail{gap:6px;}
-    /* lists & hand are full-width (below the field row), so keep them readable independent of the small field */
-    .hscroll .dcard{width:42px;}
   }
 </style>
 </head>
@@ -333,25 +336,24 @@ function renderSide(side){
   const left=document.createElement('div'); left.className='side-left';
 
   const grid=document.createElement('div'); grid.className='slotgrid';
-  // EX row: [spacer][Field][EX-left][ ][EX-right][ ][ ]
+  // 6-column grid (dropped the right spacer so the field can be larger)
+  // EX row: [spacer][Field][EX-left][ ][EX-right][ ]
   const exrow=document.createElement('div'); exrow.className='row';
-  for(let c=0;c<7;c++){
+  for(let c=0;c<6;c++){
     if(c===1){ exrow.appendChild(slotZone(side,'field',0,'フィールド')); }
     else if(c===2||c===4){ const idx=c===2?0:1; exrow.appendChild(slotZone(side,'exmon',idx,'EX')); }
     else exrow.appendChild(spacer());
   }
   grid.appendChild(exrow);
-  // monster row: [spacer][M1..M5][spacer]
+  // monster row: [spacer][M1..M5]
   const mrow=document.createElement('div'); mrow.className='row';
   mrow.appendChild(spacer());
   for(let i=0;i<5;i++) mrow.appendChild(slotZone(side,'monster',i,''));
-  mrow.appendChild(spacer());
   grid.appendChild(mrow);
-  // spell row: [spacer][S1..S5][spacer]
+  // spell row: [spacer][S1..S5]
   const srow=document.createElement('div'); srow.className='row';
   srow.appendChild(spacer());
   for(let i=0;i<5;i++) srow.appendChild(slotZone(side,'spell',i,''));
-  srow.appendChild(spacer());
   grid.appendChild(srow);
   left.appendChild(grid);
 
@@ -363,12 +365,7 @@ function renderSide(side){
   main.appendChild(rail);
   wrap.appendChild(main);
 
-  // below the field row (full width): EX/Deck lists (self only) + hand
-  if(side==='self'){
-    wrap.appendChild(buildList(side,'extra','EXデッキ','タップ=手札 / 長押し=フィールドへ / ドラッグ'));
-    wrap.appendChild(buildList(side,'deck','デッキ','タップ=手札 / ドラッグ=任意ゾーン'));
-  }
-
+  // below the field row (full width): hand (top) -> deck (middle) -> EX (bottom)
   // free zone == hand (free placement). The drawn cards land here.
   const fz=document.createElement('div'); fz.className='freezone handzone'; fz.dataset.drop=side+'.free';
   const fl=document.createElement('div'); fl.className='fzlabel'; fl.textContent= side==='opp'?'相手手札':'手札（自由配置）'; fz.appendChild(fl);
@@ -382,6 +379,10 @@ function renderSide(side){
   });
   fz.style.minHeight=Math.max(cardH+24, maxBottom+10)+'px'; // ~1 row tall by default, grows only if needed
   wrap.appendChild(fz);
+  if(side==='self'){
+    wrap.appendChild(buildList(side,'deck','デッキ','タップ=手札 / ドラッグ=任意ゾーン'));
+    wrap.appendChild(buildList(side,'extra','EXデッキ','タップ=手札 / 長押し=フィールドへ / ドラッグ'));
+  }
   return wrap;
 }
 
@@ -392,7 +393,7 @@ function buildList(side, zone, label, hint){
   const col=document.createElement('div'); col.className='listcol inline';
   const t=document.createElement('div'); t.className='side-title';
   t.innerHTML=`${label} <span class="pill">${S[side][zone].length}</span> <span class="muted">${hint}</span>`;
-  const sc=document.createElement('div'); sc.className='hscroll'; sc.dataset.drop=`${side}.${zone}`;
+  const sc=document.createElement('div'); sc.className='hscroll overlap'; sc.dataset.drop=`${side}.${zone}`;
   S[side][zone].forEach((c,i)=>{ sc.appendChild(cardEl(c, `${side}.${zone}.${i}`, true, ()=>moveTo(`${side}.${zone}.${i}`, side+'.free'))); });
   col.appendChild(t); col.appendChild(sc);
   return col;
