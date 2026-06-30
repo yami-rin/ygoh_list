@@ -11,6 +11,7 @@
     --bg:#0f1117; --panel:#1a1d27; --line:#2c3140; --accent:#4f8cff;
     --grave:#8b5cf6; --banish:#ea580c; --ex:#a855f7; --deck:#22c55e; --field:#14b8a6;
     --slot-w: 72px; /* base card slot width; scaled by JS for responsiveness */
+    --hand-w: 56px; /* hand(free) card width — smaller so the hand strip stays short */
   }
   *{box-sizing:border-box;}
   html,body{margin:0;padding:0;background:var(--bg);color:#e7eaf0;font-family:"Segoe UI",system-ui,"Hiragino Kaku Gothic ProN","Meiryo",sans-serif;-webkit-user-select:none;user-select:none;touch-action:manipulation;overscroll-behavior:none;}
@@ -67,10 +68,10 @@
   /* card */
   .dcard{position:relative;aspect-ratio:59/86;border-radius:5px;overflow:visible;cursor:grab;width:100%;height:100%;touch-action:none;}
   .hand .dcard{width:var(--slot-w);height:auto;}
-  .freezone .dcard{position:absolute;width:var(--slot-w);}
+  .freezone .dcard{position:absolute;width:var(--hand-w);}
   .dcard img{width:100%;height:100%;object-fit:cover;border-radius:5px;display:block;pointer-events:none;box-shadow:0 1px 4px #000a;}
   .dcard .ph{width:100%;aspect-ratio:59/86;background:#cdd3df;color:#222;font-size:0.55rem;display:flex;align-items:center;justify-content:center;text-align:center;padding:3px;border-radius:5px;}
-  .dcard.def{transform:rotate(90deg) scale(0.86);}
+  .dcard.def{transform:rotate(90deg) scale(0.66);} /* fit the rotated (defense/set) card inside its slot */
   .dcard .back{width:100%;height:100%;aspect-ratio:59/86;border-radius:5px;background:linear-gradient(135deg,#6b4b9a,#3a2a5e);border:1px solid #2a1f44;display:flex;align-items:center;justify-content:center;}
   .dcard .back::after{content:"";width:60%;height:60%;border-radius:50%;background:radial-gradient(circle,#d8b24a,#9c7a1e);opacity:.5;}
   .dcard.token .ph{background:linear-gradient(135deg,#1f7a4d,#0e5132);color:#d6ffe6;}
@@ -101,7 +102,7 @@
   #replaybar input[type=range]{flex:1 1 auto;}
   .muted{color:#8a93a6;font-size:0.74rem;}
   @media(max-width:560px){
-    :root{--slot-w:46px;}
+    :root{--slot-w:46px;--hand-w:42px;}
     select{max-width:40vw;}
     .btn{padding:5px 7px;font-size:0.74rem;}
   }
@@ -289,7 +290,7 @@ function placeCard(loc, card, opts){
   }
   if(zone==='free'){
     if(opts && opts.x!=null){ card.x=opts.x; card.y=opts.y; }
-    else { const n=a.length; const cw=getSlotW()+6, ch=getSlotW()*1.458+8, cols=freeCols(side); card.x=6+(n%cols)*cw; card.y=6+Math.floor(n/cols)*ch; }
+    else { const n=a.length; const hw=getHandW(); const cw=hw+6, ch=hw*1.458+6, cols=freeCols(side); card.x=6+(n%cols)*cw; card.y=4+Math.floor(n/cols)*ch; }
     a.push(card); return;
   }
   if(zone==='deck' && opts && opts.top){ a.unshift(card); return; }
@@ -303,11 +304,12 @@ const PILES = [
   {zone:'extra',cls:'extra',label:'EX'},
 ];
 function getSlotW(){ return parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--slot-w'))||60; }
+function getHandW(){ return parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--hand-w'))||56; }
 // number of columns the hand(free) zone can fit, measured from the rendered handzone width
 function freeCols(side){
   const el=document.querySelector('.side'+(side==='opp'?'.opp':':not(.opp)')+' .handzone');
   const w = el && el.clientWidth ? el.clientWidth : (window.innerWidth-180);
-  return Math.max(1, Math.floor((w-12)/(getSlotW()+6)));
+  return Math.max(6, Math.floor((w-12)/(getHandW()+6))); // at least 6 across
 }
 
 function render(){
@@ -351,23 +353,18 @@ function renderSide(side){
   grid.appendChild(srow);
   left.appendChild(grid);
 
-  // pile bar (deck + extra only)
-  const pb=document.createElement('div'); pb.className='pilebar';
-  for(const p of PILES) pb.appendChild(pileZone(side,p));
-  left.appendChild(pb);
-
   // free zone == hand (free placement). The drawn cards land here.
   const fz=document.createElement('div'); fz.className='freezone handzone'; fz.dataset.drop=side+'.free';
   const fl=document.createElement('div'); fl.className='fzlabel'; fl.textContent= side==='opp'?'相手手札':'手札（自由配置）'; fz.appendChild(fl);
-  const cardH=getSlotW()*1.458; let maxBottom=0;
+  const cardH=getHandW()*1.458; let maxBottom=0;
   S[side].free.forEach((card,i)=>{
     const el=cardEl(card, side+'.free.'+i);
-    const x=card.x||8, y=card.y||22;
+    const x=card.x||8, y=card.y||20;
     el.style.left=x+'px'; el.style.top=y+'px';
     maxBottom=Math.max(maxBottom, y+cardH);
     fz.appendChild(el);
   });
-  fz.style.minHeight=Math.max(150, maxBottom+12)+'px'; // grow to contain all hand cards
+  fz.style.minHeight=Math.max(cardH+24, maxBottom+10)+'px'; // ~1 row tall by default, grows only if needed
   left.appendChild(fz);
 
   main.appendChild(left);
@@ -571,8 +568,8 @@ function performDrop(fromLoc, toDrop, x, y){
   if(toDrop.endsWith('.free')){
     const {side}=parseLoc(toDrop+'.0');
     const fz=document.querySelector(`.freezone[data-drop="${toDrop}"]`);
-    if(fz){ const r=fz.getBoundingClientRect(); const w=parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--slot-w'))||60;
-      opts={x:Math.max(2,Math.min(r.width-w, x-r.left-w/2)), y:Math.max(2,Math.min(r.height-w*1.45, y-r.top-w*0.72))}; }
+    if(fz){ const r=fz.getBoundingClientRect(); const w=getHandW();
+      opts={x:Math.max(2,Math.min(r.width-w, x-r.left-w/2)), y:Math.max(2,Math.min(Math.max(2,r.height-w*1.45), y-r.top-w*0.72))}; }
   }
   const card=removeCard(fromLoc);
   if(!card){ render(); return; }
