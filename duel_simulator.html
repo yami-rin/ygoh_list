@@ -397,7 +397,7 @@ function buildList(side, zone, label, hint){
   const col=document.createElement('div'); col.className='listcol inline';
   const t=document.createElement('div'); t.className='side-title';
   t.innerHTML=`${label} <span class="pill">${S[side][zone].length}</span> <span class="muted">${hint}</span>`;
-  const sc=document.createElement('div'); sc.className='hscroll nowrap'; sc.dataset.drop=`${side}.${zone}`;
+  const sc=document.createElement('div'); sc.className='hscroll'; sc.dataset.drop=`${side}.${zone}`;
   S[side][zone].forEach((c,i)=>{ sc.appendChild(cardEl(c, `${side}.${zone}.${i}`, true, ()=>moveTo(`${side}.${zone}.${i}`, side+'.free'))); });
   col.appendChild(t); col.appendChild(sc);
   return col;
