@@ -231,7 +231,16 @@
   <button class="btn" id="rbStepF">|▶</button>
   <input type="range" id="rbSlider" min="0" max="0" value="0">
   <span class="muted" id="rbInfo">0 / 0</span>
-  <select id="rbSpeed"><option value="1500">遅い</option><option value="900" selected>標準</option><option value="450">速い</option></select>
+  <select id="rbSpeed">
+    <option value="1600">0.5x（とても遅い）</option>
+    <option value="1000">0.8x（遅い）</option>
+    <option value="800" selected>1x（標準）</option>
+    <option value="500">1.5x</option>
+    <option value="300">2.5x</option>
+    <option value="150">5x</option>
+    <option value="80">10x</option>
+    <option value="40">20x（最速）</option>
+  </select>
   <button class="btn warn" id="rbExit">リプレイ終了</button>
 </div>
 
@@ -935,7 +944,8 @@ function dec(s){ try{ return JSON.parse(LZString.decompressFromEncodedURICompone
 // open the share modal, filling both the board URL and (if recorded) the replay URL
 function openShareModal(){
   const base=location.origin+location.pathname;
-  document.getElementById('shareBoardUrl').value = base+'#b='+enc(curBoard());
+  const bEl=document.getElementById('shareBoardUrl'), bBtn=document.getElementById('shareBoardCopy');
+  bEl.value = base+'#b='+enc(curBoard()); bEl.disabled=false; bBtn.disabled=false;
   const rEl=document.getElementById('shareReplayUrl'), rBtn=document.getElementById('shareReplayCopy');
   if(history.length>=2){
     rEl.value = base+'#r='+enc({frames:history}); rEl.disabled=false; rBtn.disabled=false;
@@ -943,6 +953,21 @@ function openShareModal(){
     rEl.value='（操作の記録がありません。「⏺記録開始」→カードを動かすとリプレイになります）';
     rEl.disabled=true; rBtn.disabled=true;
   }
+  openModal(document.getElementById('shareModal'));
+}
+// share a specific saved item (board or replay) — enable only the relevant URL field
+function shareSaved(item){
+  const base=location.origin+location.pathname;
+  const bEl=document.getElementById('shareBoardUrl'), bBtn=document.getElementById('shareBoardCopy');
+  const rEl=document.getElementById('shareReplayUrl'), rBtn=document.getElementById('shareReplayCopy');
+  if(item.type==='replay'){
+    rEl.value=base+'#r='+enc({frames:item.data.frames}); rEl.disabled=false; rBtn.disabled=false;
+    bEl.value='（この保存はリプレイです）'; bEl.disabled=true; bBtn.disabled=true;
+  } else {
+    bEl.value=base+'#b='+enc(item.data); bEl.disabled=false; bBtn.disabled=false;
+    rEl.value='（この保存は盤面です）'; rEl.disabled=true; rBtn.disabled=true;
+  }
+  closeModal(document.getElementById('savesModal'));
   openModal(document.getElementById('shareModal'));
 }
 function copyField(id,label){
@@ -970,9 +995,11 @@ function openSaves(){
     info.innerHTML=`<div class="t">${esc(s.title)}</div><div class="d">${s.type==='replay'?'リプレイ':'盤面'} · ${new Date(s.ts).toLocaleString('ja-JP')}</div>`;
     const open=document.createElement('button'); open.className='btn primary'; open.textContent='開く';
     open.addEventListener('click',()=>{ closeModal(document.getElementById('savesModal')); if(s.type==='replay') startReplay(s.data.frames); else restoreBoard(s.data); });
+    const sh=document.createElement('button'); sh.className='btn'; sh.textContent='共有';
+    sh.addEventListener('click',()=>shareSaved(s));
     const del=document.createElement('button'); del.className='btn warn'; del.textContent='削除';
     del.addEventListener('click',()=>{ const l=getSaves().filter(x=>x.id!==s.id); localStorage.setItem(SAVE_KEY,JSON.stringify(l)); openSaves(); });
-    row.appendChild(info); row.appendChild(open); row.appendChild(del); c.appendChild(row);
+    row.appendChild(info); row.appendChild(sh); row.appendChild(open); row.appendChild(del); c.appendChild(row);
   }
   openModal(document.getElementById('savesModal'));
 }
@@ -1096,6 +1123,8 @@ document.getElementById('rbStepB').addEventListener('click',()=>{ stopReplayPlay
 document.getElementById('rbStepF').addEventListener('click',()=>{ stopReplayPlay(); showReplayFrame(replayIdx+1); });
 document.getElementById('rbSlider').addEventListener('input',e=>{ stopReplayPlay(); showReplayFrame(+e.target.value); });
 document.getElementById('rbExit').addEventListener('click',exitReplay);
+// change speed live: if currently playing, restart the interval at the new rate
+document.getElementById('rbSpeed').addEventListener('change',()=>{ if(replayTimer){ stopReplayPlay(); replayPlay(); } });
 
 // ===== test hook (only with ?test=1) =====
 if(location.search.includes('test')){
