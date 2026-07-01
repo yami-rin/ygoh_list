@@ -629,7 +629,7 @@ function cardEl(card, loc, interactive=true, onTap=null){
   }
   if(card.counters>0){ const b=document.createElement('div'); b.className='cbadge'; b.textContent=card.counters; d.appendChild(b); }
   // effect-activation flash: shown once live (then flag cleared), and re-shown when replaying the recorded frame
-  if(card.fx){ const fx=document.createElement('div'); fx.className='fx-activate'; fx.innerHTML='<span>発動</span>'; d.appendChild(fx); if(!replayMode) card.fx=false; }
+  if(card.fx){ const fx=document.createElement('div'); fx.className='fx-activate'; d.appendChild(fx); if(!replayMode) card.fx=false; }
   if(interactive) attachPointer(d, loc);
   return d;
 }
