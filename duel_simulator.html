@@ -623,8 +623,9 @@ function cardEl(card, loc, interactive=true, onTap=null){
   if(card.faceDown){ d.innerHTML='<div class="back"></div>'; }
   else if(card.token){ d.innerHTML='<div class="ph">'+esc(card.name)+'</div>'; }
   else {
-    d.innerHTML='<div class="ph">'+esc(card.name)+'</div>';
-    cardImage(card).then(u=>{ if(u && d.dataset.loc===loc) d.innerHTML='<img src="'+u+'" alt="'+esc(card.name)+'">'; });
+    const ph=document.createElement('div'); ph.className='ph'; ph.textContent=card.name; d.appendChild(ph);
+    // replace ONLY the placeholder with the image so overlays (counter badge / fx flash) appended later survive
+    cardImage(card).then(u=>{ if(u && d.dataset.loc===loc){ const cur=d.querySelector('.ph'); if(cur){ const img=document.createElement('img'); img.src=u; img.alt=card.name; cur.replaceWith(img); } } });
   }
   if(card.counters>0){ const b=document.createElement('div'); b.className='cbadge'; b.textContent=card.counters; d.appendChild(b); }
   // effect-activation flash: shown once live (then flag cleared), and re-shown when replaying the recorded frame
