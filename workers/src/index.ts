@@ -13,6 +13,7 @@ import { profiles } from './routes/profiles';
 import { community } from './routes/community';
 import { account } from './routes/account';
 import { supplies } from './routes/supplies';
+import { shares } from './routes/shares';
 
 type Bindings = {
   DB: D1Database;
@@ -60,6 +61,15 @@ app.get('/api/profiles/public', async (c) => {
   }));
   return c.json({ profiles: results });
 });
+// Duel-simulator share fetch is public (recipients open without logging in)
+app.get('/api/shares/:id', async (c) => {
+  const id = c.req.param('id');
+  const row = await c.env.DB.prepare(
+    'SELECT kind, data FROM duel_shares WHERE id = ?'
+  ).bind(id).first();
+  if (!row) return c.json({ error: 'Share not found' }, 404);
+  return c.json({ kind: row.kind as string, data: row.data as string });
+});
 app.get('/api/profiles/:userId', async (c) => {
   const targetUserId = c.req.param('userId');
   const row = await c.env.DB.prepare(
@@ -97,6 +107,8 @@ app.use('/api/account/*', authMiddleware);
 app.use('/api/account', authMiddleware);
 app.use('/api/supplies/*', authMiddleware);
 app.use('/api/supplies', authMiddleware);
+// creating a share needs auth (exact path only — GET /api/shares/:id stays public above)
+app.use('/api/shares', authMiddleware);
 
 // Rankings PUT needs auth (GET is public, already routed above)
 app.put('/api/rankings', authMiddleware, async (c) => {
@@ -169,6 +181,7 @@ app.route('/api/decks', decks);
 app.route('/api/community', community);
 app.route('/api/account', account);
 app.route('/api/supplies', supplies);
+app.route('/api/shares', shares);
 
 // 404 fallback
 app.notFound((c) => c.json({ error: 'Not found' }, 404));

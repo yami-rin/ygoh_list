@@ -342,6 +342,22 @@ class CardManagerAPI {
         return data.decks;
     }
 
+    // ========== Duel-simulator shares ==========
+
+    /** Store a board/replay blob, returns a short id (requires auth) */
+    async createShare(kind, data) {
+        const res = await this._fetch('/api/shares', {
+            method: 'POST',
+            body: JSON.stringify({ kind, data }),
+        });
+        return res.id;
+    }
+
+    /** Fetch a shared blob by id (public, no auth) */
+    async getShare(id) {
+        return this._fetch(`/api/shares/${encodeURIComponent(id)}`);
+    }
+
     // ========== Account ==========
 
     async deleteAccount() {
