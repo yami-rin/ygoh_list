@@ -156,6 +156,7 @@
   <button class="btn" id="fullscreenBtn" title="全画面表示 (スマホでURL/タブを隠す)">⛶全画面</button>
   <button class="btn" id="clearBtn">クリア</button>
   <button class="btn" id="shareBtn">共有</button>
+  <button class="btn" id="recStartBtn" title="この盤面をリプレイの開始地点にする">⏺記録開始</button>
   <button class="btn" id="saveReplayBtn">リプレイ保存</button>
   <button class="btn" id="savesBtn">保存一覧</button>
   <button class="btn" id="loginBtn" style="display:none;">ログイン</button>
@@ -896,6 +897,8 @@ function openListModal(side,zone,label){
 const SAVE_KEY='duelsim_saves';
 function curBoard(){ return { self:S.self, opp:S.opp, showOpponent:S.showOpponent, deckName:S.deckName, uidSeq }; }
 function restoreBoard(st){
+  // deep-copy so live mutations never write back into the source frame (undo/shared board)
+  st=JSON.parse(JSON.stringify(st));
   S.self=st.self; S.opp=st.opp||makeSide(); S.showOpponent=!!st.showOpponent; S.deckName=st.deckName||'';
   if(st.uidSeq) uidSeq=st.uidSeq;
   render();
@@ -1028,6 +1031,8 @@ document.addEventListener('webkitfullscreenchange',syncFsBtn);
 document.getElementById('clearBtn').addEventListener('click',()=>{ if(confirm('盤面をクリアしますか？(デッキは保持)')) { resetDraw5Soft(); } });
 function resetDraw5Soft(){ S.self.hand=[]; S.self.graveyard=[]; S.self.banished=[]; S.self.field=[null]; S.self.monster=[null,null,null,null,null]; S.self.spell=[null,null,null,null,null]; S.self.exmon=[null,null]; S.self.free=[]; if(originalMain.length) rebuildSelfDeck(false); commit(); }
 document.getElementById('shareBtn').addEventListener('click',shareBoard);
+// mark the current board as the replay start point (frame 0); subsequent actions are recorded from here
+document.getElementById('recStartBtn').addEventListener('click',()=>{ history=[snapshot()]; recording=true; toast('この盤面からリプレイ記録を開始しました'); });
 document.getElementById('saveReplayBtn').addEventListener('click',saveReplay);
 document.getElementById('savesBtn').addEventListener('click',openSaves);
 document.getElementById('loginBtn').addEventListener('click',async()=>{
