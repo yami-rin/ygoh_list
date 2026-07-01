@@ -2,7 +2,10 @@
 <html lang="ja">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <title>デュエルシミュレーター</title>
 <script src="image_cache_manager.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/lz-string@1.5.0/libs/lz-string.min.js"></script>
@@ -143,6 +146,7 @@
   <button class="btn" id="shuffleBtn">シャッフル</button>
   <button class="btn" id="tokenBtn">トークン</button>
   <button class="btn" id="oppBtn">相手フィールド表示</button>
+  <button class="btn" id="fullscreenBtn" title="全画面表示 (スマホでURL/タブを隠す)">⛶全画面</button>
   <button class="btn" id="clearBtn">クリア</button>
   <button class="btn" id="shareBtn">共有</button>
   <button class="btn" id="saveReplayBtn">リプレイ保存</button>
@@ -376,17 +380,16 @@ function renderSide(side){
 
   const grid=document.createElement('div'); grid.className='slotgrid';
   // 6-column grid (dropped the right spacer so the field can be larger)
-  // EX row: [spacer][Field][EX-left][ ][EX-right][ ]
+  // EX row: [spacer][spacer][EX-left][ ][EX-right][ ]
   const exrow=document.createElement('div'); exrow.className='row';
   for(let c=0;c<6;c++){
-    if(c===1){ exrow.appendChild(slotZone(side,'field',0,'フィールド')); }
-    else if(c===2||c===4){ const idx=c===2?0:1; exrow.appendChild(slotZone(side,'exmon',idx,'EX')); }
+    if(c===2||c===4){ const idx=c===2?0:1; exrow.appendChild(slotZone(side,'exmon',idx,'EX')); }
     else exrow.appendChild(spacer());
   }
   grid.appendChild(exrow);
-  // monster row: [spacer][M1..M5]
+  // monster row: [Field][M1..M5] — field zone sits to the left of the main monster zone
   const mrow=document.createElement('div'); mrow.className='row';
-  mrow.appendChild(spacer());
+  mrow.appendChild(slotZone(side,'field',0,'フィールド'));
   for(let i=0;i<5;i++) mrow.appendChild(slotZone(side,'monster',i,''));
   grid.appendChild(mrow);
   // spell row: [spacer][S1..S5]
@@ -993,6 +996,23 @@ document.getElementById('reset5Btn').addEventListener('click',()=>{ if(confirm('
 document.getElementById('shuffleBtn').addEventListener('click',doShuffle);
 document.getElementById('tokenBtn').addEventListener('click',genToken);
 document.getElementById('oppBtn').addEventListener('click',()=>{ S.showOpponent=!S.showOpponent; commit(); });
+// fullscreen toggle: hide the browser URL/tab chrome on mobile (Fullscreen API, vendor-prefixed)
+function fsElement(){ return document.fullscreenElement || document.webkitFullscreenElement || null; }
+function toggleFullscreen(){
+  const el=document.documentElement;
+  if(!fsElement()){
+    const req=el.requestFullscreen||el.webkitRequestFullscreen;
+    if(req){ req.call(el).catch(()=>toast('この端末では全画面表示に対応していません')); }
+    else toast('この端末では全画面表示に対応していません（ホーム画面に追加で全画面化できます）');
+  } else {
+    const exit=document.exitFullscreen||document.webkitExitFullscreen;
+    if(exit) exit.call(document);
+  }
+}
+function syncFsBtn(){ document.getElementById('fullscreenBtn').textContent = fsElement()?'⛶解除':'⛶全画面'; }
+document.getElementById('fullscreenBtn').addEventListener('click',toggleFullscreen);
+document.addEventListener('fullscreenchange',syncFsBtn);
+document.addEventListener('webkitfullscreenchange',syncFsBtn);
 document.getElementById('clearBtn').addEventListener('click',()=>{ if(confirm('盤面をクリアしますか？(デッキは保持)')) { resetDraw5Soft(); } });
 function resetDraw5Soft(){ S.self.hand=[]; S.self.graveyard=[]; S.self.banished=[]; S.self.field=[null]; S.self.monster=[null,null,null,null,null]; S.self.spell=[null,null,null,null,null]; S.self.exmon=[null,null]; S.self.free=[]; if(originalMain.length) rebuildSelfDeck(false); commit(); }
 document.getElementById('shareBtn').addEventListener('click',shareBoard);
