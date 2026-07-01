@@ -81,6 +81,9 @@
   .dcard img{width:100%;height:100%;object-fit:cover;border-radius:5px;display:block;pointer-events:none;box-shadow:0 1px 4px #000a;}
   .dcard .ph{width:100%;aspect-ratio:59/86;background:#cdd3df;color:#222;font-size:0.55rem;display:flex;align-items:center;justify-content:center;text-align:center;padding:3px;border-radius:5px;}
   .dcard.def{transform:rotate(-90deg);z-index:6;} /* defense/set: rotated sideways at full size (may overflow the slot, intentional) */
+  /* opponent field grid: cards face the player upside-down (across the table); grave/banish rail is unaffected */
+  .oppgrid .dcard{transform:rotate(180deg);}
+  .oppgrid .dcard.def{transform:rotate(90deg);}
   /* effect-activation flash (also replayed) */
   .fx-activate{position:absolute;inset:0;z-index:70;pointer-events:none;border-radius:5px;display:flex;align-items:center;justify-content:center;animation:fxflash 1.1s ease-out forwards;}
   .fx-activate::before{content:"";position:absolute;inset:-6px;border-radius:8px;border:3px solid #ffd34d;box-shadow:0 0 14px 4px #ffcb2e,inset 0 0 12px #ffcb2e;animation:fxring 1.1s ease-out forwards;}
@@ -187,6 +190,28 @@
       <button class="btn warn" id="matRemoveBtn">選択した素材を墓地へ</button>
       <button class="btn" data-close>閉じる</button>
     </div>
+  </div>
+</div>
+
+<!-- share modal -->
+<div class="modal" id="shareModal">
+  <div class="box">
+    <h3>共有</h3>
+    <div style="margin-bottom:14px;">
+      <div class="muted" style="margin-bottom:4px;">盤面URL（今の盤面をそのまま開ける・ログイン不要）</div>
+      <div style="display:flex;gap:6px;">
+        <input id="shareBoardUrl" readonly style="flex:1 1 auto;min-width:0;background:#0c0f17;color:#e7eaf0;border:1px solid var(--line);border-radius:6px;padding:7px 9px;font-size:0.78rem;">
+        <button class="btn primary" id="shareBoardCopy">コピー</button>
+      </div>
+    </div>
+    <div>
+      <div class="muted" style="margin-bottom:4px;">リプレイURL（記録開始〜現在の操作を再生できる）</div>
+      <div style="display:flex;gap:6px;">
+        <input id="shareReplayUrl" readonly style="flex:1 1 auto;min-width:0;background:#0c0f17;color:#e7eaf0;border:1px solid var(--line);border-radius:6px;padding:7px 9px;font-size:0.78rem;">
+        <button class="btn primary" id="shareReplayCopy">コピー</button>
+      </div>
+    </div>
+    <div style="margin-top:14px;text-align:right;"><button class="btn" data-close>閉じる</button></div>
   </div>
 </div>
 
@@ -386,7 +411,8 @@ function renderSide(side){
   const main=document.createElement('div'); main.className='side-main';
   const left=document.createElement('div'); left.className='side-left';
 
-  const grid=document.createElement('div'); grid.className='slotgrid';
+  // opponent field is mirrored across the table: rows reversed + cards rotated 180° (oppgrid class)
+  const grid=document.createElement('div'); grid.className='slotgrid'+(side==='opp'?' oppgrid':'');
   // 6-column grid (dropped the right spacer so the field can be larger)
   // EX row: [spacer][spacer][EX-left][ ][EX-right][ ]
   const exrow=document.createElement('div'); exrow.className='row';
@@ -394,17 +420,17 @@ function renderSide(side){
     if(c===2||c===4){ const idx=c===2?0:1; exrow.appendChild(slotZone(side,'exmon',idx,'EX')); }
     else exrow.appendChild(spacer());
   }
-  grid.appendChild(exrow);
   // monster row: [Field][M1..M5] — field zone sits to the left of the main monster zone
   const mrow=document.createElement('div'); mrow.className='row';
   mrow.appendChild(slotZone(side,'field',0,'フィールド'));
   for(let i=0;i<5;i++) mrow.appendChild(slotZone(side,'monster',i,''));
-  grid.appendChild(mrow);
   // spell row: [spacer][S1..S5]
   const srow=document.createElement('div'); srow.className='row';
   srow.appendChild(spacer());
   for(let i=0;i<5;i++) srow.appendChild(slotZone(side,'spell',i,''));
-  grid.appendChild(srow);
+  // self: EX(top)->monster->spell. opp: mirrored so the monster rows face each other in the middle
+  const rowOrder = side==='opp' ? [srow,mrow,exrow] : [exrow,mrow,srow];
+  rowOrder.forEach(r=>grid.appendChild(r));
   left.appendChild(grid);
 
   main.appendChild(left);
@@ -906,19 +932,28 @@ function restoreBoard(st){
 function enc(obj){ return LZString.compressToEncodedURIComponent(JSON.stringify(obj)); }
 function dec(s){ try{ return JSON.parse(LZString.decompressFromEncodedURIComponent(s)); }catch(e){ return null; } }
 
-function shareBoard(){
-  const code=enc(curBoard());
-  const url=location.origin+location.pathname+'#b='+code;
-  copy(url); toast('盤面共有URLをコピーしました');
-  saveLocal('board', prompt('保存名（盤面）:', S.deckName||'盤面')||S.deckName||'盤面', curBoard());
+// open the share modal, filling both the board URL and (if recorded) the replay URL
+function openShareModal(){
+  const base=location.origin+location.pathname;
+  document.getElementById('shareBoardUrl').value = base+'#b='+enc(curBoard());
+  const rEl=document.getElementById('shareReplayUrl'), rBtn=document.getElementById('shareReplayCopy');
+  if(history.length>=2){
+    rEl.value = base+'#r='+enc({frames:history}); rEl.disabled=false; rBtn.disabled=false;
+  } else {
+    rEl.value='（操作の記録がありません。「⏺記録開始」→カードを動かすとリプレイになります）';
+    rEl.disabled=true; rBtn.disabled=true;
+  }
+  openModal(document.getElementById('shareModal'));
+}
+function copyField(id,label){
+  const el=document.getElementById(id); if(el.disabled) return;
+  el.focus(); el.select(); copy(el.value); toast(label+'URLをコピーしました');
 }
 function saveReplay(){
   if(history.length<2){ toast('リプレイにする操作履歴がありません'); return; }
-  const title=prompt('保存名（リプレイ）:', (S.deckName||'リプレイ')+'_'+history.length+'手')||'リプレイ';
+  const title=prompt('保存名（リプレイ）:', (S.deckName||'リプレイ')+'_'+(history.length-1)+'手')||'リプレイ';
   saveLocal('replay', title, {frames:history});
-  const code=enc({frames:history});
-  const url=location.origin+location.pathname+'#r='+code;
-  copy(url); toast('リプレイを保存＆URLをコピーしました');
+  toast('リプレイを保存しました（保存一覧から開ける・共有はURLで）');
 }
 function saveLocal(type,title,data){
   const list=getSaves();
@@ -1030,7 +1065,9 @@ document.addEventListener('fullscreenchange',syncFsBtn);
 document.addEventListener('webkitfullscreenchange',syncFsBtn);
 document.getElementById('clearBtn').addEventListener('click',()=>{ if(confirm('盤面をクリアしますか？(デッキは保持)')) { resetDraw5Soft(); } });
 function resetDraw5Soft(){ S.self.hand=[]; S.self.graveyard=[]; S.self.banished=[]; S.self.field=[null]; S.self.monster=[null,null,null,null,null]; S.self.spell=[null,null,null,null,null]; S.self.exmon=[null,null]; S.self.free=[]; if(originalMain.length) rebuildSelfDeck(false); commit(); }
-document.getElementById('shareBtn').addEventListener('click',shareBoard);
+document.getElementById('shareBtn').addEventListener('click',openShareModal);
+document.getElementById('shareBoardCopy').addEventListener('click',()=>copyField('shareBoardUrl','盤面'));
+document.getElementById('shareReplayCopy').addEventListener('click',()=>copyField('shareReplayUrl','リプレイ'));
 // mark the current board as the replay start point (frame 0); subsequent actions are recorded from here
 document.getElementById('recStartBtn').addEventListener('click',()=>{ history=[snapshot()]; recording=true; toast('この盤面からリプレイ記録を開始しました'); });
 document.getElementById('saveReplayBtn').addEventListener('click',saveReplay);
