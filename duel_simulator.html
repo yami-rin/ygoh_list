@@ -201,6 +201,7 @@
       <div class="muted" style="margin-bottom:4px;">盤面URL（今の盤面をそのまま開ける・ログイン不要）</div>
       <div style="display:flex;gap:6px;">
         <input id="shareBoardUrl" readonly style="flex:1 1 auto;min-width:0;background:#0c0f17;color:#e7eaf0;border:1px solid var(--line);border-radius:6px;padding:7px 9px;font-size:0.78rem;">
+        <button class="btn" id="shareBoardShort" title="短縮URLにする">短縮</button>
         <button class="btn primary" id="shareBoardCopy">コピー</button>
       </div>
     </div>
@@ -208,6 +209,7 @@
       <div class="muted" style="margin-bottom:4px;">リプレイURL（記録開始〜現在の操作を再生できる）</div>
       <div style="display:flex;gap:6px;">
         <input id="shareReplayUrl" readonly style="flex:1 1 auto;min-width:0;background:#0c0f17;color:#e7eaf0;border:1px solid var(--line);border-radius:6px;padding:7px 9px;font-size:0.78rem;">
+        <button class="btn" id="shareReplayShort" title="短縮URLにする">短縮</button>
         <button class="btn primary" id="shareReplayCopy">コピー</button>
       </div>
     </div>
@@ -974,6 +976,22 @@ function copyField(id,label){
   const el=document.getElementById(id); if(el.disabled) return;
   el.focus(); el.select(); copy(el.value); toast(label+'URLをコピーしました');
 }
+// shorten via a keyless, CORS-enabled shortener (is.gd, fallback v.gd). No backend needed.
+async function shortenUrl(url){
+  for(const ep of ['https://is.gd/create.php?format=simple&url=','https://v.gd/create.php?format=simple&url=']){
+    try{ const r=await fetch(ep+encodeURIComponent(url)); if(r.ok){ const t=(await r.text()).trim(); if(/^https?:\/\//.test(t)) return t; } }catch(e){}
+  }
+  return null;
+}
+async function shortenField(id,btn,label){
+  const el=document.getElementById(id); if(el.disabled) return;
+  if(/^https?:\/\/(is|v)\.gd\//.test(el.value)){ toast('すでに短縮済みです'); return; }
+  const orig=el.value; btn.disabled=true; const old=btn.textContent; btn.textContent='短縮中…';
+  const s=await shortenUrl(orig);
+  btn.disabled=false; btn.textContent=old;
+  if(s){ el.value=s; el.focus(); el.select(); copy(s); toast(label+'短縮URLを作成＆コピーしました'); }
+  else { toast('短縮に失敗しました（URLが長すぎる可能性。元URLをそのままお使いください）'); }
+}
 function saveReplay(){
   if(history.length<2){ toast('リプレイにする操作履歴がありません'); return; }
   const title=prompt('保存名（リプレイ）:', (S.deckName||'リプレイ')+'_'+(history.length-1)+'手')||'リプレイ';
@@ -1095,6 +1113,8 @@ function resetDraw5Soft(){ S.self.hand=[]; S.self.graveyard=[]; S.self.banished=
 document.getElementById('shareBtn').addEventListener('click',openShareModal);
 document.getElementById('shareBoardCopy').addEventListener('click',()=>copyField('shareBoardUrl','盤面'));
 document.getElementById('shareReplayCopy').addEventListener('click',()=>copyField('shareReplayUrl','リプレイ'));
+document.getElementById('shareBoardShort').addEventListener('click',(e)=>shortenField('shareBoardUrl',e.currentTarget,'盤面'));
+document.getElementById('shareReplayShort').addEventListener('click',(e)=>shortenField('shareReplayUrl',e.currentTarget,'リプレイ'));
 // mark the current board as the replay start point (frame 0); subsequent actions are recorded from here
 document.getElementById('recStartBtn').addEventListener('click',()=>{ history=[snapshot()]; recording=true; toast('この盤面からリプレイ記録を開始しました'); });
 document.getElementById('saveReplayBtn').addEventListener('click',saveReplay);
