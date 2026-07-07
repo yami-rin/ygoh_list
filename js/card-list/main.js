@@ -286,25 +286,33 @@
         
         const getCurrentCollection = () => currentListType === 'collection' ? cardCollection : wishlistCollection;
         
+        // レアリティ順序はキャッシュし、設定変更時のみ再読込（renderTable毎のlocalStorage+JSON.parseを排除）
+        const defaultRarityOrder = ['N','NR','P','M','R','SR','M+SR','P+SR','UR','P+UR','UL','GR','PG','CR','HR','SE','EXSE','GSE','P+SE','PSE','QCSE','20SE','10000th','25SE','GMR'];
+        let rarityIndexMap = null; // Map: レアリティ → ソート順
+        const refreshRarityOrder = () => {
+            const order = JSON.parse(localStorage.getItem('customRarityOrder') || 'null') || defaultRarityOrder;
+            rarityIndexMap = new Map(order.map((r, i) => [r, i]));
+        };
+        refreshRarityOrder();
+        window.addEventListener('storage', (e) => { if (e.key === 'customRarityOrder') refreshRarityOrder(); });
+
         const renderTable = () => {
             const currentData = getCurrentCollection();
-            const defaultRarityOrder = ['N','NR','P','M','R','SR','M+SR','P+SR','UR','P+UR','UL','GR','PG','CR','HR','SE','EXSE','GSE','P+SE','PSE','QCSE','20SE','10000th','25SE','GMR'];
-            const customRarityOrder = JSON.parse(localStorage.getItem('customRarityOrder') || 'null') || defaultRarityOrder;
-            filteredCardCollection.sort((a, b) => {
-                let [vA, vB] = [a.data[sortConfig.key], b.data[sortConfig.key]];
-                if (sortConfig.key === '枚数') {
-                    [vA, vB] = [parseInt(vA, 10) || 0, parseInt(vB, 10) || 0];
-                } else if (sortConfig.key === 'レアリティ') {
-                    const idxA = customRarityOrder.indexOf(vA);
-                    const idxB = customRarityOrder.indexOf(vB);
-                    [vA, vB] = [idxA === -1 ? 9999 : idxA, idxB === -1 ? 9999 : idxB];
-                } else if (sortConfig.key === '名前') {
-                    [vA, vB] = [getReadingForSort(String(vA || '')).toLowerCase(), getReadingForSort(String(vB || '')).toLowerCase()];
-                } else {
-                    [vA, vB] = [String(vA || '').toLowerCase(), String(vB || '').toLowerCase()];
+            // decorate-sort-undecorate: ソートキーをO(n)で事前計算（比較毎の正規表現/indexOfを排除）
+            const dir = sortConfig.direction === 'ascending' ? 1 : -1;
+            const sortKey = (card) => {
+                const v = card.data[sortConfig.key];
+                if (sortConfig.key === '枚数') return parseInt(v, 10) || 0;
+                if (sortConfig.key === 'レアリティ') {
+                    const idx = rarityIndexMap.get(v);
+                    return idx === undefined ? 9999 : idx;
                 }
-                return vA === vB ? 0 : (vA < vB ? -1 : 1) * (sortConfig.direction === 'ascending' ? 1 : -1);
-            });
+                if (sortConfig.key === '名前') return getReadingForSort(String(v || '')).toLowerCase();
+                return String(v || '').toLowerCase();
+            };
+            const decorated = filteredCardCollection.map(card => [sortKey(card), card]);
+            decorated.sort((a, b) => a[0] === b[0] ? 0 : (a[0] < b[0] ? -1 : 1) * dir);
+            filteredCardCollection = decorated.map(d => d[1]);
 
             // Get table rows setting
             const rowsPerPage = localStorage.getItem('tableRowsPerPage') || '100';
@@ -314,28 +322,25 @@
             const endIndex = startIndex + actualItemsPerPage;
             const paginatedItems = filteredCardCollection.slice(startIndex, endIndex);
 
-            // Use DocumentFragment for better performance
-            const fragment = document.createDocumentFragment();
+            // 行HTMLを文字列で組み立てて一括挿入（行毎のinnerHTMLパースを排除。リスナーは全て委譲済み）
+            const rows = [];
 
             if (paginatedItems.length === 0) {
-                const tr = document.createElement('tr');
-                tr.innerHTML = '<td colspan="6" class="text-center">該当するカードはありません。</td>';
-                fragment.appendChild(tr);
+                rows.push('<tr><td colspan="6" class="text-center">該当するカードはありません。</td></tr>');
             } else {
                 // Check if mobile for simplified view
                 const isMobile = window.innerWidth <= 768;
                 const showInlineQtyBtn = localStorage.getItem('inlineQtyBtn') !== 'false';
 
                 paginatedItems.forEach(card => {
-                    const tr = document.createElement('tr');
                     const tags = (card.data.tags || []).map(tag => escapeHtml(tag)).join(', ');
                     const isChecked = selectedCardIds.has(card.id) ? 'checked' : '';
                     const decodedName = decodeHtmlEntities(card.data['名前']);
 
                     if (isMobile) {
                         // Simplified mobile view without tags column
-                        tr.innerHTML = `
-                            <td>
+                        rows.push(`
+                            <tr><td>
                                 <input type="checkbox" class="form-check-input card-checkbox" data-id="${escapeHtml(card.id)}" ${isChecked}>
                             </td>
                             <td>${escapeHtml(decodedName)}</td>
@@ -349,11 +354,11 @@
                             <td>
                                 <button class="btn btn-sm btn-outline-info view-detail-btn" data-id="${escapeHtml(card.id)}" data-card-data='${JSON.stringify(card.data).replace(/'/g, "&#39;")}'>詳細</button>
                                 <button class="btn btn-sm btn-outline-secondary edit-tags-btn" data-id="${escapeHtml(card.id)}" data-current-tags='${JSON.stringify(card.data.tags || []).replace(/'/g, "&#39;")}'>タグ</button>
-                            </td>
-                        `;
+                            </td></tr>
+                        `);
                     } else {
-                        tr.innerHTML = `
-                            <td>
+                        rows.push(`
+                            <tr><td>
                                 <input type="checkbox" class="form-check-input card-checkbox" data-id="${escapeHtml(card.id)}" ${isChecked}>
                             </td>
                             <td>${escapeHtml(decodedName)}</td>
@@ -373,16 +378,14 @@
                                 <button class="btn btn-primary btn-sm edit-btn" data-id="${escapeHtml(card.id)}"><i class="bi bi-pencil"></i></button>
                                 ${currentListType === 'wishlist' ? `<button class="btn btn-success btn-sm move-to-collection-btn" data-id="${escapeHtml(card.id)}" title="所持カードへ移動"><i class="bi bi-check-circle"></i></button>` : ''}
                                 <button class="btn btn-danger btn-sm delete-btn" data-id="${escapeHtml(card.id)}"><i class="bi bi-trash"></i></button>
-                            </td>
-                        `;
+                            </td></tr>
+                        `);
                     }
-                    fragment.appendChild(tr);
                 });
             }
 
-            // Clear and append all at once for better performance
-            cardTableBody.innerHTML = '';
-            cardTableBody.appendChild(fragment);
+            // Replace all rows in one parse
+            cardTableBody.innerHTML = rows.join('');
 
             updatePaginationControls();
             updateSortIcons();
@@ -1958,33 +1961,40 @@
         };
         
         // Helper function to normalize text for search
+        // メモ化: decodeHtmlEntities(textarea経由=DOM操作)+正規表現4回が
+        // 検索のたび全カードに走っていたため、結果をキャッシュする
+        const _normalizeCache = new Map();
         const normalizeForSearch = (text) => {
             if (!text) return '';
+            const cached = _normalizeCache.get(text);
+            if (cached !== undefined) return cached;
 
             // Decode HTML entities (e.g., &ldquo; → ", &rdquo; → ")
-            text = decodeHtmlEntities(text);
+            let t = decodeHtmlEntities(text);
 
             // Convert to lowercase
-            text = text.toLowerCase();
+            t = t.toLowerCase();
 
             // Convert katakana to hiragana
-            text = text.replace(/[ァ-ヶ]/g, (match) => {
+            t = t.replace(/[ァ-ヶ]/g, (match) => {
                 const code = match.charCodeAt(0) - 0x60;
                 return String.fromCharCode(code);
             });
 
             // Convert full-width alphanumeric to half-width
-            text = text.replace(/[Ａ-Ｚａ-ｚ０-９]/g, (match) => {
+            t = t.replace(/[Ａ-Ｚａ-ｚ０-９]/g, (match) => {
                 return String.fromCharCode(match.charCodeAt(0) - 0xFEE0);
             });
 
             // Convert full-width space to half-width
-            text = text.replace(/　/g, ' ');
+            t = t.replace(/　/g, ' ');
 
             // Remove middle dots (・) for more flexible search
-            text = text.replace(/・/g, '');
+            t = t.replace(/・/g, '');
 
-            return text;
+            if (_normalizeCache.size > 50000) _normalizeCache.clear();
+            _normalizeCache.set(text, t);
+            return t;
         };
 
         // Helper for card type matching in search
@@ -2056,6 +2066,8 @@
                 }
                 possibleCardNames = [...new Set(possibleCardNames)];
             }
+            // 候補名の正規化は1回だけ（従来は所持カード×候補名の組合せ毎に正規化していた）
+            const possibleNormalized = possibleCardNames.map(normalizeForSearch);
 
             // Helper function to check range values (e.g., "2000-3000" or "2500")
             const checkRange = (value, rangeStr) => {
@@ -2087,11 +2099,11 @@
                     nameMatch = normalizeForSearch(cardName).includes(sN);
 
                     // Reading-based match
-                    if (!nameMatch && possibleCardNames.length > 0) {
+                    if (!nameMatch && possibleNormalized.length > 0) {
                         const normalizedCardName = normalizeForSearch(cardName);
-                        for (const possibleName of possibleCardNames) {
-                            if (normalizedCardName.includes(normalizeForSearch(possibleName)) ||
-                                normalizeForSearch(possibleName).includes(normalizedCardName)) {
+                        for (const possibleName of possibleNormalized) {
+                            if (normalizedCardName.includes(possibleName) ||
+                                possibleName.includes(normalizedCardName)) {
                                 nameMatch = true;
                                 break;
                             }
