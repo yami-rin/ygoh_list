@@ -1,6 +1,7 @@
         import { initializeApp } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-app.js";
         import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, onAuthStateChanged, signOut, deleteUser, setPersistence, browserLocalPersistence, sendEmailVerification, applyActionCode } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-auth.js";
         import { api } from '../../api-client.js';
+        import { loadMasterData } from '../shared/master-data.js';
 
         const firebaseConfig = {
             apiKey: "AIzaSyAOYKalLUb2hbghrjQUS8AWzxpLExBT7aU",
@@ -135,137 +136,23 @@
         let currentCardTags = [];
         let selectedCardIds = new Set();
 
-        // Load Yu-Gi-Oh card reading data from CSV
+        // Load Yu-Gi-Oh card master data (shared loader: Worker parse + IndexedDB cache)
+        let masterDataPromise = null;
         const loadCardReadingData = async () => {
-            try {
-                // Try loading master CSV file first, then fall back to the old file
-                let response = await fetch('yugioh_cards_master.csv');
-                if (!response.ok) {
-                    response = await fetch('yugioh_cards_all_20250914_104808.csv');
+            if (masterDataPromise) return masterDataPromise;
+            masterDataPromise = (async () => {
+                try {
+                    const master = await loadMasterData();
+                    cardDetailsMap = master.cardDetailsMap;
+                    cardIdToDetailsMap = master.cardIdToDetailsMap;
+                    cardReadingMap = master.cardReadingMap;
+                    csvCardMap = master.nameToIdMap;
+                    console.log(`Loaded ${cardReadingMap.size} card readings and ${cardDetailsMap.size} card details from CSV`);
+                } catch (error) {
+                    console.error('Failed to load card reading data:', error);
                 }
-                let csvText = await response.text();
-
-                // Remove BOM if present
-                if (csvText.charCodeAt(0) === 0xFEFF) {
-                    csvText = csvText.substring(1);
-                }
-
-                // Parse CSV
-                const lines = csvText.split('\n');
-
-                // Check if first column is カードID (new format) or 名前 (old format)
-                const headers = lines[0].split(',');
-                const hasCardId = headers[0].includes('カードID') || headers[0].includes('ID');
-
-                // CSV columns: [カードID,]名前,読み方,レベル,属性,種族,カードタイプ,攻撃力,守備力,カードテキスト
-
-                // Process each line (skip header)
-                for (let i = 1; i < lines.length; i++) {
-                    const line = lines[i].trim();
-                    if (!line) continue;
-
-                    // Parse CSV line (handle commas in quotes)
-                    const values = [];
-                    let current = '';
-                    let inQuotes = false;
-
-                    for (let j = 0; j < line.length; j++) {
-                        const char = line[j];
-                        if (char === '"') {
-                            inQuotes = !inQuotes;
-                        } else if (char === ',' && !inQuotes) {
-                            values.push(current);
-                            current = '';
-                        } else {
-                            current += char;
-                        }
-                    }
-                    values.push(current);
-
-                    // Get card data
-                    // Handle both formats (with and without カードID)
-                    let cardId, cardName, cardReading, level, attribute, race, cardType, attack, defense, cardText;
-
-                    if (hasCardId) {
-                        cardId = values[0]?.replace(/^"|"$/g, '').trim();
-                        cardName = values[1]?.replace(/^"|"$/g, '').trim();
-                        cardReading = values[2]?.replace(/^"|"$/g, '').trim();
-                        level = values[3]?.replace(/^"|"$/g, '').trim();
-                        attribute = values[4]?.replace(/^"|"$/g, '').trim();
-                        race = values[5]?.replace(/^"|"$/g, '').trim();
-                        cardType = values[6]?.replace(/^"|"$/g, '').trim();
-                        attack = values[7]?.replace(/^"|"$/g, '').trim();
-                        defense = values[8]?.replace(/^"|"$/g, '').trim();
-                        cardText = values[9]?.replace(/^"|"$/g, '').trim();
-                    } else {
-                        cardName = values[0]?.replace(/^"|"$/g, '').trim();
-                        cardReading = values[1]?.replace(/^"|"$/g, '').trim();
-                        level = values[2]?.replace(/^"|"$/g, '').trim();
-                        attribute = values[3]?.replace(/^"|"$/g, '').trim();
-                        race = values[4]?.replace(/^"|"$/g, '').trim();
-                        cardType = values[5]?.replace(/^"|"$/g, '').trim();
-                        attack = values[6]?.replace(/^"|"$/g, '').trim();
-                        defense = values[7]?.replace(/^"|"$/g, '').trim();
-                        cardText = values[8]?.replace(/^"|"$/g, '').trim();
-                    }
-
-                    if (cardName) {
-                        // Store card details
-                        const detailsObj = {
-                            cardId: cardId || '',
-                            reading: cardReading,
-                            level: level,
-                            attribute: attribute,
-                            race: race,
-                            cardType: cardType,
-                            attack: attack,
-                            defense: defense,
-                            cardText: cardText
-                        };
-                        cardDetailsMap.set(cardName, detailsObj);
-                        if (cardId) cardIdToDetailsMap.set(cardId, detailsObj);
-
-                        // Store reading mappings
-                        if (cardReading) {
-                            // Store the reading in lowercase for case-insensitive search
-                            const readingKey = cardReading.toLowerCase();
-
-                            // Store multiple cards with same reading
-                            if (!cardReadingMap.has(readingKey)) {
-                                cardReadingMap.set(readingKey, []);
-                            }
-                            cardReadingMap.get(readingKey).push(cardName);
-
-                            // Also store hiragana version of the reading if it's in katakana
-                            const hiraganaReading = readingKey.replace(/[\u30A1-\u30F6]/g, function(match) {
-                                const code = match.charCodeAt(0) - 0x60;
-                                return String.fromCharCode(code);
-                            });
-
-                            if (hiraganaReading !== readingKey) {
-                                if (!cardReadingMap.has(hiraganaReading)) {
-                                    cardReadingMap.set(hiraganaReading, []);
-                                }
-                                cardReadingMap.get(hiraganaReading).push(cardName);
-                            }
-                        }
-                    }
-                }
-
-                console.log(`Loaded ${cardReadingMap.size} card readings and ${cardDetailsMap.size} card details from CSV`);
-
-                // Debug: Show first few entries
-                let count = 0;
-                for (const [name, details] of cardDetailsMap) {
-                    if (count++ < 5) {
-                        console.log('Sample card in master data:', name);
-                    } else {
-                        break;
-                    }
-                }
-            } catch (error) {
-                console.error('Failed to load card reading data:', error);
-            }
+            })();
+            return masterDataPromise;
         };
 
         // Load card reading data on page load
@@ -4037,39 +3924,13 @@ Firebase Consoleで確認すべき項目:
             }
         });
         
-        // CSV master data cache
+        // CSV master data (shared loader経由。GitHub rawからの重複ダウンロードは廃止)
         let csvCardMap = null; // Map: cardName → cardId
 
         const loadCsvMaster = async () => {
             if (csvCardMap) return csvCardMap;
-            const csvUrl = 'https://raw.githubusercontent.com/yami-rin/ygoh_list/main/yugioh_cards_master.csv';
-            const response = await fetch(csvUrl);
-            if (!response.ok) throw new Error('CSVマスターデータの取得に失敗しました');
-            const text = await response.text();
-            csvCardMap = new Map();
-            const lines = text.split('\n');
-            for (let i = 1; i < lines.length; i++) {
-                const line = lines[i].trim();
-                if (!line) continue;
-                // CSV parse: カードID,名前,... (名前 may be quoted)
-                let cardId, name;
-                if (line.startsWith('"') || line.indexOf(',"') !== -1) {
-                    // Handle quoted fields
-                    const match = line.match(/^(\d+),("(?:[^"]|"")*"|[^,]*)/);
-                    if (match) {
-                        cardId = match[1];
-                        name = match[2].replace(/^"|"$/g, '').replace(/""/g, '"');
-                    }
-                } else {
-                    const parts = line.split(',');
-                    cardId = parts[0];
-                    name = parts[1];
-                }
-                if (cardId && name) {
-                    csvCardMap.set(name, cardId);
-                }
-            }
-            console.log(`CSVマスターデータ読み込み完了: ${csvCardMap.size}件`);
+            await loadCardReadingData();
+            if (!csvCardMap) throw new Error('CSVマスターデータの取得に失敗しました');
             return csvCardMap;
         };
 
