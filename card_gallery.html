@@ -3704,6 +3704,7 @@
         import { initializeApp } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-app.js";
         import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-auth.js";
         import { api } from './api-client.js';
+        import { loadMasterData } from './js/shared/master-data.js';
 
         // Firebase configuration
         const firebaseConfig = {
@@ -3797,63 +3798,18 @@
         let draggedDeckCard = null; // Deck card being dragged (for moving between decks or removing)
 
         // Load card reading data
+        // \u5171\u901A\u30DE\u30B9\u30BF\u30FC\u30C7\u30FC\u30BF\u57FA\u76E4\uFF08js/shared/master-data.js\uFF09\u3092\u4F7F\u7528\u3002
+        // CSV\u30D1\u30FC\u30B9\u306F Web Worker\u3001\u30D1\u30FC\u30B9\u6E08\u307F\u30C7\u30FC\u30BF\u306F IndexedDB \u306B\u30AD\u30E3\u30C3\u30B7\u30E5\u3055\u308C\u3001
+        // \u518D\u8A2A\u6642\u306F HEAD \u30EA\u30AF\u30A8\u30B9\u30C8\u3067\u66F4\u65B0\u78BA\u8A8D\u306E\u307F\uFF08\u672A\u5909\u66F4\u306A\u3089\u518DDL\u30FB\u518D\u30D1\u30FC\u30B9\u306A\u3057\uFF09\u3002
+        // \u5F15\u7528\u7B26\u5185\u30AB\u30F3\u30DE\u3082\u6B63\u3057\u304F\u30D1\u30FC\u30B9\u3059\u308B\uFF08\u65E7 split(',') \u65B9\u5F0F\u306E\u30D0\u30B0\u3092\u89E3\u6D88\uFF09\u3002
         const loadCardData = async () => {
             try {
-                const response = await fetch('yugioh_cards_master.csv');
-                const csvText = await response.text();
-                const lines = csvText.split('\n');
-                const headers = lines[0].split(',');
+                const master = await loadMasterData();
+                // \u65E2\u5B58\u306E module \u30B9\u30B3\u30FC\u30D7\u5909\u6570\u3092\u5DEE\u3057\u66FF\u3048\u308B\uFF08\u5168\u30AF\u30ED\u30FC\u30B8\u30E3\u304C\u540C\u3058\u675F\u7E1B\u3092\u53C2\u7167\uFF09
+                cardDetailsMap = master.cardDetailsMap;
+                cardReadingMap = master.cardReadingMap;
 
-                // Parse CSV and build card details map
-                for (let i = 1; i < lines.length; i++) {
-                    const line = lines[i].trim();
-                    if (!line) continue;
-
-                    const values = line.split(',');
-                    const cardName = values[1]?.replace(/"/g, '');
-                    const cardId = values[0]?.replace(/"/g, '');
-                    const cardReading = values[2]?.replace(/"/g, '');
-
-                    if (cardName && cardId) {
-                        cardDetailsMap.set(cardName, {
-                            cardId: cardId,
-                            reading: cardReading,
-                            level: values[3]?.replace(/"/g, ''),
-                            attribute: values[4]?.replace(/"/g, ''),
-                            race: values[5]?.replace(/"/g, ''),
-                            cardType: values[6]?.replace(/"/g, ''),
-                            attack: values[7]?.replace(/"/g, ''),
-                            defense: values[8]?.replace(/"/g, ''),
-                            cardText: values[9]?.replace(/"/g, '')
-                        });
-
-                        // Build reading map for hiragana search
-                        if (cardReading) {
-                            const readingKey = cardReading.toLowerCase();
-
-                            // Store multiple cards with same reading
-                            if (!cardReadingMap.has(readingKey)) {
-                                cardReadingMap.set(readingKey, []);
-                            }
-                            cardReadingMap.get(readingKey).push(cardName);
-
-                            // Also store hiragana version of the reading if it's in katakana
-                            const hiraganaReading = readingKey.replace(/[\u30A1-\u30F6]/g, function(match) {
-                                const code = match.charCodeAt(0) - 0x60;
-                                return String.fromCharCode(code);
-                            });
-
-                            if (hiraganaReading !== readingKey) {
-                                if (!cardReadingMap.has(hiraganaReading)) {
-                                    cardReadingMap.set(hiraganaReading, []);
-                                }
-                                cardReadingMap.get(hiraganaReading).push(cardName);
-                            }
-                        }
-                    }
-                }
-
-                console.log(`Loaded ${cardReadingMap.size} card readings and ${cardDetailsMap.size} card details from CSV`);
+                console.log(`Loaded ${cardReadingMap.size} card readings and ${cardDetailsMap.size} card details (${master.fromCache ? 'IndexedDB\u30AD\u30E3\u30C3\u30B7\u30E5' : '\u30CD\u30C3\u30C8\u30EF\u30FC\u30AF'})`);
 
                 // Make cardDetailsMap globally available for duel simulator
                 window.cardDetailsMap = cardDetailsMap;
