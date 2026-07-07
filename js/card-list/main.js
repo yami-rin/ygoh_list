@@ -2117,8 +2117,11 @@
                     if (!nameMatch && possibleNormalized.length > 0) {
                         const normalizedCardName = normalizeForSearch(cardName);
                         for (const possibleName of possibleNormalized) {
-                            if (normalizedCardName.includes(possibleName) ||
-                                possibleName.includes(normalizedCardName)) {
+                            // 順方向のみ判定する。逆方向(possibleName.includes(cardName))は
+                            // 候補名が対象カード名を内包する誤検出を生む
+                            // （例: 「シャドール」で候補に入る「影依融合」が「融合」を誤ヒット、
+                            //   「トゥーン」で候補の「トゥーン・サイバー・ドラゴン」が「サイバー・ドラゴン」を誤ヒット）
+                            if (normalizedCardName.includes(possibleName)) {
                                 nameMatch = true;
                                 break;
                             }
