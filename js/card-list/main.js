@@ -296,6 +296,21 @@
         refreshRarityOrder();
         window.addEventListener('storage', (e) => { if (e.key === 'customRarityOrder') refreshRarityOrder(); });
 
+        // レアリティ系統 → バッジ色クラス（表示のみ。検索/ソートはdataを使うため影響なし）
+        const rarityBadgeCellHtml = (rarity) => {
+            if (!rarity) return '';
+            const s = String(rarity).toUpperCase();
+            let cls = '';
+            if (/HR|GMR|10000TH|CR/.test(s)) cls = 'rarity-b-holo';
+            else if (s.includes('SE')) cls = 'rarity-b-se';
+            else if (s.includes('UR') || s.includes('GR') || s === 'PG') cls = 'rarity-b-ur';
+            else if (s.includes('SR')) cls = 'rarity-b-sr';
+            else if (s === 'UL') cls = 'rarity-b-ul';
+            else if (s === 'M') cls = 'rarity-b-m';
+            else if (s === 'R' || s === 'P') cls = 'rarity-b-r';
+            return `<span class="rarity-badge ${cls}">${escapeHtml(rarity)}</span>`;
+        };
+
         const renderTable = () => {
             const currentData = getCurrentCollection();
             // decorate-sort-undecorate: ソートキーをO(n)で事前計算（比較毎の正規表現/indexOfを排除）
@@ -345,7 +360,7 @@
                             </td>
                             <td>${escapeHtml(decodedName)}</td>
                             <td>${escapeHtml(card.data['型番'])}</td>
-                            <td>${escapeHtml(card.data['レアリティ'])}</td>
+                            <td>${rarityBadgeCellHtml(card.data['レアリティ'])}</td>
                             <td class="text-nowrap">
                                 ${showInlineQtyBtn ? `<button class="btn btn-outline-secondary btn-sm qty-minus-btn" data-id="${escapeHtml(card.id)}" style="padding:0 0.4rem;line-height:1.2;">-</button>` : ''}
                                 <span class="qty-display" data-id="${escapeHtml(card.id)}" style="display:inline-block;min-width:2.5em;text-align:center;">${escapeHtml(String(card.data['枚数']))}</span>
@@ -363,7 +378,7 @@
                             </td>
                             <td>${escapeHtml(decodedName)}</td>
                             <td>${escapeHtml(card.data['型番'])}</td>
-                            <td>${escapeHtml(card.data['レアリティ'])}</td>
+                            <td>${rarityBadgeCellHtml(card.data['レアリティ'])}</td>
                             <td class="text-nowrap">
                                 ${showInlineQtyBtn ? `<button class="btn btn-outline-secondary btn-sm qty-minus-btn" data-id="${escapeHtml(card.id)}" style="padding:0 0.4rem;line-height:1.2;">-</button>` : ''}
                                 <span class="qty-display" data-id="${escapeHtml(card.id)}" style="display:inline-block;min-width:2.5em;text-align:center;">${escapeHtml(String(card.data['枚数']))}</span>
@@ -5211,6 +5226,7 @@ Firebase Consoleで確認すべき項目:
 
             const nav = document.querySelector('.navbar');
             if (nav) {
+                nav.setAttribute('data-bs-theme', savedTheme); // HTML側のlight固定を上書き
                 if (savedTheme === 'dark') {
                     nav.classList.remove('navbar-light', 'bg-light');
                     nav.classList.add('navbar-dark', 'bg-dark');
