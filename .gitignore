@@ -60,3 +60,6 @@ analyze_*.py
 # Keep important CSV file names documented but not tracked
 # yugioh_cards_master.csv
 # yugioh_cards_all_*.csv
+.rewrite-harness/
+tests/shots_gallery/
+workers/.wrangler/
