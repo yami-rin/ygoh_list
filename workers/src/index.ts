@@ -120,31 +120,51 @@ app.use('/api/shares', authMiddleware);
 // Rankings PUT needs auth (GET is public, already routed above)
 app.put('/api/rankings', authMiddleware, async (c) => {
   const userId = c.get('userId');
+  // The leaderboard sort keys (totalCards / uniqueCards) are computed
+  // server-side from the cards table so they cannot be claimed arbitrarily.
+  // currentStreak / totalPoints remain client-reported: their source of truth
+  // (the gamification blob) is client-written anyway, and reading it here
+  // would race the client's debounced save (stale by one update).
   const body = await c.req.json<{
     nickname?: string;
     icon?: string;
-    totalCards?: number;
-    uniqueCards?: number;
     currentStreak?: number;
     totalPoints?: number;
-  }>();
+  }>().catch(() => ({} as Record<string, never>));
+
+  const nickname = typeof body.nickname === 'string' ? body.nickname.slice(0, 50) : '';
+  const icon = typeof body.icon === 'string' ? body.icon.slice(0, 16) : '👤';
+  const clampStat = (v: unknown): number =>
+    typeof v === 'number' && Number.isFinite(v)
+      ? Math.min(Math.max(0, Math.floor(v)), 1_000_000_000)
+      : 0;
+  const currentStreak = clampStat(body.currentStreak);
+  const totalPoints = clampStat(body.totalPoints);
+
+  // Same semantics as the client's old calculation:
+  // SUM(quantity) / row count of the collection list
+  const cardStats = await c.env.DB.prepare(
+    `SELECT COALESCE(SUM(quantity), 0) AS total, COUNT(*) AS unique_count
+     FROM cards WHERE user_id = ? AND list_type = 'collection'`
+  ).bind(userId).first();
+  const totalCards = (cardStats?.total as number) ?? 0;
+  const uniqueCards = (cardStats?.unique_count as number) ?? 0;
+
   const now = new Date().toISOString();
   await c.env.DB.prepare(
     `INSERT INTO rankings (user_id, nickname, icon, total_cards, unique_cards, current_streak, total_points, last_updated)
      VALUES (?, ?, ?, ?, ?, ?, ?, ?)
      ON CONFLICT(user_id) DO UPDATE SET
-       nickname = COALESCE(excluded.nickname, rankings.nickname),
-       icon = COALESCE(excluded.icon, rankings.icon),
-       total_cards = COALESCE(excluded.total_cards, rankings.total_cards),
-       unique_cards = COALESCE(excluded.unique_cards, rankings.unique_cards),
-       current_streak = COALESCE(excluded.current_streak, rankings.current_streak),
-       total_points = COALESCE(excluded.total_points, rankings.total_points),
+       nickname = excluded.nickname,
+       icon = excluded.icon,
+       total_cards = excluded.total_cards,
+       unique_cards = excluded.unique_cards,
+       current_streak = excluded.current_streak,
+       total_points = excluded.total_points,
        last_updated = excluded.last_updated`
   ).bind(
-    userId,
-    body.nickname ?? '', body.icon ?? '👤',
-    body.totalCards ?? 0, body.uniqueCards ?? 0,
-    body.currentStreak ?? 0, body.totalPoints ?? 0,
+    userId, nickname, icon,
+    totalCards, uniqueCards, currentStreak, totalPoints,
     now
   ).run();
   return c.json({ success: true });

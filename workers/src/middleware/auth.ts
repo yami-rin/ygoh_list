@@ -201,6 +201,10 @@ async function verifyFirebaseToken(token: string, projectId: string): Promise<Jw
   const header = decodeJwtPart<JwtHeader>(parts[0]);
   const payload = decodeJwtPart<JwtPayload>(parts[1]);
 
+  // Firebase ID tokens are always RS256; reject anything else up front
+  if (header.alg !== 'RS256') throw new Error('Invalid algorithm');
+  if (!header.kid || typeof header.kid !== 'string') throw new Error('Missing key ID');
+
   // Verify claims
   const now = Math.floor(Date.now() / 1000);
   if (payload.exp <= now) throw new Error('Token expired');

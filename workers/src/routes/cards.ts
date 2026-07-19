@@ -215,7 +215,14 @@ cards.post('/batch-import', async (c) => {
       selectedCiid?: string;
       linkedDetails?: Record<string, unknown>;
     }>;
-  }>();
+  }>().catch(() => null);
+
+  if (!body || !Array.isArray(body.cards)) {
+    return c.json({ error: 'cards must be an array' }, 400);
+  }
+  if (body.cards.length > 30000) {
+    return c.json({ error: 'too many cards (max 30000)' }, 413);
+  }
 
   const listType = body.listType || 'collection';
   const now = Date.now();
