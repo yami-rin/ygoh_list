@@ -259,6 +259,21 @@ declare module 'hono' {
   }
 }
 
+/** Verify the Authorization header if present. Returns the user ID, or null when missing/invalid. */
+export async function getAuthUserId(c: Context): Promise<string | null> {
+  const authHeader = c.req.header('Authorization');
+  if (!authHeader || !authHeader.startsWith('Bearer ')) return null;
+  try {
+    const payload = await verifyFirebaseToken(
+      authHeader.slice(7),
+      c.env.FIREBASE_PROJECT_ID as string
+    );
+    return payload.sub;
+  } catch {
+    return null;
+  }
+}
+
 export async function authMiddleware(c: Context, next: Next) {
   const authHeader = c.req.header('Authorization');
   if (!authHeader || !authHeader.startsWith('Bearer ')) {

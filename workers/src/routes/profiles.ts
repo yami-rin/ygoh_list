@@ -1,4 +1,5 @@
 import { Hono } from 'hono';
+import { getAuthUserId } from '../middleware/auth';
 
 type Bindings = { DB: D1Database; FIREBASE_PROJECT_ID: string };
 
@@ -33,6 +34,14 @@ profiles.get('/:userId', async (c) => {
     .first();
 
   if (!row) return c.json({ error: 'Profile not found' }, 404);
+
+  // Private profiles are only visible to their owner (public ones need no auth)
+  if (!(row.is_public as number)) {
+    const requesterId = await getAuthUserId(c);
+    if (requesterId !== targetUserId) {
+      return c.json({ error: 'Profile not found' }, 404);
+    }
+  }
 
   return c.json({
     profile: {

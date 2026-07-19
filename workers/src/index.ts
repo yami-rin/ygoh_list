@@ -1,6 +1,6 @@
 import { Hono } from 'hono';
 import { cors } from 'hono/cors';
-import { authMiddleware } from './middleware/auth';
+import { authMiddleware, getAuthUserId } from './middleware/auth';
 import { cards } from './routes/cards';
 import { sync } from './routes/sync';
 import { tags } from './routes/tags';
@@ -76,6 +76,13 @@ app.get('/api/profiles/:userId', async (c) => {
     'SELECT * FROM public_profiles WHERE user_id = ?'
   ).bind(targetUserId).first();
   if (!row) return c.json({ error: 'Profile not found' }, 404);
+  // Private profiles are only visible to their owner (public ones need no auth)
+  if (!(row.is_public as number)) {
+    const requesterId = await getAuthUserId(c);
+    if (requesterId !== targetUserId) {
+      return c.json({ error: 'Profile not found' }, 404);
+    }
+  }
   return c.json({
     profile: {
       userId: row.user_id as string,
