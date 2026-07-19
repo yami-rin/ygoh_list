@@ -12,11 +12,11 @@ profiles.get('/public', async (c) => {
   )
     .all();
 
+  // shareToken is deliberately omitted (not used for access control)
   const results = rows.results.map(row => ({
     userId: row.user_id as string,
     isPublic: true,
     displayName: row.display_name as string,
-    shareToken: row.share_token as string | null,
     updatedAt: row.updated_at as string,
   }));
 

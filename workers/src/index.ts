@@ -52,11 +52,12 @@ app.get('/api/profiles/public', async (c) => {
   const rows = await c.env.DB.prepare(
     'SELECT * FROM public_profiles WHERE is_public = 1 ORDER BY updated_at DESC'
   ).all();
+  // shareToken is deliberately omitted: it is not part of any access-control
+  // flow today, and the owner-only GET /api/profiles/:userId still returns it
   const results = rows.results.map(row => ({
     userId: row.user_id as string,
     isPublic: true,
     displayName: row.display_name as string,
-    shareToken: row.share_token as string | null,
     updatedAt: row.updated_at as string,
   }));
   return c.json({ profiles: results });

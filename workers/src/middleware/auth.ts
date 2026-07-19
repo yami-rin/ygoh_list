@@ -205,7 +205,12 @@ async function verifyFirebaseToken(token: string, projectId: string): Promise<Jw
   if (header.alg !== 'RS256') throw new Error('Invalid algorithm');
   if (!header.kid || typeof header.kid !== 'string') throw new Error('Missing key ID');
 
-  // Verify claims
+  // Verify claims (require numeric time claims explicitly: a missing exp
+  // would otherwise slip past the comparison below as `undefined <= now`)
+  if (typeof payload.exp !== 'number' || !Number.isFinite(payload.exp) ||
+      typeof payload.iat !== 'number' || !Number.isFinite(payload.iat)) {
+    throw new Error('Invalid token claims');
+  }
   const now = Math.floor(Date.now() / 1000);
   if (payload.exp <= now) throw new Error('Token expired');
   if (payload.iat > now + 10) throw new Error('Token issued in the future');
