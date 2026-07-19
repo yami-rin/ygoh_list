@@ -18,6 +18,9 @@ account.delete('/', async (c) => {
     c.env.DB.prepare('DELETE FROM user_gamification WHERE user_id = ?').bind(userId),
     c.env.DB.prepare('DELETE FROM rankings WHERE user_id = ?').bind(userId),
     c.env.DB.prepare('DELETE FROM public_profiles WHERE user_id = ?').bind(userId),
+    c.env.DB.prepare('DELETE FROM card_aliases WHERE user_id = ?').bind(userId),
+    c.env.DB.prepare('DELETE FROM supplies WHERE user_id = ?').bind(userId),
+    c.env.DB.prepare('DELETE FROM duel_shares WHERE user_id = ?').bind(userId),
   ];
 
   await c.env.DB.batch(stmts);
