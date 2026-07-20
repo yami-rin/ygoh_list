@@ -2558,3 +2558,118 @@
             .pack-card-name-label { display: none; }
             .card-back-design { font-size: 1.5rem; }
         }
+
+        /* ============================================================
+           モダンテーマ層 (2026-07 リフレッシュ / card_list準拠トークン)
+           既存ルールの後に置き、カスケードで上書きする。
+           ライト/ダークは data-bs-theme のトークン差し替えで統一する。
+           ============================================================ */
+        :root {
+            --ygo-bg: #eef1f6;
+            --ygo-surface: #ffffff;
+            --ygo-surface-muted: #f1f3f8;
+            --ygo-border: rgba(15, 23, 42, 0.09);
+            --ygo-shadow: 0 1px 2px rgba(15, 23, 42, 0.05), 0 10px 28px -16px rgba(15, 23, 42, 0.18);
+            --ygo-text-muted: #5b6472;
+            --ygo-radius: 0.75rem;
+            --ygo-radius-sm: 0.5rem;
+            --ygo-accent: #4f6ef7;
+        }
+        [data-bs-theme="dark"] {
+            --ygo-bg: #12151c;
+            --ygo-surface: #1b202a;
+            --ygo-surface-muted: #232a37;
+            --ygo-border: rgba(148, 163, 184, 0.16);
+            --ygo-shadow: 0 1px 2px rgba(0, 0, 0, 0.45), 0 10px 28px -16px rgba(0, 0, 0, 0.6);
+            --ygo-text-muted: #97a3b4;
+        }
+
+        body {
+            background-color: var(--ygo-bg);
+            color: var(--bs-body-color);
+            font-family: system-ui, -apple-system, "Segoe UI", "Hiragino Sans", "Noto Sans JP", "Yu Gothic UI", Meiryo, sans-serif;
+        }
+
+        /* ナビバー: フラット+境界線(ブランドのグラデ文字はアクセントとして残す) */
+        .navbar-custom {
+            background: var(--ygo-surface);
+            border-bottom: 1px solid var(--ygo-border);
+            box-shadow: none;
+        }
+        .navbar-custom.scrolled { box-shadow: var(--ygo-shadow); }
+        .nav-link-custom { color: var(--bs-body-color); }
+        .nav-link-custom:hover {
+            background: var(--ygo-surface-muted);
+            color: var(--bs-body-color);
+            transform: none;
+        }
+        .nav-link-custom.active {
+            background: var(--ygo-surface-muted);
+            color: var(--ygo-accent);
+        }
+
+        /* ヒーロー: 全面紫グラデをやめ、控えめなアクセント面に */
+        .header-section {
+            background: linear-gradient(135deg,
+                color-mix(in srgb, #667eea 12%, var(--ygo-bg)),
+                color-mix(in srgb, #764ba2 8%, var(--ygo-bg)));
+            color: var(--bs-body-color);
+            border-bottom: 1px solid var(--ygo-border);
+            box-shadow: none;
+            padding: 2.25rem 0 1.9rem 0;
+        }
+        .header-section h1 { text-shadow: none; font-size: 2rem; }
+        .header-subtitle { color: var(--ygo-text-muted); opacity: 1; }
+
+        /* サーフェス群: パネル/カード/メニューをトークンで統一(ダーク対応) */
+        .controls-bar, .stats-bar, .filter-section,
+        .edit-panel, .edit-panel-right, #illustrationOptions,
+        .deck-list-panel, .deck-builder-panel, .deck-selector-section,
+        .context-menu, .deck-list-item, .card-item,
+        .playmat-gallery-card, .modal-content, .dropdown-menu {
+            background: var(--ygo-surface);
+            border-color: var(--ygo-border);
+        }
+        .controls-bar, .stats-bar, .filter-section, .card-item, .playmat-gallery-card {
+            border: 1px solid var(--ygo-border);
+            box-shadow: var(--ygo-shadow);
+            border-radius: var(--ygo-radius);
+        }
+        .modal-content, .dropdown-menu, .context-menu {
+            border: 1px solid var(--ygo-border);
+            box-shadow: var(--ygo-shadow);
+        }
+        .rarity-filter-btn, .rarity-exclude-btn, .tag-filter-btn, .tag-exclude-btn, .no-tag-btn {
+            background: var(--ygo-surface);
+            border-color: var(--ygo-border);
+            color: var(--bs-body-color);
+        }
+
+        .btn { border-radius: var(--ygo-radius-sm); }
+        .form-control, .form-select { border-radius: var(--ygo-radius-sm); }
+
+        /* タブ: 下線アクセント型 */
+        .nav-tabs { border-bottom: 1px solid var(--ygo-border); }
+        .nav-tabs .nav-link { color: var(--ygo-text-muted); font-weight: 500; }
+        .nav-tabs .nav-link:hover { color: var(--bs-body-color); border-color: transparent; }
+        .nav-tabs .nav-link.active {
+            color: var(--ygo-accent);
+            background: transparent;
+            border-color: transparent;
+            border-bottom: 2px solid var(--ygo-accent);
+        }
+
+        /* フォーカスリング(キーボード操作の可視性) */
+        :focus-visible {
+            outline: 2px solid rgba(99, 102, 241, 0.7);
+            outline-offset: 1px;
+        }
+
+        /* アニメーション削減設定の尊重 */
+        @media (prefers-reduced-motion: reduce) {
+            *, *::before, *::after {
+                animation-duration: 0.01ms !important;
+                animation-iteration-count: 1 !important;
+                transition-duration: 0.01ms !important;
+            }
+        }

@@ -146,6 +146,10 @@ const constructSystems = () => {
 };
 
 const init = async () => {
+    // card_listと共通のテーマ設定(localStorage['theme'])を起動時に適用
+    const savedTheme = localStorage.getItem('theme') || 'light';
+    document.documentElement.setAttribute('data-bs-theme', savedTheme);
+
     try {
         await imageCacheManager.init();
         console.log('Image cache manager initialized');
