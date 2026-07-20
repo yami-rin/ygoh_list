@@ -157,6 +157,17 @@ const init = async () => {
     const { loadPublicProfile, initializeCommunity } = constructSystems();
     collectionSystem.showLoading(true);
 
+    // ローカルテストモード(?localtest=1): Firebase認証を迂回し、
+    // localStorageのgalleryCacheから描画する（card_listのlocal_userパターン踏襲。
+    // ヘッドレスでの認証後ホットパス計測・検証専用。APIは呼ばない）
+    if (new URLSearchParams(location.search).has('localtest')) {
+        currentUser = { uid: 'local_user' };
+        isAdmin = false;
+        collectionSystem.restorePreferences();
+        collectionSystem.loadAllData('local_user');
+        return;
+    }
+
     onAuthStateChanged(auth, (user) => {
         if (user) {
             const vipData = localStorage.getItem('vip_membership');

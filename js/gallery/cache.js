@@ -27,6 +27,8 @@ export const createCacheSystem = (deps) => {
     };
     const isGalleryRemoteNewer = async (cachedAt) => {
         if (!deps.getCurrentUser()) return true;
+        // ローカルテストモードではAPIを呼ばず常にキャッシュを使う
+        if (deps.getCurrentUser().uid === 'local_user') return false;
         try {
             const meta = await deps.api.getSyncMetadata();
             const remoteUpdatedAt = meta.updatedAt || 0;
