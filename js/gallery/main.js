@@ -133,6 +133,7 @@ const constructSystems = () => {
         PROXY_URL,
         escapeHtml: collectionSystem.escapeHtml,
         decodeHtmlEntities: collectionSystem.decodeHtmlEntities,
+        getReadingForSort: (...args) => collectionSystem.getReadingForSort(...args),
         switchToPlaymat,
         applyPlaymatFilter
     });

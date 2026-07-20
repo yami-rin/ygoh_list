@@ -1669,6 +1669,7 @@ export const createCollectionSystem = (deps) => {
         return {
             loadAllData,
             loadAllAliases,
+            getReadingForSort,
             showLoading,
             switchListType,
             applyFilters,

@@ -284,7 +284,7 @@ export const createCommunitySystem = (deps) => {
         // Sort
         viewingFilteredCards.sort((a, b) => {
             if (sortBy === 'name') {
-                return getReadingForSort(a.data['名前']).localeCompare(getReadingForSort(b.data['名前']), 'ja');
+                return deps.getReadingForSort(a.data['名前']).localeCompare(deps.getReadingForSort(b.data['名前']), 'ja');
             } else if (sortBy === 'quantity-desc') {
                 return (b.data['枚数'] || 0) - (a.data['枚数'] || 0);
             } else if (sortBy === 'rarity') {
