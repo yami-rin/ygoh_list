@@ -2595,6 +2595,8 @@
             background: var(--ygo-surface);
             border-bottom: 1px solid var(--ygo-border);
             box-shadow: none;
+            /* 旧ルールの transition:all はテーマ切替を0.3s遅延させ白背景に見せる。影のみ遷移 */
+            transition: box-shadow 0.3s ease;
         }
         .navbar-custom.scrolled { box-shadow: var(--ygo-shadow); }
         .nav-link-custom { color: var(--bs-body-color); }
