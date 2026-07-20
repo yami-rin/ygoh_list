@@ -2292,6 +2292,12 @@
             border-color: var(--ygo-border);
             color: var(--bs-body-color);
         }
+        /* 折りたたみパネル(タグ・レアリティ/詳細検索): 旧bg-lightの代替 */
+        #tag-rarity-filters .card, #advanced-search .card {
+            background: var(--ygo-surface-muted);
+            border: 1px solid var(--ygo-border);
+        }
+        .context-menu-item:hover { background: var(--ygo-surface-muted); }
 
         .btn { border-radius: var(--ygo-radius-sm); }
         .form-control, .form-select { border-radius: var(--ygo-radius-sm); }
@@ -2325,7 +2331,7 @@
         /* ============================================================
            モバイル層 (2026-07 / card_gallery レイアウト最適化)
            768px以下でのタブ・操作バー・検索・FABの使い勝手改善。
-           L916/L1668/L2011/L2545 の既存 @media(max-width:768px) より
+           ファイル前方の既存 @media(max-width:768px) 3箇所より
            後方に置き、同一セレクタはカスケードで上書きする(直接編集はしない)。
            ============================================================ */
         @media (max-width: 768px) {
