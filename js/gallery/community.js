@@ -20,6 +20,18 @@ export const createCommunitySystem = (deps) => {
     const loadPublicProfile = async () => {
         if (!deps.getCurrentUser()) return;
 
+        const cachedProfile = deps.communityCache.getCachedProfile(deps.getCurrentUser().uid, deps.communityTtl.PROFILE);
+        if (cachedProfile) {
+            document.getElementById('public-profile-toggle').checked = cachedProfile.isPublic || false;
+            document.getElementById('display-name-input').value = cachedProfile.displayName || '';
+
+            if (cachedProfile.isPublic && cachedProfile.shareToken) {
+                const shareUrl = `${window.location.origin}${window.location.pathname}?view=${deps.getCurrentUser().uid}`;
+                document.getElementById('share-link-input').value = shareUrl;
+            }
+            return;
+        }
+
         try {
             const profile = await deps.api.getProfile(deps.getCurrentUser().uid).catch(() => null);
 
@@ -31,15 +43,22 @@ export const createCommunitySystem = (deps) => {
                     const shareUrl = `${window.location.origin}${window.location.pathname}?view=${deps.getCurrentUser().uid}`;
                     document.getElementById('share-link-input').value = shareUrl;
                 }
+                deps.communityCache.setCachedProfile(deps.getCurrentUser().uid, profile);
             } else {
                 // Initialize profile for new users
                 const defaultDisplayName = deps.getCurrentUser().email?.split('@')[0] || 'Anonymous';
+                const shareToken = crypto.randomUUID ? crypto.randomUUID() : Date.now().toString(36);
                 await deps.api.updateProfile({
                     isPublic: false,
                     displayName: defaultDisplayName,
-                    shareToken: crypto.randomUUID ? crypto.randomUUID() : Date.now().toString(36),
+                    shareToken,
                 });
                 document.getElementById('display-name-input').value = defaultDisplayName;
+                deps.communityCache.setCachedProfile(deps.getCurrentUser().uid, {
+                    isPublic: false,
+                    displayName: defaultDisplayName,
+                    shareToken
+                });
                 console.log('Initialized public profile for new user (private by default)');
             }
         } catch (error) {
@@ -70,6 +89,11 @@ export const createCommunitySystem = (deps) => {
                 document.getElementById('share-link-input').value = '';
             }
 
+            const uid = deps.getCurrentUser().uid;
+            const profilePatch = { isPublic, displayName: displayName || deps.getCurrentUser().email?.split('@')[0] || 'Anonymous', shareToken };
+            deps.communityCache.setCachedProfile(uid, profilePatch);
+            deps.communityCache.patchCachedPublicProfile(uid, profilePatch);
+
             alert('公開設定を保存しました');
         } catch (error) {
             console.error('Error saving public profile:', error);
@@ -78,12 +102,31 @@ export const createCommunitySystem = (deps) => {
     };
 
     // Load public users list (limited to 50 users to save reads)
-    const loadPublicUsers = async () => {
+    const loadPublicUsers = async (forceRefresh = false) => {
         const userList = document.getElementById('user-list');
+
+        if (!forceRefresh) {
+            const cachedProfiles = deps.communityCache.getCachedPublicProfiles(deps.communityTtl.PUBLIC_PROFILES);
+            if (cachedProfiles) {
+                publicUsers = [];
+                for (const data of cachedProfiles) {
+                    if (deps.getIsAdmin() || data.isPublic) {
+                        publicUsers.push({
+                            id: data.userId,
+                            ...data
+                        });
+                    }
+                }
+                renderUserList();
+                return;
+            }
+        }
+
         userList.innerHTML = '<div class="text-center py-3"><div class="spinner-border spinner-border-sm" role="status"></div> 読み込み中...</div>';
 
         try {
             const profiles = await deps.api.getPublicProfiles();
+            deps.communityCache.setCachedPublicProfiles(profiles);
 
             publicUsers = [];
             for (const data of profiles) {
@@ -173,7 +216,8 @@ export const createCommunitySystem = (deps) => {
         viewingGrid.innerHTML = '<div class="col-12 text-center py-5"><div class="spinner-border" role="status"></div><p class="mt-2">読み込み中...</p></div>';
 
         try {
-            // Load user's profile
+            // Load user's profile (認可判定に使うため常にサーバーで再検証。キャッシュしない:
+            // 相手が非公開に切り替えた場合にTTL内で閲覧が継続する事故を防ぐ)
             viewingUserData.profile = await deps.api.getProfile(userId).catch(() => null);
 
             // Check access permission
@@ -182,8 +226,12 @@ export const createCommunitySystem = (deps) => {
                 return;
             }
 
-            // Load only collection initially
-            const communityCards = await deps.api.getCommunityCards(userId);
+            // Load only collection initially (cache-first)
+            let communityCards = deps.communityCache.getCachedCommunityCards(userId, deps.communityTtl.VIEW_USER_DATA);
+            if (!communityCards) {
+                communityCards = await deps.api.getCommunityCards(userId);
+                deps.communityCache.setCachedCommunityCards(userId, communityCards);
+            }
             viewingUserData.collection = communityCards.map(c => ({ id: c.id, data: c }));
 
             // Update header and show UI
@@ -222,7 +270,11 @@ export const createCommunitySystem = (deps) => {
         if (!viewingUserId || viewingUserData.wishlistLoaded) return;
 
         try {
-            const wishlistData = await deps.api.getCommunityCards(viewingUserId);
+            let wishlistData = deps.communityCache.getCachedCommunityCards(viewingUserId, deps.communityTtl.VIEW_USER_DATA);
+            if (!wishlistData) {
+                wishlistData = await deps.api.getCommunityCards(viewingUserId);
+                deps.communityCache.setCachedCommunityCards(viewingUserId, wishlistData);
+            }
             viewingUserData.wishlist = wishlistData.map(c => ({ id: c.id, data: c }));
             viewingUserData.wishlistLoaded = true;
             document.getElementById('view-wishlist-count').textContent = viewingUserData.wishlist.length;
@@ -237,7 +289,11 @@ export const createCommunitySystem = (deps) => {
         if (!viewingUserId || viewingUserData.decksLoaded) return;
 
         try {
-            const communityDecks = await deps.api.getCommunityDecks(viewingUserId);
+            let communityDecks = deps.communityCache.getCachedCommunityDecks(viewingUserId, deps.communityTtl.VIEW_USER_DATA);
+            if (!communityDecks) {
+                communityDecks = await deps.api.getCommunityDecks(viewingUserId);
+                deps.communityCache.setCachedCommunityDecks(viewingUserId, communityDecks);
+            }
             viewingUserData.decks = communityDecks.map(d => ({ id: d.id, data: d }));
             viewingUserData.decksLoaded = true;
             document.getElementById('view-decks-count').textContent = viewingUserData.decks.length;
@@ -424,7 +480,7 @@ export const createCommunitySystem = (deps) => {
     // Initialize community event handlers
     const initializeCommunity = () => {
         // Refresh users button
-        document.getElementById('refresh-users-btn').addEventListener('click', loadPublicUsers);
+        document.getElementById('refresh-users-btn').addEventListener('click', () => loadPublicUsers(true));
 
         // User search
         document.getElementById('user-search-input').addEventListener('input', renderUserList);

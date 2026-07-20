@@ -3,6 +3,7 @@ import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/
 import { api } from '../../api-client.js';
 import { loadMasterData } from '../shared/master-data.js';
 import { createCacheSystem } from './cache.js';
+import { createCommunityCacheSystem, COMMUNITY_TTL } from './community-cache.js';
 import { createPlaymatSystem } from './playmat.js';
 import { createPackOpeningSystem } from './pack-opening.js';
 import { createBookmarksSystem } from './bookmarks.js';
@@ -32,6 +33,7 @@ let cardReadingMap = new Map();
 let collectionSystem;
 let cacheSystem;
 let deckSystem;
+let communityCacheSystem;
 
 const loadCardData = async () => {
     try {
@@ -124,6 +126,8 @@ const constructSystems = () => {
         bootstrap: window.bootstrap
     });
 
+    communityCacheSystem = createCommunityCacheSystem({ getCurrentUser: () => currentUser });
+
     const { loadPublicProfile, initializeCommunity } = createCommunitySystem({
         api,
         getCurrentUser: () => currentUser,
@@ -135,7 +139,9 @@ const constructSystems = () => {
         decodeHtmlEntities: collectionSystem.decodeHtmlEntities,
         getReadingForSort: (...args) => collectionSystem.getReadingForSort(...args),
         switchToPlaymat,
-        applyPlaymatFilter
+        applyPlaymatFilter,
+        communityCache: communityCacheSystem,
+        communityTtl: COMMUNITY_TTL
     });
 
     window.changePage = collectionSystem.changePage;
