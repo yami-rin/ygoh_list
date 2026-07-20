@@ -1731,360 +1731,6 @@
             border-color: #0d6efd;
         }
 
-        /* Duel Simulator Styles */
-        .duel-field {
-            background: linear-gradient(135deg, #2c3e50 0%, #34495e 100%);
-            border-radius: 15px;
-            padding: 20px;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
-        }
-
-        .deck-selector-section {
-            background: rgba(255, 255, 255, 0.95);
-            padding: 20px;
-            border-radius: 10px;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
-        }
-
-        .ex-monster-row {
-            margin-bottom: 0px;
-        }
-
-        .ex-monster-row > div {
-            align-items: flex-start;
-        }
-
-        /* Make mini list areas align to top, not affecting row height */
-        .ex-monster-row > div > div:first-child,
-        .ex-monster-row > div > div:last-child {
-            align-self: flex-start;
-        }
-
-        .field-top-section {
-            margin-bottom: 0px;
-        }
-
-        .field-middle-section {
-            margin-bottom: 5px;
-        }
-
-        .field-bottom-section {
-            margin-bottom: 5px;
-        }
-
-        .card-zone {
-            aspect-ratio: 421/614;
-            background: rgba(255, 255, 255, 0.1);
-            border: 2px dashed rgba(255, 255, 255, 0.3);
-            border-radius: 8px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            position: relative;
-            transition: all 0.3s ease;
-            cursor: pointer;
-        }
-
-        .card-zone:hover {
-            background: rgba(255, 255, 255, 0.15);
-            border-color: rgba(255, 255, 255, 0.5);
-        }
-
-        .card-zone.has-card {
-            background: rgba(255, 255, 255, 0.2);
-            border: 2px solid rgba(102, 126, 234, 0.8);
-        }
-
-        .card-zone.drag-over {
-            background: rgba(102, 126, 234, 0.3);
-            border-color: rgba(102, 126, 234, 1);
-            transform: scale(1.05);
-        }
-
-        .zone-label {
-            font-size: 0.7rem;
-            color: rgba(255, 255, 255, 0.6);
-            text-align: center;
-            position: absolute;
-            top: 5px;
-            left: 50%;
-            transform: translateX(-50%);
-            pointer-events: none;
-        }
-
-        .zone-count {
-            position: absolute;
-            bottom: 5px;
-            right: 5px;
-            background: rgba(0, 0, 0, 0.7);
-            color: white;
-            padding: 2px 6px;
-            border-radius: 4px;
-            font-size: 0.75rem;
-            font-weight: bold;
-            pointer-events: none;
-        }
-
-        .monster-zone,
-        .spell-trap-zone {
-            background: rgba(255, 255, 255, 0.05);
-        }
-
-        .grave-zone {
-            background: rgba(147, 51, 234, 0.1);
-            border-color: rgba(147, 51, 234, 0.4);
-        }
-
-        .banish-zone {
-            background: rgba(234, 179, 8, 0.1);
-            border-color: rgba(234, 179, 8, 0.4);
-        }
-
-        .field-zone {
-            background: rgba(59, 130, 246, 0.1);
-            border-color: rgba(59, 130, 246, 0.4);
-        }
-
-        .deck-zone {
-            background: rgba(239, 68, 68, 0.1);
-            border-color: rgba(239, 68, 68, 0.4);
-        }
-
-        .ex-monster-zone {
-            background: rgba(168, 85, 247, 0.1);
-            border-color: rgba(168, 85, 247, 0.4);
-        }
-
-        .hand-zone {
-            background: rgba(255, 255, 255, 0.05);
-            border: 2px solid rgba(255, 255, 255, 0.2);
-            border-radius: 10px;
-            padding: 15px;
-            min-height: 180px;
-            position: relative;
-        }
-
-        .hand-label {
-            color: rgba(255, 255, 255, 0.7);
-            font-size: 0.9rem;
-            margin-bottom: 10px;
-            text-align: center;
-        }
-
-        .hand-cards {
-            display: flex;
-            gap: 10px;
-            flex-wrap: wrap;
-            justify-content: center;
-        }
-
-        .field-card {
-            width: 100%;
-            height: 100%;
-            border-radius: 6px;
-            object-fit: cover;
-            cursor: move;
-            position: relative;
-        }
-
-        .field-card img {
-            width: 100%;
-            height: 100%;
-            border-radius: 6px;
-            object-fit: cover;
-        }
-
-        .hand-card {
-            width: 80px;
-            aspect-ratio: 421/614;
-            border-radius: 6px;
-            overflow: hidden;
-            cursor: move;
-            transition: transform 0.2s ease;
-            position: relative;
-        }
-
-        .hand-card img {
-            width: 100%;
-            height: 100%;
-            object-fit: cover;
-        }
-
-        .hand-card:hover {
-            transform: translateY(-10px);
-        }
-
-        .counter-display {
-            background: rgba(255, 255, 255, 0.1);
-            border: 2px solid rgba(255, 255, 255, 0.3);
-            border-radius: 10px;
-            padding: 15px;
-            text-align: center;
-            margin-bottom: 10px;
-        }
-
-        .counter-value {
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 10px;
-            margin-bottom: 5px;
-        }
-
-        .counter-btn {
-            background: rgba(102, 126, 234, 0.8);
-            border: none;
-            color: white;
-            width: 30px;
-            height: 30px;
-            border-radius: 50%;
-            cursor: pointer;
-            font-size: 0.8rem;
-            transition: all 0.2s ease;
-        }
-
-        .counter-btn:hover {
-            background: rgba(102, 126, 234, 1);
-            transform: scale(1.1);
-        }
-
-        #counter-number {
-            font-size: 1.5rem;
-            font-weight: bold;
-            color: white;
-            min-width: 40px;
-        }
-
-        .counter-label {
-            color: rgba(255, 255, 255, 0.7);
-            font-size: 0.8rem;
-        }
-
-        .action-buttons {
-            margin-top: 10px;
-        }
-
-        .action-buttons .btn {
-            font-size: 0.8rem;
-        }
-
-        /* Card in field with rotation */
-        .field-card-wrapper {
-            width: 100%;
-            height: 100%;
-            position: relative;
-        }
-
-        .field-card-wrapper.rotated {
-            transform: rotate(90deg);
-        }
-
-        .field-card-wrapper .card-controls {
-            position: absolute;
-            top: 5px;
-            right: 5px;
-            display: none;
-            gap: 5px;
-        }
-
-        .field-card-wrapper:hover .card-controls {
-            display: flex;
-        }
-
-        .card-control-btn {
-            background: rgba(0, 0, 0, 0.7);
-            border: none;
-            color: white;
-            width: 25px;
-            height: 25px;
-            border-radius: 50%;
-            cursor: pointer;
-            font-size: 0.7rem;
-            transition: all 0.2s ease;
-        }
-
-        .card-control-btn:hover {
-            background: rgba(102, 126, 234, 1);
-        }
-
-        /* Mobile responsiveness for duel field */
-        @media (max-width: 768px) {
-            .duel-field {
-                padding: 10px;
-            }
-
-            .card-zone {
-                border-width: 1px;
-            }
-
-            .zone-label {
-                font-size: 0.6rem;
-            }
-
-            .hand-card {
-                width: 60px;
-            }
-
-            .counter-display {
-                padding: 10px;
-            }
-
-            .action-buttons .btn {
-                font-size: 0.7rem;
-                padding: 5px;
-            }
-        }
-
-        /* Permanent Cards Display Section */
-        .permanent-cards-section {
-            background: rgba(0, 0, 0, 0.3);
-            border-radius: 10px;
-            padding: 15px;
-        }
-
-        .permanent-card-area {
-            background: rgba(0, 0, 0, 0.4);
-            border-radius: 8px;
-            padding: 10px;
-            height: 100%;
-        }
-
-        .permanent-card-list {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 5px;
-            max-height: 300px;
-            overflow-y: auto;
-            padding: 5px;
-        }
-
-        .permanent-card-item {
-            width: 60px;
-            aspect-ratio: 421/614;
-            border-radius: 4px;
-            overflow: hidden;
-            cursor: grab;
-            transition: transform 0.2s ease;
-            position: relative;
-            border: 2px solid #ddd;
-        }
-
-        .permanent-card-item:hover {
-            transform: scale(1.1);
-            z-index: 10;
-            border-color: #667eea;
-        }
-
-        .permanent-card-item:active {
-            cursor: grabbing;
-        }
-
-        .permanent-card-item img {
-            width: 100%;
-            height: 100%;
-            object-fit: cover;
-        }
-
         /* Community styles */
         .user-item {
             transition: background-color 0.2s ease;
@@ -2626,7 +2272,7 @@
         /* サーフェス群: パネル/カード/メニューをトークンで統一(ダーク対応) */
         .controls-bar, .stats-bar, .filter-section,
         .edit-panel, .edit-panel-right, #illustrationOptions,
-        .deck-list-panel, .deck-builder-panel, .deck-selector-section,
+        .deck-list-panel, .deck-builder-panel,
         .context-menu, .deck-list-item, .card-item,
         .playmat-gallery-card, .modal-content, .dropdown-menu {
             background: var(--ygo-surface);
@@ -2673,5 +2319,82 @@
                 animation-duration: 0.01ms !important;
                 animation-iteration-count: 1 !important;
                 transition-duration: 0.01ms !important;
+            }
+        }
+
+        /* ============================================================
+           モバイル層 (2026-07 / card_gallery レイアウト最適化)
+           768px以下でのタブ・操作バー・検索・FABの使い勝手改善。
+           L916/L1668/L2011/L2545 の既存 @media(max-width:768px) より
+           後方に置き、同一セレクタはカスケードで上書きする(直接編集はしない)。
+           ============================================================ */
+        @media (max-width: 768px) {
+            /* --- タブ列: 横スクロール自体はL944で既に有効(overflow-x:auto +
+               nowrap)。ここではトークンで見た目を整え、タップ領域を広げる --- */
+            .nav-tabs {
+                gap: 0.15rem;
+            }
+            .nav-tabs .nav-link {
+                min-height: 40px;
+            }
+
+            /* --- 操作バー: 右下固定FAB(.pack-open-fab)と重ならないよう
+               常に右側の余白を確保する。すべての行に一律で効かせるため
+               コンテナ側のpaddingで確保する(個別ボタンでは対応しきれない) --- */
+            .controls-bar {
+                padding: 0.75rem;
+                padding-right: calc(0.75rem + 58px);
+            }
+
+            .view-controls {
+                gap: 0.55rem 0.6rem;
+            }
+
+            .view-controls .input-group-text,
+            .view-controls .form-select {
+                font-size: 0.82rem;
+                padding-top: 0.35rem;
+                padding-bottom: 0.35rem;
+            }
+
+            .view-controls .size-btn,
+            #fx-toggle-btn {
+                min-height: 38px;
+                white-space: nowrap;
+            }
+
+            .view-controls .ms-auto .btn {
+                min-height: 42px;
+                font-size: 0.74rem;
+                padding: 0.35rem 0.35rem;
+            }
+
+            /* --- 検索フィルタ: 縦積みの余白と入力幅を整える --- */
+            .filter-section {
+                padding: 0.85rem;
+            }
+            .filter-section .row.g-2 {
+                row-gap: 0.55rem;
+            }
+            .filter-section .form-control,
+            .filter-section .form-select {
+                min-height: 42px;
+            }
+            .filter-section .btn {
+                min-height: 42px;
+            }
+
+            /* --- パック開封FAB: 操作バーは上でpadding-rightを確保済み。
+               縦方向もページ最下部の要素と密着しすぎないよう少し上げる --- */
+            .pack-open-fab {
+                bottom: 1.25rem;
+                right: 1rem;
+            }
+
+            /* --- カードグリッド「小」: 既存は5列(L918)でモバイルには
+               密集しすぎるため3列に緩和(「中」「大」は既存のままで適正) --- */
+            .card-grid.size-small {
+                grid-template-columns: repeat(3, 1fr);
+                gap: 0.4rem;
             }
         }
