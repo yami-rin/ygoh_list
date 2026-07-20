@@ -40,7 +40,7 @@
         let userAliasMap = new Map(); // Map<alias, [cardName, ...]>
 
         // Gamification data - will be synced with Firebase
-        let gamificationData = {
+        const createDefaultGamificationData = () => ({
             userPoints: 0,
             purchasedItems: {},
             activeIcon: '',
@@ -63,27 +63,85 @@
                 maxStreak: 0,
                 totalPointsEarned: 0
             }
-        };
+        });
+        let gamificationData = createDefaultGamificationData();
         
         // Save gamification data to Firebase (debounced to reduce writes)
         let _saveGamificationTimer = null;
-        const _doSaveGamification = async () => {
-            if (!currentUser) return;
+        let _gamificationLoaded = false;
+
+        // localStorage cache for gamification data (API障害時のデータ消失防止)
+        const getGamificationCacheKey = () => {
+            if (!currentUser || currentUser.uid === 'local_user') return null;
+            return `gamificationCache_${currentUser.uid}_data`;
+        };
+        const buildGamificationSavePayload = () => ({
+            ...gamificationData,
+            profile: {
+                ...gamificationData.profile,
+                usageDays: gamificationData.profile?.usageDays ? Array.from(gamificationData.profile.usageDays) : []
+            }
+        });
+        const saveGamificationToCache = () => {
+            const cacheKey = getGamificationCacheKey();
+            if (!cacheKey) return;
             try {
-                const dataToSave = {
-                    ...gamificationData,
-                    profile: {
-                        ...gamificationData.profile,
-                        usageDays: gamificationData.profile?.usageDays ? Array.from(gamificationData.profile.usageDays) : []
-                    }
-                };
+                const cacheData = { ...buildGamificationSavePayload(), cachedAt: Date.now() };
+                localStorage.setItem(cacheKey, JSON.stringify(cacheData));
+            } catch (e) {
+                console.error('Failed to save gamification cache:', e);
+                if (e.name === 'QuotaExceededError') localStorage.removeItem(cacheKey);
+            }
+        };
+        const loadGamificationFromCache = () => {
+            const cacheKey = getGamificationCacheKey();
+            if (!cacheKey) return null;
+            try {
+                const cached = localStorage.getItem(cacheKey);
+                if (cached) {
+                    // cachedAt はキャッシュのメタ情報。gamificationData 本体に混入させない
+                    const { cachedAt, ...data } = JSON.parse(cached);
+                    return data;
+                }
+            } catch (e) {
+                console.error('Failed to load gamification cache:', e);
+            }
+            return null;
+        };
+        const applyGamificationPayload = (data) => {
+            // Convert Array back to Set for usageDays
+            if (data.profile?.usageDays) {
+                data.profile.usageDays = new Set(data.profile.usageDays);
+            }
+            // Merge with default values to ensure all properties exist
+            gamificationData = {
+                ...gamificationData,
+                ...data,
+                profile: {
+                    ...gamificationData.profile,
+                    ...data.profile
+                }
+            };
+        };
+        const _doSaveGamification = async () => {
+            if (!currentUser || currentUser.uid === 'local_user') return;
+            if (!_gamificationLoaded) {
+                console.warn('gamification: 初期ロード未完了のため保存をスキップしました');
+                return;
+            }
+            try {
+                const dataToSave = buildGamificationSavePayload();
                 await api.saveGamification(dataToSave);
+                saveGamificationToCache();
             } catch (error) {
                 console.error('Error saving gamification data:', error);
+                // API失敗時もローカルには最新状態を残す(オフライン中のリロード耐性)。
+                // 次回オンラインロードでサーバー値が正となり整合する
+                saveGamificationToCache();
             }
         };
         const saveGamificationData = async (immediate = false) => {
-            if (!currentUser) return;
+            if (!currentUser || currentUser.uid === 'local_user') return;
             if (_saveGamificationTimer) {
                 clearTimeout(_saveGamificationTimer);
                 _saveGamificationTimer = null;
@@ -94,44 +152,46 @@
                 _saveGamificationTimer = setTimeout(_doSaveGamification, 300);
             }
         };
-        
+
         // Load gamification data from Firebase
         const loadGamificationData = async () => {
-            if (!currentUser) return;
+            if (!currentUser || currentUser.uid === 'local_user') return;
+
+            const cached = loadGamificationFromCache();
+            if (cached) {
+                applyGamificationPayload(cached);
+                _gamificationLoaded = true;
+            }
 
             try {
                 const data = await api.getGamification();
 
                 if (data && Object.keys(data).length > 0) {
-                    // Convert Array back to Set for usageDays
-                    if (data.profile?.usageDays) {
-                        data.profile.usageDays = new Set(data.profile.usageDays);
-                    }
-                    // Merge with default values to ensure all properties exist
-                    gamificationData = {
-                        ...gamificationData,
-                        ...data,
-                        profile: {
-                            ...gamificationData.profile,
-                            ...data.profile
-                        }
-                    };
-                } else {
+                    applyGamificationPayload(data);
+                    _gamificationLoaded = true;
+                    saveGamificationToCache();
+                } else if (!cached) {
                     // Initialize new user data
+                    _gamificationLoaded = true;
                     await saveGamificationData();
+                } else {
+                    console.warn('gamification: サーバーにデータが無くローカルキャッシュのみ存在します。自動書き戻しは行いません');
                 }
-                
+
                 // Sync recentCardsHistory from Firebase to localStorage
                 if (gamificationData.recentCardsHistory && gamificationData.recentCardsHistory.length > 0) {
                     localStorage.setItem('recentCardsHistory', JSON.stringify(gamificationData.recentCardsHistory));
                     console.log('📥 Synced recentCardsHistory from Firebase:', gamificationData.recentCardsHistory.length, 'entries');
                 }
-                
-                // Track today's usage
-                trackDailyUsage();
             } catch (error) {
                 console.error('Error loading gamification data:', error);
+                if (!cached) {
+                    console.warn('gamification: キャッシュ・API双方とも利用不可のため保存を抑止します');
+                }
             }
+
+            // Track today's usage
+            trackDailyUsage();
         };
         let currentCardTags = [];
         let selectedCardIds = new Set();
@@ -3612,6 +3672,8 @@
 
         const handleUserLogout = () => {
             currentUser = null;
+            _gamificationLoaded = false;
+            gamificationData = createDefaultGamificationData(); // アカウント切替時の前ユーザー値混入を防止
             mainApp.style.display = 'none';
             appLoader.style.display = 'none';
             authModal.show();
