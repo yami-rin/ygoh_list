@@ -885,72 +885,7 @@
             }
         }
 
-        /* ============================================================
-           モダンテーマ層 (2026-07 リフレッシュ)
-           既存ルールの後に置き、カスケードで上書きする。
-           デザイントークン: サーフェス/境界/影/角丸を集中管理し、
-           ライト/ダークは data-bs-theme のトークン差し替えで統一する。
-           ============================================================ */
-        :root {
-            --ygo-bg: #eef1f6;
-            --ygo-surface: #ffffff;
-            --ygo-surface-muted: #f1f3f8;
-            --ygo-border: rgba(15, 23, 42, 0.09);
-            --ygo-shadow: 0 1px 2px rgba(15, 23, 42, 0.05), 0 10px 28px -16px rgba(15, 23, 42, 0.18);
-            --ygo-text-muted: #5b6472;
-            --ygo-radius: 0.75rem;
-            --ygo-radius-sm: 0.5rem;
-        }
-        [data-bs-theme="dark"] {
-            --ygo-bg: #12151c;
-            --ygo-surface: #1b202a;
-            --ygo-surface-muted: #232a37;
-            --ygo-border: rgba(148, 163, 184, 0.16);
-            --ygo-shadow: 0 1px 2px rgba(0, 0, 0, 0.45), 0 10px 28px -16px rgba(0, 0, 0, 0.6);
-            --ygo-text-muted: #97a3b4;
-        }
-
-        body,
-        [data-bs-theme="dark"] body {
-            background-color: var(--ygo-bg);
-            font-family: system-ui, -apple-system, "Segoe UI", "Hiragino Sans", "Noto Sans JP", "Yu Gothic UI", Meiryo, sans-serif;
-        }
-
-        /* サーフェス（カード・モーダル・ドロップダウン） */
-        .card {
-            background-color: var(--ygo-surface);
-            border: 1px solid var(--ygo-border);
-            border-radius: var(--ygo-radius);
-            box-shadow: var(--ygo-shadow);
-        }
-        .card > .card-header {
-            background-color: transparent;
-            border-bottom: 1px solid var(--ygo-border);
-            font-weight: 600;
-        }
-        .modal-content {
-            border: 1px solid var(--ygo-border);
-            border-radius: var(--ygo-radius);
-            box-shadow: var(--ygo-shadow);
-        }
-        .dropdown-menu {
-            border: 1px solid var(--ygo-border);
-            border-radius: var(--ygo-radius-sm);
-            box-shadow: var(--ygo-shadow);
-        }
-        .btn { border-radius: var(--ygo-radius-sm); }
-        .form-control, .form-select { border-radius: var(--ygo-radius-sm); }
-
-        /* ナビゲーションバー: フラット+境界線 */
-        .navbar.bg-light, .navbar.bg-dark {
-            background-color: var(--ygo-surface) !important;
-            border-bottom: 1px solid var(--ygo-border);
-            box-shadow: none;
-        }
-        .navbar-brand { font-weight: 700; letter-spacing: 0.01em; }
-
-        /* テーブル: スティッキーヘッダー+行ホバー */
-        .table-responsive { border-radius: var(--ygo-radius-sm); }
+        /* card_list固有のtable/rarity/mobile表現。共通token/componentは共通CSSで管理する。 */
         #card-table thead th {
             position: sticky;
             top: 0;
@@ -968,8 +903,6 @@
             --bs-table-hover-bg: color-mix(in srgb, var(--ygo-surface-muted) 90%, transparent);
         }
         #card-table td { vertical-align: middle; }
-        th.sortable { cursor: pointer; user-select: none; }
-        th.sortable:hover { color: var(--bs-body-color); }
 
         /* レアリティバッジ（シグネチャ要素）: コレクターの言語であるレアリティを
            系統色で可視化する。テキスト内容は従来のまま */
@@ -1000,12 +933,6 @@
         [data-bs-theme="dark"] .rarity-b-ul   { color: #c084fc; }
         [data-bs-theme="dark"] .rarity-b-m    { color: #d6b26e; }
         [data-bs-theme="dark"] .rarity-b-holo { color: #f28ecd; }
-
-        /* フォーカスリング（キーボード操作の可視性） */
-        :focus-visible {
-            outline: 2px solid rgba(99, 102, 241, 0.7);
-            outline-offset: 1px;
-        }
 
         /* モバイル: 行をカード型に積み上げ（thead はソートチップとして残す =
            ソート/全選択機能を失わない） */
@@ -1110,13 +1037,4 @@
             --bs-btn-active-color: #fff;
             --bs-btn-active-bg: #3d5ce5;
             --bs-btn-active-border-color: #3d5ce5;
-        }
-
-        /* アニメーション削減設定の尊重 */
-        @media (prefers-reduced-motion: reduce) {
-            *, *::before, *::after {
-                animation-duration: 0.01ms !important;
-                animation-iteration-count: 1 !important;
-                transition-duration: 0.01ms !important;
-            }
         }
