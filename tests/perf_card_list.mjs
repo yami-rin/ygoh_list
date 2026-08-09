@@ -3,7 +3,7 @@
 //   旧版比較: git worktree add /tmp/cm_old <commit> && node tests/perf_card_list.mjs <worktreeのパス> OLD
 import fs from 'fs';
 import path from 'path';
-import { serve, loginLocal, importCards, firefox, DOCROOT } from './helpers.mjs';
+import { serve, loginLocal, importCards, firefox, DOCROOT, summarizeSamples } from './helpers.mjs';
 
 const docroot = process.argv[2] || DOCROOT;
 const label = process.argv[3] || 'CUR';
@@ -33,34 +33,44 @@ await page.waitForTimeout(6000);
 await importCards(page, cards, 50);
 console.log(`[${label}] imported 3000 cards`);
 
-const median = (a) => a.slice().sort((x, y) => x - y)[Math.floor(a.length / 2)];
+const printSummary = (name, values) => {
+    const summary = summarizeSamples(values);
+    console.log(`[${label}] ${name}: median ${summary.median.toFixed(1)}ms, p95 ${summary.p95.toFixed(1)}ms (all: ${summary.samples.map((v) => v.toFixed(1)).join(', ')})`);
+};
 const renderOnce = () => page.evaluate(() => {
     const t0 = performance.now(); window.changePage(1); return performance.now() - t0;
 });
 
 let t = [];
 for (let i = 0; i < 7; i++) t.push(await renderOnce());
-console.log(`[${label}] sort+render 100rows: median ${median(t).toFixed(1)}ms`);
+printSummary('sort+render 100rows', t);
 
 await page.evaluate(() => localStorage.setItem('tableRowsPerPage', 'all'));
 t = [];
 for (let i = 0; i < 5; i++) t.push(await renderOnce());
-console.log(`[${label}] sort+render ALL(3000)rows: median ${median(t).toFixed(1)}ms`);
+printSummary('sort+render ALL(3000)rows', t);
 await page.evaluate(() => localStorage.setItem('tableRowsPerPage', '100'));
 
 for (const q of ['うらら', 'どらごん', 'まじしゃん']) {
-    await page.fill('[name="search_name"]', '');
-    await page.waitForTimeout(500);
-    await page.evaluate(() => { document.getElementById('search-result-summary').style.display = 'none'; });
-    const t0 = Date.now();
-    await page.fill('[name="search_name"]', q);
-    await page.waitForFunction(() => {
-        const el = document.getElementById('search-result-summary');
-        return el && el.style.display !== 'none';
-    }, { timeout: 60000 });
+    const wallTimes = [];
+    for (let i = 0; i < 5; i++) {
+        await page.fill('[name="search_name"]', '');
+        await page.waitForTimeout(500);
+        await page.evaluate(() => { document.getElementById('search-result-summary').style.display = 'none'; });
+        const t0 = performance.now();
+        await page.fill('[name="search_name"]', q);
+        await page.waitForFunction(() => {
+            const el = document.getElementById('search-result-summary');
+            return el && el.style.display !== 'none';
+        }, { timeout: 60000 });
+        wallTimes.push(performance.now() - t0);
+    }
     const kinds = await page.evaluate(() => document.getElementById('search-result-kinds')?.textContent);
-    console.log(`[${label}] search "${q}": ~${Date.now() - t0 - 300}ms (デバウンス300ms除く), hits=${kinds}`);
+    printSummary(`search "${q}" input-to-render`, wallTimes);
+    console.log(`[${label}] search "${q}" hits=${kinds}`);
 }
+
+console.log(`[${label}] browser=Firefox ${browser.version()}, fixture=3000 cards, state=warm after import`);
 
 await browser.close();
 server.close();

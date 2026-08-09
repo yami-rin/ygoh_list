@@ -1,14 +1,12 @@
 // card_gallery の認証後ホットパス計測（?localtest=1 + galleryCacheシード）
 // 計測: シード→グリッド表示までの壁時計時間 / changePage(再描画) / 検索フィルタ
-import { serve, firefox } from './helpers.mjs';
+import { serve, firefox, summarizeSamples } from './helpers.mjs';
 
 const PORT = 5603;
 const CARD_COUNT = Number(process.argv[2] || 3000);
 const RUNS = 5;
 const { server, baseUrl } = serve(PORT);
 const browser = await firefox.launch();
-
-const median = (a) => [...a].sort((x, y) => x - y)[Math.floor(a.length / 2)];
 
 const seedCards = Array.from({ length: CARD_COUNT }, (_, i) => ({
     id: `t${i}`,
@@ -48,7 +46,8 @@ try {
             return performance.now() - s;
         }));
     }
-    console.log(`changePage再描画(median of ${RUNS}): ${median(renderTimes).toFixed(1)}ms  (all: ${renderTimes.map(t => t.toFixed(0)).join(', ')})`);
+    const render = summarizeSamples(renderTimes);
+    console.log(`changePage再描画: median ${render.median.toFixed(1)}ms, p95 ${render.p95.toFixed(1)}ms (all: ${render.samples.map(t => t.toFixed(1)).join(', ')})`);
 
     // 検索: input発火→グリッドDOM更新完了までの実時間(デバウンス込み)
     const filterTimes = [];
@@ -71,7 +70,9 @@ try {
         filterTimes.push(t);
         await page.waitForTimeout(150);
     }
-    console.log(`検索→グリッド更新完了(median of ${RUNS}): ${median(filterTimes).toFixed(1)}ms  (all: ${filterTimes.map(t => t.toFixed(0)).join(', ')})`);
+    const filter = summarizeSamples(filterTimes);
+    console.log(`検索→グリッド更新完了: median ${filter.median.toFixed(1)}ms, p95 ${filter.p95.toFixed(1)}ms (all: ${filter.samples.map(t => t.toFixed(1)).join(', ')})`);
+    console.log(`browser=Firefox ${browser.version()}, fixture=${CARD_COUNT} cards, state=warm localtest cache`);
 
     await page.close().catch(() => {});
 } finally {

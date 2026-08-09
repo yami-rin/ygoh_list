@@ -1,5 +1,7 @@
 // card_manager_web ヘッドレス検証の共通ヘルパー
-// 前提・コツは knowledge/runbooks/card-manager-playwright-verify.md を参照
+// 再現条件: express.static のローカルHTTP配信 + Playwright Firefox headless。
+// card_list は local ログインを使い、localhost から本番Workersへ向かう既知CORSだけを除外する。
+// 詳細は knowledge/runbooks/card-manager-playwright-verify.md を参照。
 import path from 'path';
 import os from 'os';
 import fs from 'fs';
@@ -10,6 +12,24 @@ export const DOCROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url))
 const require = createRequire(path.join(DOCROOT, 'package.json'));
 export const express = require('express');
 export const { firefox } = require('playwright');
+
+/** nearest-rank percentile。空配列は null（= UNMEASURED）を返す。 */
+export function percentile(values, ratio) {
+    if (!values.length) return null;
+    const sorted = [...values].sort((a, b) => a - b);
+    return sorted[Math.max(0, Math.ceil(sorted.length * ratio) - 1)];
+}
+
+/** baseline記録用に中央値/p95/sampleを同じ形へ揃える。 */
+export function summarizeSamples(values) {
+    const samples = values.filter(Number.isFinite);
+    if (!samples.length) return 'UNMEASURED';
+    return {
+        median: percentile(samples, 0.5),
+        p95: percentile(samples, 0.95),
+        samples,
+    };
+}
 
 /** 静的サーバを起動して {server, baseUrl} を返す */
 export function serve(port, docroot = DOCROOT) {

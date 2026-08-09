@@ -1,11 +1,11 @@
 // UIスクリーンショット取得: デスクトップ(ライト/ダーク) + モバイル
-// 実行: node tests/shots.mjs  → tests/screenshots/ に出力
+// 実行: node tests/shots.mjs [出力先]（省略時は tests/screenshots/）
 import fs from 'fs';
 import path from 'path';
 import { serve, loginLocal, importCards, firefox, DOCROOT } from './helpers.mjs';
 
 const { server, baseUrl } = serve(8934);
-const OUT = path.join(DOCROOT, 'tests', 'screenshots');
+const OUT = process.argv[2] ? path.resolve(process.argv[2]) : path.join(DOCROOT, 'tests', 'screenshots');
 fs.mkdirSync(OUT, { recursive: true });
 
 const cards = [

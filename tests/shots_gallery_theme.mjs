@@ -1,11 +1,11 @@
 // card_gallery テーマ確認用スクリーンショット（?localtest=1 + galleryCacheシード）
-// light/dark × desktop/mobile の4枚を tests/shots_gallery/ に保存（オーバーレイなし）
+// light/dark × desktop/mobile の4枚を保存（第1引数省略時は tests/shots_gallery/）
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { serve, firefox } from './helpers.mjs';
 
 const TEST_DIR = path.dirname(fileURLToPath(import.meta.url));
-const SHOT_DIR = path.join(TEST_DIR, 'shots_gallery');
+const SHOT_DIR = process.argv[2] ? path.resolve(process.argv[2]) : path.join(TEST_DIR, 'shots_gallery');
 const PORT = 5614;
 const { server, baseUrl } = serve(PORT);
 const browser = await firefox.launch();
