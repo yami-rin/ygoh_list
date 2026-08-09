@@ -6,6 +6,9 @@
     <title>カードギャラリー - グリッド表示</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css">
+    <link rel="stylesheet" href="css/theme.css">
+    <link rel="stylesheet" href="css/components.css">
+    <link rel="stylesheet" href="css/page-shell.css">
     <script src="image_cache_manager.js"></script>
     <link rel="stylesheet" href="css/gallery.css">
 </head>
@@ -18,9 +21,9 @@
     </div>
 
     <!-- Navigation Bar -->
-    <nav class="navbar navbar-expand-lg navbar-custom">
+    <nav class="navbar navbar-expand-lg navbar-custom ygo-nav">
         <div class="container">
-            <a class="navbar-brand" href="index.html">
+            <a class="navbar-brand ygo-brand" href="index.html">
                 <i class="bi bi-layers-fill"></i>
                 Card Manager
             </a>
@@ -30,37 +33,37 @@
             <div class="collapse navbar-collapse" id="navbarNav">
                 <ul class="navbar-nav ms-auto">
                     <li class="nav-item">
-                        <a class="nav-link-custom" href="index.html">
+                        <a class="nav-link nav-link-custom" href="index.html">
                             <i class="bi bi-house-door-fill"></i>
                             ホーム
                         </a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link-custom" href="card_list.html">
+                        <a class="nav-link nav-link-custom" href="card_list.html">
                             <i class="bi bi-list-ul"></i>
                             カード管理
                         </a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link-custom active" href="card_gallery.html">
+                        <a class="nav-link nav-link-custom active" href="card_gallery.html" aria-current="page">
                             <i class="bi bi-grid-3x3-gap-fill"></i>
                             ギャラリー
                         </a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link-custom" href="battle_records.html">
+                        <a class="nav-link nav-link-custom" href="battle_records.html">
                             <i class="bi bi-trophy-fill"></i>
                             対戦記録
                         </a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link-custom" href="supply_manager.html">
+                        <a class="nav-link nav-link-custom" href="supply_manager.html">
                             <i class="bi bi-layout-wtf"></i>
                             サプライ
                         </a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link-custom" href="options.html">
+                        <a class="nav-link nav-link-custom" href="options.html">
                             <i class="bi bi-gear-fill"></i>
                             オプション
                         </a>
@@ -117,7 +120,7 @@
 
         <div id="gallery-content">
         <!-- Stats bar -->
-        <div class="stats-bar">
+        <div class="stats-bar ygo-surface">
             <div class="row text-center">
                 <div class="col-6 col-md-3">
                     <h4 class="mb-0 text-primary" id="total-cards">0</h4>
@@ -139,13 +142,13 @@
         </div>
 
         <!-- Filter section -->
-        <div class="filter-section">
+        <div class="filter-section ygo-surface">
             <div class="row g-2">
                 <div class="col-md-3">
-                    <input type="text" class="form-control" id="search-input" placeholder="カード名で検索...">
+                    <input type="text" class="form-control ygo-field" id="search-input" placeholder="カード名で検索...">
                 </div>
                 <div class="col-md-3">
-                    <input type="text" class="form-control" id="code-search-input" placeholder="型番で検索...">
+                    <input type="text" class="form-control ygo-field" id="code-search-input" placeholder="型番で検索...">
                 </div>
                 <div class="col-md-2">
                     <button class="btn btn-outline-primary w-100" type="button" data-bs-toggle="collapse" data-bs-target="#tag-rarity-filters" id="tag-rarity-toggle-btn">
@@ -375,12 +378,12 @@
                         <!-- Attack -->
                         <div class="col-md-6">
                             <label class="form-label small fw-bold">攻撃力</label>
-                            <input type="text" class="form-control form-control-sm" id="attack-filter">
+                            <input type="text" class="form-control form-control-sm ygo-field" id="attack-filter">
                         </div>
                         <!-- Defense -->
                         <div class="col-md-6">
                             <label class="form-label small fw-bold">守備力</label>
-                            <input type="text" class="form-control form-control-sm" id="defense-filter">
+                            <input type="text" class="form-control form-control-sm ygo-field" id="defense-filter">
                         </div>
                     </div>
                 </div>
@@ -398,12 +401,12 @@
         </div>
 
         <!-- Controls bar -->
-        <div class="controls-bar">
+        <div class="controls-bar ygo-surface">
             <div class="view-controls">
                 <!-- Display count -->
                 <div class="input-group" style="width: auto;">
                     <label class="input-group-text" for="items-per-page">表示件数</label>
-                    <select class="form-select" id="items-per-page" style="width: auto;">
+                    <select class="form-select ygo-select" id="items-per-page" style="width: auto;">
                         <option value="10">10</option>
                         <option value="20">20</option>
                         <option value="30">30</option>
@@ -433,7 +436,7 @@
                 <!-- Sort selector -->
                 <div class="input-group" style="width: auto;">
                     <label class="input-group-text" for="sort-select">並び替え</label>
-                    <select class="form-select" id="sort-select" style="width: auto;">
+                    <select class="form-select ygo-select" id="sort-select" style="width: auto;">
                         <option value="name-asc">名前 (昇順)</option>
                         <option value="name-desc">名前 (降順)</option>
                         <option value="code-asc">型番 (昇順)</option>
@@ -485,19 +488,19 @@
                 <i class="bi bi-pencil-square"></i> 登録・編集
             </a>
         </div>
-        <div class="filter-section">
+        <div class="filter-section ygo-surface">
             <div class="row g-2">
                 <div class="col-md-4">
-                    <input type="text" class="form-control" id="pm-search" placeholder="名前で検索...">
+                    <input type="text" class="form-control ygo-field" id="pm-search" placeholder="名前で検索...">
                 </div>
                 <div class="col-md-3">
-                    <select class="form-select" id="pm-sort">
+                    <select class="form-select ygo-select" id="pm-sort">
                         <option value="date-desc">登録日時 新→古</option>
                         <option value="date-asc">登録日時 古→新</option>
                     </select>
                 </div>
                 <div class="col-md-3">
-                    <select class="form-select" id="pm-sealed-filter">
+                    <select class="form-select ygo-select" id="pm-sealed-filter">
                         <option value="all">すべて</option>
                         <option value="sealed">未開封のみ</option>
                         <option value="opened">開封済みのみ</option>
@@ -527,7 +530,7 @@
     <!-- Playmat Detail Modal -->
     <div class="modal fade" id="playmatDetailModal" tabindex="-1">
         <div class="modal-dialog modal-lg modal-dialog-centered">
-            <div class="modal-content">
+            <div class="modal-content ygo-modal">
                 <div class="modal-header">
                     <h5 class="modal-title" id="pm-detail-name"></h5>
                     <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
@@ -564,7 +567,7 @@
                         </button>
                     </div>
                     <div class="card-body">
-                        <input type="text" class="form-control mb-3" id="user-search-input" placeholder="ユーザーを検索...">
+                        <input type="text" class="form-control mb-3 ygo-field" id="user-search-input" placeholder="ユーザーを検索...">
                         <div id="user-list" style="max-height: 500px; overflow-y: auto;">
                             <div class="text-center text-muted py-3">
                                 <i class="bi bi-arrow-up-circle"></i> 更新ボタンを押してユーザー一覧を読み込み
@@ -588,7 +591,7 @@
                         <div class="mb-3">
                             <label class="form-label small">共有リンク</label>
                             <div class="input-group input-group-sm">
-                                <input type="text" class="form-control" id="share-link-input" readonly placeholder="公開設定をONにすると生成されます">
+                                <input type="text" class="form-control ygo-field" id="share-link-input" readonly placeholder="公開設定をONにすると生成されます">
                                 <button class="btn btn-outline-secondary" type="button" id="copy-share-link-btn">
                                     <i class="bi bi-clipboard"></i>
                                 </button>
@@ -596,7 +599,7 @@
                         </div>
                         <div class="mb-2">
                             <label class="form-label small">表示名</label>
-                            <input type="text" class="form-control form-control-sm" id="display-name-input" placeholder="ニックネーム">
+                            <input type="text" class="form-control form-control-sm ygo-field" id="display-name-input" placeholder="ニックネーム">
                         </div>
                         <button class="btn btn-primary btn-sm w-100" id="save-profile-settings-btn">
                             <i class="bi bi-check-lg"></i> 保存
@@ -639,15 +642,15 @@
                         <!-- Search/Filter for viewing -->
                         <div class="row g-2 mb-3" id="viewing-filters" style="display: none;">
                             <div class="col-md-6">
-                                <input type="text" class="form-control form-control-sm" id="viewing-search-input" placeholder="カード名で検索...">
+                                <input type="text" class="form-control form-control-sm ygo-field" id="viewing-search-input" placeholder="カード名で検索...">
                             </div>
                             <div class="col-md-3">
-                                <select class="form-select form-select-sm" id="viewing-rarity-filter">
+                                <select class="form-select form-select-sm ygo-select" id="viewing-rarity-filter">
                                     <option value="">全レアリティ</option>
                                 </select>
                             </div>
                             <div class="col-md-3">
-                                <select class="form-select form-select-sm" id="viewing-sort">
+                                <select class="form-select form-select-sm ygo-select" id="viewing-sort">
                                     <option value="name">名前順</option>
                                     <option value="quantity-desc">枚数(多い順)</option>
                                     <option value="rarity">レアリティ順</option>
@@ -703,21 +706,21 @@
                         <label for="panelQuantity" class="form-label">
                             <i class="bi bi-stack"></i> 枚数
                         </label>
-                        <input type="number" class="form-control" id="panelQuantity" min="0">
+                        <input type="number" class="form-control ygo-field" id="panelQuantity" min="0">
                     </div>
 
                     <div class="mb-3">
                         <label for="panelTags" class="form-label">
                             <i class="bi bi-tags"></i> タグ（カンマ区切り）
                         </label>
-                        <input type="text" class="form-control" id="panelTags" placeholder="デッキ1, お気に入り">
+                        <input type="text" class="form-control ygo-field" id="panelTags" placeholder="デッキ1, お気に入り">
                     </div>
 
                     <div class="mb-3">
                         <label for="panelCustomCardId" class="form-label">
                             <i class="bi bi-fingerprint"></i> カードID（手動設定）
                         </label>
-                        <input type="text" class="form-control" id="panelCustomCardId" placeholder="例: 12345678">
+                        <input type="text" class="form-control ygo-field" id="panelCustomCardId" placeholder="例: 12345678">
                         <div class="form-text">設定すると画像取得にこのIDを使用します</div>
                     </div>
 
@@ -725,7 +728,7 @@
                         <label for="panelCardLang" class="form-label">
                             <i class="bi bi-translate"></i> 言語
                         </label>
-                        <select class="form-select" id="panelCardLang">
+                        <select class="form-select ygo-select" id="panelCardLang">
                             <option value="ja">日本語</option>
                             <option value="ko">한국어</option>
                             <option value="ae">English (Asia)</option>
@@ -771,7 +774,7 @@
     </div>
 
     <!-- Deck List Side Panel -->
-    <div class="deck-list-panel" id="deckListPanel">
+    <div class="deck-list-panel ygo-surface" id="deckListPanel">
         <div class="deck-list-header">
             <h4><i class="bi bi-stack"></i> デッキ管理</h4>
             <button class="deck-list-close" id="closeDeckListBtn">
@@ -792,7 +795,7 @@
     </div>
 
     <!-- Deck Builder Side Panel -->
-    <div class="deck-builder-panel" id="deckBuilderPanel">
+    <div class="deck-builder-panel ygo-surface" id="deckBuilderPanel">
         <div class="deck-builder-header">
             <h4 id="deckBuilderTitle">デッキ編集</h4>
             <div style="display: flex; gap: 0.5rem;">
@@ -809,11 +812,11 @@
             <div class="deck-info-section">
                 <div class="mb-2">
                     <label class="form-label small fw-bold">デッキ名</label>
-                    <input type="text" class="form-control form-control-sm" id="deckName" placeholder="デッキ名を入力">
+                    <input type="text" class="form-control form-control-sm ygo-field" id="deckName" placeholder="デッキ名を入力">
                 </div>
                 <div class="mb-3">
                     <label class="form-label small fw-bold">メモ</label>
-                    <textarea class="form-control form-control-sm" id="deckMemo" rows="2" placeholder="メモを入力"></textarea>
+                    <textarea class="form-control form-control-sm ygo-field" id="deckMemo" rows="2" placeholder="メモを入力"></textarea>
                 </div>
             </div>
 
@@ -877,7 +880,7 @@
     <!-- Deck View Modal -->
     <div class="modal fade" id="deckViewModal" tabindex="-1">
         <div class="modal-dialog modal-fullscreen">
-            <div class="modal-content">
+            <div class="modal-content ygo-modal">
                 <div class="modal-header">
                     <h5 class="modal-title">
                         <i class="bi bi-eye"></i> <span id="viewDeckName">デッキ閲覧</span>
@@ -909,7 +912,7 @@
 
 
     <!-- Context Menu -->
-    <div id="contextMenu" class="context-menu"></div>
+    <div id="contextMenu" class="context-menu ygo-surface"></div>
 
     <!-- Pack Opening FAB -->
     <button class="pack-open-fab" id="packOpenFab" title="パック開封">
