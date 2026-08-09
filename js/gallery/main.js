@@ -10,6 +10,7 @@ import { createBookmarksSystem } from './bookmarks.js';
 import { createCommunitySystem } from './community.js';
 import { createDeckSystem } from './deck.js';
 import { createCollectionSystem } from './collection.js';
+import { createGalleryImageQueue } from './image-queue.js';
 
 const firebaseConfig = {
     apiKey: "AIzaSyAOYKalLUb2hbghrjQUS8AWzxpLExBT7aU",
@@ -34,6 +35,7 @@ let collectionSystem;
 let cacheSystem;
 let deckSystem;
 let communityCacheSystem;
+const imageQueue = createGalleryImageQueue({ maxConcurrent: 6 });
 
 const loadCardData = async () => {
     try {
@@ -53,7 +55,13 @@ const constructSystems = () => {
         getCollectionCards: () => collectionSystem.getCollectionCards(),
         escapeHtml: (...args) => collectionSystem.escapeHtml(...args),
         decodeHtmlEntities: (...args) => collectionSystem.decodeHtmlEntities(...args),
-        getCardImageUrl: (...args) => collectionSystem.getCardImageUrl(...args)
+        getCardImageUrl: (...args) => new Promise((resolve, reject) => {
+            imageQueue.enqueueCurrent('pack-opening', {
+                load: () => collectionSystem.getCardImageUrl(...args),
+                apply: resolve,
+                onError: reject
+            });
+        })
     });
 
     collectionSystem = createCollectionSystem({
@@ -64,6 +72,7 @@ const constructSystems = () => {
         cardReadingMap,
         RARITY_ORDER,
         buildEffectHtml,
+        imageQueue,
         getCurrentUser: () => currentUser,
         saveGalleryToCache: (...args) => cacheSystem.saveGalleryToCache(...args),
         loadGalleryFromCache: (...args) => cacheSystem.loadGalleryFromCache(...args),
@@ -114,6 +123,7 @@ const constructSystems = () => {
         escapeHtml: collectionSystem.escapeHtml,
         decodeHtmlEntities: collectionSystem.decodeHtmlEntities,
         getCardImageUrl: collectionSystem.getCardImageUrl,
+        imageQueue,
         createBookmarksSystem,
         bootstrap: window.bootstrap,
         html2canvas: window.html2canvas
@@ -135,6 +145,8 @@ const constructSystems = () => {
         getCardDetailsMap: () => cardDetailsMap,
         imageCacheManager,
         PROXY_URL,
+        getCardImageUrl: collectionSystem.getCardImageUrl,
+        imageQueue,
         escapeHtml: collectionSystem.escapeHtml,
         decodeHtmlEntities: collectionSystem.decodeHtmlEntities,
         getReadingForSort: (...args) => collectionSystem.getReadingForSort(...args),
@@ -147,6 +159,9 @@ const constructSystems = () => {
     window.changePage = collectionSystem.changePage;
     window.openCardEditModal = collectionSystem.openCardEditModal;
     window.handleDragStart = collectionSystem.handleDragStart;
+    if (new URLSearchParams(location.search).has('localtest')) {
+        window.__galleryImageQueue = imageQueue;
+    }
 
     return { loadPublicProfile, initializeCommunity };
 };

@@ -442,7 +442,7 @@ export const createDeckSystem = (deps) => {
             // Add placeholder cards
             expandedCards.forEach((card, index) => {
                 html += `
-                    <div class="deck-view-card" data-card-name="${deps.escapeHtml(card.name)}">
+                    <div class="deck-view-card" data-card-name="${deps.escapeHtml(card.name)}" data-ciid="${deps.escapeHtml(card.selectedCiid || '1')}">
                         <div class="deck-view-card-placeholder">
                             <i class="bi bi-card-image"></i>
                         </div>
@@ -474,47 +474,25 @@ export const createDeckSystem = (deps) => {
 
         container.innerHTML = html;
 
-        // Load images asynchronously
-        const loadSectionImages = async (cards, sectionId) => {
-            if (!cards || cards.length === 0) return;
-
-            const expandedCards = cards.flatMap(card =>
-                Array(card.quantity).fill(card)
-            );
-
-            const cardElements = document.querySelectorAll(`#${sectionId} .deck-view-card`);
-
-            for (let i = 0; i < expandedCards.length; i++) {
-                const card = expandedCards[i];
-                const cardElement = cardElements[i];
-
-                if (!cardElement) continue;
-
-                try {
-                    // Decode HTML entities in card name before fetching image
-                    const decodedCardName = deps.decodeHtmlEntities(card.name);
-                    // Use selectedCiid if available, otherwise default to '1'
-                    const ciid = card.selectedCiid || '1';
-                    const imageUrl = await deps.getCardImageUrl(decodedCardName, ciid);
-                    if (imageUrl) {
-                        // Replace placeholder with image, keeping code and rarity elements
-                        const placeholder = cardElement.querySelector('.deck-view-card-placeholder');
-                        if (placeholder) {
-                            placeholder.outerHTML = `<img src="${imageUrl}" alt="${deps.escapeHtml(decodedCardName)}">`;
-                        }
+        const cardElements = container.querySelectorAll('.deck-view-card');
+        deps.imageQueue.observe('deck-view', cardElements, (cardElement) => {
+            const decodedCardName = deps.decodeHtmlEntities(cardElement.dataset.cardName || '');
+            const ciid = cardElement.dataset.ciid || '1';
+            return {
+                key: `${decodedCardName}_${ciid}`,
+                load: () => deps.getCardImageUrl(decodedCardName, ciid),
+                apply: (imageUrl) => {
+                    const placeholder = cardElement.querySelector('.deck-view-card-placeholder');
+                    if (imageUrl && placeholder) {
+                        const img = document.createElement('img');
+                        img.src = imageUrl;
+                        img.alt = decodedCardName;
+                        placeholder.replaceWith(img);
                     }
-                } catch (error) {
-                    console.error(`Failed to load image for ${card.name}:`, error);
-                }
-            }
-        };
-
-        // Load images for all sections
-        await Promise.all([
-            loadSectionImages(deck.mainDeck, 'view-main-deck'),
-            loadSectionImages(deck.extraDeck, 'view-extra-deck'),
-            loadSectionImages(deck.sideDeck, 'view-side-deck')
-        ]);
+                },
+                onError: (error) => console.error(`Failed to load image for ${decodedCardName}:`, error)
+            };
+        });
     };
 
     // Export deck as image
@@ -651,6 +629,7 @@ export const createDeckSystem = (deps) => {
             if (cards.length === 0) {
                 container.innerHTML = '';
                 if (placeholder) placeholder.style.display = 'block';
+                deps.imageQueue.cancel(`deck-builder-${containerId}`);
                 return;
             }
 
@@ -678,33 +657,33 @@ export const createDeckSystem = (deps) => {
                 });
             }).join('') + `</div>`;
 
-            // Then load images asynchronously
+            // Queue images only after the deck DOM is available and visible.
             const grid = container.querySelector('.deck-cards-grid');
             if (grid) {
-                for (let i = 0; i < cards.length; i++) {
-                    const card = cards[i];
-                    const cardItems = grid.querySelectorAll(`[data-card-index="${i}"]`);
-
-                    try {
-                        // Decode HTML entities in card name before fetching image
-                        const decodedCardName = deps.decodeHtmlEntities(card.name);
-                        // Use selectedCiid if available, otherwise default to '1'
-                        const ciid = card.selectedCiid || '1';
-                        const imageUrl = await deps.getCardImageUrl(decodedCardName, ciid);
-                        if (imageUrl) {
-                            // Apply the same image to all copies of this card
-                            cardItems.forEach(cardItem => {
+                const targets = cards
+                    .map((_, index) => grid.querySelector(`[data-card-index="${index}"]`))
+                    .filter(Boolean);
+                deps.imageQueue.observe(`deck-builder-${containerId}`, targets, (target) => {
+                    const cardIndex = Number(target.dataset.cardIndex);
+                    const card = cards[cardIndex];
+                    const decodedCardName = deps.decodeHtmlEntities(card.name);
+                    const ciid = card.selectedCiid || '1';
+                    return {
+                        key: `${decodedCardName}_${ciid}`,
+                        load: () => deps.getCardImageUrl(decodedCardName, ciid),
+                        apply: (imageUrl) => {
+                            if (!imageUrl) return;
+                            grid.querySelectorAll(`[data-card-index="${cardIndex}"]`).forEach((cardItem) => {
                                 const img = cardItem.querySelector('img');
-                                const placeholder = cardItem.querySelector('.deck-card-image-placeholder');
+                                const imagePlaceholder = cardItem.querySelector('.deck-card-image-placeholder');
                                 img.src = imageUrl;
                                 img.style.display = 'block';
-                                placeholder.style.display = 'none';
+                                imagePlaceholder.style.display = 'none';
                             });
-                        }
-                    } catch (error) {
-                        console.error(`Failed to load image for ${card.name}:`, error);
-                    }
-                }
+                        },
+                        onError: (error) => console.error(`Failed to load image for ${card.name}:`, error)
+                    };
+                });
 
                 // Setup drag events for deck cards
                 grid.querySelectorAll('.deck-card-item').forEach(cardItem => {

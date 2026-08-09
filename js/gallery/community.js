@@ -355,6 +355,7 @@ export const createCommunitySystem = (deps) => {
         const grid = document.getElementById('viewing-card-grid');
 
         if (viewingCurrentType === 'decks') {
+            deps.imageQueue.cancel('community-view');
             // Render decks list
             if (viewingUserData.decks.length === 0) {
                 grid.innerHTML = '<div class="col-12 text-center text-muted py-5">デッキがありません</div>';
@@ -384,6 +385,7 @@ export const createCommunitySystem = (deps) => {
         const pageCards = viewingFilteredCards.slice(start, start + viewingItemsPerPage);
 
         if (pageCards.length === 0) {
+            deps.imageQueue.cancel('community-view');
             grid.innerHTML = '<div class="col-12 text-center text-muted py-5">カードがありません</div>';
             document.getElementById('viewing-pagination').style.display = 'none';
             return;
@@ -395,7 +397,8 @@ export const createCommunitySystem = (deps) => {
                 <div class="col-6 col-md-4 col-lg-3">
                     <div class="card h-100">
                         <div class="card-img-wrapper" style="position: relative; padding-top: 145%; background: #f0f0f0;">
-                            <img src="" data-card-id="${cardId}" data-ciid="${card.data.ciid || '1'}"
+                            <img data-card-id="${cardId}" data-ciid="${card.data.ciid || '1'}"
+                                 data-card-name="${deps.escapeHtml(deps.decodeHtmlEntities(card.data['名前'] || ''))}"
                                  class="view-card-img" alt="${deps.escapeHtml(deps.decodeHtmlEntities(card.data['名前'] || ''))}"
                                  style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; object-fit: cover;"
                                  loading="lazy">
@@ -415,23 +418,18 @@ export const createCommunitySystem = (deps) => {
             `;
         }).join('');
 
-        // Load images
-        grid.querySelectorAll('.view-card-img').forEach(async img => {
+        // Load only cards that are visible after the result DOM has been rendered.
+        deps.imageQueue.observe('community-view', grid.querySelectorAll('.view-card-img'), (img) => {
             const cardId = img.dataset.cardId;
             const ciid = img.dataset.ciid || '1';
-            if (cardId) {
-                try {
-                    const cacheKey = `${cardId}_${ciid}`;
-                    const cachedImage = await deps.imageCacheManager.getImage(cacheKey);
-                    if (cachedImage) {
-                        img.src = cachedImage;
-                    } else {
-                        img.src = `${deps.PROXY_URL}/image?cid=${cardId}&ciid=${ciid}`;
-                    }
-                } catch (e) {
-                    img.src = `${deps.PROXY_URL}/image?cid=${cardId}`;
-                }
-            }
+            const cardName = img.dataset.cardName || '';
+            if (!cardId) return null;
+            return {
+                key: `${cardId}_${ciid}`,
+                load: () => deps.getCardImageUrl(cardName, ciid, cardId),
+                apply: (imageUrl) => { if (imageUrl) img.src = imageUrl; },
+                onError: (error) => console.error(`Failed to load image for ${cardName}:`, error)
+            };
         });
 
         // Render pagination

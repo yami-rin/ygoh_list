@@ -156,3 +156,81 @@ warm app-readyの規定runはsample `[1176, 1300, 1438, 1251, 1111, 1169]` で�
 ### Phase 3後の既知失敗
 
 `verify_common_theme.mjs`はPhase 1と同じ56件。内訳はindex、battle_records、card_shop、duel_simulator、supply_manager、banlist_editor、optionsの各8件（light/dark x desktop/mobile x 初回/reload）。card_listはPhase 1時点ですでに0件で、Phase 3後も0件のため総失敗数は減らない。新規失敗は0件、全9画面のdocument横overflowは引き続き0px。
+
+## Phase 4 後
+
+galleryを共通CSS/UIへ接続し、filter/render/image境界を分離した後の回帰判定結果。Phase 1と同じOS、Node.js、Playwright、Firefox headless、localhost配信、viewport、cold/warm定義、nearest-rank集計を使用した。
+
+- 計測日時: 2026-08-09 22:53:00〜23:06:08 JST
+- app-ready: `tests/perf_all_pages.mjs`、各画面3回 x 2セット = 6 sample
+- master ready: `tests/perf_gallery_baseline.mjs`、cold/warm各5 sample
+- render/search: `tests/perf_gallery_render.mjs 3000`、3,000枚fixture、warm localtest cache、各5 sample
+- image queue: `tests/verify_gallery_image_queue.mjs`、120枚fixture、1440x1400、proxyをPlaywright routeで60ms遅延mock
+- cold report: `%TEMP%\cm_phase4_cold.json`
+- warm report: `%TEMP%\cm_phase4_warm.json`
+
+再実行コマンド:
+
+```powershell
+node tests/perf_all_pages.mjs --mode=cold --sets=2 --runs=3 --port=5621 --output="$env:TEMP\cm_phase4_cold.json"
+node tests/perf_all_pages.mjs --mode=warm --sets=2 --runs=3 --port=5622 --output="$env:TEMP\cm_phase4_warm.json"
+node tests/perf_gallery_baseline.mjs 5 cold
+node tests/perf_gallery_baseline.mjs 5 warm
+node tests/perf_gallery_render.mjs 3000
+node tests/verify_gallery_image_queue.mjs
+```
+
+### gallery性能比較
+
+許容上限は各Phase 1値の+10%。設計目標はapp-ready p95 1,500ms以下、galleryの表示対象100枚再描画p95 100ms以下。単位はms、値は`中央値 / p95`。
+
+| 指標 | Phase 1 | Phase 4 後 | Phase 1比 | 許容上限 | 判定 |
+|---|---:|---:|---:|---:|---|
+| app-ready cold | 816 / 1,193 | 602 / 754 | -26.2% / -36.8% | 897.6 / 1,312.3 | PASS |
+| app-ready warm | 567 / 818 | 421 / 687 | -25.7% / -16.0% | 623.7 / 899.8 | PASS |
+| `changePage(1)`再描画 | 43.0 / 47.0 | 12.0 / 19.0 | -72.1% / -59.6% | 47.3 / 51.7 | PASS |
+| 検索→grid更新 | 58.0 / 101.0 | 18.0 / 21.0 | -69.0% / -79.2% | 63.8 / 111.1 | PASS |
+| `cardDetailsMap` ready cold | 2,076 / 2,552 | 545 / 1,044 | -73.7% / -59.1% | 2,283.6 / 2,807.2 | PASS |
+| `cardDetailsMap` ready warm | 730 / 848 | 308 / 345 | -57.8% / -59.3% | 803.0 / 932.8 | PASS |
+
+採用sample:
+
+- app-ready cold: `[590, 638, 691, 754, 602, 565]`
+- app-ready warm: `[373, 421, 429, 687, 480, 384]`
+- `changePage(1)`: `[19.0, 12.0, 12.0, 12.0, 11.0]`
+- 検索→grid更新: `[21.0, 18.0, 17.0, 19.0, 17.0]`
+- master ready cold: `[1044, 637, 538, 545, 538]`
+- master ready warm: `[291, 308, 302, 345, 331]`
+
+initial gridは単発で890msを観測したが、Phase 1と同じく3 sample未満のため中央値/p95は`UNMEASURED`のままとし、回帰ゲートには使用しない。Firefox 148.0.2はLong Tasks API非対応のため、画像scroll時の同期long taskも`UNMEASURED`であり推測値は記録しない。
+
+### ダークモードcontrast
+
+同じdark desktop fixtureでcomputed styleの前景色を背景へalpha合成し、WCAG相対輝度式で実測した。カード名・型番はいずれも通常文字の基準4.5:1を満たす。
+
+| 対象 | 修正前 | Phase 4 後 | 判定 |
+|---|---:|---:|---|
+| `.card-name`（14.4px / 600） | 1.49:1 | 13.54:1 | PASS |
+| `.card-code`（12px / 400） | 2.84:1 | 6.38:1 | PASS |
+| `.card-tags .text-muted`（11.2px / 400） | 5.04:1 | 5.04:1 | PASS（変更なし） |
+
+### 画像queue/request
+
+Playwright routeで`card-detail`と画像本体を別々に集計した。画像要求開始時点で54/54件のカード名DOMが存在し、filter/sort/page計算から画像fetchが分離されている。
+
+| 操作 | cache hit | cache miss | `card-detail` request | 画像request | 備考 |
+|---|---:|---:|---:|---:|---|
+| rapid filter（最終1件） | 0 | 7 | 7 | 7 | 旧世代の実行中6件のみ継続、未開始6件cancel、最終可視1件を取得 |
+| 同じfilterを再表示 | 1 | 0 | 0 | 0 | IndexedDB cache hit、network再取得なし |
+| filter解除後の上部viewport | 6 | 6 | 6 | 6 | cache済み6件を再利用、追加の可視6件だけ取得 |
+| 最下部へscroll | 0 | 42 | 42 | 42 | scroll前13件→後55件（累計`card-detail`） |
+
+全操作合計はcache hit 7、miss 55、`card-detail` 55、画像本体55。同時実行はqueue内部・Playwright route実測とも最大6 request。filter変更時は未開始の旧queueを破棄し、既に実行中の旧世代結果は新DOMへ反映しない。実行中fetch自体のAbortControllerによる中断と同一keyのPromise共有は設計書どおりPhase 5のimage serviceで行う。
+
+### Phase 4機能・テーマ回帰
+
+- `verify_gallery_master.mjs`、`verify_gallery_smoke.mjs`、`verify_gallery_image_queue.mjs`: 成功、console/page error 0
+- `shots_gallery_theme.mjs`: light/dark desktop/mobileを一時領域へ生成し、主要表示とdocument横overflowなしを目視
+- gallery DOM ID: Phase 4前後の集合差分0件
+- 必須契約: `#card-grid`、`#deckListPanel`、`#community-container`、`#packOverlay`、playmat/filter、`window.cardDetailsMap`、`window.changePage`を維持
+- `verify_common_theme.mjs`: Phase 1/3と同じ56件。index、battle_records、card_shop、duel_simulator、supply_manager、banlist_editor、optionsの各8件。gallery由来0件、新規失敗0件
