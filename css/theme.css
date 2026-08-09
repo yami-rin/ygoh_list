@@ -1,0 +1,103 @@
+:root {
+  color-scheme: light;
+
+  --ygo-bg: #eef1f6;
+  --ygo-surface: #ffffff;
+  --ygo-surface-muted: #f1f3f8;
+  --ygo-border: rgba(15, 23, 42, 0.09);
+  --ygo-text: #1f2937;
+  --ygo-text-muted: #5b6472;
+  --ygo-accent: #4f6ef7;
+  --ygo-accent-hover: #3d5ce5;
+  --ygo-on-accent: #ffffff;
+  --ygo-success: #198754;
+  --ygo-warning: #f59e0b;
+  --ygo-danger: #dc3545;
+  --ygo-info: #0d6efd;
+
+  --ygo-shadow-sm: 0 1px 2px rgba(15, 23, 42, 0.05);
+  --ygo-shadow-md: 0 1px 2px rgba(15, 23, 42, 0.05),
+                   0 10px 28px -16px rgba(15, 23, 42, 0.18);
+  --ygo-shadow-overlay: 0 16px 40px -18px rgba(15, 23, 42, 0.28);
+
+  --ygo-radius-xs: 0.375rem;
+  --ygo-radius-sm: 0.5rem;
+  --ygo-radius-md: 0.75rem;
+  --ygo-radius-lg: 1rem;
+  --ygo-radius-pill: 999px;
+
+  --ygo-space-1: 0.25rem;
+  --ygo-space-2: 0.5rem;
+  --ygo-space-3: 0.75rem;
+  --ygo-space-4: 1rem;
+  --ygo-space-5: 1.25rem;
+  --ygo-space-6: 1.5rem;
+  --ygo-space-8: 2rem;
+  --ygo-space-10: 2.5rem;
+
+  --ygo-font-family: system-ui, -apple-system, "Segoe UI", "Hiragino Sans",
+                     "Noto Sans JP", "Yu Gothic UI", Meiryo, sans-serif;
+  --ygo-font-size-xs: 0.75rem;
+  --ygo-font-size-sm: 0.875rem;
+  --ygo-font-size-md: 1rem;
+  --ygo-font-size-lg: 1.125rem;
+  --ygo-font-size-xl: 1.5rem;
+  --ygo-line-height: 1.5;
+  --ygo-touch-target: 2.75rem;
+  --ygo-focus-ring: 0 0 0 3px rgba(79, 110, 247, 0.32);
+
+  --bs-body-bg: var(--ygo-bg);
+  --bs-body-color: var(--ygo-text);
+  --bs-border-color: var(--ygo-border);
+  --bs-primary: var(--ygo-accent);
+}
+
+[data-bs-theme="dark"] {
+  color-scheme: dark;
+
+  --ygo-bg: #12151c;
+  --ygo-surface: #1b202a;
+  --ygo-surface-muted: #232a37;
+  --ygo-border: rgba(148, 163, 184, 0.16);
+  --ygo-text: #e7eaf0;
+  --ygo-text-muted: #97a3b4;
+  --ygo-accent: #8fa8ff;
+  --ygo-accent-hover: #a9b9ff;
+  --ygo-on-accent: #111827;
+  --ygo-shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.45);
+  --ygo-shadow-md: 0 1px 2px rgba(0, 0, 0, 0.45),
+                   0 10px 28px -16px rgba(0, 0, 0, 0.6);
+  --ygo-shadow-overlay: 0 16px 40px -18px rgba(0, 0, 0, 0.75);
+  --ygo-focus-ring: 0 0 0 3px rgba(143, 168, 255, 0.38);
+
+  --bs-body-bg: var(--ygo-bg);
+  --bs-body-color: var(--ygo-text);
+  --bs-border-color: var(--ygo-border);
+  --bs-primary: var(--ygo-accent);
+}
+
+body {
+  background: var(--ygo-bg);
+  color: var(--ygo-text);
+  font-family: var(--ygo-font-family);
+  font-size: var(--ygo-font-size-md);
+  line-height: var(--ygo-line-height);
+}
+
+:where(a, button, input, select, textarea, [tabindex]):focus-visible {
+  outline: 0;
+  box-shadow: var(--ygo-focus-ring);
+}
+
+::selection {
+  background: color-mix(in srgb, var(--ygo-accent) 28%, transparent);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  :where(*, *::before, *::after) {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    scroll-behavior: auto !important;
+    transition-duration: 0.01ms !important;
+  }
+}

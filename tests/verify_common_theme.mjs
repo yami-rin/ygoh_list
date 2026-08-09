@@ -7,7 +7,8 @@ process.env.MOZ_DISABLE_CONTENT_SANDBOX = '1';
 const PORT = 5621;
 const { server, baseUrl } = serve(PORT);
 const browser = await firefox.launch({ headless: true });
-const pages = [
+const foundationOnly = process.argv.includes('--foundation');
+const productionPages = [
     { name: 'index', path: '/index.html', surface: '.portal-container', ready: '.portal-container' },
     { name: 'card_list', path: '/card_list.html', surface: '#main-app', ready: '#main-app', loginLocal: true },
     { name: 'card_gallery', path: '/card_gallery.html?localtest=1', surface: '#gallery-content', ready: '#card-grid', abortRedirect: true },
@@ -18,6 +19,12 @@ const pages = [
     { name: 'banlist_editor', path: '/banlist_editor.html', surface: '#app', ready: '#app' },
     { name: 'options', path: '/options.html', surface: '.container', ready: '#rarityList' },
 ];
+const pages = foundationOnly ? [{
+    name: 'shared-foundation',
+    path: '/tests/fixtures/shared-foundation.html',
+    surface: '[data-ygo-component="surface"]',
+    ready: '[data-ygo-component="surface"]',
+}] : productionPages;
 const variants = [
     { theme: 'light', viewport: { width: 1440, height: 900 } },
     { theme: 'dark', viewport: { width: 1440, height: 900 } },
@@ -106,8 +113,8 @@ try {
 }
 
 if (issues.length) {
-    console.error(`\n既知候補を含むテーマ/layout失敗: ${issues.length}件`);
+    console.error(`\n${foundationOnly ? '共通基盤fixture' : '既知候補を含むテーマ/layout'}失敗: ${issues.length}件`);
     issues.forEach((issue) => console.error(`- ${issue}`));
     process.exit(1);
 }
-console.log('\n全9画面のテーマ/layout契約: OK');
+console.log(`\n${foundationOnly ? '共通基盤fixture' : '全9画面'}のテーマ/layout契約: OK`);

@@ -1,0 +1,293 @@
+.ygo-nav {
+  background: color-mix(in srgb, var(--ygo-surface) 94%, transparent);
+  border-bottom: 1px solid var(--ygo-border);
+  box-shadow: var(--ygo-shadow-sm);
+  color: var(--ygo-text);
+}
+
+.ygo-brand,
+.ygo-nav .nav-link {
+  color: var(--ygo-text);
+}
+
+.ygo-brand {
+  font-weight: 700;
+  letter-spacing: -0.015em;
+}
+
+.ygo-nav .nav-link:hover,
+.ygo-nav .nav-link[aria-current="page"] {
+  color: var(--ygo-accent);
+}
+
+.ygo-surface {
+  background: var(--ygo-surface);
+  border: 1px solid var(--ygo-border);
+  border-radius: var(--ygo-radius-md);
+  box-shadow: var(--ygo-shadow-md);
+  color: var(--ygo-text);
+}
+
+.ygo-card {
+  overflow: clip;
+}
+
+.ygo-card__header,
+.ygo-card__body,
+.ygo-card__footer {
+  padding: var(--ygo-space-4);
+}
+
+.ygo-card__header {
+  align-items: center;
+  border-bottom: 1px solid var(--ygo-border);
+  display: flex;
+  gap: var(--ygo-space-3);
+  justify-content: space-between;
+}
+
+.ygo-card__footer {
+  border-top: 1px solid var(--ygo-border);
+}
+
+.ygo-stat {
+  display: grid;
+  gap: var(--ygo-space-1);
+  min-width: 0;
+  padding: var(--ygo-space-4);
+}
+
+.ygo-stat__label {
+  color: var(--ygo-text-muted);
+  font-size: var(--ygo-font-size-sm);
+}
+
+.ygo-stat__value {
+  color: var(--ygo-text);
+  font-size: var(--ygo-font-size-xl);
+  font-weight: 700;
+}
+
+.ygo-btn {
+  align-items: center;
+  border: 1px solid transparent;
+  border-radius: var(--ygo-radius-sm);
+  cursor: pointer;
+  display: inline-flex;
+  font: inherit;
+  font-weight: 600;
+  gap: var(--ygo-space-2);
+  justify-content: center;
+  min-height: var(--ygo-touch-target);
+  padding: var(--ygo-space-2) var(--ygo-space-4);
+  text-decoration: none;
+  transition: background-color 140ms ease, border-color 140ms ease, color 140ms ease,
+              transform 140ms ease;
+}
+
+.ygo-btn:hover {
+  transform: translateY(-1px);
+}
+
+.ygo-btn:active {
+  transform: translateY(0);
+}
+
+.ygo-btn:disabled,
+.ygo-btn[aria-disabled="true"] {
+  cursor: not-allowed;
+  opacity: 0.58;
+  transform: none;
+}
+
+.ygo-btn--primary {
+  background: var(--ygo-accent);
+  border-color: var(--ygo-accent);
+  color: var(--ygo-on-accent);
+}
+
+.ygo-btn--primary:hover {
+  background: var(--ygo-accent-hover);
+  border-color: var(--ygo-accent-hover);
+  color: var(--ygo-on-accent);
+}
+
+.ygo-btn--secondary {
+  background: var(--ygo-surface-muted);
+  border-color: var(--ygo-border);
+  color: var(--ygo-text);
+}
+
+.ygo-btn--danger {
+  background: var(--ygo-danger);
+  border-color: var(--ygo-danger);
+  color: #ffffff;
+}
+
+.ygo-btn--ghost {
+  background: transparent;
+  border-color: var(--ygo-border);
+  color: var(--ygo-text);
+}
+
+.ygo-btn--icon {
+  aspect-ratio: 1;
+  padding: var(--ygo-space-2);
+  width: var(--ygo-touch-target);
+}
+
+.ygo-field,
+.ygo-select {
+  background: var(--ygo-surface);
+  border: 1px solid var(--ygo-border);
+  border-radius: var(--ygo-radius-sm);
+  color: var(--ygo-text);
+  min-height: var(--ygo-touch-target);
+  padding: var(--ygo-space-2) var(--ygo-space-3);
+}
+
+.ygo-field::placeholder {
+  color: var(--ygo-text-muted);
+  opacity: 0.8;
+}
+
+.ygo-filter-bar {
+  align-items: end;
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--ygo-space-3);
+}
+
+.ygo-filter-bar > :where(.ygo-field, .ygo-select) {
+  flex: 1 1 12rem;
+}
+
+.ygo-table-wrap {
+  border: 1px solid var(--ygo-border);
+  border-radius: var(--ygo-radius-sm);
+  overflow-x: auto;
+}
+
+.ygo-table {
+  --bs-table-bg: transparent;
+  --bs-table-color: var(--ygo-text);
+  --bs-table-border-color: var(--ygo-border);
+  color: var(--ygo-text);
+  margin: 0;
+  width: 100%;
+}
+
+.ygo-table > :not(caption) > * > * {
+  background: transparent;
+  border-color: var(--ygo-border);
+  color: inherit;
+  padding: var(--ygo-space-3);
+}
+
+.ygo-table thead {
+  background: var(--ygo-surface-muted);
+}
+
+.ygo-table .sortable {
+  cursor: pointer;
+  user-select: none;
+}
+
+.ygo-table .sortable[aria-sort="ascending"]::after {
+  content: " ↑";
+}
+
+.ygo-table .sortable[aria-sort="descending"]::after {
+  content: " ↓";
+}
+
+.ygo-modal {
+  background: var(--ygo-surface);
+  border: 1px solid var(--ygo-border);
+  border-radius: var(--ygo-radius-lg);
+  box-shadow: var(--ygo-shadow-overlay);
+  color: var(--ygo-text);
+}
+
+.ygo-modal .modal-header,
+.ygo-modal .modal-footer {
+  border-color: var(--ygo-border);
+}
+
+.ygo-toast-region {
+  display: grid;
+  gap: var(--ygo-space-2);
+  inset: auto var(--ygo-space-4) var(--ygo-space-4) auto;
+  max-width: min(24rem, calc(100vw - 2rem));
+  position: fixed;
+  z-index: 1090;
+}
+
+.ygo-toast {
+  align-items: start;
+  background: var(--ygo-surface);
+  border: 1px solid var(--ygo-border);
+  border-inline-start: 0.25rem solid var(--ygo-accent);
+  border-radius: var(--ygo-radius-sm);
+  box-shadow: var(--ygo-shadow-overlay);
+  color: var(--ygo-text);
+  display: flex;
+  gap: var(--ygo-space-3);
+  padding: var(--ygo-space-3) var(--ygo-space-4);
+}
+
+.ygo-toast--success { border-inline-start-color: var(--ygo-success); }
+.ygo-toast--warning { border-inline-start-color: var(--ygo-warning); }
+.ygo-toast--danger { border-inline-start-color: var(--ygo-danger); }
+.ygo-toast--info { border-inline-start-color: var(--ygo-info); }
+
+.ygo-loading,
+.ygo-empty {
+  color: var(--ygo-text-muted);
+  padding: var(--ygo-space-8) var(--ygo-space-4);
+  text-align: center;
+}
+
+.ygo-loading[hidden],
+.ygo-empty[hidden] {
+  display: none;
+}
+
+.ygo-empty__title {
+  color: var(--ygo-text);
+  font-weight: 700;
+  margin: 0 0 var(--ygo-space-2);
+}
+
+.ygo-card-image,
+.ygo-image-placeholder {
+  aspect-ratio: 177 / 254;
+  border-radius: var(--ygo-radius-xs);
+  display: block;
+  object-fit: cover;
+  width: 100%;
+}
+
+.ygo-image-placeholder {
+  align-items: center;
+  background: var(--ygo-surface-muted);
+  color: var(--ygo-text-muted);
+  display: grid;
+  place-items: center;
+}
+
+@media (max-width: 575.98px) {
+  .ygo-filter-bar {
+    align-items: stretch;
+    flex-direction: column;
+  }
+
+  .ygo-filter-bar > :where(.ygo-field, .ygo-select) {
+    flex-basis: auto;
+    width: 100%;
+  }
+
+  .ygo-btn:not(.ygo-btn--icon) {
+    width: 100%;
+  }
+}
