@@ -16,6 +16,10 @@ import { parseCsvCards } from './csv-worker.js';
 const DB_NAME = 'ygoh-master-cache';
 const DB_VERSION = 1;
 const STORE = 'files';
+export const MASTER_PARSER_VERSION = 1;
+
+// 同じページ内の同一URLロードは、HEAD/GET/parse/index構築まで同じPromiseを共有する。
+const inFlightLoads = new Map();
 
 const openDb = () => new Promise((resolve, reject) => {
     const req = indexedDB.open(DB_NAME, DB_VERSION);
@@ -119,8 +123,7 @@ const buildIndexes = (cards) => {
  * @returns {Promise<{cards: Array, cardDetailsMap: Map, cardIdToDetailsMap: Map,
  *                    cardReadingMap: Map, nameToIdMap: Map, fromCache: boolean}>}
  */
-export async function loadMasterData({ csvUrl = 'yugioh_cards_master.csv', forceRefresh = false } = {}) {
-    const absUrl = new URL(csvUrl, document.baseURI).href;
+async function loadMasterDataInternal(absUrl, forceRefresh) {
     const t0 = performance.now();
     const cached = forceRefresh ? null : await idbGet(absUrl);
 
@@ -135,7 +138,8 @@ export async function loadMasterData({ csvUrl = 'yugioh_cards_master.csv', force
             if (head.ok) signature = fileSignature(head.headers);
         } catch { /* offline: use cache */ }
 
-        if (signature === null || signature === cached.signature) {
+        const parserIsCurrent = cached.parserVersion === MASTER_PARSER_VERSION;
+        if (signature === null || (signature === cached.signature && parserIsCurrent)) {
             cards = cached.cards;
             fromCache = true;
         }
@@ -154,11 +158,31 @@ export async function loadMasterData({ csvUrl = 'yugioh_cards_master.csv', force
             const signature = fileSignature(response.headers);
             const text = await response.text();
             cards = await parseInWorker(text);
-            idbPut({ url: absUrl, signature, cachedAt: Date.now(), cards });
+            await idbPut({
+                url: absUrl,
+                signature,
+                parserVersion: MASTER_PARSER_VERSION,
+                cachedAt: Date.now(),
+                cards
+            });
         }
     }
 
     const indexes = buildIndexes(cards);
     console.log(`master-data: ${cards.length}件ロード完了 (${fromCache ? 'IndexedDBキャッシュ' : 'ネットワーク'}, ${Math.round(performance.now() - t0)}ms)`);
     return { cards, ...indexes, fromCache };
+}
+
+export function loadMasterData({ csvUrl = 'yugioh_cards_master.csv', forceRefresh = false } = {}) {
+    const absUrl = new URL(csvUrl, document.baseURI).href;
+    const requestKey = `${absUrl}|${forceRefresh ? 'force' : 'cached'}`;
+    const existing = inFlightLoads.get(requestKey);
+    if (existing) return existing;
+
+    const load = loadMasterDataInternal(absUrl, forceRefresh)
+        .finally(() => {
+            if (inFlightLoads.get(requestKey) === load) inFlightLoads.delete(requestKey);
+        });
+    inFlightLoads.set(requestKey, load);
+    return load;
 }

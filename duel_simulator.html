@@ -248,6 +248,7 @@
 
 <script type="module">
 import { api } from './api-client.js';
+import { loadMasterData } from './js/shared/master-data.js';
 
 const firebaseConfig = {
   apiKey: "AIzaSyAOYKalLUb2hbghrjQUS8AWzxpLExBT7aU",
@@ -282,7 +283,7 @@ async function initAuth(){
 }
 
 // ===== card details (name -> cardId) from CSV =====
-const cardDetailsMap = new Map();
+let cardDetailsMap = new Map();
 function decodeEntities(s){ const ta=document.createElement('textarea'); ta.innerHTML=s; return ta.value; }
 function lookupCardId(name){
   if(!name) return null;
@@ -300,15 +301,8 @@ function lookupDetails(name){
 function isLinkMonster(card){ if(!card) return false; const d=lookupDetails(card.name); return !!(d && d.cardType && d.cardType.includes('リンク')); }
 async function loadCardData(){
   try{
-    const res = await fetch('yugioh_cards_master.csv');
-    const txt = await res.text();
-    const lines = txt.split('\n');
-    for(let i=1;i<lines.length;i++){
-      const line=lines[i].trim(); if(!line) continue;
-      const v=line.split(',');
-      const id=v[0]?.replace(/"/g,''); const name=v[1]?.replace(/"/g,''); const cardType=v[6]?.replace(/"/g,'')||'';
-      if(name && id && !cardDetailsMap.has(name)) cardDetailsMap.set(name,{cardId:id,cardType});
-    }
+    const master = await loadMasterData();
+    cardDetailsMap = master.cardDetailsMap;
     console.log('cardDetailsMap loaded:', cardDetailsMap.size);
   }catch(e){ console.error('CSV load failed',e); }
 }
