@@ -100,3 +100,59 @@ gallery initial gridは1回だけ3,557msを観測したが、3 sample未満な�
 - Firestore/Workers本番応答時間
 
 これらは値を推定せず、対応Phaseで安全なmock/fixtureが追加された時点から測定する。
+
+## Phase 3 後
+
+card_listを共通CSS/UIへ接続し、JavaScriptを責務別moduleへ分割した後の回帰判定結果。Phase 1と同じOS、Node.js、Playwright、Firefox headless、localhost配信、viewport、cold/warm定義、nearest-rank集計を使用した。
+
+- 計測日時: 2026-08-09 22:30:00〜22:36:44 JST
+- app-ready: `tests/perf_all_pages.mjs`、各画面3回 x 2セット = 6 sample
+- render/search: `tests/perf_card_list.mjs`、3,000枚import後warm
+- cold report: `%TEMP%\cm_phase3_cold.json`
+- warm report: `%TEMP%\cm_phase3_warm.json`
+- warm再現確認report: `%TEMP%\cm_phase3_warm_repeat.json`
+
+再実行コマンド:
+
+```powershell
+node tests/perf_all_pages.mjs --mode=cold --sets=2 --runs=3 --output="$env:TEMP\cm_phase3_cold.json"
+node tests/perf_all_pages.mjs --mode=warm --sets=2 --runs=3 --output="$env:TEMP\cm_phase3_warm.json"
+node tests/perf_card_list.mjs . PHASE3
+```
+
+### card_list性能比較
+
+判定には最初の規定runを使用した。許容上限は各Phase 1値の+10%。単位はms、値は`中央値 / p95`。
+
+| 指標 | Phase 1 | Phase 3 後 | Phase 1比 | 許容上限 | 判定 |
+|---|---:|---:|---:|---:|---|
+| app-ready cold | 1,362 / 1,597 | 1,218 / 1,330 | -10.6% / -16.7% | 1,498.2 / 1,756.7 | PASS |
+| app-ready warm | 1,282 / 1,334 | 1,176 / 1,438 | -8.3% / +7.8% | 1,410.2 / 1,467.4 | PASS |
+| 100行 sort+render | 46.0 / 52.0 | 13.0 / 14.0 | -71.7% / -73.1% | 50.6 / 57.2 | PASS |
+| 3,000行 sort+render | 1,140.0 / 1,225.0 | 270.0 / 279.0 | -76.3% / -77.2% | 1,254.0 / 1,347.5 | PASS |
+| 検索「うらら」 | 833.7 / 1,684.8 | 583.5 / 855.6 | -30.0% / -49.2% | 917.1 / 1,853.3 | PASS |
+| 検索「どらごん」 | 976.9 / 1,289.4 | 601.3 / 612.3 | -38.5% / -52.5% | 1,074.6 / 1,418.3 | PASS |
+| 検索「まじしゃん」 | 603.3 / 704.0 | 541.7 / 596.2 | -10.2% / -15.3% | 663.6 / 774.4 | PASS |
+
+warm app-readyの規定runはsample `[1176, 1300, 1438, 1251, 1111, 1169]` で、最大値を採るp95だけがPhase 1比+7.8%だった。原因切り分けの同条件再実測では`1,085 / 1,138`、sample `[1138, 1067, 1133, 1060, 1104, 1085]` となり、1,438msの単発tailは再現しなかった。console/page error、CSV request数、機能testに異常はなく、規定run自体も+10%以内のため回帰なしと判定した。
+
+`perf_card_list.mjs`のPhase 3 sample:
+
+- 100行: `[14.0, 8.0, 13.0, 13.0, 13.0, 12.0, 14.0]`
+- 3,000行: `[120.0, 264.0, 279.0, 275.0, 270.0]`
+- うらら: `[855.6, 583.5, 593.7, 552.8, 564.8]`、hits=0
+- どらごん: `[601.3, 612.3, 601.4, 570.4, 594.9]`、hits=116
+- まじしゃん: `[536.3, 550.1, 596.2, 541.7, 541.1]`、hits=18
+
+### Phase 3機能・契約回帰
+
+- `verify_card_list.mjs`、`verify_sort.mjs`、`verify_search_bug.mjs`: 成功、console/page error 0
+- manual screenshot: light/dark desktopとmobile tableを一時領域へ生成し、文字欠け・document横overflowなしを目視
+- DOM ID: Phase 3前237件、Phase 3後237件、集合差分0件
+- modal ID: 17件を維持（`auth-modal`、`edit-card-modal`、`card-detail-modal`、`how-to-use-modal`、`settings-modal`、`tag-management-modal`、`alias-management-modal`、`bulk-tag-modal`、`bulk-quantity-modal`、`analysis-modal`、`gacha-result-modal`、`point-shop-modal`、`profile-modal`、`ranking-modal`、`stats-info-modal`、`custom-css-modal`、`bulk-import-modal`）
+- 必須契約: `#main-app`、`#card-table`、`#card-table-body`、`#import-file-input`、`[name="search_name"]`、`#search-result-summary`、`#search-result-kinds`、`window.changePage`を維持
+- module依存: `main.js -> collection.js -> auth/gamification/render/search/settings`の一方向。page moduleから`main.js`または`collection.js`への逆importはなく、循環0
+
+### Phase 3後の既知失敗
+
+`verify_common_theme.mjs`はPhase 1と同じ56件。内訳はindex、battle_records、card_shop、duel_simulator、supply_manager、banlist_editor、optionsの各8件（light/dark x desktop/mobile x 初回/reload）。card_listはPhase 1時点ですでに0件で、Phase 3後も0件のため総失敗数は減らない。新規失敗は0件、全9画面のdocument横overflowは引き続き0px。

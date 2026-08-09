@@ -1,0 +1,23 @@
+export const createDefaultGamificationData = () => ({
+    userPoints: 0,
+    purchasedItems: {},
+    activeIcon: '',
+    registrationStreak: { count: 0, lastDate: null },
+    weeklyGoalData: { weekStart: null, count: 0, goal: 50 },
+    todayAdditions: { date: null, count: 0 },
+    firstCollectionDate: null,
+    lastMilestoneReached: 0,
+    cardAdditionDates: {},
+    cardAdditionHeatmap: {},
+    hasReceivedFirstLoginBonus: false,
+    recentCardsHistory: [],
+    profile: {
+        nickname: '',
+        icon: '👤',
+        firstUseDate: null,
+        lastUseDate: null,
+        usageDays: new Set(),
+        maxStreak: 0,
+        totalPointsEarned: 0,
+    },
+});
