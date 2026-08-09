@@ -14,14 +14,15 @@
     <link rel="stylesheet" href="css/card_list.css">
 </head>
 <body>
+    <div class="ygo-toast-region" aria-live="polite" aria-atomic="true"></div>
     <!-- Full screen loader -->
-    <div id="app-loader">
+    <div id="app-loader" class="ygo-loading">
         <div class="spinner-border" style="width: 3rem; height: 3rem;" role="status"><span class="visually-hidden">Loading...</span></div>
     </div>
 
     <!-- Login Modal -->
     <div class="modal fade" id="auth-modal" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1">
-        <div class="modal-dialog modal-dialog-centered"><div class="modal-content">
+        <div class="modal-dialog modal-dialog-centered"><div class="modal-content ygo-modal">
             <div class="modal-header"><h5 class="modal-title">ログインまたは新規登録</h5></div>
             <div class="modal-body">
                 <div id="auth-error" class="alert alert-danger" style="display: none;"></div>
@@ -45,7 +46,7 @@
 
     <!-- Edit Card Modal -->
     <div class="modal fade" id="edit-card-modal" tabindex="-1">
-        <div class="modal-dialog modal-dialog-centered"><div class="modal-content">
+        <div class="modal-dialog modal-dialog-centered"><div class="modal-content ygo-modal">
             <div class="modal-header"><h5 class="modal-title">カード情報の編集</h5><button type="button" class="btn-close" data-bs-dismiss="modal"></button></div>
             <div class="modal-body">
                 <form id="edit-form">
@@ -76,7 +77,7 @@
     <!-- Card Detail Modal -->
     <div class="modal fade" id="card-detail-modal" tabindex="-1">
         <div class="modal-dialog modal-lg modal-dialog-centered modal-dialog-scrollable">
-            <div class="modal-content">
+<div class="modal-content ygo-modal">
                 <div class="modal-header bg-primary text-white">
                     <h5 class="modal-title"><i class="bi bi-info-circle"></i> カード詳細情報</h5>
                     <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
@@ -99,7 +100,7 @@
 
     <!-- How to Use Modal -->
     <div class="modal fade" id="how-to-use-modal" tabindex="-1">
-        <div class="modal-dialog modal-xl modal-dialog-centered modal-dialog-scrollable"><div class="modal-content">
+        <div class="modal-dialog modal-xl modal-dialog-centered modal-dialog-scrollable"><div class="modal-content ygo-modal">
             <div class="modal-header"><h5 class="modal-title">使い方ガイド</h5><button type="button" class="btn-close" data-bs-dismiss="modal"></button></div>
             <div class="modal-body" style="max-height: 70vh; overflow-y: auto;">
                 <div class="alert alert-info">
@@ -348,7 +349,7 @@
     <!-- Ranking Modal -->
     <div class="modal fade" id="ranking-modal" tabindex="-1">
         <div class="modal-dialog modal-lg modal-dialog-centered modal-dialog-scrollable">
-            <div class="modal-content">
+<div class="modal-content ygo-modal">
                 <div class="modal-header bg-primary text-white">
                     <h5 class="modal-title"><i class="bi bi-trophy"></i> ランキング</h5>
                     <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
@@ -448,7 +449,7 @@
     <!-- Profile Modal -->
     <div class="modal fade" id="profile-modal" tabindex="-1">
         <div class="modal-dialog modal-dialog-centered">
-            <div class="modal-content">
+<div class="modal-content ygo-modal">
                 <div class="modal-header bg-info text-white">
                     <h5 class="modal-title"><i class="bi bi-person-circle"></i> プロフィール</h5>
                     <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
@@ -548,7 +549,7 @@
     <!-- Point Shop Modal -->
     <div class="modal fade" id="point-shop-modal" tabindex="-1">
         <div class="modal-dialog modal-lg modal-dialog-centered modal-dialog-scrollable">
-            <div class="modal-content">
+<div class="modal-content ygo-modal">
                 <div class="modal-header bg-warning text-dark">
                     <h5 class="modal-title"><i class="bi bi-shop"></i> ショップ</h5>
                     <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
@@ -687,7 +688,7 @@
                             <!-- Gacha Result Modal -->
                             <div class="modal fade" id="gacha-result-modal" tabindex="-1" data-bs-backdrop="static">
                                 <div class="modal-dialog modal-dialog-centered">
-                                    <div class="modal-content" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);">
+                                    <div class="modal-content ygo-modal" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);">
                                         <div class="modal-body text-center text-white p-4">
                                             <div id="gacha-animation" style="min-height: 200px;">
                                                 <!-- Animation will be shown here -->
@@ -716,7 +717,7 @@
     <!-- Stats Info Modal -->
     <div class="modal fade" id="stats-info-modal" tabindex="-1">
         <div class="modal-dialog modal-dialog-centered">
-            <div class="modal-content">
+<div class="modal-content ygo-modal">
                 <div class="modal-header">
                     <h5 class="modal-title">コレクション統計の説明</h5>
                     <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
@@ -766,7 +767,7 @@
     </div>
     <!-- Settings Modal -->
     <div class="modal fade" id="settings-modal" tabindex="-1">
-        <div class="modal-dialog modal-dialog-centered"><div class="modal-content">
+        <div class="modal-dialog modal-dialog-centered"><div class="modal-content ygo-modal">
             <div class="modal-header"><h5 class="modal-title">設定</h5><button type="button" class="btn-close" data-bs-dismiss="modal"></button></div>
             <div class="modal-body">
                 <h6 class="mb-3"><i class="bi bi-display"></i> 表示設定</h6>
@@ -870,7 +871,7 @@
     <!-- Tag Management Modal -->
     <div class="modal fade" id="tag-management-modal" tabindex="-1">
         <div class="modal-dialog modal-lg modal-dialog-centered modal-dialog-scrollable">
-            <div class="modal-content">
+<div class="modal-content ygo-modal">
                 <div class="modal-header">
                     <h5 class="modal-title">タグ管理</h5>
                     <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
@@ -903,7 +904,7 @@
     <!-- Alias Management Modal -->
     <div class="modal fade" id="alias-management-modal" tabindex="-1">
         <div class="modal-dialog modal-lg modal-dialog-centered modal-dialog-scrollable">
-            <div class="modal-content">
+<div class="modal-content ygo-modal">
                 <div class="modal-header">
                     <h5 class="modal-title"><i class="bi bi-chat-quote"></i> 俗称管理</h5>
                     <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
@@ -941,7 +942,7 @@
     <!-- Bulk Import Modal -->
     <div class="modal fade" id="bulk-import-modal" tabindex="-1">
         <div class="modal-dialog modal-xl modal-dialog-centered modal-dialog-scrollable">
-            <div class="modal-content">
+<div class="modal-content ygo-modal">
                 <div class="modal-header">
                     <h5 class="modal-title"><i class="bi bi-plus-square"></i> 一括登録</h5>
                     <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
@@ -1111,7 +1112,7 @@
     <!-- Custom CSS Modal (VIP) -->
     <div class="modal fade" id="custom-css-modal" tabindex="-1">
         <div class="modal-dialog modal-lg modal-dialog-centered">
-            <div class="modal-content">
+<div class="modal-content ygo-modal">
                 <div class="modal-header">
                     <h5 class="modal-title"><i class="bi bi-palette"></i> カスタムCSS <span class="badge bg-warning text-dark">VIP</span></h5>
                     <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
@@ -1149,7 +1150,7 @@
 
     <div class="modal fade" id="bulk-tag-modal" tabindex="-1">
         <div class="modal-dialog modal-dialog-centered">
-            <div class="modal-content">
+<div class="modal-content ygo-modal">
                 <div class="modal-header">
                     <h5 class="modal-title" id="bulk-tag-modal-title">タグ一括編集</h5>
                     <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
@@ -1169,7 +1170,7 @@
     <!-- Bulk Quantity Modal -->
     <div class="modal fade" id="bulk-quantity-modal" tabindex="-1">
         <div class="modal-dialog modal-dialog-centered">
-            <div class="modal-content">
+<div class="modal-content ygo-modal">
                 <div class="modal-header">
                     <h5 class="modal-title">枚数一括変更</h5>
                     <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
@@ -1209,7 +1210,7 @@
     <!-- Analysis Modal -->
     <div class="modal fade" id="analysis-modal" tabindex="-1">
         <div class="modal-dialog modal-xl modal-dialog-centered modal-dialog-scrollable">
-            <div class="modal-content">
+<div class="modal-content ygo-modal">
                 <div class="modal-header">
                     <h5 class="modal-title"><i class="bi bi-graph-up"></i> コレクション分析</h5>
                     <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
@@ -1350,9 +1351,9 @@
 
     <!-- Main App -->
     <div id="main-app">
-        <nav class="navbar navbar-expand-lg navbar-light bg-light mb-4" data-bs-theme="light">
+        <nav class="navbar navbar-expand-lg navbar-light bg-light mb-4 ygo-nav">
             <div class="container-fluid">
-                <span class="navbar-brand"><i class="bi bi-layers-fill"></i> カード管理</span>
+                <span class="navbar-brand ygo-brand"><i class="bi bi-layers-fill"></i> カード管理</span>
                 <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarContent">
                     <span class="navbar-toggler-icon"></span>
                 </button>
@@ -1446,14 +1447,14 @@
             </div>
         </nav>
 
-        <div class="container-fluid">
-             <div id="loading-overlay" style="display: none;"><div class="spinner-border" role="status"></div></div>
+        <div class="container-fluid ygo-page">
+             <div id="loading-overlay" class="ygo-loading" hidden><div class="spinner-border" role="status"></div></div>
             <div class="row">
                 <!-- Left Column: Add Card -->
                 <div class="col-lg-5">
-                    <div class="card">
-                        <div class="card-header">カード登録</div>
-                        <div class="card-body">
+                    <div class="card ygo-surface ygo-card">
+                        <div class="card-header ygo-card__header">カード登録</div>
+                        <div class="card-body ygo-card__body">
                             <form id="add-form">
                                 <div class="mb-3">
                                     <label for="card-search" class="form-label">カード名で検索</label>
@@ -1518,8 +1519,8 @@
                 <!-- Right Column: Search/List and Stats -->
                 <div class="col-lg-7">
                     <!-- Card List -->
-                    <div class="card mb-3">
-                        <div class="card-header">
+                    <div class="card mb-3 ygo-surface ygo-card">
+                        <div class="card-header ygo-card__header">
                             <ul class="nav nav-tabs card-header-tabs">
                                 <li class="nav-item">
                                     <a class="nav-link active" id="collection-tab" data-list-type="collection" href="#">所持カード (<span id="total-collection">0</span>)</a>
@@ -1529,12 +1530,12 @@
                                 </li>
                             </ul>
                         </div>
-                        <div class="card-body">
-                            <form id="search-form" class="row g-3 mb-4">
-                                <div class="col-md-6"><input type="text" name="search_name" class="form-control" placeholder="名前..."></div>
-                                <div class="col-md-6"><input type="text" name="search_set_code" class="form-control" placeholder="型番..."></div>
-                                <div class="col-md-6"><input type="text" name="search_rarity" class="form-control" placeholder="レアリティ..."></div>
-                                <div class="col-md-6"><input type="text" name="search_tags" class="form-control" placeholder="タグ..."></div>
+                        <div class="card-body ygo-card__body">
+                            <form id="search-form" class="row g-3 mb-4 ygo-filter-bar" style="column-gap: 0;">
+                                <div class="col-md-6"><input type="text" name="search_name" class="form-control ygo-field" placeholder="名前..."></div>
+                                <div class="col-md-6"><input type="text" name="search_set_code" class="form-control ygo-field" placeholder="型番..."></div>
+                                <div class="col-md-6"><input type="text" name="search_rarity" class="form-control ygo-field" placeholder="レアリティ..."></div>
+                                <div class="col-md-6"><input type="text" name="search_tags" class="form-control ygo-field" placeholder="タグ..."></div>
 
                                 <!-- Advanced Search Section -->
                                 <div class="col-12">
@@ -1733,8 +1734,8 @@
                                 </div>
                                 <div id="pagination-controls"></div>
                             </div>
-                            <div class="table-responsive">
-                                <table id="card-table" class="table table-striped table-hover">
+                            <div class="table-responsive ygo-table-wrap">
+                                <table id="card-table" class="table table-striped table-hover ygo-table">
                                     <thead>
                                         <tr>
                                             <th scope="col" style="width: 30px; min-width: 30px;">
@@ -1758,8 +1759,8 @@
                     </div>
                     
                     <!-- Points System -->
-                    <div class="card mt-3">
-                        <div class="card-body">
+                    <div class="card mt-3 ygo-surface ygo-card">
+                        <div class="card-body ygo-card__body">
                             <div class="alert alert-light border-start border-5 border-warning mb-0" role="alert">
                                 <div class="d-flex align-items-center justify-content-between">
                                     <div class="d-flex align-items-center">
@@ -1783,8 +1784,8 @@
                     </div>
                     
                     <!-- Collection Stats Dashboard -->
-                    <div class="card mt-3" id="stats-dashboard">
-                        <div class="card-header bg-primary text-white d-flex justify-content-between align-items-center">
+                    <div class="card mt-3 ygo-surface ygo-card" id="stats-dashboard">
+                        <div class="card-header bg-primary text-white d-flex justify-content-between align-items-center ygo-card__header">
                             <div>
                                 <i class="bi bi-graph-up"></i> コレクション統計 <span id="collector-rank" class="badge bg-warning ms-2"></span>
                             </div>
@@ -1792,30 +1793,30 @@
                                 <i class="bi bi-info-circle"></i>
                             </button>
                         </div>
-                        <div class="card-body">
+                        <div class="card-body ygo-card__body">
                             <div class="row g-3">
                                 <div class="col-6 col-md-3">
-                                    <div class="text-center">
-                                        <div class="fs-2 fw-bold text-primary" id="total-cards">0</div>
-                                        <small class="text-muted">総カード枚数</small>
+                                    <div class="text-center ygo-stat">
+                                        <div class="fs-2 fw-bold text-primary ygo-stat__value" id="total-cards">0</div>
+                                        <small class="text-muted ygo-stat__label">総カード枚数</small>
                                     </div>
                                 </div>
                                 <div class="col-6 col-md-3">
-                                    <div class="text-center">
-                                        <div class="fs-2 fw-bold text-success" id="unique-cards">0</div>
-                                        <small class="text-muted">種類数</small>
+                                    <div class="text-center ygo-stat">
+                                        <div class="fs-2 fw-bold text-success ygo-stat__value" id="unique-cards">0</div>
+                                        <small class="text-muted ygo-stat__label">種類数</small>
                                     </div>
                                 </div>
                                 <div class="col-6 col-md-3">
-                                    <div class="text-center">
-                                        <div class="fs-2 fw-bold text-warning" id="collection-days">0</div>
-                                        <small class="text-muted">収集日数</small>
+                                    <div class="text-center ygo-stat">
+                                        <div class="fs-2 fw-bold text-warning ygo-stat__value" id="collection-days">0</div>
+                                        <small class="text-muted ygo-stat__label">収集日数</small>
                                     </div>
                                 </div>
                                 <div class="col-6 col-md-3">
-                                    <div class="text-center">
-                                        <div class="fs-2 fw-bold text-info" id="recent-cards">0</div>
-                                        <small class="text-muted">今週追加</small>
+                                    <div class="text-center ygo-stat">
+                                        <div class="fs-2 fw-bold text-info ygo-stat__value" id="recent-cards">0</div>
+                                        <small class="text-muted ygo-stat__label">今週追加</small>
                                     </div>
                                 </div>
                             </div>

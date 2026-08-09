@@ -2,6 +2,8 @@
         import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, onAuthStateChanged, signOut, deleteUser, setPersistence, browserLocalPersistence, sendEmailVerification, applyActionCode } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-auth.js";
         import { api } from '../../api-client.js';
         import { loadMasterData } from '../shared/master-data.js';
+        import { applyTheme as applySharedTheme, getTheme } from '../shared/theme.js';
+        import { escapeHtml as escapeHtmlShared, getModal, setLoading, showToast } from '../shared/ui.js';
 
         const firebaseConfig = {
             apiKey: "AIzaSyAOYKalLUb2hbghrjQUS8AWzxpLExBT7aU",
@@ -220,16 +222,16 @@
 
         const mainApp = document.getElementById('main-app');
         const appLoader = document.getElementById('app-loader');
-        const authModal = new bootstrap.Modal(document.getElementById('auth-modal'));
-        const editCardModal = new bootstrap.Modal(document.getElementById('edit-card-modal'));
-        const cardDetailModal = new bootstrap.Modal(document.getElementById('card-detail-modal'));
-        const howToUseModal = new bootstrap.Modal(document.getElementById('how-to-use-modal'));
-        const settingsModal = new bootstrap.Modal(document.getElementById('settings-modal'));
-        const tagManagementModal = new bootstrap.Modal(document.getElementById('tag-management-modal'));
-        const aliasManagementModal = new bootstrap.Modal(document.getElementById('alias-management-modal'));
-        const bulkTagModal = new bootstrap.Modal(document.getElementById('bulk-tag-modal'));
-        const bulkQuantityModal = new bootstrap.Modal(document.getElementById('bulk-quantity-modal'));
-        const analysisModal = new bootstrap.Modal(document.getElementById('analysis-modal'));
+        const authModal = getModal(document.getElementById('auth-modal'));
+        const editCardModal = getModal(document.getElementById('edit-card-modal'));
+        const cardDetailModal = getModal(document.getElementById('card-detail-modal'));
+        const howToUseModal = getModal(document.getElementById('how-to-use-modal'));
+        const settingsModal = getModal(document.getElementById('settings-modal'));
+        const tagManagementModal = getModal(document.getElementById('tag-management-modal'));
+        const aliasManagementModal = getModal(document.getElementById('alias-management-modal'));
+        const bulkTagModal = getModal(document.getElementById('bulk-tag-modal'));
+        const bulkQuantityModal = getModal(document.getElementById('bulk-quantity-modal'));
+        const analysisModal = getModal(document.getElementById('analysis-modal'));
 
         // Ensure modals are always visible when opened
         const ensureModalVisible = (modalElement) => {
@@ -323,8 +325,9 @@
         const showRegistrationHistoryToggle = document.getElementById('show-registration-history-toggle');
         const useTapQuantityToggle = document.getElementById('use-tap-quantity-toggle');
         const inlineQtyBtnToggle = document.getElementById('inline-qty-btn-toggle');
+        const toastRegion = document.querySelector('.ygo-toast-region');
 
-        const showLoading = (show) => { loadingOverlay.style.display = show ? 'flex' : 'none'; };
+        const showLoading = (show) => setLoading(loadingOverlay, show);
         
         const updateHistoryButton = (btnId, storageKey, data, titlePrefix) => {
             const btn = document.getElementById(btnId);
@@ -342,7 +345,7 @@
             return textarea.value;
         };
 
-        const escapeHtml = (str) => str == null ? '' : String(str).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#039;');
+        const escapeHtml = (str) => escapeHtmlShared(str);
         
         const getCurrentCollection = () => currentListType === 'collection' ? cardCollection : wishlistCollection;
         
@@ -1271,7 +1274,7 @@
             updatePointsDisplay();
 
             // ガチャ結果モーダルを表示
-            const gachaResultModal = new bootstrap.Modal(document.getElementById('gacha-result-modal'));
+            const gachaResultModal = getModal(document.getElementById('gacha-result-modal'));
             gachaResultModal.show();
 
             // アニメーションを表示
@@ -1458,22 +1461,7 @@
         };
         
         // Show notification function
-        const showNotification = (message, type = 'info') => {
-            // Create notification element
-            const notification = document.createElement('div');
-            notification.className = `alert alert-${type} position-fixed top-0 start-50 translate-middle-x mt-3`;
-            notification.style.zIndex = '9999';
-            notification.style.minWidth = '300px';
-            notification.textContent = message;
-            
-            // Add to body
-            document.body.appendChild(notification);
-            
-            // Remove after 3 seconds
-            setTimeout(() => {
-                notification.remove();
-            }, 3000);
-        };
+        const showNotification = (message, type = 'info') => showToast(toastRegion, message, { variant: type });
 
         // Initialize fun dashboard
         const initializeFunDashboard = () => {
@@ -2840,7 +2828,7 @@
             }
 
             mainApp.style.display = 'block';
-            appLoader.style.display = 'none';
+            setLoading(appLoader, false);
             authModal.hide();
             
             // Set API auth token
@@ -2913,7 +2901,7 @@
             
             // Add shop button event listener
             document.getElementById('point-shop-btn').addEventListener('click', () => {
-                const shopModal = new bootstrap.Modal(document.getElementById('point-shop-modal'));
+                const shopModal = getModal(document.getElementById('point-shop-modal'));
                 shopModal.show();
             });
             
@@ -3051,7 +3039,7 @@
         // Initialize profile functionality
         const initializeProfile = () => {
             const profileBtn = document.getElementById('profile-btn');
-            const profileModal = new bootstrap.Modal(document.getElementById('profile-modal'));
+            const profileModal = getModal(document.getElementById('profile-modal'));
             const editProfileBtn = document.getElementById('edit-profile-btn');
             const cancelEditBtn = document.getElementById('cancel-edit-btn');
             const profileEditForm = document.getElementById('profile-edit-form');
@@ -3128,7 +3116,7 @@
         // Initialize ranking functionality
         const initializeRanking = () => {
             const rankingBtn = document.getElementById('ranking-btn');
-            const rankingModal = new bootstrap.Modal(document.getElementById('ranking-modal'));
+            const rankingModal = getModal(document.getElementById('ranking-modal'));
 
             rankingBtn.addEventListener('click', async () => {
                 rankingModal.show();
@@ -3675,7 +3663,7 @@
             _gamificationLoaded = false;
             gamificationData = createDefaultGamificationData(); // アカウント切替時の前ユーザー値混入を防止
             mainApp.style.display = 'none';
-            appLoader.style.display = 'none';
+            setLoading(appLoader, false);
             authModal.show();
             cardCollection = [];
             wishlistCollection = [];
@@ -5045,8 +5033,7 @@ Firebase Consoleで確認すべき項目:
 
         darkModeToggle.addEventListener('change', (e) => {
             const theme = e.target.checked ? 'dark' : 'light';
-            document.documentElement.setAttribute('data-bs-theme', theme);
-            localStorage.setItem('theme', theme);
+            applySharedTheme(theme);
             applyTheme(); // 設定変更時に即時反映
         });
         
@@ -5114,7 +5101,7 @@ Firebase Consoleで確認すべき項目:
         
         // Stats info button
         document.getElementById('stats-info-btn').addEventListener('click', () => {
-            const statsInfoModal = new bootstrap.Modal(document.getElementById('stats-info-modal'));
+            const statsInfoModal = getModal(document.getElementById('stats-info-modal'));
             statsInfoModal.show();
         });
         
@@ -5285,8 +5272,7 @@ Firebase Consoleで確認すべき項目:
         }, 100);
 
         const applyTheme = () => {
-            const savedTheme = localStorage.getItem('theme') || 'light';
-            document.documentElement.setAttribute('data-bs-theme', savedTheme);
+            const savedTheme = applySharedTheme(getTheme());
             darkModeToggle.checked = savedTheme === 'dark';
 
             const nav = document.querySelector('.navbar');
@@ -5648,7 +5634,7 @@ Firebase Consoleで確認すべき項目:
                 alert('この機能はVIPメンバー専用です。');
                 return;
             }
-            const customCssModal = new bootstrap.Modal(document.getElementById('custom-css-modal'));
+            const customCssModal = getModal(document.getElementById('custom-css-modal'));
             customCssModal.show();
 
             // Load saved CSS
@@ -5664,7 +5650,7 @@ Firebase Consoleで確認すべき項目:
                 alert('この機能はVIPメンバー専用です。');
                 return;
             }
-            const bulkImportModal = new bootstrap.Modal(document.getElementById('bulk-import-modal'));
+            const bulkImportModal = getModal(document.getElementById('bulk-import-modal'));
             bulkImportModal.show();
         });
 
