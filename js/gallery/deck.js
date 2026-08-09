@@ -475,23 +475,26 @@ export const createDeckSystem = (deps) => {
         container.innerHTML = html;
 
         const cardElements = container.querySelectorAll('.deck-view-card');
-        deps.imageQueue.observe('deck-view', cardElements, (cardElement) => {
-            const decodedCardName = deps.decodeHtmlEntities(cardElement.dataset.cardName || '');
-            const ciid = cardElement.dataset.ciid || '1';
-            return {
-                key: `${decodedCardName}_${ciid}`,
-                load: () => deps.getCardImageUrl(decodedCardName, ciid),
-                apply: (imageUrl) => {
-                    const placeholder = cardElement.querySelector('.deck-view-card-placeholder');
-                    if (imageUrl && placeholder) {
-                        const img = document.createElement('img');
-                        img.src = imageUrl;
-                        img.alt = decodedCardName;
-                        placeholder.replaceWith(img);
-                    }
-                },
-                onError: (error) => console.error(`Failed to load image for ${decodedCardName}:`, error)
-            };
+        deps.imageService.prefetchVisible({
+            channel: 'deck-view',
+            elements: cardElements,
+            createRequest: (cardElement) => {
+                const decodedCardName = deps.decodeHtmlEntities(cardElement.dataset.cardName || '');
+                const ciid = cardElement.dataset.ciid || '1';
+                return {
+                    load: ({ signal }) => deps.getCardImageUrl(decodedCardName, ciid, null, 'ja', signal),
+                    apply: (imageUrl) => {
+                        const placeholder = cardElement.querySelector('.deck-view-card-placeholder');
+                        if (imageUrl && placeholder) {
+                            const img = document.createElement('img');
+                            img.src = imageUrl;
+                            img.alt = decodedCardName;
+                            placeholder.replaceWith(img);
+                        }
+                    },
+                    onError: (error) => console.error(`Failed to load image for ${decodedCardName}:`, error)
+                };
+            }
         });
     };
 
@@ -629,7 +632,7 @@ export const createDeckSystem = (deps) => {
             if (cards.length === 0) {
                 container.innerHTML = '';
                 if (placeholder) placeholder.style.display = 'block';
-                deps.imageQueue.cancel(`deck-builder-${containerId}`);
+                deps.imageService.cancel(`deck-builder-${containerId}`);
                 return;
             }
 
@@ -663,26 +666,29 @@ export const createDeckSystem = (deps) => {
                 const targets = cards
                     .map((_, index) => grid.querySelector(`[data-card-index="${index}"]`))
                     .filter(Boolean);
-                deps.imageQueue.observe(`deck-builder-${containerId}`, targets, (target) => {
-                    const cardIndex = Number(target.dataset.cardIndex);
-                    const card = cards[cardIndex];
-                    const decodedCardName = deps.decodeHtmlEntities(card.name);
-                    const ciid = card.selectedCiid || '1';
-                    return {
-                        key: `${decodedCardName}_${ciid}`,
-                        load: () => deps.getCardImageUrl(decodedCardName, ciid),
-                        apply: (imageUrl) => {
-                            if (!imageUrl) return;
-                            grid.querySelectorAll(`[data-card-index="${cardIndex}"]`).forEach((cardItem) => {
-                                const img = cardItem.querySelector('img');
-                                const imagePlaceholder = cardItem.querySelector('.deck-card-image-placeholder');
-                                img.src = imageUrl;
-                                img.style.display = 'block';
-                                imagePlaceholder.style.display = 'none';
-                            });
-                        },
-                        onError: (error) => console.error(`Failed to load image for ${card.name}:`, error)
-                    };
+                deps.imageService.prefetchVisible({
+                    channel: `deck-builder-${containerId}`,
+                    elements: targets,
+                    createRequest: (target) => {
+                        const cardIndex = Number(target.dataset.cardIndex);
+                        const card = cards[cardIndex];
+                        const decodedCardName = deps.decodeHtmlEntities(card.name);
+                        const ciid = card.selectedCiid || '1';
+                        return {
+                            load: ({ signal }) => deps.getCardImageUrl(decodedCardName, ciid, null, 'ja', signal),
+                            apply: (imageUrl) => {
+                                if (!imageUrl) return;
+                                grid.querySelectorAll(`[data-card-index="${cardIndex}"]`).forEach((cardItem) => {
+                                    const img = cardItem.querySelector('img');
+                                    const imagePlaceholder = cardItem.querySelector('.deck-card-image-placeholder');
+                                    img.src = imageUrl;
+                                    img.style.display = 'block';
+                                    imagePlaceholder.style.display = 'none';
+                                });
+                            },
+                            onError: (error) => console.error(`Failed to load image for ${card.name}:`, error)
+                        };
+                    }
                 });
 
                 // Setup drag events for deck cards

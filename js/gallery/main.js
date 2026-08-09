@@ -10,7 +10,7 @@ import { createBookmarksSystem } from './bookmarks.js';
 import { createCommunitySystem } from './community.js';
 import { createDeckSystem } from './deck.js';
 import { createCollectionSystem } from './collection.js';
-import { createGalleryImageQueue } from './image-queue.js';
+import { createImageService } from '../shared/image-service.js';
 
 const firebaseConfig = {
     apiKey: "AIzaSyAOYKalLUb2hbghrjQUS8AWzxpLExBT7aU",
@@ -35,7 +35,7 @@ let collectionSystem;
 let cacheSystem;
 let deckSystem;
 let communityCacheSystem;
-const imageQueue = createGalleryImageQueue({ maxConcurrent: 6 });
+const imageService = createImageService({ imageCacheManager, maxConcurrent: 6 });
 
 const loadCardData = async () => {
     try {
@@ -55,13 +55,7 @@ const constructSystems = () => {
         getCollectionCards: () => collectionSystem.getCollectionCards(),
         escapeHtml: (...args) => collectionSystem.escapeHtml(...args),
         decodeHtmlEntities: (...args) => collectionSystem.decodeHtmlEntities(...args),
-        getCardImageUrl: (...args) => new Promise((resolve, reject) => {
-            imageQueue.enqueueCurrent('pack-opening', {
-                load: () => collectionSystem.getCardImageUrl(...args),
-                apply: resolve,
-                onError: reject
-            });
-        })
+        getCardImageUrl: (...args) => collectionSystem.getCardImageUrl(...args)
     });
 
     collectionSystem = createCollectionSystem({
@@ -72,7 +66,7 @@ const constructSystems = () => {
         cardReadingMap,
         RARITY_ORDER,
         buildEffectHtml,
-        imageQueue,
+        imageService,
         getCurrentUser: () => currentUser,
         saveGalleryToCache: (...args) => cacheSystem.saveGalleryToCache(...args),
         loadGalleryFromCache: (...args) => cacheSystem.loadGalleryFromCache(...args),
@@ -123,7 +117,7 @@ const constructSystems = () => {
         escapeHtml: collectionSystem.escapeHtml,
         decodeHtmlEntities: collectionSystem.decodeHtmlEntities,
         getCardImageUrl: collectionSystem.getCardImageUrl,
-        imageQueue,
+        imageService,
         createBookmarksSystem,
         bootstrap: window.bootstrap,
         html2canvas: window.html2canvas
@@ -146,7 +140,7 @@ const constructSystems = () => {
         imageCacheManager,
         PROXY_URL,
         getCardImageUrl: collectionSystem.getCardImageUrl,
-        imageQueue,
+        imageService,
         escapeHtml: collectionSystem.escapeHtml,
         decodeHtmlEntities: collectionSystem.decodeHtmlEntities,
         getReadingForSort: (...args) => collectionSystem.getReadingForSort(...args),
@@ -160,7 +154,8 @@ const constructSystems = () => {
     window.openCardEditModal = collectionSystem.openCardEditModal;
     window.handleDragStart = collectionSystem.handleDragStart;
     if (new URLSearchParams(location.search).has('localtest')) {
-        window.__galleryImageQueue = imageQueue;
+        window.__galleryImageService = imageService;
+        window.__galleryImageQueue = imageService;
     }
 
     return { loadPublicProfile, initializeCommunity };

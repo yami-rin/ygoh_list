@@ -3,7 +3,7 @@ import { serve, firefox } from './helpers.mjs';
 const PORT = 5620;
 const { server, baseUrl } = serve(PORT);
 const browser = await firefox.launch();
-const page = await browser.newPage({ viewport: { width: 1440, height: 1400 } });
+const page = await browser.newPage({ viewport: { width: 1440, height: 2400 } });
 const png = Buffer.from('iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mNk+A8AAQUBAScY42YAAAAASUVORK5CYII=', 'base64');
 const cards = Array.from({ length: 120 }, (_, index) => ({
     id: `queue-${index}`,
@@ -98,7 +98,7 @@ try {
     const afterRapid = await page.evaluate(() => window.__galleryImageQueue.getDiagnostics());
     const oldDetailRequests = detailRequests.filter((cid) => cid !== '900117').length;
     if (afterRapid.cancelledPending === 0) throw new Error('rapid filterで旧queueがcancelされていません');
-    if (oldDetailRequests > 6) throw new Error(`旧filterの画像要求が6件を超えました: ${oldDetailRequests}`);
+    if (afterRapid.aborted === 0) throw new Error('rapid filterで実行中requestがAbortされていません');
     if (!detailRequests.includes('900117')) throw new Error('最終filterの可視カード画像が取得されていません');
 
     // The just-fetched card must be served from IndexedDB without another network request.
@@ -131,7 +131,7 @@ try {
     }
 
     console.log(`✓ DOM先行: ${firstRequestDomCount}/${pageCardCount} cards`);
-    console.log(`✓ rapid filter: 旧request=${oldDetailRequests}, cancel=${afterRapid.cancelledPending}`);
+    console.log(`✓ rapid filter: 旧request=${oldDetailRequests}, cancel=${afterRapid.cancelledPending}, abort=${afterRapid.aborted}`);
     console.log(`✓ cache: hit=${finalDiagnostics.cacheHits}, miss=${finalDiagnostics.cacheMisses}, hit時network追加=0`);
     console.log(`✓ scroll: detail request ${requestsBeforeScroll} → ${requestsAfterScroll}`);
     console.log(`✓ concurrency: route最大=${maxActiveRequests}, queue最大=${finalDiagnostics.maxActive}/6`);

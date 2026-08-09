@@ -306,7 +306,7 @@ class ImageCacheManager {
      * @param {string} ciid - イラストID (デフォルト: '1')
      * @param {string} proxyUrl - プロキシURL
      */
-    async fetchAndCache(cacheKey, cardId = null, ciid = '1', locale = 'ja') {
+    async fetchAndCache(cacheKey, cardId = null, ciid = '1', locale = 'ja', { signal } = {}) {
         // Backward compatibility: if only one argument, treat as cardId
         if (arguments.length === 1) {
             cardId = cacheKey;
@@ -336,7 +336,12 @@ class ImageCacheManager {
 
             // カード詳細を取得
             const detailUrl = `${PROXY_URL}/card-detail?cid=${cardId}&locale=${locale}`;
-            const detailResponse = await fetch(detailUrl);
+            const detailResponse = await fetch(detailUrl, { signal });
+            if (!detailResponse.ok) {
+                const error = new Error(`Card detail request failed (${detailResponse.status})`);
+                error.status = detailResponse.status;
+                throw error;
+            }
             const cardDetail = await detailResponse.json();
 
             // Find the correct illustration
@@ -353,7 +358,12 @@ class ImageCacheManager {
             }
 
             // 画像を取得
-            const imageResponse = await fetch(imageUrl);
+            const imageResponse = await fetch(imageUrl, { signal });
+            if (!imageResponse.ok) {
+                const error = new Error(`Card image request failed (${imageResponse.status})`);
+                error.status = imageResponse.status;
+                throw error;
+            }
             const blob = await imageResponse.blob();
 
             // BlobをBase64データURLに変換
@@ -366,6 +376,7 @@ class ImageCacheManager {
 
             // キャッシュに保存
             console.log(`[fetchAndCache] Saving to cache. Key: ${cacheKey}, dataUrl length: ${dataUrl.length}`);
+            if (signal?.aborted) throw new DOMException('Image request was aborted', 'AbortError');
             await this.saveImage(cacheKey, dataUrl, {
                 cardName: cardDetail.cardName,
                 encToken: cardDetail.encToken,

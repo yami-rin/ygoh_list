@@ -355,7 +355,7 @@ export const createCommunitySystem = (deps) => {
         const grid = document.getElementById('viewing-card-grid');
 
         if (viewingCurrentType === 'decks') {
-            deps.imageQueue.cancel('community-view');
+            deps.imageService.cancel('community-view');
             // Render decks list
             if (viewingUserData.decks.length === 0) {
                 grid.innerHTML = '<div class="col-12 text-center text-muted py-5">デッキがありません</div>';
@@ -385,7 +385,7 @@ export const createCommunitySystem = (deps) => {
         const pageCards = viewingFilteredCards.slice(start, start + viewingItemsPerPage);
 
         if (pageCards.length === 0) {
-            deps.imageQueue.cancel('community-view');
+            deps.imageService.cancel('community-view');
             grid.innerHTML = '<div class="col-12 text-center text-muted py-5">カードがありません</div>';
             document.getElementById('viewing-pagination').style.display = 'none';
             return;
@@ -419,17 +419,20 @@ export const createCommunitySystem = (deps) => {
         }).join('');
 
         // Load only cards that are visible after the result DOM has been rendered.
-        deps.imageQueue.observe('community-view', grid.querySelectorAll('.view-card-img'), (img) => {
-            const cardId = img.dataset.cardId;
-            const ciid = img.dataset.ciid || '1';
-            const cardName = img.dataset.cardName || '';
-            if (!cardId) return null;
-            return {
-                key: `${cardId}_${ciid}`,
-                load: () => deps.getCardImageUrl(cardName, ciid, cardId),
-                apply: (imageUrl) => { if (imageUrl) img.src = imageUrl; },
-                onError: (error) => console.error(`Failed to load image for ${cardName}:`, error)
-            };
+        deps.imageService.prefetchVisible({
+            channel: 'community-view',
+            elements: grid.querySelectorAll('.view-card-img'),
+            createRequest: (img) => {
+                const cardId = img.dataset.cardId;
+                const ciid = img.dataset.ciid || '1';
+                const cardName = img.dataset.cardName || '';
+                if (!cardId) return null;
+                return {
+                    load: ({ signal }) => deps.getCardImageUrl(cardName, ciid, cardId, 'ja', signal),
+                    apply: (imageUrl) => { if (imageUrl) img.src = imageUrl; },
+                    onError: (error) => console.error(`Failed to load image for ${cardName}:`, error)
+                };
+            }
         });
 
         // Render pagination

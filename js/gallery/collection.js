@@ -29,6 +29,7 @@ export const createCollectionSystem = (deps) => {
         let currentSort = 'quantity-desc';
         let currentListType = 'collection'; // 'collection', 'wishlist', or 'bookmark'
         let currentEditingCard = null;
+        let imagePrefetchFrame = null;
 
         // Advanced filter state
         let selectedLevel = '';
@@ -48,29 +49,15 @@ export const createCollectionSystem = (deps) => {
         let draggedCard = null; // Card being dragged from gallery
 
         // Get card image URL (with cache support)
-        const getCardImageUrl = async (cardName, ciid = '1', overrideCardId = null, locale = 'ja') => {
+        const getCardImageUrl = async (cardName, ciid = '1', overrideCardId = null, locale = 'ja', signal) => {
             const cardId = overrideCardId || cardDetailsMap.get(cardName)?.cardId;
             if (!cardId) {
                 return null;
             }
-            // ja は旧形式（後方互換）、非 ja はロケール付き形式
-            const cacheKey = locale === 'ja' ? `${cardId}_${ciid}` : `${cardId}_${ciid}_${locale}`;
-
             try {
-                // Check cache first
-                const cachedImage = await imageCacheManager.getImage(cacheKey);
-                if (cachedImage) {
-                    deps.imageQueue.recordCacheHit();
-                    console.log(`Using cached image for: ${cardName} (ID: ${cardId}, ciid: ${ciid}, locale: ${locale})`);
-                    return cachedImage;
-                }
-
-                // Cache miss - fetch from proxy and cache it
-                deps.imageQueue.recordCacheMiss();
-                console.log(`Fetching image for: ${cardName} (ID: ${cardId}, ciid: ${ciid}, locale: ${locale})`);
-                const imageData = await imageCacheManager.fetchAndCache(cacheKey, cardId, ciid, locale);
-                return imageData;
+                return await deps.imageService.getCardImage({ cardId, ciid, locale, signal });
             } catch (error) {
+                if (error?.name === 'AbortError') throw error;
                 console.error(`Error loading image for ${cardName}:`, error);
                 return `${PROXY_URL}/image?cid=${cardId}&ciid=${ciid}&locale=${locale}`;
             }
@@ -639,6 +626,10 @@ export const createCollectionSystem = (deps) => {
 
         // Render cards (with async image loading)
         const renderCards = async () => {
+            if (imagePrefetchFrame !== null) {
+                cancelAnimationFrame(imagePrefetchFrame);
+                imagePrefetchFrame = null;
+            }
             const grid = document.getElementById('card-grid');
             grid.className = `card-grid size-${currentGridSize}`;
 
@@ -653,6 +644,7 @@ export const createCollectionSystem = (deps) => {
                         <p class="text-muted mt-3">該当するカードはありません。</p>
                     </div>
                 `;
+                imagePrefetchFrame = requestAnimationFrame(() => deps.imageService.cancel('collection'));
             } else {
                 // First render with placeholders
                 grid.innerHTML = pageCards.map((card, index) => {
@@ -717,63 +709,70 @@ export const createCollectionSystem = (deps) => {
                 }).join('');
 
                 const imageContainers = grid.querySelectorAll('.card-image-container');
-                deps.imageQueue.observe('collection', imageContainers, (container, index) => {
-                    const card = pageCards[index];
-                    const decodedCardName = decodeHtmlEntities(card.data['名前']);
-                    const ciid = card.data.selectedCiid || '1';
-                    const locale = card.data.cardLang || 'ja';
-                    const overrideCardId = card.data.customCardId || null;
-
-                    const showReload = () => {
-                        if (!container.isConnected || container.querySelector('.card-image-reload')) return;
-                        if (!container.querySelector('.card-image-placeholder')) {
-                            const placeholder = document.createElement('i');
-                            placeholder.className = 'bi bi-card-image card-image-placeholder';
-                            container.appendChild(placeholder);
-                        }
-                        const reloadBtn = document.createElement('button');
-                        reloadBtn.className = 'card-image-reload';
-                        reloadBtn.innerHTML = '<i class="bi bi-arrow-clockwise"></i>再読み込み';
-                        reloadBtn.onclick = (event) => {
-                            event.stopPropagation();
-                            reloadBtn.remove();
-                            deps.imageQueue.enqueueCurrent('collection', createImageTask());
-                        };
-                        container.appendChild(reloadBtn);
-                    };
-
-                    const createImageTask = () => ({
-                        element: container,
-                        key: `${overrideCardId || cardDetailsMap.get(decodedCardName)?.cardId || ''}_${ciid}_${locale}`,
-                        load: () => getCardImageUrl(decodedCardName, ciid, overrideCardId, locale),
-                        apply: (imageUrl) => {
-                            if (!imageUrl) {
-                                showReload();
-                                return;
-                            }
-                            const img = document.createElement('img');
-                            img.src = imageUrl;
-                            img.alt = decodedCardName;
-                            img.loading = 'lazy';
-                            img.onerror = () => {
-                                img.remove();
-                                showReload();
-                            };
-                            container.querySelector('.card-image-placeholder')?.remove();
-                            container.querySelector('.card-image-reload')?.remove();
-                            container.appendChild(img);
-                        },
-                        onError: (error) => {
-                            console.error(`Failed to load image for ${card.data['名前']}:`, error);
-                            showReload();
-                        }
-                    });
-
-                    return createImageTask();
+                const hasImageCandidates = pageCards.some((card) => {
+                    const decodedName = decodeHtmlEntities(card.data['名前']);
+                    return Boolean(card.data.customCardId || cardDetailsMap.get(decodedName)?.cardId);
                 });
-            }
+                // Keep image observation outside the synchronous filter/render hot path.
+                imagePrefetchFrame = requestAnimationFrame(() => hasImageCandidates
+                    ? deps.imageService.prefetchVisible({
+                    channel: 'collection',
+                    elements: imageContainers,
+                    createRequest: (container, index) => {
+                        const card = pageCards[index];
+                        const decodedCardName = decodeHtmlEntities(card.data['名前']);
+                        const ciid = card.data.selectedCiid || '1';
+                        const locale = card.data.cardLang || 'ja';
+                        const overrideCardId = card.data.customCardId || null;
 
-            if (pageCards.length === 0) deps.imageQueue.cancel('collection');
+                        const showReload = () => {
+                            if (!container.isConnected || container.querySelector('.card-image-reload')) return;
+                            if (!container.querySelector('.card-image-placeholder')) {
+                                const placeholder = document.createElement('i');
+                                placeholder.className = 'bi bi-card-image card-image-placeholder';
+                                container.appendChild(placeholder);
+                            }
+                            const reloadBtn = document.createElement('button');
+                            reloadBtn.className = 'card-image-reload';
+                            reloadBtn.innerHTML = '<i class="bi bi-arrow-clockwise"></i>再読み込み';
+                            reloadBtn.onclick = (event) => {
+                                event.stopPropagation();
+                                reloadBtn.remove();
+                                deps.imageService.request({ channel: 'collection', element: container, ...createImageTask() });
+                            };
+                            container.appendChild(reloadBtn);
+                        };
+
+                        const createImageTask = () => ({
+                            load: ({ signal }) => getCardImageUrl(decodedCardName, ciid, overrideCardId, locale, signal),
+                            apply: (imageUrl) => {
+                                if (!imageUrl) {
+                                    showReload();
+                                    return;
+                                }
+                                const img = document.createElement('img');
+                                img.src = imageUrl;
+                                img.alt = decodedCardName;
+                                img.loading = 'lazy';
+                                img.onerror = () => {
+                                    img.remove();
+                                    showReload();
+                                };
+                                container.querySelector('.card-image-placeholder')?.remove();
+                                container.querySelector('.card-image-reload')?.remove();
+                                container.appendChild(img);
+                            },
+                            onError: (error) => {
+                                console.error(`Failed to load image for ${card.data['名前']}:`, error);
+                                showReload();
+                            }
+                        });
+
+                        return createImageTask();
+                    }
+                })
+                    : deps.imageService.cancel('collection'));
+            }
 
             updatePagination();
             updateStats();
@@ -1091,11 +1090,12 @@ export const createCollectionSystem = (deps) => {
             // Load image first (fast)
             const panelImage = document.getElementById('panelCardImage');
             console.log(`Loading initial card image for: ${decodedName}, ciid: ${currentCiid}, locale: ${cardLang}`);
-            deps.imageQueue.cancel('edit-panel-image');
-            deps.imageQueue.enqueueCurrent('edit-panel-image', {
+            deps.imageService.cancel('edit-panel-image');
+            deps.imageService.request({
+                channel: 'edit-panel-image',
                 element: panelImage,
                 key: `${customCardId || details?.cardId || ''}_${currentCiid}_${cardLang}`,
-                load: () => getCardImageUrl(decodedName, currentCiid, customCardId, cardLang),
+                load: ({ signal }) => getCardImageUrl(decodedName, currentCiid, customCardId, cardLang, signal),
                 apply: (imageUrl) => {
                     console.log('Initial image URL:', imageUrl);
                     if (imageUrl) {
