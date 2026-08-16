@@ -177,10 +177,13 @@ const init = async () => {
     const { loadPublicProfile, initializeCommunity } = constructSystems();
     collectionSystem.showLoading(true);
 
+    const isLocalTest = new URLSearchParams(location.search).has('localtest') &&
+        ['localhost', '127.0.0.1'].includes(location.hostname);
+
     // ローカルテストモード(?localtest=1): Firebase認証を迂回し、
     // localStorageのgalleryCacheから描画する（card_listのlocal_userパターン踏襲。
     // ヘッドレスでの認証後ホットパス計測・検証専用。APIは呼ばない）
-    if (new URLSearchParams(location.search).has('localtest')) {
+    if (isLocalTest) {
         currentUser = { uid: 'local_user' };
         isAdmin = false;
         collectionSystem.restorePreferences();
@@ -188,36 +191,25 @@ const init = async () => {
         return;
     }
 
-    onAuthStateChanged(auth, (user) => {
+    onAuthStateChanged(auth, async (user) => {
         if (user) {
-            const vipData = localStorage.getItem('vip_membership');
-            let isVipMember = false;
-
-            if (vipData) {
-                try {
-                    const parsed = JSON.parse(vipData);
-                    if (parsed.active && parsed.verified) {
-                        isVipMember = true;
-                    }
-                } catch (e) {
-                    console.error('Error parsing VIP data:', e);
-                }
-            }
-
-            if (!isVipMember) {
+            currentUser = user;
+            await api.setAuth(user);
+            const vipStatus = await api.getVipStatus().catch((error) => {
+                console.error('VIP status check failed:', error);
+                return null;
+            });
+            if (!vipStatus?.active) {
                 alert('このページはVIPメンバー専用です。\n\nカードリストページに戻ります。');
                 window.location.href = 'card_list.html';
                 return;
             }
 
-            currentUser = user;
             isAdmin = ADMIN_UIDS.includes(user.uid);
             console.log('Admin status:', isAdmin);
 
-            api.setAuth(user).then(() => {
-                collectionSystem.loadAllData(user.uid);
-                collectionSystem.loadAllAliases();
-            });
+            collectionSystem.loadAllData(user.uid);
+            collectionSystem.loadAllAliases();
             loadPublicProfile();
             initializeCommunity();
             collectionSystem.restorePreferences();

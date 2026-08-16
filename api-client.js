@@ -39,6 +39,7 @@ class CardManagerAPI {
             const errorData = await response.json().catch(() => ({}));
             const err = new Error(errorData.error || `API error: ${response.status}`);
             err.status = response.status;
+            err.data = errorData;
             throw err;
         }
         return response.json();
@@ -362,6 +363,23 @@ class CardManagerAPI {
 
     async deleteAccount() {
         return this._fetch('/api/account', { method: 'DELETE' });
+    }
+
+    // ========== VIP membership ==========
+
+    async getVipStatus() {
+        return this._fetch('/api/vip/status');
+    }
+
+    async activateVip(serial) {
+        return this._fetch('/api/vip/activate', {
+            method: 'POST',
+            body: JSON.stringify({ serial }),
+        });
+    }
+
+    async deactivateVip() {
+        return this._fetch('/api/vip', { method: 'DELETE' });
     }
 }
 

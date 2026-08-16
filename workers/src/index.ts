@@ -14,10 +14,12 @@ import { community } from './routes/community';
 import { account } from './routes/account';
 import { supplies } from './routes/supplies';
 import { shares } from './routes/shares';
+import { vip } from './routes/vip';
 
 type Bindings = {
   DB: D1Database;
   FIREBASE_PROJECT_ID: string;
+  VIP_SERIAL_HASHES: string;
 };
 
 const app = new Hono<{ Bindings: Bindings }>();
@@ -117,6 +119,8 @@ app.use('/api/supplies/*', authMiddleware);
 app.use('/api/supplies', authMiddleware);
 // creating a share needs auth (exact path only — GET /api/shares/:id stays public above)
 app.use('/api/shares', authMiddleware);
+app.use('/api/vip/*', authMiddleware);
+app.use('/api/vip', authMiddleware);
 
 // Rankings PUT needs auth (GET is public, already routed above)
 app.put('/api/rankings', authMiddleware, async (c) => {
@@ -210,6 +214,7 @@ app.route('/api/community', community);
 app.route('/api/account', account);
 app.route('/api/supplies', supplies);
 app.route('/api/shares', shares);
+app.route('/api/vip', vip);
 
 // 404 fallback
 app.notFound((c) => c.json({ error: 'Not found' }, 404));

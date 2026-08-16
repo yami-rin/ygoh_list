@@ -9,3 +9,6 @@ database_id = "1a0f1ca4-54b7-4b39-890d-46e952fa13f1"
 
 [vars]
 FIREBASE_PROJECT_ID = "ygoh-9bcf6"
+
+# Configure a comma-separated list of SHA-256 hashes with:
+# npx wrangler secret put VIP_SERIAL_HASHES

@@ -5275,53 +5275,9 @@ Firebase Consoleで確認すべき項目:
         // VIP Membership System (Secured)
         // ============================================
 
-        // SHA-256 hashes of valid serial numbers
-        // Serial numbers are not stored in source code for security
-        const VALID_SERIAL_HASHES = [
-            '1a0475ee08c7580c51f9492b1f26dbff0528c4754a023adb532e6a437b747216', // Original serial
-            '4abe6d8174c8939aa058f78639c49b3ff7c51898c9386dcf007d06d3dc8537d6'  // 0P3NC48DG411ERY
-        ];
-
         let isVipMember = false;
 
-        // SHA-256 hash function
-        const sha256 = async (message) => {
-            const msgBuffer = new TextEncoder().encode(message);
-            const hashBuffer = await crypto.subtle.digest('SHA-256', msgBuffer);
-            const hashArray = Array.from(new Uint8Array(hashBuffer));
-            const hashHex = hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
-            return hashHex;
-        };
-
-        // Check daily attempt limit
-        const checkAttemptLimit = () => {
-            const today = new Date().toISOString().split('T')[0];
-            const attemptsData = localStorage.getItem('serial_attempts');
-
-            let attempts = { date: today, count: 0 };
-            if (attemptsData) {
-                try {
-                    attempts = JSON.parse(attemptsData);
-                    // Reset counter if it's a new day
-                    if (attempts.date !== today) {
-                        attempts = { date: today, count: 0 };
-                    }
-                } catch (e) {
-                    attempts = { date: today, count: 0 };
-                }
-            }
-
-            return attempts;
-        };
-
-        // Update attempts counter
-        const updateAttempts = (count) => {
-            const today = new Date().toISOString().split('T')[0];
-            const attemptsData = { date: today, count: count };
-            localStorage.setItem('serial_attempts', JSON.stringify(attemptsData));
-
-            // Update UI
-            const remainingAttempts = Math.max(0, 3 - count);
+        const updateVipAttempts = (remainingAttempts) => {
             const attemptsText = document.getElementById('serial-attempts-text');
             if (attemptsText) {
                 attemptsText.innerHTML = `<i class="bi bi-info-circle"></i> 残り試行回数: ${remainingAttempts}回`;
@@ -5332,56 +5288,28 @@ Firebase Consoleで確認すべき項目:
         };
 
         // Check VIP status on load
-        const checkVipStatus = () => {
+        const checkVipStatus = async () => {
             const serialSection = document.getElementById('serial-number-section');
-            const vipMenuContainer = document.getElementById('vip-menu-container');
 
             // Guest users cannot access VIP features
             if (!currentUser || currentUser.uid === 'local_user') {
-                console.log('[DEBUG] checkVipStatus: Guest user detected, hiding VIP features');
                 if (serialSection) serialSection.style.display = 'none';
-                // Explicitly hide VIP menu for guest users using Bootstrap classes
-                if (vipMenuContainer) {
-                    vipMenuContainer.classList.remove('d-inline-block');
-                    vipMenuContainer.classList.add('d-none');
-                }
-                console.log('[DEBUG] checkVipStatus: VIP menu classes after hiding:', vipMenuContainer ? vipMenuContainer.className : 'not found');
-                updateVipUI(false); // Hide VIP menu for guest users
+                isVipMember = false;
+                updateVipUI(false);
                 return;
             }
 
-            const vipData = localStorage.getItem('vip_membership');
-            if (vipData) {
-                try {
-                    const parsed = JSON.parse(vipData);
-                    if (parsed.active && parsed.verified) {
-                        isVipMember = true;
-                        updateVipUI(true);
-                        // Show serial section only for VIP users
-                        if (serialSection) serialSection.style.display = 'block';
-                    } else {
-                        isVipMember = false;
-                        updateVipUI(false);
-                        // Hide serial section for non-VIP users
-                        if (serialSection) serialSection.style.display = 'none';
-                    }
-                } catch (e) {
-                    console.error('Error parsing VIP data:', e);
-                    isVipMember = false;
-                    updateVipUI(false);
-                    if (serialSection) serialSection.style.display = 'none';
-                }
-            } else {
+            try {
+                const status = await api.getVipStatus();
+                isVipMember = status.active === true;
+                updateVipUI(isVipMember);
+                updateVipAttempts(status.attemptsRemaining);
+                if (serialSection) serialSection.style.display = isVipMember ? 'block' : 'none';
+            } catch (error) {
+                console.error('VIP status check failed:', error);
                 isVipMember = false;
                 updateVipUI(false);
-                // Hide serial section for non-VIP users
                 if (serialSection) serialSection.style.display = 'none';
-            }
-
-            // Update attempts display (only if VIP)
-            if (isVipMember) {
-                const attempts = checkAttemptLimit();
-                updateAttempts(attempts.count);
             }
         };
 
@@ -5446,6 +5374,7 @@ Firebase Consoleで確認すべき項目:
         // VIP Activation
         document.getElementById('vip-activate-btn').addEventListener('click', async () => {
             const serialInput = document.getElementById('vip-serial-input');
+            const activateButton = document.getElementById('vip-activate-btn');
             const serial = serialInput.value.trim();
 
             if (!serial) {
@@ -5453,54 +5382,53 @@ Firebase Consoleで確認すべき項目:
                 return;
             }
 
-            // Check attempt limit
-            const attempts = checkAttemptLimit();
-            if (attempts.count >= 3) {
-                alert('❌ 本日の試行回数上限に達しました。\n明日再度お試しください。');
-                return;
-            }
-
-            // Increment attempts
-            updateAttempts(attempts.count + 1);
-
-            // Validate serial number by hashing
-            const serialHash = await sha256(serial);
-
-            if (VALID_SERIAL_HASHES.includes(serialHash)) {
-                // Save VIP status
-                const vipData = {
-                    active: true,
-                    verified: true,
-                    activatedAt: new Date().toISOString()
-                };
-                localStorage.setItem('vip_membership', JSON.stringify(vipData));
+            activateButton.disabled = true;
+            try {
+                const result = await api.activateVip(serial);
                 isVipMember = true;
                 updateVipUI(true);
+                updateVipAttempts(result.attemptsRemaining);
+                document.getElementById('serial-number-section').style.display = 'block';
                 serialInput.value = '';
-
-                // Reset attempts on success
-                updateAttempts(0);
-
-                // Show success message
                 alert('✅ 認証に成功しました！\n特典機能が利用可能になりました。');
-            } else {
-                const remainingAttempts = Math.max(0, 3 - attempts.count - 1);
-                alert(`❌ 無効なシリアル番号です。\n\n残り試行回数: ${remainingAttempts}回`);
+            } catch (error) {
+                const remainingAttempts = error.data?.attemptsRemaining;
+                if (Number.isInteger(remainingAttempts)) {
+                    updateVipAttempts(remainingAttempts);
+                }
+                if (error.status === 429) {
+                    alert('❌ 本日の試行回数上限に達しました。\n明日再度お試しください。');
+                } else if (error.status === 400) {
+                    alert(`❌ 無効なシリアル番号です。\n\n残り試行回数: ${remainingAttempts ?? 0}回`);
+                } else if (error.status === 503) {
+                    alert('VIP認証は現在利用できません。管理者に連絡してください。');
+                } else {
+                    console.error('VIP activation failed:', error);
+                    alert('VIP認証に失敗しました。通信状態を確認して再度お試しください。');
+                }
+            } finally {
+                activateButton.disabled = false;
             }
         });
 
         // VIP Deactivation
-        document.getElementById('vip-deactivate-btn').addEventListener('click', () => {
+        document.getElementById('vip-deactivate-btn').addEventListener('click', async () => {
             if (confirm('認証を解除しますか？\n\n再度利用するには、シリアル番号の再入力が必要です。')) {
-                localStorage.removeItem('vip_membership');
-                isVipMember = false;
-                updateVipUI(false);
-                alert('認証を解除しました。');
+                try {
+                    await api.deactivateVip();
+                    isVipMember = false;
+                    updateVipUI(false);
+                    document.getElementById('serial-number-section').style.display = 'none';
+                    alert('認証を解除しました。');
+                } catch (error) {
+                    console.error('VIP deactivation failed:', error);
+                    alert('VIP認証の解除に失敗しました。');
+                }
             }
         });
 
         // Console command to show serial input section
-        window.enableSerialInput = () => {
+        window.enableSerialInput = async () => {
             if (!currentUser || currentUser.uid === 'local_user') {
                 console.log('%c[ERROR] ログインが必要です。', 'color: red; font-weight: bold;');
                 return;
@@ -5509,9 +5437,13 @@ Firebase Consoleで確認すべき項目:
             const inputSection = document.getElementById('vip-serial-input-section');
             if (serialSection) serialSection.style.display = 'block';
             if (inputSection) inputSection.style.display = 'block';
-            const attempts = checkAttemptLimit();
-            updateAttempts(attempts.count);
-            console.log('%c[OK] シリアル入力が有効になりました。設定画面のシリアル番号欄から入力してください。', 'color: green; font-weight: bold;');
+            try {
+                const status = await api.getVipStatus();
+                updateVipAttempts(status.attemptsRemaining);
+                console.log('%c[OK] シリアル入力が有効になりました。設定画面のシリアル番号欄から入力してください。', 'color: green; font-weight: bold;');
+            } catch (error) {
+                console.error('VIP status check failed:', error);
+            }
         };
 
         // VIP Features Button

@@ -1,8 +1,13 @@
 import { Hono } from 'hono';
 import { generateId } from '../utils/id';
 import { rowToCard } from '../utils/fields';
+import { vipMembershipMiddleware } from '../middleware/vip';
 
-type Bindings = { DB: D1Database; FIREBASE_PROJECT_ID: string };
+type Bindings = {
+  DB: D1Database;
+  FIREBASE_PROJECT_ID: string;
+  VIP_SERIAL_HASHES: string;
+};
 
 const cards = new Hono<{ Bindings: Bindings; Variables: { userId: string } }>();
 
@@ -202,7 +207,7 @@ cards.put('/:id/increment', async (c) => {
 });
 
 // POST /api/cards/batch-import — bulk import with dedup
-cards.post('/batch-import', async (c) => {
+cards.post('/batch-import', vipMembershipMiddleware, async (c) => {
   const userId = c.get('userId');
   const body = await c.req.json<{
     listType?: string;
