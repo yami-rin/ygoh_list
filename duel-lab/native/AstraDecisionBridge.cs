@@ -16,6 +16,15 @@ namespace WindBot.Game
         private readonly JObject config;
         private readonly object[] ownDeck;
         private readonly string session = Guid.NewGuid().ToString("N");
+        private long requestSequence;
+        private long drawEpoch;
+        private long ownDrawEpoch;
+        private long opponentDrawEpoch;
+        private long opponentEffectEpoch;
+        private long negationEpoch;
+        private long turnEpoch;
+        private long duelEpoch;
+        private object selectionContext;
 
         public AstraDecisionBridge(Duel state, Deck deck, string configFile)
         {
@@ -25,6 +34,50 @@ namespace WindBot.Game
             config = JObject.Parse(File.ReadAllText(configFile));
             if ((string)config["url"] != "http://127.0.0.1:8788/choose")
                 throw new InvalidOperationException("Invalid local Astra endpoint");
+        }
+
+        // These observations come from GameBehavior's public wire messages,
+        // never from card-name heuristics or the opponent's private state.
+        public void ObserveDuelStart()
+        {
+            duelEpoch++;
+            selectionContext = null;
+        }
+
+        public void ObserveTurn()
+        {
+            turnEpoch++;
+            selectionContext = null;
+        }
+
+        public void ObserveDraw(int localPlayer, int count)
+        {
+            if (count <= 0) return;
+            drawEpoch++;
+            if (localPlayer == 0) ownDrawEpoch++;
+            else if (localPlayer == 1) opponentDrawEpoch++;
+        }
+
+        public void ObserveChaining(int localController)
+        {
+            if (localController == 1) opponentEffectEpoch++;
+        }
+
+        public void ObserveNegation()
+        {
+            negationEpoch++;
+        }
+
+        public void SetSelectionContext(string subtype, bool finishable, bool cancelable,
+            int selectCount, int unselectCount)
+        {
+            selectionContext = new { subtype, finishable, cancelable, selectCount, unselectCount,
+                selectionIndexSpace = "select-only", exposesUnselectChoices = false };
+        }
+
+        public void ClearSelectionContext()
+        {
+            selectionContext = null;
         }
 
         private object Card(ClientCard c)
@@ -69,14 +122,28 @@ namespace WindBot.Game
             }
         }
 
-        private JObject Request(object prompt)
+        private JObject BuildPayload(object prompt)
         {
-            var payload = new {
-                session, ownDeck,
+            JObject requestPrompt = JObject.FromObject(prompt);
+            if (selectionContext != null)
+            {
+                JObject context = JObject.FromObject(selectionContext);
+                requestPrompt["selectionContext"] = context;
+                requestPrompt["subtype"] = context["subtype"].DeepClone();
+            }
+            return JObject.FromObject(new {
+                protocolVersion = 2, requestId = ++requestSequence, session, ownDeck,
+                safety = new { drawEpoch, ownDrawEpoch, opponentDrawEpoch,
+                    opponentEffectEpoch, negationEpoch, turnEpoch, duelEpoch },
                 state = new { turn = duel.Turn, player = 1 - duel.Player,
                     phase = duel.Phase.ToString(), players = new [] { Field(1), Field(0) },
-                    chain = Zone(duel.CurrentChain), request = prompt }
-            };
+                    chain = Zone(duel.CurrentChain), request = requestPrompt }
+            });
+        }
+
+        private JObject Request(object prompt)
+        {
+            JObject payload = BuildPayload(prompt);
             var request = (HttpWebRequest)WebRequest.Create((string)config["url"]);
             request.Method = "POST";
             request.ContentType = "application/json";

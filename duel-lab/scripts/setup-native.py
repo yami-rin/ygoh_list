@@ -91,8 +91,7 @@ if not editor.exists():
         raise RuntimeError('Unity installation did not finish')
 
 ai = source / 'Assets/Scripts/Windbot/Game/GameAI.cs'
-if 'AstraDecisionBridge Astra' not in ai.read_text(encoding='utf-8-sig'):
-    subprocess.run([sys.executable, str(ROOT / 'scripts/patch-mdpro3.py'), str(source)], check=True)
+subprocess.run([sys.executable, str(ROOT / 'scripts/patch-mdpro3.py'), str(source)], check=True)
 shutil.copyfile(ROOT / 'native/AstraDecisionBridge.cs', ai.parent / 'AstraDecisionBridge.cs')
 # Unity's Mono player lacks the framework's configuration-based serializer types.
 dialogs = ai.parent / 'AI/Dialogs.cs'
