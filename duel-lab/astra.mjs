@@ -2,6 +2,7 @@ import fs from 'node:fs';
 import os from 'node:os';
 import path from 'node:path';
 import {spawn} from 'node:child_process';
+import {acquireInferenceLock} from './inference-lock.mjs';
 import {ROOT,cardInfo} from './cards.mjs';
 
 export const MODEL='gpt-6-astra';
@@ -13,7 +14,7 @@ const instructions=`あなたは遊戯王OCGの対戦相手Astraです。実際�
 singleはchoicesのidをactionに。multi/announce/orderはcardsの0始まりindexをselectionに。
 orderは順番に並べた全index。counterは各カードから取り除く個数をcountersに。
 使わないactionは-1、selection/countersは空配列。キャンセルはcanCancel時だけ。
-planは自分だけが読む短い戦略メモ（最大400字）。次の判断にも引き継ぐ。
+planは自分だけが読む短い戦略メモ（最大120字。変更がない場合は前回のメモを簡潔に維持）。次の判断にも引き継ぐ。
 リンク素材のSELECT_UNSELECT_CARDは1枚ずつ選ぶ。先に完成させるリンク先を考える。
 M∀LICEの除外帰還・リンク先・LPコスト・召喚制約・効果の使用済みを追跡する。
 Cat/バックアップ/コード・マジシャン/ドット/ウィキッドの接続を考え、手札誘発を無駄打ちしない。
@@ -29,28 +30,36 @@ export function astraPayload(duel,plan='') {
   return {state,ownDeck,previousPlan:plan};
 }
 export class Astra {
-  constructor(){this.plan='';this.child=null;this.calls=0;this.lastMs=null;}
-  stop(){if(this.child){if(process.platform==='win32')spawn('taskkill',['/pid',String(this.child.pid),'/t','/f'],{windowsHide:true,stdio:'ignore'});else this.child.kill('SIGTERM');this.child=null;}}
+  constructor(){this.plan='';this.busy=false;this.child=null;this.calls=0;this.lastMs=null;}
+  stop(){if(this.child){if(process.platform==='win32')spawn('taskkill',['/pid',String(this.child.pid),'/t','/f'],{windowsHide:true,stdio:'ignore'});else this.child.kill('SIGTERM');}}
   async choose(duel) {
     return this.choosePayload(astraPayload(duel,this.plan));
   }
   async choosePayload(input) {
+    if(this.busy)throw new Error('Astraは既に思考中です');
+    this.busy=true;
+    let release;
+    try { release=await acquireInferenceLock(); return await this.runChoice(input); }
+    finally { if(release)await release(); this.busy=false; }
+  }
+  async runChoice(input) {
     const payload={...input,previousPlan:this.plan};
     const dir=fs.mkdtempSync(path.join(os.tmpdir(),'astra-duel-'));
     const schemaFile=path.join(dir,'response.schema.json');fs.writeFileSync(schemaFile,JSON.stringify(schema));
     const cli=process.env.DUEL_CODEX_JS || path.join(ROOT,'node_modules/@openai/codex/bin/codex.js');
-    if(!fs.existsSync(cli))throw new Error('Codex CLIが見つかりません。DUEL_CODEX_JSにcodex.jsのパスを指定してください');
+    if(!fs.existsSync(cli)){fs.rmSync(dir,{recursive:true,force:true});throw new Error('Codex CLIが見つかりません。DUEL_CODEX_JSにcodex.jsのパスを指定してください');}
     const args=[cli,'exec','--ignore-user-config','--ephemeral','--skip-git-repo-check','--sandbox','read-only','--disable','shell_tool','--disable','skill_search','-c','web_search="disabled"','-c','model_reasoning_effort="low"','-m',MODEL,'--json','--output-schema',schemaFile,'-'];
     const started=Date.now();this.calls++;
     try {
       const output=await new Promise((resolve,reject)=>{
         const child=spawn(process.execPath,args,{cwd:dir,windowsHide:true,stdio:['pipe','pipe','pipe']});this.child=child;
-        let out='',err='';
-        const timer=setTimeout(()=>{this.stop();reject(new Error('Astraの応答が180秒以内に返りませんでした。再試行できます'));},180000);
-        child.stdout.on('data',d=>{out+=d;if(out.length>2_000_000){this.stop();reject(new Error('Astra応答が大きすぎます'));}});
+        let out='',err='',failure;
+        const timer=setTimeout(()=>{failure=new Error('Astraの応答が180秒以内に返りませんでした。再試行できます');this.stop();},180000);
+        child.stdout.on('data',d=>{out+=d;if(out.length>2_000_000){failure=new Error('Astra応答が大きすぎます');this.stop();}});
         child.stderr.on('data',d=>{err=(err+d).slice(-4000);});
         child.on('error',e=>{clearTimeout(timer);reject(e);});
-        child.on('close',code=>{clearTimeout(timer);this.child=null;if(code!==0)reject(new Error(`Astra接続に失敗しました（終了コード ${code}）。Codexのログイン・モデル利用枠を確認してください`));else resolve(out);});
+        child.on('close',code=>{clearTimeout(timer);this.child=null;if(failure)reject(failure);else if(code!==0)reject(new Error(`Astra接続に失敗しました（終了コード ${code}）。Codexのログイン・モデル利用枠を確認してください`));else resolve(out);});
+        child.stdin.on('error',e=>{failure=e;this.stop();});
         child.stdin.end(instructions+'\n\n'+JSON.stringify(payload));
       });
       let answer;

@@ -3,7 +3,8 @@ import fs from 'node:fs';
 import path from 'node:path';
 import crypto from 'node:crypto';
 import {Astra} from './astra.mjs';
-import {ROOT,cardInfo,cards} from './cards.mjs';
+import {ROOT} from './cards.mjs';
+import {compactNativePayload} from './native-payload.mjs';
 
 // Only the native WindBot client's visible state enters this process.
 // It never reads the local duel server's complete game state.
@@ -14,19 +15,6 @@ let session=null;
 const runtime=path.join(ROOT,'runtime');
 fs.mkdirSync(runtime,{recursive:true});
 const configPath=path.join(runtime,'astra-bridge.json');
-const enrich=value=>{
-  if(Array.isArray(value))return value.map(enrich);
-  if(value && typeof value==='object') {
-    const result=Object.fromEntries(Object.entries(value).map(([k,v])=>[k,enrich(v)]));
-    if(Number.isInteger(value.code) && value.code>0)Object.assign(result,cardInfo(value.code),value);
-    if(Number.isInteger(value.description)) {
-      const code=Math.floor(value.description/16),offset=value.description%16;
-      result.effectText=cards[code]?.strings?.[offset] || `選択 ${value.description}`;
-    }
-    return result;
-  }
-  return value;
-};
 const server=http.createServer(async(req,res)=>{
   const reply=(status,value)=>{res.writeHead(status,{'Content-Type':'application/json','Cache-Control':'no-store'});res.end(JSON.stringify(value));};
   if(req.headers.host!=='127.0.0.1:8788' || req.headers.origin || req.headers['x-astra-token']!==token)return reply(403,{error:'Forbidden'});
@@ -40,7 +28,7 @@ const server=http.createServer(async(req,res)=>{
     if(!input.state?.request)throw new Error('Missing selection request');
     if(input.session!==session){astra.plan='';session=input.session;}
     console.log(`Astra: ${input.state.request.title || input.state.request.kind}`);
-    const result=await astra.choosePayload(enrich(input));
+    const result=await astra.choosePayload(compactNativePayload(input));
     console.log(`Astra: response (${Math.round(astra.lastMs/1000)} s)`);
     reply(200,result);
   }catch(e){console.error(e.message);reply(502,{error:e.message});}

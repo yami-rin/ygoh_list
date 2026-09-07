@@ -1,4 +1,9 @@
 ﻿$ErrorActionPreference = 'Stop'
+$astraMutex = New-Object System.Threading.Mutex($false, 'Local\AstraDuelNativeLauncher')
+$astraOwnMutex = $false
+try {
+    try { $astraOwnMutex = $astraMutex.WaitOne(0) } catch [System.Threading.AbandonedMutexException] { $astraOwnMutex = $true }
+    if (-not $astraOwnMutex) { throw 'Astra対戦は既に起動中です。開いている対戦画面を使ってください。' }
 $astraRoot = $PSScriptRoot
 $astraClientRoot = Join-Path $astraRoot 'runtime\MDPro3-client'
 $astraExe = Join-Path $astraClientRoot 'MDPro3.exe'
@@ -24,4 +29,9 @@ try {
     $astraBridge.Refresh()
     if (-not $astraBridge.HasExited) { & taskkill /PID $astraBridge.Id /T /F | Out-Null }
     Remove-Item -LiteralPath (Join-Path $astraRoot 'runtime\astra-bridge.json') -Force -ErrorAction SilentlyContinue
+}
+
+} finally {
+    if ($astraOwnMutex) { $astraMutex.ReleaseMutex() }
+    $astraMutex.Dispose()
 }
