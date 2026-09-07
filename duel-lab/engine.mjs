@@ -5,6 +5,17 @@ import {DATA,cards,cardInfo,description} from './cards.mjs';
 import {makePrompt,promptTypes,responseFor,publicPrompt} from './prompts.mjs';
 
 const scripts=new Map();
+let compiledModule;
+async function freshCore() {
+  // Share immutable compiled code only. Each duel keeps a fresh WASM memory,
+  // callback registry and Lua state, so effect-use flags cannot leak across runs.
+  compiledModule ??= WebAssembly.compile(fs.readFileSync(path.join(DATA,'ocgcore.sync.wasm')));
+  const module=await compiledModule;
+  return createCore({sync:true,instantiateWasm(imports,receive){
+    const instance=new WebAssembly.Instance(module,imports);
+    receive(instance,module);return instance.exports;
+  }});
+}
 function scriptReader(name) {
   if(scripts.has(name))return scripts.get(name);
   if(!/^[a-zA-Z0-9_./-]+\.lua$/.test(name)||name.includes('..'))return null;
@@ -25,7 +36,7 @@ const queryFlags=Q.CODE|Q.POSITION|Q.ATTACK|Q.DEFENSE|Q.LEVEL|Q.RANK|Q.LINK|Q.IS
 export const phaseNames={1:'DRAW',2:'STANDBY',4:'MAIN 1',8:'BATTLE',16:'BATTLE',32:'DAMAGE',64:'DAMAGE',128:'BATTLE',256:'MAIN 2',512:'END'};
 export class Duel {
   static async create(decks,{seed=Date.now(),first=0,fixtures=null}={}) {
-    const lib=await createCore({sync:true,wasmBinary:fs.readFileSync(path.join(DATA,'ocgcore.sync.wasm'))});
+    const lib=await freshCore();
     const duel=new Duel();
     duel.lib=lib;duel.decks=decks;duel.seed=seed;duel.first=first;duel.fixture=!!fixtures;
     const team={startingLP:8000,startingDrawCount:fixtures?0:5,drawCountPerTurn:1};
@@ -87,7 +98,7 @@ export class Duel {
       case M.WIN:this.winner=m.player===2?2:m.player^this.first;this.reason=m.reason;this.status='ended';this.emit(this.winner===2?'DRAW':`${this.winner===0?'YOU':'ASTRA'} WIN`);break;
     }
   }
-  respond(player,revision,input) {
+  respond(player,revision,input,{snapshot=true}={}) {
     if(this.status!=='playing'||!this.pending)throw new Error('現在は入力できません');
     if(revision!==this.revision)throw new Error('盤面が更新されました。新しい選択肢で操作してください');
     if((this.pending.player^this.first)!==player)throw new Error('相手の選択待ちです');
@@ -95,7 +106,7 @@ export class Duel {
     this.inputs.push({revision,player,input:jsonSafe(input),response:jsonSafe(response)});
     this.validationError=null;this.lib.duelSetResponse(this.handle,response);
     try{this.advance();}catch(e){this.status='error';this.failure=e.message;this.pending=null;this.revision++;this.emit(e.message,{event:'error'});throw e;}
-    return this.snapshot(player);
+    return snapshot?this.snapshot(player):undefined;
   }
   snapshot(viewer=0) {
     const players=[0,1].map(uiPlayer=>{

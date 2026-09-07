@@ -1,0 +1,3 @@
+# Research checkpoints identify source bytes; keep their hashes stable on Windows.
+*.json text eol=lf
+*.mjs text eol=lf

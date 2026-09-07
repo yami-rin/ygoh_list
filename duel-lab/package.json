@@ -7,7 +7,10 @@
     "start": "powershell.exe -NoProfile -ExecutionPolicy Bypass -File start-native.ps1",
     "test": "node --test tests/*.test.mjs",
     "postinstall": "node scripts/patch-core.mjs",
-    "start:browser": "node server.mjs"
+    "start:browser": "node server.mjs",
+    "openings:verify": "node scripts/build-opening-book.mjs",
+    "search:report": "node scripts/build-search-report.mjs",
+    "search:verify": "node scripts/build-search-report.mjs --verify"
   },
   "dependencies": {
     "@openai/codex": "0.153.4",

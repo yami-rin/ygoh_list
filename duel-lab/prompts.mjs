@@ -91,7 +91,8 @@ export function responseFor(m,p,input) {
   switch(m.type) {
     case M.SELECT_CARD:return {type:R.SELECT_CARD,indicies:indices};
     case M.SELECT_TRIBUTE:return {type:R.SELECT_TRIBUTE,indicies:indices};
-    case M.SELECT_SUM:return {type:R.SELECT_SUM,indicies:[...m.selects_must.map((_,i)=>i),...indices.map(i=>i+m.selects_must.length)]};
+    // Modern core adds mandatory cards itself; response indices refer only to selects.
+    case M.SELECT_SUM:return {type:R.SELECT_SUM,indicies:indices};
     case M.SELECT_PLACE:case M.SELECT_DISFIELD:return {type:m.type===M.SELECT_PLACE?R.SELECT_PLACE:R.SELECT_DISFIELD,places:indices.map(i=>p.cards[i].place)};
     case M.SORT_CARD:case M.SORT_CHAIN:return {type:R.SORT_CARD,order:p.cards.map((_,i)=>indices.indexOf(i))};
     case M.ANNOUNCE_RACE:return {type:R.ANNOUNCE_RACE,races:indices.map(i=>BigInt(p.cards[i].value))};
