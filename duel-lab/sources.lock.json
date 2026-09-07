@@ -1,0 +1,22 @@
+{
+  "ocgcore-wasm": {
+    "version": "0.1.4",
+    "url": "https://jsr.io/@n1xx1/ocgcore-wasm/0.1.4/lib/ocgcore.sync.wasm",
+    "sha256": "68e0ddde6932df1dc9de39e6eff8afae10a5db0f18ea8a0870a6b7eb80073ea8"
+  },
+  "ProjectIgnis/BabelCDB": {
+    "revision": "8b8a52ba7af74077ea6898bdba31d7cd4d12eab9",
+    "url": "https://raw.githubusercontent.com/ProjectIgnis/BabelCDB/8b8a52ba7af74077ea6898bdba31d7cd4d12eab9/cards.cdb",
+    "sha256": "e282824946afeb82118ac4e2da4a244fe6fc05ac17c18bab90115a5c22f1f898"
+  },
+  "mycard/ygopro-database": {
+    "revision": "ac5d8fb80465e74b33f3b4a294e3b22c02d743f2",
+    "url": "https://raw.githubusercontent.com/mycard/ygopro-database/ac5d8fb80465e74b33f3b4a294e3b22c02d743f2/locales/ja-JP/cards.cdb",
+    "sha256": "ef751442241749dbd12196378767cf3e235fb86e04ca1b7077db115be7c98c06"
+  },
+  "ProjectIgnis/CardScripts": {
+    "revision": "49b0af044cebcb92f3f23211ef436971e1fc16fb",
+    "url": "https://codeload.github.com/ProjectIgnis/CardScripts/zip/49b0af044cebcb92f3f23211ef436971e1fc16fb",
+    "sha256": "6cafa4f32886ba5bea0fb05a74c86b9f5cb71477db0bfb4846fd1a35e5f5fe80"
+  }
+}

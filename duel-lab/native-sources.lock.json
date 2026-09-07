@@ -1,0 +1,458 @@
+{
+  "mdpro3": {
+    "url": "https://code.moenext.com/ElderLich/MDPro3",
+    "project": 8324,
+    "commit": "228e4ae652d23cb0e6e466a35e2281ce9b1d630a",
+    "archiveSha256": "d52921df70677b83a1928f8556634db8b49ef52fc44e812d26aa912ef97da311",
+    "archiveTreeSha256": "94056af496cb6d36353bac07b8d0244c5f79c6a6076a088d27dc37f9ced6b2ba"
+  },
+  "unity": {
+    "version": "6000.0.24f1",
+    "changeset": "11fa355cd605",
+    "installerMd5": "f8a3119dfb5eaf05393ced84cdd1a54e"
+  },
+  "assets": {
+    "project": 4479,
+    "commit": "b36a95a24ff1a2f77ca6b9f9e0c30bc3e1cfa4d7",
+    "files": [
+      {
+        "path": "Mat/Mat_001_near",
+        "sha256": "fc96962a46e1064fe4cc3cf613f1efe7934c6324a838402465ae47ea645172fa",
+        "bytes": 10811559
+      },
+      {
+        "path": "Mat/Mat_001_far",
+        "sha256": "cdced3050169ed1aaecfe22a1bcc31d1613914dbb11c4bcbbaf0f4a3c489086e",
+        "bytes": 10724705
+      },
+      {
+        "path": "Mat/Mat_002_near",
+        "sha256": "af4058f40b4615669855cf6a1dc4337b66ceb013425d37a37d9ea9abde0def46",
+        "bytes": 9620761
+      },
+      {
+        "path": "Mat/Mat_002_far",
+        "sha256": "bde2e12d4c5973d14d8f7f8a795cf0d24584c2202235d8b6ca9b8a0d67e7c0dd",
+        "bytes": 9585131
+      },
+      {
+        "path": "AvatarStand/AvatarStand_001_near",
+        "sha256": "386b8098de559b965e4516754712d6b5e610fc583d260d7d461164d02070672d",
+        "bytes": 1061194
+      },
+      {
+        "path": "AvatarStand/AvatarStand_001_far",
+        "sha256": "c21aa461e374a4ff61c3f5373e4b9ff30d607abc16982c59c6998b06bbe53107",
+        "bytes": 1061391
+      },
+      {
+        "path": "Grave/Grave_002_near",
+        "sha256": "2402206cf7d6cbc66267f9e8ebda87bce2ff9464bb8ad157b1a06e9fb1ee16be",
+        "bytes": 1296825
+      },
+      {
+        "path": "Grave/Grave_002_far",
+        "sha256": "d24a348aedc3648e2deb4c04e8d339663d80f4bf82dcea617d660ea53266f7f4",
+        "bytes": 1519510
+      },
+      {
+        "path": "Frame/ProfileFrameMat1030001",
+        "sha256": "eb0053ce6feb95ff4b6a548780076ee7e1491a03069030993b907072d620a004",
+        "bytes": 20253
+      },
+      {
+        "path": "Protector/1070002/1070002",
+        "sha256": "47a2474941a2e5df685efdb2ddf5a2b1dc2acae694986e3fa7f49d0a82215aa7",
+        "bytes": 28163
+      },
+      {
+        "path": "Protector/1070002/ProtectorIcon1070002",
+        "sha256": "e1777c689c1a9f415045c503ac32bffc6f3eee4c0156e5f632a80ca197bb2a8f",
+        "bytes": 603683
+      },
+      {
+        "path": "Background/Back0001/Back0001",
+        "sha256": "2f027f1cde1c1bccf5e743f9f9fd0a273df3661393a07d29b652200aafc2b8b2",
+        "bytes": 168570
+      },
+      {
+        "path": "BG/Timer/PhaseButton_013",
+        "sha256": "f2aebc9e1f0ae001006965ab68802b93bbdce6ecaa397ddd94d9b004ae4dcf74",
+        "bytes": 799042
+      },
+      {
+        "path": "BG/Timer/PlayableGuide_c001_far_Mat13",
+        "sha256": "e09dc3b7b61885559de092942feed26e4f9fdc0a31c404eee146f7296dd4f6df",
+        "bytes": 239425
+      },
+      {
+        "path": "BG/Timer/PlayableGuide_c001_near_Mat13",
+        "sha256": "1ec53952e9e24a63c0a4db6093fdde0fb42bcb4a6c422c15624e3ff8f11de60e",
+        "bytes": 238685
+      },
+      {
+        "path": "BG/Timer/Timer_013",
+        "sha256": "aadec76fdecdd9849a8413c8d2dddc3b29f3a8542c6790dff5a0a50beffb0a81",
+        "bytes": 798451
+      },
+      {
+        "path": "AvatarStand/AvatarStand_002_near",
+        "bytes": 502829,
+        "sha256": "5d52a096577c356989bd2eeffbf6dc0148759eef887a70554e53544a0bfd93da"
+      },
+      {
+        "path": "AvatarStand/AvatarStand_002_far",
+        "bytes": 504441,
+        "sha256": "5601100c4ba34bdfa40b26de675075a38a656d66b327071ade5c526bf78accc8"
+      },
+      {
+        "path": "Protector/1070001/1070001",
+        "bytes": 26460,
+        "sha256": "b4793d63214773e2cb7e0ecac3c9e05eb687e5b196f8f23c1d21fbb1519f76e5"
+      },
+      {
+        "path": "Protector/1070001/ProtectorIcon1070001",
+        "bytes": 2289774,
+        "sha256": "fc97f101ac512e66cd7f008baa587e6d3839b97dcb53c8bd6a185f4606c8d01e"
+      },
+      {
+        "path": "Mate/M09755_Model",
+        "bytes": 3971492,
+        "sha256": "6e5db18e9cff8027b87d3ca898db6070eef593c4f5117917b3a6b4d16e5490db"
+      },
+      {
+        "path": "Built-in/duel",
+        "bytes": 61819293,
+        "sha256": "fd3cb5cb08a0ce5f4d048951bb88f443e57fe71899ad041c3b45b1120137e0ab"
+      },
+      {
+        "path": "Built-in/materials",
+        "bytes": 1119834,
+        "sha256": "7d6c96b7044b910ad679572c50ab5d8fd869b56db14a4107875804e906e6e0de"
+      },
+      {
+        "path": "Built-in/outduel",
+        "bytes": 28848487,
+        "sha256": "0d05b72f56775e2d5183edecc8dfc73f0cf23c721cfca63f7769ebfe1dbfe34c"
+      },
+      {
+        "path": "Built-in/shaders",
+        "bytes": 514840,
+        "sha256": "4f05facde202320e43ac50c99891570d6facf44e785ac672a3a3c5eecb7ba05f"
+      },
+      {
+        "path": "Built-in/sprites",
+        "bytes": 1331308,
+        "sha256": "35305a12e63ad8857125815857807e110239a7d6244000325eb12c262da4b661"
+      },
+      {
+        "path": "Built-in/textures",
+        "bytes": 367887,
+        "sha256": "40430641b5f0392bcd5c9c6583fe9c7346044b00d6cb37a83337571468ef275f"
+      },
+      {
+        "path": "Material/GUI_CommonShopButton_N",
+        "bytes": 27728,
+        "sha256": "415cc57122f734d3603ed3ff2bf122b125492960dc8a8ad721bb29915101796a"
+      },
+      {
+        "path": "Material/GUI_CommonShopButton_N_Over",
+        "bytes": 39709,
+        "sha256": "10e79a1d1bd13c1d4161a8acc512b5ed2a5bc8250d3d453560979f60c301d4cb"
+      },
+      {
+        "path": "Material/CardInfoColorMat",
+        "bytes": 30230,
+        "sha256": "c55255491fa750bc2ebf9f037e72f5b3adc0bc3ef07852a973d6295feaf8dbab"
+      },
+      {
+        "path": "Wallpaper/Front0001/0df1e770",
+        "bytes": 5623,
+        "sha256": "93eee2c6a5dee31f31d48af27eb1a3af264b3705120cc45284c2e44e14102c89"
+      },
+      {
+        "path": "Wallpaper/Front0001/6aadf393",
+        "bytes": 868100,
+        "sha256": "f7a5406786cf8ae8ec93df7e72dad65fedc4d1cbdf0ccc623bbbb1082a5d02f1"
+      },
+      {
+        "path": "Wallpaper/Front0001/f3a4a229",
+        "bytes": 666946,
+        "sha256": "6b4106e1f90453e9b1e7f2a9a6db2319d9e987c15af517affc2829c6f25b98b6"
+      }
+    ]
+  },
+  "missingCardArt": {
+    "project": 362,
+    "commit": "9f1023714dd7caddb0c344537ee4b7bc6ee62741",
+    "files": [
+      {
+        "code": 64865,
+        "file": "arts/64865.jpg",
+        "bytes": 237829,
+        "sha256": "f9d8c3044e4a01613ee6d5b7bd6a3c73cbdfba006d83ecf126ffc855f02151ed"
+      },
+      {
+        "code": 1475311,
+        "file": "arts/1475311.jpg",
+        "bytes": 34179,
+        "sha256": "067263947a2568152a4ce30d0bb93a759a776f26623fe04021898405304be52e"
+      },
+      {
+        "code": 3723262,
+        "file": "arts/3723262.jpg",
+        "bytes": 206281,
+        "sha256": "f7b87041e7993664928fcfd27acc7455726490cb061ce6fef50a6b9a44f3cb79"
+      },
+      {
+        "code": 4993187,
+        "file": "arts/4993187.jpg",
+        "bytes": 207364,
+        "sha256": "6b81fd197c857459e70117331a08a0f58594d6e90597c83bae31a0b0d7ce840c"
+      },
+      {
+        "code": 5043010,
+        "file": "arts/5043010.jpg",
+        "bytes": 189099,
+        "sha256": "5001ebc8594ac5c9b27793f9f17d1d0dc29c936a20d055db041b21f0e4c83106"
+      },
+      {
+        "code": 13203964,
+        "file": "arts/13203964.jpg",
+        "bytes": 211048,
+        "sha256": "54e802f7972eb452391df294c8f851a664b08d0a172b4ecf452c155266f219fe"
+      },
+      {
+        "code": 14558127,
+        "file": "arts/14558127.jpg",
+        "bytes": 112173,
+        "sha256": "4559bb6409b939a0640ce0b080ee7131851000a51448bb79af616d1bc44e1b3a"
+      },
+      {
+        "code": 18789533,
+        "file": "arts/18789533.jpg",
+        "bytes": 110306,
+        "sha256": "aa50307af4ec075d2a6fd118390828f8c710b9935da8f9f63fe332268744149b"
+      },
+      {
+        "code": 20726052,
+        "file": "arts/20726052.jpg",
+        "bytes": 230706,
+        "sha256": "35dc176e79f5a3b8a25b95e830fcd1e8e50a112f5cc39a41c8f4b14a30d465f5"
+      },
+      {
+        "code": 20938824,
+        "file": "arts/20938824.jpg",
+        "bytes": 240711,
+        "sha256": "40f1d7f71d8193f01cdc5a81d7dfaa4cb3133f5a99adc8fb4d6780402d7fb214"
+      },
+      {
+        "code": 21848500,
+        "file": "arts/21848500.jpg",
+        "bytes": 230723,
+        "sha256": "6ad1628f78beae053d91207ce76368a89c555d3744b25c1d89dbcf4d935e8abe"
+      },
+      {
+        "code": 23434538,
+        "file": "arts/23434538.jpg",
+        "bytes": 63923,
+        "sha256": "3a471b9008587862d74264f8b506a6aff706fd4a828dcdcdfb99070827692ee0"
+      },
+      {
+        "code": 24842059,
+        "file": "arts/24842059.jpg",
+        "bytes": 143614,
+        "sha256": "8e262ed0cd404f25f2c0307314a6585cb798ab6753013a6757da6c4626c1e8ca"
+      },
+      {
+        "code": 29301450,
+        "file": "arts/29301450.jpg",
+        "bytes": 235650,
+        "sha256": "81decba558b4cbf9f1939448221d23a999d4b3aea29074098fdcc11867345f9a"
+      },
+      {
+        "code": 30118811,
+        "file": "arts/30118811.jpg",
+        "bytes": 224050,
+        "sha256": "269dd9a91d5cb84d4c0d5bd035c63315931724b87a7bf868c69eb552bfcbd2e1"
+      },
+      {
+        "code": 30342076,
+        "file": "arts/30342076.jpg",
+        "bytes": 200222,
+        "sha256": "09240161c0ffb16c2e4e7ebbb88c2db61c03d47ff79ad6ee7738088478f8e8f7"
+      },
+      {
+        "code": 32061192,
+        "file": "arts/32061192.jpg",
+        "bytes": 237657,
+        "sha256": "34f1877e68d84e326b5dfe64bfd69e53aa0c95dc72a068d4146f8bf33a2a37b3"
+      },
+      {
+        "code": 33854624,
+        "file": "arts/33854624.jpg",
+        "bytes": 200856,
+        "sha256": "cf9c7c34f069cffcc2cc92d9f5c56a9527c9523f5a3724ece0b4ba160d75f98a"
+      },
+      {
+        "code": 37458564,
+        "file": "arts/37458564.jpg",
+        "bytes": 219391,
+        "sha256": "64539ce50904a1c8594b283ade9a0fef72f971306501cf75badb6b19bc47f19d"
+      },
+      {
+        "code": 39138610,
+        "file": "arts/39138610.jpg",
+        "bytes": 224070,
+        "sha256": "c6b01ffe96eff8f3b9771e3fe6e7d6376b199c242acaba7b759340b3517e060d"
+      },
+      {
+        "code": 40366667,
+        "file": "arts/40366667.jpg",
+        "bytes": 221140,
+        "sha256": "e545f605202152cb699a5b623191acc9ad8117edd1be88284800fa9ab2618a90"
+      },
+      {
+        "code": 46947713,
+        "file": "arts/46947713.jpg",
+        "bytes": 162388,
+        "sha256": "a3bf119aaf6eb73ef646dd591d533674a2b110df5fd25333a7ed74715997fdda"
+      },
+      {
+        "code": 52698008,
+        "file": "arts/52698008.jpg",
+        "bytes": 140476,
+        "sha256": "2c1ef5a0b0111cc5611520eaa632cd171002e78024696b5b8e4e7e7ffd291693"
+      },
+      {
+        "code": 57111661,
+        "file": "arts/57111661.jpg",
+        "bytes": 218615,
+        "sha256": "ae2f2dbd644d01ec5d7dd2206e9a16572622442e2026b48b749337e996a154f0"
+      },
+      {
+        "code": 59438930,
+        "file": "arts/59438930.jpg",
+        "bytes": 142668,
+        "sha256": "949774c7bbb67fb6bbecc95c6d9356d6630dbfdba6e85c6886e29957432ab7d2"
+      },
+      {
+        "code": 60303245,
+        "file": "arts/60303245.jpg",
+        "bytes": 105738,
+        "sha256": "5c066971364ed2ae3270475fccdca54c7ed186ef7c7d0e776e1dcd95f6603d10"
+      },
+      {
+        "code": 65741786,
+        "file": "arts/65741786.jpg",
+        "bytes": 221407,
+        "sha256": "cd258dcc289f112b5f389c4cf50630c9a154c2c5b1b48369743849f07c10a14b"
+      },
+      {
+        "code": 68337209,
+        "file": "arts/68337209.jpg",
+        "bytes": 240304,
+        "sha256": "b82ee835058811f6e2ae8ecdde3a280132d65695f8d47c3928cb5aef91006947"
+      },
+      {
+        "code": 69272449,
+        "file": "arts/69272449.jpg",
+        "bytes": 239986,
+        "sha256": "f065eef5343b66d262b71a6cfbe3a8bf7c2d3523aea327e337c0a716e37e9ba3"
+      },
+      {
+        "code": 72656408,
+        "file": "arts/72656408.jpg",
+        "bytes": 208321,
+        "sha256": "367faaf732731f67e3926d02466e6bb817b8fc0b074a17127e21fd5d7deea004"
+      },
+      {
+        "code": 73628505,
+        "file": "arts/73628505.jpg",
+        "bytes": 56784,
+        "sha256": "153e7fa8f65d2f34173265c748521585997e8d7a86095fe24e2b721bb94bfa77"
+      },
+      {
+        "code": 74652966,
+        "file": "arts/74652966.jpg",
+        "bytes": 241081,
+        "sha256": "b20074b0295f4f445a103344c2b2ddb4312da68581d5e54b61872c7d1248220c"
+      },
+      {
+        "code": 75500286,
+        "file": "arts/75500286.jpg",
+        "bytes": 125236,
+        "sha256": "df8690023e2d387b3002303b4567bd76ba963bd489462ed9df4619eec5ca998a"
+      },
+      {
+        "code": 78114463,
+        "file": "arts/78114463.jpg",
+        "bytes": 151684,
+        "sha256": "c478afc0b84de8ddfd5dcc1fb593d55fe4f9b0b443fa237eeddd9894515dc15c"
+      },
+      {
+        "code": 84192580,
+        "file": "arts/84192580.jpg",
+        "bytes": 201623,
+        "sha256": "864502cf698bff2b8e02e146882336bf134cbdf79598f8124f562fcd4b1cddc1"
+      },
+      {
+        "code": 86066372,
+        "file": "arts/86066372.jpg",
+        "bytes": 153606,
+        "sha256": "377783791b961968f4472614206e8261f1e86baa1292815f8d007b61973ddd0d"
+      },
+      {
+        "code": 91800273,
+        "file": "arts/91800273.jpg",
+        "bytes": 132692,
+        "sha256": "a1155cac1f6af796307b5e03b718b0eda0869d0e565e687c63533808f5df0a6f"
+      },
+      {
+        "code": 94145021,
+        "file": "arts/94145021.jpg",
+        "bytes": 128609,
+        "sha256": "4238a9427de659372ae4c5dbb9548ec0d08643ac83cb514de8723618a37893ab"
+      },
+      {
+        "code": 94722358,
+        "file": "arts/94722358.jpg",
+        "bytes": 298702,
+        "sha256": "df6d348c98e8e73731f5088e7b8d95559b3e30e6c1618598eca916db84ac2869"
+      },
+      {
+        "code": 95454996,
+        "file": "arts/95454996.jpg",
+        "bytes": 239010,
+        "sha256": "c86dc9b1bf5e466c5d4eab561aa9bcd38062ffe697022f4d50220493a55de55d"
+      },
+      {
+        "code": 96676583,
+        "file": "arts/96676583.jpg",
+        "bytes": 237975,
+        "sha256": "0d0a7c542db198803b37e2d404c9929b7cf76385e934991513fb0b4fd9a08104"
+      }
+    ]
+  },
+  "interfaceImages": {
+    "project": 4484,
+    "commit": "3a7423e6b389c413cc64b157dc213ab67b2ae551",
+    "files": [
+      {
+        "path": "Picture/DIY/Rock.png",
+        "bytes": 18903,
+        "sha256": "f2346a5b88e1393a5cad0886d1934b33dce2c3b03889016dfcccdefb7aed879e"
+      },
+      {
+        "path": "Picture/DIY/Paper.png",
+        "bytes": 18764,
+        "sha256": "cab3e0bfbb1cd72dd1d8ec4f4a2b509782237975732b9c0bc97dbac0cc08a713"
+      },
+      {
+        "path": "Picture/DIY/Scissors.png",
+        "bytes": 17965,
+        "sha256": "d45daf769ad8d1e85b600d61c7651f4ad207893c7256fbf4f70a0d1def1679c2"
+      }
+    ]
+  }
+}

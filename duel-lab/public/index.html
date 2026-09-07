@@ -1,0 +1,27 @@
+<!doctype html>
+<html lang="ja">
+<head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Astra Duel Lab</title><link rel="stylesheet" href="style.css"></head>
+<body>
+<header><a class="brand" href="/">ASTRA <span>DUEL LAB</span></a><div class="format">OCG <span>2026.07</span></div><div class="header-tools"><button id="new-game">デッキ・新規対戦</button><button id="save-log">ログ保存</button><button id="surrender" class="quiet">降参</button></div></header>
+<main>
+  <aside class="inspector"><div class="eyebrow">CARD DETAILS</div><div id="preview" class="preview-empty">カードを選択すると<br>ここに効果を表示します</div><h2 id="card-name">カード情報</h2><div id="card-stats" class="card-stats"></div><p id="card-text">手札またはフィールドのカードを選び、右側の行動から召喚・発動してください。</p><div class="source-note" id="image-source">ローカルのカードデータを使用</div></aside>
+  <section class="arena" aria-label="デュエルフィールド">
+    <div class="player-bar enemy"><div class="avatar">A</div><div><span class="eyebrow">OPPONENT</span><strong>ASTRA <small id="ai-state">READY</small></strong></div><div class="lp"><span>LP</span><b id="lp-1">8000</b><div class="lp-track"><i id="lp-fill-1"></i></div></div></div>
+    <div id="enemy-hand" class="enemy-hand" aria-label="相手の手札"></div>
+    <div class="field" id="field"><div class="field-ornament"></div><div id="enemy-field" class="half-field enemy-field"></div><div class="center-line"><span class="turn-number" id="turn-label">TURN —</span><div id="extra-zones" class="extra-zones"></div><span class="phase-badge" id="phase">STANDBY</span></div><div id="your-field" class="half-field"></div></div>
+    <div id="chain" class="chain-strip" aria-live="polite"></div>
+    <div class="player-bar you"><div class="avatar">Y</div><div><span class="eyebrow">DUELIST</span><strong>YOU <small id="priority">READY</small></strong></div><div class="lp"><span>LP</span><b id="lp-0">8000</b><div class="lp-track"><i id="lp-fill-0"></i></div></div></div>
+    <div id="your-hand" class="your-hand" aria-label="自分の手札"></div>
+    <div class="phase-track"><span>DRAW</span><span>STANDBY</span><span>MAIN 1</span><span>BATTLE</span><span>MAIN 2</span><span>END</span></div>
+  </section>
+  <aside class="right-panel"><section class="decision"><div class="eyebrow">YOUR ACTION</div><h2 id="prompt-title">デュエルを始めよう</h2><p id="prompt-sub">デッキを選び、Astraと対戦できます。</p><div id="actions"></div><div id="selection-footer"></div></section><section class="history"><div class="history-title"><span class="eyebrow">DUEL LOG</span><span id="log-count">0</span></div><ol id="log"></ol></section><div class="connection" id="connection">ルール：EDOPro / 判断：GPT-6 Astra</div></aside>
+</main>
+<div id="toast" role="alert" hidden></div>
+<dialog id="setup"><div class="dialog-heading"><div><div class="eyebrow">LOCAL DUEL ROOM</div><h1>あなた vs Astra</h1></div><button id="close-setup" aria-label="閉じる">×</button></div><p class="intro">M∀LICEの展開を、実際の効果処理で。<br>発動・チェーン・素材・対象を選びながら対戦します。</p>
+<div class="setup-info"><span>MR5 · 8000 LP</span><span>メイン40–60 / EX 0–15</span><span>2026年7月規制</span></div>
+<div class="deck-editors"><label>あなたのデッキ<textarea id="human-deck" spellcheck="false" aria-label="あなたのデッキ"></textarea><small id="human-count"></small></label><label>Astraのデッキ<textarea id="astra-deck" spellcheck="false" aria-label="Astraのデッキ"></textarea><small id="astra-count"></small></label></div>
+<p class="editor-help">1行にカード名と枚数（例：灰流うらら 2）。EXは「#extra」以降。YDKの貼り付けにも対応。</p>
+<div class="setup-bottom"><label>先攻<select id="first"><option value="0">あなた</option><option value="1">Astra</option></select></label><div><p class="ai-notice">Astraはログイン済みCodexを使い、通信と使用枠を消費します。<br>判断ごとに待ち時間があります。相手の手札は双方に非公開です。</p><button id="start" class="primary">DUEL START <span>→</span></button></div></div><p id="setup-error" role="alert"></p><div class="setup-footer">通常M∀LICEプリセット：日本選手権2026 シバタ ユウキ選手の公開構築を参照。<br>Unofficial simulator · <a href="https://github.com/yami-rin/ygoh_list/tree/main/duel-lab" target="_blank" rel="noreferrer">ソース・ライセンス</a></div></dialog>
+<dialog id="pile-dialog"><div class="dialog-heading"><h2 id="pile-title"></h2><button id="close-pile" aria-label="閉じる">×</button></div><div id="pile-cards"></div></dialog>
+<script type="module" src="app.js"></script>
+</body></html>
