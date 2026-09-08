@@ -10,17 +10,22 @@ import {loadOpeningTemplates,NativeOpeningPolicy} from './opening-policy.mjs';
 
 // Only the native WindBot client's visible state enters this process.
 // It never reads the local duel server's complete game state.
-export async function startNativeBridge({astra=new Astra(),onDecision=()=>{}}={}) {
+export async function startNativeBridge({astra=new Astra(),onDecision=()=>{},port=8788,configPath=path.join(ROOT,'runtime','astra-bridge.json')}={}) {
+if(!Number.isInteger(port)||port<0||port>65535)throw new Error('Invalid local bridge port');
+const productionConfig=path.resolve(ROOT,'runtime','astra-bridge.json');
+configPath=path.resolve(configPath);
+if(port!==8788&&configPath.toLowerCase()===productionConfig.toLowerCase())throw new Error('A test bridge requires a separate configPath');
 const token=crypto.randomBytes(32).toString('hex');
 const openings=new NativeOpeningPolicy(await loadOpeningTemplates());
 let busy=false;
 let session=null;
 const runtime=path.join(ROOT,'runtime');
 fs.mkdirSync(runtime,{recursive:true});
-const configPath=path.join(runtime,'astra-bridge.json');
+fs.mkdirSync(path.dirname(configPath),{recursive:true});
+let boundPort=port;
 const server=http.createServer(async(req,res)=>{
   const reply=(status,value)=>{res.writeHead(status,{'Content-Type':'application/json','Cache-Control':'no-store'});res.end(JSON.stringify(value));};
-  if(req.headers.host!=='127.0.0.1:8788' || req.headers.origin || req.headers['x-astra-token']!==token)return reply(403,{error:'Forbidden'});
+  if(req.headers.host!==`127.0.0.1:${boundPort}` || req.headers.origin || req.headers['x-astra-token']!==token)return reply(403,{error:'Forbidden'});
   if(req.method!=='POST'||req.url!=='/choose')return reply(404,{error:'Not found'});
   if(busy)return reply(409,{error:'Astra is already choosing'});
   busy=true;
@@ -49,13 +54,15 @@ const server=http.createServer(async(req,res)=>{
   }catch(e){console.error(e.message);reply(502,{error:e.message});}
   finally{busy=false;}
 });
-await new Promise((resolve,reject)=>{server.once('error',reject);server.listen(8788,'127.0.0.1',()=>{
-  fs.writeFileSync(configPath,JSON.stringify({url:'http://127.0.0.1:8788/choose',token}));
-  console.log('MDPro3 Astra bridge ready at 127.0.0.1:8788');
+await new Promise((resolve,reject)=>{server.once('error',reject);server.listen(port,'127.0.0.1',()=>{
+  boundPort=server.address().port;
+  try{fs.writeFileSync(configPath,JSON.stringify({url:`http://127.0.0.1:${boundPort}/choose`,token}),{flag:port===8788?'w':'wx'});}
+  catch(error){server.close();reject(error);return;}
+  console.log(`MDPro3 Astra bridge ready at 127.0.0.1:${boundPort}`);
   resolve();
 });});
 function stop(){astra.stop();server.close();if(fs.existsSync(configPath)&&JSON.parse(fs.readFileSync(configPath)).token===token)fs.unlinkSync(configPath);}
-return {server,astra,openings,configPath,stop};
+return {server,astra,openings,configPath,port:boundPort,stop};
 }
 if(process.argv[1]&&pathToFileURL(process.argv[1]).href===import.meta.url){
   const bridge=await startNativeBridge();

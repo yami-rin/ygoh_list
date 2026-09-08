@@ -32,7 +32,16 @@ namespace WindBot.Game
             ownDeck = deck.Cards.Concat(deck.ExtraCards).GroupBy(c => c.Id)
                 .OrderBy(g => g.Key).Select(g => (object)new { code = g.Key, count = g.Count() }).ToArray();
             config = JObject.Parse(File.ReadAllText(configFile));
-            if ((string)config["url"] != "http://127.0.0.1:8788/choose")
+            string expectedEndpoint = "http://127.0.0.1:8788/choose";
+#if ASTRA_NATIVE_TEST_ENDPOINT
+            // Only the headless test build defines this; the Unity player
+            // cannot opt into another endpoint through an environment variable.
+            int testPort;
+            if (int.TryParse(Environment.GetEnvironmentVariable("ASTRA_BRIDGE_TEST_PORT"), out testPort)
+                && testPort > 0 && testPort <= 65535)
+                expectedEndpoint = "http://127.0.0.1:" + testPort + "/choose";
+#endif
+            if ((string)config["url"] != expectedEndpoint)
                 throw new InvalidOperationException("Invalid local Astra endpoint");
         }
 
@@ -172,12 +181,12 @@ namespace WindBot.Game
             return Single(title, new object[] { new { answer = false, context }, new { answer = true, context } }) == 1;
         }
 
-        public IList<ClientCard> SelectCards(IList<ClientCard> cards, int min, int max, int hint, bool cancelable, bool order = false, int sum = -1, bool exact = true)
+        public IList<ClientCard> SelectCards(IList<ClientCard> cards, int min, int max, int hint, bool cancelable, bool order = false, int sum = -1, bool exact = true, string subtype = "SELECT_CARD")
         {
             if (!order && !cancelable && min == cards.Count && max == cards.Count)
                 return cards.ToList();
             JObject response = Ask(new { kind = order ? "order" : "multi", title = "カード選択",
-                cards = cards.Select(Card).ToArray(), min, max, canCancel = cancelable, hint, sum, exact });
+                cards = cards.Select(Card).ToArray(), min, max, canCancel = cancelable, hint, sum, exact, subtype });
             if ((bool)response["cancel"] && cancelable) return new List<ClientCard>();
             int[] indexes = response["selection"].ToObject<int[]>();
             if (indexes.Length < min || indexes.Length > max || indexes.Distinct().Count() != indexes.Length ||

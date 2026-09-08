@@ -1,0 +1,396 @@
+{
+  "presetHash": "8d4d40bc085644f9150344c6237b4239a07ef69f1cc21631832b4b695b641095",
+  "fixtures": [
+    {
+      "id": "rabbit",
+      "hand": [
+        69272449,
+        40366667,
+        40366667,
+        78114463,
+        20726052
+      ],
+      "routeId": "rabbit-no-draw-accord",
+      "lp": 6200,
+      "monsters": [
+        95454996,
+        39138610
+      ],
+      "spells": [],
+      "finalMainHand": [
+        40366667,
+        40366667,
+        78114463,
+        20726052
+      ],
+      "terminalHand": [
+        40366667,
+        40366667,
+        78114463,
+        20726052
+      ],
+      "wasmFinalHash": "47324c03b566952bb3e22a9032ebe8a8e7490976c0b2fda1fd262dfcaf0e22c5",
+      "score": 17.1255,
+      "frames": 62
+    },
+    {
+      "id": "backup-ash",
+      "hand": [
+        30118811,
+        14558127,
+        40366667,
+        40366667,
+        78114463
+      ],
+      "routeId": "backup-discard-accord",
+      "lp": 8000,
+      "monsters": [
+        46947713,
+        39138610
+      ],
+      "spells": [],
+      "finalMainHand": [
+        40366667,
+        40366667,
+        78114463
+      ],
+      "terminalHand": [
+        40366667,
+        40366667,
+        78114463
+      ],
+      "wasmFinalHash": "c4e53d6480999bafe6b8e386eebcd36cb7f342cb75cf95ccdc6d90378aedff11",
+      "score": 13.56,
+      "frames": 40
+    },
+    {
+      "id": "cat-mag",
+      "hand": [
+        96676583,
+        64865,
+        40366667,
+        40366667,
+        78114463
+      ],
+      "routeId": "cat-mag-crypter-binder-ip-gwc",
+      "lp": 6200,
+      "monsters": [
+        65741786,
+        95454996,
+        21848500
+      ],
+      "spells": [
+        20726052
+      ],
+      "finalMainHand": [
+        78114463,
+        40366667,
+        40366667
+      ],
+      "terminalHand": [
+        78114463,
+        40366667,
+        40366667
+      ],
+      "wasmFinalHash": "65ef65620bcfa3f09499ed3317f3539f13c651176b842a45c41dfaede87d699c",
+      "score": 22.4145,
+      "frames": 73
+    },
+    {
+      "id": "mag-dormouse",
+      "hand": [
+        64865,
+        32061192,
+        40366667,
+        40366667,
+        78114463
+      ],
+      "routeId": "pair-shard-0-mag-dorm-crypter-binder-ip-gwc",
+      "lp": 6200,
+      "monsters": [
+        65741786,
+        95454996,
+        21848500
+      ],
+      "spells": [
+        20726052
+      ],
+      "finalMainHand": [
+        78114463,
+        40366667,
+        40366667
+      ],
+      "terminalHand": [
+        78114463,
+        40366667,
+        40366667
+      ],
+      "wasmFinalHash": "c082adc643b887f6c0eaedf8e8f8c37839a6d8245682373be5e03dbfe35f97cd",
+      "score": 22.4145,
+      "frames": 73
+    },
+    {
+      "id": "mag-ogre",
+      "hand": [
+        64865,
+        59438930,
+        40366667,
+        40366667,
+        78114463
+      ],
+      "routeId": "pair-shard-4-mag-59438930-accord",
+      "lp": 8000,
+      "monsters": [
+        46947713,
+        39138610
+      ],
+      "spells": [],
+      "finalMainHand": [
+        40366667,
+        40366667,
+        78114463
+      ],
+      "terminalHand": [
+        40366667,
+        40366667,
+        78114463
+      ],
+      "wasmFinalHash": "d8424725aee1b2a2157296a2fe979d35ce1b713409dcb6c34288fbf965f4c7d7",
+      "score": 13.562999999999999,
+      "frames": 37
+    },
+    {
+      "id": "underground-soul",
+      "hand": [
+        68337209,
+        74652966,
+        40366667,
+        40366667,
+        78114463
+      ],
+      "routeId": "pair3-underground-soul-accord-binder-ip",
+      "lp": 6800,
+      "monsters": [
+        95454996,
+        65741786,
+        39138610
+      ],
+      "spells": [
+        94722358
+      ],
+      "finalMainHand": [
+        40366667,
+        78114463,
+        40366667
+      ],
+      "terminalHand": [
+        40366667,
+        78114463,
+        40366667
+      ],
+      "wasmFinalHash": "b9e621f8e5ba5bbb25d04fd87e155f81b0f647d532e67fc1b5002e50b9716ede",
+      "score": 26.442000000000004,
+      "frames": 83
+    },
+    {
+      "id": "cat-magnamhut",
+      "hand": [
+        96676583,
+        33854624,
+        40366667,
+        40366667,
+        78114463
+      ],
+      "routeId": "pair-shard-5-cat-magnamhut-binder-crypter",
+      "lp": 6200,
+      "monsters": [
+        95454996,
+        21848500
+      ],
+      "spells": [
+        94722358
+      ],
+      "finalMainHand": [
+        40366667,
+        40366667,
+        78114463
+      ],
+      "terminalHand": [
+        40366667,
+        40366667,
+        78114463,
+        72656408
+      ],
+      "endPhaseSearch": {
+        "triggerCode": 33854624,
+        "searchCode": 72656408
+      },
+      "wasmFinalHash": "d2bdea6d4aee2dcf39199a4f66f90789e603d26ff2b24cb784b69f1f6a4b6276",
+      "score": 14.4285,
+      "frames": 59
+    },
+    {
+      "id": "hare-tb",
+      "hand": [
+        20938824,
+        57111661,
+        40366667,
+        40366667,
+        78114463
+      ],
+      "routeId": "pair-shard-5-hare-tb-binder-ip",
+      "lp": 6200,
+      "monsters": [
+        95454996,
+        65741786
+      ],
+      "spells": [
+        94722358
+      ],
+      "finalMainHand": [
+        40366667,
+        40366667,
+        78114463
+      ],
+      "terminalHand": [
+        40366667,
+        40366667,
+        78114463
+      ],
+      "wasmFinalHash": "a5cd2c456c51a41fbb504b882fbbfb1238258104017e698da95e647f9043eadb",
+      "score": 17.4195,
+      "frames": 68
+    },
+    {
+      "id": "dormouse-tb",
+      "hand": [
+        32061192,
+        57111661,
+        40366667,
+        40366667,
+        78114463
+      ],
+      "routeId": "dorm-no-draw-firewall-accord",
+      "lp": 6200,
+      "monsters": [
+        46947713,
+        39138610,
+        95454996,
+        5043010
+      ],
+      "spells": [],
+      "finalMainHand": [
+        40366667,
+        57111661,
+        78114463,
+        40366667
+      ],
+      "terminalHand": [
+        40366667,
+        57111661,
+        78114463,
+        40366667
+      ],
+      "wasmFinalHash": "630e9fb8cd52651f555a5d992ad1e6085bb34a877c39966eef8c8d6fc0514515",
+      "score": 23.0855,
+      "frames": 102
+    },
+    {
+      "id": "rabbit-shifter",
+      "hand": [
+        69272449,
+        91800273,
+        40366667,
+        40366667,
+        78114463
+      ],
+      "routeId": "rabbit-no-draw-accord",
+      "lp": 6200,
+      "monsters": [
+        95454996,
+        39138610
+      ],
+      "spells": [],
+      "finalMainHand": [
+        91800273,
+        40366667,
+        40366667,
+        78114463
+      ],
+      "terminalHand": [
+        91800273,
+        40366667,
+        40366667,
+        78114463
+      ],
+      "wasmFinalHash": "c1bc8240660480be3db0439f10d141d94a94a099bef6c286d84741729125c72f",
+      "score": 17.1215,
+      "frames": 66
+    },
+    {
+      "id": "cat-cat",
+      "hand": [
+        96676583,
+        96676583,
+        40366667,
+        40366667,
+        78114463
+      ],
+      "routeId": "pair-shard-4-cat-cat-sp-no-draw",
+      "lp": 7700,
+      "monsters": [
+        29301450
+      ],
+      "spells": [],
+      "finalMainHand": [
+        40366667,
+        40366667,
+        78114463
+      ],
+      "terminalHand": [
+        40366667,
+        40366667,
+        78114463
+      ],
+      "wasmFinalHash": "9502428903aacff02f5d5bfac0378cf43aee075f4207962cb12789da0f943548",
+      "score": 7.56525,
+      "frames": 16
+    },
+    {
+      "id": "underground-underground",
+      "hand": [
+        68337209,
+        68337209,
+        40366667,
+        40366667,
+        78114463
+      ],
+      "routeId": "spell-68337209-contract",
+      "lp": 6800,
+      "monsters": [
+        65741786,
+        95454996
+      ],
+      "spells": [
+        94722358
+      ],
+      "finalMainHand": [
+        40366667,
+        68337209,
+        69272449,
+        78114463,
+        40366667
+      ],
+      "terminalHand": [
+        40366667,
+        68337209,
+        69272449,
+        78114463,
+        40366667
+      ],
+      "wasmFinalHash": "fcd946900c8680211bb47a5bc6d3c80aa2d48cbb494c3e7e6ed8c7fb857a711a",
+      "score": 18.861,
+      "frames": 64
+    }
+  ]
+}

@@ -2,10 +2,10 @@
 
 Default: a local fixture responder stops at the first real Main request, without Astra CLI.
 --bridge-config PATH: use an already running product bridge and wait until the opening ends.
-All generated files/processes belong to runtime/native-opening-test. Existing clients stay running.
+Generated files belong to a dedicated runtime/native-opening-* directory. Existing clients stay running.
 """
 from pathlib import Path
-import argparse,collections,ctypes,hashlib,http.server,json,os,secrets,shutil,socket,struct,subprocess,sys,threading,time,urllib.request,zipfile
+import argparse,collections,contextlib,ctypes,datetime,hashlib,http.server,json,os,secrets,shutil,socket,struct,subprocess,sys,threading,time,urllib.parse,urllib.request,zipfile
 
 ROOT=Path(__file__).resolve().parents[1]
 WORK=ROOT/'runtime/native-opening-test'
@@ -16,6 +16,26 @@ PLUGINS=CLIENT/'MDPro3_Data/Plugins/x86_64'
 DEFAULT_HAND=[69272449,40366667,40366667,78114463,20726052]
 
 def digest(path):return hashlib.sha256(Path(path).read_bytes()).hexdigest()
+def set_workdir(value):
+    global WORK
+    candidate=Path(value).resolve() if value else WORK.resolve()
+    try:relative=candidate.relative_to((ROOT/'runtime').resolve())
+    except ValueError:raise ValueError('Work directory must be inside this project runtime directory')
+    if not relative.parts or not relative.parts[0].startswith('native-opening-'):
+        raise ValueError('Work directory must be in a dedicated runtime/native-opening-* tree')
+    WORK=candidate
+
+@contextlib.contextmanager
+def workspace_lock():
+    WORK.mkdir(parents=True,exist_ok=True)
+    path=WORK/'harness.lock'
+    try:handle=os.open(path,os.O_CREAT|os.O_EXCL|os.O_WRONLY)
+    except FileExistsError:raise RuntimeError('This native opening work directory is already in use: '+str(WORK))
+    try:
+        os.write(handle,str(os.getpid()).encode());os.close(handle)
+        yield
+    finally:path.unlink(missing_ok=True)
+
 def stage():
     WORK.mkdir(parents=True,exist_ok=True)
     for rel in ['Data/script.zip','Data/config.conf','Data/lflist.conf','Data/lflist_merged.conf','lflist.conf']:
@@ -31,7 +51,10 @@ def stage():
     # Unity's public-signed Newtonsoft binary cannot load under the desktop CLR.
     # Use the corresponding signed net45 distribution, without changing production assets.
     package=WORK/'newtonsoft.json.13.0.3.nupkg'
-    if not package.exists():urllib.request.urlretrieve('https://api.nuget.org/v3-flatcontainer/newtonsoft.json/13.0.3/newtonsoft.json.13.0.3.nupkg',package)
+    if not package.exists():
+        cached=ROOT/'runtime/native-opening-test'/package.name
+        if cached.exists() and cached!=package:shutil.copyfile(cached,package)
+        else:urllib.request.urlretrieve('https://api.nuget.org/v3-flatcontainer/newtonsoft.json/13.0.3/newtonsoft.json.13.0.3.nupkg',package)
     with zipfile.ZipFile(package) as archive:(WORK/'Newtonsoft.Json.dll').write_bytes(archive.read('lib/net45/Newtonsoft.Json.dll'))
     shutil.copyfile(MONO/'lib/mono/4.5/Mono.Data.Sqlite.dll',WORK/'Mono.Data.Sqlite.dll')
 
@@ -46,14 +69,17 @@ def build():
     sources=sorted(sources)
     framework=Path(os.environ.get('WINDIR','C:/Windows'))/'Microsoft.NET/Framework64/v4.0.30319'
     refs=[str(framework/(name+'.dll')) for name in ['mscorlib','System','System.Core','System.Data','System.Runtime.Serialization']]+[str(MONO/'lib/mono/4.5/Mono.Data.Sqlite.dll'),str(WORK/'Newtonsoft.Json.dll')]
-    command=[str(MONO/'bin/mono.exe'),str(MONO/'lib/mono/4.5/mcs.exe'),'-nostdlib','-unsafe','-langversion:latest','-out:'+str(WORK/'opening-client.exe')]+['-r:'+r for r in refs]+[str(p) for p in sources]
+    command=[str(MONO/'bin/mono.exe'),str(MONO/'lib/mono/4.5/mcs.exe'),'-nostdlib','-unsafe','-langversion:latest','-define:ASTRA_NATIVE_TEST_ENDPOINT','-out:'+str(WORK/'opening-client.exe')]+['-r:'+r for r in refs]+[str(p) for p in sources]
     before={str(p):digest(p) for p in sources}
     run=subprocess.run(command,cwd=WORK,capture_output=True,text=True,encoding='utf-8',errors='replace',timeout=60)
     (WORK/'build.log').write_text(run.stdout+run.stderr,encoding='utf-8')
     if run.returncode:raise RuntimeError('Native client compilation failed: '+run.stdout+run.stderr)
     assert before=={str(p):digest(p) for p in sources},'Native source changed while compiling; rerun after the source update completes'
-    manifest={'sources':[{'path':str(p.relative_to(ROOT)),'sha256':digest(p)} for p in sources],
-              'nativeServerSha256':digest(PLUGINS/'ygoserver.dll'),'nativeCoreSha256':digest(PLUGINS/'ocgcore.dll'),'newtonsoftNugetPackageSha256':digest(WORK/'newtonsoft.json.13.0.3.nupkg')}
+    manifest={'createdAt':datetime.datetime.now(datetime.timezone.utc).isoformat(),'defines':['ASTRA_NATIVE_TEST_ENDPOINT'],
+              'sources':[{'path':str(p.relative_to(ROOT)),'sha256':digest(p)} for p in sources],
+              'nativeServerSha256':digest(PLUGINS/'ygoserver.dll'),'nativeCoreSha256':digest(PLUGINS/'ocgcore.dll'),
+              'nativeScriptsSha256':digest(WORK/'Data/script.zip'),'nativeCardsSha256':digest(WORK/'Data/locales/ja-JP/cards.cdb'),
+              'presetSha256':digest(ROOT/'preset.json'),'newtonsoftNugetPackageSha256':digest(WORK/'newtonsoft.json.13.0.3.nupkg')}
     (WORK/'build-manifest.json').write_text(json.dumps(manifest,indent=2),encoding='utf-8')
     print('BUILD PASS',len(sources),'unchanged native sources plus console entrypoint',flush=True)
 
@@ -105,7 +131,14 @@ def main(args):
     (WORK/'opening.ydk').write_text('#main\n'+'\n'.join(map(str,main_deck))+'\n#extra\n'+'\n'.join(map(str,preset['extra']))+'\n!side\n',encoding='utf-8')
     requests=[];main_seen=threading.Event();errors=[];stop=threading.Event();httpd=None
     token=secrets.token_hex(32)
-    if args.bridge_config:config_path=Path(args.bridge_config).resolve()
+    bridge_port=args.bridge_port
+    if args.bridge_config:
+        config_path=Path(args.bridge_config).resolve()
+        endpoint=urllib.parse.urlsplit(json.loads(config_path.read_text('utf-8'))['url'])
+        assert endpoint.scheme=='http' and endpoint.hostname=='127.0.0.1' and endpoint.path=='/choose'
+        assert not endpoint.username and not endpoint.password and not endpoint.query and not endpoint.fragment
+        assert endpoint.port and (not bridge_port or bridge_port==endpoint.port),'Explicit bridge port differs from config'
+        bridge_port=endpoint.port
     else:
         class Handler(http.server.BaseHTTPRequestHandler):
             def log_message(self,*_):pass
@@ -131,20 +164,26 @@ def main(args):
                     errors.append('Unexpected pre-main native request: '+str(request));response={'action':0,'selection':[],'cancel':True}
                 body=json.dumps(response).encode();self.send_response(200);self.send_header('Content-Type','application/json');self.send_header('Content-Length',str(len(body)));self.end_headers();self.wfile.write(body)
         # Binding is exclusive. An existing user's product bridge is never stopped or reused implicitly.
-        httpd=http.server.ThreadingHTTPServer(('127.0.0.1',8788),Handler)
+        httpd=http.server.ThreadingHTTPServer(('127.0.0.1',bridge_port),Handler)
+        bridge_port=httpd.server_address[1]
         threading.Thread(target=httpd.serve_forever,daemon=True).start()
-        config_path=WORK/'bridge-config.json';config_path.write_text(json.dumps({'url':'http://127.0.0.1:8788/choose','token':token}),encoding='utf-8')
+        config_path=WORK/'bridge-config.json';config_path.write_text(json.dumps({'url':f'http://127.0.0.1:{bridge_port}/choose','token':token}),encoding='utf-8')
     with socket.socket() as reservation:reservation.bind(('127.0.0.1',0));port=reservation.getsockname()[1]
     processes=[]
     try:
         with (WORK/'server.log').open('w',encoding='utf-8') as server_log,(WORK/'client.log').open('w',encoding='utf-8') as client_log:
-            server=subprocess.Popen([sys.executable,__file__,'--server-worker',str(port)],cwd=WORK,stdout=server_log,stderr=subprocess.STDOUT,creationflags=subprocess.CREATE_NO_WINDOW);processes.append(server)
+            server=subprocess.Popen([sys.executable,__file__,'--server-worker',str(port),'--workdir',str(WORK)],cwd=WORK,stdout=server_log,stderr=subprocess.STDOUT,creationflags=subprocess.CREATE_NO_WINDOW);processes.append(server)
             time.sleep(.6)
             env=os.environ.copy();env['ASTRA_BRIDGE_CONFIG']=str(config_path);env['PATH']=str(PLUGINS)+os.pathsep+env.get('PATH','')
+            # The product bridge must explicitly support this test-only opt-in;
+            # this harness never patches or bypasses its endpoint validation.
+            if bridge_port!=8788:env['ASTRA_BRIDGE_TEST_PORT']=str(bridge_port)
+            else:env.pop('ASTRA_BRIDGE_TEST_PORT',None)
             client=subprocess.Popen([str(WORK/'opening-client.exe'),str(port),str(args.timeout)],cwd=WORK,env=env,stdout=client_log,stderr=subprocess.STDOUT,creationflags=subprocess.CREATE_NO_WINDOW);processes.append(client)
             time.sleep(.4);thread=threading.Thread(target=opponent,args=(port,preset,stop,errors),daemon=True);thread.start()
             deadline=time.monotonic()+args.timeout
             while time.monotonic()<deadline:
+                if (WORK/'cancel.request').exists():raise RuntimeError('Native opening fixture was cancelled by its owner')
                 if errors:raise RuntimeError('; '.join(errors))
                 if not args.bridge_config and main_seen.is_set():break
                 if client.poll() is not None:
@@ -159,7 +198,7 @@ def main(args):
                 observed_hand=json.loads(next(line[len('FIRST_MAIN_HAND '):] for line in log.splitlines() if line.startswith('FIRST_MAIN_HAND ')))
                 assert collections.Counter(observed_hand)==collections.Counter(hand),'External bridge starting hand differs from fixture'
                 assert terminal['mainResponses']>=1 and terminal['bridgeRequests']>=1,'Native Main did not complete through the bridge'
-            result={'mode':'product-bridge' if args.bridge_config else 'first-main-request','nativeServer':str(PLUGINS/'ygoserver.dll'),'actualBridgeSource':'native/AstraDecisionBridge.cs','hand':hand,'mainRequestReceived':main_seen.is_set() or bool(terminal),'requests':len(requests) if terminal is None else terminal['bridgeRequests'],'terminal':terminal,'errors':errors,'serverPort':port}
+            result={'mode':'product-bridge' if args.bridge_config else 'first-main-request','nativeServer':str(PLUGINS/'ygoserver.dll'),'actualBridgeSource':'native/AstraDecisionBridge.cs','hand':hand,'mainRequestReceived':main_seen.is_set() or bool(terminal),'requests':len(requests) if terminal is None else terminal['bridgeRequests'],'terminal':terminal,'errors':errors,'serverPort':port,'bridgePort':bridge_port,'workdir':str(WORK),'buildManifestSha256':digest(WORK/'build-manifest.json')}
             (WORK/'result.json').write_text(json.dumps(result,indent=2),encoding='utf-8')
             if requests:(WORK/'requests.json').write_text(json.dumps(requests,indent=2),encoding='utf-8')
             print('RESULT '+json.dumps(result),flush=True)
@@ -173,7 +212,10 @@ def main(args):
         if not args.bridge_config and config_path.exists():config_path.unlink()
 
 if __name__=='__main__':
-    parser=argparse.ArgumentParser();parser.add_argument('--server-worker',type=int);parser.add_argument('--build-only',action='store_true');parser.add_argument('--bridge-config');parser.add_argument('--hand');parser.add_argument('--timeout',type=int,default=30)
+    parser=argparse.ArgumentParser();parser.add_argument('--server-worker',type=int);parser.add_argument('--build-only',action='store_true');parser.add_argument('--bridge-config');parser.add_argument('--bridge-port',type=int,default=0);parser.add_argument('--workdir');parser.add_argument('--hand');parser.add_argument('--timeout',type=int,default=30)
     args=parser.parse_args()
+    assert 0<=args.bridge_port<=65535,'Invalid HTTP bridge port'
+    set_workdir(args.workdir)
     if args.server_worker:server_worker(args.server_worker)
-    else:main(args)
+    else:
+        with workspace_lock():main(args)

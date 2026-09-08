@@ -37,6 +37,19 @@ FIXTURE = '''class GameBehavior {
 
 
 class PatchTests(unittest.TestCase):
+    def test_tribute_tag_is_distinct_and_idempotent(self):
+        source = '''public IList<ClientCard> OnSelectTribute(IList<ClientCard> cards, int min, int max, int hint, bool cancelable)
+        {
+            if (Astra != null) return Astra.SelectCards(cards, min, max, hint, cancelable);
+            // KEEP_OTHER_SELECTIONS
+        }'''
+        result = patch.patch_ai_tribute_subtype(source)
+        self.assertIn('"SELECT_TRIBUTE"', result)
+        self.assertIn('KEEP_OTHER_SELECTIONS', result)
+        self.assertEqual(patch.patch_ai_tribute_subtype(result), result)
+        with self.assertRaisesRegex(RuntimeError, 'subtype'):
+            patch.patch_ai_tribute_subtype(source.replace('OnSelectTribute', 'Unknown'))
+
     def test_idempotent_event_hooks_preserve_unrelated_code(self):
         result = patch.patch_behavior_safety(FIXTURE)
         self.assertEqual(patch.patch_behavior_safety(result), result)

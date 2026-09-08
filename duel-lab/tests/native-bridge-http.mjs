@@ -1,7 +1,19 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import fs from 'node:fs';
+import path from 'node:path';
+import crypto from 'node:crypto';
+import {fileURLToPath} from 'node:url';
 import {startNativeBridge} from '../native-bridge.mjs';
+
+test('an isolated port cannot overwrite the running production bridge configuration',async()=>{
+  const production=fileURLToPath(new URL('../runtime/astra-bridge.json',import.meta.url));
+  const digest=()=>fs.existsSync(production)?crypto.createHash('sha256').update(fs.readFileSync(production)).digest('hex'):null;
+  const before=digest();
+  await assert.rejects(()=>startNativeBridge({port:0}),/separate configPath/);
+  await assert.rejects(()=>startNativeBridge({port:8790,configPath:production}),/separate configPath/);
+  assert.equal(digest(),before);
+});
 
 test('real HTTP bridge enforces auth, serializes inference and hands unknown state to Astra',async()=>{
   let release,entered;const started=new Promise(resolve=>entered=resolve);
@@ -10,7 +22,8 @@ test('real HTTP bridge enforces auth, serializes inference and hands unknown sta
     await new Promise(resolve=>release=resolve);
     return {action:0,selection:[],counters:[],cancel:false,plan:'stubbed Astra fallback'};
   }};
-  const b=await startNativeBridge({astra});
+  const work=fs.mkdtempSync(fileURLToPath(new URL('../runtime/http-test-',import.meta.url)));
+  const b=await startNativeBridge({astra,port:0,configPath:path.join(work,'bridge.json')});
   try{
     const cfg=JSON.parse(fs.readFileSync(b.configPath));
     const input={session:'http-test',protocolVersion:2,requestId:1,state:{turn:2,player:1,players:[],request:{kind:'single',title:'test',choices:[{id:0,option:'End Phase'}]}}};
@@ -21,5 +34,5 @@ test('real HTTP bridge enforces auth, serializes inference and hands unknown sta
     release();const response=await pending;assert.equal(response.status,200);assert.equal((await response.json()).source,'astra');
     const retry=await post();assert.equal(retry.status,200);assert.equal((await retry.json()).source,'astra');
     assert.equal(astra.calls,1,'Same request must reuse the completed model response');
-  }finally{release?.();b.server.closeAllConnections();b.stop();}
+  }finally{release?.();b.server.closeAllConnections();b.stop();fs.rmdirSync(work);}
 });

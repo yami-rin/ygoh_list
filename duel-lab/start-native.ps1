@@ -15,7 +15,8 @@ $astraNode = (Get-Command node.exe -ErrorAction Stop).Source
 $astraBridge = Start-Process -FilePath $astraNode -ArgumentList ('"' + (Join-Path $astraRoot 'native-bridge.mjs') + '"') -WorkingDirectory $astraRoot -WindowStyle Hidden -PassThru -RedirectStandardOutput (Join-Path $astraRoot 'runtime\native-astra.log') -RedirectStandardError (Join-Path $astraRoot 'runtime\native-astra-error.log')
 try {
     $astraReady = $false
-    for ($i = 0; $i -lt 40; $i++) {
+    $astraStartup = [System.Diagnostics.Stopwatch]::StartNew()
+    while ($astraStartup.Elapsed.TotalSeconds -lt 90) {
         $astraBridge.Refresh()
         if ($astraBridge.HasExited) { throw 'Astra接続を開始できませんでした。runtime\native-astra-error.logを確認してください。' }
         if (Get-NetTCPConnection -LocalPort 8788 -State Listen -ErrorAction SilentlyContinue) { $astraReady = $true; break }

@@ -1,0 +1,603 @@
+{
+  "verifiedAt": "2026-09-08T01:10:19.494747+00:00",
+  "passed": 12,
+  "failed": 0,
+  "jsTestsPassed": 149,
+  "sourceIdentity": "6caca166683d3a9b787e8eadad1b1efbfba32bb8190af64d84c2ab2d2ebba8ab",
+  "sourceHashes": {
+    "native-bridge.mjs": "5c220b16c75a03dfd2b622ca835430dc0b8e05afb5c0b4e149301d32073ed1aa",
+    "opening-policy.mjs": "4961acc57e0ed79119009df80b4bae178cbd09816fe56ead76a4b409272148cf",
+    "opening-sources.mjs": "60c649b002b7f87796a249c102cfc4bc8a1b68ebf9303d4889f3dfa955b6cbf0",
+    "opening-semantics.mjs": "0a2528f2460d600dd85edbe9aa3dbba55ec7a9a16dbb0ba12aacc3ba4ca84e38",
+    "opening-placement.mjs": "f40a36f307ecbbe97836688945c01c637f24438286a894b0070b923f14f14a1a",
+    "native-payload.mjs": "5add97b23c1f14d31aea4da37ecc59a02284beb92955464e153bd48493b0fe92",
+    "cards.mjs": "aae518138dc79a26f8812d59817bb0539785810542b3b4f8a6d9e4ceb0dbac8f",
+    "engine.mjs": "f8d3fbc44ed97419222dd4d3ebe48b9ec4c12b42d8a9e8589c66c14bab138176",
+    "scripts\\route-harness.mjs": "c33d2c4c42aa0d7f1d00b10f57fee90a26163b0fa5c59027342d4155c10aad6b",
+    "native\\AstraDecisionBridge.cs": "170c8755dd67df1e7c89738d391983c01595306ca32924fbba0e309eb8abd1b3",
+    "preset.json": "9e4dfecdcddcd0c16313e4d450ecd9233dc130d228a26ebd8bace36c54374b85",
+    "tests\\opening-bridge-runner.mjs": "78a7f8e3bf101da38dbbdd06669292d4204390720458f65a1a3258366289e83e",
+    "tests\\native-opening-smoke.py": "b505ece97a64e11ae4e04236d42a26069cfecfee446a839785bfd9d8d598ce95",
+    "tests\\native-opening-smoke.cs": "35a0964340e1ec0b066320a2bc3ec9335e2f40e0d67d57e741c5fb04999ef3a7",
+    "tests\\native-opening-suite.py": "afdfed5840400e94df90b69fa8cc549e764387908e0c83496b7d82add428a486",
+    "routes\\allure-continuations.json": "c0d97615b09e34575d9eafc07d06aa289e4cbdcae3ee9f1234f2cfead8a6d5bb",
+    "routes\\cyberse-starters.json": "a8aec3f6aceca02071ceef07ace21ecebbe5b695c203e9939b1c9607e3c8e449",
+    "routes\\exhaustive-cyberse.json": "9c3f1b2146f912489819c079bbd080496a955a7f72d5fa74fb4481cdeb4e34b8",
+    "routes\\exhaustive-dormouse.json": "6e39e02f38bd0280763ede5b6e39bb536586752df3a44b901a18d50f010746bc",
+    "routes\\exhaustive-draws.json": "b672b7b397f9ea4bc143a267d825f9271f5be40408704dcd388cef536f8549f6",
+    "routes\\exhaustive-gold.json": "588a90ab8b3d6d1822a2bf30ebe4025446a91552c470254bd990f384b927e8ad",
+    "routes\\exhaustive-others.json": "b9d319e4ab54bfe6515aeaa9dff327deb5d40587276884ba7be009393275bb7a",
+    "routes\\exhaustive-rabbit.json": "77239299bc83daa5eb0c5e634473a3b5e1eecac9ab6774bb2393674c14c07d5b",
+    "routes\\exhaustive-underground.json": "28a2a95b00bae846658d54f58f826a805bd1273a0b2934425f8630c12c98ebe9",
+    "routes\\malice-monsters.json": "9e3f81b046176acce566863428bf0aafaf433db818f2058daefef022a748c353",
+    "routes\\multi-cyberse.json": "8f8caab8067fb081bba9a5f384075d09ccc36e3c9cfeb9c56ef3ab9267700177",
+    "routes\\multi-malice.json": "940fc9fd2def3d535d979a852fafcc3b80a56c32eac7b0c5aff7f4bcc532ff8c",
+    "routes\\multi-opening-survey.json": "6f72eafb98ea6bf79c9aa540ee6738bf3322794b041743fb1b0fb535652e623f",
+    "routes\\multi-search-best.json": "02cef573aca64f8014a1c336d3c70a332bea2ea7753c2fc92a60c9515542d17e",
+    "routes\\multi-search-report.json": "d470f7dd9d7f0142a234929e8c60faec21a81b3b5fd04e11b75f11863f229788",
+    "routes\\optional-draw-continuations.json": "a3ea1b42764d2c1ba8a485ce8a7fbf19b6edbd0d86c04622f986babafc330784",
+    "routes\\pair-shard-0.json": "344114cb6864b585d7c3afde7da92d7270872b4ddfa368ae4de9fb23b760e314",
+    "routes\\pair-shard-1.json": "cd77d314c723682b8f14d6a336dec5f4a777638689e04b2e8294c5a22dad9777",
+    "routes\\pair-shard-2.json": "132150e2a48cfd723e61ae9b3eacc8cf82fa73dfa0b8b5534090b1aed9a1b1f4",
+    "routes\\pair-shard-3.json": "de005f5dc91571c821db68a96ed34173cdb103486640c6f68db9eb6d56eb36fe",
+    "routes\\pair-shard-4.json": "01e0879f2eede4e960679e0cb44235da966dfdcce3718c193e136089904f7f92",
+    "routes\\pair-shard-5.json": "f944926c3a0fb650b40d1be3eaccc7ee1de151c8da4cf21e997e1d814b173eff",
+    "routes\\pair-shard-6.json": "277ffd113f23823ba3d40c8366ce03bfcd5b4fedd2aac9440ac535e9588af4c6",
+    "routes\\pair-shard-7.json": "faf9d50ce1add1c0f7c55720ebf24cfda8fe41a0a16f53195dc115584011a836",
+    "routes\\spell-starters.json": "3c3e237dfaa1f658e20b979bd905f947352ffd97e7047e953fcfccf4048dc3a6"
+  },
+  "groups": [
+    {
+      "directory": "runtime/native-opening-suite/20260908T010647Z-f37fd1",
+      "summaryHash": "65829a8ad8810b87cbe2a7f66e2a36ce392f825e313b42daf36ea93e3cd710bd"
+    },
+    {
+      "directory": "runtime/native-opening-suite/20260908T010647Z-ccfa4d",
+      "summaryHash": "7866f41b2bd39dbb838259e6e6f72ddf667154e1860ed40cdaa4c0977728e1d8"
+    },
+    {
+      "directory": "runtime/native-opening-suite/20260908T010648Z-c0f18c",
+      "summaryHash": "e1ee241124f8dfdc2991be1c518885b170e0c73610536afce5f643c5ce8932c5"
+    },
+    {
+      "directory": "runtime/native-opening-suite/20260908T010648Z-06a864",
+      "summaryHash": "2e8dc4ec6c48394d8b233b4a515b96f401ba5947f9dfdf79eeccb146448d581c"
+    }
+  ],
+  "fixtures": [
+    {
+      "id": "rabbit",
+      "routeId": "rabbit-no-draw-accord",
+      "frames": 62,
+      "automaticResponses": 59,
+      "httpResponses": 61,
+      "finalMainHand": [
+        40366667,
+        40366667,
+        20726052,
+        78114463
+      ],
+      "terminal": {
+        "turn": 2,
+        "player": 1,
+        "phase": "Draw",
+        "lp": 6200,
+        "mainResponses": 11,
+        "bridgeRequests": 61,
+        "hand": [
+          40366667,
+          40366667,
+          20726052,
+          78114463
+        ],
+        "monsters": [
+          {
+            "code": 95454996,
+            "sequence": 1
+          },
+          {
+            "code": 39138610,
+            "sequence": 5
+          }
+        ],
+        "spells": [],
+        "opponentHandCount": 6
+      },
+      "testHandoffActions": []
+    },
+    {
+      "id": "backup-ash",
+      "routeId": "backup-discard-accord",
+      "frames": 40,
+      "automaticResponses": 37,
+      "httpResponses": 39,
+      "finalMainHand": [
+        40366667,
+        40366667,
+        78114463
+      ],
+      "terminal": {
+        "turn": 2,
+        "player": 1,
+        "phase": "Draw",
+        "lp": 8000,
+        "mainResponses": 8,
+        "bridgeRequests": 39,
+        "hand": [
+          40366667,
+          40366667,
+          78114463
+        ],
+        "monsters": [
+          {
+            "code": 46947713,
+            "sequence": 0
+          },
+          {
+            "code": 39138610,
+            "sequence": 5
+          }
+        ],
+        "spells": [],
+        "opponentHandCount": 6
+      },
+      "testHandoffActions": []
+    },
+    {
+      "id": "cat-mag",
+      "routeId": "cat-mag-crypter-binder-ip-gwc",
+      "frames": 73,
+      "automaticResponses": 71,
+      "httpResponses": 75,
+      "finalMainHand": [
+        40366667,
+        78114463,
+        40366667
+      ],
+      "terminal": {
+        "turn": 2,
+        "player": 1,
+        "phase": "Draw",
+        "lp": 6200,
+        "mainResponses": 12,
+        "bridgeRequests": 75,
+        "hand": [
+          40366667,
+          78114463,
+          40366667
+        ],
+        "monsters": [
+          {
+            "code": 65741786,
+            "sequence": 2
+          },
+          {
+            "code": 95454996,
+            "sequence": 4
+          },
+          {
+            "code": 21848500,
+            "sequence": 6
+          }
+        ],
+        "spells": [
+          {
+            "code": 20726052,
+            "sequence": 0
+          }
+        ],
+        "opponentHandCount": 6
+      },
+      "testHandoffActions": [
+        "end-phase-pass",
+        "opponent-draw-pass"
+      ]
+    },
+    {
+      "id": "mag-dormouse",
+      "routeId": "pair-shard-0-mag-dorm-crypter-binder-ip-gwc",
+      "frames": 73,
+      "automaticResponses": 72,
+      "httpResponses": 76,
+      "finalMainHand": [
+        78114463,
+        40366667,
+        40366667
+      ],
+      "terminal": {
+        "turn": 2,
+        "player": 1,
+        "phase": "Draw",
+        "lp": 6200,
+        "mainResponses": 12,
+        "bridgeRequests": 76,
+        "hand": [
+          78114463,
+          40366667,
+          40366667
+        ],
+        "monsters": [
+          {
+            "code": 65741786,
+            "sequence": 2
+          },
+          {
+            "code": 95454996,
+            "sequence": 4
+          },
+          {
+            "code": 21848500,
+            "sequence": 6
+          }
+        ],
+        "spells": [
+          {
+            "code": 20726052,
+            "sequence": 0
+          }
+        ],
+        "opponentHandCount": 6
+      },
+      "testHandoffActions": [
+        "end-phase-pass",
+        "opponent-draw-pass"
+      ]
+    },
+    {
+      "id": "mag-ogre",
+      "routeId": "pair-shard-4-mag-59438930-accord",
+      "frames": 37,
+      "automaticResponses": 33,
+      "httpResponses": 35,
+      "finalMainHand": [
+        40366667,
+        40366667,
+        78114463
+      ],
+      "terminal": {
+        "turn": 2,
+        "player": 1,
+        "phase": "Draw",
+        "lp": 8000,
+        "mainResponses": 8,
+        "bridgeRequests": 35,
+        "hand": [
+          40366667,
+          40366667,
+          78114463
+        ],
+        "monsters": [
+          {
+            "code": 46947713,
+            "sequence": 1
+          },
+          {
+            "code": 39138610,
+            "sequence": 5
+          }
+        ],
+        "spells": [],
+        "opponentHandCount": 6
+      },
+      "testHandoffActions": []
+    },
+    {
+      "id": "underground-soul",
+      "routeId": "pair3-underground-soul-accord-binder-ip",
+      "frames": 83,
+      "automaticResponses": 80,
+      "httpResponses": 84,
+      "finalMainHand": [
+        78114463,
+        40366667,
+        40366667
+      ],
+      "terminal": {
+        "turn": 2,
+        "player": 1,
+        "phase": "Draw",
+        "lp": 6800,
+        "mainResponses": 13,
+        "bridgeRequests": 84,
+        "hand": [
+          78114463,
+          40366667,
+          40366667
+        ],
+        "monsters": [
+          {
+            "code": 95454996,
+            "sequence": 0
+          },
+          {
+            "code": 65741786,
+            "sequence": 1
+          },
+          {
+            "code": 39138610,
+            "sequence": 5
+          }
+        ],
+        "spells": [
+          {
+            "code": 94722358,
+            "sequence": 0
+          }
+        ],
+        "opponentHandCount": 6
+      },
+      "testHandoffActions": [
+        "end-phase-pass",
+        "opponent-draw-pass"
+      ]
+    },
+    {
+      "id": "cat-magnamhut",
+      "routeId": "pair-shard-5-cat-magnamhut-binder-crypter",
+      "frames": 59,
+      "automaticResponses": 56,
+      "httpResponses": 62,
+      "finalMainHand": [
+        40366667,
+        40366667,
+        78114463
+      ],
+      "terminal": {
+        "turn": 2,
+        "player": 1,
+        "phase": "Draw",
+        "lp": 6200,
+        "mainResponses": 10,
+        "bridgeRequests": 62,
+        "hand": [
+          40366667,
+          78114463,
+          40366667,
+          72656408
+        ],
+        "monsters": [
+          {
+            "code": 95454996,
+            "sequence": 2
+          },
+          {
+            "code": 21848500,
+            "sequence": 5
+          }
+        ],
+        "spells": [
+          {
+            "code": 94722358,
+            "sequence": 0
+          }
+        ],
+        "opponentHandCount": 6
+      },
+      "testHandoffActions": [
+        "magnamhut-delayed-trigger",
+        "end-phase-pass",
+        "end-phase-pass",
+        "opponent-draw-pass",
+        "magnamhut-baldrake-search-native-automatic"
+      ]
+    },
+    {
+      "id": "hare-tb",
+      "routeId": "pair-shard-5-hare-tb-binder-ip",
+      "frames": 68,
+      "automaticResponses": 64,
+      "httpResponses": 68,
+      "finalMainHand": [
+        40366667,
+        78114463,
+        40366667
+      ],
+      "terminal": {
+        "turn": 2,
+        "player": 1,
+        "phase": "Draw",
+        "lp": 6200,
+        "mainResponses": 12,
+        "bridgeRequests": 68,
+        "hand": [
+          40366667,
+          78114463,
+          40366667
+        ],
+        "monsters": [
+          {
+            "code": 95454996,
+            "sequence": 2
+          },
+          {
+            "code": 65741786,
+            "sequence": 5
+          }
+        ],
+        "spells": [
+          {
+            "code": 94722358,
+            "sequence": 0
+          }
+        ],
+        "opponentHandCount": 6
+      },
+      "testHandoffActions": [
+        "end-phase-pass",
+        "opponent-draw-pass"
+      ]
+    },
+    {
+      "id": "dormouse-tb",
+      "routeId": "dorm-no-draw-firewall-accord",
+      "frames": 102,
+      "automaticResponses": 93,
+      "httpResponses": 95,
+      "finalMainHand": [
+        40366667,
+        78114463,
+        40366667,
+        57111661
+      ],
+      "terminal": {
+        "turn": 2,
+        "player": 1,
+        "phase": "Draw",
+        "lp": 6200,
+        "mainResponses": 17,
+        "bridgeRequests": 95,
+        "hand": [
+          40366667,
+          78114463,
+          40366667,
+          57111661
+        ],
+        "monsters": [
+          {
+            "code": 46947713,
+            "sequence": 0
+          },
+          {
+            "code": 39138610,
+            "sequence": 1
+          },
+          {
+            "code": 95454996,
+            "sequence": 2
+          },
+          {
+            "code": 5043010,
+            "sequence": 5
+          }
+        ],
+        "spells": [],
+        "opponentHandCount": 6
+      },
+      "testHandoffActions": []
+    },
+    {
+      "id": "rabbit-shifter",
+      "routeId": "rabbit-no-draw-accord",
+      "frames": 66,
+      "automaticResponses": 64,
+      "httpResponses": 66,
+      "finalMainHand": [
+        78114463,
+        40366667,
+        40366667,
+        91800273
+      ],
+      "terminal": {
+        "turn": 2,
+        "player": 1,
+        "phase": "Draw",
+        "lp": 6200,
+        "mainResponses": 11,
+        "bridgeRequests": 66,
+        "hand": [
+          78114463,
+          40366667,
+          40366667,
+          91800273
+        ],
+        "monsters": [
+          {
+            "code": 95454996,
+            "sequence": 1
+          },
+          {
+            "code": 39138610,
+            "sequence": 5
+          }
+        ],
+        "spells": [],
+        "opponentHandCount": 6
+      },
+      "testHandoffActions": []
+    },
+    {
+      "id": "cat-cat",
+      "routeId": "pair-shard-4-cat-cat-sp-no-draw",
+      "frames": 16,
+      "automaticResponses": 15,
+      "httpResponses": 17,
+      "finalMainHand": [
+        40366667,
+        40366667,
+        78114463
+      ],
+      "terminal": {
+        "turn": 2,
+        "player": 1,
+        "phase": "Draw",
+        "lp": 7700,
+        "mainResponses": 5,
+        "bridgeRequests": 17,
+        "hand": [
+          40366667,
+          40366667,
+          78114463
+        ],
+        "monsters": [
+          {
+            "code": 29301450,
+            "sequence": 5
+          }
+        ],
+        "spells": [],
+        "opponentHandCount": 6
+      },
+      "testHandoffActions": []
+    },
+    {
+      "id": "underground-underground",
+      "routeId": "spell-68337209-contract",
+      "frames": 64,
+      "automaticResponses": 62,
+      "httpResponses": 65,
+      "finalMainHand": [
+        40366667,
+        40366667,
+        78114463,
+        68337209,
+        69272449
+      ],
+      "terminal": {
+        "turn": 2,
+        "player": 1,
+        "phase": "Draw",
+        "lp": 6800,
+        "mainResponses": 11,
+        "bridgeRequests": 65,
+        "hand": [
+          40366667,
+          40366667,
+          78114463,
+          68337209,
+          69272449
+        ],
+        "monsters": [
+          {
+            "code": 65741786,
+            "sequence": 1
+          },
+          {
+            "code": 95454996,
+            "sequence": 5
+          }
+        ],
+        "spells": [
+          {
+            "code": 94722358,
+            "sequence": 0
+          }
+        ],
+        "opponentHandCount": 6
+      },
+      "testHandoffActions": [
+        "opponent-draw-pass"
+      ]
+    }
+  ],
+  "scope": "Twelve actual native opening fixtures; exact final Main state compared to WASM plan; no Astra CLI calls. This is not every opening hand or every search branch."
+}

@@ -10,7 +10,7 @@ const plan=await prepareOpening(templates.find(t=>t.id==='rabbit-no-draw-accord'
 function stateFor(frame){
   const own=structuredClone(frame.state.own);
   for(const zone of ['hand','grave','extra','banished'])own[zone]=own[zone].map(JSON.parse);
-  return {turn:1,player:1,phase:'Main1',players:[{player:0,lp:8000,deckCount:35,hand:Array.from({length:5},()=>({code:0})),monsters:[],spells:[],grave:[],banished:[]},{...own,player:1}],
+  return {turn:1,player:1,phase:frame.state.phase,players:[{player:0,lp:8000,deckCount:35,hand:Array.from({length:5},()=>({code:0})),monsters:[],spells:[],grave:[],banished:[]},{...own,player:1}],
     request:{...structuredClone(frame.request),...(frame.materialContext?{selectionContext:{...frame.materialContext,subtype:'SELECT_UNSELECT_CARD'}}:{})}};
 }
 function inputFor(frame=plan.frames[0]){return {session:'test',protocolVersion:2,requestId:1,state:stateFor(frame),
@@ -61,13 +61,42 @@ test('different preset and old native protocol never receive a saved action',asy
 });
 test('completed opening hands off; cached model response is reused and shortcut cannot resume',async()=>{
   const p=new NativeOpeningPolicy(templates),i=inputFor();await p.choose(i);p.cursor=p.plan.frames.length;
-  const next={...inputFor(),requestId:2};assert.equal(await p.choose(next),null);assert.equal(p.reason,'opening-completed');
+  const finalFrame={state:{phase:'MAIN1',own:p.plan.finalOwn},request:{kind:'single',title:'メインフェイズの行動',choices:[]}};
+  const next={...inputFor(finalFrame),requestId:2};assert.equal(await p.choose(next),null);assert.equal(p.reason,'opening-completed');
   const model={action:12,selection:[],counters:[],cancel:false,plan:'model'};p.rememberFallback(next,model);
   assert.equal(await p.choose(next),model);assert.equal(await p.choose({...next,requestId:3}),null);
+});
+test('last response resolution must preserve exact final monster positions before completion',async()=>{
+  const p=new NativeOpeningPolicy(templates);await p.choose(inputFor());p.cursor=p.plan.frames.length;
+  const finalFrame={state:{phase:'MAIN1',own:p.plan.finalOwn},request:{kind:'single',title:'メインフェイズの行動',choices:[]}};
+  const next={...inputFor(finalFrame),requestId:2},monsters=next.state.players[1].monsters;
+  const used=monsters.map((c,i)=>c?i:-1).filter(i=>i>=0);assert(used.length>=2);
+  [monsters[used[0]],monsters[used[1]]]=[monsters[used[1]],monsters[used[0]]];
+  assert.equal(await p.choose(next),null);assert.equal(p.reason,'opening-endpoint-mismatch');assert(p.retired);
 });
 test('Cat and Code Magician use both known cards with no draw for the saved endpoint',async()=>{
   const t=templates.find(t=>t.id==='cat-mag-crypter-binder-ip-gwc');assert(t);
   const p=await prepareOpening(t,[96676583,64865,40366667,40366667,78114463]);
   assert.deepEqual(p.final.players[0].monsters.filter(Boolean).map(c=>c.code).sort((a,b)=>a-b),[21848500,65741786,95454996]);
   assert(p.final.players[0].spells.some(c=>c?.code===20726052));assert.equal(p.drawDependent,false);
+});
+test('replacing Ash as Backup cost omits only its absent optional pass window',async()=>{
+  const p=await prepareOpening(templates.find(t=>t.id==='backup-discard-accord'),[30118811,1475311],{14558127:1475311});
+  assert.equal(p.drawDependent,false);assert.equal(p.final.lp[0],8000);
+  assert(p.final.players[0].monsters.some(c=>c?.code===39138610));
+  assert(p.final.players[0].grave.some(c=>c?.code===1475311));
+});
+test('an extra optional hand Link material can be declined without consuming it',async()=>{
+  const p=await prepareOpening(templates.find(t=>t.id==='rabbit-no-draw-accord'),[69272449,64865]);
+  assert(p.final.players[0].hand.some(c=>c?.code===64865));
+  assert(p.final.players[0].monsters.some(c=>c?.code===39138610));
+  assert.equal(p.drawDependent,false);
+});
+test('a Shifter window in Draw and Standby is replayed rather than skipping to Main',async()=>{
+  const p=new NativeOpeningPolicy(templates);
+  const probe=await prepareOpening(templates.find(t=>t.id==='rabbit-no-draw-accord'),[69272449,91800273,40366667,40366667,78114463]);
+  assert.equal(probe.frames[0].state.phase,'DRAW');
+  const first=inputFor(probe.frames[0]);assert(await p.choose(first));assert.equal(p.retired,false);assert.equal(p.preparations,1);
+  assert.equal(p.plan.frames[p.cursor].state.phase,'STANDBY');
+  assert(await p.choose({...inputFor(p.plan.frames[p.cursor]),requestId:2}));assert.equal(p.retired,false);
 });

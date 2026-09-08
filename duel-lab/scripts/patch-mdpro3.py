@@ -7,6 +7,17 @@ import sys
 ROOT = Path(__file__).resolve().parents[1]
 
 
+def patch_ai_tribute_subtype(source):
+    source = source.replace('\r\n', '\n')
+    signature = 'public IList<ClientCard> OnSelectTribute(IList<ClientCard> cards, int min, int max, int hint, bool cancelable)'
+    prefix = signature + '\n        {\n            if (Astra != null) return Astra.SelectCards(cards, min, max, hint, cancelable'
+    old = prefix + ');'
+    new = prefix + ', false, -1, true, "SELECT_TRIBUTE");'
+    if source.count(new) == 1:
+        return source
+    return _once(source, old, new, 'OnSelectTribute subtype')
+
+
 def _method_span(source, name):
     matches = list(re.finditer(r'private void ' + re.escape(name) + r'\([^\n]*\)\s*\{', source))
     if len(matches) != 1:
@@ -107,6 +118,9 @@ def main(argv=None):
     ai_path = game / 'GameAI.cs'
     ai = ai_path.read_text(encoding='utf-8-sig')
     if 'AstraDecisionBridge Astra' in ai:
+        tagged_ai = patch_ai_tribute_subtype(ai)
+        if tagged_ai != ai:
+            ai_path.write_text(tagged_ai, encoding='utf-8', newline='\r\n')
         changed = apply_safety_patch(TARGET)
         print('Updated Astra safety hooks' if changed else 'Astra safety hooks already current')
         raise SystemExit(0)
@@ -128,7 +142,7 @@ def main(argv=None):
     hook('OnSelectPlace', 'return Astra.Place(cardId, player, location, available);')
     hook('OnSelectPosition', 'return positions[Astra.Single("表示形式", positions.Select(p => (object)new { code = cardId, position = p.ToString() }).ToList())];')
     hook('OnSelectSum', 'return Astra.SelectCards(cards, min, max, hint, false, false, sum, mode);')
-    hook('OnSelectTribute', 'return Astra.SelectCards(cards, min, max, hint, cancelable);')
+    hook('OnSelectTribute', 'return Astra.SelectCards(cards, min, max, hint, cancelable, false, -1, true, "SELECT_TRIBUTE");')
     hook('OnSelectYesNo', 'return Astra.YesNo("はい／いいえ", new { description = desc });')
     hook('OnSelectBattleReplay', 'return Astra.YesNo("攻撃を続けるか", null);')
     hook('OnSelectHand', 'return Astra.YesNo("先攻を選ぶか", null);')

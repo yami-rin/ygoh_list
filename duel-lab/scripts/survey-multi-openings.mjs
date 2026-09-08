@@ -5,11 +5,12 @@ import assert from 'node:assert/strict';
 import {fileURLToPath} from 'node:url';
 import {cards} from '../cards.mjs';
 import {loadOpeningTemplates,bestOpening} from '../opening-policy.mjs';
+import {openingSources} from '../opening-sources.mjs';
 
 const ROOT=fileURLToPath(new URL('../',import.meta.url));
 const OUTPUT=path.join(ROOT,'routes/multi-opening-survey.json');
-const SOURCE_NAMES=['malice-monsters','spell-starters','cyberse-starters','multi-malice','multi-cyberse'];
-const CODE_FILES=['opening-policy.mjs','opening-semantics.mjs','engine.mjs','prompts.mjs','scripts/route-harness.mjs'];
+const SOURCE_NAMES=openingSources();
+const CODE_FILES=['opening-sources.mjs','opening-policy.mjs','opening-semantics.mjs','opening-placement.mjs','engine.mjs','prompts.mjs','scripts/route-harness.mjs'];
 const digest=value=>crypto.createHash('sha256').update(value).digest('hex');
 const safe=value=>JSON.parse(JSON.stringify(value,(_,item)=>typeof item==='bigint'?String(item):item));
 const hash=value=>digest(JSON.stringify(safe(value)));

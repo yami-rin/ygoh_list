@@ -2,9 +2,10 @@ import fs from 'node:fs';
 import assert from 'node:assert/strict';
 import {cards,ROOT} from './cards.mjs';
 import {startRoute,respond,board,hash,preset} from './scripts/route-harness.mjs';
-import {nativeFrame,semanticInput,matchFrame,emptyOpponent,publicOwn} from './opening-semantics.mjs';
+import {nativeFrame,semanticInput,matchFrame,emptyOpponent,publicOwn,startDeckCopyAudit} from './opening-semantics.mjs';
+import {openingSources} from './opening-sources.mjs';
+import {buildFinalPlacementBlock,matchPlacementBlock} from './opening-placement.mjs';
 
-const sourceNames=['malice-monsters','spell-starters','cyberse-starters','multi-malice','multi-cyberse'];
 const hasHand=(hand,required)=>{const left=[...hand];return required.every(code=>{const i=left.indexOf(code);if(i<0)return false;left.splice(i,1);return true;});};
 const drawn=g=>g.log.some(e=>/\d+\s*枚ドロー/.test(e.text));
 const weights={39138610:9,65741786:8,95454996:5,21848500:5,29301450:5,5043010:4,4993187:4,46947713:2,52698008:2,86066372:1,13203964:1,24842059:2};
@@ -16,10 +17,11 @@ export function openingScore(g) {
 }
 
 export async function loadOpeningTemplates() {
-  const templates=[];
-  for(const name of sourceNames){const file=new URL(`./routes/${name}.json`,import.meta.url);if(!fs.existsSync(file))continue;
+  const templates=[],ids=new Set();
+  for(const name of openingSources()){const file=new URL(`./routes/${name}.json`,import.meta.url);
     for(const route of JSON.parse(fs.readFileSync(file)).routes||[]){
       if(!route.verified||route.requiresDraw||route.hand.length>3||route.log?.some(e=>/\d+\s*枚ドロー/.test(e.text)))continue;
+      assert.equal(typeof route.id,'string');assert(!ids.has(route.id),`Duplicate opening route id: ${route.id}`);ids.add(route.id);
       assert.equal(route.presetHash,hash(preset));assert.equal(hash(route.final),route.finalHash);
       const g=await startRoute(route.hand,{seed:route.seed,deckOrder:route.deckOrder});
       const steps=[];
@@ -39,14 +41,31 @@ export async function loadOpeningTemplates() {
 
 export async function prepareOpening(template,hand,replacements={}) {
   const required=template.hand.map(code=>replacements[code]||code);assert(hasHand(hand,required));
-  const g=await startRoute(hand);const frames=[];
-  const take=input=>{const frame=nativeFrame(g,input);frames.push(frame);respond(g,input);assert(!drawn(g),'Opening crosses a draw boundary');};
+  const g=await startRoute(hand),frames=[];let resolutionEvents=[];
+  const record=g.record;
+  g.record=function(message){resolutionEvents.push(structuredClone(message));return record.call(this,message);};
+  startDeckCopyAudit(g);
+  const take=input=>{const frame=nativeFrame(g,input);frames.push(frame);
+    const chain=structuredClone(g.chain);resolutionEvents=[];respond(g,input);
+    if(frame.type==='SELECT_PLACE'){
+      frame.resolutionEvents=JSON.parse(JSON.stringify(resolutionEvents,(_,v)=>typeof v==='bigint'?String(v):v));frame.resolutionChain=chain;
+    }
+    assert(!drawn(g),'Opening crosses a draw boundary');};
   try {
     for(const step of template.steps){
+      // A replaced hand trap can remove an optional chain window entirely.
+      // Only a saved explicit pass has no game action to reproduce.
+      if(g.prompt.type!==step.prompt.type&&step.prompt.type==='SELECT_CHAIN'&&!step.pending.forced&&
+        step.prompt.choices.find(c=>c.id===step.input.action)?.response.index===null)continue;
       // Additional optional chains supplied by extra hand cards may be declined;
       // their explicit choices are still recorded and matched by the native replayer.
       for(let i=0;g.prompt.type!==step.prompt.type&&g.prompt.type==='SELECT_CHAIN'&&!g.pending.forced&&i<8;i++){
         const pass=g.prompt.choices.find(c=>c.response.index===null);assert(pass);take({action:pass.id});
+      }
+      // A hand Link material adds another optional material to the candidate
+      // group. Finish only when the actual core says the saved selection is legal.
+      if(step.prompt.type==='SELECT_PLACE'&&g.prompt.type==='SELECT_UNSELECT_CARD'&&g.pending.can_finish){
+        const finish=g.prompt.choices.find(c=>c.response.index===null);assert(finish);take({action:finish.id});
       }
       take(semanticInput(step,g,step.input,replacements));
     }
@@ -54,8 +73,9 @@ export async function prepareOpening(template,hand,replacements={}) {
       const pass=g.prompt.choices.find(c=>c.response.index===null);assert(pass);take({action:pass.id});
     }
     assert(g.turn===1&&g.phase===4&&g.prompt.type==='SELECT_IDLECMD');assert(frames.some(f=>!f.automatic));
+    const finalOwn=publicOwn(g.snapshot(0).players[0]);
     return {id:template.id,source:template.source,requiredHand:required,hand:[...hand],frames,score:openingScore(g),final:board(g),
-      finalOwn:publicOwn(g.snapshot(0).players[0]),responseCount:g.inputs.length,drawDependent:false};
+      finalOwn,finalPlacement:buildFinalPlacementBlock(frames,finalOwn),responseCount:g.inputs.length,drawDependent:false};
   }finally{g.close();}
 }
 
@@ -81,7 +101,7 @@ export async function bestOpening(templates,hand,{maxCandidates=24}={}) {
 
 export class NativeOpeningPolicy {
   constructor(templates){this.templates=templates;this.reset(null);this.hits=0;this.preparations=0;}
-  reset(session){this.session=session;this.plan=null;this.cursor=0;this.retired=false;this.lastId=0;this.lastHash=null;this.lastResult=null;this.safety=null;this.opponent=null;this.reason='not-started';}
+  reset(session){this.session=session;this.plan=null;this.cursor=0;this.placementAnsweredCodes=[];this.retired=false;this.lastId=0;this.lastHash=null;this.lastResult=null;this.safety=null;this.opponent=null;this.reason='not-started';}
   retire(reason){this.retired=true;this.reason=reason;return null;}
   context(){return {status:this.reason,route:this.plan?.id||null,completedSteps:this.cursor,totalSteps:this.plan?.frames.length||0,
     note:'検証済み初動の続き。実際の現在状態を優先し、未確定ドローや妨害後へ保存手順を流用しない。'};}
@@ -109,7 +129,7 @@ export class NativeOpeningPolicy {
     if(!emptyOpponent(op)||safe.opponentEffectEpoch!==0||safe.negationEpoch!==0)return this.retire('opponent-interruption');
     if((me?.monsters||[]).some(c=>c?.disabled))return this.retire('disabled-card');
     if(!this.plan){
-      if(String(s.phase).replace(/[ _]/g,'').toUpperCase()!=='MAIN1'||s.request.title!=='メインフェイズの行動')return null;
+      if(!['DRAW','STANDBY','MAIN1'].includes(String(s.phase).replace(/[ _]/g,'').toUpperCase()))return null;
       if(!me||me.hand.length!==5||me.deckCount!==35||me.lp!==8000||!emptyOpponent(me))return this.retire('not-clean-opening');
       const expected=Object.entries([...preset.main,...preset.extra].reduce((m,c)=>(m[c]=(m[c]||0)+1,m),{})).map(([code,count])=>({code:Number(code),count}));
       if(hash(input.ownDeck?.slice().sort((a,b)=>a.code-b.code))!==hash(expected.sort((a,b)=>a.code-b.code)))return this.retire('different-deck');
@@ -119,7 +139,16 @@ export class NativeOpeningPolicy {
     }
     if(hash(safe)!==this.safety)return this.retire('draw-or-history-changed');
     if(hash({hand:op.hand.length,deckCount:op.deckCount,lp:op.lp})!==this.opponent)return this.retire('opponent-state-changed');
+    const block=this.plan.finalPlacement;
     while(this.cursor<this.plan.frames.length){
+    if(block&&this.cursor>=block.startFrame&&this.cursor<block.endExclusive){
+      const matched=matchPlacementBlock(block,s,this.placementAnsweredCodes);
+      if(!matched)return this.retire('placement-resolution-mismatch');
+      if(matched.kind==='complete'){this.cursor=block.endExclusive;this.placementAnsweredCodes=[];break;}
+      else{this.placementAnsweredCodes=[...new Set([...this.placementAnsweredCodes,...matched.observedCodes,matched.code])];this.hits++;this.reason='verified-opening';
+        const decision={...matched.decision,plan:`事前検証: ${this.plan.id}。アコードの蘇生対象と予定位置を照合。`};
+        this.lastResult=decision;return decision;}
+    }
       const frame=this.plan.frames[this.cursor];const decision=matchFrame(frame,s);
       if(decision){this.cursor++;this.hits++;this.reason='verified-opening';
         decision.plan=`事前検証: ${this.plan.id} ${this.cursor}/${this.plan.frames.length}。不一致・追加ドロー・相手干渉では再判断。`;
@@ -127,6 +156,9 @@ export class NativeOpeningPolicy {
       if(frame.automatic){this.cursor++;continue;}
       return this.retire('state-or-request-mismatch');
     }
+    // The last response may resolve several effects without another prompt.
+    // Verify that resolution too before calling the saved opening complete.
+    if(hash(publicOwn(me))!==hash(this.plan.finalOwn))return this.retire('opening-endpoint-mismatch');
     return this.retire('opening-completed');
   }
 }
