@@ -18,8 +18,8 @@ export function validatePairSummary(p,base){
   assert.equal(p.completeWithinNoDrawScope,p.unresolved===0,'Completion must reflect unresolved work');
   assert.equal(p.status,p.unresolved===0?'completeWithinNoDrawScope':'incomplete');
 }
-export function validateSearchIdentity(r,shard){
-  for(const [key,value] of Object.entries(searchIdentity))assert.equal(r[key],value,`Invalid search ${key}`);
+export function validateSearchIdentity(r,shard,expected=searchIdentity){
+  for(const [key,value] of Object.entries(expected))assert.equal(r[key],value,`Invalid search ${key}`);
   assert.equal(r.shard,shard);assert.equal(r.shards,8);assert.equal(typeof r.generation,'string');assert(r.generation.length>0);
 }
 export async function verifyNoDrawRoute(route){
@@ -35,21 +35,24 @@ export async function verifyNoDrawRoute(route){
     assert.equal(hash(board(g)),route.finalHash);assert.equal(hash(route.final),route.finalHash);
   }finally{g.close();}
 }
-export async function main(){
+export async function main({fast=false,tribute=false}={}){
+assert(!(fast&&tribute),'Choose only one search implementation');
+const expected=tribute?(await import('./search-multi-pairs-tribute.mjs')).searchIdentity:fast?(await import('./search-multi-pairs-fast.mjs')).searchIdentity:searchIdentity;
+const searchRoot=tribute?'runtime/multi-pair-search-tribute':fast?'runtime/multi-pair-search-fast':'runtime/multi-pair-search';
 const reports=[],sources=[],routes=[],manual=[],seen=new Set(),routeIds=new Set();
 const read=file=>{const bytes=fs.readFileSync(file,'utf8');sources.push({path:path.relative(ROOT,file).replaceAll('\\','/'),hash:hash(bytes)});return JSON.parse(bytes);};
 const verifyRoute=async route=>{assert.equal(typeof route.id,'string');assert(!routeIds.has(route.id),`Duplicate route ${route.id}`);routeIds.add(route.id);await verifyNoDrawRoute(route);};
 for(let shard=0;shard<8;shard++){
-  const file=path.join(ROOT,`runtime/multi-pair-search/shard-${shard}/summary.json`);
-  const routeFile=path.join(ROOT,`runtime/multi-pair-search/shard-${shard}/best-routes.json`);
+  const file=path.join(ROOT,`${searchRoot}/shard-${shard}/summary.json`);
+  const routeFile=path.join(ROOT,`${searchRoot}/shard-${shard}/best-routes.json`);
   if(fs.existsSync(file)){
-    const r=read(file);validateSearchIdentity(r,shard);
+    const r=read(file);validateSearchIdentity(r,shard,expected);
     assert.deepEqual(r.pairs.map(p=>p.index),all.filter(p=>p.index%8===shard).map(p=>p.index));
     assert.equal(new Set(r.selectedPairIndices).size,r.selectedPairIndices.length);
     assert(r.selectedPairIndices.every(index=>r.pairs.some(p=>p.index===index)),'Selected slice must belong to the published shard');
     for(const p of r.pairs){assert.equal(p.index%8,shard);validatePairSummary(p,all[p.index]);assert(!seen.has(p.index));seen.add(p.index);}
     reports.push(r);
-    const data=read(routeFile);validateSearchIdentity(data,shard);assert.equal(data.generation,r.generation,'Mixed shard publication');
+    const data=read(routeFile);validateSearchIdentity(data,shard,expected);assert.equal(data.generation,r.generation,'Mixed shard publication');
     const routePairs=new Set();
     for(const route of data.routes){assert.equal(route.pairIndex%8,shard);assert.deepEqual(route.hand,all[route.pairIndex].hand);
       assert(!routePairs.has(route.pairIndex));routePairs.add(route.pairIndex);
@@ -76,8 +79,8 @@ const summary={totalPairs:333,physicalCombinations:780,searched:pairs.filter(p=>
   completeWithinNoDrawScope:pairs.filter(p=>p.completeWithinNoDrawScope).length,unsearched:pairs.filter(p=>!p.visited).length,
   visited:sum('visited'),terminalPaths:sum('terminalPaths'),unresolved:sum('unresolved'),excludedDraw:sum('excludedDraw'),
   manualRoutes:manual.length,searchRoutes:routes.length};
-const report={schemaVersion:1,presetHash:hash(preset),summary,sources,pairs,
-  scope:'固定2枚の先攻・相手手札なし。未知ドロー後を除外。既知template照合と実合法木探索は別指標。',
+const report={schemaVersion:1,presetHash:hash(preset),searchImplementation:expected,summary,sources,pairs,
+  scope:'固定2枚の先攻・相手手札なし。未知ドロー後を除外。既知template照合と実合法木探索は別指標。'+(tribute?' 初期手札バルドレイク・マグナムートの通常召喚キャンセルと既存のLink素材UI循環は、ソース照合などの監査条件が成立する場合のみ縮約する。':''),
   complete:summary.completeWithinNoDrawScope===333,updatedAt:new Date().toISOString()};
 write(path.join(ROOT,'routes/multi-search-best.json'),{schemaVersion:1,presetHash:hash(preset),routes});
 write(path.join(ROOT,'routes/multi-search-report.json'),report);
@@ -92,4 +95,7 @@ write(path.join(ROOT,'docs/MULTI_SEARCH_COVERAGE.md'),lines.join('\n')+'\n');
 console.log(JSON.stringify(summary));
 return report;
 }
-if(process.argv[1]&&pathToFileURL(path.resolve(process.argv[1])).href===import.meta.url)await main();
+if(process.argv[1]&&pathToFileURL(path.resolve(process.argv[1])).href===import.meta.url){
+  assert(process.argv.slice(2).every(arg=>['--fast','--tribute'].includes(arg)),'Only --fast or --tribute is supported');
+  await main({fast:process.argv.includes('--fast'),tribute:process.argv.includes('--tribute')});
+}

@@ -1,0 +1,6355 @@
+{
+  "schema": "astra-fast-wave-verification-v1",
+  "identity": {
+    "schema": "astra-multi-pair-search-fast-v1",
+    "presetHash": "8d4d40bc085644f9150344c6237b4239a07ef69f1cc21631832b4b695b641095",
+    "pairHash": "ba812b10266fad6016bcf6bd5470b9499098478c460902ea4a3ff02882ac5bdf",
+    "sourceHash": "337622b90a51183bde4dd75e3dc51aab46e37dafa032fc688d8718097800d604",
+    "assetsHash": "2c909f0750c3fcc3e81a08a57329fe62bd92d913079c4ac0842b1dfe175a2c82"
+  },
+  "verifiedAt": "2026-09-08T01:38:03.372Z",
+  "checks": [
+    "333 reference file hashes unchanged",
+    "all previous terminal histories retained",
+    "all excluded draw boundaries retained",
+    "migration payload hashes match reference",
+    "completed reference trees stay complete",
+    "all shard locks released"
+  ],
+  "summary": {
+    "pairs": 333,
+    "oldComplete": 134,
+    "complete": 136,
+    "oldVisited": 222997,
+    "visited": 334795,
+    "frontier": 66571,
+    "fastCoreStarts": 44285,
+    "fastReplayedResponses": 1270561,
+    "fastReusedResponses": 67513
+  },
+  "pairs": [
+    {
+      "index": 0,
+      "id": "64865-1475311",
+      "originHash": "394c4f158d13e952f37eb1d0b509860b0823b13670dbdec2bc4e0d02431c1e26",
+      "old": {
+        "visited": 24,
+        "complete": true,
+        "frontier": 0
+      },
+      "current": {
+        "visited": 24,
+        "complete": true,
+        "frontier": 0
+      },
+      "execution": null
+    },
+    {
+      "index": 1,
+      "id": "64865-3723262",
+      "originHash": "a8e71114248f9ea81011e927344103769e7ed7d0f0c79a0c3e2c39da4485ea56",
+      "old": {
+        "visited": 554,
+        "complete": false,
+        "frontier": 165
+      },
+      "current": {
+        "visited": 972,
+        "complete": false,
+        "frontier": 243
+      },
+      "execution": {
+        "coreStarts": 159,
+        "replayedResponses": 6663,
+        "reusedResponses": 259,
+        "scope": "Actual operations since first use of this executor; earlier baseline operations are not inferred"
+      }
+    },
+    {
+      "index": 2,
+      "id": "64865-14558127",
+      "originHash": "89a5b63e012363ab34913f3929ea4000eba0d646a4f891e97dcd4900f7d619b5",
+      "old": {
+        "visited": 469,
+        "complete": false,
+        "frontier": 326
+      },
+      "current": {
+        "visited": 1024,
+        "complete": false,
+        "frontier": 404
+      },
+      "execution": {
+        "coreStarts": 204,
+        "replayedResponses": 8609,
+        "reusedResponses": 351,
+        "scope": "Actual operations since first use of this executor; earlier baseline operations are not inferred"
+      }
+    },
+    {
+      "index": 3,
+      "id": "64865-18789533",
+      "originHash": "7357be725b9a86c5cd283b5eb280a1c2f1b7b310a1d30fdf8537626ac454f8a2",
+      "old": {
+        "visited": 681,
+        "complete": false,
+        "frontier": 222
+      },
+      "current": {
+        "visited": 1129,
+        "complete": false,
+        "frontier": 281
+      },
+      "execution": {
+        "coreStarts": 177,
+        "replayedResponses": 5112,
+        "reusedResponses": 271,
+        "scope": "Actual operations since first use of this executor; earlier baseline operations are not inferred"
+      }
+    },
+    {
+      "index": 4,
+      "id": "64865-20726052",
+      "originHash": "9230394027a33641e4ab41e01dc64e391029fcb597501b6fc3b8da7af882034d",
+      "old": {
+        "visited": 13,
+        "complete": true,
+        "frontier": 0
+      },
+      "current": {
+        "visited": 13,
+        "complete": true,
+        "frontier": 0
+      },
+      "execution": null
+    },
+    {
+      "index": 5,
+      "id": "64865-20938824",
+      "originHash": "1ea022dcf1d5f7fd8e8b1afe8ca0f2098ebe5a9d706de2e747524a5aec79a952",
+      "old": {
+        "visited": 496,
+        "complete": false,
+        "frontier": 318
+      },
+      "current": {
+        "visited": 955,
+        "complete": false,
+        "frontier": 399
+      },
+      "execution": {
+        "coreStarts": 176,
+        "replayedResponses": 7422,
+        "reusedResponses": 283,
+        "scope": "Actual operations since first use of this executor; earlier baseline operations are not inferred"
+      }
+    },
+    {
+      "index": 6,
+      "id": "64865-23434538",
+      "originHash": "c866d51c37e2fde41853d3f393694a86891a1c668f66aa3b249e5bdc0a375075",
+      "old": {
+        "visited": 449,
+        "complete": false,
+        "frontier": 329
+      },
+      "current": {
+        "visited": 915,
+        "complete": false,
+        "frontier": 406
+      },
+      "execution": {
+        "coreStarts": 170,
+        "replayedResponses": 7494,
+        "reusedResponses": 296,
+        "scope": "Actual operations since first use of this executor; earlier baseline operations are not inferred"
+      }
+    },
+    {
+      "index": 7,
+      "id": "64865-30118811",
+      "originHash": "6e426268006d4956bc1e78551b1b27db2d714715ac7bc7c6c9daf897f0cdb62e",
+      "old": {
+        "visited": 553,
+        "complete": false,
+        "frontier": 192
+      },
+      "current": {
+        "visited": 1040,
+        "complete": false,
+        "frontier": 258
+      },
+      "execution": {
+        "coreStarts": 193,
+        "replayedResponses": 6400,
+        "reusedResponses": 294,
+        "scope": "Actual operations since first use of this executor; earlier baseline operations are not inferred"
+      }
+    },
+    {
+      "index": 8,
+      "id": "64865-32061192",
+      "originHash": "e86be3bf4f2ebe168fd659a2aacd0ef6947d378fdfc2f272d1c8f7a7fc7baacf",
+      "old": {
+        "visited": 681,
+        "complete": false,
+        "frontier": 316
+      },
+      "current": {
+        "visited": 1204,
+        "complete": false,
+        "frontier": 392
+      },
+      "execution": {
+        "coreStarts": 206,
+        "replayedResponses": 8780,
+        "reusedResponses": 317,
+        "scope": "Actual operations since first use of this executor; earlier baseline operations are not inferred"
+      }
+    },
+    {
+      "index": 9,
+      "id": "64865-33854624",
+      "originHash": "f040749e5cc5dfdf800a89babeeeb43370a2ea6f4fd6682ae1f88a350dd617aa",
+      "old": {
+        "visited": 2,
+        "complete": true,
+        "frontier": 0
+      },
+      "current": {
+        "visited": 2,
+        "complete": true,
+        "frontier": 0
+      },
+      "execution": null
+    },
+    {
+      "index": 10,
+      "id": "64865-40366667",
+      "originHash": "c42e421c8a3ce2674a2b300e4c498f0cf23a7e9d3198d236e1d5fefec3ab58a1",
+      "old": {
+        "visited": 13,
+        "complete": true,
+        "frontier": 0
+      },
+      "current": {
+        "visited": 13,
+        "complete": true,
+        "frontier": 0
+      },
+      "execution": null
+    },
+    {
+      "index": 11,
+      "id": "64865-57111661",
+      "originHash": "75decb6f1161cc84dabed092a162faf599e67aebe0c24079aa27c1ea04507dc7",
+      "old": {
+        "visited": 13,
+        "complete": true,
+        "frontier": 0
+      },
+      "current": {
+        "visited": 13,
+        "complete": true,
+        "frontier": 0
+      },
+      "execution": null
+    },
+    {
+      "index": 12,
+      "id": "64865-59438930",
+      "originHash": "1a2ab70be1c5e49a69470128de392c03f0f75c5bfccd0c8a29bacd00d9cd3214",
+      "old": {
+        "visited": 462,
+        "complete": false,
+        "frontier": 245
+      },
+      "current": {
+        "visited": 957,
+        "complete": false,
+        "frontier": 325
+      },
+      "execution": {
+        "coreStarts": 180,
+        "replayedResponses": 7587,
+        "reusedResponses": 315,
+        "scope": "Actual operations since first use of this executor; earlier baseline operations are not inferred"
+      }
+    },
+    {
+      "index": 13,
+      "id": "64865-68337209",
+      "originHash": "1f1c1e69ab351232335fed30d1dd88a12b3f27850f0e5a221c3a64b6f816dddb",
+      "old": {
+        "visited": 508,
+        "complete": false,
+        "frontier": 376
+      },
+      "current": {
+        "visited": 960,
+        "complete": false,
+        "frontier": 468
+      },
+      "execution": {
+        "coreStarts": 173,
+        "replayedResponses": 7804,
+        "reusedResponses": 279,
+        "scope": "Actual operations since first use of this executor; earlier baseline operations are not inferred"
+      }
+    },
+    {
+      "index": 14,
+      "id": "64865-69272449",
+      "originHash": "87b488df8b49b1b1d326b0a28d36ebd40e02ee7622799dd42b4c34c2381f1931",
+      "old": {
+        "visited": 484,
+        "complete": false,
+        "frontier": 309
+      },
+      "current": {
+        "visited": 974,
+        "complete": false,
+        "frontier": 390
+      },
+      "execution": {
+        "coreStarts": 192,
+        "replayedResponses": 7128,
+        "reusedResponses": 298,
+        "scope": "Actual operations since first use of this executor; earlier baseline operations are not inferred"
+      }
+    },
+    {
+      "index": 15,
+      "id": "64865-72656408",
+      "originHash": "0ed6a16731602416f653f5f020ab3409e8dbaa591f37b1c622989335b24dff3b",
+      "old": {
+        "visited": 2,
+        "complete": true,
+        "frontier": 0
+      },
+      "current": {
+        "visited": 2,
+        "complete": true,
+        "frontier": 0
+      },
+      "execution": null
+    },
+    {
+      "index": 16,
+      "id": "64865-73628505",
+      "originHash": "5676ae1d463b1c353f90f13a5c7c40f996fe579e9dc256146ea65120e758eaf1",
+      "old": {
+        "visited": 654,
+        "complete": false,
+        "frontier": 431
+      },
+      "current": {
+        "visited": 1155,
+        "complete": false,
+        "frontier": 537
+      },
+      "execution": {
+        "coreStarts": 192,
+        "replayedResponses": 9261,
+        "reusedResponses": 309,
+        "scope": "Actual operations since first use of this executor; earlier baseline operations are not inferred"
+      }
+    },
+    {
+      "index": 17,
+      "id": "64865-74652966",
+      "originHash": "99faeed96db92b59d140351a11dbd3021280a532c0e272236f8a87bf5bea6f2a",
+      "old": {
+        "visited": 559,
+        "complete": false,
+        "frontier": 174
+      },
+      "current": {
+        "visited": 978,
+        "complete": false,
+        "frontier": 256
+      },
+      "execution": {
+        "coreStarts": 159,
+        "replayedResponses": 6699,
+        "reusedResponses": 260,
+        "scope": "Actual operations since first use of this executor; earlier baseline operations are not inferred"
+      }
+    },
+    {
+      "index": 18,
+      "id": "64865-75500286",
+      "originHash": "cf22fb99956a13bc02b77fda4e79237b1db89be9dce614285bd025a9e1c42a45",
+      "old": {
+        "visited": 692,
+        "complete": false,
+        "frontier": 137
+      },
+      "current": {
+        "visited": 1366,
+        "complete": false,
+        "frontier": 162
+      },
+      "execution": {
+        "coreStarts": 308,
+        "replayedResponses": 4164,
+        "reusedResponses": 366,
+        "scope": "Actual operations since first use of this executor; earlier baseline operations are not inferred"
+      }
+    },
+    {
+      "index": 19,
+      "id": "64865-78114463",
+      "originHash": "a69076a5c878b0506b41213aec46383aa3a51093b793c055385494d65f9d5dbf",
+      "old": {
+        "visited": 13,
+        "complete": true,
+        "frontier": 0
+      },
+      "current": {
+        "visited": 13,
+        "complete": true,
+        "frontier": 0
+      },
+      "execution": null
+    },
+    {
+      "index": 20,
+      "id": "64865-84192580",
+      "originHash": "8a44adf44af0e980dfabf70dcc98cef0730748caf7b706c94a0a45ea10f3d008",
+      "old": {
+        "visited": 468,
+        "complete": false,
+        "frontier": 248
+      },
+      "current": {
+        "visited": 969,
+        "complete": false,
+        "frontier": 328
+      },
+      "execution": {
+        "coreStarts": 182,
+        "replayedResponses": 8039,
+        "reusedResponses": 319,
+        "scope": "Actual operations since first use of this executor; earlier baseline operations are not inferred"
+      }
+    },
+    {
+      "index": 21,
+      "id": "64865-91800273",
+      "originHash": "a4a0eab33276b60b84a3dcca0d76f32188ed4ab289eb770a6d06212b09db6e5c",
+      "old": {
+        "visited": 12,
+        "complete": true,
+        "frontier": 0
+      },
+      "current": {
+        "visited": 12,
+        "complete": true,
+        "frontier": 0
+      },
+      "execution": null
+    },
+    {
+      "index": 22,
+      "id": "64865-94145021",
+      "originHash": "3984bd2c73bfe3c12f4ae4a2980194bdf8c9e87053024aa0780c787e013c5b21",
+      "old": {
+        "visited": 441,
+        "complete": false,
+        "frontier": 328
+      },
+      "current": {
+        "visited": 944,
+        "complete": false,
+        "frontier": 407
+      },
+      "execution": {
+        "coreStarts": 183,
+        "replayedResponses": 7719,
+        "reusedResponses": 320,
+        "scope": "Actual operations since first use of this executor; earlier baseline operations are not inferred"
+      }
+    },
+    {
+      "index": 23,
+      "id": "64865-94722358",
+      "originHash": "048ff53683bc2bbbe8fd8f20f048306c6246f3ae87a0eaa1b6d89be3cfc9517a",
+      "old": {
+        "visited": 13,
+        "complete": true,
+        "frontier": 0
+      },
+      "current": {
+        "visited": 13,
+        "complete": true,
+        "frontier": 0
+      },
+      "execution": null
+    },
+    {
+      "index": 24,
+      "id": "64865-96676583",
+      "originHash": "853115a59ff7f16b1529ac23b20549df056523e63ea418a6fed90b43aa766b17",
+      "old": {
+        "visited": 642,
+        "complete": false,
+        "frontier": 311
+      },
+      "current": {
+        "visited": 1070,
+        "complete": false,
+        "frontier": 383
+      },
+      "execution": {
+        "coreStarts": 165,
+        "replayedResponses": 6927,
+        "reusedResponses": 263,
+        "scope": "Actual operations since first use of this executor; earlier baseline operations are not inferred"
+      }
+    },
+    {
+      "index": 25,
+      "id": "1475311-3723262",
+      "originHash": "7c4128229b3438aab4f34c7bab2025ddd6f1476fc581369523e71f24ae5511a4",
+      "old": {
+        "visited": 1837,
+        "complete": true,
+        "frontier": 0
+      },
+      "current": {
+        "visited": 1837,
+        "complete": true,
+        "frontier": 0
+      },
+      "execution": null
+    },
+    {
+      "index": 26,
+      "id": "1475311-14558127",
+      "originHash": "3b825b1f7efb3f646db27e762a093b49c24b8d0c180dab8ca2b059e1642e0805",
+      "old": {
+        "visited": 1162,
+        "complete": true,
+        "frontier": 0
+      },
+      "current": {
+        "visited": 1162,
+        "complete": true,
+        "frontier": 0
+      },
+      "execution": null
+    },
+    {
+      "index": 27,
+      "id": "1475311-18789533",
+      "originHash": "57869e6d3c3d6e88f040119ef0eb6aeeca28b6a7d912b7d5dfa7ddea597cecb5",
+      "old": {
+        "visited": 859,
+        "complete": false,
+        "frontier": 125
+      },
+      "current": {
+        "visited": 1342,
+        "complete": false,
+        "frontier": 150
+      },
+      "execution": {
+        "coreStarts": 259,
+        "replayedResponses": 4254,
+        "reusedResponses": 224,
+        "scope": "Actual operations since first use of this executor; earlier baseline operations are not inferred"
+      }
+    },
+    {
+      "index": 28,
+      "id": "1475311-20726052",
+      "originHash": "dc44eb43ffa754052b5756684249a67b3d532fdff694e04283e7343c9bf749da",
+      "old": {
+        "visited": 190,
+        "complete": true,
+        "frontier": 0
+      },
+      "current": {
+        "visited": 190,
+        "complete": true,
+        "frontier": 0
+      },
+      "execution": null
+    },
+    {
+      "index": 29,
+      "id": "1475311-20938824",
+      "originHash": "9428e9a2f6b76d9bd10c2bee7a92a568c4520f432470beb161850515dc5b85b3",
+      "old": {
+        "visited": 2544,
+        "complete": true,
+        "frontier": 0
+      },
+      "current": {
+        "visited": 2544,
+        "complete": true,
+        "frontier": 0
+      },
+      "execution": null
+    },
+    {
+      "index": 30,
+      "id": "1475311-23434538",
+      "originHash": "6e2e96afc3aa6da36035a81e33195a5fccef75ff7100e4d8c76999bd8f0ab950",
+      "old": {
+        "visited": 1272,
+        "complete": true,
+        "frontier": 0
+      },
+      "current": {
+        "visited": 1272,
+        "complete": true,
+        "frontier": 0
+      },
+      "execution": null
+    },
+    {
+      "index": 31,
+      "id": "1475311-30118811",
+      "originHash": "8790b169b02691b96e0456244f12047ab195752a36b9740205b9f6be3065375b",
+      "old": {
+        "visited": 662,
+        "complete": false,
+        "frontier": 184
+      },
+      "current": {
+        "visited": 1170,
+        "complete": false,
+        "frontier": 232
+      },
+      "execution": {
+        "coreStarts": 270,
+        "replayedResponses": 5212,
+        "reusedResponses": 238,
+        "scope": "Actual operations since first use of this executor; earlier baseline operations are not inferred"
+      }
+    },
+    {
+      "index": 32,
+      "id": "1475311-32061192",
+      "originHash": "e7e564d6c659dd1f775f3a55a0404951948141992f0f8f89d7c3476b93a762db",
+      "old": {
+        "visited": 798,
+        "complete": false,
+        "frontier": 221
+      },
+      "current": {
+        "visited": 1196,
+        "complete": false,
+        "frontier": 291
+      },
+      "execution": {
+        "coreStarts": 202,
+        "replayedResponses": 6307,
+        "reusedResponses": 196,
+        "scope": "Actual operations since first use of this executor; earlier baseline operations are not inferred"
+      }
+    },
+    {
+      "index": 33,
+      "id": "1475311-33854624",
+      "originHash": "e8c8331368a0cc8f0733bb93607534299fecd6445a8e8f06392220b7405c721d",
+      "old": {
+        "visited": 24,
+        "complete": true,
+        "frontier": 0
+      },
+      "current": {
+        "visited": 24,
+        "complete": true,
+        "frontier": 0
+      },
+      "execution": null
+    },
+    {
+      "index": 34,
+      "id": "1475311-40366667",
+      "originHash": "0975ca7369fb6c5d555284adff17703f9c3c4f0106f17bf47def4e2d1366a717",
+      "old": {
+        "visited": 190,
+        "complete": true,
+        "frontier": 0
+      },
+      "current": {
+        "visited": 190,
+        "complete": true,
+        "frontier": 0
+      },
+      "execution": null
+    },
+    {
+      "index": 35,
+      "id": "1475311-57111661",
+      "originHash": "3df2fc8999973ffcf50838278de39ac76b2bfb999421ccc256ad2ba84e6a9fa7",
+      "old": {
+        "visited": 190,
+        "complete": true,
+        "frontier": 0
+      },
+      "current": {
+        "visited": 190,
+        "complete": true,
+        "frontier": 0
+      },
+      "execution": null
+    },
+    {
+      "index": 36,
+      "id": "1475311-59438930",
+      "originHash": "ba4e53cff980a0f98d453dace4191df284550d42f4ce9aca1ef5d8e240657616",
+      "old": {
+        "visited": 1132,
+        "complete": true,
+        "frontier": 0
+      },
+      "current": {
+        "visited": 1132,
+        "complete": true,
+        "frontier": 0
+      },
+      "execution": null
+    },
+    {
+      "index": 37,
+      "id": "1475311-68337209",
+      "originHash": "86f9abe922ee1d63f97ff7c14f8ad4aa64fe9b988cbd9a9e718a4ce521c70327",
+      "old": {
+        "visited": 697,
+        "complete": false,
+        "frontier": 282
+      },
+      "current": {
+        "visited": 1091,
+        "complete": false,
+        "frontier": 378
+      },
+      "execution": {
+        "coreStarts": 191,
+        "replayedResponses": 7877,
+        "reusedResponses": 203,
+        "scope": "Actual operations since first use of this executor; earlier baseline operations are not inferred"
+      }
+    },
+    {
+      "index": 38,
+      "id": "1475311-69272449",
+      "originHash": "d470c6e6448a3f6ca3e2d009b960b9ffa2237d87537e9dfb723c8b0ebc13a959",
+      "old": {
+        "visited": 533,
+        "complete": false,
+        "frontier": 298
+      },
+      "current": {
+        "visited": 944,
+        "complete": false,
+        "frontier": 462
+      },
+      "execution": {
+        "coreStarts": 193,
+        "replayedResponses": 9874,
+        "reusedResponses": 218,
+        "scope": "Actual operations since first use of this executor; earlier baseline operations are not inferred"
+      }
+    },
+    {
+      "index": 39,
+      "id": "1475311-72656408",
+      "originHash": "5185dde9f57e267219954d56180d563b74909a2e8d7bc2658248e0e0c3a170a7",
+      "old": {
+        "visited": 24,
+        "complete": true,
+        "frontier": 0
+      },
+      "current": {
+        "visited": 24,
+        "complete": true,
+        "frontier": 0
+      },
+      "execution": null
+    },
+    {
+      "index": 40,
+      "id": "1475311-73628505",
+      "originHash": "3123b59e561c8a008272405a37e4b5ab3c501d9167354c2c9140724ee7b23542",
+      "old": {
+        "visited": 680,
+        "complete": false,
+        "frontier": 434
+      },
+      "current": {
+        "visited": 1072,
+        "complete": false,
+        "frontier": 540
+      },
+      "execution": {
+        "coreStarts": 189,
+        "replayedResponses": 8388,
+        "reusedResponses": 203,
+        "scope": "Actual operations since first use of this executor; earlier baseline operations are not inferred"
+      }
+    },
+    {
+      "index": 41,
+      "id": "1475311-74652966",
+      "originHash": "b1831f29ff9e714f0a816bf2dd2ad0430e90213e733ee6b96793fdcaf22586da",
+      "old": {
+        "visited": 2637,
+        "complete": false,
+        "frontier": 53
+      },
+      "current": {
+        "visited": 3243,
+        "complete": false,
+        "frontier": 61
+      },
+      "execution": {
+        "coreStarts": 362,
+        "replayedResponses": 2592,
+        "reusedResponses": 244,
+        "scope": "Actual operations since first use of this executor; earlier baseline operations are not inferred"
+      }
+    },
+    {
+      "index": 42,
+      "id": "1475311-75500286",
+      "originHash": "df8bbe598a0ff6a8c915a2814cfda249ffaf96edfe01cf47c9bc0e5a1e2665aa",
+      "old": {
+        "visited": 741,
+        "complete": false,
+        "frontier": 124
+      },
+      "current": {
+        "visited": 1284,
+        "complete": false,
+        "frontier": 141
+      },
+      "execution": {
+        "coreStarts": 360,
+        "replayedResponses": 1823,
+        "reusedResponses": 183,
+        "scope": "Actual operations since first use of this executor; earlier baseline operations are not inferred"
+      }
+    },
+    {
+      "index": 43,
+      "id": "1475311-78114463",
+      "originHash": "37d79ca35c08594d6bc3c3efd237ee0ad11c50876bd4157bf254cc05b62dc199",
+      "old": {
+        "visited": 190,
+        "complete": true,
+        "frontier": 0
+      },
+      "current": {
+        "visited": 190,
+        "complete": true,
+        "frontier": 0
+      },
+      "execution": null
+    },
+    {
+      "index": 44,
+      "id": "1475311-84192580",
+      "originHash": "fe19e0ccb2c97b94f0ca11e0e26997965a507512ffcf2ead7838a85d91d3d681",
+      "old": {
+        "visited": 1208,
+        "complete": true,
+        "frontier": 0
+      },
+      "current": {
+        "visited": 1208,
+        "complete": true,
+        "frontier": 0
+      },
+      "execution": null
+    },
+    {
+      "index": 45,
+      "id": "1475311-91800273",
+      "originHash": "707537a85c2dadfcf3efbc53c76195b590bdb247cd8d8a8dcce29a7e370002df",
+      "old": {
+        "visited": 165,
+        "complete": true,
+        "frontier": 0
+      },
+      "current": {
+        "visited": 165,
+        "complete": true,
+        "frontier": 0
+      },
+      "execution": null
+    },
+    {
+      "index": 46,
+      "id": "1475311-94145021",
+      "originHash": "51a9d602111f1eba9cb084c8a4516ecee8e0a0e9b0109c14e1dd2d034c4aa698",
+      "old": {
+        "visited": 1131,
+        "complete": true,
+        "frontier": 0
+      },
+      "current": {
+        "visited": 1131,
+        "complete": true,
+        "frontier": 0
+      },
+      "execution": null
+    },
+    {
+      "index": 47,
+      "id": "1475311-94722358",
+      "originHash": "f55ce063a1037578e0a4be9ffb857231b3948b03a3cd6e1a3d9372cd81dbbee6",
+      "old": {
+        "visited": 190,
+        "complete": true,
+        "frontier": 0
+      },
+      "current": {
+        "visited": 190,
+        "complete": true,
+        "frontier": 0
+      },
+      "execution": null
+    },
+    {
+      "index": 48,
+      "id": "1475311-96676583",
+      "originHash": "849608c129d2d745111ce9d5030b1e5643794cdfb8e39a36c8f8cf69697119bd",
+      "old": {
+        "visited": 1838,
+        "complete": true,
+        "frontier": 0
+      },
+      "current": {
+        "visited": 1838,
+        "complete": true,
+        "frontier": 0
+      },
+      "execution": null
+    },
+    {
+      "index": 49,
+      "id": "3723262-14558127",
+      "originHash": "724911a26cb7ad8d78bdcc0253351ed588eb3b579af92028bba28c6302fe42da",
+      "old": {
+        "visited": 151,
+        "complete": true,
+        "frontier": 0
+      },
+      "current": {
+        "visited": 151,
+        "complete": true,
+        "frontier": 0
+      },
+      "execution": null
+    },
+    {
+      "index": 50,
+      "id": "3723262-18789533",
+      "originHash": "49372343d7d883b18ae8d03b4ddfffd446e7621cd782a34e5e5bb2b82bc52a06",
+      "old": {
+        "visited": 1578,
+        "complete": false,
+        "frontier": 82
+      },
+      "current": {
+        "visited": 2203,
+        "complete": false,
+        "frontier": 95
+      },
+      "execution": {
+        "coreStarts": 257,
+        "replayedResponses": 3473,
+        "reusedResponses": 368,
+        "scope": "Actual operations since first use of this executor; earlier baseline operations are not inferred"
+      }
+    },
+    {
+      "index": 51,
+      "id": "3723262-20726052",
+      "originHash": "6aa0cf4452e9e2aa6377a3f8e8b242d43a695a192df8bc4c2035bb4441593e6c",
+      "old": {
+        "visited": 1246,
+        "complete": true,
+        "frontier": 0
+      },
+      "current": {
+        "visited": 1246,
+        "complete": true,
+        "frontier": 0
+      },
+      "execution": null
+    },
+    {
+      "index": 52,
+      "id": "3723262-20938824",
+      "originHash": "a8f7554c29b3bb2657a881723b5d37110240b2405321f170af5c185d3468961d",
+      "old": {
+        "visited": 509,
+        "complete": false,
+        "frontier": 134
+      },
+      "current": {
+        "visited": 1031,
+        "complete": false,
+        "frontier": 185
+      },
+      "execution": {
+        "coreStarts": 210,
+        "replayedResponses": 5976,
+        "reusedResponses": 312,
+        "scope": "Actual operations since first use of this executor; earlier baseline operations are not inferred"
+      }
+    },
+    {
+      "index": 53,
+      "id": "3723262-23434538",
+      "originHash": "5c877b1e6f09f73f30094e32a353683bde32dd00b78fbaf9432d739644cf5511",
+      "old": {
+        "visited": 789,
+        "complete": true,
+        "frontier": 0
+      },
+      "current": {
+        "visited": 789,
+        "complete": true,
+        "frontier": 0
+      },
+      "execution": null
+    },
+    {
+      "index": 54,
+      "id": "3723262-30118811",
+      "originHash": "3c6af9f02d040476b40301c4619cbcd7f1164237164ca620ac004490b632ccd2",
+      "old": {
+        "visited": 445,
+        "complete": false,
+        "frontier": 296
+      },
+      "current": {
+        "visited": 911,
+        "complete": false,
+        "frontier": 376
+      },
+      "execution": {
+        "coreStarts": 179,
+        "replayedResponses": 7563,
+        "reusedResponses": 287,
+        "scope": "Actual operations since first use of this executor; earlier baseline operations are not inferred"
+      }
+    },
+    {
+      "index": 55,
+      "id": "3723262-32061192",
+      "originHash": "bcf2967bed9533e5714ce340bdc2e30a3738a440dd55869b87b88d957524ecfb",
+      "old": {
+        "visited": 579,
+        "complete": false,
+        "frontier": 158
+      },
+      "current": {
+        "visited": 1083,
+        "complete": false,
+        "frontier": 214
+      },
+      "execution": {
+        "coreStarts": 202,
+        "replayedResponses": 5721,
+        "reusedResponses": 302,
+        "scope": "Actual operations since first use of this executor; earlier baseline operations are not inferred"
+      }
+    },
+    {
+      "index": 56,
+      "id": "3723262-33854624",
+      "originHash": "a8858656a90404c2a4e1a1c929d840ed0fc9c177c4cbe0dec0640feed395da83",
+      "old": {
+        "visited": 1923,
+        "complete": false,
+        "frontier": 71
+      },
+      "current": {
+        "visited": 2835,
+        "complete": false,
+        "frontier": 82
+      },
+      "execution": {
+        "coreStarts": 302,
+        "replayedResponses": 4314,
+        "reusedResponses": 610,
+        "scope": "Actual operations since first use of this executor; earlier baseline operations are not inferred"
+      }
+    },
+    {
+      "index": 57,
+      "id": "3723262-40366667",
+      "originHash": "7184c1d307457b3d2ac8f722c285f327230d18217610cacc6ef86a21b5bf106e",
+      "old": {
+        "visited": 1245,
+        "complete": true,
+        "frontier": 0
+      },
+      "current": {
+        "visited": 1245,
+        "complete": true,
+        "frontier": 0
+      },
+      "execution": null
+    },
+    {
+      "index": 58,
+      "id": "3723262-57111661",
+      "originHash": "41c7c65fc73c34ec5f9fc5d8390125ba47b165261b14b70b99df7c8e1cda513f",
+      "old": {
+        "visited": 1247,
+        "complete": true,
+        "frontier": 0
+      },
+      "current": {
+        "visited": 1247,
+        "complete": true,
+        "frontier": 0
+      },
+      "execution": null
+    },
+    {
+      "index": 59,
+      "id": "3723262-59438930",
+      "originHash": "67eb3b76a68b94ede8a2453dd48bcb5779e268d1fd5c3c66af036e72300b097d",
+      "old": {
+        "visited": 151,
+        "complete": true,
+        "frontier": 0
+      },
+      "current": {
+        "visited": 151,
+        "complete": true,
+        "frontier": 0
+      },
+      "execution": null
+    },
+    {
+      "index": 60,
+      "id": "3723262-68337209",
+      "originHash": "3998135644166e7f811749d13c9ff14022f454f070fcb1f3f8bac5a57b114a8c",
+      "old": {
+        "visited": 463,
+        "complete": false,
+        "frontier": 259
+      },
+      "current": {
+        "visited": 1158,
+        "complete": false,
+        "frontier": 339
+      },
+      "execution": {
+        "coreStarts": 282,
+        "replayedResponses": 4139,
+        "reusedResponses": 413,
+        "scope": "Actual operations since first use of this executor; earlier baseline operations are not inferred"
+      }
+    },
+    {
+      "index": 61,
+      "id": "3723262-69272449",
+      "originHash": "1e97b809ce862f59c7a1f94e77412e8a26f93ca3d5404d1c26b28d4f5212d245",
+      "old": {
+        "visited": 493,
+        "complete": false,
+        "frontier": 480
+      },
+      "current": {
+        "visited": 928,
+        "complete": false,
+        "frontier": 619
+      },
+      "execution": {
+        "coreStarts": 149,
+        "replayedResponses": 9189,
+        "reusedResponses": 286,
+        "scope": "Actual operations since first use of this executor; earlier baseline operations are not inferred"
+      }
+    },
+    {
+      "index": 62,
+      "id": "3723262-72656408",
+      "originHash": "0645e979870de418752bfd2670cf9dff34780b1b0adff68dd30b7d417e98e734",
+      "old": {
+        "visited": 1484,
+        "complete": false,
+        "frontier": 61
+      },
+      "current": {
+        "visited": 2250,
+        "complete": false,
+        "frontier": 66
+      },
+      "execution": {
+        "coreStarts": 300,
+        "replayedResponses": 3985,
+        "reusedResponses": 466,
+        "scope": "Actual operations since first use of this executor; earlier baseline operations are not inferred"
+      }
+    },
+    {
+      "index": 63,
+      "id": "3723262-73628505",
+      "originHash": "209ae54e1bda0559f7c3c887d74ad5492ffb8dec7cfa1b27756963373ca187e0",
+      "old": {
+        "visited": 497,
+        "complete": false,
+        "frontier": 298
+      },
+      "current": {
+        "visited": 954,
+        "complete": false,
+        "frontier": 385
+      },
+      "execution": {
+        "coreStarts": 172,
+        "replayedResponses": 7407,
+        "reusedResponses": 285,
+        "scope": "Actual operations since first use of this executor; earlier baseline operations are not inferred"
+      }
+    },
+    {
+      "index": 64,
+      "id": "3723262-74652966",
+      "originHash": "37b5ce8fc3fb92e0e77d3bbc216462cb1e96fb4c26a0444a295face50b8c6006",
+      "old": {
+        "visited": 1943,
+        "complete": false,
+        "frontier": 77
+      },
+      "current": {
+        "visited": 2640,
+        "complete": false,
+        "frontier": 89
+      },
+      "execution": {
+        "coreStarts": 293,
+        "replayedResponses": 4131,
+        "reusedResponses": 404,
+        "scope": "Actual operations since first use of this executor; earlier baseline operations are not inferred"
+      }
+    },
+    {
+      "index": 65,
+      "id": "3723262-75500286",
+      "originHash": "b35c9281985e3c53433b382aa0e2fe574519ed4ed4cf9c3368ee9bb0a9137d02",
+      "old": {
+        "visited": 1755,
+        "complete": false,
+        "frontier": 135
+      },
+      "current": {
+        "visited": 2592,
+        "complete": false,
+        "frontier": 169
+      },
+      "execution": {
+        "coreStarts": 364,
+        "replayedResponses": 2323,
+        "reusedResponses": 473,
+        "scope": "Actual operations since first use of this executor; earlier baseline operations are not inferred"
+      }
+    },
+    {
+      "index": 66,
+      "id": "3723262-78114463",
+      "originHash": "7a9193a61191975141b0b2f5af97229c3dc30f886622fe2d852e1a8b338316c4",
+      "old": {
+        "visited": 1246,
+        "complete": true,
+        "frontier": 0
+      },
+      "current": {
+        "visited": 1246,
+        "complete": true,
+        "frontier": 0
+      },
+      "execution": null
+    },
+    {
+      "index": 67,
+      "id": "3723262-84192580",
+      "originHash": "9ee73e0e98cbf7624707b36c9f940ccce88642577a5c8bb146a3d4e043015a5c",
+      "old": {
+        "visited": 438,
+        "complete": true,
+        "frontier": 0
+      },
+      "current": {
+        "visited": 438,
+        "complete": true,
+        "frontier": 0
+      },
+      "execution": null
+    },
+    {
+      "index": 68,
+      "id": "3723262-91800273",
+      "originHash": "1d01a2acf30fef756fb788898b44fe5d8eea5b13267bdc5a2cbdac2500e57544",
+      "old": {
+        "visited": 591,
+        "complete": true,
+        "frontier": 0
+      },
+      "current": {
+        "visited": 591,
+        "complete": true,
+        "frontier": 0
+      },
+      "execution": null
+    },
+    {
+      "index": 69,
+      "id": "3723262-94145021",
+      "originHash": "d5d290402c27137a89080521e578db0fed59c6761544c96808e06710927f96a9",
+      "old": {
+        "visited": 151,
+        "complete": true,
+        "frontier": 0
+      },
+      "current": {
+        "visited": 151,
+        "complete": true,
+        "frontier": 0
+      },
+      "execution": null
+    },
+    {
+      "index": 70,
+      "id": "3723262-94722358",
+      "originHash": "b357d28ab51eb30246d1b81f584977468f8735c644d45defe95ab15b0a1bffe1",
+      "old": {
+        "visited": 1246,
+        "complete": true,
+        "frontier": 0
+      },
+      "current": {
+        "visited": 1246,
+        "complete": true,
+        "frontier": 0
+      },
+      "execution": null
+    },
+    {
+      "index": 71,
+      "id": "3723262-96676583",
+      "originHash": "38fe19e1952834538416739c6ddd68122bed29a3f4d16f3794c05a5f4df5f737",
+      "old": {
+        "visited": 556,
+        "complete": false,
+        "frontier": 140
+      },
+      "current": {
+        "visited": 1048,
+        "complete": false,
+        "frontier": 190
+      },
+      "execution": {
+        "coreStarts": 197,
+        "replayedResponses": 5566,
+        "reusedResponses": 295,
+        "scope": "Actual operations since first use of this executor; earlier baseline operations are not inferred"
+      }
+    },
+    {
+      "index": 72,
+      "id": "14558127-14558127",
+      "originHash": "b4621646db169be9fe508f451053505a7b27df2889091c4e35dc9bb1292f691e",
+      "old": {
+        "visited": 116,
+        "complete": true,
+        "frontier": 0
+      },
+      "current": {
+        "visited": 116,
+        "complete": true,
+        "frontier": 0
+      },
+      "execution": null
+    },
+    {
+      "index": 73,
+      "id": "14558127-18789533",
+      "originHash": "353be4d4d75d4892dee308f7e4c5e169a5789492effa0143800c242607b571c3",
+      "old": {
+        "visited": 1898,
+        "complete": false,
+        "frontier": 74
+      },
+      "current": {
+        "visited": 2639,
+        "complete": false,
+        "frontier": 92
+      },
+      "execution": {
+        "coreStarts": 304,
+        "replayedResponses": 4041,
+        "reusedResponses": 437,
+        "scope": "Actual operations since first use of this executor; earlier baseline operations are not inferred"
+      }
+    },
+    {
+      "index": 74,
+      "id": "14558127-20726052",
+      "originHash": "47826cb0e016e9be10ffb01820c0eae3277243a0ae825efc3d9390601665e947",
+      "old": {
+        "visited": 750,
+        "complete": true,
+        "frontier": 0
+      },
+      "current": {
+        "visited": 750,
+        "complete": true,
+        "frontier": 0
+      },
+      "execution": null
+    },
+    {
+      "index": 75,
+      "id": "14558127-20938824",
+      "originHash": "19c7233f5fd1df3ca9163df4020a4d36e318541c52f4650ed143531c28eec80b",
+      "old": {
+        "visited": 186,
+        "complete": true,
+        "frontier": 0
+      },
+      "current": {
+        "visited": 186,
+        "complete": true,
+        "frontier": 0
+      },
+      "execution": null
+    },
+    {
+      "index": 76,
+      "id": "14558127-23434538",
+      "originHash": "b5e03d38e9068c05a1cbefea68f1ed2aedf333e874fcef1d5cb909e7c00659a5",
+      "old": {
+        "visited": 518,
+        "complete": true,
+        "frontier": 0
+      },
+      "current": {
+        "visited": 518,
+        "complete": true,
+        "frontier": 0
+      },
+      "execution": null
+    },
+    {
+      "index": 77,
+      "id": "14558127-30118811",
+      "originHash": "6f5e640a2c35e2df3856e255cb03b8232ba34d879265df10bbfb3b242e85c303",
+      "old": {
+        "visited": 508,
+        "complete": false,
+        "frontier": 284
+      },
+      "current": {
+        "visited": 964,
+        "complete": false,
+        "frontier": 369
+      },
+      "execution": {
+        "coreStarts": 174,
+        "replayedResponses": 7222,
+        "reusedResponses": 282,
+        "scope": "Actual operations since first use of this executor; earlier baseline operations are not inferred"
+      }
+    },
+    {
+      "index": 78,
+      "id": "14558127-32061192",
+      "originHash": "30d666da375216ff7c2ef79f5683a16e2d17f99504f09e4039fdbbb61f796dfa",
+      "old": {
+        "visited": 514,
+        "complete": false,
+        "frontier": 215
+      },
+      "current": {
+        "visited": 1031,
+        "complete": false,
+        "frontier": 276
+      },
+      "execution": {
+        "coreStarts": 204,
+        "replayedResponses": 6580,
+        "reusedResponses": 313,
+        "scope": "Actual operations since first use of this executor; earlier baseline operations are not inferred"
+      }
+    },
+    {
+      "index": 79,
+      "id": "14558127-33854624",
+      "originHash": "bfac6ec8b6f9a4fb586daab52865816b062e168df3be9696f837211a0032c49c",
+      "old": {
+        "visited": 59,
+        "complete": true,
+        "frontier": 0
+      },
+      "current": {
+        "visited": 59,
+        "complete": true,
+        "frontier": 0
+      },
+      "execution": null
+    },
+    {
+      "index": 80,
+      "id": "14558127-40366667",
+      "originHash": "4adca706dc8607fa5ce8f78eba245dd3b4ac50ce14fb5e5717e203f0b5a0fa0e",
+      "old": {
+        "visited": 750,
+        "complete": true,
+        "frontier": 0
+      },
+      "current": {
+        "visited": 750,
+        "complete": true,
+        "frontier": 0
+      },
+      "execution": null
+    },
+    {
+      "index": 81,
+      "id": "14558127-57111661",
+      "originHash": "db15e2f77642e9e3d2dbf8fba1fa73c6ac449c78da90292f6569a3c37070d8e2",
+      "old": {
+        "visited": 750,
+        "complete": true,
+        "frontier": 0
+      },
+      "current": {
+        "visited": 750,
+        "complete": true,
+        "frontier": 0
+      },
+      "execution": null
+    },
+    {
+      "index": 82,
+      "id": "14558127-59438930",
+      "originHash": "b2c28610ddb2c02d7d56ea6238c0c5abca700f69e8234137dd7572754e6834cd",
+      "old": {
+        "visited": 116,
+        "complete": true,
+        "frontier": 0
+      },
+      "current": {
+        "visited": 116,
+        "complete": true,
+        "frontier": 0
+      },
+      "execution": null
+    },
+    {
+      "index": 83,
+      "id": "14558127-68337209",
+      "originHash": "74b6f972507f7922186970d6a57a85489ff351fe9bf115ce43e34b1f727a5833",
+      "old": {
+        "visited": 758,
+        "complete": false,
+        "frontier": 395
+      },
+      "current": {
+        "visited": 1381,
+        "complete": false,
+        "frontier": 490
+      },
+      "execution": {
+        "coreStarts": 194,
+        "replayedResponses": 8717,
+        "reusedResponses": 429,
+        "scope": "Actual operations since first use of this executor; earlier baseline operations are not inferred"
+      }
+    },
+    {
+      "index": 84,
+      "id": "14558127-69272449",
+      "originHash": "69fb781b5d47c14cbe72ffff623e86b8552f519bcfda74556e4cdae8e366135b",
+      "old": {
+        "visited": 560,
+        "complete": false,
+        "frontier": 121
+      },
+      "current": {
+        "visited": 1118,
+        "complete": false,
+        "frontier": 253
+      },
+      "execution": {
+        "coreStarts": 218,
+        "replayedResponses": 8266,
+        "reusedResponses": 340,
+        "scope": "Actual operations since first use of this executor; earlier baseline operations are not inferred"
+      }
+    },
+    {
+      "index": 85,
+      "id": "14558127-72656408",
+      "originHash": "8bec0060f35331c99cfbc4656bbd5b72e7e2664bc9bb350414a40fce0548a7fb",
+      "old": {
+        "visited": 59,
+        "complete": true,
+        "frontier": 0
+      },
+      "current": {
+        "visited": 59,
+        "complete": true,
+        "frontier": 0
+      },
+      "execution": null
+    },
+    {
+      "index": 86,
+      "id": "14558127-73628505",
+      "originHash": "e2d31637778544e90e5deba5bb4920c7d0a9e7c4b0461a67bfc75aab1ef06a02",
+      "old": {
+        "visited": 471,
+        "complete": false,
+        "frontier": 414
+      },
+      "current": {
+        "visited": 921,
+        "complete": false,
+        "frontier": 514
+      },
+      "execution": {
+        "coreStarts": 164,
+        "replayedResponses": 8900,
+        "reusedResponses": 286,
+        "scope": "Actual operations since first use of this executor; earlier baseline operations are not inferred"
+      }
+    },
+    {
+      "index": 87,
+      "id": "14558127-74652966",
+      "originHash": "63acc2ce0b4317f27031bedbdb4956e9833c19f2c5cd37ecfbd8a27ad8432c26",
+      "old": {
+        "visited": 1649,
+        "complete": false,
+        "frontier": 75
+      },
+      "current": {
+        "visited": 2277,
+        "complete": false,
+        "frontier": 97
+      },
+      "execution": {
+        "coreStarts": 255,
+        "replayedResponses": 4228,
+        "reusedResponses": 373,
+        "scope": "Actual operations since first use of this executor; earlier baseline operations are not inferred"
+      }
+    },
+    {
+      "index": 88,
+      "id": "14558127-75500286",
+      "originHash": "e648ff1c77024189cd7a179d2acade3b59d5cf24b831889cab3e00b0c3228eeb",
+      "old": {
+        "visited": 887,
+        "complete": false,
+        "frontier": 166
+      },
+      "current": {
+        "visited": 1716,
+        "complete": false,
+        "frontier": 188
+      },
+      "execution": {
+        "coreStarts": 366,
+        "replayedResponses": 2187,
+        "reusedResponses": 463,
+        "scope": "Actual operations since first use of this executor; earlier baseline operations are not inferred"
+      }
+    },
+    {
+      "index": 89,
+      "id": "14558127-78114463",
+      "originHash": "2514d0fd4ff05141582edede33474c6f2782eaf570844e3e0d963b635c2c7485",
+      "old": {
+        "visited": 750,
+        "complete": true,
+        "frontier": 0
+      },
+      "current": {
+        "visited": 750,
+        "complete": true,
+        "frontier": 0
+      },
+      "execution": null
+    },
+    {
+      "index": 90,
+      "id": "14558127-84192580",
+      "originHash": "49fe219283f9397f36f09652c76e6026305541452b85ac4a0bd1636a4dc7b98a",
+      "old": {
+        "visited": 309,
+        "complete": true,
+        "frontier": 0
+      },
+      "current": {
+        "visited": 309,
+        "complete": true,
+        "frontier": 0
+      },
+      "execution": null
+    },
+    {
+      "index": 91,
+      "id": "14558127-91800273",
+      "originHash": "a86f014d523a7058cae5054c792cfd3fe874de9b2f925c6006e3978e94018d42",
+      "old": {
+        "visited": 381,
+        "complete": true,
+        "frontier": 0
+      },
+      "current": {
+        "visited": 381,
+        "complete": true,
+        "frontier": 0
+      },
+      "execution": null
+    },
+    {
+      "index": 92,
+      "id": "14558127-94145021",
+      "originHash": "e07e33ae99c3f27d0b844f81d02893a03a0310ae07ea09ba3dc79facdaeca926",
+      "old": {
+        "visited": 116,
+        "complete": true,
+        "frontier": 0
+      },
+      "current": {
+        "visited": 116,
+        "complete": true,
+        "frontier": 0
+      },
+      "execution": null
+    },
+    {
+      "index": 93,
+      "id": "14558127-94722358",
+      "originHash": "34c861bda69889d88692d1e7385d0ad5bf2c54330efc2a809b9336c7db8f1fe1",
+      "old": {
+        "visited": 752,
+        "complete": true,
+        "frontier": 0
+      },
+      "current": {
+        "visited": 752,
+        "complete": true,
+        "frontier": 0
+      },
+      "execution": null
+    },
+    {
+      "index": 94,
+      "id": "14558127-96676583",
+      "originHash": "ee30fdff111383076744a8be910fb092845ba9265ce4c8831459b3f1ed71e23b",
+      "old": {
+        "visited": 151,
+        "complete": true,
+        "frontier": 0
+      },
+      "current": {
+        "visited": 151,
+        "complete": true,
+        "frontier": 0
+      },
+      "execution": null
+    },
+    {
+      "index": 95,
+      "id": "18789533-20726052",
+      "originHash": "d8158b774edb63889ec9fc012e64438f515dc59c8477cd4f43d867108bdc6ba6",
+      "old": {
+        "visited": 1623,
+        "complete": false,
+        "frontier": 110
+      },
+      "current": {
+        "visited": 2273,
+        "complete": false,
+        "frontier": 132
+      },
+      "execution": {
+        "coreStarts": 270,
+        "replayedResponses": 4216,
+        "reusedResponses": 380,
+        "scope": "Actual operations since first use of this executor; earlier baseline operations are not inferred"
+      }
+    },
+    {
+      "index": 96,
+      "id": "18789533-20938824",
+      "originHash": "59e5548bcbc60c53b5960ebd8c8e306e38eaaacfc5394af587cd347ecfc5d54a",
+      "old": {
+        "visited": 1692,
+        "complete": false,
+        "frontier": 84
+      },
+      "current": {
+        "visited": 2390,
+        "complete": false,
+        "frontier": 95
+      },
+      "execution": {
+        "coreStarts": 287,
+        "replayedResponses": 3825,
+        "reusedResponses": 411,
+        "scope": "Actual operations since first use of this executor; earlier baseline operations are not inferred"
+      }
+    },
+    {
+      "index": 97,
+      "id": "18789533-23434538",
+      "originHash": "62ccf0127251cf883dbb455b3eb07ac44ffac3eba41303a6232f81e6df2b8c19",
+      "old": {
+        "visited": 2032,
+        "complete": false,
+        "frontier": 85
+      },
+      "current": {
+        "visited": 2731,
+        "complete": false,
+        "frontier": 96
+      },
+      "execution": {
+        "coreStarts": 295,
+        "replayedResponses": 4248,
+        "reusedResponses": 404,
+        "scope": "Actual operations since first use of this executor; earlier baseline operations are not inferred"
+      }
+    },
+    {
+      "index": 98,
+      "id": "18789533-30118811",
+      "originHash": "fd012090a07316b32fbaba02e9b1bbf07be49fcb37e686acfc6eb107231cfb74",
+      "old": {
+        "visited": 417,
+        "complete": false,
+        "frontier": 261
+      },
+      "current": {
+        "visited": 904,
+        "complete": false,
+        "frontier": 331
+      },
+      "execution": {
+        "coreStarts": 194,
+        "replayedResponses": 6242,
+        "reusedResponses": 293,
+        "scope": "Actual operations since first use of this executor; earlier baseline operations are not inferred"
+      }
+    },
+    {
+      "index": 99,
+      "id": "18789533-32061192",
+      "originHash": "c1272ea3ab9301d55884028834bd432beb6bfc1255034d0507df8c94ddaa7d03",
+      "old": {
+        "visited": 656,
+        "complete": false,
+        "frontier": 190
+      },
+      "current": {
+        "visited": 1196,
+        "complete": false,
+        "frontier": 254
+      },
+      "execution": {
+        "coreStarts": 214,
+        "replayedResponses": 6959,
+        "reusedResponses": 326,
+        "scope": "Actual operations since first use of this executor; earlier baseline operations are not inferred"
+      }
+    },
+    {
+      "index": 100,
+      "id": "18789533-33854624",
+      "originHash": "f804bd0294c89e170a377914d57f1ed8077a463b23a064f20c887f29158ee273",
+      "old": {
+        "visited": 473,
+        "complete": false,
+        "frontier": 123
+      },
+      "current": {
+        "visited": 1154,
+        "complete": false,
+        "frontier": 197
+      },
+      "execution": {
+        "coreStarts": 226,
+        "replayedResponses": 5981,
+        "reusedResponses": 455,
+        "scope": "Actual operations since first use of this executor; earlier baseline operations are not inferred"
+      }
+    },
+    {
+      "index": 101,
+      "id": "18789533-40366667",
+      "originHash": "d3371ad997b4947373068685b486d3a5b5b75823c7daee52909d8a4dcb15fe3e",
+      "old": {
+        "visited": 622,
+        "complete": false,
+        "frontier": 122
+      },
+      "current": {
+        "visited": 1279,
+        "complete": false,
+        "frontier": 150
+      },
+      "execution": {
+        "coreStarts": 272,
+        "replayedResponses": 4250,
+        "reusedResponses": 385,
+        "scope": "Actual operations since first use of this executor; earlier baseline operations are not inferred"
+      }
+    },
+    {
+      "index": 102,
+      "id": "18789533-57111661",
+      "originHash": "645d61950e1a5deb9271972ee3daf6b2a5a2bb6d85cb28d6d9b9e69dcafc92cd",
+      "old": {
+        "visited": 561,
+        "complete": false,
+        "frontier": 117
+      },
+      "current": {
+        "visited": 1207,
+        "complete": false,
+        "frontier": 142
+      },
+      "execution": {
+        "coreStarts": 268,
+        "replayedResponses": 4182,
+        "reusedResponses": 378,
+        "scope": "Actual operations since first use of this executor; earlier baseline operations are not inferred"
+      }
+    },
+    {
+      "index": 103,
+      "id": "18789533-59438930",
+      "originHash": "693c0a1d55418e665a08125f817f95422721dfe54cf6645f040895080b6bb8f7",
+      "old": {
+        "visited": 1772,
+        "complete": false,
+        "frontier": 84
+      },
+      "current": {
+        "visited": 2460,
+        "complete": false,
+        "frontier": 96
+      },
+      "execution": {
+        "coreStarts": 266,
+        "replayedResponses": 3832,
+        "reusedResponses": 422,
+        "scope": "Actual operations since first use of this executor; earlier baseline operations are not inferred"
+      }
+    },
+    {
+      "index": 104,
+      "id": "18789533-68337209",
+      "originHash": "0f30421340c48582b42a88e8b5707e66386b4f4f1d29b41215867a3506cd4435",
+      "old": {
+        "visited": 632,
+        "complete": false,
+        "frontier": 242
+      },
+      "current": {
+        "visited": 1171,
+        "complete": false,
+        "frontier": 299
+      },
+      "execution": {
+        "coreStarts": 223,
+        "replayedResponses": 6296,
+        "reusedResponses": 316,
+        "scope": "Actual operations since first use of this executor; earlier baseline operations are not inferred"
+      }
+    },
+    {
+      "index": 105,
+      "id": "18789533-69272449",
+      "originHash": "fdea530b40d4375a0e9f485ec6eaa8c4ae8195769b775a8dc5bcefbf1029d836",
+      "old": {
+        "visited": 795,
+        "complete": false,
+        "frontier": 324
+      },
+      "current": {
+        "visited": 1276,
+        "complete": false,
+        "frontier": 472
+      },
+      "execution": {
+        "coreStarts": 182,
+        "replayedResponses": 9560,
+        "reusedResponses": 299,
+        "scope": "Actual operations since first use of this executor; earlier baseline operations are not inferred"
+      }
+    },
+    {
+      "index": 106,
+      "id": "18789533-72656408",
+      "originHash": "e91673fc7930b39766b4af63c4872dfd1d161c67a0202cd611851f0291457da2",
+      "old": {
+        "visited": 427,
+        "complete": false,
+        "frontier": 147
+      },
+      "current": {
+        "visited": 1023,
+        "complete": false,
+        "frontier": 215
+      },
+      "execution": {
+        "coreStarts": 229,
+        "replayedResponses": 7034,
+        "reusedResponses": 367,
+        "scope": "Actual operations since first use of this executor; earlier baseline operations are not inferred"
+      }
+    },
+    {
+      "index": 107,
+      "id": "18789533-73628505",
+      "originHash": "aa7339848f202b49fafedc1677c7577e1297ff6cb54529d2fa963f26eb140074",
+      "old": {
+        "visited": 590,
+        "complete": false,
+        "frontier": 321
+      },
+      "current": {
+        "visited": 1088,
+        "complete": false,
+        "frontier": 414
+      },
+      "execution": {
+        "coreStarts": 193,
+        "replayedResponses": 8153,
+        "reusedResponses": 305,
+        "scope": "Actual operations since first use of this executor; earlier baseline operations are not inferred"
+      }
+    },
+    {
+      "index": 108,
+      "id": "18789533-74652966",
+      "originHash": "2bc87f2c386947fbd17f03e2d597f9eed73e9be22bfce9ff74c8be43c0e50f4b",
+      "old": {
+        "visited": 1301,
+        "complete": false,
+        "frontier": 144
+      },
+      "current": {
+        "visited": 1816,
+        "complete": false,
+        "frontier": 195
+      },
+      "execution": {
+        "coreStarts": 206,
+        "replayedResponses": 5936,
+        "reusedResponses": 309,
+        "scope": "Actual operations since first use of this executor; earlier baseline operations are not inferred"
+      }
+    },
+    {
+      "index": 109,
+      "id": "18789533-75500286",
+      "originHash": "b07b870c803a018aadbc3911fb644effcbc82f4853c1b6ee80ed464e792151ea",
+      "old": {
+        "visited": 574,
+        "complete": false,
+        "frontier": 251
+      },
+      "current": {
+        "visited": 1187,
+        "complete": false,
+        "frontier": 310
+      },
+      "execution": {
+        "coreStarts": 255,
+        "replayedResponses": 4187,
+        "reusedResponses": 358,
+        "scope": "Actual operations since first use of this executor; earlier baseline operations are not inferred"
+      }
+    },
+    {
+      "index": 110,
+      "id": "18789533-78114463",
+      "originHash": "77bad84e79bb9e0d477def296fff3d6ecd9c53615fc3c414981af5db36d082a2",
+      "old": {
+        "visited": 527,
+        "complete": false,
+        "frontier": 117
+      },
+      "current": {
+        "visited": 1175,
+        "complete": false,
+        "frontier": 141
+      },
+      "execution": {
+        "coreStarts": 269,
+        "replayedResponses": 4200,
+        "reusedResponses": 379,
+        "scope": "Actual operations since first use of this executor; earlier baseline operations are not inferred"
+      }
+    },
+    {
+      "index": 111,
+      "id": "18789533-84192580",
+      "originHash": "3de815e4c7136ef52212bfdae189ead4b208cbb9b25d8e612bf1da6fbb1e9456",
+      "old": {
+        "visited": 1589,
+        "complete": false,
+        "frontier": 83
+      },
+      "current": {
+        "visited": 2188,
+        "complete": false,
+        "frontier": 94
+      },
+      "execution": {
+        "coreStarts": 252,
+        "replayedResponses": 3562,
+        "reusedResponses": 347,
+        "scope": "Actual operations since first use of this executor; earlier baseline operations are not inferred"
+      }
+    },
+    {
+      "index": 112,
+      "id": "18789533-91800273",
+      "originHash": "cb3010acf770af3d8d0a717b3a86649386fe865d6df732f9ce0c10600b8ad155",
+      "old": {
+        "visited": 736,
+        "complete": false,
+        "frontier": 102
+      },
+      "current": {
+        "visited": 1445,
+        "complete": false,
+        "frontier": 115
+      },
+      "execution": {
+        "coreStarts": 284,
+        "replayedResponses": 3864,
+        "reusedResponses": 425,
+        "scope": "Actual operations since first use of this executor; earlier baseline operations are not inferred"
+      }
+    },
+    {
+      "index": 113,
+      "id": "18789533-94145021",
+      "originHash": "599da9b2f36789079042e43a7dc707e1e6dff4eb4770786d55b60ff47d6a5637",
+      "old": {
+        "visited": 1847,
+        "complete": false,
+        "frontier": 70
+      },
+      "current": {
+        "visited": 2538,
+        "complete": false,
+        "frontier": 84
+      },
+      "execution": {
+        "coreStarts": 284,
+        "replayedResponses": 3785,
+        "reusedResponses": 407,
+        "scope": "Actual operations since first use of this executor; earlier baseline operations are not inferred"
+      }
+    },
+    {
+      "index": 114,
+      "id": "18789533-94722358",
+      "originHash": "30e0f84f28feb326d4d335d30880e4656d8d8ef52639dcc81f1feb76875ab83d",
+      "old": {
+        "visited": 473,
+        "complete": false,
+        "frontier": 127
+      },
+      "current": {
+        "visited": 1172,
+        "complete": false,
+        "frontier": 145
+      },
+      "execution": {
+        "coreStarts": 292,
+        "replayedResponses": 4570,
+        "reusedResponses": 407,
+        "scope": "Actual operations since first use of this executor; earlier baseline operations are not inferred"
+      }
+    },
+    {
+      "index": 115,
+      "id": "18789533-96676583",
+      "originHash": "d74d8ae2598b8ef76b482cb390a4b517c45c110a6892766c609e6ec428c71eb3",
+      "old": {
+        "visited": 2040,
+        "complete": false,
+        "frontier": 92
+      },
+      "current": {
+        "visited": 2747,
+        "complete": false,
+        "frontier": 97
+      },
+      "execution": {
+        "coreStarts": 293,
+        "replayedResponses": 3889,
+        "reusedResponses": 414,
+        "scope": "Actual operations since first use of this executor; earlier baseline operations are not inferred"
+      }
+    },
+    {
+      "index": 116,
+      "id": "20726052-20938824",
+      "originHash": "e83133af2318c8912ac987844409ea3ead7e93670ba87ea5b15d3164ee08ba05",
+      "old": {
+        "visited": 1908,
+        "complete": true,
+        "frontier": 0
+      },
+      "current": {
+        "visited": 1908,
+        "complete": true,
+        "frontier": 0
+      },
+      "execution": null
+    },
+    {
+      "index": 117,
+      "id": "20726052-23434538",
+      "originHash": "5c96bd0cfd649b014884ece8a8fdd6014e9c78573a1fd4e7c191fdcc469e1a5f",
+      "old": {
+        "visited": 830,
+        "complete": true,
+        "frontier": 0
+      },
+      "current": {
+        "visited": 830,
+        "complete": true,
+        "frontier": 0
+      },
+      "execution": null
+    },
+    {
+      "index": 118,
+      "id": "20726052-30118811",
+      "originHash": "1cac95ae5fa9b00bf45ff0e686feffaa4440f39b284996cb97e701b9e59ef5c3",
+      "old": {
+        "visited": 521,
+        "complete": false,
+        "frontier": 225
+      },
+      "current": {
+        "visited": 1119,
+        "complete": false,
+        "frontier": 266
+      },
+      "execution": {
+        "coreStarts": 253,
+        "replayedResponses": 4709,
+        "reusedResponses": 345,
+        "scope": "Actual operations since first use of this executor; earlier baseline operations are not inferred"
+      }
+    },
+    {
+      "index": 119,
+      "id": "20726052-32061192",
+      "originHash": "0221cbd5729e60d9e34acb8f049cbf6b62d77183ef25d4c8838a9b2cc5d76769",
+      "old": {
+        "visited": 590,
+        "complete": false,
+        "frontier": 279
+      },
+      "current": {
+        "visited": 1085,
+        "complete": false,
+        "frontier": 387
+      },
+      "execution": {
+        "coreStarts": 184,
+        "replayedResponses": 8484,
+        "reusedResponses": 311,
+        "scope": "Actual operations since first use of this executor; earlier baseline operations are not inferred"
+      }
+    },
+    {
+      "index": 120,
+      "id": "20726052-33854624",
+      "originHash": "97a69bab6468177ab71520894ebf9f8fc8a8c43cb3bf75e39b81fdc9f2df7107",
+      "old": {
+        "visited": 13,
+        "complete": true,
+        "frontier": 0
+      },
+      "current": {
+        "visited": 13,
+        "complete": true,
+        "frontier": 0
+      },
+      "execution": null
+    },
+    {
+      "index": 121,
+      "id": "20726052-40366667",
+      "originHash": "f8ecdaba490bed7e0dc120d076252420daa05770533fcc555841c112fec74918",
+      "old": {
+        "visited": 114,
+        "complete": true,
+        "frontier": 0
+      },
+      "current": {
+        "visited": 114,
+        "complete": true,
+        "frontier": 0
+      },
+      "execution": null
+    },
+    {
+      "index": 122,
+      "id": "20726052-57111661",
+      "originHash": "aea731a627ace68d3731f7d6bbb7e7122079021ab299fff986e3fbfce893ba44",
+      "old": {
+        "visited": 115,
+        "complete": true,
+        "frontier": 0
+      },
+      "current": {
+        "visited": 115,
+        "complete": true,
+        "frontier": 0
+      },
+      "execution": null
+    },
+    {
+      "index": 123,
+      "id": "20726052-59438930",
+      "originHash": "5521c7622198c0591d774e633679d7e565a0b73753a6c1ab5f89cdd0d614ea6d",
+      "old": {
+        "visited": 751,
+        "complete": true,
+        "frontier": 0
+      },
+      "current": {
+        "visited": 751,
+        "complete": true,
+        "frontier": 0
+      },
+      "execution": null
+    },
+    {
+      "index": 124,
+      "id": "20726052-68337209",
+      "originHash": "e80f823c42a458533dc8e6407ff719205fbc100667fc8d9dc276c2881500d9a2",
+      "old": {
+        "visited": 479,
+        "complete": false,
+        "frontier": 295
+      },
+      "current": {
+        "visited": 997,
+        "complete": false,
+        "frontier": 397
+      },
+      "execution": {
+        "coreStarts": 196,
+        "replayedResponses": 7552,
+        "reusedResponses": 322,
+        "scope": "Actual operations since first use of this executor; earlier baseline operations are not inferred"
+      }
+    },
+    {
+      "index": 125,
+      "id": "20726052-69272449",
+      "originHash": "674811fff15d649e2954f8438321d564ce8ae66060cd3fbe9351c730da296b79",
+      "old": {
+        "visited": 493,
+        "complete": false,
+        "frontier": 341
+      },
+      "current": {
+        "visited": 996,
+        "complete": false,
+        "frontier": 506
+      },
+      "execution": {
+        "coreStarts": 185,
+        "replayedResponses": 9823,
+        "reusedResponses": 318,
+        "scope": "Actual operations since first use of this executor; earlier baseline operations are not inferred"
+      }
+    },
+    {
+      "index": 126,
+      "id": "20726052-72656408",
+      "originHash": "4e0c59fbec1bd84d3908fda4c656cf19d07feef1e8569f12e4b74c6db7e4b184",
+      "old": {
+        "visited": 13,
+        "complete": true,
+        "frontier": 0
+      },
+      "current": {
+        "visited": 13,
+        "complete": true,
+        "frontier": 0
+      },
+      "execution": null
+    },
+    {
+      "index": 127,
+      "id": "20726052-73628505",
+      "originHash": "e17e25bcd3fac4baeacd0a62b1b6a52dceb4dbe9dc1a3603fc0fdd31cae8647a",
+      "old": {
+        "visited": 483,
+        "complete": false,
+        "frontier": 330
+      },
+      "current": {
+        "visited": 910,
+        "complete": false,
+        "frontier": 434
+      },
+      "execution": {
+        "coreStarts": 154,
+        "replayedResponses": 8243,
+        "reusedResponses": 273,
+        "scope": "Actual operations since first use of this executor; earlier baseline operations are not inferred"
+      }
+    },
+    {
+      "index": 128,
+      "id": "20726052-74652966",
+      "originHash": "ad256ded893de23250734a3ca182494ef9e8d9e9ad8bfb5ee1ba7c58aa2a596a",
+      "old": {
+        "visited": 1838,
+        "complete": false,
+        "frontier": 39
+      },
+      "current": {
+        "visited": 2610,
+        "complete": false,
+        "frontier": 48
+      },
+      "execution": {
+        "coreStarts": 337,
+        "replayedResponses": 2191,
+        "reusedResponses": 435,
+        "scope": "Actual operations since first use of this executor; earlier baseline operations are not inferred"
+      }
+    },
+    {
+      "index": 129,
+      "id": "20726052-75500286",
+      "originHash": "93129537b266330280c34e0c6570a141a051b0fc1a4b0c7e7ad48a898fa022a1",
+      "old": {
+        "visited": 577,
+        "complete": false,
+        "frontier": 125
+      },
+      "current": {
+        "visited": 1368,
+        "complete": false,
+        "frontier": 153
+      },
+      "execution": {
+        "coreStarts": 351,
+        "replayedResponses": 2681,
+        "reusedResponses": 440,
+        "scope": "Actual operations since first use of this executor; earlier baseline operations are not inferred"
+      }
+    },
+    {
+      "index": 130,
+      "id": "20726052-78114463",
+      "originHash": "79bb14d125b59ef62f699dd2a3925a93b297a7be01824506bfe39d2389b71878",
+      "old": {
+        "visited": 115,
+        "complete": true,
+        "frontier": 0
+      },
+      "current": {
+        "visited": 115,
+        "complete": true,
+        "frontier": 0
+      },
+      "execution": null
+    },
+    {
+      "index": 131,
+      "id": "20726052-84192580",
+      "originHash": "b87aeb2fe61dcde6719c63bd4b4adc4045639ed517873d20e19db669b64ff0f8",
+      "old": {
+        "visited": 794,
+        "complete": true,
+        "frontier": 0
+      },
+      "current": {
+        "visited": 794,
+        "complete": true,
+        "frontier": 0
+      },
+      "execution": null
+    },
+    {
+      "index": 132,
+      "id": "20726052-91800273",
+      "originHash": "63a34881568da420dabe89bd5771745b81ad97d5ee476b91f4a861d1c6c36583",
+      "old": {
+        "visited": 91,
+        "complete": true,
+        "frontier": 0
+      },
+      "current": {
+        "visited": 91,
+        "complete": true,
+        "frontier": 0
+      },
+      "execution": null
+    },
+    {
+      "index": 133,
+      "id": "20726052-94145021",
+      "originHash": "d86182f43219046fb78167931be667977fd34816ec97d0bc6b54166e704d8d9e",
+      "old": {
+        "visited": 752,
+        "complete": true,
+        "frontier": 0
+      },
+      "current": {
+        "visited": 752,
+        "complete": true,
+        "frontier": 0
+      },
+      "execution": null
+    },
+    {
+      "index": 134,
+      "id": "20726052-94722358",
+      "originHash": "1f68a5cd9e25855eafffb4694649f256dba046e55736ab372f86b2c1206b46e4",
+      "old": {
+        "visited": 114,
+        "complete": true,
+        "frontier": 0
+      },
+      "current": {
+        "visited": 114,
+        "complete": true,
+        "frontier": 0
+      },
+      "execution": null
+    },
+    {
+      "index": 135,
+      "id": "20726052-96676583",
+      "originHash": "dfaf6e9d869e5dde5315ab0f24fb6a900b7ec3251a97d927a2615e499bd47f09",
+      "old": {
+        "visited": 1340,
+        "complete": true,
+        "frontier": 0
+      },
+      "current": {
+        "visited": 1340,
+        "complete": true,
+        "frontier": 0
+      },
+      "execution": null
+    },
+    {
+      "index": 136,
+      "id": "20938824-23434538",
+      "originHash": "5821cb53442ff4fbbdc13a63b7f84a71ae2720900df824d475fee9529a08dc8c",
+      "old": {
+        "visited": 1069,
+        "complete": true,
+        "frontier": 0
+      },
+      "current": {
+        "visited": 1069,
+        "complete": true,
+        "frontier": 0
+      },
+      "execution": null
+    },
+    {
+      "index": 137,
+      "id": "20938824-30118811",
+      "originHash": "4a208417b3cf7ebddf665d90ac39e3e73e9bb4b35d348ffbe924229148392551",
+      "old": {
+        "visited": 468,
+        "complete": false,
+        "frontier": 154
+      },
+      "current": {
+        "visited": 937,
+        "complete": false,
+        "frontier": 234
+      },
+      "execution": {
+        "coreStarts": 181,
+        "replayedResponses": 7173,
+        "reusedResponses": 288,
+        "scope": "Actual operations since first use of this executor; earlier baseline operations are not inferred"
+      }
+    },
+    {
+      "index": 138,
+      "id": "20938824-32061192",
+      "originHash": "3d77a8c61a92f54b6ee5d3e3146ba946c974fcc0a4e6c10e4c311d9422ecc717",
+      "old": {
+        "visited": 422,
+        "complete": false,
+        "frontier": 141
+      },
+      "current": {
+        "visited": 976,
+        "complete": false,
+        "frontier": 199
+      },
+      "execution": {
+        "coreStarts": 219,
+        "replayedResponses": 6559,
+        "reusedResponses": 335,
+        "scope": "Actual operations since first use of this executor; earlier baseline operations are not inferred"
+      }
+    },
+    {
+      "index": 139,
+      "id": "20938824-33854624",
+      "originHash": "bceea1db337efecb3d122dd424162f85cb5c4367ee4369fabaa1c03e2dac18e1",
+      "old": {
+        "visited": 2011,
+        "complete": false,
+        "frontier": 93
+      },
+      "current": {
+        "visited": 2911,
+        "complete": false,
+        "frontier": 102
+      },
+      "execution": {
+        "coreStarts": 289,
+        "replayedResponses": 4547,
+        "reusedResponses": 611,
+        "scope": "Actual operations since first use of this executor; earlier baseline operations are not inferred"
+      }
+    },
+    {
+      "index": 140,
+      "id": "20938824-40366667",
+      "originHash": "491d9d21bcd05ef1e6b08a1f11d7a45efaf054d4814638dc36541600cc05d336",
+      "old": {
+        "visited": 1705,
+        "complete": false,
+        "frontier": 12
+      },
+      "current": {
+        "visited": 1740,
+        "complete": true,
+        "frontier": 0
+      },
+      "execution": {
+        "coreStarts": 19,
+        "replayedResponses": 112,
+        "reusedResponses": 16,
+        "scope": "Actual operations since first use of this executor; earlier baseline operations are not inferred"
+      }
+    },
+    {
+      "index": 141,
+      "id": "20938824-57111661",
+      "originHash": "bb64d2f2bb02d97aed1be0276fe4c814c488762a57192b428e5437f33250f2f3",
+      "old": {
+        "visited": 554,
+        "complete": false,
+        "frontier": 204
+      },
+      "current": {
+        "visited": 1016,
+        "complete": false,
+        "frontier": 333
+      },
+      "execution": {
+        "coreStarts": 173,
+        "replayedResponses": 9027,
+        "reusedResponses": 289,
+        "scope": "Actual operations since first use of this executor; earlier baseline operations are not inferred"
+      }
+    },
+    {
+      "index": 142,
+      "id": "20938824-59438930",
+      "originHash": "91fc60d487d34eefa31346c5ef859a80082c5d65a1ead3107dea31553da7ae6a",
+      "old": {
+        "visited": 186,
+        "complete": true,
+        "frontier": 0
+      },
+      "current": {
+        "visited": 186,
+        "complete": true,
+        "frontier": 0
+      },
+      "execution": null
+    },
+    {
+      "index": 143,
+      "id": "20938824-68337209",
+      "originHash": "216944a46b1d7998ed054bb50a355774944253bfebef3f0646ce11bd25ae31c9",
+      "old": {
+        "visited": 545,
+        "complete": false,
+        "frontier": 209
+      },
+      "current": {
+        "visited": 1057,
+        "complete": false,
+        "frontier": 283
+      },
+      "execution": {
+        "coreStarts": 199,
+        "replayedResponses": 5864,
+        "reusedResponses": 313,
+        "scope": "Actual operations since first use of this executor; earlier baseline operations are not inferred"
+      }
+    },
+    {
+      "index": 144,
+      "id": "20938824-69272449",
+      "originHash": "d60b11e79b2c84475a5292a1c16f9e58d06404c00f220144054acba67ed7fce4",
+      "old": {
+        "visited": 556,
+        "complete": false,
+        "frontier": 596
+      },
+      "current": {
+        "visited": 992,
+        "complete": false,
+        "frontier": 788
+      },
+      "execution": {
+        "coreStarts": 156,
+        "replayedResponses": 9195,
+        "reusedResponses": 280,
+        "scope": "Actual operations since first use of this executor; earlier baseline operations are not inferred"
+      }
+    },
+    {
+      "index": 145,
+      "id": "20938824-72656408",
+      "originHash": "73ceb95b08cc746083da829afdb1d46f7cccb879ea0e1bbbe57e63db512a645d",
+      "old": {
+        "visited": 1720,
+        "complete": false,
+        "frontier": 61
+      },
+      "current": {
+        "visited": 2445,
+        "complete": false,
+        "frontier": 68
+      },
+      "execution": {
+        "coreStarts": 281,
+        "replayedResponses": 4143,
+        "reusedResponses": 444,
+        "scope": "Actual operations since first use of this executor; earlier baseline operations are not inferred"
+      }
+    },
+    {
+      "index": 146,
+      "id": "20938824-73628505",
+      "originHash": "bfa4e6cf3fccf49a17c709e17ccb2c0300b2f983c97767a56f0c903fe6b012c6",
+      "old": {
+        "visited": 485,
+        "complete": false,
+        "frontier": 332
+      },
+      "current": {
+        "visited": 1045,
+        "complete": false,
+        "frontier": 421
+      },
+      "execution": {
+        "coreStarts": 214,
+        "replayedResponses": 6773,
+        "reusedResponses": 346,
+        "scope": "Actual operations since first use of this executor; earlier baseline operations are not inferred"
+      }
+    },
+    {
+      "index": 147,
+      "id": "20938824-74652966",
+      "originHash": "e00262fba5eb659a60e03d56b4d4d802f7c891269ea1df53163c9b7d9bc77577",
+      "old": {
+        "visited": 1708,
+        "complete": false,
+        "frontier": 87
+      },
+      "current": {
+        "visited": 2417,
+        "complete": false,
+        "frontier": 105
+      },
+      "execution": {
+        "coreStarts": 279,
+        "replayedResponses": 3946,
+        "reusedResponses": 430,
+        "scope": "Actual operations since first use of this executor; earlier baseline operations are not inferred"
+      }
+    },
+    {
+      "index": 148,
+      "id": "20938824-75500286",
+      "originHash": "7d5ecc92869339c3504fde3f7bdb58e91d5f4077e79c0437cf67d50299baa11e",
+      "old": {
+        "visited": 566,
+        "complete": false,
+        "frontier": 130
+      },
+      "current": {
+        "visited": 1289,
+        "complete": false,
+        "frontier": 173
+      },
+      "execution": {
+        "coreStarts": 311,
+        "replayedResponses": 2035,
+        "reusedResponses": 412,
+        "scope": "Actual operations since first use of this executor; earlier baseline operations are not inferred"
+      }
+    },
+    {
+      "index": 149,
+      "id": "20938824-78114463",
+      "originHash": "084202caf44ddc8690cabcc84ba7acd567b739958c7b4265f5501d9e814dc35c",
+      "old": {
+        "visited": 1743,
+        "complete": true,
+        "frontier": 0
+      },
+      "current": {
+        "visited": 1743,
+        "complete": true,
+        "frontier": 0
+      },
+      "execution": null
+    },
+    {
+      "index": 150,
+      "id": "20938824-84192580",
+      "originHash": "65f7dde2f6157cf1fffbf48cc6da6e38afcd2a09318e58436c0782b268f51252",
+      "old": {
+        "visited": 578,
+        "complete": true,
+        "frontier": 0
+      },
+      "current": {
+        "visited": 578,
+        "complete": true,
+        "frontier": 0
+      },
+      "execution": null
+    },
+    {
+      "index": 151,
+      "id": "20938824-91800273",
+      "originHash": "35a02583e21bbac917709600e49396cc770e65fdd3e51ee0d6c533cd27825ff2",
+      "old": {
+        "visited": 1401,
+        "complete": true,
+        "frontier": 0
+      },
+      "current": {
+        "visited": 1401,
+        "complete": true,
+        "frontier": 0
+      },
+      "execution": null
+    },
+    {
+      "index": 152,
+      "id": "20938824-94145021",
+      "originHash": "fc21345dd9378fe3b33b5eefb8ea329130979aacfe2fa31e10c0e4b0ce03cc41",
+      "old": {
+        "visited": 186,
+        "complete": true,
+        "frontier": 0
+      },
+      "current": {
+        "visited": 186,
+        "complete": true,
+        "frontier": 0
+      },
+      "execution": null
+    },
+    {
+      "index": 153,
+      "id": "20938824-94722358",
+      "originHash": "35f4fab8b7df3ac7008b9c932f19c51d61155e3664b73cf9c67c4f42f48a9fe3",
+      "old": {
+        "visited": 1263,
+        "complete": false,
+        "frontier": 171
+      },
+      "current": {
+        "visited": 1787,
+        "complete": false,
+        "frontier": 249
+      },
+      "execution": {
+        "coreStarts": 206,
+        "replayedResponses": 6719,
+        "reusedResponses": 318,
+        "scope": "Actual operations since first use of this executor; earlier baseline operations are not inferred"
+      }
+    },
+    {
+      "index": 154,
+      "id": "20938824-96676583",
+      "originHash": "e4b2170a2c5c532cc76f3c46e70b27495d572a5143244c35e4a3d202185db690",
+      "old": {
+        "visited": 452,
+        "complete": false,
+        "frontier": 149
+      },
+      "current": {
+        "visited": 988,
+        "complete": false,
+        "frontier": 207
+      },
+      "execution": {
+        "coreStarts": 211,
+        "replayedResponses": 6281,
+        "reusedResponses": 325,
+        "scope": "Actual operations since first use of this executor; earlier baseline operations are not inferred"
+      }
+    },
+    {
+      "index": 155,
+      "id": "23434538-30118811",
+      "originHash": "b163aa06601c3694a774d6608106fd6a75e7400d7e4b9116bad39e98ad372d9b",
+      "old": {
+        "visited": 644,
+        "complete": false,
+        "frontier": 182
+      },
+      "current": {
+        "visited": 1295,
+        "complete": false,
+        "frontier": 220
+      },
+      "execution": {
+        "coreStarts": 277,
+        "replayedResponses": 5070,
+        "reusedResponses": 374,
+        "scope": "Actual operations since first use of this executor; earlier baseline operations are not inferred"
+      }
+    },
+    {
+      "index": 156,
+      "id": "23434538-32061192",
+      "originHash": "82a72a24f11414a385c3f693b5d7c654952f5ea6324dcdbe8312445ebc647511",
+      "old": {
+        "visited": 455,
+        "complete": false,
+        "frontier": 177
+      },
+      "current": {
+        "visited": 985,
+        "complete": false,
+        "frontier": 241
+      },
+      "execution": {
+        "coreStarts": 211,
+        "replayedResponses": 6299,
+        "reusedResponses": 319,
+        "scope": "Actual operations since first use of this executor; earlier baseline operations are not inferred"
+      }
+    },
+    {
+      "index": 157,
+      "id": "23434538-33854624",
+      "originHash": "1a9d0f23f6213d5406a1306b9ba473c7d5344923bfa8717b2f3df8a78e532a08",
+      "old": {
+        "visited": 69,
+        "complete": true,
+        "frontier": 0
+      },
+      "current": {
+        "visited": 69,
+        "complete": true,
+        "frontier": 0
+      },
+      "execution": null
+    },
+    {
+      "index": 158,
+      "id": "23434538-40366667",
+      "originHash": "b0f1ab5036b1ceebed0e3c28e7f2a530405510dafc4f4df582d4988fec9e113f",
+      "old": {
+        "visited": 829,
+        "complete": true,
+        "frontier": 0
+      },
+      "current": {
+        "visited": 829,
+        "complete": true,
+        "frontier": 0
+      },
+      "execution": null
+    },
+    {
+      "index": 159,
+      "id": "23434538-57111661",
+      "originHash": "c809d7fee54212f5c5a49a47c6303ce686d2feb6d72af638afb1529eecfe443c",
+      "old": {
+        "visited": 829,
+        "complete": true,
+        "frontier": 0
+      },
+      "current": {
+        "visited": 829,
+        "complete": true,
+        "frontier": 0
+      },
+      "execution": null
+    },
+    {
+      "index": 160,
+      "id": "23434538-59438930",
+      "originHash": "a9d740cae1be4012f751c96fb228ef75848c4901b8a883e85d60555e9cf5900f",
+      "old": {
+        "visited": 508,
+        "complete": true,
+        "frontier": 0
+      },
+      "current": {
+        "visited": 508,
+        "complete": true,
+        "frontier": 0
+      },
+      "execution": null
+    },
+    {
+      "index": 161,
+      "id": "23434538-68337209",
+      "originHash": "895f01b11b226e7429d84c5dfd320b3e1876a30f9a87922808f1d643174b1121",
+      "old": {
+        "visited": 447,
+        "complete": false,
+        "frontier": 181
+      },
+      "current": {
+        "visited": 896,
+        "complete": false,
+        "frontier": 279
+      },
+      "execution": {
+        "coreStarts": 165,
+        "replayedResponses": 8749,
+        "reusedResponses": 284,
+        "scope": "Actual operations since first use of this executor; earlier baseline operations are not inferred"
+      }
+    },
+    {
+      "index": 162,
+      "id": "23434538-69272449",
+      "originHash": "15fab8d4cbae44cd6375bcb049b33569d15b6baca7dfd21cde106d7c4f10c32c",
+      "old": {
+        "visited": 463,
+        "complete": false,
+        "frontier": 388
+      },
+      "current": {
+        "visited": 943,
+        "complete": false,
+        "frontier": 557
+      },
+      "execution": {
+        "coreStarts": 183,
+        "replayedResponses": 9346,
+        "reusedResponses": 297,
+        "scope": "Actual operations since first use of this executor; earlier baseline operations are not inferred"
+      }
+    },
+    {
+      "index": 163,
+      "id": "23434538-72656408",
+      "originHash": "ac9d8f30dbcf251396588eac23364888d3e2cd984a999b3dc964cc5d0a1aa101",
+      "old": {
+        "visited": 69,
+        "complete": true,
+        "frontier": 0
+      },
+      "current": {
+        "visited": 69,
+        "complete": true,
+        "frontier": 0
+      },
+      "execution": null
+    },
+    {
+      "index": 164,
+      "id": "23434538-73628505",
+      "originHash": "6f8cb62b4c0b2d73c09c1e7962658b9b89839d63daac7ca4b51aedd8fe4f9aef",
+      "old": {
+        "visited": 398,
+        "complete": false,
+        "frontier": 302
+      },
+      "current": {
+        "visited": 851,
+        "complete": false,
+        "frontier": 403
+      },
+      "execution": {
+        "coreStarts": 168,
+        "replayedResponses": 7798,
+        "reusedResponses": 285,
+        "scope": "Actual operations since first use of this executor; earlier baseline operations are not inferred"
+      }
+    },
+    {
+      "index": 165,
+      "id": "23434538-74652966",
+      "originHash": "48af5560f3e493b69993fe1fcf9b8caaa56d597167f73542a1973efecca6273a",
+      "old": {
+        "visited": 1869,
+        "complete": false,
+        "frontier": 55
+      },
+      "current": {
+        "visited": 2518,
+        "complete": false,
+        "frontier": 66
+      },
+      "execution": {
+        "coreStarts": 272,
+        "replayedResponses": 3553,
+        "reusedResponses": 377,
+        "scope": "Actual operations since first use of this executor; earlier baseline operations are not inferred"
+      }
+    },
+    {
+      "index": 166,
+      "id": "23434538-75500286",
+      "originHash": "5e12c72473d9d74153aaacd7decfaaf350411a8eb30298343a605a9fbc020026",
+      "old": {
+        "visited": 600,
+        "complete": false,
+        "frontier": 160
+      },
+      "current": {
+        "visited": 1252,
+        "complete": false,
+        "frontier": 204
+      },
+      "execution": {
+        "coreStarts": 278,
+        "replayedResponses": 4525,
+        "reusedResponses": 374,
+        "scope": "Actual operations since first use of this executor; earlier baseline operations are not inferred"
+      }
+    },
+    {
+      "index": 167,
+      "id": "23434538-78114463",
+      "originHash": "435ec24574fcde09f67cd53246a7d3a70f0447e5bc72fd0634ec4abdea1541ab",
+      "old": {
+        "visited": 828,
+        "complete": true,
+        "frontier": 0
+      },
+      "current": {
+        "visited": 828,
+        "complete": true,
+        "frontier": 0
+      },
+      "execution": null
+    },
+    {
+      "index": 168,
+      "id": "23434538-84192580",
+      "originHash": "a104d07457275ec677c73b8aebbd532e3ba757483f45fe109963f533b6eff72b",
+      "old": {
+        "visited": 793,
+        "complete": true,
+        "frontier": 0
+      },
+      "current": {
+        "visited": 793,
+        "complete": true,
+        "frontier": 0
+      },
+      "execution": null
+    },
+    {
+      "index": 169,
+      "id": "23434538-91800273",
+      "originHash": "739bb058f394a9dc346a1c7ed773a72857ff811d54a85285df711faa0ebcb1b7",
+      "old": {
+        "visited": 398,
+        "complete": true,
+        "frontier": 0
+      },
+      "current": {
+        "visited": 398,
+        "complete": true,
+        "frontier": 0
+      },
+      "execution": null
+    },
+    {
+      "index": 170,
+      "id": "23434538-94145021",
+      "originHash": "bec53fbc742e465b7945026acf6d6e2697ba5f9db2bb92006c7bd2e261b1f6fb",
+      "old": {
+        "visited": 508,
+        "complete": true,
+        "frontier": 0
+      },
+      "current": {
+        "visited": 508,
+        "complete": true,
+        "frontier": 0
+      },
+      "execution": null
+    },
+    {
+      "index": 171,
+      "id": "23434538-94722358",
+      "originHash": "fb221b7a221b77104175a819f0bacaa0f48683c8730d88cdbc42806bbe73ede9",
+      "old": {
+        "visited": 830,
+        "complete": true,
+        "frontier": 0
+      },
+      "current": {
+        "visited": 830,
+        "complete": true,
+        "frontier": 0
+      },
+      "execution": null
+    },
+    {
+      "index": 172,
+      "id": "23434538-96676583",
+      "originHash": "0626baa465aa80ddcbfad9f98c919eb2cd304c3a53a07d216ed4c1ea4e2ff0b3",
+      "old": {
+        "visited": 788,
+        "complete": true,
+        "frontier": 0
+      },
+      "current": {
+        "visited": 788,
+        "complete": true,
+        "frontier": 0
+      },
+      "execution": null
+    },
+    {
+      "index": 173,
+      "id": "30118811-30118811",
+      "originHash": "7fcb3363a78d584e08e1a099ca22b2104b8d2b886a3ccb7a62aef12a0727fda2",
+      "old": {
+        "visited": 443,
+        "complete": false,
+        "frontier": 311
+      },
+      "current": {
+        "visited": 884,
+        "complete": false,
+        "frontier": 393
+      },
+      "execution": {
+        "coreStarts": 168,
+        "replayedResponses": 7062,
+        "reusedResponses": 273,
+        "scope": "Actual operations since first use of this executor; earlier baseline operations are not inferred"
+      }
+    },
+    {
+      "index": 174,
+      "id": "30118811-32061192",
+      "originHash": "85a4f987d2bc02ead43f905427eb02f1e56889398a831471ebf9edc0e0446b15",
+      "old": {
+        "visited": 507,
+        "complete": false,
+        "frontier": 249
+      },
+      "current": {
+        "visited": 1003,
+        "complete": false,
+        "frontier": 317
+      },
+      "execution": {
+        "coreStarts": 196,
+        "replayedResponses": 6235,
+        "reusedResponses": 300,
+        "scope": "Actual operations since first use of this executor; earlier baseline operations are not inferred"
+      }
+    },
+    {
+      "index": 175,
+      "id": "30118811-33854624",
+      "originHash": "35163c8f03e6c9c1f74ec858b035128a1817373f89e5ee404e3066b3448f5894",
+      "old": {
+        "visited": 455,
+        "complete": false,
+        "frontier": 238
+      },
+      "current": {
+        "visited": 879,
+        "complete": false,
+        "frontier": 315
+      },
+      "execution": {
+        "coreStarts": 162,
+        "replayedResponses": 6804,
+        "reusedResponses": 262,
+        "scope": "Actual operations since first use of this executor; earlier baseline operations are not inferred"
+      }
+    },
+    {
+      "index": 176,
+      "id": "30118811-40366667",
+      "originHash": "590c7ec15effdf25a279732697259b0a350331a19a73ae1f3a6a5b265b78a93a",
+      "old": {
+        "visited": 739,
+        "complete": false,
+        "frontier": 227
+      },
+      "current": {
+        "visited": 1357,
+        "complete": false,
+        "frontier": 263
+      },
+      "execution": {
+        "coreStarts": 263,
+        "replayedResponses": 4863,
+        "reusedResponses": 355,
+        "scope": "Actual operations since first use of this executor; earlier baseline operations are not inferred"
+      }
+    },
+    {
+      "index": 177,
+      "id": "30118811-57111661",
+      "originHash": "0e0ff79a0db21d1b0c680bc41dcfb2d352e3529228cebab08ec6f68b4b8d3512",
+      "old": {
+        "visited": 437,
+        "complete": false,
+        "frontier": 138
+      },
+      "current": {
+        "visited": 1054,
+        "complete": false,
+        "frontier": 175
+      },
+      "execution": {
+        "coreStarts": 263,
+        "replayedResponses": 4849,
+        "reusedResponses": 354,
+        "scope": "Actual operations since first use of this executor; earlier baseline operations are not inferred"
+      }
+    },
+    {
+      "index": 178,
+      "id": "30118811-59438930",
+      "originHash": "ac5e597c75962bc7e7a0d25324413c2bfc6cdec200da77e46b0589803166340a",
+      "old": {
+        "visited": 460,
+        "complete": false,
+        "frontier": 189
+      },
+      "current": {
+        "visited": 1048,
+        "complete": false,
+        "frontier": 235
+      },
+      "execution": {
+        "coreStarts": 246,
+        "replayedResponses": 6055,
+        "reusedResponses": 342,
+        "scope": "Actual operations since first use of this executor; earlier baseline operations are not inferred"
+      }
+    },
+    {
+      "index": 179,
+      "id": "30118811-68337209",
+      "originHash": "ab0e880e92b8601c1b21096b3602f71b41df62c155c2389ad4253b6f5cb600e7",
+      "old": {
+        "visited": 607,
+        "complete": false,
+        "frontier": 337
+      },
+      "current": {
+        "visited": 1227,
+        "complete": false,
+        "frontier": 371
+      },
+      "execution": {
+        "coreStarts": 265,
+        "replayedResponses": 4878,
+        "reusedResponses": 355,
+        "scope": "Actual operations since first use of this executor; earlier baseline operations are not inferred"
+      }
+    },
+    {
+      "index": 180,
+      "id": "30118811-69272449",
+      "originHash": "5db6898afd2bbec00ab96b544610e71594a573a65523aef8c0ed239ef0ec3811",
+      "old": {
+        "visited": 440,
+        "complete": false,
+        "frontier": 255
+      },
+      "current": {
+        "visited": 895,
+        "complete": false,
+        "frontier": 346
+      },
+      "execution": {
+        "coreStarts": 174,
+        "replayedResponses": 7435,
+        "reusedResponses": 281,
+        "scope": "Actual operations since first use of this executor; earlier baseline operations are not inferred"
+      }
+    },
+    {
+      "index": 181,
+      "id": "30118811-72656408",
+      "originHash": "ebbf9fa0ac152dad22d3c79184765b0011782e43d4dd1097484d5a4d6e661881",
+      "old": {
+        "visited": 434,
+        "complete": false,
+        "frontier": 316
+      },
+      "current": {
+        "visited": 859,
+        "complete": false,
+        "frontier": 392
+      },
+      "execution": {
+        "coreStarts": 163,
+        "replayedResponses": 6848,
+        "reusedResponses": 262,
+        "scope": "Actual operations since first use of this executor; earlier baseline operations are not inferred"
+      }
+    },
+    {
+      "index": 182,
+      "id": "30118811-73628505",
+      "originHash": "463086bf94817e6abeb7b7789cbfd488cc1df1d40a910c5f416a99e0b49cd36e",
+      "old": {
+        "visited": 464,
+        "complete": false,
+        "frontier": 354
+      },
+      "current": {
+        "visited": 884,
+        "complete": false,
+        "frontier": 442
+      },
+      "execution": {
+        "coreStarts": 159,
+        "replayedResponses": 7093,
+        "reusedResponses": 261,
+        "scope": "Actual operations since first use of this executor; earlier baseline operations are not inferred"
+      }
+    },
+    {
+      "index": 183,
+      "id": "30118811-74652966",
+      "originHash": "3ad910c9dfaee2feefaf82162a47308b87b037c312b66cd93fdb49435f0c4743",
+      "old": {
+        "visited": 475,
+        "complete": false,
+        "frontier": 222
+      },
+      "current": {
+        "visited": 910,
+        "complete": false,
+        "frontier": 289
+      },
+      "execution": {
+        "coreStarts": 171,
+        "replayedResponses": 5938,
+        "reusedResponses": 264,
+        "scope": "Actual operations since first use of this executor; earlier baseline operations are not inferred"
+      }
+    },
+    {
+      "index": 184,
+      "id": "30118811-75500286",
+      "originHash": "fb4f709f35d7b2be10c95433768460139d068386b60ba4d5e126a3e33df427a4",
+      "old": {
+        "visited": 727,
+        "complete": false,
+        "frontier": 260
+      },
+      "current": {
+        "visited": 1311,
+        "complete": false,
+        "frontier": 338
+      },
+      "execution": {
+        "coreStarts": 247,
+        "replayedResponses": 4831,
+        "reusedResponses": 337,
+        "scope": "Actual operations since first use of this executor; earlier baseline operations are not inferred"
+      }
+    },
+    {
+      "index": 185,
+      "id": "30118811-78114463",
+      "originHash": "5361d2bcafa3b1fa0bc5d7506f2de606fef440ab56059340bc9a7bd5fc9ac98d",
+      "old": {
+        "visited": 438,
+        "complete": false,
+        "frontier": 137
+      },
+      "current": {
+        "visited": 1025,
+        "complete": false,
+        "frontier": 175
+      },
+      "execution": {
+        "coreStarts": 250,
+        "replayedResponses": 4637,
+        "reusedResponses": 337,
+        "scope": "Actual operations since first use of this executor; earlier baseline operations are not inferred"
+      }
+    },
+    {
+      "index": 186,
+      "id": "30118811-84192580",
+      "originHash": "e6b65848df51f33b3a5377aef4cedb1da8db3aec543bbe945abc7b60c1d4e658",
+      "old": {
+        "visited": 431,
+        "complete": false,
+        "frontier": 233
+      },
+      "current": {
+        "visited": 1046,
+        "complete": false,
+        "frontier": 271
+      },
+      "execution": {
+        "coreStarts": 261,
+        "replayedResponses": 4962,
+        "reusedResponses": 354,
+        "scope": "Actual operations since first use of this executor; earlier baseline operations are not inferred"
+      }
+    },
+    {
+      "index": 187,
+      "id": "30118811-91800273",
+      "originHash": "263d0479c44d57473a06a7e09d8d26045fbc878dcd11b2540daf940524b7c057",
+      "old": {
+        "visited": 708,
+        "complete": false,
+        "frontier": 159
+      },
+      "current": {
+        "visited": 1383,
+        "complete": false,
+        "frontier": 196
+      },
+      "execution": {
+        "coreStarts": 267,
+        "replayedResponses": 4486,
+        "reusedResponses": 408,
+        "scope": "Actual operations since first use of this executor; earlier baseline operations are not inferred"
+      }
+    },
+    {
+      "index": 188,
+      "id": "30118811-94145021",
+      "originHash": "a16887155c6e9d99c5c0248e46db4c04bfb6aa9617d79dcc614b9f507cf03752",
+      "old": {
+        "visited": 492,
+        "complete": false,
+        "frontier": 185
+      },
+      "current": {
+        "visited": 1050,
+        "complete": false,
+        "frontier": 232
+      },
+      "execution": {
+        "coreStarts": 233,
+        "replayedResponses": 5726,
+        "reusedResponses": 325,
+        "scope": "Actual operations since first use of this executor; earlier baseline operations are not inferred"
+      }
+    },
+    {
+      "index": 189,
+      "id": "30118811-94722358",
+      "originHash": "0943fbbcd2ab217a4c32b59438e765c900ae7ccda5692fd77bfef4e9857d0523",
+      "old": {
+        "visited": 534,
+        "complete": false,
+        "frontier": 223
+      },
+      "current": {
+        "visited": 1125,
+        "complete": false,
+        "frontier": 265
+      },
+      "execution": {
+        "coreStarts": 250,
+        "replayedResponses": 4655,
+        "reusedResponses": 341,
+        "scope": "Actual operations since first use of this executor; earlier baseline operations are not inferred"
+      }
+    },
+    {
+      "index": 190,
+      "id": "30118811-96676583",
+      "originHash": "ed0b35a91081186bd98c959f0943e8e83e5877453a19133d73f9f56f5b3c2097",
+      "old": {
+        "visited": 495,
+        "complete": false,
+        "frontier": 240
+      },
+      "current": {
+        "visited": 991,
+        "complete": false,
+        "frontier": 306
+      },
+      "execution": {
+        "coreStarts": 196,
+        "replayedResponses": 6235,
+        "reusedResponses": 300,
+        "scope": "Actual operations since first use of this executor; earlier baseline operations are not inferred"
+      }
+    },
+    {
+      "index": 191,
+      "id": "32061192-33854624",
+      "originHash": "1aeb6cd4037b56ad9202ffa1f4970501b90b5b8f2b9cc8caf0e63a8662e7ec66",
+      "old": {
+        "visited": 512,
+        "complete": false,
+        "frontier": 119
+      },
+      "current": {
+        "visited": 1200,
+        "complete": false,
+        "frontier": 160
+      },
+      "execution": {
+        "coreStarts": 215,
+        "replayedResponses": 4502,
+        "reusedResponses": 473,
+        "scope": "Actual operations since first use of this executor; earlier baseline operations are not inferred"
+      }
+    },
+    {
+      "index": 192,
+      "id": "32061192-40366667",
+      "originHash": "8287df6c0e6b6aab799ae3604b1771e174caa58f16014b7a8bb4543c86f84d0c",
+      "old": {
+        "visited": 637,
+        "complete": false,
+        "frontier": 199
+      },
+      "current": {
+        "visited": 1138,
+        "complete": false,
+        "frontier": 265
+      },
+      "execution": {
+        "coreStarts": 197,
+        "replayedResponses": 6666,
+        "reusedResponses": 304,
+        "scope": "Actual operations since first use of this executor; earlier baseline operations are not inferred"
+      }
+    },
+    {
+      "index": 193,
+      "id": "32061192-57111661",
+      "originHash": "9b8de6ff47def06a5618b655a91283eec3363a72ed177e2a84adc2540eedd42a",
+      "old": {
+        "visited": 493,
+        "complete": false,
+        "frontier": 225
+      },
+      "current": {
+        "visited": 984,
+        "complete": false,
+        "frontier": 329
+      },
+      "execution": {
+        "coreStarts": 184,
+        "replayedResponses": 8427,
+        "reusedResponses": 307,
+        "scope": "Actual operations since first use of this executor; earlier baseline operations are not inferred"
+      }
+    },
+    {
+      "index": 194,
+      "id": "32061192-59438930",
+      "originHash": "6c647aad174aaabae00f1840419603733825e0ba235ebc0165610a6024114f92",
+      "old": {
+        "visited": 443,
+        "complete": false,
+        "frontier": 138
+      },
+      "current": {
+        "visited": 1029,
+        "complete": false,
+        "frontier": 169
+      },
+      "execution": {
+        "coreStarts": 245,
+        "replayedResponses": 5411,
+        "reusedResponses": 341,
+        "scope": "Actual operations since first use of this executor; earlier baseline operations are not inferred"
+      }
+    },
+    {
+      "index": 195,
+      "id": "32061192-68337209",
+      "originHash": "4876cb7289685f5339d52a9810ba87a7d0c4d7ed18b28a46542eb3dc487aaa6a",
+      "old": {
+        "visited": 607,
+        "complete": false,
+        "frontier": 304
+      },
+      "current": {
+        "visited": 1091,
+        "complete": false,
+        "frontier": 383
+      },
+      "execution": {
+        "coreStarts": 170,
+        "replayedResponses": 7051,
+        "reusedResponses": 314,
+        "scope": "Actual operations since first use of this executor; earlier baseline operations are not inferred"
+      }
+    },
+    {
+      "index": 196,
+      "id": "32061192-69272449",
+      "originHash": "bb5eefc0c02742b2f3dd8a61111382e5c6eabde4add7a03d9ac8b5441f3e6485",
+      "old": {
+        "visited": 441,
+        "complete": false,
+        "frontier": 283
+      },
+      "current": {
+        "visited": 852,
+        "complete": false,
+        "frontier": 387
+      },
+      "execution": {
+        "coreStarts": 151,
+        "replayedResponses": 7248,
+        "reusedResponses": 260,
+        "scope": "Actual operations since first use of this executor; earlier baseline operations are not inferred"
+      }
+    },
+    {
+      "index": 197,
+      "id": "32061192-72656408",
+      "originHash": "ee5d8fe37308be215039cd6f60fc295cb4cbf47d30aa94145ed057525b4b5fdb",
+      "old": {
+        "visited": 486,
+        "complete": false,
+        "frontier": 137
+      },
+      "current": {
+        "visited": 1052,
+        "complete": false,
+        "frontier": 174
+      },
+      "execution": {
+        "coreStarts": 234,
+        "replayedResponses": 4692,
+        "reusedResponses": 332,
+        "scope": "Actual operations since first use of this executor; earlier baseline operations are not inferred"
+      }
+    },
+    {
+      "index": 198,
+      "id": "32061192-73628505",
+      "originHash": "5b9f71bd5c60bd8292c6fa47b6976e2afe654801c141462a73e73e7ade25dbd4",
+      "old": {
+        "visited": 463,
+        "complete": false,
+        "frontier": 342
+      },
+      "current": {
+        "visited": 931,
+        "complete": false,
+        "frontier": 437
+      },
+      "execution": {
+        "coreStarts": 162,
+        "replayedResponses": 7347,
+        "reusedResponses": 306,
+        "scope": "Actual operations since first use of this executor; earlier baseline operations are not inferred"
+      }
+    },
+    {
+      "index": 199,
+      "id": "32061192-74652966",
+      "originHash": "dc43f329dcbecc73c9495ed5bb8ba4cbef6212bd2f97cb7d0e7fe8f1297742ce",
+      "old": {
+        "visited": 524,
+        "complete": false,
+        "frontier": 188
+      },
+      "current": {
+        "visited": 997,
+        "complete": false,
+        "frontier": 275
+      },
+      "execution": {
+        "coreStarts": 180,
+        "replayedResponses": 6540,
+        "reusedResponses": 293,
+        "scope": "Actual operations since first use of this executor; earlier baseline operations are not inferred"
+      }
+    },
+    {
+      "index": 200,
+      "id": "32061192-75500286",
+      "originHash": "7f4d0dcbda8dddb14a2f337582061018c1321828f987bde4e52683603e4442ae",
+      "old": {
+        "visited": 674,
+        "complete": false,
+        "frontier": 307
+      },
+      "current": {
+        "visited": 1161,
+        "complete": false,
+        "frontier": 410
+      },
+      "execution": {
+        "coreStarts": 191,
+        "replayedResponses": 6571,
+        "reusedResponses": 296,
+        "scope": "Actual operations since first use of this executor; earlier baseline operations are not inferred"
+      }
+    },
+    {
+      "index": 201,
+      "id": "32061192-78114463",
+      "originHash": "f63a2946eae261a056feeb5183391f5b8130a723c13c66fb1327788cab2be87b",
+      "old": {
+        "visited": 508,
+        "complete": false,
+        "frontier": 128
+      },
+      "current": {
+        "visited": 987,
+        "complete": false,
+        "frontier": 195
+      },
+      "execution": {
+        "coreStarts": 188,
+        "replayedResponses": 6259,
+        "reusedResponses": 291,
+        "scope": "Actual operations since first use of this executor; earlier baseline operations are not inferred"
+      }
+    },
+    {
+      "index": 202,
+      "id": "32061192-84192580",
+      "originHash": "34e73ba33aa120475cd792f43744929d91b3e263507de931420bd7956b68c60d",
+      "old": {
+        "visited": 468,
+        "complete": false,
+        "frontier": 233
+      },
+      "current": {
+        "visited": 964,
+        "complete": false,
+        "frontier": 293
+      },
+      "execution": {
+        "coreStarts": 197,
+        "replayedResponses": 6182,
+        "reusedResponses": 299,
+        "scope": "Actual operations since first use of this executor; earlier baseline operations are not inferred"
+      }
+    },
+    {
+      "index": 203,
+      "id": "32061192-91800273",
+      "originHash": "40395020e522288a99e12bfcb901ec002aa4b925662bcfefb4500a783eb3221e",
+      "old": {
+        "visited": 678,
+        "complete": false,
+        "frontier": 124
+      },
+      "current": {
+        "visited": 1327,
+        "complete": false,
+        "frontier": 169
+      },
+      "execution": {
+        "coreStarts": 255,
+        "replayedResponses": 4532,
+        "reusedResponses": 394,
+        "scope": "Actual operations since first use of this executor; earlier baseline operations are not inferred"
+      }
+    },
+    {
+      "index": 204,
+      "id": "32061192-94145021",
+      "originHash": "0b3bf653485ae5a676c83f40304baa3d87ee3de6b671a2788e979e0d820c87ef",
+      "old": {
+        "visited": 480,
+        "complete": false,
+        "frontier": 167
+      },
+      "current": {
+        "visited": 957,
+        "complete": false,
+        "frontier": 227
+      },
+      "execution": {
+        "coreStarts": 188,
+        "replayedResponses": 5962,
+        "reusedResponses": 289,
+        "scope": "Actual operations since first use of this executor; earlier baseline operations are not inferred"
+      }
+    },
+    {
+      "index": 205,
+      "id": "32061192-94722358",
+      "originHash": "92f680fe30cd23868f8a0db0f134c054268dc01b3172af2aec6bf5900f0074e4",
+      "old": {
+        "visited": 528,
+        "complete": false,
+        "frontier": 187
+      },
+      "current": {
+        "visited": 1043,
+        "complete": false,
+        "frontier": 268
+      },
+      "execution": {
+        "coreStarts": 194,
+        "replayedResponses": 5835,
+        "reusedResponses": 321,
+        "scope": "Actual operations since first use of this executor; earlier baseline operations are not inferred"
+      }
+    },
+    {
+      "index": 206,
+      "id": "32061192-96676583",
+      "originHash": "6821b547a448d28bec3c11999c327bf5386a8474c33ae2ea2ce038be835e2d0e",
+      "old": {
+        "visited": 488,
+        "complete": false,
+        "frontier": 294
+      },
+      "current": {
+        "visited": 982,
+        "complete": false,
+        "frontier": 384
+      },
+      "execution": {
+        "coreStarts": 188,
+        "replayedResponses": 7172,
+        "reusedResponses": 306,
+        "scope": "Actual operations since first use of this executor; earlier baseline operations are not inferred"
+      }
+    },
+    {
+      "index": 207,
+      "id": "33854624-40366667",
+      "originHash": "eb898f67d9c018bd1c10d463887c6181571796027074673c3017e5a44a7a038f",
+      "old": {
+        "visited": 13,
+        "complete": true,
+        "frontier": 0
+      },
+      "current": {
+        "visited": 13,
+        "complete": true,
+        "frontier": 0
+      },
+      "execution": null
+    },
+    {
+      "index": 208,
+      "id": "33854624-57111661",
+      "originHash": "e805b64ba9f2fb5de8b25f1c1666447a9573b9f82ca2348567dc60d465272d74",
+      "old": {
+        "visited": 13,
+        "complete": true,
+        "frontier": 0
+      },
+      "current": {
+        "visited": 13,
+        "complete": true,
+        "frontier": 0
+      },
+      "execution": null
+    },
+    {
+      "index": 209,
+      "id": "33854624-59438930",
+      "originHash": "2967e7beffc71a4c20648f1f5e37a59d52758758ec5187b7ccb15e3c30777718",
+      "old": {
+        "visited": 1795,
+        "complete": false,
+        "frontier": 59
+      },
+      "current": {
+        "visited": 2605,
+        "complete": false,
+        "frontier": 71
+      },
+      "execution": {
+        "coreStarts": 255,
+        "replayedResponses": 3890,
+        "reusedResponses": 555,
+        "scope": "Actual operations since first use of this executor; earlier baseline operations are not inferred"
+      }
+    },
+    {
+      "index": 210,
+      "id": "33854624-68337209",
+      "originHash": "a62ba71bfd79eaaa1ad8994c9b04b31ee411081f7adf74463e95b4000595307f",
+      "old": {
+        "visited": 419,
+        "complete": false,
+        "frontier": 970
+      },
+      "current": {
+        "visited": 800,
+        "complete": false,
+        "frontier": 1719
+      },
+      "execution": {
+        "coreStarts": 94,
+        "replayedResponses": 22241,
+        "reusedResponses": 287,
+        "scope": "Actual operations since first use of this executor; earlier baseline operations are not inferred"
+      }
+    },
+    {
+      "index": 211,
+      "id": "33854624-69272449",
+      "originHash": "11a1cb731bb2baa87b0064c622e08df85f08614a199b4c14b0bcf801053c44b9",
+      "old": {
+        "visited": 510,
+        "complete": false,
+        "frontier": 673
+      },
+      "current": {
+        "visited": 1041,
+        "complete": false,
+        "frontier": 864
+      },
+      "execution": {
+        "coreStarts": 153,
+        "replayedResponses": 9802,
+        "reusedResponses": 378,
+        "scope": "Actual operations since first use of this executor; earlier baseline operations are not inferred"
+      }
+    },
+    {
+      "index": 212,
+      "id": "33854624-72656408",
+      "originHash": "5947e3ca59ec5744bb92a809b4bc7dee77c58eb191556e6dfd8c91839956cc7b",
+      "old": {
+        "visited": 2,
+        "complete": true,
+        "frontier": 0
+      },
+      "current": {
+        "visited": 2,
+        "complete": true,
+        "frontier": 0
+      },
+      "execution": null
+    },
+    {
+      "index": 213,
+      "id": "33854624-73628505",
+      "originHash": "41b7aaa739c5344c9d6d76cdba4b0c02e1f288174c71eff0ca3e24871fe5581e",
+      "old": {
+        "visited": 457,
+        "complete": false,
+        "frontier": 1403
+      },
+      "current": {
+        "visited": 821,
+        "complete": false,
+        "frontier": 2270
+      },
+      "execution": {
+        "coreStarts": 83,
+        "replayedResponses": 18469,
+        "reusedResponses": 281,
+        "scope": "Actual operations since first use of this executor; earlier baseline operations are not inferred"
+      }
+    },
+    {
+      "index": 214,
+      "id": "33854624-74652966",
+      "originHash": "ac35791eaa4cae1f0dd0d84750f81f0683a8963c3cf4102c8d280d8717bee0a9",
+      "old": {
+        "visited": 279,
+        "complete": true,
+        "frontier": 0
+      },
+      "current": {
+        "visited": 279,
+        "complete": true,
+        "frontier": 0
+      },
+      "execution": null
+    },
+    {
+      "index": 215,
+      "id": "33854624-75500286",
+      "originHash": "f27da4c5edb3facbe6e9ecb542312a58d12516d7963918374b9147dc5ec8dc9f",
+      "old": {
+        "visited": 494,
+        "complete": false,
+        "frontier": 1060
+      },
+      "current": {
+        "visited": 921,
+        "complete": false,
+        "frontier": 1815
+      },
+      "execution": {
+        "coreStarts": 114,
+        "replayedResponses": 21350,
+        "reusedResponses": 313,
+        "scope": "Actual operations since first use of this executor; earlier baseline operations are not inferred"
+      }
+    },
+    {
+      "index": 216,
+      "id": "33854624-78114463",
+      "originHash": "6263131a98a88255f18c308764b807f78120ea01de959778638ee31c45fea3b2",
+      "old": {
+        "visited": 13,
+        "complete": true,
+        "frontier": 0
+      },
+      "current": {
+        "visited": 13,
+        "complete": true,
+        "frontier": 0
+      },
+      "execution": null
+    },
+    {
+      "index": 217,
+      "id": "33854624-84192580",
+      "originHash": "051f1ab9f8338a154acbdfcf8e1b8796e45d047e09b20744df76ad5301d61ee5",
+      "old": {
+        "visited": 69,
+        "complete": true,
+        "frontier": 0
+      },
+      "current": {
+        "visited": 69,
+        "complete": true,
+        "frontier": 0
+      },
+      "execution": null
+    },
+    {
+      "index": 218,
+      "id": "33854624-91800273",
+      "originHash": "90d5d8e9b495e682bd7573fdf3f1064113905a9de2c2ee03c24122793a1ba75c",
+      "old": {
+        "visited": 213,
+        "complete": true,
+        "frontier": 0
+      },
+      "current": {
+        "visited": 213,
+        "complete": true,
+        "frontier": 0
+      },
+      "execution": null
+    },
+    {
+      "index": 219,
+      "id": "33854624-94145021",
+      "originHash": "364fc4328d93b308f7a2af70d6c6048bc3cef08a49033b51a543840bc892b7c4",
+      "old": {
+        "visited": 59,
+        "complete": true,
+        "frontier": 0
+      },
+      "current": {
+        "visited": 59,
+        "complete": true,
+        "frontier": 0
+      },
+      "execution": null
+    },
+    {
+      "index": 220,
+      "id": "33854624-94722358",
+      "originHash": "6b1573556766310008b51f32f019d3f3c2a3896f64ae4db143d7ec66abd0b9f6",
+      "old": {
+        "visited": 13,
+        "complete": true,
+        "frontier": 0
+      },
+      "current": {
+        "visited": 13,
+        "complete": true,
+        "frontier": 0
+      },
+      "execution": null
+    },
+    {
+      "index": 221,
+      "id": "33854624-96676583",
+      "originHash": "112739d6204a91d3c2dd119310286306ca6a7e35b3cb279e6013e17e3a027b53",
+      "old": {
+        "visited": 490,
+        "complete": false,
+        "frontier": 146
+      },
+      "current": {
+        "visited": 1210,
+        "complete": false,
+        "frontier": 179
+      },
+      "execution": {
+        "coreStarts": 225,
+        "replayedResponses": 4728,
+        "reusedResponses": 495,
+        "scope": "Actual operations since first use of this executor; earlier baseline operations are not inferred"
+      }
+    },
+    {
+      "index": 222,
+      "id": "40366667-40366667",
+      "originHash": "dbd9140be61828af520920a0f6395796ec9abcd6aae0f921044f5a9dfdb7e540",
+      "old": {
+        "visited": 114,
+        "complete": true,
+        "frontier": 0
+      },
+      "current": {
+        "visited": 114,
+        "complete": true,
+        "frontier": 0
+      },
+      "execution": null
+    },
+    {
+      "index": 223,
+      "id": "40366667-57111661",
+      "originHash": "f769855f8e43d5e8e31b5dd4df43f69513994e040010b03839917652e712f459",
+      "old": {
+        "visited": 114,
+        "complete": true,
+        "frontier": 0
+      },
+      "current": {
+        "visited": 114,
+        "complete": true,
+        "frontier": 0
+      },
+      "execution": null
+    },
+    {
+      "index": 224,
+      "id": "40366667-59438930",
+      "originHash": "2e2870377fcf2030da2d69663e2a8f0fc6c018c6f0c9ac514a410c54cc573b89",
+      "old": {
+        "visited": 751,
+        "complete": true,
+        "frontier": 0
+      },
+      "current": {
+        "visited": 751,
+        "complete": true,
+        "frontier": 0
+      },
+      "execution": null
+    },
+    {
+      "index": 225,
+      "id": "40366667-68337209",
+      "originHash": "f5ffb830438bd75223226f6c27055a9dd2002113694a8e5403c319467e0cb884",
+      "old": {
+        "visited": 398,
+        "complete": false,
+        "frontier": 188
+      },
+      "current": {
+        "visited": 898,
+        "complete": false,
+        "frontier": 287
+      },
+      "execution": {
+        "coreStarts": 191,
+        "replayedResponses": 6235,
+        "reusedResponses": 309,
+        "scope": "Actual operations since first use of this executor; earlier baseline operations are not inferred"
+      }
+    },
+    {
+      "index": 226,
+      "id": "40366667-69272449",
+      "originHash": "d691e633eef47b27f4039b6b3417b49bb37f8f65ce9fcd5edf9cea9ebedebb95",
+      "old": {
+        "visited": 416,
+        "complete": false,
+        "frontier": 298
+      },
+      "current": {
+        "visited": 874,
+        "complete": false,
+        "frontier": 455
+      },
+      "execution": {
+        "coreStarts": 170,
+        "replayedResponses": 9148,
+        "reusedResponses": 288,
+        "scope": "Actual operations since first use of this executor; earlier baseline operations are not inferred"
+      }
+    },
+    {
+      "index": 227,
+      "id": "40366667-72656408",
+      "originHash": "d21010502fd08f9c2898beaf1abbd431456b12764c18cfab71e0f6d581fb879e",
+      "old": {
+        "visited": 13,
+        "complete": true,
+        "frontier": 0
+      },
+      "current": {
+        "visited": 13,
+        "complete": true,
+        "frontier": 0
+      },
+      "execution": null
+    },
+    {
+      "index": 228,
+      "id": "40366667-73628505",
+      "originHash": "65ce06159b56cd8464f653fb61f0f0cced786e338911441cc2b2112aebe052b0",
+      "old": {
+        "visited": 437,
+        "complete": false,
+        "frontier": 300
+      },
+      "current": {
+        "visited": 870,
+        "complete": false,
+        "frontier": 400
+      },
+      "execution": {
+        "coreStarts": 160,
+        "replayedResponses": 7473,
+        "reusedResponses": 273,
+        "scope": "Actual operations since first use of this executor; earlier baseline operations are not inferred"
+      }
+    },
+    {
+      "index": 229,
+      "id": "40366667-74652966",
+      "originHash": "8fcebf131c3d905ab7abc223bbf321dd098629c7d2949883d8571954af49bfa7",
+      "old": {
+        "visited": 2335,
+        "complete": false,
+        "frontier": 53
+      },
+      "current": {
+        "visited": 3073,
+        "complete": false,
+        "frontier": 52
+      },
+      "execution": {
+        "coreStarts": 324,
+        "replayedResponses": 2108,
+        "reusedResponses": 414,
+        "scope": "Actual operations since first use of this executor; earlier baseline operations are not inferred"
+      }
+    },
+    {
+      "index": 230,
+      "id": "40366667-75500286",
+      "originHash": "63c581e9b965ce5c5e3750ef4d444d66fc470679a09f3ce77211668318a596b4",
+      "old": {
+        "visited": 668,
+        "complete": false,
+        "frontier": 125
+      },
+      "current": {
+        "visited": 1374,
+        "complete": false,
+        "frontier": 146
+      },
+      "execution": {
+        "coreStarts": 314,
+        "replayedResponses": 2318,
+        "reusedResponses": 392,
+        "scope": "Actual operations since first use of this executor; earlier baseline operations are not inferred"
+      }
+    },
+    {
+      "index": 231,
+      "id": "40366667-78114463",
+      "originHash": "220c4e10f567669780b6edcc7213f6ce84f10bff9f57d8e28527c2297bef8585",
+      "old": {
+        "visited": 114,
+        "complete": true,
+        "frontier": 0
+      },
+      "current": {
+        "visited": 114,
+        "complete": true,
+        "frontier": 0
+      },
+      "execution": null
+    },
+    {
+      "index": 232,
+      "id": "40366667-84192580",
+      "originHash": "e92823f7f85a473839fbf1d0d340b3dffaceabdd3431e0aea769cd6c9a50516f",
+      "old": {
+        "visited": 794,
+        "complete": true,
+        "frontier": 0
+      },
+      "current": {
+        "visited": 794,
+        "complete": true,
+        "frontier": 0
+      },
+      "execution": null
+    },
+    {
+      "index": 233,
+      "id": "40366667-91800273",
+      "originHash": "25f9b080850e5be873fa9a219dd89066a5b0f681e6f3ef7f4531664728a41cd2",
+      "old": {
+        "visited": 91,
+        "complete": true,
+        "frontier": 0
+      },
+      "current": {
+        "visited": 91,
+        "complete": true,
+        "frontier": 0
+      },
+      "execution": null
+    },
+    {
+      "index": 234,
+      "id": "40366667-94145021",
+      "originHash": "c8489d8a93ca667d60626a273cb46d717adb3fb98a7ba2fd00eeeb2fb13230f7",
+      "old": {
+        "visited": 750,
+        "complete": true,
+        "frontier": 0
+      },
+      "current": {
+        "visited": 750,
+        "complete": true,
+        "frontier": 0
+      },
+      "execution": null
+    },
+    {
+      "index": 235,
+      "id": "40366667-94722358",
+      "originHash": "9efd5e55075dfe0c7e56ed3f11212cfdd4f7d432d11ae4ba4986e7d6761232a8",
+      "old": {
+        "visited": 114,
+        "complete": true,
+        "frontier": 0
+      },
+      "current": {
+        "visited": 114,
+        "complete": true,
+        "frontier": 0
+      },
+      "execution": null
+    },
+    {
+      "index": 236,
+      "id": "40366667-96676583",
+      "originHash": "ece5017942d6891fad1d694198c31c2551876780bc233a9dcbda5a4f78418122",
+      "old": {
+        "visited": 1245,
+        "complete": true,
+        "frontier": 0
+      },
+      "current": {
+        "visited": 1245,
+        "complete": true,
+        "frontier": 0
+      },
+      "execution": null
+    },
+    {
+      "index": 237,
+      "id": "57111661-59438930",
+      "originHash": "f9e9a207e83bd80dbf7b07268b5f32f274f5831f2510422030b97f45bb7269d3",
+      "old": {
+        "visited": 753,
+        "complete": true,
+        "frontier": 0
+      },
+      "current": {
+        "visited": 753,
+        "complete": true,
+        "frontier": 0
+      },
+      "execution": null
+    },
+    {
+      "index": 238,
+      "id": "57111661-68337209",
+      "originHash": "f878f19de7060ab6f40e788607a402a77e60028e8ec129213515e0382e859450",
+      "old": {
+        "visited": 646,
+        "complete": false,
+        "frontier": 119
+      },
+      "current": {
+        "visited": 1306,
+        "complete": false,
+        "frontier": 141
+      },
+      "execution": {
+        "coreStarts": 275,
+        "replayedResponses": 4234,
+        "reusedResponses": 385,
+        "scope": "Actual operations since first use of this executor; earlier baseline operations are not inferred"
+      }
+    },
+    {
+      "index": 239,
+      "id": "57111661-69272449",
+      "originHash": "2c6049c2feeee81b619a7623257e0b9883c055cbd5de398a3e331bcc32b9e22d",
+      "old": {
+        "visited": 522,
+        "complete": false,
+        "frontier": 410
+      },
+      "current": {
+        "visited": 1059,
+        "complete": false,
+        "frontier": 576
+      },
+      "execution": {
+        "coreStarts": 198,
+        "replayedResponses": 10562,
+        "reusedResponses": 339,
+        "scope": "Actual operations since first use of this executor; earlier baseline operations are not inferred"
+      }
+    },
+    {
+      "index": 240,
+      "id": "57111661-72656408",
+      "originHash": "2dc512ea6dc7c7e07245b87a415759260ec85e4838d0a86a4e9fc627822eb854",
+      "old": {
+        "visited": 13,
+        "complete": true,
+        "frontier": 0
+      },
+      "current": {
+        "visited": 13,
+        "complete": true,
+        "frontier": 0
+      },
+      "execution": null
+    },
+    {
+      "index": 241,
+      "id": "57111661-73628505",
+      "originHash": "b23be40864d2a7ca5d8d50ff2359d421b362e7633af8a064b256bbcecbcb4b1f",
+      "old": {
+        "visited": 1866,
+        "complete": false,
+        "frontier": 125
+      },
+      "current": {
+        "visited": 2495,
+        "complete": false,
+        "frontier": 157
+      },
+      "execution": {
+        "coreStarts": 260,
+        "replayedResponses": 4773,
+        "reusedResponses": 369,
+        "scope": "Actual operations since first use of this executor; earlier baseline operations are not inferred"
+      }
+    },
+    {
+      "index": 242,
+      "id": "57111661-74652966",
+      "originHash": "2b9273d4798620729518dc9757a8feb4c990fe3ad4ec1b6638209e86691be085",
+      "old": {
+        "visited": 1816,
+        "complete": false,
+        "frontier": 51
+      },
+      "current": {
+        "visited": 2521,
+        "complete": false,
+        "frontier": 57
+      },
+      "execution": {
+        "coreStarts": 308,
+        "replayedResponses": 2010,
+        "reusedResponses": 397,
+        "scope": "Actual operations since first use of this executor; earlier baseline operations are not inferred"
+      }
+    },
+    {
+      "index": 243,
+      "id": "57111661-75500286",
+      "originHash": "41c19ac43c28c0f192d6ffe10e1dd64cccac28ab4ee375755bb71e7e54e4c997",
+      "old": {
+        "visited": 777,
+        "complete": false,
+        "frontier": 106
+      },
+      "current": {
+        "visited": 1497,
+        "complete": false,
+        "frontier": 128
+      },
+      "execution": {
+        "coreStarts": 320,
+        "replayedResponses": 2376,
+        "reusedResponses": 400,
+        "scope": "Actual operations since first use of this executor; earlier baseline operations are not inferred"
+      }
+    },
+    {
+      "index": 244,
+      "id": "57111661-78114463",
+      "originHash": "9b479a68a156506066951cb4e2f0b1e9c37b36da150d942e8e634a5696aaffeb",
+      "old": {
+        "visited": 114,
+        "complete": true,
+        "frontier": 0
+      },
+      "current": {
+        "visited": 114,
+        "complete": true,
+        "frontier": 0
+      },
+      "execution": null
+    },
+    {
+      "index": 245,
+      "id": "57111661-84192580",
+      "originHash": "04994ed2be3aad9f2dd2915ab68e33628d094afdb1e328cad2e3957b64b9b8b2",
+      "old": {
+        "visited": 793,
+        "complete": true,
+        "frontier": 0
+      },
+      "current": {
+        "visited": 793,
+        "complete": true,
+        "frontier": 0
+      },
+      "execution": null
+    },
+    {
+      "index": 246,
+      "id": "57111661-91800273",
+      "originHash": "d4fc430e41972327cf013e90eddf46e843283f1d4642fc07bc0b09f843be793f",
+      "old": {
+        "visited": 91,
+        "complete": true,
+        "frontier": 0
+      },
+      "current": {
+        "visited": 91,
+        "complete": true,
+        "frontier": 0
+      },
+      "execution": null
+    },
+    {
+      "index": 247,
+      "id": "57111661-94145021",
+      "originHash": "14c373e726599c4afb3be225c7eb562a3f35f2a5d81b903e4b8bae1e06a32bf5",
+      "old": {
+        "visited": 751,
+        "complete": true,
+        "frontier": 0
+      },
+      "current": {
+        "visited": 751,
+        "complete": true,
+        "frontier": 0
+      },
+      "execution": null
+    },
+    {
+      "index": 248,
+      "id": "57111661-94722358",
+      "originHash": "5c5c021d18c146f43bfbccb575a09dabdc50451ac8504ab739594a39c62689b0",
+      "old": {
+        "visited": 114,
+        "complete": true,
+        "frontier": 0
+      },
+      "current": {
+        "visited": 114,
+        "complete": true,
+        "frontier": 0
+      },
+      "execution": null
+    },
+    {
+      "index": 249,
+      "id": "57111661-96676583",
+      "originHash": "15b19e0df6a604a41c5f53832737afb152b1a9af1ca1335c87e29fcc9362c442",
+      "old": {
+        "visited": 497,
+        "complete": false,
+        "frontier": 284
+      },
+      "current": {
+        "visited": 919,
+        "complete": false,
+        "frontier": 437
+      },
+      "execution": {
+        "coreStarts": 156,
+        "replayedResponses": 7796,
+        "reusedResponses": 266,
+        "scope": "Actual operations since first use of this executor; earlier baseline operations are not inferred"
+      }
+    },
+    {
+      "index": 250,
+      "id": "59438930-59438930",
+      "originHash": "93f8d735122d07af39ce1ad143de7371a0be3b2e998e06362ff6214897c6d1ee",
+      "old": {
+        "visited": 117,
+        "complete": true,
+        "frontier": 0
+      },
+      "current": {
+        "visited": 117,
+        "complete": true,
+        "frontier": 0
+      },
+      "execution": null
+    },
+    {
+      "index": 251,
+      "id": "59438930-68337209",
+      "originHash": "560cf2d7dd184d2ba3a4b0acceecc616669e3d5884abb2f8b2d2a5194958638b",
+      "old": {
+        "visited": 667,
+        "complete": false,
+        "frontier": 301
+      },
+      "current": {
+        "visited": 1235,
+        "complete": false,
+        "frontier": 391
+      },
+      "execution": {
+        "coreStarts": 178,
+        "replayedResponses": 7812,
+        "reusedResponses": 390,
+        "scope": "Actual operations since first use of this executor; earlier baseline operations are not inferred"
+      }
+    },
+    {
+      "index": 252,
+      "id": "59438930-69272449",
+      "originHash": "90deee322fc2bf7a763b1df9034cf5d36595b60b76f5da0135668d005fe490c3",
+      "old": {
+        "visited": 457,
+        "complete": false,
+        "frontier": 179
+      },
+      "current": {
+        "visited": 932,
+        "complete": false,
+        "frontier": 240
+      },
+      "execution": {
+        "coreStarts": 191,
+        "replayedResponses": 6828,
+        "reusedResponses": 284,
+        "scope": "Actual operations since first use of this executor; earlier baseline operations are not inferred"
+      }
+    },
+    {
+      "index": 253,
+      "id": "59438930-72656408",
+      "originHash": "8ad1cd9746c2202099763ddbad4e2745424d3e9558dcc9a3da9af5745c2c3f8d",
+      "old": {
+        "visited": 1736,
+        "complete": false,
+        "frontier": 56
+      },
+      "current": {
+        "visited": 2541,
+        "complete": false,
+        "frontier": 49
+      },
+      "execution": {
+        "coreStarts": 311,
+        "replayedResponses": 4184,
+        "reusedResponses": 494,
+        "scope": "Actual operations since first use of this executor; earlier baseline operations are not inferred"
+      }
+    },
+    {
+      "index": 254,
+      "id": "59438930-73628505",
+      "originHash": "ba995209119d6b21c3d287224ca3603a576c133a85b32ac6820165164fc9f274",
+      "old": {
+        "visited": 506,
+        "complete": false,
+        "frontier": 415
+      },
+      "current": {
+        "visited": 909,
+        "complete": false,
+        "frontier": 519
+      },
+      "execution": {
+        "coreStarts": 143,
+        "replayedResponses": 7487,
+        "reusedResponses": 260,
+        "scope": "Actual operations since first use of this executor; earlier baseline operations are not inferred"
+      }
+    },
+    {
+      "index": 255,
+      "id": "59438930-74652966",
+      "originHash": "cff1cfa84e12ac6e87c33007cc6a73fd854e5185474f28c6bff3be1352423711",
+      "old": {
+        "visited": 1586,
+        "complete": false,
+        "frontier": 77
+      },
+      "current": {
+        "visited": 2281,
+        "complete": false,
+        "frontier": 95
+      },
+      "execution": {
+        "coreStarts": 284,
+        "replayedResponses": 4698,
+        "reusedResponses": 411,
+        "scope": "Actual operations since first use of this executor; earlier baseline operations are not inferred"
+      }
+    },
+    {
+      "index": 256,
+      "id": "59438930-75500286",
+      "originHash": "efa124767f6cba73a03facc9e78a27897718b6368af17a85b990abe5b38ffd4b",
+      "old": {
+        "visited": 778,
+        "complete": false,
+        "frontier": 166
+      },
+      "current": {
+        "visited": 1484,
+        "complete": false,
+        "frontier": 193
+      },
+      "execution": {
+        "coreStarts": 311,
+        "replayedResponses": 1863,
+        "reusedResponses": 395,
+        "scope": "Actual operations since first use of this executor; earlier baseline operations are not inferred"
+      }
+    },
+    {
+      "index": 257,
+      "id": "59438930-78114463",
+      "originHash": "574c36d57fbf8e3855be50c5d48d3c97d03e9f12e75822f47edee6a0a71d153a",
+      "old": {
+        "visited": 750,
+        "complete": true,
+        "frontier": 0
+      },
+      "current": {
+        "visited": 750,
+        "complete": true,
+        "frontier": 0
+      },
+      "execution": null
+    },
+    {
+      "index": 258,
+      "id": "59438930-84192580",
+      "originHash": "59bf81b334896cae0d690f004eacd1d60e697a5c7880c552b30cc9cab54dc5b9",
+      "old": {
+        "visited": 298,
+        "complete": true,
+        "frontier": 0
+      },
+      "current": {
+        "visited": 298,
+        "complete": true,
+        "frontier": 0
+      },
+      "execution": null
+    },
+    {
+      "index": 259,
+      "id": "59438930-91800273",
+      "originHash": "3f2c38129efe5a8819e8086298abae2dc59d0deeb589fdd1cc5aea83ed870625",
+      "old": {
+        "visited": 381,
+        "complete": true,
+        "frontier": 0
+      },
+      "current": {
+        "visited": 381,
+        "complete": true,
+        "frontier": 0
+      },
+      "execution": null
+    },
+    {
+      "index": 260,
+      "id": "59438930-94145021",
+      "originHash": "8723a7d3222738fa60ec534b5345ec2d476b1e69c69bca8efac80ff62d312962",
+      "old": {
+        "visited": 116,
+        "complete": true,
+        "frontier": 0
+      },
+      "current": {
+        "visited": 116,
+        "complete": true,
+        "frontier": 0
+      },
+      "execution": null
+    },
+    {
+      "index": 261,
+      "id": "59438930-94722358",
+      "originHash": "0ea23479caf63b97a1869f3d57cd10f4bbb005a27fc6ba53ff4d66a7a56d3a9a",
+      "old": {
+        "visited": 751,
+        "complete": true,
+        "frontier": 0
+      },
+      "current": {
+        "visited": 751,
+        "complete": true,
+        "frontier": 0
+      },
+      "execution": null
+    },
+    {
+      "index": 262,
+      "id": "59438930-96676583",
+      "originHash": "2e71fa5e0d0ee74e346dcb9908997ad5f6e1e4d9e07ef60564135f244572adbe",
+      "old": {
+        "visited": 151,
+        "complete": true,
+        "frontier": 0
+      },
+      "current": {
+        "visited": 151,
+        "complete": true,
+        "frontier": 0
+      },
+      "execution": null
+    },
+    {
+      "index": 263,
+      "id": "68337209-68337209",
+      "originHash": "7f83e7e811d209f9def3fd99d69d832a69fcd9f1a08a065747a86a3c3a160248",
+      "old": {
+        "visited": 597,
+        "complete": false,
+        "frontier": 235
+      },
+      "current": {
+        "visited": 1242,
+        "complete": false,
+        "frontier": 275
+      },
+      "execution": {
+        "coreStarts": 271,
+        "replayedResponses": 5964,
+        "reusedResponses": 374,
+        "scope": "Actual operations since first use of this executor; earlier baseline operations are not inferred"
+      }
+    },
+    {
+      "index": 264,
+      "id": "68337209-69272449",
+      "originHash": "e190fbf0cfda229ab1bea8d75dd314496f34f950c74685402edb23b3dc10e50a",
+      "old": {
+        "visited": 641,
+        "complete": false,
+        "frontier": 357
+      },
+      "current": {
+        "visited": 1077,
+        "complete": false,
+        "frontier": 446
+      },
+      "execution": {
+        "coreStarts": 162,
+        "replayedResponses": 7579,
+        "reusedResponses": 274,
+        "scope": "Actual operations since first use of this executor; earlier baseline operations are not inferred"
+      }
+    },
+    {
+      "index": 265,
+      "id": "68337209-72656408",
+      "originHash": "37b590370ad439a3c262198b8a4f000246e44fdce01168a28c1a1f820a714792",
+      "old": {
+        "visited": 388,
+        "complete": false,
+        "frontier": 1201
+      },
+      "current": {
+        "visited": 969,
+        "complete": false,
+        "frontier": 1216
+      },
+      "execution": {
+        "coreStarts": 234,
+        "replayedResponses": 4296,
+        "reusedResponses": 347,
+        "scope": "Actual operations since first use of this executor; earlier baseline operations are not inferred"
+      }
+    },
+    {
+      "index": 266,
+      "id": "68337209-73628505",
+      "originHash": "2d9dd5b1bce47d430c3967e443a59266f354da24b7e00c4c9e25e404271f731f",
+      "old": {
+        "visited": 445,
+        "complete": false,
+        "frontier": 174
+      },
+      "current": {
+        "visited": 886,
+        "complete": false,
+        "frontier": 267
+      },
+      "execution": {
+        "coreStarts": 164,
+        "replayedResponses": 7880,
+        "reusedResponses": 277,
+        "scope": "Actual operations since first use of this executor; earlier baseline operations are not inferred"
+      }
+    },
+    {
+      "index": 267,
+      "id": "68337209-74652966",
+      "originHash": "e96345a8898ab608be2c5fdd05a4fe11cc1f44db102890eea0eaad4e740f00a1",
+      "old": {
+        "visited": 654,
+        "complete": false,
+        "frontier": 287
+      },
+      "current": {
+        "visited": 1283,
+        "complete": false,
+        "frontier": 383
+      },
+      "execution": {
+        "coreStarts": 221,
+        "replayedResponses": 5535,
+        "reusedResponses": 408,
+        "scope": "Actual operations since first use of this executor; earlier baseline operations are not inferred"
+      }
+    },
+    {
+      "index": 268,
+      "id": "68337209-75500286",
+      "originHash": "9f3ac93effc355617c5e1f749079ba1db5d5190a7bd0b505cfe946595fc91fa3",
+      "old": {
+        "visited": 570,
+        "complete": false,
+        "frontier": 155
+      },
+      "current": {
+        "visited": 987,
+        "complete": false,
+        "frontier": 290
+      },
+      "execution": {
+        "coreStarts": 152,
+        "replayedResponses": 6783,
+        "reusedResponses": 265,
+        "scope": "Actual operations since first use of this executor; earlier baseline operations are not inferred"
+      }
+    },
+    {
+      "index": 269,
+      "id": "68337209-78114463",
+      "originHash": "72621ec61a588c556ed01790497914efa76940ac4a04b51bc07a1ba278f88398",
+      "old": {
+        "visited": 516,
+        "complete": false,
+        "frontier": 285
+      },
+      "current": {
+        "visited": 1002,
+        "complete": false,
+        "frontier": 378
+      },
+      "execution": {
+        "coreStarts": 183,
+        "replayedResponses": 8250,
+        "reusedResponses": 303,
+        "scope": "Actual operations since first use of this executor; earlier baseline operations are not inferred"
+      }
+    },
+    {
+      "index": 270,
+      "id": "68337209-84192580",
+      "originHash": "157fdd5d815cac550d581deb9d7c0c3e661d21320dbbf3cdf6a354d4458019e3",
+      "old": {
+        "visited": 519,
+        "complete": false,
+        "frontier": 349
+      },
+      "current": {
+        "visited": 1050,
+        "complete": false,
+        "frontier": 451
+      },
+      "execution": {
+        "coreStarts": 157,
+        "replayedResponses": 8223,
+        "reusedResponses": 374,
+        "scope": "Actual operations since first use of this executor; earlier baseline operations are not inferred"
+      }
+    },
+    {
+      "index": 271,
+      "id": "68337209-91800273",
+      "originHash": "8d0f57e79e6cccee1663954ce8df4e32d538ebb71f022bc2600729aaf0a310a6",
+      "old": {
+        "visited": 732,
+        "complete": false,
+        "frontier": 142
+      },
+      "current": {
+        "visited": 1415,
+        "complete": false,
+        "frontier": 183
+      },
+      "execution": {
+        "coreStarts": 276,
+        "replayedResponses": 6446,
+        "reusedResponses": 407,
+        "scope": "Actual operations since first use of this executor; earlier baseline operations are not inferred"
+      }
+    },
+    {
+      "index": 272,
+      "id": "68337209-94145021",
+      "originHash": "641a2724ac269c9add2f90f635a6fb9d94b5acfe311ed32d4604886db1c5c20f",
+      "old": {
+        "visited": 670,
+        "complete": false,
+        "frontier": 295
+      },
+      "current": {
+        "visited": 1225,
+        "complete": false,
+        "frontier": 391
+      },
+      "execution": {
+        "coreStarts": 172,
+        "replayedResponses": 7488,
+        "reusedResponses": 383,
+        "scope": "Actual operations since first use of this executor; earlier baseline operations are not inferred"
+      }
+    },
+    {
+      "index": 273,
+      "id": "68337209-94722358",
+      "originHash": "9f99536f502453335fe149bec7b98ad83a715bd08ea718f783eacd5b573b2eec",
+      "old": {
+        "visited": 1850,
+        "complete": false,
+        "frontier": 185
+      },
+      "current": {
+        "visited": 2499,
+        "complete": false,
+        "frontier": 209
+      },
+      "execution": {
+        "coreStarts": 273,
+        "replayedResponses": 4517,
+        "reusedResponses": 376,
+        "scope": "Actual operations since first use of this executor; earlier baseline operations are not inferred"
+      }
+    },
+    {
+      "index": 274,
+      "id": "68337209-96676583",
+      "originHash": "eaa3101d7133ff6894e8e4fb00b5a264de9aa3aeb38d5c813274446b8e67b59f",
+      "old": {
+        "visited": 494,
+        "complete": false,
+        "frontier": 246
+      },
+      "current": {
+        "visited": 1049,
+        "complete": false,
+        "frontier": 333
+      },
+      "execution": {
+        "coreStarts": 177,
+        "replayedResponses": 6990,
+        "reusedResponses": 378,
+        "scope": "Actual operations since first use of this executor; earlier baseline operations are not inferred"
+      }
+    },
+    {
+      "index": 275,
+      "id": "69272449-69272449",
+      "originHash": "e339ce57b7a5dccba443d60ce6280715e72783904bc969d378feb51c9f2f1ec5",
+      "old": {
+        "visited": 590,
+        "complete": false,
+        "frontier": 501
+      },
+      "current": {
+        "visited": 1030,
+        "complete": false,
+        "frontier": 652
+      },
+      "execution": {
+        "coreStarts": 163,
+        "replayedResponses": 8427,
+        "reusedResponses": 277,
+        "scope": "Actual operations since first use of this executor; earlier baseline operations are not inferred"
+      }
+    },
+    {
+      "index": 276,
+      "id": "69272449-72656408",
+      "originHash": "712ecf8ce41c473b43b5e402a82d4380ad6e717bc6b75cec397b19c1bc65c0f9",
+      "old": {
+        "visited": 407,
+        "complete": false,
+        "frontier": 527
+      },
+      "current": {
+        "visited": 812,
+        "complete": false,
+        "frontier": 720
+      },
+      "execution": {
+        "coreStarts": 142,
+        "replayedResponses": 8896,
+        "reusedResponses": 263,
+        "scope": "Actual operations since first use of this executor; earlier baseline operations are not inferred"
+      }
+    },
+    {
+      "index": 277,
+      "id": "69272449-73628505",
+      "originHash": "8604d66b19244f7a1bc9ded78823e908b630ee59873c7d3e2cca44d3c2a1aa6a",
+      "old": {
+        "visited": 446,
+        "complete": false,
+        "frontier": 470
+      },
+      "current": {
+        "visited": 962,
+        "complete": false,
+        "frontier": 578
+      },
+      "execution": {
+        "coreStarts": 178,
+        "replayedResponses": 9582,
+        "reusedResponses": 338,
+        "scope": "Actual operations since first use of this executor; earlier baseline operations are not inferred"
+      }
+    },
+    {
+      "index": 278,
+      "id": "69272449-74652966",
+      "originHash": "345d96d5435df54ff20057ee3e91c4b640adee1afa8697f57ed44729fa68c525",
+      "old": {
+        "visited": 595,
+        "complete": false,
+        "frontier": 428
+      },
+      "current": {
+        "visited": 1027,
+        "complete": false,
+        "frontier": 646
+      },
+      "execution": {
+        "coreStarts": 154,
+        "replayedResponses": 9264,
+        "reusedResponses": 278,
+        "scope": "Actual operations since first use of this executor; earlier baseline operations are not inferred"
+      }
+    },
+    {
+      "index": 279,
+      "id": "69272449-75500286",
+      "originHash": "26e35a28ff9460b8af0b0eddcb97e0c87822e06ec180c26d2c6bac2b41f4cb61",
+      "old": {
+        "visited": 619,
+        "complete": false,
+        "frontier": 497
+      },
+      "current": {
+        "visited": 1174,
+        "complete": false,
+        "frontier": 715
+      },
+      "execution": {
+        "coreStarts": 210,
+        "replayedResponses": 11819,
+        "reusedResponses": 345,
+        "scope": "Actual operations since first use of this executor; earlier baseline operations are not inferred"
+      }
+    },
+    {
+      "index": 280,
+      "id": "69272449-78114463",
+      "originHash": "4435a536c42adc652d7cc99925ad5fe8b79ed1e11508b63c9783fdb145f2ba3b",
+      "old": {
+        "visited": 625,
+        "complete": false,
+        "frontier": 472
+      },
+      "current": {
+        "visited": 1054,
+        "complete": false,
+        "frontier": 629
+      },
+      "execution": {
+        "coreStarts": 158,
+        "replayedResponses": 8407,
+        "reusedResponses": 271,
+        "scope": "Actual operations since first use of this executor; earlier baseline operations are not inferred"
+      }
+    },
+    {
+      "index": 281,
+      "id": "69272449-84192580",
+      "originHash": "318e638bcc98384b640a295958b593f72a246e2cd0cc4ad4c6a61da0f28525a4",
+      "old": {
+        "visited": 422,
+        "complete": false,
+        "frontier": 337
+      },
+      "current": {
+        "visited": 911,
+        "complete": false,
+        "frontier": 494
+      },
+      "execution": {
+        "coreStarts": 184,
+        "replayedResponses": 9949,
+        "reusedResponses": 305,
+        "scope": "Actual operations since first use of this executor; earlier baseline operations are not inferred"
+      }
+    },
+    {
+      "index": 282,
+      "id": "69272449-91800273",
+      "originHash": "e57f3d3cec0a8208eac3356e85e8038fdec9bcaccc2b1dce7b4fa3c7c6dadbd4",
+      "old": {
+        "visited": 433,
+        "complete": false,
+        "frontier": 288
+      },
+      "current": {
+        "visited": 941,
+        "complete": false,
+        "frontier": 372
+      },
+      "execution": {
+        "coreStarts": 184,
+        "replayedResponses": 7095,
+        "reusedResponses": 324,
+        "scope": "Actual operations since first use of this executor; earlier baseline operations are not inferred"
+      }
+    },
+    {
+      "index": 283,
+      "id": "69272449-94145021",
+      "originHash": "9a64cdefa81038169d0cb9a7bc5c74ef649d81474afaff9dd8cde4d0e24fed22",
+      "old": {
+        "visited": 610,
+        "complete": false,
+        "frontier": 494
+      },
+      "current": {
+        "visited": 1057,
+        "complete": false,
+        "frontier": 645
+      },
+      "execution": {
+        "coreStarts": 166,
+        "replayedResponses": 8607,
+        "reusedResponses": 281,
+        "scope": "Actual operations since first use of this executor; earlier baseline operations are not inferred"
+      }
+    },
+    {
+      "index": 284,
+      "id": "69272449-94722358",
+      "originHash": "275ee43e568d8d08c32f096a02e84a08efa2eea572ba5975958c6326559d0942",
+      "old": {
+        "visited": 643,
+        "complete": false,
+        "frontier": 125
+      },
+      "current": {
+        "visited": 1321,
+        "complete": false,
+        "frontier": 151
+      },
+      "execution": {
+        "coreStarts": 280,
+        "replayedResponses": 5482,
+        "reusedResponses": 398,
+        "scope": "Actual operations since first use of this executor; earlier baseline operations are not inferred"
+      }
+    },
+    {
+      "index": 285,
+      "id": "69272449-96676583",
+      "originHash": "367d8f142efa5bc9b902943759ce2f57cd1afa0cdbd86be94d6caa9cd6b21d96",
+      "old": {
+        "visited": 475,
+        "complete": false,
+        "frontier": 388
+      },
+      "current": {
+        "visited": 1032,
+        "complete": false,
+        "frontier": 508
+      },
+      "execution": {
+        "coreStarts": 210,
+        "replayedResponses": 9730,
+        "reusedResponses": 347,
+        "scope": "Actual operations since first use of this executor; earlier baseline operations are not inferred"
+      }
+    },
+    {
+      "index": 286,
+      "id": "72656408-73628505",
+      "originHash": "dd0b24b177f2d241952a9486c0733590f28882c7ce34fe2866f1b12cbf1cc439",
+      "old": {
+        "visited": 528,
+        "complete": false,
+        "frontier": 1520
+      },
+      "current": {
+        "visited": 923,
+        "complete": false,
+        "frontier": 2404
+      },
+      "execution": {
+        "coreStarts": 106,
+        "replayedResponses": 23981,
+        "reusedResponses": 289,
+        "scope": "Actual operations since first use of this executor; earlier baseline operations are not inferred"
+      }
+    },
+    {
+      "index": 287,
+      "id": "72656408-74652966",
+      "originHash": "d8aff3bc766c71205afed6963c270c4fdb03d98fd9e4422bce6dfc7acc5e9e78",
+      "old": {
+        "visited": 279,
+        "complete": true,
+        "frontier": 0
+      },
+      "current": {
+        "visited": 279,
+        "complete": true,
+        "frontier": 0
+      },
+      "execution": null
+    },
+    {
+      "index": 288,
+      "id": "72656408-75500286",
+      "originHash": "e88ff3a1a782be0908d9360b1b613786964b9e797fde581d6c121cf00f394342",
+      "old": {
+        "visited": 624,
+        "complete": false,
+        "frontier": 1221
+      },
+      "current": {
+        "visited": 1042,
+        "complete": false,
+        "frontier": 1970
+      },
+      "execution": {
+        "coreStarts": 108,
+        "replayedResponses": 19912,
+        "reusedResponses": 310,
+        "scope": "Actual operations since first use of this executor; earlier baseline operations are not inferred"
+      }
+    },
+    {
+      "index": 289,
+      "id": "72656408-78114463",
+      "originHash": "2cee4738dfc1e81799bfe40319ef18e1274136e7122143c7f9fd589c32f3d366",
+      "old": {
+        "visited": 13,
+        "complete": true,
+        "frontier": 0
+      },
+      "current": {
+        "visited": 13,
+        "complete": true,
+        "frontier": 0
+      },
+      "execution": null
+    },
+    {
+      "index": 290,
+      "id": "72656408-84192580",
+      "originHash": "66d87d8f2bcb8efccc0fc04673b70c44711a99f66bdadb859a302b887a520ee5",
+      "old": {
+        "visited": 69,
+        "complete": true,
+        "frontier": 0
+      },
+      "current": {
+        "visited": 69,
+        "complete": true,
+        "frontier": 0
+      },
+      "execution": null
+    },
+    {
+      "index": 291,
+      "id": "72656408-91800273",
+      "originHash": "d9b264dc9d59fd2bc5ba5762cf988ad8ba0ad5ea477c40c8904bd0da7ab16704",
+      "old": {
+        "visited": 93,
+        "complete": true,
+        "frontier": 0
+      },
+      "current": {
+        "visited": 93,
+        "complete": true,
+        "frontier": 0
+      },
+      "execution": null
+    },
+    {
+      "index": 292,
+      "id": "72656408-94145021",
+      "originHash": "ef976bcdc0d50534ee770feed5751642a1d496a8dc633672844a619575d845ec",
+      "old": {
+        "visited": 59,
+        "complete": true,
+        "frontier": 0
+      },
+      "current": {
+        "visited": 59,
+        "complete": true,
+        "frontier": 0
+      },
+      "execution": null
+    },
+    {
+      "index": 293,
+      "id": "72656408-94722358",
+      "originHash": "d390b050c0fb03ea7893de41fb709172f9fa45faa51db610bcbf928ac0dee684",
+      "old": {
+        "visited": 13,
+        "complete": true,
+        "frontier": 0
+      },
+      "current": {
+        "visited": 13,
+        "complete": true,
+        "frontier": 0
+      },
+      "execution": null
+    },
+    {
+      "index": 294,
+      "id": "72656408-96676583",
+      "originHash": "bfab5a8594025397da82662973dba3348eec5a94557ddeacc27abc3fb4d1f45f",
+      "old": {
+        "visited": 611,
+        "complete": false,
+        "frontier": 123
+      },
+      "current": {
+        "visited": 1221,
+        "complete": false,
+        "frontier": 147
+      },
+      "execution": {
+        "coreStarts": 255,
+        "replayedResponses": 5095,
+        "reusedResponses": 355,
+        "scope": "Actual operations since first use of this executor; earlier baseline operations are not inferred"
+      }
+    },
+    {
+      "index": 295,
+      "id": "73628505-74652966",
+      "originHash": "f1f6f6af690c0add6267d26e37ee1eb0737351d265067b0de99595e73b779c34",
+      "old": {
+        "visited": 500,
+        "complete": false,
+        "frontier": 301
+      },
+      "current": {
+        "visited": 1054,
+        "complete": false,
+        "frontier": 389
+      },
+      "execution": {
+        "coreStarts": 214,
+        "replayedResponses": 9487,
+        "reusedResponses": 340,
+        "scope": "Actual operations since first use of this executor; earlier baseline operations are not inferred"
+      }
+    },
+    {
+      "index": 296,
+      "id": "73628505-75500286",
+      "originHash": "9ae2f60a6a6e98905c611555b3fb132407f38ba939adb006d25adc22e29e82a2",
+      "old": {
+        "visited": 555,
+        "complete": false,
+        "frontier": 563
+      },
+      "current": {
+        "visited": 960,
+        "complete": false,
+        "frontier": 701
+      },
+      "execution": {
+        "coreStarts": 146,
+        "replayedResponses": 6988,
+        "reusedResponses": 259,
+        "scope": "Actual operations since first use of this executor; earlier baseline operations are not inferred"
+      }
+    },
+    {
+      "index": 297,
+      "id": "73628505-78114463",
+      "originHash": "09bc48cf126ee832725baf5a33267d7177525f4b5ed29e800a9f65015a161cb0",
+      "old": {
+        "visited": 405,
+        "complete": false,
+        "frontier": 211
+      },
+      "current": {
+        "visited": 868,
+        "complete": false,
+        "frontier": 316
+      },
+      "execution": {
+        "coreStarts": 172,
+        "replayedResponses": 8186,
+        "reusedResponses": 291,
+        "scope": "Actual operations since first use of this executor; earlier baseline operations are not inferred"
+      }
+    },
+    {
+      "index": 298,
+      "id": "73628505-84192580",
+      "originHash": "02dc1ef1c5f56a469e298361506cdebe18038937faec86d052ecd0852079c151",
+      "old": {
+        "visited": 432,
+        "complete": false,
+        "frontier": 337
+      },
+      "current": {
+        "visited": 862,
+        "complete": false,
+        "frontier": 430
+      },
+      "execution": {
+        "coreStarts": 159,
+        "replayedResponses": 7263,
+        "reusedResponses": 271,
+        "scope": "Actual operations since first use of this executor; earlier baseline operations are not inferred"
+      }
+    },
+    {
+      "index": 299,
+      "id": "73628505-91800273",
+      "originHash": "66857831a2445751cfede20f24e56afa45fdd53db170c2b014c83fc280385bdb",
+      "old": {
+        "visited": 647,
+        "complete": false,
+        "frontier": 227
+      },
+      "current": {
+        "visited": 1191,
+        "complete": false,
+        "frontier": 267
+      },
+      "execution": {
+        "coreStarts": 219,
+        "replayedResponses": 5298,
+        "reusedResponses": 325,
+        "scope": "Actual operations since first use of this executor; earlier baseline operations are not inferred"
+      }
+    },
+    {
+      "index": 300,
+      "id": "73628505-94145021",
+      "originHash": "c5d1f6565f45250628f8453888259bc0fb447a50a770faa95bc4716257ccbdc7",
+      "old": {
+        "visited": 439,
+        "complete": false,
+        "frontier": 313
+      },
+      "current": {
+        "visited": 910,
+        "complete": false,
+        "frontier": 420
+      },
+      "execution": {
+        "coreStarts": 173,
+        "replayedResponses": 9411,
+        "reusedResponses": 298,
+        "scope": "Actual operations since first use of this executor; earlier baseline operations are not inferred"
+      }
+    },
+    {
+      "index": 301,
+      "id": "73628505-94722358",
+      "originHash": "63db6bdd5097141818b2b66051ac894bc9a4096e0d5b4c62e8ca0bab250a2cc5",
+      "old": {
+        "visited": 621,
+        "complete": false,
+        "frontier": 167
+      },
+      "current": {
+        "visited": 1474,
+        "complete": false,
+        "frontier": 282
+      },
+      "execution": {
+        "coreStarts": 342,
+        "replayedResponses": 7199,
+        "reusedResponses": 511,
+        "scope": "Actual operations since first use of this executor; earlier baseline operations are not inferred"
+      }
+    },
+    {
+      "index": 302,
+      "id": "73628505-96676583",
+      "originHash": "0a52fb8ce9053aef33e5befc851c56571de18e666a7d121b10113210cd03a12b",
+      "old": {
+        "visited": 570,
+        "complete": false,
+        "frontier": 375
+      },
+      "current": {
+        "visited": 1056,
+        "complete": false,
+        "frontier": 462
+      },
+      "execution": {
+        "coreStarts": 185,
+        "replayedResponses": 8047,
+        "reusedResponses": 301,
+        "scope": "Actual operations since first use of this executor; earlier baseline operations are not inferred"
+      }
+    },
+    {
+      "index": 303,
+      "id": "74652966-75500286",
+      "originHash": "420d2c1bae0fd8284babe617b16fe4f77282283785f9330fa6d69fbbb61906e6",
+      "old": {
+        "visited": 845,
+        "complete": false,
+        "frontier": 125
+      },
+      "current": {
+        "visited": 1774,
+        "complete": false,
+        "frontier": 168
+      },
+      "execution": {
+        "coreStarts": 401,
+        "replayedResponses": 2897,
+        "reusedResponses": 528,
+        "scope": "Actual operations since first use of this executor; earlier baseline operations are not inferred"
+      }
+    },
+    {
+      "index": 304,
+      "id": "74652966-78114463",
+      "originHash": "5e628298a0aa30eef1f93521359b86b5511613ec61aa46b527417e0dcbb945b0",
+      "old": {
+        "visited": 1839,
+        "complete": false,
+        "frontier": 45
+      },
+      "current": {
+        "visited": 2463,
+        "complete": false,
+        "frontier": 44
+      },
+      "execution": {
+        "coreStarts": 273,
+        "replayedResponses": 1795,
+        "reusedResponses": 351,
+        "scope": "Actual operations since first use of this executor; earlier baseline operations are not inferred"
+      }
+    },
+    {
+      "index": 305,
+      "id": "74652966-84192580",
+      "originHash": "d53b085e68c60ffc104126f8b56568560b1f53a6ae2d57f458a27cc1f4583987",
+      "old": {
+        "visited": 2293,
+        "complete": false,
+        "frontier": 48
+      },
+      "current": {
+        "visited": 2953,
+        "complete": false,
+        "frontier": 61
+      },
+      "execution": {
+        "coreStarts": 271,
+        "replayedResponses": 5032,
+        "reusedResponses": 389,
+        "scope": "Actual operations since first use of this executor; earlier baseline operations are not inferred"
+      }
+    },
+    {
+      "index": 306,
+      "id": "74652966-91800273",
+      "originHash": "d5a6ce8483d9beebc60dff871cee1897c189fe9b6a3227282e2748141340a064",
+      "old": {
+        "visited": 1632,
+        "complete": false,
+        "frontier": 21
+      },
+      "current": {
+        "visited": 2171,
+        "complete": true,
+        "frontier": 0
+      },
+      "execution": {
+        "coreStarts": 237,
+        "replayedResponses": 1919,
+        "reusedResponses": 302,
+        "scope": "Actual operations since first use of this executor; earlier baseline operations are not inferred"
+      }
+    },
+    {
+      "index": 307,
+      "id": "74652966-94145021",
+      "originHash": "9af42511979768428d1f3db93b5f51c06aba0a06679d5c22bf8ae78517d50090",
+      "old": {
+        "visited": 1698,
+        "complete": false,
+        "frontier": 97
+      },
+      "current": {
+        "visited": 2266,
+        "complete": false,
+        "frontier": 118
+      },
+      "execution": {
+        "coreStarts": 230,
+        "replayedResponses": 3704,
+        "reusedResponses": 338,
+        "scope": "Actual operations since first use of this executor; earlier baseline operations are not inferred"
+      }
+    },
+    {
+      "index": 308,
+      "id": "74652966-94722358",
+      "originHash": "b626690fad5be1b879cf44d5eb7868804162b19b52b7bd6640591fd07753318f",
+      "old": {
+        "visited": 1788,
+        "complete": false,
+        "frontier": 35
+      },
+      "current": {
+        "visited": 2560,
+        "complete": false,
+        "frontier": 44
+      },
+      "execution": {
+        "coreStarts": 337,
+        "replayedResponses": 2191,
+        "reusedResponses": 435,
+        "scope": "Actual operations since first use of this executor; earlier baseline operations are not inferred"
+      }
+    },
+    {
+      "index": 309,
+      "id": "74652966-96676583",
+      "originHash": "7306be9bb7286b33abad878ebb93f0075ad4378580deebc841d9fe41217a1b4e",
+      "old": {
+        "visited": 547,
+        "complete": false,
+        "frontier": 251
+      },
+      "current": {
+        "visited": 1189,
+        "complete": false,
+        "frontier": 333
+      },
+      "execution": {
+        "coreStarts": 249,
+        "replayedResponses": 9285,
+        "reusedResponses": 393,
+        "scope": "Actual operations since first use of this executor; earlier baseline operations are not inferred"
+      }
+    },
+    {
+      "index": 310,
+      "id": "75500286-78114463",
+      "originHash": "33044cd6ce344fe89f3c3797eee331a88ba4678337b7b82326013d81474c1386",
+      "old": {
+        "visited": 847,
+        "complete": false,
+        "frontier": 121
+      },
+      "current": {
+        "visited": 1641,
+        "complete": false,
+        "frontier": 143
+      },
+      "execution": {
+        "coreStarts": 353,
+        "replayedResponses": 2704,
+        "reusedResponses": 441,
+        "scope": "Actual operations since first use of this executor; earlier baseline operations are not inferred"
+      }
+    },
+    {
+      "index": 311,
+      "id": "75500286-84192580",
+      "originHash": "7cad5078c4226437460a25a43ea93248302f76c8b9f6a1a66f8b89f9922c0637",
+      "old": {
+        "visited": 1973,
+        "complete": false,
+        "frontier": 144
+      },
+      "current": {
+        "visited": 2775,
+        "complete": false,
+        "frontier": 194
+      },
+      "execution": {
+        "coreStarts": 341,
+        "replayedResponses": 5960,
+        "reusedResponses": 461,
+        "scope": "Actual operations since first use of this executor; earlier baseline operations are not inferred"
+      }
+    },
+    {
+      "index": 312,
+      "id": "75500286-91800273",
+      "originHash": "556cfb24b16a8dfe92a1b93ff76d1f4558fdf5f770f712dd7109ca967fffe9d5",
+      "old": {
+        "visited": 802,
+        "complete": false,
+        "frontier": 132
+      },
+      "current": {
+        "visited": 1408,
+        "complete": false,
+        "frontier": 176
+      },
+      "execution": {
+        "coreStarts": 247,
+        "replayedResponses": 3694,
+        "reusedResponses": 359,
+        "scope": "Actual operations since first use of this executor; earlier baseline operations are not inferred"
+      }
+    },
+    {
+      "index": 313,
+      "id": "75500286-94145021",
+      "originHash": "df6664c35324da7f217daff5af6b99d94762bc032a3bd236d5754bc3f7a84e77",
+      "old": {
+        "visited": 1985,
+        "complete": false,
+        "frontier": 147
+      },
+      "current": {
+        "visited": 2783,
+        "complete": false,
+        "frontier": 178
+      },
+      "execution": {
+        "coreStarts": 350,
+        "replayedResponses": 2102,
+        "reusedResponses": 448,
+        "scope": "Actual operations since first use of this executor; earlier baseline operations are not inferred"
+      }
+    },
+    {
+      "index": 314,
+      "id": "75500286-94722358",
+      "originHash": "05804999b86a7946a3b3ecb385eb6610974d16f22be2b15e98ab3a75bb3a7c63",
+      "old": {
+        "visited": 646,
+        "complete": false,
+        "frontier": 129
+      },
+      "current": {
+        "visited": 1291,
+        "complete": false,
+        "frontier": 150
+      },
+      "execution": {
+        "coreStarts": 288,
+        "replayedResponses": 2062,
+        "reusedResponses": 357,
+        "scope": "Actual operations since first use of this executor; earlier baseline operations are not inferred"
+      }
+    },
+    {
+      "index": 315,
+      "id": "75500286-96676583",
+      "originHash": "f0eee7ab0a791cf2be366d93b00770b6e6d9554c424378d5528f8638349521c5",
+      "old": {
+        "visited": 744,
+        "complete": false,
+        "frontier": 246
+      },
+      "current": {
+        "visited": 1405,
+        "complete": false,
+        "frontier": 275
+      },
+      "execution": {
+        "coreStarts": 289,
+        "replayedResponses": 1830,
+        "reusedResponses": 372,
+        "scope": "Actual operations since first use of this executor; earlier baseline operations are not inferred"
+      }
+    },
+    {
+      "index": 316,
+      "id": "78114463-84192580",
+      "originHash": "5b4a7be09bc0396f9a7cb7575574454c2dace3a2b8806765cdab847080b08299",
+      "old": {
+        "visited": 795,
+        "complete": true,
+        "frontier": 0
+      },
+      "current": {
+        "visited": 795,
+        "complete": true,
+        "frontier": 0
+      },
+      "execution": null
+    },
+    {
+      "index": 317,
+      "id": "78114463-91800273",
+      "originHash": "dbc1277cd14b3a36018a75d7bf2508ec7f12355322c761e5bfb18ebf1570f956",
+      "old": {
+        "visited": 91,
+        "complete": true,
+        "frontier": 0
+      },
+      "current": {
+        "visited": 91,
+        "complete": true,
+        "frontier": 0
+      },
+      "execution": null
+    },
+    {
+      "index": 318,
+      "id": "78114463-94145021",
+      "originHash": "86396cdf27b3c7b263bc2954e7cd9a6900c19ecea37dcef4f868f93587a85df4",
+      "old": {
+        "visited": 750,
+        "complete": true,
+        "frontier": 0
+      },
+      "current": {
+        "visited": 750,
+        "complete": true,
+        "frontier": 0
+      },
+      "execution": null
+    },
+    {
+      "index": 319,
+      "id": "78114463-94722358",
+      "originHash": "41e1d079a9aac9544a8fabc7a3b826876df94d5053c617da17b5f2394bc7bce3",
+      "old": {
+        "visited": 114,
+        "complete": true,
+        "frontier": 0
+      },
+      "current": {
+        "visited": 114,
+        "complete": true,
+        "frontier": 0
+      },
+      "execution": null
+    },
+    {
+      "index": 320,
+      "id": "78114463-96676583",
+      "originHash": "7c034f99e422eac7766c9bae61a0cf3ff77c41339009347702601362ae4cf5b3",
+      "old": {
+        "visited": 1246,
+        "complete": true,
+        "frontier": 0
+      },
+      "current": {
+        "visited": 1246,
+        "complete": true,
+        "frontier": 0
+      },
+      "execution": null
+    },
+    {
+      "index": 321,
+      "id": "84192580-84192580",
+      "originHash": "9f2a9de057f5761df8cc8fc6f23548f535d8b371e87a76cf30aa650c240a94cb",
+      "old": {
+        "visited": 669,
+        "complete": true,
+        "frontier": 0
+      },
+      "current": {
+        "visited": 669,
+        "complete": true,
+        "frontier": 0
+      },
+      "execution": null
+    },
+    {
+      "index": 322,
+      "id": "84192580-91800273",
+      "originHash": "c44edb35154b3faa6c601cb4e1051e4e0ab488e6d3a4d35164181c0895b10f91",
+      "old": {
+        "visited": 432,
+        "complete": true,
+        "frontier": 0
+      },
+      "current": {
+        "visited": 432,
+        "complete": true,
+        "frontier": 0
+      },
+      "execution": null
+    },
+    {
+      "index": 323,
+      "id": "84192580-94145021",
+      "originHash": "915150fc76140997ddf3c6d49130deb95da015bb829400a6be7c64b35896f7fa",
+      "old": {
+        "visited": 297,
+        "complete": true,
+        "frontier": 0
+      },
+      "current": {
+        "visited": 297,
+        "complete": true,
+        "frontier": 0
+      },
+      "execution": null
+    },
+    {
+      "index": 324,
+      "id": "84192580-94722358",
+      "originHash": "5437d116ff693e29b8f2e71497f140ee38524215d96a23736a68af27ac6095d3",
+      "old": {
+        "visited": 793,
+        "complete": true,
+        "frontier": 0
+      },
+      "current": {
+        "visited": 793,
+        "complete": true,
+        "frontier": 0
+      },
+      "execution": null
+    },
+    {
+      "index": 325,
+      "id": "84192580-96676583",
+      "originHash": "4598439a73e5a3f227d9ca2472dca40d94fcbbba1978cb44f22b4a85f271bc2b",
+      "old": {
+        "visited": 438,
+        "complete": true,
+        "frontier": 0
+      },
+      "current": {
+        "visited": 438,
+        "complete": true,
+        "frontier": 0
+      },
+      "execution": null
+    },
+    {
+      "index": 326,
+      "id": "91800273-94145021",
+      "originHash": "dd4f71f0888b8a2e60df1005d1f02fe6ef2954c6a5726daca04f43cc1b2b1425",
+      "old": {
+        "visited": 381,
+        "complete": true,
+        "frontier": 0
+      },
+      "current": {
+        "visited": 381,
+        "complete": true,
+        "frontier": 0
+      },
+      "execution": null
+    },
+    {
+      "index": 327,
+      "id": "91800273-94722358",
+      "originHash": "407fdd8e3b18d5b9149ec4e5b5c514dc249fab1a1eab974f877d5921931eb341",
+      "old": {
+        "visited": 91,
+        "complete": true,
+        "frontier": 0
+      },
+      "current": {
+        "visited": 91,
+        "complete": true,
+        "frontier": 0
+      },
+      "execution": null
+    },
+    {
+      "index": 328,
+      "id": "91800273-96676583",
+      "originHash": "9123854e5de909eb958642e14089cea3d8b4d5c6d7a7e89b0a4c45ebcf3033ae",
+      "old": {
+        "visited": 1935,
+        "complete": false,
+        "frontier": 91
+      },
+      "current": {
+        "visited": 2599,
+        "complete": false,
+        "frontier": 109
+      },
+      "execution": {
+        "coreStarts": 263,
+        "replayedResponses": 3640,
+        "reusedResponses": 401,
+        "scope": "Actual operations since first use of this executor; earlier baseline operations are not inferred"
+      }
+    },
+    {
+      "index": 329,
+      "id": "94145021-94722358",
+      "originHash": "c517ce3578580095ebe54506e955cb52c4461a1c1172f0e50322c13a97bd33de",
+      "old": {
+        "visited": 750,
+        "complete": true,
+        "frontier": 0
+      },
+      "current": {
+        "visited": 750,
+        "complete": true,
+        "frontier": 0
+      },
+      "execution": null
+    },
+    {
+      "index": 330,
+      "id": "94145021-96676583",
+      "originHash": "87b4d1f65f59c7d9499047c0759a7904f5941c8a61e6b110179ff332686531e8",
+      "old": {
+        "visited": 152,
+        "complete": true,
+        "frontier": 0
+      },
+      "current": {
+        "visited": 152,
+        "complete": true,
+        "frontier": 0
+      },
+      "execution": null
+    },
+    {
+      "index": 331,
+      "id": "94722358-96676583",
+      "originHash": "76a6f01ef22189442c4741da022a7ec60ba514107c8967dac6d635a59078033d",
+      "old": {
+        "visited": 690,
+        "complete": false,
+        "frontier": 188
+      },
+      "current": {
+        "visited": 1195,
+        "complete": false,
+        "frontier": 271
+      },
+      "execution": {
+        "coreStarts": 198,
+        "replayedResponses": 6495,
+        "reusedResponses": 307,
+        "scope": "Actual operations since first use of this executor; earlier baseline operations are not inferred"
+      }
+    },
+    {
+      "index": 332,
+      "id": "96676583-96676583",
+      "originHash": "7b9d381c1c542bf3a0c1ffc39834991c38abef3ba2faf09f55ce70791658a856",
+      "old": {
+        "visited": 1600,
+        "complete": false,
+        "frontier": 96
+      },
+      "current": {
+        "visited": 2275,
+        "complete": false,
+        "frontier": 121
+      },
+      "execution": {
+        "coreStarts": 280,
+        "replayedResponses": 4570,
+        "reusedResponses": 395,
+        "scope": "Actual operations since first use of this executor; earlier baseline operations are not inferred"
+      }
+    }
+  ]
+}

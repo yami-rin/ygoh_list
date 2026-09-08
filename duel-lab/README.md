@@ -73,6 +73,7 @@ MDに存在しない・未取得のカードは名前と効果全文で表示す
 以前の全分岐探索は[探索範囲と進捗](docs/SEARCH_COVERAGE.md)に履歴として残す。そこにあるドロー後の枝・再開コマンドは今回の探索方針の対象外。`npm run search:report`で過去資料を集約し、`npm run search:verify`で元資料との一致を検査できる。
 全入力履歴と再開用checkpointはローカルの`runtime/search-*`に保存し、Gitには集計・代表ルート・証拠ファイルのハッシュを含める。新しいcheckoutでは未追跡checkpointを復元したものと扱わず、スクリプトから再探索する。
 探索は対戦用AstraのCLIを起動しない。対戦側の単一起動制御を維持したまま、研究側でルールエンジンを並列実行する。
+現在の再開入口は `scripts/search-multi-pairs-tribute.mjs`、集約は `node scripts/build-multi-search-report.mjs --tribute`。実Duelの再利用と、対象を限定した通常召喚取消しの縮約を使う。[高速化と移行](docs/MULTI_SEARCH_FAST.md)・[取消し処理と残件](docs/MULTI_SEARCH_TRIBUTE.md)に適用条件と検証を記録している。旧reference・fastのcheckpointは別ディレクトリに保持する。稼働中bridgeは読み込み済みの候補集を使うため、更新した候補集は次回起動時に読み込まれる。
 
 ## 検証と対応範囲
 

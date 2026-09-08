@@ -141,3 +141,40 @@ native endpointと意味変換の同時修正は別担当が検証中であり�
 native側の完了は、2枚が予定した位置・表示形式に存在し、全ownが予定終端と一致し、chainが空で、先攻Main1のメインフェイズ行動requestである場合だけ許可される。進行中はAccord単独chainと配置候補集合も一致させる。
 
 独立実行した `node --test tests/opening-placement.test.mjs` は **45件PASS、失敗0、skip0**。正常な両蘇生順、捕捉済みnative request 94のTranscode配置、source event/chain/合法maskの不一致、余分なDRAW、盤面の変化、累積履歴、pin変更、完了条件を確認した。対象2ファイルの修正後readbackと `git diff --check -- opening-policy.mjs` もPASS。対象の具体的反例は解消済みであり、この限定監査に追加の指摘はない。全native代表12例の完走は別担当の検証範囲で、ここで成功とは扱っていない。
+
+## 高速探索とreference移行の独立監査（2026-09-08）
+
+`scripts/search-kernel-fast.mjs`、`scripts/search-multi-pairs-fast.mjs`、`tests/multi-pair-fast-migration.test.mjs` と集約器のfast対応差分を読み取り専用で監査した。今回の対象に具体的な不具合は見つからなかった。
+
+高速kernelは、次に処理する最初の子に限り、同じ実DuelとLink取引のclosureを保持する。兄弟は以前と同じprefix全体を再生する。子の応答前にnode/time/重複の判定を行い、未生成tailのnextCandidateと残frontierを保持する。列挙、終端、DRAW境界、局所Link循環の条件はreferenceと同じであり、盤面による枝の合流を追加していない。使用済み効果等の状態は実Duel内に残り、盤面から再構成しない。
+
+`finishRoute`が返すsteps配列と、snapshotが参照するchain等が後続応答で増える問題に対して、継続前にroute.stepsとlog/chain/lp/inputs/errorsの各配列を分離する実装を確認した。現engineはこれらの要素を後から変更せず、配列への追加・置換で更新するため、既に公開した履歴へ継続操作が混入しない。論理上の訪問数・生成数はreferenceの定義を保ち、実Duelの生成回数と応答回数はexecutionで区別する。
+
+移行はreferenceと異なる保存先を要求し、sourceとdestinationの両方を排他的にlockする。現reference identity、preset、pair、seed=123、空rootPrefix、既定deck順、protocol、scopeを照合したうえで、search全体、DRAW除外、best routes、観測数、failureHistoryを保存する。既存の高速checkpointはoriginHash/payloadHashを照合して保持し、再移行で巻き戻さない。コピーだけで旧frontierを処理済みにせず、元の完了状態を引き継ぐ。
+
+集約の `--fast` は高速専用runtimeと高速identityを選び、旧版と高速版を一つの集計へ混ぜない。各routeの実無ドロー再生、同generation、最良routeとの対応、全333組の在庫と未完了表示の検査は維持される。
+
+- 独立実行した `node --test tests/multi-pair-fast-migration.test.mjs tests/multi-search-report.test.mjs`: **4件PASS、失敗0、skip0**。実Allure＋霊王を45nodes探索したreferenceからDRAW除外と残frontierを移行し、高速版40nodes再開後の再移行で進捗が戻らないこと、source bytes不変、異なるseed・競合lock・同じ保存先の拒否を確認した。
+- 読み取り専用のfast report identity追試: 正規reference/fast各1件を受理、相互schema混入2件、fastにreference sourceHashを混ぜた1件、必須identity5項目の各欠落をすべて拒否。出力ファイルは作成していない。
+- 主担当から、同じ凍結sourceでの全体 `npm test` **164件PASS**が報告された。この中の差分試験は、Wizard全木、node/depth/generated予算、checkpoint再開、Code of Soulの使用済み状態、公開履歴の不変性、Link取引、RETRY、DRAW停止をreferenceと比較している。既に成功した同条件の全体試験は重複実行していない。
+
+この監査は全333組の実移行前に行った。全333組の移行完了や未解決枝の全探索完了を意味しない。referenceのsource/runtime、本番port 8788、稼働中GUIは変更していない。
+
+## 通常召喚取消しの限定縮約と別estate移行の独立監査（2026-09-08）
+
+`scripts/search-kernel-tribute.mjs`、`scripts/search-multi-pairs-tribute.mjs`、対応するkernel/migration試験、集約器の `--tribute` 差分を読み取り専用で監査した。最終kernelのSHA256は `4b3ff3af5f822c4fc9585b5dd1b6b09335fe29248c44dded2125055774ae9f93`。今回の限定対象に未解消の具体的な不具合は見つからなかった。
+
+縮約対象は初期手札に唯一存在し、その後一度も自分の手札を離れていないバルドレイク `72656408` とマグナムート `33854624` だけである。コード別のSetで未離脱を追跡し、不明なMOVEやSWAP等は資格を失わせる。先攻Main1・空chainでの通常召喚action 0、正確な `HINT(3,500) → SELECT_TRIBUTE`、自分の表側モンスター・release_param=1・min=max=1・取消可能という条件から、直後の明示取消しで元のIdleへ戻る2入力だけを扱う。pending、全zone query、field query、LP、phase、chain、logの一致と固定資産pinも必要とする。固定rootPrefixより前・途中にかかる往復は削除しない。シフター、召喚セット、手札に戻った個体、別の召喚手順へは適用しない。
+
+実使用WASMのregistry checksumとwrapper/core revisionの対応を読み、対応する `SummonRule` の取消し位置を照合した。取消しは召喚コストの実行、素材のリリース、召喚回数消費より前に戻る。一方、その前に `material_cards.clear()` があるため、公開盤面の一致だけでは一般化できない。上記の初期未離脱個体の条件、固定41カードLuaと補助scriptのpin、通常召喚proc/cost等の不在が必要である。これは全内部byteの不変や一般のHOPT同値を主張する監査ではない。provenanceは保存された公開registry資料とchecksumの照合であり、独立した再ビルドやRekor署名の暗号学的検証までは行っていない。
+
+`shortenAuditedRoute` は元routeを実coreで監査し、証明された隣接2入力の組だけを除く。残る全入力を最初から再生し、各prompt・元のbefore hash・応答label・無ドローを照合してから、元finalHash/logとの一致と先攻Main1終端を要求する。短縮後のsteps、盤面、log、scoreは再生結果から生成する。探索checkpointの生履歴やfrontierを、この短縮routeで置き換える処理はない。
+
+移行はfastと異なる保存先、両estateの排他的lock、元identity・seed・scope等の照合を要求する。旧search全体、DRAW除外、最良route、failureHistoryを保持し、migrationの祖先も残す。再移行はoriginHash/payloadHashが一致する既存進捗を保持し、巻き戻さない。v4で縮約済みのcheckpointはpolicy/pinが異なる、または縮約を無効にした実行では再開を拒否する。集約の `--tribute` は専用estateとidentityを選び、`--fast` との併用を拒否する。既存の実無ドロー再生、route/generation対応、全333組の在庫・未完了表示の検査は維持される。
+
+- 独立実行した `node --test tests/multi-pair-tribute-migration.test.mjs` は **3件PASS**。実routeの取消し4入力削除、final/log維持と再採点、異なるsource identity拒否、DRAW除外を含むfast checkpointの移行・v4再開・再移行時の非rollback、source bytes不変を確認した。この実行は2枚目の対象追加前であり、最終sourceについては下記の全体試験を再利用した。
+- 独立した実core追試で、バルドレイクの取消し86往復を含む182入力を10入力へ短縮し、86組だけの削除、元route不変、final/log一致、短縮routeの独立replay成功を確認した。出力ファイルは作成していない。
+- 最終凍結後の読み取り専用追試で、証拠manifest **19件すべてのSHA**、実使用WASM、証拠文書SHA、kernelの上記SHAと有効pinを照合しPASS。マグナムートの取消し0/1/116回の保存済み3継続を読み戻し、9/11/241入力後のfinal（board・pending・log・rawを含む）が完全一致することを確認した。バルドレイクの通常召喚・Dormouse使用済み効果を含む6継続も先に読み戻している。
+- kernel担当の最終限定試験 **10件PASS**、主担当の同じ凍結sourceに対する全体 `npm test` **178件PASS、skip0**を受領した。実coreの正のリリース枝、固定root、長い旧prefix、再開、DRAW境界、余分なイベント、未離脱条件、pin変更、追加マグナムートの116往復を含む。成功済みの同条件全体試験は重複実行していない。
+
+全333組の別estateへの実移行と、その後の未解決枝の探索完了は、この監査の完了とは別である。共有実装、既存runtime/routes、本番port 8788、稼働中GUIは監査担当から変更していない。

@@ -1,3 +1,5 @@
 # Research checkpoints identify source bytes; keep their hashes stable on Windows.
 *.json text eol=lf
 *.mjs text eol=lf
+# The audited preset was already CRLF; preserve its exact bytes on checkout.
+preset.json text eol=crlf

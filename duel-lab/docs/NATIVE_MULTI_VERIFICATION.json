@@ -1,9 +1,9 @@
 {
-  "verifiedAt": "2026-09-08T01:10:19.494747+00:00",
+  "verifiedAt": "2026-09-08T02:23:22.785665+00:00",
   "passed": 12,
   "failed": 0,
-  "jsTestsPassed": 149,
-  "sourceIdentity": "6caca166683d3a9b787e8eadad1b1efbfba32bb8190af64d84c2ab2d2ebba8ab",
+  "jsTestsPassed": 178,
+  "sourceIdentity": "f57482c88a17cfc69960a593cad098a9ca2fa28853ee9c90843e0be6db6d2bfb",
   "sourceHashes": {
     "native-bridge.mjs": "5c220b16c75a03dfd2b622ca835430dc0b8e05afb5c0b4e149301d32073ed1aa",
     "opening-policy.mjs": "4961acc57e0ed79119009df80b4bae178cbd09816fe56ead76a4b409272148cf",
@@ -32,9 +32,9 @@
     "routes\\malice-monsters.json": "9e3f81b046176acce566863428bf0aafaf433db818f2058daefef022a748c353",
     "routes\\multi-cyberse.json": "8f8caab8067fb081bba9a5f384075d09ccc36e3c9cfeb9c56ef3ab9267700177",
     "routes\\multi-malice.json": "940fc9fd2def3d535d979a852fafcc3b80a56c32eac7b0c5aff7f4bcc532ff8c",
-    "routes\\multi-opening-survey.json": "6f72eafb98ea6bf79c9aa540ee6738bf3322794b041743fb1b0fb535652e623f",
-    "routes\\multi-search-best.json": "02cef573aca64f8014a1c336d3c70a332bea2ea7753c2fc92a60c9515542d17e",
-    "routes\\multi-search-report.json": "d470f7dd9d7f0142a234929e8c60faec21a81b3b5fd04e11b75f11863f229788",
+    "routes\\multi-opening-survey.json": "f80f1d38805440e9869ee05efa6d59f2fdbe2e4288a7b355ee072c8804bc9103",
+    "routes\\multi-search-best.json": "dfa3ab754762526d2ba9fab940af03d82a7ec0de4ae92e463017a3097c076c90",
+    "routes\\multi-search-report.json": "6f99a06d7c514d40bceff5f3251899fb025ecc7c26e84a4cc7edb0ab14f9762e",
     "routes\\optional-draw-continuations.json": "a3ea1b42764d2c1ba8a485ce8a7fbf19b6edbd0d86c04622f986babafc330784",
     "routes\\pair-shard-0.json": "344114cb6864b585d7c3afde7da92d7270872b4ddfa368ae4de9fb23b760e314",
     "routes\\pair-shard-1.json": "cd77d314c723682b8f14d6a336dec5f4a777638689e04b2e8294c5a22dad9777",
@@ -48,20 +48,20 @@
   },
   "groups": [
     {
-      "directory": "runtime/native-opening-suite/20260908T010647Z-f37fd1",
-      "summaryHash": "65829a8ad8810b87cbe2a7f66e2a36ce392f825e313b42daf36ea93e3cd710bd"
+      "directory": "runtime/native-opening-suite/20260908-tribute-final-0",
+      "summaryHash": "0d051a1b3ffe1804d820278ea3310b6499b05f943cf8aada8615a40540517d1f"
     },
     {
-      "directory": "runtime/native-opening-suite/20260908T010647Z-ccfa4d",
-      "summaryHash": "7866f41b2bd39dbb838259e6e6f72ddf667154e1860ed40cdaa4c0977728e1d8"
+      "directory": "runtime/native-opening-suite/20260908-tribute-final-1",
+      "summaryHash": "855816f6985bdcc35b979c8a4cc79d5269c0530e1dc3dd29e4b52726af9eea6c"
     },
     {
-      "directory": "runtime/native-opening-suite/20260908T010648Z-c0f18c",
-      "summaryHash": "e1ee241124f8dfdc2991be1c518885b170e0c73610536afce5f643c5ce8932c5"
+      "directory": "runtime/native-opening-suite/20260908-tribute-final-2",
+      "summaryHash": "b101475ba7a2dc95cc7b72e29e31dac8fdaa428f35101ae8c0a6e4c6964f5093"
     },
     {
-      "directory": "runtime/native-opening-suite/20260908T010648Z-06a864",
-      "summaryHash": "2e8dc4ec6c48394d8b233b4a515b96f401ba5947f9dfdf79eeccb146448d581c"
+      "directory": "runtime/native-opening-suite/20260908-tribute-final-3",
+      "summaryHash": "112940edf0068a5db7cce39fac0b86e91ccc0d78b9a97985788575e073941de7"
     }
   ],
   "fixtures": [
@@ -73,9 +73,9 @@
       "httpResponses": 61,
       "finalMainHand": [
         40366667,
-        40366667,
         20726052,
-        78114463
+        78114463,
+        40366667
       ],
       "terminal": {
         "turn": 2,
@@ -86,9 +86,9 @@
         "bridgeRequests": 61,
         "hand": [
           40366667,
-          40366667,
           20726052,
-          78114463
+          78114463,
+          40366667
         ],
         "monsters": [
           {
@@ -200,8 +200,8 @@
       "automaticResponses": 72,
       "httpResponses": 76,
       "finalMainHand": [
-        78114463,
         40366667,
+        78114463,
         40366667
       ],
       "terminal": {
@@ -212,8 +212,8 @@
         "mainResponses": 12,
         "bridgeRequests": 76,
         "hand": [
-          78114463,
           40366667,
+          78114463,
           40366667
         ],
         "monsters": [
@@ -251,8 +251,8 @@
       "httpResponses": 35,
       "finalMainHand": [
         40366667,
-        40366667,
-        78114463
+        78114463,
+        40366667
       ],
       "terminal": {
         "turn": 2,
@@ -263,8 +263,8 @@
         "bridgeRequests": 35,
         "hand": [
           40366667,
-          40366667,
-          78114463
+          78114463,
+          40366667
         ],
         "monsters": [
           {
@@ -288,8 +288,8 @@
       "automaticResponses": 80,
       "httpResponses": 84,
       "finalMainHand": [
-        78114463,
         40366667,
+        78114463,
         40366667
       ],
       "terminal": {
@@ -300,8 +300,8 @@
         "mainResponses": 13,
         "bridgeRequests": 84,
         "hand": [
-          78114463,
           40366667,
+          78114463,
           40366667
         ],
         "monsters": [
@@ -350,8 +350,8 @@
         "mainResponses": 10,
         "bridgeRequests": 62,
         "hand": [
-          40366667,
           78114463,
+          40366667,
           40366667,
           72656408
         ],
@@ -388,8 +388,8 @@
       "automaticResponses": 64,
       "httpResponses": 68,
       "finalMainHand": [
-        40366667,
         78114463,
+        40366667,
         40366667
       ],
       "terminal": {
@@ -400,8 +400,8 @@
         "mainResponses": 12,
         "bridgeRequests": 68,
         "hand": [
-          40366667,
           78114463,
+          40366667,
           40366667
         ],
         "monsters": [
@@ -435,9 +435,9 @@
       "httpResponses": 95,
       "finalMainHand": [
         40366667,
+        57111661,
         78114463,
-        40366667,
-        57111661
+        40366667
       ],
       "terminal": {
         "turn": 2,
@@ -448,9 +448,9 @@
         "bridgeRequests": 95,
         "hand": [
           40366667,
+          57111661,
           78114463,
-          40366667,
-          57111661
+          40366667
         ],
         "monsters": [
           {
@@ -482,9 +482,9 @@
       "automaticResponses": 64,
       "httpResponses": 66,
       "finalMainHand": [
+        40366667,
+        40366667,
         78114463,
-        40366667,
-        40366667,
         91800273
       ],
       "terminal": {
@@ -495,9 +495,9 @@
         "mainResponses": 11,
         "bridgeRequests": 66,
         "hand": [
+          40366667,
+          40366667,
           78114463,
-          40366667,
-          40366667,
           91800273
         ],
         "monsters": [
@@ -556,11 +556,11 @@
       "automaticResponses": 62,
       "httpResponses": 65,
       "finalMainHand": [
-        40366667,
-        40366667,
         78114463,
-        68337209,
-        69272449
+        40366667,
+        40366667,
+        69272449,
+        68337209
       ],
       "terminal": {
         "turn": 2,
@@ -570,11 +570,11 @@
         "mainResponses": 11,
         "bridgeRequests": 65,
         "hand": [
-          40366667,
-          40366667,
           78114463,
-          68337209,
-          69272449
+          40366667,
+          40366667,
+          69272449,
+          68337209
         ],
         "monsters": [
           {
