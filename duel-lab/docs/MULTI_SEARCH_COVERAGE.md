@@ -3,7 +3,7 @@
 固定2枚の先攻・相手手札なし。未知ドロー後を除外。既知template照合と実合法木探索は別指標。 初期手札バルドレイク・マグナムートの通常召喚キャンセルと既存のLink素材UI循環は、ソース照合などの監査条件が成立する場合のみ縮約する。
 
 全333組のうち実探索済み333組、無ドロー範囲の全枝終了136組、未着手0組。
-訪問442207、終端履歴126411、未解決prefix 79907、対象外の未知ドロー境界8482。
+訪問442207、終端履歴126411、未解決prefix 69167、対象外の未知ドロー境界8482。
 手作業の実core検証ルート65件、探索が発見したMain1入力ルート330件。罠伏せ・小展開も含むため、件数は強い初動の成功率ではない。
 
 保存ルートは実手札で再生して自動入力候補へ加える。未解決の木を最善性の証明や全網羅として扱わない。
@@ -220,12 +220,12 @@
 | 深淵の獣マグナムート＋霊王の波動 | completeWithinNoDrawScope | 13 | 0 | set-or-spell-only | 0 |
 | 深淵の獣マグナムート＋M∀LICE＜C＞TB－１１ | completeWithinNoDrawScope | 13 | 0 | set-or-spell-only | 0 |
 | 深淵の獣マグナムート＋幽鬼うさぎ | incomplete | 3229 | 64 | link-development | 0 |
-| 深淵の獣マグナムート＋M∀LICE IN UNDERGROUND | incomplete | 1284 | 1844 | link-development | 0 |
+| 深淵の獣マグナムート＋M∀LICE IN UNDERGROUND | incomplete | 1284 | 210 | link-development | 0 |
 | 深淵の獣マグナムート＋M∀LICE＜P＞White Rabbit | incomplete | 1513 | 1012 | link-development | 0 |
 | 深淵の獣マグナムート＋深淵の獣バルドレイク | completeWithinNoDrawScope | 2 | 0 | no-action | 0 |
-| 深淵の獣マグナムート＋テラ・フォーミング | incomplete | 1238 | 2390 | link-development | 0 |
+| 深淵の獣マグナムート＋テラ・フォーミング | incomplete | 1238 | 256 | link-development | 0 |
 | 深淵の獣マグナムート＋コード・オブ・ソウル | completeWithinNoDrawScope | 279 | 0 | link-development | 0 |
-| 深淵の獣マグナムート＋封印の黄金櫃 | incomplete | 1398 | 1919 | link-development | 0 |
+| 深淵の獣マグナムート＋封印の黄金櫃 | incomplete | 1398 | 211 | link-development | 0 |
 | 深淵の獣マグナムート＋神の密告 | completeWithinNoDrawScope | 13 | 0 | set-or-spell-only | 0 |
 | 深淵の獣マグナムート＋マルチャミー・プルリア | completeWithinNoDrawScope | 69 | 0 | no-board-development | 0 |
 | 深淵の獣マグナムート＋ディメンション・アトラクター | completeWithinNoDrawScope | 213 | 0 | no-board-development | 1 |
@@ -275,7 +275,7 @@
 | 幽鬼うさぎ＋M∀LICE＜P＞Cheshire Cat | completeWithinNoDrawScope | 151 | 0 | link-development | 0 |
 | M∀LICE IN UNDERGROUND＋M∀LICE IN UNDERGROUND | incomplete | 1739 | 360 | link-development | 1 |
 | M∀LICE IN UNDERGROUND＋M∀LICE＜P＞White Rabbit | incomplete | 1581 | 542 | link-development | 0 |
-| M∀LICE IN UNDERGROUND＋深淵の獣バルドレイク | incomplete | 1365 | 1325 | link-development | 0 |
+| M∀LICE IN UNDERGROUND＋深淵の獣バルドレイク | incomplete | 1365 | 168 | link-development | 0 |
 | M∀LICE IN UNDERGROUND＋テラ・フォーミング | incomplete | 1262 | 367 | link-development | 0 |
 | M∀LICE IN UNDERGROUND＋コード・オブ・ソウル | incomplete | 1927 | 404 | link-development | 1 |
 | M∀LICE IN UNDERGROUND＋封印の黄金櫃 | incomplete | 1354 | 419 | link-development | 0 |
@@ -296,9 +296,9 @@
 | M∀LICE＜P＞White Rabbit＋ドロール＆ロックバード | incomplete | 1594 | 676 | link-development | 0 |
 | M∀LICE＜P＞White Rabbit＋M∀LICE＜C＞MTP－０７ | incomplete | 1951 | 179 | link-development | 1 |
 | M∀LICE＜P＞White Rabbit＋M∀LICE＜P＞Cheshire Cat | incomplete | 1707 | 627 | link-development | 0 |
-| 深淵の獣バルドレイク＋テラ・フォーミング | incomplete | 1489 | 2565 | link-development | 0 |
+| 深淵の獣バルドレイク＋テラ・フォーミング | incomplete | 1489 | 297 | link-development | 0 |
 | 深淵の獣バルドレイク＋コード・オブ・ソウル | completeWithinNoDrawScope | 279 | 0 | link-development | 0 |
-| 深淵の獣バルドレイク＋封印の黄金櫃 | incomplete | 1471 | 2065 | link-development | 0 |
+| 深淵の獣バルドレイク＋封印の黄金櫃 | incomplete | 1471 | 226 | link-development | 0 |
 | 深淵の獣バルドレイク＋神の密告 | completeWithinNoDrawScope | 13 | 0 | set-or-spell-only | 0 |
 | 深淵の獣バルドレイク＋マルチャミー・プルリア | completeWithinNoDrawScope | 69 | 0 | no-board-development | 0 |
 | 深淵の獣バルドレイク＋ディメンション・アトラクター | completeWithinNoDrawScope | 93 | 0 | no-board-development | 1 |

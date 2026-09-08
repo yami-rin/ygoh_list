@@ -1,0 +1,203 @@
+{
+  "schema": "astra-frontier-audit-verification-v1",
+  "status": "PASS",
+  "verifiedAt": "2026-09-08T02:47:59.733Z",
+  "verifier": {
+    "file": "scripts/verify-frontier-audit.mjs",
+    "sha256": "ca3357c50fbff53db00d4092468ecbe7338ce1eec2bf68b1c17ed1e01b7bf18e"
+  },
+  "identity": {
+    "schema": "astra-multi-pair-search-tribute-v1",
+    "presetHash": "8d4d40bc085644f9150344c6237b4239a07ef69f1cc21631832b4b695b641095",
+    "pairHash": "ba812b10266fad6016bcf6bd5470b9499098478c460902ea4a3ff02882ac5bdf",
+    "sourceHash": "096cfa9ffcdee54c4cc35dc99a6a969910ccafb10a46558dd930e4b5a5fd4f46",
+    "assetsHash": "2c909f0750c3fcc3e81a08a57329fe62bd92d913079c4ac0842b1dfe175a2c82"
+  },
+  "scope": "Latest ledger in every requested shard; exact preservation of audited checkpoint payloads and current route exports. No new core replay; no claim that unrecorded checkpoints changed or stayed unchanged.",
+  "totals": {
+    "shards": 8,
+    "verifiedShards": 8,
+    "pairs": 6,
+    "selected": 11318,
+    "removed": 10740,
+    "frontierBefore": 12108,
+    "frontierAfter": 1368,
+    "auditVisits": 11318,
+    "searchVisitDelta": 0,
+    "generatedDelta": 0,
+    "pruningDeltas": {
+      "tribute": 10740,
+      "linkCancel": 0,
+      "linkToggle": 0
+    }
+  },
+  "checkedFiles": 22745,
+  "elapsedMs": 3848,
+  "shards": [
+    {
+      "shard": 0,
+      "status": "PASS",
+      "ledger": "runtime/multi-pair-search-tribute/shard-0/frontier-audits/2026-09-08T02-42-57-880Z-313612ac",
+      "summaryHash": "0470380c32e550a75563c0a96d7bba80722bf8f3c085607e8d7198a37a50e59f",
+      "records": [
+        {
+          "pairIndex": 288,
+          "selected": 1908,
+          "removed": 1839,
+          "frontierBefore": 2065,
+          "frontierAfter": 226,
+          "auditVisits": 1908,
+          "searchVisited": 1471,
+          "deltas": {
+            "tribute": 1839,
+            "linkCancel": 0,
+            "linkToggle": 0
+          },
+          "beforeHash": "8c8b19c81919258811166241948f0801aeaad7dc4557b6a3ba0b2e2bc8ecfe6a",
+          "afterHash": "dfa63da6b8a049db5859427fd76f1c6444502aea5ebf4c4851ae38273d3c2cea",
+          "proofHash": "4a56fd7de7582730cbfec803a50ea7eea740ad0af2d682bc2c326e5784673dc2"
+        }
+      ]
+    },
+    {
+      "shard": 1,
+      "status": "PASS",
+      "ledger": "runtime/multi-pair-search-tribute/shard-1/frontier-audits/2026-09-08T02-42-57-557Z-23b400da",
+      "summaryHash": "fd51b409898f7c408ebc8479fc3b2dd3dd3e5a41f2d993df22b7937638b451e4",
+      "records": [
+        {
+          "pairIndex": 265,
+          "selected": 1252,
+          "removed": 1157,
+          "frontierBefore": 1325,
+          "frontierAfter": 168,
+          "auditVisits": 1252,
+          "searchVisited": 1365,
+          "deltas": {
+            "tribute": 1157,
+            "linkCancel": 0,
+            "linkToggle": 0
+          },
+          "beforeHash": "f6513fb4efc24442935c9837bb6570fe355743b9d5a871fdb168470ffb856e01",
+          "afterHash": "c24b550ac1cbbe2629e6ff554755de434930144e458f5ac744be1bf0eaf7eb28",
+          "proofHash": "2ecd0903d6883b283f9ade7dc9e52e6a595fb7a7866c0002f26e1b2c8494a0b3"
+        }
+      ]
+    },
+    {
+      "shard": 2,
+      "status": "PASS",
+      "ledger": "runtime/multi-pair-search-tribute/shard-2/frontier-audits/2026-09-08T02-43-20-851Z-28756015",
+      "summaryHash": "c980940f7bea7c808510677142da73ee9bbb6a1070bb35f97122a9387f6e60be",
+      "records": [
+        {
+          "pairIndex": 210,
+          "selected": 1745,
+          "removed": 1634,
+          "frontierBefore": 1844,
+          "frontierAfter": 210,
+          "auditVisits": 1745,
+          "searchVisited": 1284,
+          "deltas": {
+            "tribute": 1634,
+            "linkCancel": 0,
+            "linkToggle": 0
+          },
+          "beforeHash": "0e9a812fe26a18ec0f00ecbbc1bce1a849c29bc77b84c764bc732518b9aeda5b",
+          "afterHash": "2c610b6e8636f39420afa77a86ea8fd93749e78e685610cf401c3820ebfbeddd",
+          "proofHash": "39a4f618a57fddb51f04125da450fbd3a0ede81882af3f6c0e7bf4a63998b4f6"
+        }
+      ]
+    },
+    {
+      "shard": 3,
+      "status": "PASS",
+      "ledger": "runtime/multi-pair-search-tribute/shard-3/frontier-audits/2026-09-08T02-43-37-808Z-a2cc6ff9",
+      "summaryHash": "4e5d8af65bf742910354d986842338905bbd782750ad95f69da2b2dc5e43638b",
+      "records": []
+    },
+    {
+      "shard": 4,
+      "status": "PASS",
+      "ledger": "runtime/multi-pair-search-tribute/shard-4/frontier-audits/2026-09-08T02-43-37-902Z-754b5f8c",
+      "summaryHash": "4e5d8af65bf742910354d986842338905bbd782750ad95f69da2b2dc5e43638b",
+      "records": []
+    },
+    {
+      "shard": 5,
+      "status": "PASS",
+      "ledger": "runtime/multi-pair-search-tribute/shard-5/frontier-audits/2026-09-08T02-43-30-096Z-eb404428",
+      "summaryHash": "9c20f88efdeb1685f6209c754713c49e3b0afc9562f8a79f7013cb659040deea",
+      "records": [
+        {
+          "pairIndex": 213,
+          "selected": 2226,
+          "removed": 2134,
+          "frontierBefore": 2390,
+          "frontierAfter": 256,
+          "auditVisits": 2226,
+          "searchVisited": 1238,
+          "deltas": {
+            "tribute": 2134,
+            "linkCancel": 0,
+            "linkToggle": 0
+          },
+          "beforeHash": "4e351a3d93295bfca6b01193edf1ea3cc4aee591e088776a6a254eb1ec5b6f3e",
+          "afterHash": "4884af8610c37df7fb6037eac19d45dd9aee2981aa206d1fa5ed7edc0524ddae",
+          "proofHash": "411452ea06a67cc01a7a78981bedbe72dc9893a3f5b62571989b3d074c3e4831"
+        }
+      ]
+    },
+    {
+      "shard": 6,
+      "status": "PASS",
+      "ledger": "runtime/multi-pair-search-tribute/shard-6/frontier-audits/2026-09-08T02-43-37-321Z-7b800b22",
+      "summaryHash": "671a4aea59d67d87245cbcfb4adcf51f1f92eb143b8b9452b88006a902a5a12d",
+      "records": [
+        {
+          "pairIndex": 286,
+          "selected": 2401,
+          "removed": 2268,
+          "frontierBefore": 2565,
+          "frontierAfter": 297,
+          "auditVisits": 2401,
+          "searchVisited": 1489,
+          "deltas": {
+            "tribute": 2268,
+            "linkCancel": 0,
+            "linkToggle": 0
+          },
+          "beforeHash": "2821d4c8bfd37d3f75a1f378478ed3c7b2f9b03e195456eb618c6711c9d81253",
+          "afterHash": "7bce168b2e9615a2dd57339056a89a7a028397e64c2161dba5c9889e9e03b602",
+          "proofHash": "e59317bebd27fd1ccdcec2b90c5f4e602c9be9ae9261689faa91e9a187e55731"
+        }
+      ]
+    },
+    {
+      "shard": 7,
+      "status": "PASS",
+      "ledger": "runtime/multi-pair-search-tribute/shard-7/frontier-audits/2026-09-08T02-43-55-725Z-36794cef",
+      "summaryHash": "412286bbec17deb491c2b93ba709aac0a4cfd57359fd32928fed4732bb36ad7f",
+      "records": [
+        {
+          "pairIndex": 215,
+          "selected": 1786,
+          "removed": 1708,
+          "frontierBefore": 1919,
+          "frontierAfter": 211,
+          "auditVisits": 1786,
+          "searchVisited": 1398,
+          "deltas": {
+            "tribute": 1708,
+            "linkCancel": 0,
+            "linkToggle": 0
+          },
+          "beforeHash": "6ded965719b5e175cb7ac7db5f0e3e16b7bfba4b51ed4ef68cdf9fc51de78646",
+          "afterHash": "70a551450beb0eda0bca8052d75ab203de2de7c4c1a8cb332bb87fb0e4853e80",
+          "proofHash": "f467da385237593fd13d973586349e426d3b28bc97bc7ac977370ab72b94b7b6"
+        }
+      ]
+    }
+  ],
+  "errors": []
+}

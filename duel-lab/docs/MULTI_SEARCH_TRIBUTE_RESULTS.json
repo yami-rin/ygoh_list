@@ -7,7 +7,7 @@
     "sourceHash": "096cfa9ffcdee54c4cc35dc99a6a969910ccafb10a46558dd930e4b5a5fd4f46",
     "assetsHash": "2c909f0750c3fcc3e81a08a57329fe62bd92d913079c4ac0842b1dfe175a2c82"
   },
-  "verifiedAt": "2026-09-08T02:15:57.198Z",
+  "verifiedAt": "2026-09-08T02:47:01.095Z",
   "checks": [
     "333 reference file hashes unchanged",
     "all previous terminal histories retained",
@@ -22,11 +22,11 @@
     "complete": 136,
     "oldVisited": 334795,
     "visited": 442207,
-    "frontier": 79907,
+    "frontier": 69167,
     "fastCoreStarts": 87178,
     "fastReplayedResponses": 2408146,
     "fastReusedResponses": 132032,
-    "tributePruned": 166,
+    "tributePruned": 10906,
     "shortenedWinners": 0,
     "sameOutcomeShorterWinners": 4
   },
@@ -5708,7 +5708,7 @@
       "current": {
         "visited": 1284,
         "complete": false,
-        "frontier": 1844
+        "frontier": 210
       },
       "execution": {
         "coreStarts": 305,
@@ -5716,7 +5716,7 @@
         "reusedResponses": 560,
         "scope": "Actual operations since first use of this executor; earlier baseline operations are not inferred"
       },
-      "tributePruned": 30,
+      "tributePruned": 1664,
       "bestShortening": null,
       "winnerComparison": {
         "before": 20,
@@ -5785,7 +5785,7 @@
       "current": {
         "visited": 1238,
         "complete": false,
-        "frontier": 2390
+        "frontier": 256
       },
       "execution": {
         "coreStarts": 263,
@@ -5793,7 +5793,7 @@
         "reusedResponses": 518,
         "scope": "Actual operations since first use of this executor; earlier baseline operations are not inferred"
       },
-      "tributePruned": 25,
+      "tributePruned": 2159,
       "bestShortening": null,
       "winnerComparison": {
         "before": 239,
@@ -5838,7 +5838,7 @@
       "current": {
         "visited": 1398,
         "complete": false,
-        "frontier": 1919
+        "frontier": 211
       },
       "execution": {
         "coreStarts": 324,
@@ -5846,7 +5846,7 @@
         "reusedResponses": 580,
         "scope": "Actual operations since first use of this executor; earlier baseline operations are not inferred"
       },
-      "tributePruned": 27,
+      "tributePruned": 1735,
       "bestShortening": null,
       "winnerComparison": {
         "before": 237,
@@ -7143,7 +7143,7 @@
       "current": {
         "visited": 1365,
         "complete": false,
-        "frontier": 1325
+        "frontier": 168
       },
       "execution": {
         "coreStarts": 406,
@@ -7151,7 +7151,7 @@
         "reusedResponses": 571,
         "scope": "Actual operations since first use of this executor; earlier baseline operations are not inferred"
       },
-      "tributePruned": 25,
+      "tributePruned": 1182,
       "bestShortening": null,
       "winnerComparison": {
         "before": 19,
@@ -7752,7 +7752,7 @@
       "current": {
         "visited": 1489,
         "complete": false,
-        "frontier": 2565
+        "frontier": 297
       },
       "execution": {
         "coreStarts": 350,
@@ -7760,7 +7760,7 @@
         "reusedResponses": 611,
         "scope": "Actual operations since first use of this executor; earlier baseline operations are not inferred"
       },
-      "tributePruned": 35,
+      "tributePruned": 2303,
       "bestShortening": null,
       "winnerComparison": {
         "before": 179,
@@ -7805,7 +7805,7 @@
       "current": {
         "visited": 1471,
         "complete": false,
-        "frontier": 2065
+        "frontier": 226
       },
       "execution": {
         "coreStarts": 297,
@@ -7813,7 +7813,7 @@
         "reusedResponses": 550,
         "scope": "Actual operations since first use of this executor; earlier baseline operations are not inferred"
       },
-      "tributePruned": 24,
+      "tributePruned": 1863,
       "bestShortening": null,
       "winnerComparison": {
         "before": 237,

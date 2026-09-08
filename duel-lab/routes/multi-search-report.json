@@ -16,7 +16,7 @@
     "unsearched": 0,
     "visited": 442207,
     "terminalPaths": 126411,
-    "unresolved": 79907,
+    "unresolved": 69167,
     "excludedDraw": 8482,
     "manualRoutes": 65,
     "searchRoutes": 330
@@ -24,11 +24,11 @@
   "sources": [
     {
       "path": "runtime/multi-pair-search-tribute/shard-0/summary.json",
-      "hash": "42aa4daccabceb2a51bcc4d1727986ea5e2de81dfe7330e57b313e2d642ca0b4"
+      "hash": "5359b46296793dc3717b919e428809004a412aeff23527a5ba51d130d1ffc544"
     },
     {
       "path": "runtime/multi-pair-search-tribute/shard-0/best-routes.json",
-      "hash": "bc84f58ca9cd1e2db8de29274e5e19d1064230c66e5011ec4531fa8feaaed384"
+      "hash": "ec7c7988d6f029ed861b338cec15d1016333bf9439e2fa703eec21037ea8f8a5"
     },
     {
       "path": "routes/pair-shard-0.json",
@@ -36,11 +36,11 @@
     },
     {
       "path": "runtime/multi-pair-search-tribute/shard-1/summary.json",
-      "hash": "83646921d564f2c4f6ba1d048bddd37fecee4b1253cccdf0c79739a11d218742"
+      "hash": "f08b4b0d7f080348589f1cc6162cf021d75f1b2c9230eecff090dca69cab305c"
     },
     {
       "path": "runtime/multi-pair-search-tribute/shard-1/best-routes.json",
-      "hash": "4a1be9e8eddd81a3cd353def75511cb7a661d5a08863b4b76632363280371800"
+      "hash": "6917d187b6cf081e704850d4c9d858d5a885e92c74f0e054eb5ae5c37b601817"
     },
     {
       "path": "routes/pair-shard-1.json",
@@ -48,11 +48,11 @@
     },
     {
       "path": "runtime/multi-pair-search-tribute/shard-2/summary.json",
-      "hash": "b13a0b66ece77f066208c5dc16de6a722f51146722a71d883117d2f4772c2136"
+      "hash": "07ada5db9149346eb6b28c3b3ea3ef77ee0955af921d99ca5ee0016912360734"
     },
     {
       "path": "runtime/multi-pair-search-tribute/shard-2/best-routes.json",
-      "hash": "8dc30d78edbe70bf34f3d3d3d4c7b483011a73a71d7568955f5a75693d4ae6d1"
+      "hash": "f28e4fa106c9bce542709a6973b8385318e05ec1521c44cf3e1b562dd73097ca"
     },
     {
       "path": "routes/pair-shard-2.json",
@@ -60,7 +60,7 @@
     },
     {
       "path": "runtime/multi-pair-search-tribute/shard-3/summary.json",
-      "hash": "b44836daddf895ab2926301db744905b1343fc7d5cdf477bb815d642f742f51f"
+      "hash": "961a109c88760a800dd13b7097c7551745428c6771bcabd166e3f2a97c3ec7d2"
     },
     {
       "path": "runtime/multi-pair-search-tribute/shard-3/best-routes.json",
@@ -72,7 +72,7 @@
     },
     {
       "path": "runtime/multi-pair-search-tribute/shard-4/summary.json",
-      "hash": "2944e3fd28bf15a06e8d65f332fd1d3227b0676fb7297ff26f341dcc34f61730"
+      "hash": "b6bf558e03233e9d42ef51f6184159cb8595af511b06da481ea58c5263fbfee2"
     },
     {
       "path": "runtime/multi-pair-search-tribute/shard-4/best-routes.json",
@@ -84,11 +84,11 @@
     },
     {
       "path": "runtime/multi-pair-search-tribute/shard-5/summary.json",
-      "hash": "d57560a52d87a23b751fb131f97260a8dfcb7b163ab50040af90152ba99c9fab"
+      "hash": "95ac7ad2f352b9155ed0f4c17c4bf5bc25f453bf282b27acb9504af12afc5990"
     },
     {
       "path": "runtime/multi-pair-search-tribute/shard-5/best-routes.json",
-      "hash": "bd11759aa5081419f08934df0f48cf2855cedf758430184a6352926661cf838f"
+      "hash": "f244cc694b8d91afb36b06d21578098a418dd81b955f09ed0404a65dc3ef3e1f"
     },
     {
       "path": "routes/pair-shard-5.json",
@@ -96,11 +96,11 @@
     },
     {
       "path": "runtime/multi-pair-search-tribute/shard-6/summary.json",
-      "hash": "d6f6f2fbb9c85097f852e35ab077d1bd306a920d05b7286aa6195bad78aa5a1a"
+      "hash": "c0537dcb27546f38cfedb27c970508dabe72fda50bf1fb54ce11c48b0fda5371"
     },
     {
       "path": "runtime/multi-pair-search-tribute/shard-6/best-routes.json",
-      "hash": "961a572f395b9cc7970d203efd53c1a0ff176fc3d72798bade5328719494484a"
+      "hash": "b8a00729fab8f5eec284baa411d2773470c94760bf6656ea0d4a2a447bf9efda"
     },
     {
       "path": "routes/pair-shard-6.json",
@@ -108,11 +108,11 @@
     },
     {
       "path": "runtime/multi-pair-search-tribute/shard-7/summary.json",
-      "hash": "a682fc01c2bb1a1c352c7cca7c0f42558d56b563d9f16d19487237515f2a3061"
+      "hash": "0966d89d1515f3131ee6ed8fc94347af0a3da43e7248661932326d447d87b8ef"
     },
     {
       "path": "runtime/multi-pair-search-tribute/shard-7/best-routes.json",
-      "hash": "e5ab960d2f2bb6eeeaa5715608b38d39b98ed99cac0fd54f4c0f40b712af6763"
+      "hash": "2bfe82fb2201e35f7e14f226d887e55887f1aa8f98abd68ad7dc357c58e7c1d0"
     },
     {
       "path": "routes/pair-shard-7.json",
@@ -111117,11 +111117,10 @@
       "visited": 1284,
       "generated": 3071,
       "terminalPaths": 210,
-      "unresolved": 1844,
+      "unresolved": 210,
       "unresolvedByReason": {
-        "maxMs": 1483,
-        "maxDepth": 52,
-        "maxNodes": 309
+        "maxMs": 194,
+        "maxNodes": 16
       },
       "excludedDraw": 0,
       "coreRejected": 40,
@@ -111633,7 +111632,7 @@
           "enabled": true,
           "requested": true,
           "counts": {
-            "cancelledNormalTribute": 30
+            "cancelledNormalTribute": 1664
           },
           "examples": [
             {
@@ -114595,10 +114594,9 @@
       "visited": 1238,
       "generated": 3573,
       "terminalPaths": 172,
-      "unresolved": 2390,
+      "unresolved": 256,
       "unresolvedByReason": {
-        "maxMs": 2341,
-        "maxDepth": 49
+        "maxMs": 256
       },
       "excludedDraw": 0,
       "coreRejected": 31,
@@ -115120,7 +115118,7 @@
           "enabled": true,
           "requested": true,
           "counts": {
-            "cancelledNormalTribute": 25
+            "cancelledNormalTribute": 2159
           },
           "examples": [
             {
@@ -118063,10 +118061,9 @@
       "visited": 1398,
       "generated": 3266,
       "terminalPaths": 279,
-      "unresolved": 1919,
+      "unresolved": 211,
       "unresolvedByReason": {
-        "maxMs": 1873,
-        "maxDepth": 46
+        "maxMs": 211
       },
       "excludedDraw": 0,
       "coreRejected": 38,
@@ -118580,7 +118577,7 @@
           "enabled": true,
           "requested": true,
           "counts": {
-            "cancelledNormalTribute": 27
+            "cancelledNormalTribute": 1735
           },
           "examples": [
             {
@@ -146257,10 +146254,9 @@
       "visited": 1365,
       "generated": 2672,
       "terminalPaths": 337,
-      "unresolved": 1325,
+      "unresolved": 168,
       "unresolvedByReason": {
-        "maxMs": 1311,
-        "maxDepth": 14
+        "maxMs": 168
       },
       "excludedDraw": 0,
       "coreRejected": 26,
@@ -146772,7 +146768,7 @@
           "enabled": true,
           "requested": true,
           "counts": {
-            "cancelledNormalTribute": 25
+            "cancelledNormalTribute": 1182
           },
           "examples": [
             {
@@ -160361,11 +160357,10 @@
       "visited": 1489,
       "generated": 3965,
       "terminalPaths": 228,
-      "unresolved": 2565,
+      "unresolved": 297,
       "unresolvedByReason": {
-        "maxDepth": 85,
-        "maxMs": 2177,
-        "maxNodes": 303
+        "maxNodes": 31,
+        "maxMs": 266
       },
       "excludedDraw": 0,
       "coreRejected": 43,
@@ -160887,7 +160882,7 @@
           "enabled": true,
           "requested": true,
           "counts": {
-            "cancelledNormalTribute": 35
+            "cancelledNormalTribute": 2303
           },
           "examples": [
             {
@@ -163830,11 +163825,10 @@
       "visited": 1471,
       "generated": 3477,
       "terminalPaths": 289,
-      "unresolved": 2065,
+      "unresolved": 226,
       "unresolvedByReason": {
-        "maxMs": 1851,
-        "maxDepth": 53,
-        "maxNodes": 161
+        "maxMs": 196,
+        "maxNodes": 30
       },
       "excludedDraw": 0,
       "coreRejected": 40,
@@ -164348,7 +164342,7 @@
           "enabled": true,
           "requested": true,
           "counts": {
-            "cancelledNormalTribute": 24
+            "cancelledNormalTribute": 1863
           },
           "examples": [
             {
@@ -189817,5 +189811,5 @@
   ],
   "scope": "固定2枚の先攻・相手手札なし。未知ドロー後を除外。既知template照合と実合法木探索は別指標。 初期手札バルドレイク・マグナムートの通常召喚キャンセルと既存のLink素材UI循環は、ソース照合などの監査条件が成立する場合のみ縮約する。",
   "complete": false,
-  "updatedAt": "2026-09-08T02:13:19.056Z"
+  "updatedAt": "2026-09-08T02:47:31.203Z"
 }
