@@ -1,0 +1,278 @@
+{
+  "schema": "monster-set-cancel-validation-v1",
+  "verifiedAt": "2026-09-10T20:01:25.560Z",
+  "implementation": {
+    "schema": "astra-multi-pair-search-set-v1",
+    "presetHash": "8d4d40bc085644f9150344c6237b4239a07ef69f1cc21631832b4b695b641095",
+    "pairHash": "ba812b10266fad6016bcf6bd5470b9499098478c460902ea4a3ff02882ac5bdf",
+    "sourceHash": "8dfc7e8c1d3d9aa04cca37a6bc646d8ee9a7b053ce686e348bd548b58ca96142",
+    "assetsHash": "2c909f0750c3fcc3e81a08a57329fe62bd92d913079c4ac0842b1dfe175a2c82"
+  },
+  "assets": {
+    "policy": "fresh-initial-hand-bystial-normal-or-set-tribute-cancel-v1",
+    "expectedPin": "6f43e013f78cf7f9fe40502ab79de5d55f2ca07f2d283c792a5ad705d81cedd6",
+    "installedPin": "6f43e013f78cf7f9fe40502ab79de5d55f2ca07f2d283c792a5ad705d81cedd6",
+    "pinVerified": true,
+    "wasmSha256": "68e0ddde6932df1dc9de39e6eff8afae10a5db0f18ea8a0870a6b7eb80073ea8",
+    "coreRevision": "46779fbe40e6a9bd8967f5dc6a03f4eaa6550d57",
+    "cards": [
+      72656408,
+      33854624
+    ],
+    "evidence": "docs/MULTI_SEARCH_DEPTH_AUDIT.md; runtime/set-cancel-audit/source-evidence.json; runtime/set-cancel-audit/experiments/summary.json; MonsterSet core-operations.cpp:2472,2607-2620"
+  },
+  "verifiedEvidence": {
+    "coreSources": 6,
+    "cardScripts": 41,
+    "helpers": 26,
+    "snapshots": 2
+  },
+  "primarySources": [
+    {
+      "file": "core-card.cpp",
+      "sha256": "27544345ece5e57d71b6db07ab86174f157ca6f123b1e43d221cf4dcd58bfade",
+      "url": "https://github.com/edo9300/ygopro-core/blob/46779fbe40e6a9bd8967f5dc6a03f4eaa6550d57/card.cpp"
+    },
+    {
+      "file": "core-operations.cpp",
+      "sha256": "651a9bc6ef45d9b40c2506ae8eac513e65618233eee992b582eac7516d5b3764",
+      "url": "https://github.com/edo9300/ygopro-core/blob/46779fbe40e6a9bd8967f5dc6a03f4eaa6550d57/operations.cpp"
+    },
+    {
+      "file": "core-playerop.cpp",
+      "sha256": "2b4c3f844f15afd2e25a394ea281bd3bf0f56efb137bc2784d92b4e1e0059895",
+      "url": "https://github.com/edo9300/ygopro-core/blob/46779fbe40e6a9bd8967f5dc6a03f4eaa6550d57/playerop.cpp"
+    },
+    {
+      "file": "core-processor.cpp",
+      "sha256": "b795f687a62ca1cb80fb1876725e06b860e32632a0749b268136f9c75b2355e2",
+      "url": "https://github.com/edo9300/ygopro-core/blob/46779fbe40e6a9bd8967f5dc6a03f4eaa6550d57/processor.cpp"
+    },
+    {
+      "file": "core-field.cpp",
+      "sha256": "7f35276e14b30c3236b9d971c9b9b9ec54a2a11346e79be68ebadd3ae772e31e",
+      "url": "https://github.com/edo9300/ygopro-core/blob/46779fbe40e6a9bd8967f5dc6a03f4eaa6550d57/field.cpp"
+    },
+    {
+      "file": "core-libduel.cpp",
+      "sha256": "2508f0e41806b36a21bc06bdab5f946594c051c718aa8afd9c1ea14c3c649165",
+      "url": "https://github.com/edo9300/ygopro-core/blob/46779fbe40e6a9bd8967f5dc6a03f4eaa6550d57/libduel.cpp"
+    }
+  ],
+  "validation": {
+    "targetedTests": 13,
+    "projectTests": 200,
+    "failed": 0,
+    "baselineRegression": "The non-cancel coverage test fails on v4 at the expected missing cancelledMonsterSet assertion and passes on v5.",
+    "command": "node --test --test-concurrency=2 tests/*.test.mjs",
+    "projectDurationMs": 99237.1646
+  },
+  "frozenHistoryProbe": {
+    "scope": "One-node replay of two frozen pending histories, five trials per implementation. Counts are actual response execution, not whole-tree speed, strategic coverage or win rate.",
+    "rows": [
+      {
+        "pairIndex": 288,
+        "hand": [
+          72656408,
+          75500286
+        ],
+        "snapshotSha256": "d0fdbf1d4254b4688ff66a7a9839e413b24397bc5345b89b13fc29982596aa6f",
+        "savedDepth": 54,
+        "baselineReplayedResponses": 54,
+        "setPolicyReplayedResponses": 11,
+        "trials": [
+          {
+            "version": 4,
+            "trial": 0,
+            "replayedResponses": 54,
+            "elapsedMs": 107.47030000000001
+          },
+          {
+            "version": 5,
+            "trial": 0,
+            "replayedResponses": 11,
+            "elapsedMs": 67.26490000000001
+          },
+          {
+            "version": 5,
+            "trial": 1,
+            "replayedResponses": 11,
+            "elapsedMs": 50.608100000000036
+          },
+          {
+            "version": 4,
+            "trial": 1,
+            "replayedResponses": 54,
+            "elapsedMs": 59.1198
+          },
+          {
+            "version": 4,
+            "trial": 2,
+            "replayedResponses": 54,
+            "elapsedMs": 59.53639999999996
+          },
+          {
+            "version": 5,
+            "trial": 2,
+            "replayedResponses": 11,
+            "elapsedMs": 52.20939999999996
+          },
+          {
+            "version": 5,
+            "trial": 3,
+            "replayedResponses": 11,
+            "elapsedMs": 60.80309999999997
+          },
+          {
+            "version": 4,
+            "trial": 3,
+            "replayedResponses": 54,
+            "elapsedMs": 59.48140000000001
+          },
+          {
+            "version": 4,
+            "trial": 4,
+            "replayedResponses": 54,
+            "elapsedMs": 75.1232
+          },
+          {
+            "version": 5,
+            "trial": 4,
+            "replayedResponses": 11,
+            "elapsedMs": 54.401500000000055
+          }
+        ]
+      },
+      {
+        "pairIndex": 210,
+        "hand": [
+          33854624,
+          68337209
+        ],
+        "snapshotSha256": "95960a036652b183ec3a904b566cef078605f9d945d23f1f4e83f2b480eaa00a",
+        "savedDepth": 66,
+        "baselineReplayedResponses": 66,
+        "setPolicyReplayedResponses": 11,
+        "trials": [
+          {
+            "version": 4,
+            "trial": 0,
+            "replayedResponses": 66,
+            "elapsedMs": 72.3162000000001
+          },
+          {
+            "version": 5,
+            "trial": 0,
+            "replayedResponses": 11,
+            "elapsedMs": 53.447799999999916
+          },
+          {
+            "version": 5,
+            "trial": 1,
+            "replayedResponses": 11,
+            "elapsedMs": 56.534799999999905
+          },
+          {
+            "version": 4,
+            "trial": 1,
+            "replayedResponses": 66,
+            "elapsedMs": 78.02980000000002
+          },
+          {
+            "version": 4,
+            "trial": 2,
+            "replayedResponses": 66,
+            "elapsedMs": 75.36850000000004
+          },
+          {
+            "version": 5,
+            "trial": 2,
+            "replayedResponses": 11,
+            "elapsedMs": 54.968200000000024
+          },
+          {
+            "version": 5,
+            "trial": 3,
+            "replayedResponses": 11,
+            "elapsedMs": 50.80449999999996
+          },
+          {
+            "version": 4,
+            "trial": 3,
+            "replayedResponses": 66,
+            "elapsedMs": 64.21340000000009
+          },
+          {
+            "version": 4,
+            "trial": 4,
+            "replayedResponses": 66,
+            "elapsedMs": 69.97949999999992
+          },
+          {
+            "version": 5,
+            "trial": 4,
+            "replayedResponses": 11,
+            "elapsedMs": 53.49849999999992
+          }
+        ]
+      }
+    ]
+  },
+  "isolatedCliSmoke": [
+    {
+      "pairIndex": 288,
+      "hand": [
+        72656408,
+        75500286
+      ],
+      "names": [
+        "深淵の獣バルドレイク",
+        "封印の黄金櫃"
+      ],
+      "originalCheckpointSha256": "e8169a4e502885ceffd8d74d40712c6457d06da8d04a82c9e230415dab91325d",
+      "afterCheckpointSha256": "4f84d5f0eda14681a19e1b205d32268ba98d3c6b91d80cbe68fec83b50ce2df4",
+      "before": {
+        "visited": 2035,
+        "frontier": 343
+      },
+      "after": {
+        "visited": 3027,
+        "frontier": 203,
+        "completeWithinNoDrawScope": false
+      },
+      "cancelledMonsterSet": 184,
+      "bestRouteReplayed": true,
+      "bestFinalHash": "ee4375d13aac058a96ba0029395ecf50ea057805352924d1413f9a2592154936"
+    },
+    {
+      "pairIndex": 210,
+      "hand": [
+        33854624,
+        68337209
+      ],
+      "names": [
+        "深淵の獣マグナムート",
+        "M∀LICE IN UNDERGROUND"
+      ],
+      "originalCheckpointSha256": "08c975c018d1006f601ad99c8dde8fbd380c96ec6f75adc730177d9bc733e68a",
+      "afterCheckpointSha256": "e04444cc041f10115495fc5c06af484d5afff497aee86c512ebfbad74de10674",
+      "before": {
+        "visited": 1808,
+        "frontier": 362
+      },
+      "after": {
+        "visited": 2808,
+        "frontier": 270,
+        "completeWithinNoDrawScope": false
+      },
+      "cancelledMonsterSet": 231,
+      "bestRouteReplayed": true,
+      "bestFinalHash": "94e7378a399879efac8b4d8991619de716fbfe263a2cb3b1a929fd770d5d9df8"
+    }
+  ],
+  "limitations": [
+    "Two frozen prefix probes and two bounded pair resumptions, not whole-tree speed or exhaustive coverage.",
+    "Fixed assets, unique untouched initial-hand Bystials, exact audited cancellation only.",
+    "No unknown-draw continuation, opponent interference or native autoplay changes."
+  ]
+}
