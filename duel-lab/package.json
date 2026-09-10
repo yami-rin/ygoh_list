@@ -9,6 +9,7 @@
     "postinstall": "node scripts/patch-core.mjs",
     "start:browser": "node server.mjs",
     "openings:verify": "node scripts/build-opening-book.mjs",
+    "openings:atlas": "node scripts/build-opening-atlas.mjs",
     "search:report": "node scripts/build-search-report.mjs",
     "search:verify": "node scripts/build-search-report.mjs --verify"
   },

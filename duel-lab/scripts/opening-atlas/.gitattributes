@@ -1,0 +1,2 @@
+# Keep the hash-pinned viewer sources stable across Windows checkouts.
+* text eol=lf

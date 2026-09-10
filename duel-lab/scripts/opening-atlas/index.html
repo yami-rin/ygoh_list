@@ -1,0 +1,72 @@
+<!doctype html>
+<html lang="ja">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="color-scheme" content="light">
+  <title>M∀LICE 初動アトラス — 2枚からの展開を見る</title>
+  <link rel="icon" href="favicon.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="atlas.css">
+  <script src="data.js" defer></script>
+  <script src="atlas.js" defer></script>
+</head>
+<body>
+  <a class="skip" href="#replay">展開へ移動</a>
+  <header class="topbar">
+    <a href="README.md" class="back">使い方と確認範囲</a>
+    <a href="#" class="wordmark" aria-label="MALICE 初動アトラス">M∀LICE <span>OPENING ATLAS</span></a>
+    <span class="edition">FIXED DECK / VERIFIED REPLAY</span>
+  </header>
+  <main>
+    <section class="intro">
+      <div><p class="eyebrow">CARDS IN HAND. POSSIBILITIES ON THE TABLE.</p><h1>その2枚から、<em>どこまで。</em></h1><p class="lead">手札を選んで、盤面を1手ずつ。<br class="mobile-break">検証済みの展開を、見て確かめる。</p></div>
+      <div class="scope-card"><span class="scope-label">このアトラスの範囲</span><strong><b id="main-size">—</b><span>枚の固定構築</span> / 2<span>枚の手札</span></strong><p>先攻・相手の妨害なし。<br>未確定ドローの結果は使いません。</p></div>
+    </section>
+    <div class="catalog-bar"><p><strong id="pair-count">—</strong> 種類の2枚組 <span class="separator">/</span> <span id="catalog-count">—</span> 件の既知手順から再生確認</p><a href="#about">結果の読み方</a></div>
+    <div id="load-error" class="notice error" role="alert" hidden>データを読み込めませんでした。data.jsと同じフォルダーでこのページを開いてください。</div>
+    <div class="workspace">
+      <aside class="library" aria-label="手札の選択">
+        <div class="section-label"><span>01</span><h2>手札を選ぶ</h2></div>
+        <label class="field-label" for="first-card">1枚目</label><select id="first-card"></select>
+        <label class="field-label" for="second-card">2枚目</label><select id="second-card"></select>
+        <button class="primary" id="show-hand" type="button">この2枚の展開を見る</button>
+        <p class="form-note" id="hand-error" role="status"></p>
+        <div class="quick-picks"><span class="field-label">まずはこちらから</span><div id="quick-picks"></div></div>
+        <div class="library-search"><label class="field-label" for="pair-search">組み合わせを探す</label><input id="pair-search" type="search" placeholder="カード名を入力" autocomplete="off"><div class="list-meta"><span id="list-count">—</span><button id="clear-search" class="quiet" type="button">クリア</button></div></div>
+        <div class="pair-list" id="pair-list" aria-label="2枚組の一覧"></div>
+      </aside>
+      <section class="replay" id="replay" aria-labelledby="hand-title">
+        <div class="replay-heading"><div><p class="eyebrow">02 / FOLLOW THE LINE</p><h2 id="hand-title">展開を読み込み中</h2></div><span id="route-badge" class="badge"></span></div>
+        <p class="usage-note" id="usage-note"></p>
+        <div id="unsupported" class="notice" hidden><h3>この手札に適用できる保存手順はありません。</h3><p>この2枚から展開できないことの証明ではありません。別の組み合わせを選ぶか、実対戦で改めて判断してください。</p></div>
+        <div id="supported-view">
+          <div class="transport">
+            <div class="step-heading"><p id="step-label" aria-live="polite">初期状態</p><span id="step-counter">0 / 0</span></div>
+            <input id="step-range" type="range" min="0" max="0" value="0" aria-label="展開の操作位置">
+            <div class="transport-buttons"><button id="first-step" type="button">最初</button><button id="previous-step" type="button">前へ</button><button id="play" class="play" type="button">自動で見る</button><button id="next-step" type="button">次へ</button><button id="last-step" type="button">最終盤面</button></div>
+            <p class="next-label" id="next-label"></p>
+          </div>
+          <div class="board-wrap">
+            <div class="board-top"><span class="board-label">YOUR FIELD</span><div class="board-stats"><span>LP <strong id="lp">8000</strong></span><span>デッキ <b id="deck-count">38</b></span><span>EX <b id="extra-count">15</b></span></div></div>
+            <div class="extra-zones" id="extra-zones"></div>
+            <div class="zone-row" id="monster-zones" aria-label="モンスターゾーン"></div>
+            <div class="zone-row" id="spell-zones" aria-label="魔法・罠ゾーン"></div>
+            <div id="field-zone" class="field-zone"></div>
+            <div class="hand-zone"><div class="zone-title">HAND <span id="hand-count"></span></div><div id="hand-cards" class="card-pills"></div></div>
+          </div>
+          <div class="side-zones"><section><h3>墓地 <span id="grave-count">0</span></h3><div id="grave-cards" class="card-pills compact"></div></section><section><h3>除外 <span id="banished-count">0</span></h3><div id="banished-cards" class="card-pills compact"></div></section></div>
+          <details class="timeline-details"><summary>すべての操作を見る <span id="timeline-count"></span></summary><ol id="timeline" class="timeline"></ol></details>
+          <details class="route-details"><summary>この手順の確認情報</summary><div id="route-details"></div></details>
+        </div>
+      </section>
+    </div>
+    <section class="about" id="about">
+      <div><p class="eyebrow">READ THE EVIDENCE</p><h2>「再生できた」を、<br>正しく読む。</h2></div>
+      <div class="about-grid"><article><span>01</span><h3>既知の手順を比較</h3><p>固定デッキから作れる2枚組に、保存済みの無ドロー手順を適用しています。未知の全合法手を探索した結果ではありません。</p></article><article><span>02</span><h3>小さな展開も含む</h3><p>罠を伏せるだけの手順や、通常召喚だけの手順も表示します。「手順あり」を強い初動の成功率として数えることはできません。</p></article><article><span>03</span><h3>実際の5枚では再判断</h3><p>残りの手札によって、デッキから選ぶカードや選択肢が変わります。この2枚で通る手順が、実際の5枚でもそのまま通るとは限りません。</p></article><article><span>04</span><h3>最終盤面は停止点</h3><p>盤面の重み・罠・手札・LPなどによる評価で、適用できた既知候補から1つを表示します。勝率・妨害貫通率・最善手の証明ではありません。</p></article></div>
+    </section>
+  </main>
+  <footer><span>M∀LICE / OPENING ATLAS</span><p id="verified-at"></p><a href="verification.json">再生と盤面照合の証拠</a></footer>
+  <dialog id="card-dialog"><button id="close-card" class="dialog-close" type="button">閉じる</button><p class="eyebrow" id="card-kind"></p><h2 id="card-name"></h2><p id="card-english" class="card-english"></p><p id="card-stats" class="card-statline"></p><p id="card-text" class="card-text"></p><p class="card-footnote">この固定構築のカードデータ。カード名のリンクからいつでも確認できます。</p></dialog>
+  <noscript><p class="notice">操作ごとの表示にはJavaScriptが必要です。</p></noscript>
+</body>
+</html>
