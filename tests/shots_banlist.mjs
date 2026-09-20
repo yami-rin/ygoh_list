@@ -36,7 +36,7 @@ try {
     await page.evaluate(async () => {
         const { emptyState, saveBanlistState } = await import('./js/pages/banlist/storage.js');
         const state = emptyState();
-        state.title = 'フレンド対戦 レギュレーション';
+        state.title = '次回 禁止・制限予想';
         state.tierState = [['強欲な壺', '天使の施し'], ['灰流うらら', '増殖するG'], ['サンダー・ボルト'], ['無限泡影', '墓穴の指名者'], ['ブラック・マジシャン'], ['青眼の白龍']];
         saveBanlistState(state);
     });

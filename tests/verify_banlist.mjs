@@ -14,7 +14,7 @@ const png = Buffer.from('iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR
 const errors = [];
 const contexts = [];
 const read = page => page.evaluate(() => JSON.parse(localStorage.getItem('banlist_editor_v4')));
-const card = (page, scope, name) => page.locator(`${scope} .tier-card`).filter({ has: page.locator('.card-name', { hasText: new RegExp(`^${name}$`) }) });
+const card = (page, scope, name) => page.locator(scope).getByRole('button', { name: new RegExp(`^${name}：`) });
 async function makePage(options = {}) {
     const context = await browser.newContext({ viewport: { width: 390, height: 844 }, hasTouch: true });
     contexts.push(context);
@@ -65,6 +65,7 @@ try {
     await page.setViewportSize({ width: 390, height: 844 });
     await search(page, 'はるうらら');
     await card(page, '#pool-cards', '灰流うらら').tap();
+    assert.equal(await page.locator('.card-name').count(), 0);
     assert.deepEqual((await read(page)).tierState[0], ['灰流うらら']);
     assert.equal(await page.locator('#mobile-count').innerText(), '1');
     await card(page, '#pool-cards', '灰流うらら').tap();

@@ -25,11 +25,11 @@ export function validateState(data) {
         return cards.filter(name => { if (seen.has(name)) return false; seen.add(name); return true; });
     });
     if (seen.size > 2000) throw new Error('1つのリストに登録できるのは2,000枚までです。');
-    return { version: 4, title: typeof data.title === 'string' ? data.title.slice(0, 60) : 'マイ・バンリスト', tierConfig, tierState };
+    return { version: 4, title: typeof data.title === 'string' ? data.title.slice(0, 60) : '次回 禁止・制限予想', tierConfig, tierState };
 }
 
 export function emptyState() {
-    return { version: 4, title: 'マイ・バンリスト', tierConfig: DEFAULT_CONFIG.map(tier => ({ ...tier })), tierState: DEFAULT_CONFIG.map(() => []) };
+    return { version: 4, title: '次回 禁止・制限予想', tierConfig: DEFAULT_CONFIG.map(tier => ({ ...tier })), tierState: DEFAULT_CONFIG.map(() => []) };
 }
 
 export function loadBanlistState() {

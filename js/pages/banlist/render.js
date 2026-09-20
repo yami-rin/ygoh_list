@@ -34,7 +34,9 @@ export function createBanlistRenderer({ getState, getDestination, onCardClick, o
         const action = sourceTier === null && assigned < 0 ? `${getDestination().name}に追加` : '分類を変更';
         card.setAttribute('aria-label', `${name}：${action}`);
         card.title = `${name}：${action}`;
-        card.append(element('span', 'card-art'), element('span', 'card-name', name));
+        const art = element('span', 'card-art');
+        art.append(element('span', 'card-placeholder', name));
+        card.append(art);
         if (sourceTier === null) card.append(element('span', assigned < 0 ? 'card-add' : 'assigned-badge', assigned < 0 ? '+' : '追加済'));
         card.addEventListener('click', () => onCardClick(name, sourceTier));
         card.addEventListener('dragstart', event => {
@@ -92,7 +94,7 @@ export function createBanlistRenderer({ getState, getDestination, onCardClick, o
             const empty = element('div', 'pool-empty');
             empty.append(icon('search'));
             empty.append(element('strong', '', !ready ? (failed ? 'データを読み込めませんでした' : 'カードを準備しています') : query ? '該当するカードがありません' : 'まずはカードを検索'));
-            empty.append(element('p', '', query ? '短い名前や、よみがなでも試せます。' : '追加先を選んで、カードをタップ。自分だけのリストを作りましょう。'));
+            empty.append(element('p', '', query ? '短い名前や、よみがなでも検索できます。' : '予想する規制を選び、カードを追加してください。'));
             if (ready && !query) {
                 const suggestions = element('div', 'suggestions');
                 for (const name of ['灰流うらら', '青眼', 'ブラック・マジシャン']) {

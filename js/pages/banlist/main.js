@@ -239,7 +239,7 @@ async function openExport() {
         if (controller.signal.aborted) return;
         exportBlob = result.blob;
         $('export-canvas').hidden = false;
-        $('export-status').textContent = result.missing ? `${result.missing}枚の画像を取得できなかったため、カード名で表示しています。` : 'リスト名・カード名を含めてPNG画像に保存します。';
+        $('export-status').textContent = result.missing ? `${result.missing}枚の画像を取得できなかったため、カード名で表示しています。` : '予想リストをPNG画像で保存します。';
         $('download-btn').disabled = false;
     } catch (error) {
         if (!controller.signal.aborted) $('export-status').textContent = `画像を作成できませんでした。${error.message}`;

@@ -4,8 +4,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
     <meta name="theme-color" content="#132c35">
-    <meta name="description" content="遊戯王のオリジナル制限リストを作成。カードを検索してタップで分類、画像として保存できます。スマートフォン対応。">
-    <title>バンリストエディター | YGO Card Tools</title>
+    <meta name="description" content="遊戯王の禁止・制限改訂を予想。禁止、制限、準制限、緩和・解除の予想をカード画像でまとめて保存できます。">
+    <title>禁止・制限予想メーカー | 遊戯王</title>
     <link rel="stylesheet" href="css/theme.css">
     <link rel="stylesheet" href="css/pages/banlist-editor.css">
     <script src="image_cache_manager.js" defer></script>
@@ -22,19 +22,18 @@
 <a class="skip-link" href="#workspace">編集エリアへ</a>
 <header class="site-header">
     <a class="brand" href="index.html" aria-label="YGO Card Tools ホーム"><span class="brand-mark">Y</span><span>YGO <span class="brand-sub">CARD TOOLS</span></span></a>
-    <span class="header-location">BANLIST EDITOR</span>
     <a class="back-link" href="index.html">ホームへ <span aria-hidden="true">↗</span></a>
 </header>
 <main class="page" id="app" data-view="board">
     <div class="page-heading">
-        <div><p class="eyebrow">YOUR RULES. YOUR GAME.</p><h1>バンリストエディター</h1><p class="intro">カードを選んで、自分だけのレギュレーションを。</p></div>
+        <h1>禁止・制限予想メーカー</h1>
         <button class="button primary" id="export-btn"><svg class="icon"><use href="#i-download"/></svg>画像を書き出す</button>
     </div>
     <div id="load-error" class="error-banner" role="alert" hidden>カードデータを読み込めませんでした。保存済みのリストは引き続き編集できます。<button class="button" id="retry-btn">再読み込み</button></div>
     <div class="workspace" id="workspace" tabindex="-1">
-        <section class="board-panel" aria-label="作成中のリスト">
+        <section class="board-panel" aria-label="禁止・制限の予想リスト">
             <div class="board-heading">
-                <div class="list-title-wrap"><label for="list-title">リスト名</label><input id="list-title" maxlength="60" value="マイ・バンリスト" autocomplete="off"><p class="save-status" id="save-status" role="status">この端末に自動保存されます</p></div>
+                <div class="list-title-wrap"><label for="list-title">予想タイトル</label><input id="list-title" maxlength="60" value="次回 禁止・制限予想" placeholder="例：2026年10月 禁止・制限予想" autocomplete="off"><p class="save-status" id="save-status" role="status">この端末に自動保存されます</p></div>
                 <span class="card-total"><strong id="total-count">0</strong> 枚</span>
             </div>
             <div class="board-toolbar">
@@ -45,34 +44,33 @@
             </div>
             <div class="board-hint"><span class="hint-dot"></span><span>カードをタップで移動・削除<span class="desktop-hint">。ドラッグでも並べられます</span></span></div>
             <div id="tier-container" class="tier-container"></div>
-            <div class="board-footer"><span>カスタムレギュレーション</span><span>公式の禁止・制限リストではありません</span></div>
+            <div class="board-footer"><span>禁止・制限の改訂予想</span><span>個人の予想です。公式発表ではありません</span></div>
         </section>
         <aside class="search-panel" aria-labelledby="search-heading">
-            <div class="search-heading"><div><p class="eyebrow">CARD LIBRARY</p><h2 id="search-heading">カードを追加</h2></div><svg class="icon"><use href="#i-plus"/></svg></div>
+            <div class="search-heading"><h2 id="search-heading">予想に追加</h2><svg class="icon"><use href="#i-plus"/></svg></div>
             <div class="search-field"><svg class="icon"><use href="#i-search"/></svg><input type="search" id="search-input" aria-label="カード名・よみがなで検索" placeholder="カード名・よみがなで検索" autocomplete="off" enterkeyhint="search" disabled></div>
-            <fieldset class="destination"><legend>追加先</legend><div id="tier-picker" class="tier-picker"></div></fieldset>
+            <fieldset class="destination"><legend>予想する規制</legend><div id="tier-picker" class="tier-picker"></div></fieldset>
             <div class="results-meta"><span id="search-stats" role="status">カードデータを読み込み中…</span><span>タップで追加</span></div>
             <div id="pool-cards" class="pool-cards" aria-label="検索結果" aria-busy="true"></div>
-            <p class="search-note">追加したカードはリストからいつでも移動できます。</p>
         </aside>
     </div>
-    <nav class="mobile-nav" aria-label="編集画面の切り替え"><button id="view-board" class="active" aria-pressed="true"><svg class="icon"><use href="#i-list"/></svg>リスト <span id="mobile-count">0</span></button><button id="view-search" aria-pressed="false"><svg class="icon"><use href="#i-search"/></svg>カードを検索</button></nav>
+    <nav class="mobile-nav" aria-label="編集画面の切り替え"><button id="view-board" class="active" aria-pressed="true"><svg class="icon"><use href="#i-list"/></svg>予想リスト <span id="mobile-count">0</span></button><button id="view-search" aria-pressed="false"><svg class="icon"><use href="#i-search"/></svg>カードを検索</button></nav>
 </main>
 <div id="toast" class="toast" role="status"></div>
 <dialog id="card-dialog" class="dialog card-dialog" aria-labelledby="card-dialog-title">
-    <div class="dialog-heading"><h2 id="card-dialog-title">カードの分類</h2><button class="close-button" data-close aria-label="閉じる">×</button></div>
-    <p id="selected-card-name" class="selected-card-name"></p><p class="muted">移動先を選んでください</p><div id="move-options" class="move-options"></div>
+    <div class="dialog-heading"><h2 id="card-dialog-title">予想する規制を変更</h2><button class="close-button" data-close aria-label="閉じる">×</button></div>
+    <p id="selected-card-name" class="selected-card-name"></p><div id="move-options" class="move-options"></div>
     <button id="remove-card-btn" class="button danger full-width">リストから削除</button>
 </dialog>
 <dialog id="settings-dialog" class="dialog" aria-labelledby="settings-title">
     <div class="dialog-heading"><h2 id="settings-title">分類を編集</h2><button class="close-button" data-close aria-label="閉じる">閉じる ×</button></div>
-    <p class="muted">名前・色・順番を自由に変更できます。</p><div id="tier-config-list" class="tier-config-list"></div><button id="add-tier-btn" class="button full-width dashed">＋ 分類を追加</button>
+    <div id="tier-config-list" class="tier-config-list"></div><button id="add-tier-btn" class="button full-width dashed">＋ 分類を追加</button>
     <p class="settings-note">分類を削除すると、その中のカードもリストから外れます。「元に戻す」で取り消せます。</p><p id="settings-error" class="danger-text" role="alert"></p>
     <div class="dialog-actions"><button class="button" data-close>キャンセル</button><button id="apply-settings-btn" class="button primary">変更を適用</button></div>
 </dialog>
 <dialog id="export-dialog" class="dialog export-dialog" aria-labelledby="export-title">
     <div class="dialog-heading"><h2 id="export-title">画像を書き出す</h2><button class="close-button" data-close aria-label="閉じる">閉じる ×</button></div>
-    <p id="export-status" class="muted" role="status">画像を準備しています…</p><div class="export-preview"><canvas id="export-canvas" aria-label="バンリストの画像プレビュー"></canvas></div>
+    <p id="export-status" class="muted" role="status">画像を準備しています…</p><div class="export-preview"><canvas id="export-canvas" aria-label="禁止・制限予想の画像プレビュー"></canvas></div>
     <div class="dialog-actions"><button class="button" data-close>閉じる</button><button id="download-btn" class="button primary" disabled><svg class="icon"><use href="#i-download"/></svg>PNGを保存</button></div>
 </dialog>
 <noscript>このエディターの利用にはJavaScriptを有効にしてください。</noscript>
