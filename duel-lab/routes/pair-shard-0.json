@@ -50,212 +50,212 @@
     "checkpoints": [
       {
         "pairIndex": 0,
-        "path": "C:/Project/card_manager_web/duel-lab/runtime/multi-pair-search/shard-0/pair-000-64865-1475311.checkpoint.json",
+        "path": "C:/Project/Apps/card_manager_web/duel-lab/runtime/multi-pair-search/shard-0/pair-000-64865-1475311.checkpoint.json",
         "sha256": "b572177416d40597b9a05fb6c1e91f6f0cfec8809b8a90109b8b8e8768ed4fb2"
       },
       {
         "pairIndex": 8,
-        "path": "C:/Project/card_manager_web/duel-lab/runtime/multi-pair-search/shard-0/pair-008-64865-32061192.checkpoint.json",
+        "path": "C:/Project/Apps/card_manager_web/duel-lab/runtime/multi-pair-search/shard-0/pair-008-64865-32061192.checkpoint.json",
         "sha256": "f6a329853daec28ed95a5f475a51d1623ce772600a3182351716c5dfdc9ffb1e"
       },
       {
         "pairIndex": 16,
-        "path": "C:/Project/card_manager_web/duel-lab/runtime/multi-pair-search/shard-0/pair-016-64865-73628505.checkpoint.json",
+        "path": "C:/Project/Apps/card_manager_web/duel-lab/runtime/multi-pair-search/shard-0/pair-016-64865-73628505.checkpoint.json",
         "sha256": "2d1fc5e46dc67ddce18b86610417b05491e8fe68ad99442a132c3d43702ffa27"
       },
       {
         "pairIndex": 24,
-        "path": "C:/Project/card_manager_web/duel-lab/runtime/multi-pair-search/shard-0/pair-024-64865-96676583.checkpoint.json",
+        "path": "C:/Project/Apps/card_manager_web/duel-lab/runtime/multi-pair-search/shard-0/pair-024-64865-96676583.checkpoint.json",
         "sha256": "2cbbb4f95269b6766b8ef8d68836a70b9b2597e5b5c232f4f237f3a7d021b02b"
       },
       {
         "pairIndex": 32,
-        "path": "C:/Project/card_manager_web/duel-lab/runtime/multi-pair-search/shard-0/pair-032-1475311-32061192.checkpoint.json",
+        "path": "C:/Project/Apps/card_manager_web/duel-lab/runtime/multi-pair-search/shard-0/pair-032-1475311-32061192.checkpoint.json",
         "sha256": "47425cdf7de31b3e539161266ece1e4367059322c92f5d471e952a556216f5bb"
       },
       {
         "pairIndex": 40,
-        "path": "C:/Project/card_manager_web/duel-lab/runtime/multi-pair-search/shard-0/pair-040-1475311-73628505.checkpoint.json",
+        "path": "C:/Project/Apps/card_manager_web/duel-lab/runtime/multi-pair-search/shard-0/pair-040-1475311-73628505.checkpoint.json",
         "sha256": "3e5758a7cc75cdd10c6bda5e6e5bf47778b42d97380a6432894a2d695091f2a7"
       },
       {
         "pairIndex": 48,
-        "path": "C:/Project/card_manager_web/duel-lab/runtime/multi-pair-search/shard-0/pair-048-1475311-96676583.checkpoint.json",
+        "path": "C:/Project/Apps/card_manager_web/duel-lab/runtime/multi-pair-search/shard-0/pair-048-1475311-96676583.checkpoint.json",
         "sha256": "115b1335fdcb9e99c852ab09a6ea928200af82949c329e8b068da4cf45f8d3b5"
       },
       {
         "pairIndex": 56,
-        "path": "C:/Project/card_manager_web/duel-lab/runtime/multi-pair-search/shard-0/pair-056-3723262-33854624.checkpoint.json",
+        "path": "C:/Project/Apps/card_manager_web/duel-lab/runtime/multi-pair-search/shard-0/pair-056-3723262-33854624.checkpoint.json",
         "sha256": "994c39dd5a489e24db97e3f50b20aceca2621d0a9a8e2fe7bea10d9cbca88b5b"
       },
       {
         "pairIndex": 64,
-        "path": "C:/Project/card_manager_web/duel-lab/runtime/multi-pair-search/shard-0/pair-064-3723262-74652966.checkpoint.json",
+        "path": "C:/Project/Apps/card_manager_web/duel-lab/runtime/multi-pair-search/shard-0/pair-064-3723262-74652966.checkpoint.json",
         "sha256": "da0ada0c91c47da32447d2a6048a698448c5903e24672a14846dd6751ba8ad73"
       },
       {
         "pairIndex": 72,
-        "path": "C:/Project/card_manager_web/duel-lab/runtime/multi-pair-search/shard-0/pair-072-14558127-14558127.checkpoint.json",
+        "path": "C:/Project/Apps/card_manager_web/duel-lab/runtime/multi-pair-search/shard-0/pair-072-14558127-14558127.checkpoint.json",
         "sha256": "ae11b942780fbcc19db9b21975787d5ed759debe6f4cfade8e463b7c6e8462c1"
       },
       {
         "pairIndex": 80,
-        "path": "C:/Project/card_manager_web/duel-lab/runtime/multi-pair-search/shard-0/pair-080-14558127-40366667.checkpoint.json",
+        "path": "C:/Project/Apps/card_manager_web/duel-lab/runtime/multi-pair-search/shard-0/pair-080-14558127-40366667.checkpoint.json",
         "sha256": "dbb224dd184b39c3fcbbcba5c20f2531add6bd3083937d4b2a48d20a35555381"
       },
       {
         "pairIndex": 88,
-        "path": "C:/Project/card_manager_web/duel-lab/runtime/multi-pair-search/shard-0/pair-088-14558127-75500286.checkpoint.json",
+        "path": "C:/Project/Apps/card_manager_web/duel-lab/runtime/multi-pair-search/shard-0/pair-088-14558127-75500286.checkpoint.json",
         "sha256": "1d17c3df3c11fd2ada3aaa90f913ba863058d965e3272497d6582745d4789079"
       },
       {
         "pairIndex": 96,
-        "path": "C:/Project/card_manager_web/duel-lab/runtime/multi-pair-search/shard-0/pair-096-18789533-20938824.checkpoint.json",
+        "path": "C:/Project/Apps/card_manager_web/duel-lab/runtime/multi-pair-search/shard-0/pair-096-18789533-20938824.checkpoint.json",
         "sha256": "0bc8a5bf31894e068f6d2855dbb7777f7e3b5bed54acb678c80800462fce9216"
       },
       {
         "pairIndex": 104,
-        "path": "C:/Project/card_manager_web/duel-lab/runtime/multi-pair-search/shard-0/pair-104-18789533-68337209.checkpoint.json",
+        "path": "C:/Project/Apps/card_manager_web/duel-lab/runtime/multi-pair-search/shard-0/pair-104-18789533-68337209.checkpoint.json",
         "sha256": "bcfbd968bb0d3e044ba8eb57bcd96aaa8e49627fea9809df6f2a3cc41ac6e0ff"
       },
       {
         "pairIndex": 112,
-        "path": "C:/Project/card_manager_web/duel-lab/runtime/multi-pair-search/shard-0/pair-112-18789533-91800273.checkpoint.json",
+        "path": "C:/Project/Apps/card_manager_web/duel-lab/runtime/multi-pair-search/shard-0/pair-112-18789533-91800273.checkpoint.json",
         "sha256": "70d0154f14573e08eca6b2314fc0e8402591222210a2077545e7e58f57b86218"
       },
       {
         "pairIndex": 120,
-        "path": "C:/Project/card_manager_web/duel-lab/runtime/multi-pair-search/shard-0/pair-120-20726052-33854624.checkpoint.json",
+        "path": "C:/Project/Apps/card_manager_web/duel-lab/runtime/multi-pair-search/shard-0/pair-120-20726052-33854624.checkpoint.json",
         "sha256": "e2ee4ee76148fed533f0e04c48010cfe114fe07586e9376272e5a6455b16709a"
       },
       {
         "pairIndex": 128,
-        "path": "C:/Project/card_manager_web/duel-lab/runtime/multi-pair-search/shard-0/pair-128-20726052-74652966.checkpoint.json",
+        "path": "C:/Project/Apps/card_manager_web/duel-lab/runtime/multi-pair-search/shard-0/pair-128-20726052-74652966.checkpoint.json",
         "sha256": "0257d2c98bdb74c785625d6d4e05fc4690332ad461fd83fc7f32b9a98e7da875"
       },
       {
         "pairIndex": 136,
-        "path": "C:/Project/card_manager_web/duel-lab/runtime/multi-pair-search/shard-0/pair-136-20938824-23434538.checkpoint.json",
+        "path": "C:/Project/Apps/card_manager_web/duel-lab/runtime/multi-pair-search/shard-0/pair-136-20938824-23434538.checkpoint.json",
         "sha256": "643fea6b8bd8cec89558141f9aef8829d14077de3eaf92ade3af9ee7305a0c07"
       },
       {
         "pairIndex": 144,
-        "path": "C:/Project/card_manager_web/duel-lab/runtime/multi-pair-search/shard-0/pair-144-20938824-69272449.checkpoint.json",
+        "path": "C:/Project/Apps/card_manager_web/duel-lab/runtime/multi-pair-search/shard-0/pair-144-20938824-69272449.checkpoint.json",
         "sha256": "c5c05e79be240dca609d8241723e3b3b0a8998ad41a96cb117bb1d5792b8650d"
       },
       {
         "pairIndex": 152,
-        "path": "C:/Project/card_manager_web/duel-lab/runtime/multi-pair-search/shard-0/pair-152-20938824-94145021.checkpoint.json",
+        "path": "C:/Project/Apps/card_manager_web/duel-lab/runtime/multi-pair-search/shard-0/pair-152-20938824-94145021.checkpoint.json",
         "sha256": "3dabf7f8acfcf4df4f6f16cadfe24b6ec1ffd6fac9889dfc5837f786c2f86a0f"
       },
       {
         "pairIndex": 160,
-        "path": "C:/Project/card_manager_web/duel-lab/runtime/multi-pair-search/shard-0/pair-160-23434538-59438930.checkpoint.json",
+        "path": "C:/Project/Apps/card_manager_web/duel-lab/runtime/multi-pair-search/shard-0/pair-160-23434538-59438930.checkpoint.json",
         "sha256": "cf1c8e8c5354aafa5067f5d50957250822b8f20caf3c0674c12913e4806fc062"
       },
       {
         "pairIndex": 168,
-        "path": "C:/Project/card_manager_web/duel-lab/runtime/multi-pair-search/shard-0/pair-168-23434538-84192580.checkpoint.json",
+        "path": "C:/Project/Apps/card_manager_web/duel-lab/runtime/multi-pair-search/shard-0/pair-168-23434538-84192580.checkpoint.json",
         "sha256": "6933028128061d7804e2f3e076c2672ab64cff841c8372eec478d4f800a4c259"
       },
       {
         "pairIndex": 176,
-        "path": "C:/Project/card_manager_web/duel-lab/runtime/multi-pair-search/shard-0/pair-176-30118811-40366667.checkpoint.json",
+        "path": "C:/Project/Apps/card_manager_web/duel-lab/runtime/multi-pair-search/shard-0/pair-176-30118811-40366667.checkpoint.json",
         "sha256": "65d81d3b51e7b00025777953d167224b47d18386d5de24c93fd51a12574388e2"
       },
       {
         "pairIndex": 184,
-        "path": "C:/Project/card_manager_web/duel-lab/runtime/multi-pair-search/shard-0/pair-184-30118811-75500286.checkpoint.json",
+        "path": "C:/Project/Apps/card_manager_web/duel-lab/runtime/multi-pair-search/shard-0/pair-184-30118811-75500286.checkpoint.json",
         "sha256": "64e1f387adbc89c05629dbfcbb3c5a8bd138b71d8dc68008316dce1e36ec57a0"
       },
       {
         "pairIndex": 192,
-        "path": "C:/Project/card_manager_web/duel-lab/runtime/multi-pair-search/shard-0/pair-192-32061192-40366667.checkpoint.json",
+        "path": "C:/Project/Apps/card_manager_web/duel-lab/runtime/multi-pair-search/shard-0/pair-192-32061192-40366667.checkpoint.json",
         "sha256": "8fe03b0d73ff47580528779738db4cfbcf2a2005c076aa6d27d9cb9719be8257"
       },
       {
         "pairIndex": 200,
-        "path": "C:/Project/card_manager_web/duel-lab/runtime/multi-pair-search/shard-0/pair-200-32061192-75500286.checkpoint.json",
+        "path": "C:/Project/Apps/card_manager_web/duel-lab/runtime/multi-pair-search/shard-0/pair-200-32061192-75500286.checkpoint.json",
         "sha256": "a1fc77914374b76e9501f9a9b88465d52750c5eef6d32723038ccbca6da1605b"
       },
       {
         "pairIndex": 208,
-        "path": "C:/Project/card_manager_web/duel-lab/runtime/multi-pair-search/shard-0/pair-208-33854624-57111661.checkpoint.json",
+        "path": "C:/Project/Apps/card_manager_web/duel-lab/runtime/multi-pair-search/shard-0/pair-208-33854624-57111661.checkpoint.json",
         "sha256": "e75a66af6dec73fae82ef55694985af169798f89d9aabea7b06d3ca6ab8a9369"
       },
       {
         "pairIndex": 216,
-        "path": "C:/Project/card_manager_web/duel-lab/runtime/multi-pair-search/shard-0/pair-216-33854624-78114463.checkpoint.json",
+        "path": "C:/Project/Apps/card_manager_web/duel-lab/runtime/multi-pair-search/shard-0/pair-216-33854624-78114463.checkpoint.json",
         "sha256": "86df618fc4f52ee774df7304a8fad97b20974b83008e5a9ee429c4b2e2c64eaa"
       },
       {
         "pairIndex": 224,
-        "path": "C:/Project/card_manager_web/duel-lab/runtime/multi-pair-search/shard-0/pair-224-40366667-59438930.checkpoint.json",
+        "path": "C:/Project/Apps/card_manager_web/duel-lab/runtime/multi-pair-search/shard-0/pair-224-40366667-59438930.checkpoint.json",
         "sha256": "e2a140487693a293ea7c4d9c0dcb4a4a575b74207de9e0c28d57cd711bf8fe46"
       },
       {
         "pairIndex": 232,
-        "path": "C:/Project/card_manager_web/duel-lab/runtime/multi-pair-search/shard-0/pair-232-40366667-84192580.checkpoint.json",
+        "path": "C:/Project/Apps/card_manager_web/duel-lab/runtime/multi-pair-search/shard-0/pair-232-40366667-84192580.checkpoint.json",
         "sha256": "dff0b65db83e693a812231bc86526511cc9a522d5237a1a07b23771115899ab6"
       },
       {
         "pairIndex": 240,
-        "path": "C:/Project/card_manager_web/duel-lab/runtime/multi-pair-search/shard-0/pair-240-57111661-72656408.checkpoint.json",
+        "path": "C:/Project/Apps/card_manager_web/duel-lab/runtime/multi-pair-search/shard-0/pair-240-57111661-72656408.checkpoint.json",
         "sha256": "be6d4df08a4981d4c45ba30693d100254eca92815e52c77508299caaea11e18a"
       },
       {
         "pairIndex": 248,
-        "path": "C:/Project/card_manager_web/duel-lab/runtime/multi-pair-search/shard-0/pair-248-57111661-94722358.checkpoint.json",
+        "path": "C:/Project/Apps/card_manager_web/duel-lab/runtime/multi-pair-search/shard-0/pair-248-57111661-94722358.checkpoint.json",
         "sha256": "7c07471f1ceef16d1310e6acf29f25f13347d22708c9735901a2195e463c9867"
       },
       {
         "pairIndex": 256,
-        "path": "C:/Project/card_manager_web/duel-lab/runtime/multi-pair-search/shard-0/pair-256-59438930-75500286.checkpoint.json",
+        "path": "C:/Project/Apps/card_manager_web/duel-lab/runtime/multi-pair-search/shard-0/pair-256-59438930-75500286.checkpoint.json",
         "sha256": "87ce190dad8c4efb4321efe0fa9c17f8c504781a3dc9df1a34f84a0db159a4fe"
       },
       {
         "pairIndex": 264,
-        "path": "C:/Project/card_manager_web/duel-lab/runtime/multi-pair-search/shard-0/pair-264-68337209-69272449.checkpoint.json",
+        "path": "C:/Project/Apps/card_manager_web/duel-lab/runtime/multi-pair-search/shard-0/pair-264-68337209-69272449.checkpoint.json",
         "sha256": "7fd66d7a5ae157ec9bc97ef84471bffa7aa0a60d5472f0f12f46123c80e50b73"
       },
       {
         "pairIndex": 272,
-        "path": "C:/Project/card_manager_web/duel-lab/runtime/multi-pair-search/shard-0/pair-272-68337209-94145021.checkpoint.json",
+        "path": "C:/Project/Apps/card_manager_web/duel-lab/runtime/multi-pair-search/shard-0/pair-272-68337209-94145021.checkpoint.json",
         "sha256": "9940ff714819632136b31c3e2dd41381eaa2d57692ec66fdf2102f6c4b3a9038"
       },
       {
         "pairIndex": 280,
-        "path": "C:/Project/card_manager_web/duel-lab/runtime/multi-pair-search/shard-0/pair-280-69272449-78114463.checkpoint.json",
+        "path": "C:/Project/Apps/card_manager_web/duel-lab/runtime/multi-pair-search/shard-0/pair-280-69272449-78114463.checkpoint.json",
         "sha256": "eb84eef6b352f6b6cf46473c9b1f516557ffaee51ade2b5ebfdbd71ac965a8f8"
       },
       {
         "pairIndex": 288,
-        "path": "C:/Project/card_manager_web/duel-lab/runtime/multi-pair-search/shard-0/pair-288-72656408-75500286.checkpoint.json",
+        "path": "C:/Project/Apps/card_manager_web/duel-lab/runtime/multi-pair-search/shard-0/pair-288-72656408-75500286.checkpoint.json",
         "sha256": "10a926bfd1c2f2abe5aecaf51b65906af9adedd630b29bb8cdd78c0eba70afb0"
       },
       {
         "pairIndex": 296,
-        "path": "C:/Project/card_manager_web/duel-lab/runtime/multi-pair-search/shard-0/pair-296-73628505-75500286.checkpoint.json",
+        "path": "C:/Project/Apps/card_manager_web/duel-lab/runtime/multi-pair-search/shard-0/pair-296-73628505-75500286.checkpoint.json",
         "sha256": "94fbcf3ded51e27dbde4f4e39a183e3c3c6a82e194ce8e66dd0e4896e70844f7"
       },
       {
         "pairIndex": 304,
-        "path": "C:/Project/card_manager_web/duel-lab/runtime/multi-pair-search/shard-0/pair-304-74652966-78114463.checkpoint.json",
+        "path": "C:/Project/Apps/card_manager_web/duel-lab/runtime/multi-pair-search/shard-0/pair-304-74652966-78114463.checkpoint.json",
         "sha256": "45351a5aab17ea11003d2ffd42c31feafc9cc5a7c2c05aa3d179515e21a19f19"
       },
       {
         "pairIndex": 312,
-        "path": "C:/Project/card_manager_web/duel-lab/runtime/multi-pair-search/shard-0/pair-312-75500286-91800273.checkpoint.json",
+        "path": "C:/Project/Apps/card_manager_web/duel-lab/runtime/multi-pair-search/shard-0/pair-312-75500286-91800273.checkpoint.json",
         "sha256": "e216731424007ca82861852ae62bdd2fc1971f7f25344290997f2545274fccf0"
       },
       {
         "pairIndex": 320,
-        "path": "C:/Project/card_manager_web/duel-lab/runtime/multi-pair-search/shard-0/pair-320-78114463-96676583.checkpoint.json",
+        "path": "C:/Project/Apps/card_manager_web/duel-lab/runtime/multi-pair-search/shard-0/pair-320-78114463-96676583.checkpoint.json",
         "sha256": "3cbefef149e61ed3d3552b8330c46aef39d5ff23e11fc59d0695136d8b95cc51"
       },
       {
         "pairIndex": 328,
-        "path": "C:/Project/card_manager_web/duel-lab/runtime/multi-pair-search/shard-0/pair-328-91800273-96676583.checkpoint.json",
+        "path": "C:/Project/Apps/card_manager_web/duel-lab/runtime/multi-pair-search/shard-0/pair-328-91800273-96676583.checkpoint.json",
         "sha256": "ad24713fd19dbdbc6a7c6486bab33f1c036ce9279a72f81bd39849292ac98908"
       }
     ]

@@ -35,7 +35,7 @@
 ## 再開
 
 ```powershell
-cd C:\Project\card_manager_web\duel-lab
+cd C:\Project\Apps\card_manager_web\duel-lab
 $env:CYBERSE_MAX_NODES='2000'
 $env:CYBERSE_MAX_MS='30000'
 $env:CYBERSE_MAX_DEPTH='100'

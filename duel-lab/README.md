@@ -32,7 +32,7 @@ MDPro3のカード全体（枠・属性・レベル・効果欄）と対戦画�
 Node.js 24とPython 3.12以降を使う。Pythonにはrequestsが必要。
 
 ```powershell
-cd C:\Project\card_manager_web\duel-lab
+cd C:\Project\Apps\card_manager_web\duel-lab
 npm ci
 & 'C:\Users\tofu\.local\bin\python.exe' scripts/setup.py
 npm test

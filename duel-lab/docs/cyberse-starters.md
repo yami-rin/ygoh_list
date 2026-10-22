@@ -59,7 +59,7 @@
 実行コマンド:
 
 ```powershell
-cd C:\Project\card_manager_web\duel-lab
+cd C:\Project\Apps\card_manager_web\duel-lab
 node scripts/research-cyberse-starters.mjs
 ```
 

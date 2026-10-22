@@ -166,7 +166,7 @@ function save(){
     lines.push(`- ${cards[s.hand[0]].name}: 境界 ${JSON.stringify(s.frontierReasons)}、直近の上限 ${JSON.stringify(s.bounds)}、枝刈り ${JSON.stringify(s.pruning)}`);
   }
   lines.push('','全入力列と未探索prefixは `runtime/search-cyberse/` のcheckpointへ保存し、追跡JSONはパス・SHA-256・件数・代表ルートを持つ。代表ルートの表示グループ化は探索の枝刈りではなく、元の終端とfrontierは全件残す。合法な候補を実コアに入力し、拒否された入力とエラーを区別する。局面の見た目だけによる探索マージや、戦略的に弱いという理由の枝刈りは行わない。ドローが発生した場合は探索境界として保持し、ランダムな全ドロー結果を調べたとは扱わない。',
-    '', '## 再開','', '```powershell','cd C:\\Project\\card_manager_web\\duel-lab',"$env:CYBERSE_MAX_NODES='2000'","$env:CYBERSE_MAX_MS='30000'","$env:CYBERSE_MAX_DEPTH='100'",'node scripts/exhaustive-cyberse.mjs --resume','```','',
+    '', '## 再開','', '```powershell','cd C:\\Project\\Apps\\card_manager_web\\duel-lab',"$env:CYBERSE_MAX_NODES='2000'","$env:CYBERSE_MAX_MS='30000'","$env:CYBERSE_MAX_DEPTH='100'",'node scripts/exhaustive-cyberse.mjs --resume','```','',
     '`CYBERSE_STARTER` に担当カードのパスコードを設定するとその1種類だけを再開する。`--probe` は候補確認だけを行う。Astra CLIは起動しない。検索器は `scripts/search-kernel.mjs`、再生は `scripts/route-harness.mjs` を使う。');
   fs.writeFileSync(new URL('../docs/exhaustive-cyberse.md',import.meta.url),lines.join('\n')+'\n');
 }

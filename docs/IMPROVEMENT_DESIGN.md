@@ -1,6 +1,6 @@
 # card_manager_web 改善設計書
 
-対象リポジトリ: `C:\Project\card_manager_web`
+対象リポジトリ: `C:\Project\Apps\card_manager_web`
 
 調査基準日: 2026-08-09（Windows 11 / PowerShell / Node.js v22.18.0）
 

@@ -62,7 +62,7 @@ v5は最初の監査済み取消しを11入力目で検出し、その同じ循�
 
 ## 再開手順
 
-作業ディレクトリは `C:\Project\card_manager_web\duel-lab`。元shardが停止していることを確認し、未使用の移行先を指定する。移行は元と移行先をlockし、元の検索履歴と候補位置を保持したコピーを作る。
+作業ディレクトリは `C:\Project\Apps\card_manager_web\duel-lab`。元shardが停止していることを確認し、未使用の移行先を指定する。移行は元と移行先をlockし、元の検索履歴と候補位置を保持したコピーを作る。
 
 ```powershell
 node scripts/search-multi-pairs-set.mjs --import-legacy --shard 0 --pair-indices 288 --legacy-root runtime/multi-pair-search-tribute --output-root runtime/multi-pair-search-set
