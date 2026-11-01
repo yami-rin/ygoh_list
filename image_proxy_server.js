@@ -9,6 +9,18 @@ const path = require('path');
 const app = express();
 const PORT = process.env.PORT || 3000;
 
+// 公式DBのカード名は M&forall;LICE のように文字参照を含むので、JSON へ渡す前に戻す
+const NAMED_ENTITIES = { amp: '&', lt: '<', gt: '>', quot: '"', apos: "'", nbsp: ' ', forall: '∀' };
+function decodeHtmlEntities(text) {
+    return text.replace(/&(#x[0-9a-f]+|#\d+|[a-z]+);/gi, (whole, code) => {
+        if (code[0] === '#') {
+            const value = code[1].toLowerCase() === 'x' ? parseInt(code.slice(2), 16) : parseInt(code.slice(1), 10);
+            return Number.isFinite(value) ? String.fromCodePoint(value) : whole;
+        }
+        return NAMED_ENTITIES[code.toLowerCase()] ?? whole;
+    });
+}
+
 // Data directory for user data storage
 const DATA_DIR = path.join(__dirname, 'user_data');
 if (!fs.existsSync(DATA_DIR)) {
@@ -170,7 +182,8 @@ app.get('/card-detail', async (req, res) => {
 
         // Extract reprints
         const reprints = [];
-        const reprintPattern = /<div class="t_row\s*">[\s\S]*?<div class="card_number">([\s\S]*?)<\/div>[\s\S]*?<div class="icon rarity">[\s\S]*?<p>([\s\S]*?)<\/p>[\s\S]*?<\/div>/g;
+        // 行のクラスは 2026-11 時点で "t_row  pack_iid_3" のように追加クラスが付く
+        const reprintPattern = /<div class="t_row\b[^"]*">[\s\S]*?<div class="card_number">([\s\S]*?)<\/div>[\s\S]*?<div class="icon rarity">[\s\S]*?<p>([\s\S]*?)<\/p>[\s\S]*?<\/div>/g;
 
         let reprintMatch;
         while ((reprintMatch = reprintPattern.exec(html)) !== null) {
@@ -265,7 +278,7 @@ app.get('/card-list', async (req, res) => {
 
             cards.push({
                 id: cardId,
-                name: rawName,
+                name: decodeHtmlEntities(rawName),
                 rarities: rarities
             });
         }
