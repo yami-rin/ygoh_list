@@ -7,10 +7,12 @@ class CardManagerAPI {
     constructor(baseUrl) {
         this.baseUrl = baseUrl.replace(/\/$/, '');
         this.token = null;
+        this.user = null;
     }
 
     /** Set auth token from Firebase user. Call after onAuthStateChanged. */
     async setAuth(firebaseUser) {
+        this.user = firebaseUser || null;
         if (firebaseUser) {
             this.token = await firebaseUser.getIdToken();
         } else {
@@ -25,16 +27,24 @@ class CardManagerAPI {
         }
     }
 
-    async _fetch(path, options = {}) {
+    async _fetch(path, options = {}, retried = false) {
         const url = `${this.baseUrl}${path}`;
         const headers = {
             'Content-Type': 'application/json',
             ...options.headers,
         };
+        // IDトークンは1時間で切れる。毎回SDKから取り直す（期限が近ければSDKが更新する）
+        if (this.user && !retried) {
+            this.token = await this.user.getIdToken().catch(() => this.token);
+        }
         if (this.token) {
             headers['Authorization'] = `Bearer ${this.token}`;
         }
         const response = await fetch(url, { ...options, headers });
+        if (response.status === 401 && this.user && !retried) {
+            this.token = await this.user.getIdToken(true);
+            return this._fetch(path, options, true);
+        }
         if (!response.ok) {
             const errorData = await response.json().catch(() => ({}));
             const err = new Error(errorData.error || `API error: ${response.status}`);
