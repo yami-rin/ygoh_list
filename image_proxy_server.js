@@ -236,7 +236,8 @@ app.get('/card-list', async (req, res) => {
 
         const cards = [];
         // Match t_row divs allowing additional classes (t_rid_X) after "open"
-        const cardPattern = /<div class="t_row c_normal open([^"]*)">([\s\S]*?)<input type="hidden" class="link_value" value="\/yugiohdb\/card_search\.action\?ope=2&cid=(\d+)">/g;
+        // link_value は 2026-11 時点で cid の後に &iid=1 などが付く
+        const cardPattern = /<div class="t_row c_normal open([^"]*)">([\s\S]*?)<input type="hidden" class="link_value" value="\/yugiohdb\/card_search\.action\?ope=2&cid=(\d+)(?:&[^"]*)?">/g;
 
         let match;
         while ((match = cardPattern.exec(html)) !== null) {
