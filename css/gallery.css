@@ -2209,8 +2209,18 @@
            gallery 固有の共通テーマ接続層
            トークン・共通部品は theme/components/page-shell.css を正本とする。
            ============================================================ */
+        body {
+            background-color: var(--ygo-bg);
+        }
         .navbar-custom {
+            background: color-mix(in srgb, var(--ygo-surface) 96%, transparent);
             transition: box-shadow 0.3s ease;
+        }
+        [data-bs-theme="dark"] .card-image-container {
+            background: linear-gradient(135deg, #262d3a 0%, #161a22 100%);
+        }
+        [data-bs-theme="dark"] .card-image-placeholder {
+            color: var(--ygo-text-muted);
         }
         .navbar-custom.scrolled { box-shadow: var(--ygo-shadow-md); }
         .navbar-custom .nav-link-custom { color: var(--ygo-text); }

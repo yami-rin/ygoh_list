@@ -1,4 +1,5 @@
 // ==================== PACK OPENING SYSTEM ====================
+import { loadRarityEffectSettings } from '../shared/rarity-effects.js';
 
 export const createPackOpeningSystem = (deps) => {
     
@@ -10,10 +11,7 @@ export const createPackOpeningSystem = (deps) => {
     // → イラストフレームのみに演出が表示される
     const FX_WATERMARK = { '20th': '20th', '25th': '25th' };
     
-    let rarityEffectSettings = {};
-    try {
-        rarityEffectSettings = JSON.parse(localStorage.getItem('rarityEffectSettings') || '{}');
-    } catch { rarityEffectSettings = {}; }
+    const rarityEffectSettings = loadRarityEffectSettings();
     
     function buildEffectHtml(rarity) {
         const effects = (rarityEffectSettings[rarity] || []).filter(e => e !== 'normal');
