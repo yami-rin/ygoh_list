@@ -6,6 +6,20 @@ export const createDeckSystem = (deps) => {
     const deckListPanel = document.getElementById('deckListPanel');
     let draggedDeckCard = null;
 
+    // 型番・レアリティを持たずに保存されたデッキ（外部から作成した等）は、所持・ウィッシュリストの同じカードから補う
+    const fillMissingCardMeta = (deck) => {
+        if (!deck) return;
+        const sources = new Map([...deps.getWishlistCards(), ...deps.getCollectionCards()].map(c => [c.id, c.data || {}]));
+        for (const key of ['mainDeck', 'extraDeck', 'sideDeck']) {
+            for (const card of deck[key] || []) {
+                const source = sources.get(card.cardId);
+                if (!source) continue;
+                if (!card.code) card.code = source['型番'] || '';
+                if (!card.rarity) card.rarity = source['レアリティ'] || '';
+            }
+        }
+    };
+
 
     // Count card usage across all deps.getDecks()
     const getCardUsageInDecks = (cardId) => {
@@ -280,6 +294,7 @@ export const createDeckSystem = (deps) => {
     // Open deck builder panel
     const openDeckBuilder = async (deck = null) => {
         currentDeck = deck || { mainDeck: [], extraDeck: [], sideDeck: [] };
+        fillMissingCardMeta(currentDeck);
 
         document.getElementById('deckName').value = currentDeck.name || '';
         document.getElementById('deckMemo').value = currentDeck.memo || '';
@@ -395,6 +410,7 @@ export const createDeckSystem = (deps) => {
         if (!deck) return;
 
         currentViewingDeck = deck;
+        fillMissingCardMeta(deck);
 
         // Set deck name
         document.getElementById('viewDeckName').textContent = deck.name || '無題のデッキ';
