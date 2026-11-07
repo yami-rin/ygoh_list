@@ -3,7 +3,7 @@ import fs from 'node:fs';
 import path from 'node:path';
 import crypto from 'node:crypto';
 import {pathToFileURL} from 'node:url';
-import {Astra} from './astra.mjs';
+import {Astra,MODEL_LABEL} from './astra.mjs';
 import {ROOT} from './cards.mjs';
 import {compactNativePayload} from './native-payload.mjs';
 import {loadOpeningTemplates,NativeOpeningPolicy} from './opening-policy.mjs';
@@ -58,7 +58,7 @@ await new Promise((resolve,reject)=>{server.once('error',reject);server.listen(p
   boundPort=server.address().port;
   try{fs.writeFileSync(configPath,JSON.stringify({url:`http://127.0.0.1:${boundPort}/choose`,token}),{flag:port===8788?'w':'wx'});}
   catch(error){server.close();reject(error);return;}
-  console.log(`MDPro3 Astra bridge ready at 127.0.0.1:${boundPort}`);
+  console.log(`MDPro3 Astra bridge ready at 127.0.0.1:${boundPort} (${MODEL_LABEL})`);
   resolve();
 });});
 function stop(){astra.stop();server.close();if(fs.existsSync(configPath)&&JSON.parse(fs.readFileSync(configPath)).token===token)fs.unlinkSync(configPath);}

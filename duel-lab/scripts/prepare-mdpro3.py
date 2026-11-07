@@ -57,16 +57,18 @@ if '!Astra OCG 2026.07' in original:
     original = original[original.index('\n!') + 1:]
 lf.write_text('\n'.join(ban) + '\n\n' + original, encoding='utf-8')
 
-bot = '''!Astra — GPT-6
+bot = '''!Astra — GPT-6 / Opus 5.5
 Name=Astra Deck=Astra Dialog=Ghoul.JP Chat=False
-GPT-6 Astraが盤面と合法な選択肢を見て考えます。Codex接続が必要です。
+起動したランチャーのモデル（GPT-6 Astra / Claude Opus 5.5）が盤面と合法な選択肢を見て考えます。
 SELECT_DECKFILE SUPPORT_MASTER_RULE_2020
 
 '''
 bot_file = source / 'Data/locales/ja-JP/bot.conf'
 text = bot_file.read_text(encoding='utf-8-sig')
-if 'Name=Astra Deck=Astra' not in text:
-    bot_file.write_text(bot + text, encoding='utf-8')
+if 'Name=Astra Deck=Astra' in text:
+    # Replace only our generated first entry, retaining the upstream bots.
+    text = text[text.index('\n\n', text.index('Name=Astra Deck=Astra')) + 2:]
+bot_file.write_text(bot + text, encoding='utf-8')
 config = source / 'Data/config.conf'
 if not config.exists():
     config.write_text('Language->ja-JP\nCardLanguage->ja-JP\nDuelPlayerName0->YOU\nDeckInUse->MALICE_202607\nBackground->1\n', encoding='utf-8')

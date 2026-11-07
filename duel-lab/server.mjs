@@ -4,7 +4,7 @@ import path from 'node:path';
 import crypto from 'node:crypto';
 import {ROOT,DATA,cards,cardInfo,parseDeck} from './cards.mjs';
 import {Duel} from './engine.mjs';
-import {Astra,MODEL} from './astra.mjs';
+import {Astra,MODEL,MODEL_LABEL} from './astra.mjs';
 
 const port=Number(process.env.DUEL_PORT || 8787);
 const limits=JSON.parse(fs.readFileSync(path.join(ROOT,'limits-202607.json'),'utf8'));
@@ -15,7 +15,7 @@ let imageManifest={};
 function refreshImages(){try{imageManifest=JSON.parse(fs.readFileSync(path.join(DATA,'images.json'),'utf8'));}catch{}}
 refreshImages();
 const serialize=value=>JSON.stringify(value,(_,v)=>typeof v==='bigint'?v.toString():v);
-const state=()=>({...(duel?duel.snapshot(0):{status:'setup'}),ai:{model:MODEL,status:aiState,error:aiError,calls:astra.calls,lastMs:astra.lastMs},imageCount:Object.keys(imageManifest).length});
+const state=()=>({...(duel?duel.snapshot(0):{status:'setup'}),ai:{model:MODEL,label:MODEL_LABEL,status:aiState,error:aiError,calls:astra.calls,lastMs:astra.lastMs},imageCount:Object.keys(imageManifest).length});
 async function runAI() {
   if(!duel||aiState==='thinking'||aiState==='paused'||duel.status!=='playing'||duel.snapshot().waitingFor!==1)return;
   const current=duel,run=epoch;aiState='thinking';aiError=null;
@@ -60,7 +60,7 @@ export const server=http.createServer(async(req,res)=>{
       if(u.pathname==='/api/surrender'){epoch++;astra.stop();duel.surrender(0);aiState='idle';send(res,200,state());return;}
       return send(res,404,{error:'Unknown action'});
     }
-    if(u.pathname==='/api/config'){refreshImages();return send(res,200,{csrf,model:MODEL,preset:{main:preset.main.map(cardInfo),extra:preset.extra.map(cardInfo)},imageIds:Object.keys(imageManifest),regulation:'2026年7月1日適用'});}
+    if(u.pathname==='/api/config'){refreshImages();return send(res,200,{csrf,model:MODEL,modelLabel:MODEL_LABEL,preset:{main:preset.main.map(cardInfo),extra:preset.extra.map(cardInfo)},imageIds:Object.keys(imageManifest),regulation:'2026年7月1日適用'});}
     if(u.pathname==='/api/state')return send(res,200,state());
     if(u.pathname==='/api/log')return send(res,200,{model:MODEL,regulation:'202607',...state(),exportedAt:new Date().toISOString()});
     if(u.pathname==='/api/cards'){const q=u.searchParams.get('q')||'';return send(res,200,Object.values(cards).filter(c=>!c.alias&&c.name.normalize('NFKC').toLowerCase().includes(q.normalize('NFKC').toLowerCase())).slice(0,50).map(cardInfo));}

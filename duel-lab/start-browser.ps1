@@ -13,7 +13,7 @@ $duelUrl = "http://127.0.0.1:$duelPort"
 $duelRunning = $false
 try {
     $duelHealth = Invoke-RestMethod "$duelUrl/api/config" -TimeoutSec 2
-    $duelRunning = $duelHealth.model -eq 'gpt-6-astra'
+    $duelRunning = $duelHealth.model -eq $(if ($env:ASTRA_MODEL) { $env:ASTRA_MODEL } else { 'gpt-6-astra' })
 } catch { }
 if (-not $duelRunning) {
     New-Item -ItemType Directory -Path runtime -Force | Out-Null

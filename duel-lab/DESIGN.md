@@ -1,7 +1,7 @@
 # Astra Duel Lab — 要件・設計
 
 ## 要件と構成
-人間と実際のGPT-6 Astraが、通常M∀LICEを使いOCGの自動処理で対戦する。
+人間と実際のAstra（GPT-6 Astra または Claude Opus 5.5）が、通常M∀LICEを使いOCGの自動処理で対戦する。
 メイン40〜60枚、EX15枚以下、2026年7月OCG禁止制限を適用する。
 MDPro3のUnityクライアントを使用し、立体フィールドと枠・属性・レベル・効果欄を含むカード全体を表示する。
 
@@ -12,7 +12,7 @@ MDPro3のUnityクライアントを使用し、立体フィールドと枠・属
                          ↕ AstraDecisionBridge
                   localhost:8788 / native-bridge.mjs
                          ↕ 構造化選択
-                  Codex CLI / gpt-6-astra
+                  Codex CLI / gpt-6-astra  または  Claude Code CLI / claude-opus-5-5（ASTRA_MODEL）
 ```
 
 召喚条件、素材、コスト、チェーン、効果、戦闘、LP、勝敗は既存エンジンが処理する。

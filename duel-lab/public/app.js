@@ -80,7 +80,7 @@ function applyState(next) {
   const changed=next.revision!==revision || next.status!==state?.status || next.ai?.status!==state?.ai?.status;
   state=next;
   $('ai-state').textContent=state.ai?.status==='thinking'?'THINKING':state.ai?.status==='paused'?'PAUSED':'CONNECTED';
-  $('connection').textContent=`GPT-6 Astra · ${state.ai?.calls||0} 回の判断${state.ai?.lastMs?' · 前回 '+Math.round(state.ai.lastMs/1000)+'秒':''}`;
+  $('connection').textContent=`${state.ai?.label||'Astra'} · ${state.ai?.calls||0} 回の判断${state.ai?.lastMs?' · 前回 '+Math.round(state.ai.lastMs/1000)+'秒':''}`;
   if(changed){if(revision!==next.revision)selected=[];revision=next.revision;renderBoard();renderActions();}
   const log=state.log||[];
   if(log.at(-1)?.id!==lastLog){lastLog=log.at(-1)?.id||0;$('log').innerHTML=log.map(e=>`<li class="${esc(e.event||'')}">${esc(e.text)}</li>`).join('');$('log').scrollTop=$('log').scrollHeight;$('log-count').textContent=lastLog;}

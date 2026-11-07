@@ -1,6 +1,6 @@
 # Astra Duel Lab
 
-実際のOCGルール処理で人間とGPT-6 Astraが対戦するローカルアプリ。
+実際のOCGルール処理で人間とAstra（GPT-6 Astra または Claude Opus 5.5）が対戦するローカルアプリ。
 要件と設計は[DESIGN.md](DESIGN.md)。カードマネージャー既存の手動シミュレーターとは別に起動する。
 
 展開精査の現在の目的は、相手ターンに実行可能で両立する妨害を複数構え、その数と質を高めること。[新しいゴールと評価基準](docs/OPENING_REVIEW_GOAL.md)・[最初の精査結果](docs/OPENING_REVIEW_INITIAL.md)を参照。旧カード点数の高さや合法な展開成功だけを、良い展開の根拠として扱わない。新基準の自動入力への接続は作業中。
@@ -8,7 +8,8 @@
 ## このPCで起動
 
 現在の対戦クライアントは **MDPro3版**。`start-native.cmd`をダブルクリックする。
-「AI対戦」→「Astra — GPT-6」→「PLAY」→ルームの「準備完了」「ゲーム開始」で進む。
+Claude Opus 5.5に考えさせる場合は`start-native-opus.cmd`を使う。
+「AI対戦」→「Astra — GPT-6 / Opus 5.5」→「PLAY」→ルームの「準備完了」「ゲーム開始」で進む。
 通常M∀LICEの40枚＋EX15枚を設定済み。デッキ編集はMDPro3のメニューを使う。
 終了すると、このランチャーが起動したAstra接続も終了する。
 二重起動はWindowsの名前付きMutexで拒否する。Astraの思考もネイティブ・ブラウザ版をまたいで1件に制限する（ローカル8789番を排他に使用）。
@@ -39,6 +40,8 @@ npm test
 powershell.exe -NoProfile -ExecutionPolicy Bypass -File build-native.ps1
 ```
 
+判断モデルは環境変数`ASTRA_MODEL`で選ぶ。既定は`gpt-6-astra`（同梱Codex CLI）、`claude-opus-5-5`はインストール済みのClaude Code CLI（`claude -p`、ツール・MCP・設定読込なし）を呼ぶ。`claude`がPATHにない場合は`DUEL_CLAUDE_BIN`にclaude.exeのパスを指定する。ブラウザ版も`ASTRA_MODEL`を設定してから`node server.mjs`を起動する。
+Claude Opus 5.5はユーザーのClaude Codeログインと利用枠を使う。
 Codexへのログインは同梱CLI（`node node_modules/@openai/codex/bin/codex.js login`）から可能。
 認証情報はアプリに保存しない。ユーザーのCodexログインを使う。通常は既存ログインで動作する。
 カード本文をカード番号ごとに一度だけ送り、戦略メモを120字以内に抑えて待ち時間を減らす。

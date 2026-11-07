@@ -5,7 +5,11 @@ import {spawn} from 'node:child_process';
 import {acquireInferenceLock} from './inference-lock.mjs';
 import {ROOT,cardInfo} from './cards.mjs';
 
-export const MODEL='gpt-6-astra';
+// ASTRA_MODEL selects the CLI: Codex for gpt-6-astra, Claude Code for claude-opus-5-5.
+export const MODELS={'gpt-6-astra':{label:'GPT-6 Astra',cli:'codex'},'claude-opus-5-5':{label:'Claude Opus 5.5',cli:'claude'}};
+export const MODEL=process.env.ASTRA_MODEL || 'gpt-6-astra';
+if(!MODELS[MODEL])throw new Error(`ASTRA_MODELは ${Object.keys(MODELS).join(' / ')} のどれかを指定してください`);
+export const MODEL_LABEL=MODELS[MODEL].label;
 const schema={type:'object',additionalProperties:false,properties:{action:{type:'integer'},selection:{type:'array',items:{type:'integer'}},counters:{type:'array',items:{type:'integer'}},cancel:{type:'boolean'},plan:{type:'string'}},required:['action','selection','counters','cancel','plan']};
 const instructions=`あなたは遊戯王OCGの対戦相手Astraです。実際に勝つために最善手を選んでください。
 あなたは画面のplayer 1（ASTRA）。player 0（YOU）が対戦相手です。stateのカードcontrollerはこの表記。
@@ -46,24 +50,40 @@ export class Astra {
     const payload={...input,previousPlan:this.plan};
     const dir=fs.mkdtempSync(path.join(os.tmpdir(),'astra-duel-'));
     const schemaFile=path.join(dir,'response.schema.json');fs.writeFileSync(schemaFile,JSON.stringify(schema));
-    const cli=process.env.DUEL_CODEX_JS || path.join(ROOT,'node_modules/@openai/codex/bin/codex.js');
-    if(!fs.existsSync(cli)){fs.rmSync(dir,{recursive:true,force:true});throw new Error('Codex CLIが見つかりません。DUEL_CODEX_JSにcodex.jsのパスを指定してください');}
-    const args=[cli,'exec','--ignore-user-config','--ephemeral','--skip-git-repo-check','--sandbox','read-only','--disable','shell_tool','--disable','skill_search','-c','web_search="disabled"','-c','model_reasoning_effort="low"','-m',MODEL,'--json','--output-schema',schemaFile,'-'];
+    const claude=MODELS[MODEL].cli==='claude';
+    let command,args,stdin;
+    if(claude) {
+      // Logged-in Claude Code CLI with every tool, MCP server and setting source disabled.
+      command=process.env.DUEL_CLAUDE_BIN || 'claude';
+      args=['-p','--model',MODEL,'--effort','low','--tools','','--strict-mcp-config','--setting-sources','','--no-session-persistence','--system-prompt',instructions,'--output-format','json','--json-schema',JSON.stringify(schema)];
+      stdin=JSON.stringify(payload);
+    } else {
+      const cli=process.env.DUEL_CODEX_JS || path.join(ROOT,'node_modules/@openai/codex/bin/codex.js');
+      if(!fs.existsSync(cli)){fs.rmSync(dir,{recursive:true,force:true});throw new Error('Codex CLIが見つかりません。DUEL_CODEX_JSにcodex.jsのパスを指定してください');}
+      command=process.execPath;
+      args=[cli,'exec','--ignore-user-config','--ephemeral','--skip-git-repo-check','--sandbox','read-only','--disable','shell_tool','--disable','skill_search','-c','web_search="disabled"','-c','model_reasoning_effort="low"','-m',MODEL,'--json','--output-schema',schemaFile,'-'];
+      stdin=instructions+'\n\n'+JSON.stringify(payload);
+    }
     const started=Date.now();this.calls++;
     try {
       const output=await new Promise((resolve,reject)=>{
-        const child=spawn(process.execPath,args,{cwd:dir,windowsHide:true,stdio:['pipe','pipe','pipe']});this.child=child;
+        const child=spawn(command,args,{cwd:dir,windowsHide:true,stdio:['pipe','pipe','pipe']});this.child=child;
         let out='',err='',failure;
         const timer=setTimeout(()=>{failure=new Error('Astraの応答が180秒以内に返りませんでした。再試行できます');this.stop();},180000);
         child.stdout.on('data',d=>{out+=d;if(out.length>2_000_000){failure=new Error('Astra応答が大きすぎます');this.stop();}});
         child.stderr.on('data',d=>{err=(err+d).slice(-4000);});
-        child.on('error',e=>{clearTimeout(timer);reject(e);});
-        child.on('close',code=>{clearTimeout(timer);this.child=null;if(failure)reject(failure);else if(code!==0)reject(new Error(`Astra接続に失敗しました（終了コード ${code}）。Codexのログイン・モデル利用枠を確認してください`));else resolve(out);});
+        child.on('error',e=>{clearTimeout(timer);reject(claude&&e.code==='ENOENT'?new Error('Claude Code CLIが見つかりません。DUEL_CLAUDE_BINにclaude.exeのパスを指定してください'):e);});
+        child.on('close',code=>{clearTimeout(timer);this.child=null;if(failure)reject(failure);else if(code!==0)reject(new Error(`Astra接続に失敗しました（終了コード ${code}）。${claude?'Claude Code':'Codex'}のログイン・モデル利用枠を確認してください`));else resolve(out);});
         child.stdin.on('error',e=>{failure=e;this.stop();});
-        child.stdin.end(instructions+'\n\n'+JSON.stringify(payload));
+        child.stdin.end(stdin);
       });
       let answer;
-      for(const line of output.split('\n')) {
+      if(claude) {
+        let result;try{result=JSON.parse(output);}catch{throw new Error('Astraから選択を受け取れませんでした');}
+        if(result.is_error)throw new Error(`Astra接続に失敗しました（${String(result.result||result.subtype||'不明なエラー').slice(0,200)}）`);
+        if(result.permission_denials?.length)throw new Error('Astraがゲーム以外のツールを要求したため停止しました');
+        answer=result.structured_output?JSON.stringify(result.structured_output):result.result;
+      } else for(const line of output.split('\n')) {
         let event;try{event=JSON.parse(line);}catch{continue;}
         if(event.type==='item.completed' && event.item?.type==='agent_message')answer=event.item.text;
         if(event.item && ['command_execution','mcp_tool_call','web_search'].includes(event.item.type))throw new Error('Astraがゲーム以外のツールを要求したため停止しました');
