@@ -41,7 +41,8 @@ powershell.exe -NoProfile -ExecutionPolicy Bypass -File build-native.ps1
 ```
 
 判断モデルは環境変数`ASTRA_MODEL`で選ぶ。既定は`gpt-6-astra`（同梱Codex CLI）、`claude-opus-5-5`はインストール済みのClaude Code CLI（`claude -p`、ツール・MCP・設定読込なし）を呼ぶ。`claude`がPATHにない場合は`DUEL_CLAUDE_BIN`にclaude.exeのパスを指定する。ブラウザ版も`ASTRA_MODEL`を設定してから`node server.mjs`を起動する。
-Claude Opus 5.5はユーザーのClaude Codeログインと利用枠を使う。
+Claude Opus 5.5はユーザーのClaude Codeログインと利用枠を使う。推論設定はmedium（GPT-6 Astraはlow）。
+指示文には主要な手札誘発14種（うらら・G・マルチャミー2種・ドロール・幽鬼うさぎ・屋敷わらし・霊王/聖王/霆王・調和ノ天救竜・泡影・ヴェーラー・朔夜しぐれ）の本文をカードDBから入れ、受けた場合の展開順と自分の誘発の使い所を指示している（`astra.mjs`の`HAND_TRAPS`）。
 Codexへのログインは同梱CLI（`node node_modules/@openai/codex/bin/codex.js login`）から可能。
 認証情報はアプリに保存しない。ユーザーのCodexログインを使う。通常は既存ログインで動作する。
 カード本文をカード番号ごとに一度だけ送り、戦略メモを120字以内に抑えて待ち時間を減らす。
