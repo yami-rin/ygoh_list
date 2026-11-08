@@ -47,9 +47,11 @@ def main():
     for theme in sorted(CUSTOM.glob('*.json')):
         count = build_cdb(theme, CLIENT / 'Expansions' / f'custom-{theme.stem}.cdb')
         print(f'{theme.name}: {count} cards')
-    scripts = sorted((CUSTOM / 'scripts').glob('c*.lua'))
+    # The scripts are written for EDOPro (Duel Lab); MDPro3 runs the YGOPro API, so prepend the compatibility block.
+    compat = (CUSTOM / 'scripts' / 'compat-mdpro3.lua').read_text(encoding='utf-8')
+    scripts = sorted((CUSTOM / 'scripts').glob('c[0-9]*.lua'))
     for lua in scripts:
-        shutil.copyfile(lua, CLIENT / 'script' / lua.name)
+        (CLIENT / 'script' / lua.name).write_text(compat + '\n' + lua.read_text(encoding='utf-8'), encoding='utf-8')
     arts = sorted((CUSTOM / 'art').glob('[0-9]*.png'))
     for art in arts:
         shutil.copyfile(art, art_dir / art.name)
