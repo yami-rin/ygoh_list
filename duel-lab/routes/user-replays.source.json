@@ -1,0 +1,3347 @@
+{
+ "schema": 1,
+ "deck": "presets/user-malice.json",
+ "note": "Board moves recorded on duel-simulator. Card ids are deck-image indexes; null = card not from the deck image (blank or token).",
+ "replays": [
+  {
+   "id": "G9pZztFA",
+   "url": "https://duel-simulator.miyauchidp.dev/replay/G9pZztFA",
+   "title": "WhiteRabbit１枚初動",
+   "hand": [],
+   "events": [
+    {
+     "code": 69272449,
+     "ref": "main-1-oz4Bym5a",
+     "from": {
+      "type": "deck",
+      "index": null
+     },
+     "to": {
+      "type": "monsterZone",
+      "index": 2
+     },
+     "faceDown": false,
+     "defense": false
+    },
+    {
+     "code": 57111661,
+     "ref": "main-35-x7MFrW3D",
+     "from": {
+      "type": "deck",
+      "index": null
+     },
+     "to": {
+      "type": "spellTrapZone",
+      "index": 3
+     },
+     "faceDown": false,
+     "defense": false
+    },
+    {
+     "code": 69272449,
+     "ref": "main-1-oz4Bym5a",
+     "from": {
+      "type": "monsterZone",
+      "index": 2
+     },
+     "to": {
+      "type": "banished",
+      "index": null
+     },
+     "faceDown": false,
+     "defense": false
+    },
+    {
+     "code": 32061192,
+     "ref": "main-8-aUolramV",
+     "from": {
+      "type": "deck",
+      "index": null
+     },
+     "to": {
+      "type": "monsterZone",
+      "index": 2
+     },
+     "faceDown": false,
+     "defense": false
+    },
+    {
+     "code": 57111661,
+     "ref": "main-35-x7MFrW3D",
+     "from": {
+      "type": "spellTrapZone",
+      "index": 3
+     },
+     "to": {
+      "type": "graveyard",
+      "index": null
+     },
+     "faceDown": false,
+     "defense": false
+    },
+    {
+     "code": 69272449,
+     "ref": "main-1-oz4Bym5a",
+     "from": {
+      "type": "banished",
+      "index": null
+     },
+     "to": {
+      "type": "monsterZone",
+      "index": 3
+     },
+     "faceDown": false,
+     "defense": false
+    },
+    {
+     "code": 69272449,
+     "ref": "main-1-oz4Bym5a",
+     "from": {
+      "type": "monsterZone",
+      "index": 3
+     },
+     "to": {
+      "type": "graveyard",
+      "index": null
+     },
+     "faceDown": false,
+     "defense": false
+    },
+    {
+     "code": 41999284,
+     "ref": "extra-2-q2CVkFo5",
+     "from": {
+      "type": "extraDeck",
+      "index": null
+     },
+     "to": {
+      "type": "extraMonsterZone",
+      "index": 1
+     },
+     "faceDown": false,
+     "defense": false
+    },
+    {
+     "code": 41999284,
+     "ref": "extra-2-q2CVkFo5",
+     "from": {
+      "type": "extraMonsterZone",
+      "index": 1
+     },
+     "to": {
+      "type": "graveyard",
+      "index": null
+     },
+     "faceDown": false,
+     "defense": false
+    },
+    {
+     "code": 32061192,
+     "ref": "main-8-aUolramV",
+     "from": {
+      "type": "monsterZone",
+      "index": 2
+     },
+     "to": {
+      "type": "graveyard",
+      "index": null
+     },
+     "faceDown": false,
+     "defense": false
+    },
+    {
+     "code": 29301450,
+     "ref": "extra-5-hM-XR2ZN",
+     "from": {
+      "type": "extraDeck",
+      "index": null
+     },
+     "to": {
+      "type": "extraMonsterZone",
+      "index": 1
+     },
+     "faceDown": false,
+     "defense": false
+    },
+    {
+     "code": 32061192,
+     "ref": "main-8-aUolramV",
+     "from": {
+      "type": "graveyard",
+      "index": null
+     },
+     "to": {
+      "type": "banished",
+      "index": 0
+     },
+     "faceDown": false,
+     "defense": false
+    },
+    {
+     "code": 32061192,
+     "ref": "main-8-aUolramV",
+     "from": {
+      "type": "banished",
+      "index": null
+     },
+     "to": {
+      "type": "monsterZone",
+      "index": 2
+     },
+     "faceDown": false,
+     "defense": false
+    },
+    {
+     "code": 96676583,
+     "ref": "main-4-lsz6X8-o",
+     "from": {
+      "type": "deck",
+      "index": null
+     },
+     "to": {
+      "type": "monsterZone",
+      "index": 1
+     },
+     "faceDown": false,
+     "defense": false
+    },
+    {
+     "code": 29301450,
+     "ref": "extra-5-hM-XR2ZN",
+     "from": {
+      "type": "extraMonsterZone",
+      "index": 1
+     },
+     "to": {
+      "type": "graveyard",
+      "index": null
+     },
+     "faceDown": false,
+     "defense": false
+    },
+    {
+     "code": 32061192,
+     "ref": "main-8-aUolramV",
+     "from": {
+      "type": "monsterZone",
+      "index": 2
+     },
+     "to": {
+      "type": "graveyard",
+      "index": null
+     },
+     "faceDown": false,
+     "defense": false
+    },
+    {
+     "code": 95454996,
+     "ref": "extra-7-fqiI7YtG",
+     "from": {
+      "type": "extraDeck",
+      "index": null
+     },
+     "to": {
+      "type": "extraMonsterZone",
+      "index": 1
+     },
+     "faceDown": false,
+     "defense": false
+    },
+    {
+     "code": 94722358,
+     "ref": "main-33-0gY1vNuo",
+     "from": {
+      "type": "deck",
+      "index": null
+     },
+     "to": {
+      "type": "spellTrapZone",
+      "index": 4
+     },
+     "faceDown": false,
+     "defense": false
+    },
+    {
+     "code": 95454996,
+     "ref": "extra-7-fqiI7YtG",
+     "from": {
+      "type": "extraMonsterZone",
+      "index": 1
+     },
+     "to": {
+      "type": "banished",
+      "index": null
+     },
+     "faceDown": false,
+     "defense": false
+    },
+    {
+     "code": 20938824,
+     "ref": "main-7-WbyEAh8S",
+     "from": {
+      "type": "deck",
+      "index": null
+     },
+     "to": {
+      "type": "hand",
+      "index": 0
+     },
+     "faceDown": false,
+     "defense": false
+    },
+    {
+     "code": 94722358,
+     "ref": "main-33-0gY1vNuo",
+     "from": {
+      "type": "spellTrapZone",
+      "index": 4
+     },
+     "to": {
+      "type": "graveyard",
+      "index": null
+     },
+     "faceDown": false,
+     "defense": false
+    },
+    {
+     "code": 95454996,
+     "ref": "extra-7-fqiI7YtG",
+     "from": {
+      "type": "banished",
+      "index": null
+     },
+     "to": {
+      "type": "monsterZone",
+      "index": 2
+     },
+     "faceDown": false,
+     "defense": false
+    },
+    {
+     "code": 10045474,
+     "ref": "main-36-nXNan76A",
+     "from": {
+      "type": "deck",
+      "index": null
+     },
+     "to": {
+      "type": "hand",
+      "index": 1
+     },
+     "faceDown": false,
+     "defense": false
+    },
+    {
+     "code": 95454996,
+     "ref": "extra-7-fqiI7YtG",
+     "from": {
+      "type": "monsterZone",
+      "index": 2
+     },
+     "to": {
+      "type": "graveyard",
+      "index": null
+     },
+     "faceDown": false,
+     "defense": false
+    },
+    {
+     "code": 96676583,
+     "ref": "main-4-lsz6X8-o",
+     "from": {
+      "type": "monsterZone",
+      "index": 1
+     },
+     "to": {
+      "type": "graveyard",
+      "index": null
+     },
+     "faceDown": false,
+     "defense": false
+    },
+    {
+     "code": 52698008,
+     "ref": "extra-4-1eitQB9A",
+     "from": {
+      "type": "extraDeck",
+      "index": null
+     },
+     "to": {
+      "type": "extraMonsterZone",
+      "index": 1
+     },
+     "faceDown": false,
+     "defense": false
+    },
+    {
+     "code": 96676583,
+     "ref": "main-4-lsz6X8-o",
+     "from": {
+      "type": "graveyard",
+      "index": null
+     },
+     "to": {
+      "type": "banished",
+      "index": 0
+     },
+     "faceDown": false,
+     "defense": false
+    },
+    {
+     "code": 20938824,
+     "ref": "main-7-WbyEAh8S",
+     "from": {
+      "type": "hand",
+      "index": null
+     },
+     "to": {
+      "type": "monsterZone",
+      "index": 4
+     },
+     "faceDown": false,
+     "defense": false
+    },
+    {
+     "code": 20938824,
+     "ref": "main-7-WbyEAh8S",
+     "from": {
+      "type": "monsterZone",
+      "index": 4
+     },
+     "to": {
+      "type": "graveyard",
+      "index": null
+     },
+     "faceDown": false,
+     "defense": false
+    },
+    {
+     "code": 30342076,
+     "ref": "extra-3-DUxvHAqF",
+     "from": {
+      "type": "extraDeck",
+      "index": null
+     },
+     "to": {
+      "type": "monsterZone",
+      "index": 4
+     },
+     "faceDown": false,
+     "defense": false
+    },
+    {
+     "code": 20938824,
+     "ref": "main-7-WbyEAh8S",
+     "from": {
+      "type": "graveyard",
+      "index": null
+     },
+     "to": {
+      "type": "banished",
+      "index": 0
+     },
+     "faceDown": false,
+     "defense": false
+    },
+    {
+     "code": 30118811,
+     "ref": "main-16-nzguumF1",
+     "from": {
+      "type": "deck",
+      "index": null
+     },
+     "to": {
+      "type": "hand",
+      "index": 1
+     },
+     "faceDown": false,
+     "defense": false
+    },
+    {
+     "code": 20938824,
+     "ref": "main-7-WbyEAh8S",
+     "from": {
+      "type": "banished",
+      "index": null
+     },
+     "to": {
+      "type": "hand",
+      "index": 2
+     },
+     "faceDown": false,
+     "defense": false
+    },
+    {
+     "code": 30118811,
+     "ref": "main-16-nzguumF1",
+     "from": {
+      "type": "hand",
+      "index": null
+     },
+     "to": {
+      "type": "monsterZone",
+      "index": 2
+     },
+     "faceDown": false,
+     "defense": false
+    },
+    {
+     "code": 3723262,
+     "ref": "main-18-Cov6K4rH",
+     "from": {
+      "type": "deck",
+      "index": null
+     },
+     "to": {
+      "type": "hand",
+      "index": 2
+     },
+     "faceDown": false,
+     "defense": false
+    },
+    {
+     "code": 10045474,
+     "ref": "main-36-nXNan76A",
+     "from": {
+      "type": "hand",
+      "index": null
+     },
+     "to": {
+      "type": "graveyard",
+      "index": null
+     },
+     "faceDown": false,
+     "defense": false
+    },
+    {
+     "code": 3723262,
+     "ref": "main-18-Cov6K4rH",
+     "from": {
+      "type": "hand",
+      "index": null
+     },
+     "to": {
+      "type": "monsterZone",
+      "index": 0
+     },
+     "faceDown": false,
+     "defense": false
+    },
+    {
+     "code": 32061192,
+     "ref": "main-8-aUolramV",
+     "from": {
+      "type": "graveyard",
+      "index": null
+     },
+     "to": {
+      "type": "monsterZone",
+      "index": 1
+     },
+     "faceDown": false,
+     "defense": false
+    },
+    {
+     "code": 30118811,
+     "ref": "main-16-nzguumF1",
+     "from": {
+      "type": "monsterZone",
+      "index": 2
+     },
+     "to": {
+      "type": "graveyard",
+      "index": null
+     },
+     "faceDown": false,
+     "defense": false
+    },
+    {
+     "code": 32061192,
+     "ref": "main-8-aUolramV",
+     "from": {
+      "type": "monsterZone",
+      "index": 1
+     },
+     "to": {
+      "type": "graveyard",
+      "index": null
+     },
+     "faceDown": false,
+     "defense": false
+    },
+    {
+     "code": 30342076,
+     "ref": "extra-3-DUxvHAqF",
+     "from": {
+      "type": "monsterZone",
+      "index": 4
+     },
+     "to": {
+      "type": "graveyard",
+      "index": null
+     },
+     "faceDown": false,
+     "defense": false
+    },
+    {
+     "code": 21848500,
+     "ref": "extra-8-csKXDuLf",
+     "from": {
+      "type": "extraDeck",
+      "index": null
+     },
+     "to": {
+      "type": "monsterZone",
+      "index": 3
+     },
+     "faceDown": false,
+     "defense": false
+    },
+    {
+     "code": 30342076,
+     "ref": "extra-3-DUxvHAqF",
+     "from": {
+      "type": "graveyard",
+      "index": null
+     },
+     "to": {
+      "type": "monsterZone",
+      "index": 4
+     },
+     "faceDown": false,
+     "defense": false
+    },
+    {
+     "code": 3723262,
+     "ref": "main-18-Cov6K4rH",
+     "from": {
+      "type": "monsterZone",
+      "index": 0
+     },
+     "to": {
+      "type": "graveyard",
+      "index": null
+     },
+     "faceDown": false,
+     "defense": false
+    },
+    {
+     "code": 21848500,
+     "ref": "extra-8-csKXDuLf",
+     "from": {
+      "type": "monsterZone",
+      "index": 3
+     },
+     "to": {
+      "type": "graveyard",
+      "index": null
+     },
+     "faceDown": false,
+     "defense": false
+    },
+    {
+     "code": 30342076,
+     "ref": "extra-3-DUxvHAqF",
+     "from": {
+      "type": "monsterZone",
+      "index": 4
+     },
+     "to": {
+      "type": "banished",
+      "index": null
+     },
+     "faceDown": false,
+     "defense": false
+    },
+    {
+     "code": 64211118,
+     "ref": "extra-13-rIzdWiHi",
+     "from": {
+      "type": "extraDeck",
+      "index": null
+     },
+     "to": {
+      "type": "monsterZone",
+      "index": 4
+     },
+     "faceDown": false,
+     "defense": false
+    },
+    {
+     "code": 74652966,
+     "ref": "main-24-Yhao-Puy",
+     "from": {
+      "type": "deck",
+      "index": null
+     },
+     "to": {
+      "type": "graveyard",
+      "index": null
+     },
+     "faceDown": false,
+     "defense": false
+    },
+    {
+     "code": 92422871,
+     "ref": "extra-14-w8JKhRL9",
+     "from": {
+      "type": "extraDeck",
+      "index": null
+     },
+     "to": {
+      "type": "graveyard",
+      "index": null
+     },
+     "faceDown": false,
+     "defense": false
+    }
+   ]
+  },
+  {
+   "id": "cEErE6ce",
+   "url": "https://duel-simulator.miyauchidp.dev/replay/cEErE6ce",
+   "title": "Dormouse１枚初動",
+   "hand": [],
+   "events": [
+    {
+     "code": 32061192,
+     "ref": "main-8-aUolramV",
+     "from": {
+      "type": "deck",
+      "index": null
+     },
+     "to": {
+      "type": "monsterZone",
+      "index": 2
+     },
+     "faceDown": false,
+     "defense": false
+    },
+    {
+     "code": 69272449,
+     "ref": "main-1-oz4Bym5a",
+     "from": {
+      "type": "deck",
+      "index": null
+     },
+     "to": {
+      "type": "banished",
+      "index": null
+     },
+     "faceDown": false,
+     "defense": false
+    },
+    {
+     "code": 69272449,
+     "ref": "main-1-oz4Bym5a",
+     "from": {
+      "type": "banished",
+      "index": null
+     },
+     "to": {
+      "type": "monsterZone",
+      "index": 3
+     },
+     "faceDown": false,
+     "defense": false
+    },
+    {
+     "code": 57111661,
+     "ref": "main-35-x7MFrW3D",
+     "from": {
+      "type": "deck",
+      "index": null
+     },
+     "to": {
+      "type": "spellTrapZone",
+      "index": 4
+     },
+     "faceDown": false,
+     "defense": false
+    },
+    {
+     "code": 32061192,
+     "ref": "main-8-aUolramV",
+     "from": {
+      "type": "monsterZone",
+      "index": 2
+     },
+     "to": {
+      "type": "banished",
+      "index": null
+     },
+     "faceDown": false,
+     "defense": false
+    },
+    {
+     "code": 96676583,
+     "ref": "main-4-lsz6X8-o",
+     "from": {
+      "type": "deck",
+      "index": null
+     },
+     "to": {
+      "type": "monsterZone",
+      "index": 2
+     },
+     "faceDown": false,
+     "defense": false
+    },
+    {
+     "code": 32061192,
+     "ref": "main-8-aUolramV",
+     "from": {
+      "type": "banished",
+      "index": null
+     },
+     "to": {
+      "type": "monsterZone",
+      "index": 1
+     },
+     "faceDown": false,
+     "defense": false
+    },
+    {
+     "code": 57111661,
+     "ref": "main-35-x7MFrW3D",
+     "from": {
+      "type": "spellTrapZone",
+      "index": 4
+     },
+     "to": {
+      "type": "graveyard",
+      "index": null
+     },
+     "faceDown": false,
+     "defense": false
+    },
+    {
+     "code": 96676583,
+     "ref": "main-4-lsz6X8-o",
+     "from": {
+      "type": "monsterZone",
+      "index": 2
+     },
+     "to": {
+      "type": "graveyard",
+      "index": null
+     },
+     "faceDown": false,
+     "defense": false
+    },
+    {
+     "code": 69272449,
+     "ref": "main-1-oz4Bym5a",
+     "from": {
+      "type": "monsterZone",
+      "index": 3
+     },
+     "to": {
+      "type": "graveyard",
+      "index": null
+     },
+     "faceDown": false,
+     "defense": false
+    },
+    {
+     "code": 52698008,
+     "ref": "extra-4-1eitQB9A",
+     "from": {
+      "type": "extraDeck",
+      "index": null
+     },
+     "to": {
+      "type": "extraMonsterZone",
+      "index": 1
+     },
+     "faceDown": false,
+     "defense": false
+    },
+    {
+     "code": 32061192,
+     "ref": "main-8-aUolramV",
+     "from": {
+      "type": "monsterZone",
+      "index": 1
+     },
+     "to": {
+      "type": "graveyard",
+      "index": null
+     },
+     "faceDown": false,
+     "defense": false
+    },
+    {
+     "code": 30342076,
+     "ref": "extra-3-DUxvHAqF",
+     "from": {
+      "type": "extraDeck",
+      "index": null
+     },
+     "to": {
+      "type": "monsterZone",
+      "index": 4
+     },
+     "faceDown": false,
+     "defense": false
+    },
+    {
+     "code": 96676583,
+     "ref": "main-4-lsz6X8-o",
+     "from": {
+      "type": "graveyard",
+      "index": null
+     },
+     "to": {
+      "type": "banished",
+      "index": 0
+     },
+     "faceDown": false,
+     "defense": false
+    },
+    {
+     "code": 30118811,
+     "ref": "main-15-iICcAHxZ",
+     "from": {
+      "type": "deck",
+      "index": null
+     },
+     "to": {
+      "type": "hand",
+      "index": 0
+     },
+     "faceDown": false,
+     "defense": false
+    },
+    {
+     "code": 96676583,
+     "ref": "main-4-lsz6X8-o",
+     "from": {
+      "type": "banished",
+      "index": null
+     },
+     "to": {
+      "type": "monsterZone",
+      "index": 2
+     },
+     "faceDown": false,
+     "defense": false
+    },
+    {
+     "code": 30342076,
+     "ref": "extra-3-DUxvHAqF",
+     "from": {
+      "type": "monsterZone",
+      "index": 4
+     },
+     "to": {
+      "type": "graveyard",
+      "index": null
+     },
+     "faceDown": false,
+     "defense": false
+    },
+    {
+     "code": 52698008,
+     "ref": "extra-4-1eitQB9A",
+     "from": {
+      "type": "extraMonsterZone",
+      "index": 1
+     },
+     "to": {
+      "type": "graveyard",
+      "index": null
+     },
+     "faceDown": false,
+     "defense": false
+    },
+    {
+     "code": 46947713,
+     "ref": "extra-9-Di2CZImC",
+     "from": {
+      "type": "extraDeck",
+      "index": null
+     },
+     "to": {
+      "type": "extraMonsterZone",
+      "index": 1
+     },
+     "faceDown": false,
+     "defense": false
+    },
+    {
+     "code": 30342076,
+     "ref": "extra-3-DUxvHAqF",
+     "from": {
+      "type": "graveyard",
+      "index": null
+     },
+     "to": {
+      "type": "monsterZone",
+      "index": 4
+     },
+     "faceDown": false,
+     "defense": false
+    },
+    {
+     "code": 52698008,
+     "ref": "extra-4-1eitQB9A",
+     "from": {
+      "type": "graveyard",
+      "index": null
+     },
+     "to": {
+      "type": "monsterZone",
+      "index": 3
+     },
+     "faceDown": false,
+     "defense": false
+    },
+    {
+     "code": 30342076,
+     "ref": "extra-3-DUxvHAqF",
+     "from": {
+      "type": "monsterZone",
+      "index": 4
+     },
+     "to": {
+      "type": "banished",
+      "index": null
+     },
+     "faceDown": false,
+     "defense": false
+    },
+    {
+     "code": 46947713,
+     "ref": "extra-9-Di2CZImC",
+     "from": {
+      "type": "extraMonsterZone",
+      "index": 1
+     },
+     "to": {
+      "type": "graveyard",
+      "index": null
+     },
+     "faceDown": false,
+     "defense": false
+    },
+    {
+     "code": 96676583,
+     "ref": "main-4-lsz6X8-o",
+     "from": {
+      "type": "monsterZone",
+      "index": 2
+     },
+     "to": {
+      "type": "graveyard",
+      "index": null
+     },
+     "faceDown": false,
+     "defense": false
+    },
+    {
+     "code": 39138610,
+     "ref": "extra-12-UzD9xQ5Q",
+     "from": {
+      "type": "extraDeck",
+      "index": null
+     },
+     "to": {
+      "type": "extraMonsterZone",
+      "index": 1
+     },
+     "faceDown": false,
+     "defense": false
+    },
+    {
+     "code": 30118811,
+     "ref": "main-15-iICcAHxZ",
+     "from": {
+      "type": "hand",
+      "index": null
+     },
+     "to": {
+      "type": "monsterZone",
+      "index": 2
+     },
+     "faceDown": false,
+     "defense": false
+    },
+    {
+     "code": 3723262,
+     "ref": "main-18-Cov6K4rH",
+     "from": {
+      "type": "deck",
+      "index": null
+     },
+     "to": {
+      "type": "hand",
+      "index": 0
+     },
+     "faceDown": false,
+     "defense": false
+    },
+    {
+     "code": 3723262,
+     "ref": "main-18-Cov6K4rH",
+     "from": {
+      "type": "hand",
+      "index": null
+     },
+     "to": {
+      "type": "monsterZone",
+      "index": 1
+     },
+     "faceDown": false,
+     "defense": false
+    },
+    {
+     "code": 32061192,
+     "ref": "main-8-aUolramV",
+     "from": {
+      "type": "graveyard",
+      "index": null
+     },
+     "to": {
+      "type": "monsterZone",
+      "index": 4
+     },
+     "faceDown": false,
+     "defense": false
+    },
+    {
+     "code": 30118811,
+     "ref": "main-15-iICcAHxZ",
+     "from": {
+      "type": "monsterZone",
+      "index": 2
+     },
+     "to": {
+      "type": "graveyard",
+      "index": null
+     },
+     "faceDown": false,
+     "defense": false
+    },
+    {
+     "code": 41999284,
+     "ref": "extra-2-q2CVkFo5",
+     "from": {
+      "type": "extraDeck",
+      "index": null
+     },
+     "to": {
+      "type": "monsterZone",
+      "index": 2
+     },
+     "faceDown": false,
+     "defense": false
+    },
+    {
+     "code": 32061192,
+     "ref": "main-8-aUolramV",
+     "from": {
+      "type": "monsterZone",
+      "index": 4
+     },
+     "to": {
+      "type": "graveyard",
+      "index": null
+     },
+     "faceDown": false,
+     "defense": false
+    },
+    {
+     "code": 52698008,
+     "ref": "extra-4-1eitQB9A",
+     "from": {
+      "type": "monsterZone",
+      "index": 3
+     },
+     "to": {
+      "type": "graveyard",
+      "index": null
+     },
+     "faceDown": false,
+     "defense": false
+    },
+    {
+     "code": 95454996,
+     "ref": "extra-7-fqiI7YtG",
+     "from": {
+      "type": "extraDeck",
+      "index": null
+     },
+     "to": {
+      "type": "monsterZone",
+      "index": 4
+     },
+     "faceDown": false,
+     "defense": false
+    },
+    {
+     "code": 57111661,
+     "ref": "main-35-x7MFrW3D",
+     "from": {
+      "type": "graveyard",
+      "index": null
+     },
+     "to": {
+      "type": "banished",
+      "index": 1
+     },
+     "faceDown": false,
+     "defense": false
+    },
+    {
+     "code": 20726052,
+     "ref": "main-34-YZBriIB7",
+     "from": {
+      "type": "deck",
+      "index": null
+     },
+     "to": {
+      "type": "spellTrapZone",
+      "index": 3
+     },
+     "faceDown": false,
+     "defense": false
+    },
+    {
+     "code": 95454996,
+     "ref": "extra-7-fqiI7YtG",
+     "from": {
+      "type": "monsterZone",
+      "index": 4
+     },
+     "to": {
+      "type": "graveyard",
+      "index": null
+     },
+     "faceDown": false,
+     "defense": false
+    },
+    {
+     "code": 41999284,
+     "ref": "extra-2-q2CVkFo5",
+     "from": {
+      "type": "monsterZone",
+      "index": 2
+     },
+     "to": {
+      "type": "graveyard",
+      "index": null
+     },
+     "faceDown": false,
+     "defense": false
+    },
+    {
+     "code": 3723262,
+     "ref": "main-18-Cov6K4rH",
+     "from": {
+      "type": "monsterZone",
+      "index": 1
+     },
+     "to": {
+      "type": "graveyard",
+      "index": null
+     },
+     "faceDown": false,
+     "defense": false
+    },
+    {
+     "code": 64211118,
+     "ref": "extra-13-rIzdWiHi",
+     "from": {
+      "type": "extraDeck",
+      "index": null
+     },
+     "to": {
+      "type": "monsterZone",
+      "index": 4
+     },
+     "faceDown": false,
+     "defense": false
+    },
+    {
+     "code": 74652966,
+     "ref": "main-24-Yhao-Puy",
+     "from": {
+      "type": "deck",
+      "index": null
+     },
+     "to": {
+      "type": "graveyard",
+      "index": null
+     },
+     "faceDown": false,
+     "defense": false
+    },
+    {
+     "code": 92422871,
+     "ref": "extra-14-w8JKhRL9",
+     "from": {
+      "type": "extraDeck",
+      "index": null
+     },
+     "to": {
+      "type": "graveyard",
+      "index": null
+     },
+     "faceDown": false,
+     "defense": false
+    }
+   ]
+  },
+  {
+   "id": "3tnYxZAt",
+   "url": "https://duel-simulator.miyauchidp.dev/replay/3tnYxZAt",
+   "title": "UNDERGROUND１枚初動",
+   "hand": [],
+   "events": [
+    {
+     "code": 68337209,
+     "ref": "main-27-23JwwTTG",
+     "from": {
+      "type": "deck",
+      "index": null
+     },
+     "to": {
+      "type": "fieldZone",
+      "index": null
+     },
+     "faceDown": false,
+     "defense": false
+    },
+    {
+     "code": 32061192,
+     "ref": "main-8-aUolramV",
+     "from": {
+      "type": "deck",
+      "index": null
+     },
+     "to": {
+      "type": "monsterZone",
+      "index": 2
+     },
+     "faceDown": false,
+     "defense": false
+    },
+    {
+     "code": 69272449,
+     "ref": "main-2-TI1Om6FK",
+     "from": {
+      "type": "deck",
+      "index": null
+     },
+     "to": {
+      "type": "banished",
+      "index": null
+     },
+     "faceDown": false,
+     "defense": false
+    },
+    {
+     "code": 69272449,
+     "ref": "main-2-TI1Om6FK",
+     "from": {
+      "type": "banished",
+      "index": null
+     },
+     "to": {
+      "type": "monsterZone",
+      "index": 3
+     },
+     "faceDown": false,
+     "defense": false
+    },
+    {
+     "code": 57111661,
+     "ref": "main-35-x7MFrW3D",
+     "from": {
+      "type": "deck",
+      "index": null
+     },
+     "to": {
+      "type": "spellTrapZone",
+      "index": 4
+     },
+     "faceDown": false,
+     "defense": false
+    },
+    {
+     "code": 69272449,
+     "ref": "main-2-TI1Om6FK",
+     "from": {
+      "type": "monsterZone",
+      "index": 3
+     },
+     "to": {
+      "type": "graveyard",
+      "index": null
+     },
+     "faceDown": false,
+     "defense": false
+    },
+    {
+     "code": 32061192,
+     "ref": "main-8-aUolramV",
+     "from": {
+      "type": "monsterZone",
+      "index": 2
+     },
+     "to": {
+      "type": "graveyard",
+      "index": null
+     },
+     "faceDown": false,
+     "defense": false
+    },
+    {
+     "code": 37458564,
+     "ref": "extra-6-1WjsUd9a",
+     "from": {
+      "type": "extraDeck",
+      "index": null
+     },
+     "to": {
+      "type": "extraMonsterZone",
+      "index": 1
+     },
+     "faceDown": false,
+     "defense": false
+    },
+    {
+     "code": 68337209,
+     "ref": "main-27-23JwwTTG",
+     "from": {
+      "type": "fieldZone",
+      "index": null
+     },
+     "to": {
+      "type": "graveyard",
+      "index": null
+     },
+     "faceDown": false,
+     "defense": false
+    },
+    {
+     "code": 64865,
+     "ref": "main-22-9ZxYdbtW",
+     "from": {
+      "type": "deck",
+      "index": null
+     },
+     "to": {
+      "type": "hand",
+      "index": 0
+     },
+     "faceDown": false,
+     "defense": false
+    },
+    {
+     "code": 37458564,
+     "ref": "extra-6-1WjsUd9a",
+     "from": {
+      "type": "extraMonsterZone",
+      "index": 1
+     },
+     "to": {
+      "type": "graveyard",
+      "index": null
+     },
+     "faceDown": false,
+     "defense": false
+    },
+    {
+     "code": 64865,
+     "ref": "main-22-9ZxYdbtW",
+     "from": {
+      "type": "hand",
+      "index": null
+     },
+     "to": {
+      "type": "graveyard",
+      "index": null
+     },
+     "faceDown": false,
+     "defense": false
+    },
+    {
+     "code": 52698008,
+     "ref": "extra-4-1eitQB9A",
+     "from": {
+      "type": "extraDeck",
+      "index": null
+     },
+     "to": {
+      "type": "extraMonsterZone",
+      "index": 1
+     },
+     "faceDown": false,
+     "defense": false
+    },
+    {
+     "code": 18789533,
+     "ref": "main-23-6RdGFFwN",
+     "from": {
+      "type": "deck",
+      "index": null
+     },
+     "to": {
+      "type": "graveyard",
+      "index": null
+     },
+     "faceDown": false,
+     "defense": false
+    },
+    {
+     "code": 18789533,
+     "ref": "main-23-6RdGFFwN",
+     "from": {
+      "type": "graveyard",
+      "index": null
+     },
+     "to": {
+      "type": "monsterZone",
+      "index": 4
+     },
+     "faceDown": false,
+     "defense": false
+    },
+    {
+     "code": 64865,
+     "ref": "main-22-9ZxYdbtW",
+     "from": {
+      "type": "graveyard",
+      "index": null
+     },
+     "to": {
+      "type": "banished",
+      "index": 0
+     },
+     "faceDown": false,
+     "defense": false
+    },
+    {
+     "code": 30118811,
+     "ref": "main-16-nzguumF1",
+     "from": {
+      "type": "deck",
+      "index": null
+     },
+     "to": {
+      "type": "hand",
+      "index": 0
+     },
+     "faceDown": false,
+     "defense": false
+    },
+    {
+     "code": 18789533,
+     "ref": "main-23-6RdGFFwN",
+     "from": {
+      "type": "monsterZone",
+      "index": 4
+     },
+     "to": {
+      "type": "graveyard",
+      "index": null
+     },
+     "faceDown": false,
+     "defense": false
+    },
+    {
+     "code": 30342076,
+     "ref": "extra-3-DUxvHAqF",
+     "from": {
+      "type": "extraDeck",
+      "index": null
+     },
+     "to": {
+      "type": "monsterZone",
+      "index": 4
+     },
+     "faceDown": false,
+     "defense": false
+    },
+    {
+     "code": 52698008,
+     "ref": "extra-4-1eitQB9A",
+     "from": {
+      "type": "extraMonsterZone",
+      "index": 1
+     },
+     "to": {
+      "type": "graveyard",
+      "index": null
+     },
+     "faceDown": false,
+     "defense": false
+    },
+    {
+     "code": 30342076,
+     "ref": "extra-3-DUxvHAqF",
+     "from": {
+      "type": "monsterZone",
+      "index": 4
+     },
+     "to": {
+      "type": "graveyard",
+      "index": null
+     },
+     "faceDown": false,
+     "defense": false
+    },
+    {
+     "code": 46947713,
+     "ref": "extra-9-Di2CZImC",
+     "from": {
+      "type": "extraDeck",
+      "index": null
+     },
+     "to": {
+      "type": "extraMonsterZone",
+      "index": 1
+     },
+     "faceDown": false,
+     "defense": false
+    },
+    {
+     "code": 30342076,
+     "ref": "extra-3-DUxvHAqF",
+     "from": {
+      "type": "graveyard",
+      "index": null
+     },
+     "to": {
+      "type": "monsterZone",
+      "index": 4
+     },
+     "faceDown": false,
+     "defense": false
+    },
+    {
+     "code": 52698008,
+     "ref": "extra-4-1eitQB9A",
+     "from": {
+      "type": "graveyard",
+      "index": null
+     },
+     "to": {
+      "type": "monsterZone",
+      "index": 3
+     },
+     "faceDown": false,
+     "defense": false
+    },
+    {
+     "code": 30118811,
+     "ref": "main-16-nzguumF1",
+     "from": {
+      "type": "hand",
+      "index": null
+     },
+     "to": {
+      "type": "monsterZone",
+      "index": 2
+     },
+     "faceDown": false,
+     "defense": false
+    },
+    {
+     "code": 3723262,
+     "ref": "main-18-Cov6K4rH",
+     "from": {
+      "type": "deck",
+      "index": null
+     },
+     "to": {
+      "type": "hand",
+      "index": 0
+     },
+     "faceDown": false,
+     "defense": false
+    },
+    {
+     "code": 46947713,
+     "ref": "extra-9-Di2CZImC",
+     "from": {
+      "type": "extraMonsterZone",
+      "index": 1
+     },
+     "to": {
+      "type": "graveyard",
+      "index": null
+     },
+     "faceDown": false,
+     "defense": false
+    },
+    {
+     "code": 30342076,
+     "ref": "extra-3-DUxvHAqF",
+     "from": {
+      "type": "monsterZone",
+      "index": 4
+     },
+     "to": {
+      "type": "banished",
+      "index": null
+     },
+     "faceDown": false,
+     "defense": false
+    },
+    {
+     "code": 30118811,
+     "ref": "main-16-nzguumF1",
+     "from": {
+      "type": "monsterZone",
+      "index": 2
+     },
+     "to": {
+      "type": "graveyard",
+      "index": null
+     },
+     "faceDown": false,
+     "defense": false
+    },
+    {
+     "code": 39138610,
+     "ref": "extra-12-UzD9xQ5Q",
+     "from": {
+      "type": "extraDeck",
+      "index": null
+     },
+     "to": {
+      "type": "extraMonsterZone",
+      "index": 1
+     },
+     "faceDown": false,
+     "defense": false
+    },
+    {
+     "code": 3723262,
+     "ref": "main-18-Cov6K4rH",
+     "from": {
+      "type": "hand",
+      "index": null
+     },
+     "to": {
+      "type": "monsterZone",
+      "index": 1
+     },
+     "faceDown": false,
+     "defense": false
+    },
+    {
+     "code": 32061192,
+     "ref": "main-8-aUolramV",
+     "from": {
+      "type": "graveyard",
+      "index": null
+     },
+     "to": {
+      "type": "monsterZone",
+      "index": 2
+     },
+     "faceDown": false,
+     "defense": false
+    },
+    {
+     "code": 3723262,
+     "ref": "main-18-Cov6K4rH",
+     "from": {
+      "type": "monsterZone",
+      "index": 1
+     },
+     "to": {
+      "type": "graveyard",
+      "index": null
+     },
+     "faceDown": false,
+     "defense": false
+    },
+    {
+     "code": 41999284,
+     "ref": "extra-2-q2CVkFo5",
+     "from": {
+      "type": "extraDeck",
+      "index": null
+     },
+     "to": {
+      "type": "monsterZone",
+      "index": 4
+     },
+     "faceDown": false,
+     "defense": false
+    },
+    {
+     "code": 52698008,
+     "ref": "extra-4-1eitQB9A",
+     "from": {
+      "type": "monsterZone",
+      "index": 3
+     },
+     "to": {
+      "type": "graveyard",
+      "index": null
+     },
+     "faceDown": false,
+     "defense": false
+    },
+    {
+     "code": 32061192,
+     "ref": "main-8-aUolramV",
+     "from": {
+      "type": "monsterZone",
+      "index": 2
+     },
+     "to": {
+      "type": "graveyard",
+      "index": null
+     },
+     "faceDown": false,
+     "defense": false
+    },
+    {
+     "code": 95454996,
+     "ref": "extra-7-fqiI7YtG",
+     "from": {
+      "type": "extraDeck",
+      "index": null
+     },
+     "to": {
+      "type": "monsterZone",
+      "index": 2
+     },
+     "faceDown": false,
+     "defense": false
+    },
+    {
+     "code": 20726052,
+     "ref": "main-34-YZBriIB7",
+     "from": {
+      "type": "deck",
+      "index": null
+     },
+     "to": {
+      "type": "spellTrapZone",
+      "index": 0
+     },
+     "faceDown": false,
+     "defense": false
+    },
+    {
+     "code": 95454996,
+     "ref": "extra-7-fqiI7YtG",
+     "from": {
+      "type": "monsterZone",
+      "index": 2
+     },
+     "to": {
+      "type": "banished",
+      "index": null
+     },
+     "faceDown": false,
+     "defense": false
+    },
+    {
+     "code": 20938824,
+     "ref": "main-5-3VAnK4aA",
+     "from": {
+      "type": "deck",
+      "index": null
+     },
+     "to": {
+      "type": "monsterZone",
+      "index": 2
+     },
+     "faceDown": false,
+     "defense": false
+    },
+    {
+     "code": 57111661,
+     "ref": "main-35-x7MFrW3D",
+     "from": {
+      "type": "spellTrapZone",
+      "index": 4
+     },
+     "to": {
+      "type": "graveyard",
+      "index": null
+     },
+     "faceDown": false,
+     "defense": false
+    },
+    {
+     "code": 95454996,
+     "ref": "extra-7-fqiI7YtG",
+     "from": {
+      "type": "banished",
+      "index": null
+     },
+     "to": {
+      "type": "monsterZone",
+      "index": 1
+     },
+     "faceDown": false,
+     "defense": false
+    },
+    {
+     "code": 57111661,
+     "ref": "main-35-x7MFrW3D",
+     "from": {
+      "type": "graveyard",
+      "index": null
+     },
+     "to": {
+      "type": "banished",
+      "index": 0
+     },
+     "faceDown": false,
+     "defense": false
+    },
+    {
+     "code": 41999284,
+     "ref": "extra-2-q2CVkFo5",
+     "from": {
+      "type": "monsterZone",
+      "index": 4
+     },
+     "to": {
+      "type": "graveyard",
+      "index": null
+     },
+     "faceDown": false,
+     "defense": false
+    },
+    {
+     "code": 20938824,
+     "ref": "main-5-3VAnK4aA",
+     "from": {
+      "type": "monsterZone",
+      "index": 2
+     },
+     "to": {
+      "type": "graveyard",
+      "index": null
+     },
+     "faceDown": false,
+     "defense": false
+    },
+    {
+     "code": 95454996,
+     "ref": "extra-7-fqiI7YtG",
+     "from": {
+      "type": "monsterZone",
+      "index": 1
+     },
+     "to": {
+      "type": "graveyard",
+      "index": null
+     },
+     "faceDown": false,
+     "defense": false
+    },
+    {
+     "code": 64211118,
+     "ref": "extra-13-rIzdWiHi",
+     "from": {
+      "type": "extraDeck",
+      "index": null
+     },
+     "to": {
+      "type": "monsterZone",
+      "index": 4
+     },
+     "faceDown": false,
+     "defense": false
+    },
+    {
+     "code": 74652966,
+     "ref": "main-24-Yhao-Puy",
+     "from": {
+      "type": "deck",
+      "index": null
+     },
+     "to": {
+      "type": "graveyard",
+      "index": null
+     },
+     "faceDown": false,
+     "defense": false
+    },
+    {
+     "code": 92422871,
+     "ref": "extra-14-w8JKhRL9",
+     "from": {
+      "type": "extraDeck",
+      "index": null
+     },
+     "to": {
+      "type": "graveyard",
+      "index": null
+     },
+     "faceDown": false,
+     "defense": false
+    }
+   ]
+  },
+  {
+   "id": "Q5Vc2nzV",
+   "url": "https://duel-simulator.miyauchidp.dev/replay/Q5Vc2nzV",
+   "title": "NS＋コードマジシャン２枚初動",
+   "hand": [
+    94145021,
+    64865,
+    null
+   ],
+   "events": [
+    {
+     "code": 94145021,
+     "ref": "main-13-kEeQWugC",
+     "from": {
+      "type": "hand",
+      "index": null
+     },
+     "to": {
+      "type": "monsterZone",
+      "index": 2
+     },
+     "faceDown": false,
+     "defense": false
+    },
+    {
+     "code": 94145021,
+     "ref": "main-13-kEeQWugC",
+     "from": {
+      "type": "monsterZone",
+      "index": 2
+     },
+     "to": {
+      "type": "graveyard",
+      "index": null
+     },
+     "faceDown": false,
+     "defense": false
+    },
+    {
+     "code": 60303245,
+     "ref": "extra-1-viPujFDr",
+     "from": {
+      "type": "extraDeck",
+      "index": null
+     },
+     "to": {
+      "type": "extraMonsterZone",
+      "index": 1
+     },
+     "faceDown": false,
+     "defense": false
+    },
+    {
+     "code": 60303245,
+     "ref": "extra-1-viPujFDr",
+     "from": {
+      "type": "extraMonsterZone",
+      "index": 1
+     },
+     "to": {
+      "type": "graveyard",
+      "index": null
+     },
+     "faceDown": false,
+     "defense": false
+    },
+    {
+     "code": 64865,
+     "ref": "main-22-9ZxYdbtW",
+     "from": {
+      "type": "hand",
+      "index": null
+     },
+     "to": {
+      "type": "graveyard",
+      "index": null
+     },
+     "faceDown": false,
+     "defense": false
+    },
+    {
+     "code": 52698008,
+     "ref": "extra-4-1eitQB9A",
+     "from": {
+      "type": "extraDeck",
+      "index": null
+     },
+     "to": {
+      "type": "extraMonsterZone",
+      "index": 1
+     },
+     "faceDown": false,
+     "defense": false
+    },
+    {
+     "code": 18789533,
+     "ref": "main-23-6RdGFFwN",
+     "from": {
+      "type": "deck",
+      "index": null
+     },
+     "to": {
+      "type": "graveyard",
+      "index": null
+     },
+     "faceDown": false,
+     "defense": false
+    },
+    {
+     "code": 18789533,
+     "ref": "main-23-6RdGFFwN",
+     "from": {
+      "type": "graveyard",
+      "index": null
+     },
+     "to": {
+      "type": "monsterZone",
+      "index": 4
+     },
+     "faceDown": false,
+     "defense": false
+    },
+    {
+     "code": 64865,
+     "ref": "main-22-9ZxYdbtW",
+     "from": {
+      "type": "graveyard",
+      "index": null
+     },
+     "to": {
+      "type": "banished",
+      "index": 0
+     },
+     "faceDown": false,
+     "defense": false
+    },
+    {
+     "code": 30118811,
+     "ref": "main-16-nzguumF1",
+     "from": {
+      "type": "deck",
+      "index": null
+     },
+     "to": {
+      "type": "hand",
+      "index": 1
+     },
+     "faceDown": false,
+     "defense": false
+    },
+    {
+     "code": 30118811,
+     "ref": "main-16-nzguumF1",
+     "from": {
+      "type": "hand",
+      "index": null
+     },
+     "to": {
+      "type": "monsterZone",
+      "index": 2
+     },
+     "faceDown": false,
+     "defense": false
+    },
+    {
+     "code": 3723262,
+     "ref": "main-18-Cov6K4rH",
+     "from": {
+      "type": "deck",
+      "index": null
+     },
+     "to": {
+      "type": "hand",
+      "index": 1
+     },
+     "faceDown": false,
+     "defense": false
+    },
+    {
+     "code": null,
+     "ref": "KzuPu26xk8RZAtNpjiNeR",
+     "from": {
+      "type": "hand",
+      "index": null
+     },
+     "to": {
+      "type": "graveyard",
+      "index": null
+     },
+     "faceDown": false,
+     "defense": false
+    },
+    {
+     "code": 18789533,
+     "ref": "main-23-6RdGFFwN",
+     "from": {
+      "type": "monsterZone",
+      "index": 4
+     },
+     "to": {
+      "type": "graveyard",
+      "index": null
+     },
+     "faceDown": false,
+     "defense": false
+    },
+    {
+     "code": 30342076,
+     "ref": "extra-3-DUxvHAqF",
+     "from": {
+      "type": "extraDeck",
+      "index": null
+     },
+     "to": {
+      "type": "monsterZone",
+      "index": 4
+     },
+     "faceDown": false,
+     "defense": false
+    },
+    {
+     "code": 30342076,
+     "ref": "extra-3-DUxvHAqF",
+     "from": {
+      "type": "monsterZone",
+      "index": 4
+     },
+     "to": {
+      "type": "graveyard",
+      "index": null
+     },
+     "faceDown": false,
+     "defense": false
+    },
+    {
+     "code": 52698008,
+     "ref": "extra-4-1eitQB9A",
+     "from": {
+      "type": "extraMonsterZone",
+      "index": 1
+     },
+     "to": {
+      "type": "graveyard",
+      "index": null
+     },
+     "faceDown": false,
+     "defense": false
+    },
+    {
+     "code": 46947713,
+     "ref": "extra-9-Di2CZImC",
+     "from": {
+      "type": "extraDeck",
+      "index": null
+     },
+     "to": {
+      "type": "extraMonsterZone",
+      "index": 1
+     },
+     "faceDown": false,
+     "defense": false
+    },
+    {
+     "code": 30342076,
+     "ref": "extra-3-DUxvHAqF",
+     "from": {
+      "type": "graveyard",
+      "index": null
+     },
+     "to": {
+      "type": "monsterZone",
+      "index": 4
+     },
+     "faceDown": false,
+     "defense": false
+    },
+    {
+     "code": 52698008,
+     "ref": "extra-4-1eitQB9A",
+     "from": {
+      "type": "graveyard",
+      "index": null
+     },
+     "to": {
+      "type": "monsterZone",
+      "index": 3
+     },
+     "faceDown": false,
+     "defense": false
+    },
+    {
+     "code": 46947713,
+     "ref": "extra-9-Di2CZImC",
+     "from": {
+      "type": "extraMonsterZone",
+      "index": 1
+     },
+     "to": {
+      "type": "graveyard",
+      "index": null
+     },
+     "faceDown": false,
+     "defense": false
+    },
+    {
+     "code": 30118811,
+     "ref": "main-16-nzguumF1",
+     "from": {
+      "type": "monsterZone",
+      "index": 2
+     },
+     "to": {
+      "type": "graveyard",
+      "index": null
+     },
+     "faceDown": false,
+     "defense": false
+    },
+    {
+     "code": 30342076,
+     "ref": "extra-3-DUxvHAqF",
+     "from": {
+      "type": "monsterZone",
+      "index": 4
+     },
+     "to": {
+      "type": "banished",
+      "index": null
+     },
+     "faceDown": false,
+     "defense": false
+    },
+    {
+     "code": 64211118,
+     "ref": "extra-13-rIzdWiHi",
+     "from": {
+      "type": "extraDeck",
+      "index": null
+     },
+     "to": {
+      "type": "extraMonsterZone",
+      "index": 0
+     },
+     "faceDown": false,
+     "defense": false
+    },
+    {
+     "code": 32061192,
+     "ref": "main-8-aUolramV",
+     "from": {
+      "type": "deck",
+      "index": null
+     },
+     "to": {
+      "type": "graveyard",
+      "index": null
+     },
+     "faceDown": false,
+     "defense": false
+    },
+    {
+     "code": 3723262,
+     "ref": "main-18-Cov6K4rH",
+     "from": {
+      "type": "hand",
+      "index": null
+     },
+     "to": {
+      "type": "monsterZone",
+      "index": 0
+     },
+     "faceDown": false,
+     "defense": false
+    },
+    {
+     "code": 32061192,
+     "ref": "main-8-aUolramV",
+     "from": {
+      "type": "graveyard",
+      "index": null
+     },
+     "to": {
+      "type": "monsterZone",
+      "index": 2
+     },
+     "faceDown": false,
+     "defense": false
+    },
+    {
+     "code": 69272449,
+     "ref": "main-2-TI1Om6FK",
+     "from": {
+      "type": "deck",
+      "index": null
+     },
+     "to": {
+      "type": "banished",
+      "index": null
+     },
+     "faceDown": false,
+     "defense": false
+    },
+    {
+     "code": 69272449,
+     "ref": "main-2-TI1Om6FK",
+     "from": {
+      "type": "banished",
+      "index": null
+     },
+     "to": {
+      "type": "monsterZone",
+      "index": 4
+     },
+     "faceDown": false,
+     "defense": false
+    },
+    {
+     "code": 57111661,
+     "ref": "main-35-x7MFrW3D",
+     "from": {
+      "type": "deck",
+      "index": null
+     },
+     "to": {
+      "type": "spellTrapZone",
+      "index": 2
+     },
+     "faceDown": false,
+     "defense": false
+    },
+    {
+     "code": 52698008,
+     "ref": "extra-4-1eitQB9A",
+     "from": {
+      "type": "monsterZone",
+      "index": 3
+     },
+     "to": {
+      "type": "graveyard",
+      "index": null
+     },
+     "faceDown": false,
+     "defense": false
+    },
+    {
+     "code": 32061192,
+     "ref": "main-8-aUolramV",
+     "from": {
+      "type": "monsterZone",
+      "index": 2
+     },
+     "to": {
+      "type": "graveyard",
+      "index": null
+     },
+     "faceDown": false,
+     "defense": false
+    },
+    {
+     "code": 95454996,
+     "ref": "extra-7-fqiI7YtG",
+     "from": {
+      "type": "extraDeck",
+      "index": null
+     },
+     "to": {
+      "type": "monsterZone",
+      "index": 2
+     },
+     "faceDown": false,
+     "defense": false
+    },
+    {
+     "code": 20726052,
+     "ref": "main-34-YZBriIB7",
+     "from": {
+      "type": "deck",
+      "index": null
+     },
+     "to": {
+      "type": "spellTrapZone",
+      "index": 3
+     },
+     "faceDown": false,
+     "defense": false
+    },
+    {
+     "code": 95454996,
+     "ref": "extra-7-fqiI7YtG",
+     "from": {
+      "type": "monsterZone",
+      "index": 2
+     },
+     "to": {
+      "type": "banished",
+      "index": null
+     },
+     "faceDown": false,
+     "defense": false
+    },
+    {
+     "code": 20938824,
+     "ref": "main-6-U1BHU4EH",
+     "from": {
+      "type": "deck",
+      "index": null
+     },
+     "to": {
+      "type": "monsterZone",
+      "index": 2
+     },
+     "faceDown": false,
+     "defense": false
+    },
+    {
+     "code": 57111661,
+     "ref": "main-35-x7MFrW3D",
+     "from": {
+      "type": "spellTrapZone",
+      "index": 2
+     },
+     "to": {
+      "type": "graveyard",
+      "index": null
+     },
+     "faceDown": false,
+     "defense": false
+    },
+    {
+     "code": 95454996,
+     "ref": "extra-7-fqiI7YtG",
+     "from": {
+      "type": "banished",
+      "index": null
+     },
+     "to": {
+      "type": "monsterZone",
+      "index": 3
+     },
+     "faceDown": false,
+     "defense": false
+    },
+    {
+     "code": 57111661,
+     "ref": "main-35-x7MFrW3D",
+     "from": {
+      "type": "graveyard",
+      "index": null
+     },
+     "to": {
+      "type": "banished",
+      "index": 0
+     },
+     "faceDown": false,
+     "defense": false
+    },
+    {
+     "code": 3723262,
+     "ref": "main-18-Cov6K4rH",
+     "from": {
+      "type": "monsterZone",
+      "index": 0
+     },
+     "to": {
+      "type": "graveyard",
+      "index": null
+     },
+     "faceDown": false,
+     "defense": false
+    },
+    {
+     "code": 41999284,
+     "ref": "extra-2-q2CVkFo5",
+     "from": {
+      "type": "extraDeck",
+      "index": null
+     },
+     "to": {
+      "type": "monsterZone",
+      "index": 0
+     },
+     "faceDown": false,
+     "defense": false
+    },
+    {
+     "code": 20938824,
+     "ref": "main-6-U1BHU4EH",
+     "from": {
+      "type": "monsterZone",
+      "index": 2
+     },
+     "to": {
+      "type": "graveyard",
+      "index": null
+     },
+     "faceDown": false,
+     "defense": false
+    },
+    {
+     "code": 69272449,
+     "ref": "main-2-TI1Om6FK",
+     "from": {
+      "type": "monsterZone",
+      "index": 4
+     },
+     "to": {
+      "type": "graveyard",
+      "index": null
+     },
+     "faceDown": false,
+     "defense": false
+    },
+    {
+     "code": 95454996,
+     "ref": "extra-7-fqiI7YtG",
+     "from": {
+      "type": "monsterZone",
+      "index": 3
+     },
+     "to": {
+      "type": "graveyard",
+      "index": null
+     },
+     "faceDown": false,
+     "defense": false
+    },
+    {
+     "code": 39138610,
+     "ref": "extra-12-UzD9xQ5Q",
+     "from": {
+      "type": "extraDeck",
+      "index": null
+     },
+     "to": {
+      "type": "monsterZone",
+      "index": 2
+     },
+     "faceDown": false,
+     "defense": false
+    },
+    {
+     "code": 95454996,
+     "ref": "extra-7-fqiI7YtG",
+     "from": {
+      "type": "graveyard",
+      "index": null
+     },
+     "to": {
+      "type": "monsterZone",
+      "index": 3
+     },
+     "faceDown": false,
+     "defense": false
+    },
+    {
+     "code": 46947713,
+     "ref": "extra-9-Di2CZImC",
+     "from": {
+      "type": "graveyard",
+      "index": null
+     },
+     "to": {
+      "type": "monsterZone",
+      "index": 1
+     },
+     "faceDown": false,
+     "defense": false
+    }
+   ]
+  },
+  {
+   "id": "BmA74rcx",
+   "url": "https://duel-simulator.miyauchidp.dev/replay/BmA74rcx",
+   "title": "猫＋ヘア２枚初動",
+   "hand": [
+    96676583,
+    20938824,
+    null,
+    null,
+    null
+   ],
+   "events": [
+    {
+     "code": 96676583,
+     "ref": "main-4-lsz6X8-o",
+     "from": {
+      "type": "hand",
+      "index": null
+     },
+     "to": {
+      "type": "monsterZone",
+      "index": 2
+     },
+     "faceDown": false,
+     "defense": false
+    },
+    {
+     "code": 96676583,
+     "ref": "main-4-lsz6X8-o",
+     "from": {
+      "type": "monsterZone",
+      "index": 2
+     },
+     "to": {
+      "type": "graveyard",
+      "index": null
+     },
+     "faceDown": false,
+     "defense": false
+    },
+    {
+     "code": 41999284,
+     "ref": "extra-2-q2CVkFo5",
+     "from": {
+      "type": "extraDeck",
+      "index": null
+     },
+     "to": {
+      "type": "extraMonsterZone",
+      "index": 1
+     },
+     "faceDown": false,
+     "defense": false
+    },
+    {
+     "code": 96676583,
+     "ref": "main-4-lsz6X8-o",
+     "from": {
+      "type": "graveyard",
+      "index": null
+     },
+     "to": {
+      "type": "banished",
+      "index": 0
+     },
+     "faceDown": false,
+     "defense": false
+    },
+    {
+     "code": 20938824,
+     "ref": "main-6-U1BHU4EH",
+     "from": {
+      "type": "hand",
+      "index": null
+     },
+     "to": {
+      "type": "monsterZone",
+      "index": 2
+     },
+     "faceDown": false,
+     "defense": false
+    },
+    {
+     "code": 96676583,
+     "ref": "main-4-lsz6X8-o",
+     "from": {
+      "type": "banished",
+      "index": null
+     },
+     "to": {
+      "type": "monsterZone",
+      "index": 4
+     },
+     "faceDown": false,
+     "defense": false
+    },
+    {
+     "code": 41999284,
+     "ref": "extra-2-q2CVkFo5",
+     "from": {
+      "type": "extraMonsterZone",
+      "index": 1
+     },
+     "to": {
+      "type": "graveyard",
+      "index": null
+     },
+     "faceDown": false,
+     "defense": false
+    },
+    {
+     "code": 96676583,
+     "ref": "main-4-lsz6X8-o",
+     "from": {
+      "type": "monsterZone",
+      "index": 4
+     },
+     "to": {
+      "type": "graveyard",
+      "index": null
+     },
+     "faceDown": false,
+     "defense": false
+    },
+    {
+     "code": 52698008,
+     "ref": "extra-4-1eitQB9A",
+     "from": {
+      "type": "extraDeck",
+      "index": null
+     },
+     "to": {
+      "type": "extraMonsterZone",
+      "index": 1
+     },
+     "faceDown": false,
+     "defense": false
+    },
+    {
+     "code": 20938824,
+     "ref": "main-6-U1BHU4EH",
+     "from": {
+      "type": "monsterZone",
+      "index": 2
+     },
+     "to": {
+      "type": "graveyard",
+      "index": null
+     },
+     "faceDown": false,
+     "defense": false
+    },
+    {
+     "code": 30342076,
+     "ref": "extra-3-DUxvHAqF",
+     "from": {
+      "type": "extraDeck",
+      "index": null
+     },
+     "to": {
+      "type": "monsterZone",
+      "index": 4
+     },
+     "faceDown": false,
+     "defense": false
+    },
+    {
+     "code": 20938824,
+     "ref": "main-6-U1BHU4EH",
+     "from": {
+      "type": "graveyard",
+      "index": null
+     },
+     "to": {
+      "type": "banished",
+      "index": 0
+     },
+     "faceDown": false,
+     "defense": false
+    },
+    {
+     "code": 30118811,
+     "ref": "main-16-nzguumF1",
+     "from": {
+      "type": "deck",
+      "index": null
+     },
+     "to": {
+      "type": "hand",
+      "index": 3
+     },
+     "faceDown": false,
+     "defense": false
+    },
+    {
+     "code": 20938824,
+     "ref": "main-6-U1BHU4EH",
+     "from": {
+      "type": "banished",
+      "index": null
+     },
+     "to": {
+      "type": "hand",
+      "index": 4
+     },
+     "faceDown": false,
+     "defense": false
+    },
+    {
+     "code": 52698008,
+     "ref": "extra-4-1eitQB9A",
+     "from": {
+      "type": "extraMonsterZone",
+      "index": 1
+     },
+     "to": {
+      "type": "graveyard",
+      "index": null
+     },
+     "faceDown": false,
+     "defense": false
+    },
+    {
+     "code": 30342076,
+     "ref": "extra-3-DUxvHAqF",
+     "from": {
+      "type": "monsterZone",
+      "index": 4
+     },
+     "to": {
+      "type": "graveyard",
+      "index": null
+     },
+     "faceDown": false,
+     "defense": false
+    },
+    {
+     "code": 46947713,
+     "ref": "extra-9-Di2CZImC",
+     "from": {
+      "type": "extraDeck",
+      "index": null
+     },
+     "to": {
+      "type": "extraMonsterZone",
+      "index": 1
+     },
+     "faceDown": false,
+     "defense": false
+    },
+    {
+     "code": 30342076,
+     "ref": "extra-3-DUxvHAqF",
+     "from": {
+      "type": "graveyard",
+      "index": null
+     },
+     "to": {
+      "type": "monsterZone",
+      "index": 4
+     },
+     "faceDown": false,
+     "defense": false
+    },
+    {
+     "code": 52698008,
+     "ref": "extra-4-1eitQB9A",
+     "from": {
+      "type": "graveyard",
+      "index": null
+     },
+     "to": {
+      "type": "monsterZone",
+      "index": 3
+     },
+     "faceDown": false,
+     "defense": false
+    },
+    {
+     "code": 30118811,
+     "ref": "main-16-nzguumF1",
+     "from": {
+      "type": "hand",
+      "index": null
+     },
+     "to": {
+      "type": "monsterZone",
+      "index": 2
+     },
+     "faceDown": false,
+     "defense": false
+    },
+    {
+     "code": 3723262,
+     "ref": "main-18-Cov6K4rH",
+     "from": {
+      "type": "deck",
+      "index": null
+     },
+     "to": {
+      "type": "hand",
+      "index": 4
+     },
+     "faceDown": false,
+     "defense": false
+    },
+    {
+     "code": null,
+     "ref": "SN7hyyuetblBbetRKbMop",
+     "from": {
+      "type": "hand",
+      "index": null
+     },
+     "to": {
+      "type": "graveyard",
+      "index": null
+     },
+     "faceDown": false,
+     "defense": false
+    },
+    {
+     "code": 46947713,
+     "ref": "extra-9-Di2CZImC",
+     "from": {
+      "type": "extraMonsterZone",
+      "index": 1
+     },
+     "to": {
+      "type": "graveyard",
+      "index": null
+     },
+     "faceDown": false,
+     "defense": false
+    },
+    {
+     "code": 30118811,
+     "ref": "main-16-nzguumF1",
+     "from": {
+      "type": "monsterZone",
+      "index": 2
+     },
+     "to": {
+      "type": "graveyard",
+      "index": null
+     },
+     "faceDown": false,
+     "defense": false
+    },
+    {
+     "code": 30342076,
+     "ref": "extra-3-DUxvHAqF",
+     "from": {
+      "type": "monsterZone",
+      "index": 4
+     },
+     "to": {
+      "type": "banished",
+      "index": null
+     },
+     "faceDown": false,
+     "defense": false
+    },
+    {
+     "code": 64211118,
+     "ref": "extra-13-rIzdWiHi",
+     "from": {
+      "type": "extraDeck",
+      "index": null
+     },
+     "to": {
+      "type": "extraMonsterZone",
+      "index": 0
+     },
+     "faceDown": false,
+     "defense": false
+    },
+    {
+     "code": 32061192,
+     "ref": "main-8-aUolramV",
+     "from": {
+      "type": "deck",
+      "index": null
+     },
+     "to": {
+      "type": "graveyard",
+      "index": null
+     },
+     "faceDown": false,
+     "defense": false
+    },
+    {
+     "code": 3723262,
+     "ref": "main-18-Cov6K4rH",
+     "from": {
+      "type": "hand",
+      "index": null
+     },
+     "to": {
+      "type": "monsterZone",
+      "index": 0
+     },
+     "faceDown": false,
+     "defense": false
+    },
+    {
+     "code": 32061192,
+     "ref": "main-8-aUolramV",
+     "from": {
+      "type": "graveyard",
+      "index": null
+     },
+     "to": {
+      "type": "monsterZone",
+      "index": 2
+     },
+     "faceDown": false,
+     "defense": false
+    },
+    {
+     "code": 69272449,
+     "ref": "main-2-TI1Om6FK",
+     "from": {
+      "type": "deck",
+      "index": null
+     },
+     "to": {
+      "type": "banished",
+      "index": null
+     },
+     "faceDown": false,
+     "defense": false
+    },
+    {
+     "code": 69272449,
+     "ref": "main-2-TI1Om6FK",
+     "from": {
+      "type": "banished",
+      "index": null
+     },
+     "to": {
+      "type": "monsterZone",
+      "index": 4
+     },
+     "faceDown": false,
+     "defense": false
+    },
+    {
+     "code": 57111661,
+     "ref": "main-35-x7MFrW3D",
+     "from": {
+      "type": "deck",
+      "index": null
+     },
+     "to": {
+      "type": "spellTrapZone",
+      "index": 3
+     },
+     "faceDown": false,
+     "defense": false
+    },
+    {
+     "code": 32061192,
+     "ref": "main-8-aUolramV",
+     "from": {
+      "type": "monsterZone",
+      "index": 2
+     },
+     "to": {
+      "type": "graveyard",
+      "index": null
+     },
+     "faceDown": false,
+     "defense": false
+    },
+    {
+     "code": 52698008,
+     "ref": "extra-4-1eitQB9A",
+     "from": {
+      "type": "monsterZone",
+      "index": 3
+     },
+     "to": {
+      "type": "graveyard",
+      "index": null
+     },
+     "faceDown": false,
+     "defense": false
+    },
+    {
+     "code": 95454996,
+     "ref": "extra-7-fqiI7YtG",
+     "from": {
+      "type": "extraDeck",
+      "index": null
+     },
+     "to": {
+      "type": "monsterZone",
+      "index": 2
+     },
+     "faceDown": false,
+     "defense": false
+    },
+    {
+     "code": 20726052,
+     "ref": "main-34-YZBriIB7",
+     "from": {
+      "type": "deck",
+      "index": null
+     },
+     "to": {
+      "type": "spellTrapZone",
+      "index": 2
+     },
+     "faceDown": false,
+     "defense": false
+    },
+    {
+     "code": 95454996,
+     "ref": "extra-7-fqiI7YtG",
+     "from": {
+      "type": "monsterZone",
+      "index": 2
+     },
+     "to": {
+      "type": "banished",
+      "index": null
+     },
+     "faceDown": false,
+     "defense": false
+    },
+    {
+     "code": 20938824,
+     "ref": "main-7-WbyEAh8S",
+     "from": {
+      "type": "deck",
+      "index": null
+     },
+     "to": {
+      "type": "monsterZone",
+      "index": 2
+     },
+     "faceDown": false,
+     "defense": false
+    },
+    {
+     "code": 57111661,
+     "ref": "main-35-x7MFrW3D",
+     "from": {
+      "type": "spellTrapZone",
+      "index": 3
+     },
+     "to": {
+      "type": "graveyard",
+      "index": null
+     },
+     "faceDown": false,
+     "defense": false
+    },
+    {
+     "code": 95454996,
+     "ref": "extra-7-fqiI7YtG",
+     "from": {
+      "type": "banished",
+      "index": null
+     },
+     "to": {
+      "type": "monsterZone",
+      "index": 3
+     },
+     "faceDown": false,
+     "defense": false
+    },
+    {
+     "code": null,
+     "ref": "N0dQbxWxkC5NnrZTjTy2T",
+     "from": {
+      "type": "freeZone",
+      "index": null
+     },
+     "to": {
+      "type": "hand",
+      "index": 3
+     },
+     "faceDown": false,
+     "defense": false
+    },
+    {
+     "code": 95454996,
+     "ref": "extra-7-fqiI7YtG",
+     "from": {
+      "type": "monsterZone",
+      "index": 3
+     },
+     "to": {
+      "type": "graveyard",
+      "index": null
+     },
+     "faceDown": false,
+     "defense": false
+    },
+    {
+     "code": 20938824,
+     "ref": "main-7-WbyEAh8S",
+     "from": {
+      "type": "monsterZone",
+      "index": 2
+     },
+     "to": {
+      "type": "graveyard",
+      "index": null
+     },
+     "faceDown": false,
+     "defense": false
+    },
+    {
+     "code": 3723262,
+     "ref": "main-18-Cov6K4rH",
+     "from": {
+      "type": "monsterZone",
+      "index": 0
+     },
+     "to": {
+      "type": "graveyard",
+      "index": null
+     },
+     "faceDown": false,
+     "defense": false
+    },
+    {
+     "code": 39138610,
+     "ref": "extra-12-UzD9xQ5Q",
+     "from": {
+      "type": "extraDeck",
+      "index": null
+     },
+     "to": {
+      "type": "monsterZone",
+      "index": 2
+     },
+     "faceDown": false,
+     "defense": false
+    },
+    {
+     "code": 46947713,
+     "ref": "extra-9-Di2CZImC",
+     "from": {
+      "type": "graveyard",
+      "index": null
+     },
+     "to": {
+      "type": "monsterZone",
+      "index": 1
+     },
+     "faceDown": false,
+     "defense": false
+    },
+    {
+     "code": 95454996,
+     "ref": "extra-7-fqiI7YtG",
+     "from": {
+      "type": "graveyard",
+      "index": null
+     },
+     "to": {
+      "type": "monsterZone",
+      "index": 3
+     },
+     "faceDown": false,
+     "defense": false
+    },
+    {
+     "code": 92422871,
+     "ref": "extra-14-w8JKhRL9",
+     "from": {
+      "type": "extraDeck",
+      "index": null
+     },
+     "to": {
+      "type": "graveyard",
+      "index": null
+     },
+     "faceDown": false,
+     "defense": false
+    }
+   ]
+  }
+ ]
+}
