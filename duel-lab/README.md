@@ -82,6 +82,17 @@ MDに存在しない・未取得のカードは名前と効果全文で表示す
 現在の再開入口は `scripts/search-multi-pairs-tribute.mjs`、集約は `node scripts/build-multi-search-report.mjs --tribute`。実Duelの再利用と、対象を限定した通常召喚取消しの縮約を使う。[高速化と移行](docs/MULTI_SEARCH_FAST.md)・[取消し処理と残件](docs/MULTI_SEARCH_TRIBUTE.md)に適用条件と検証を記録している。旧reference・fastのcheckpointは別ディレクトリに保持する。稼働中bridgeは読み込み済みの候補集を使うため、更新した候補集は次回起動時に読み込まれる。
 旧長prefixは [保存枝監査](docs/MULTI_SEARCH_FRONTIER_AUDIT.md) で優先的に再生できる。監査だけの訪問と本探索の訪問を分け、削除前後の証拠と独立検証を残す。
 
+## ユーザーのデッキと展開リプレイ
+
+ユーザーの通常M∀LICE（メイン41・EX15）は`presets/user-malice.json`。既定の`preset.json`とは別に置き、既存の探索資料・自動入力は変えていない。
+duel-simulatorの展開リプレイ5本はカード移動列として`routes/user-replays.source.json`に保存し、`node scripts/import-replays.mjs [replayId ...]`で実エンジンの手順へ変換する（`TIME_LIMIT`秒・`MAX_RUNS`回で打ち切り）。再現できた手順は1本ごとに`routes/user-replays.json`へ保存し、止まったものは召喚ごとの到達表と止まった局面を表示する。
+探索しない枝のルールは[PRUNE_RULES.md](docs/PRUNE_RULES.md)。
+
+## MCP（ルールエンジンを1手ずつ操作）
+
+`mcp/duel-mcp.mjs`は、MDPro3と同じEDOProのルール処理を画面なしで動かすMCPサーバー。`claude mcp add -s user duel-lab -- node C:/Project/Apps/card_manager_web/duel-lab/mcp/duel-mcp.mjs`で登録済み。
+ツールは`duel_start`（デッキ・手札を指定して先攻開始）、`duel_state`、`duel_act`（番号か選択肢の文字列で1手）、`duel_undo`、`duel_history`、`duel_save_route`（`routes/mcp-routes.json`へ保存）。相手は手札なしで、展開の確認用。
+
 ## 検証と対応範囲
 
 `python tests/native-server.py` は実ネイティブサーバーで正常デッキの受理と禁止・制限・準制限・同名4枚の拒否を検証する。

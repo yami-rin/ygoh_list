@@ -4,20 +4,13 @@ import assert from 'node:assert/strict';
 import {OcgMessageType as M,OcgQueryFlags as Q} from 'ocgcore-wasm';
 import {Duel} from '../engine.mjs';
 import {preset,board,hash} from './route-harness.mjs';
-import {cards,cardInfo} from '../cards.mjs';
+import {cardInfo} from '../cards.mjs';
+import {TARGET_RULES,pointless} from './prune-rules.mjs';
+export {TARGET_RULES};
 
 const STATUS_DISABLED=0x1;
 const FIELD=new Set([4,8]);
 const own=b=>b.players[0];
-const MALICE=441;
-const isMalice=c=>!!cards[c.code]?.setcodes?.includes(MALICE);
-
-// Domain pruning: target choices that are never worth searching. Add a rule per card effect.
-export const TARGET_RULES={
-  // S:P Little Knight (user rule, 2026-11-08): ① banishes only our own M∀LICE card;
-  // ② (two face-up monsters) may also take an opponent monster, but our side must be M∀LICE.
-  29301450:{allow:(c,p)=>c.controller===0?isMalice(c):p.min===2,reason:'リトルナイト①は自分のM∀LICEだけ、②は自分のM∀LICE＋相手モンスター'},
-};
 
 // Opponent scenario: fixed hand taken from the preset, remaining deck in preset order.
 export const SCENARIOS={
@@ -113,7 +106,7 @@ function ownOptions(g) {
   const p=g.prompt;
   if(p.type==='SELECT_IDLECMD'||p.type==='SELECT_BATTLECMD')return p.choices.filter(c=>c.label==='ターンを終了').map(c=>({action:c.id}));
   // Unselecting a material only loops back; every material set is reachable by selecting.
-  if(p.type==='SELECT_UNSELECT_CARD')return p.choices.filter(c=>!c.label.startsWith('解除')).map(c=>({action:c.id}));
+  if(p.type==='SELECT_UNSELECT_CARD')return p.choices.map(c=>({action:c.id})).filter(input=>!pointless(p,input));
   if(['SELECT_CHAIN','SELECT_EFFECTYN','SELECT_YESNO','SELECT_OPTION'].includes(p.type))return p.choices.map(c=>({action:c.id}));
   // Zone choice is fixed to the first legal zone (approximation recorded in the doc).
   if(p.mode==='multi'&&p.type!=='SELECT_PLACE'&&p.type!=='SELECT_DISFIELD'&&p.min===p.max&&p.min<=2){
