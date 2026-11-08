@@ -21,10 +21,12 @@ test('summoning from a set trap alone is not counted as an interruption',async()
   assert.equal(result.interruptions,0);
 });
 
-test('Little Knight only targets our own M∀LICE cards',()=>{
-  const rule=TARGET_RULES[29301450];
-  assert.equal(rule.allow({code:69272449,controller:0}),true);
-  assert.equal(rule.allow({code:69272449,controller:1}),false);
-  assert.equal(rule.allow({code:78114463,controller:0}),false);
+test('Little Knight: ① own M∀LICE only, ② own M∀LICE plus opponent monsters',()=>{
+  const rule=TARGET_RULES[29301450],first={min:1},second={min:2};
+  assert.equal(rule.allow({code:69272449,controller:0},first),true);
+  assert.equal(rule.allow({code:69272449,controller:1},first),false);
+  assert.equal(rule.allow({code:78114463,controller:0},first),false);
+  assert.equal(rule.allow({code:30118811,controller:1},second),true);
+  assert.equal(rule.allow({code:30118811,controller:0},second),false);
   assert(cards[69272449].setcodes.includes(441));
 });

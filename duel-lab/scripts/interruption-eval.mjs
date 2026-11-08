@@ -14,8 +14,9 @@ const isMalice=c=>!!cards[c.code]?.setcodes?.includes(MALICE);
 
 // Domain pruning: target choices that are never worth searching. Add a rule per card effect.
 export const TARGET_RULES={
-  // S:P Little Knight: only our own M∀LICE cards are worth banishing (user rule, 2026-11-08).
-  29301450:{allow:c=>isMalice(c)&&c.controller===0,reason:'リトルナイトは自分のM∀LICEカードだけを除外する'},
+  // S:P Little Knight (user rule, 2026-11-08): ① banishes only our own M∀LICE card;
+  // ② (two face-up monsters) may also take an opponent monster, but our side must be M∀LICE.
+  29301450:{allow:(c,p)=>c.controller===0?isMalice(c):p.min===2,reason:'リトルナイト①は自分のM∀LICEだけ、②は自分のM∀LICE＋相手モンスター'},
 };
 
 // Opponent scenario: fixed hand taken from the preset, remaining deck in preset order.
@@ -117,7 +118,7 @@ function ownOptions(g) {
   // Zone choice is fixed to the first legal zone (approximation recorded in the doc).
   if(p.mode==='multi'&&p.type!=='SELECT_PLACE'&&p.type!=='SELECT_DISFIELD'&&p.min===p.max&&p.min<=2){
     const rule=TARGET_RULES[g.activating];
-    const usable=p.cards.map((c,i)=>({c,i})).filter(({c})=>!rule||rule.allow(c));
+    const usable=p.cards.map((c,i)=>({c,i})).filter(({c})=>!rule||rule.allow(c,p));
     // Identical copies in deck, hand, grave or Extra Deck are interchangeable.
     const seen=new Set(),unique=usable.filter(({c})=>{
       if(![1,2,16,64].includes(c.location))return true;
