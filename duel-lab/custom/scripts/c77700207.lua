@@ -1,6 +1,5 @@
 --嵐気流－絶対零度嵐
 --Storm Flow - Absolute Zero (original card)
---The text numbers its only effect "②" while limiting "①" to once per turn; the single effect is treated as the once-per-turn effect.
 local s,id=GetID()
 local SET_STORM_FLOW=0x7c1
 function s.initial_effect(c)
