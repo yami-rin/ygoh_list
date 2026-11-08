@@ -4,3 +4,4 @@ runtime/
 tests/artifacts/
 custom/art/*.png
 custom/art/codex-run.log
+custom/art/codex-run-*.log

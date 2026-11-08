@@ -125,4 +125,4 @@ duel-simulatorの展開リプレイ5本はカード移動列として`routes/use
 `custom/<テーマ>.json`にカード定義、`custom/scripts/c<番号>.lua`に効果を置く。`custom-cards.mjs`が起動時にカード一覧へ追加し、スクリプトを`data/scripts/unofficial/`へコピーする（探索資料がハッシュ照合する`cards.mjs`・`engine.mjs`・`data/cards.json`は変えない）。サーバー・ネイティブ接続・MCPは読み込み済み。
 MDPro3へは`python scripts/install-custom.py`でカードDBを`Expansions/`、スクリプトを`script/`、画像を`Picture/Art/`へ置く。
 画像は`custom/art/PROMPT.md`の指示でCodex（gpt-6.1-sol）に生成させ、使ったプロンプトを`custom/art/prompts.json`に残す。PNG本体はGitに入れない。
-現在のテーマ：連鎖律（setcode 0x1f0、77700001〜77700012）。
+現在のテーマ：連鎖律（setcode 0x1f0、77700001〜77700012）、凋落（setcode 0x7c0、77700101〜77700108）。凋落の虚像－アイドル②の「デッキから召喚」は、エンジンが手札からしか通常召喚できないため「手札に加えてすぐ召喚」で近似している。

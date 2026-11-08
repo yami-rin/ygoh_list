@@ -36,3 +36,21 @@ test('Initiator search chains into Extender and a Chain Link 4 Dominate adds two
     assert(g.log.some(e=>/CHAIN 4 解決/.test(e.text)));
   }finally{g.close();}
 });
+
+test('Decline: Herald Tribute Summons Tyrant, Tyrant adds Idol, Idol is Tribute Summoned with only Tyrant',async()=>{
+  const x3=c=>[c,c,c];
+  const main=[77700101,77700102,77700103,77700104,77700105,77700106,77700107,77700108].flatMap(x3);
+  const hand=[77700101,77700102,77700105,77700106,77700107];
+  const own={main:[...main],extra:[]};
+  for(const c of hand)own.main.splice(own.main.indexOf(c),1);
+  const g=await Duel.create([own,{main,extra:[]}],{seed:1,fixtures:hand.map(code=>({code,team:0,controller:0,location:2,position:8}))});
+  try{
+    pass(g);pick(g,'召喚：凋落の先触れ－ヘラルド');pick(g,'自分 モンスター 3');pass(g);pick(g,'凋落の暴君－タイラント');
+    pass(g);pick(g,'効果発動：凋落の先触れ－ヘラルド');pick(g,'凋落の暴君－タイラント');pick(g,'凋落の先触れ－ヘラルド');pick(g,'自分 モンスター 3');
+    pass(g);pick(g,'効果発動：凋落の暴君－タイラント');
+    const p=g.prompt;g.respond(0,g.revision,{selection:[p.cards.findIndex(c=>c.label.includes('ダスト')),p.cards.findIndex(c=>c.label.includes('シェイド'))]},{snapshot:false});
+    pick(g,'凋落の虚像－アイドル');pick(g,'凋落の虚像－アイドル');pick(g,'凋落の暴君－タイラント');pick(g,'自分 モンスター 3');
+    assert(g.log.some(e=>/YOU：凋落の虚像－アイドル を召喚/.test(e.text)));
+    assert.equal(g.snapshot(0).players[0].grave.filter(c=>c.code===77700105).length,1,'only Tyrant was Tributed');
+  }finally{g.close();}
+});
