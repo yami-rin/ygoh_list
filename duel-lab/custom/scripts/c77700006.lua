@@ -30,21 +30,38 @@ function s.initial_effect(c)
 	c:RegisterEffect(e2)
 end
 s.listed_series={SET_CHAIN_CODE}
---A "Chain Code" Spell/Trap is Set to the Spell & Trap Zone; a monster is Set face-down in the Monster Zone.
-function s.setfilter(c,e,tp)
-	if not c:IsSetCard(SET_CHAIN_CODE) then return false end
-	if c:IsSpellTrap() then return c:IsSSetable() end
-	return c:IsMonster() and Duel.GetLocationCount(tp,LOCATION_MZONE)>0 and c:IsCanBeSpecialSummoned(e,0,tp,false,false,POS_FACEDOWN_DEFENSE)
+--A "Chain Code" Spell/Trap is Set to the Spell & Trap Zone; a monster is Set face-down in the Monster Zone
+--(Special Summoned in face-down Defense Position, as official "Set a monster" effects are scripted).
+function s.stfilter(c)
+	return c:IsSetCard(SET_CHAIN_CODE) and c:IsSpellTrap() and c:IsSSetable()
+end
+function s.monfilter(c,e,tp)
+	return c:IsSetCard(SET_CHAIN_CODE) and c:IsMonster() and c:IsCanBeSpecialSummoned(e,0,tp,false,false,POS_FACEDOWN_DEFENSE)
+end
+function s.canmon(e,tp)
+	return Duel.GetLocationCount(tp,LOCATION_MZONE)>0 and Duel.IsExistingMatchingCard(s.monfilter,tp,LOCATION_HAND+LOCATION_DECK,0,1,nil,e,tp)
+end
+function s.canst(tp)
+	return Duel.IsExistingMatchingCard(s.stfilter,tp,LOCATION_HAND+LOCATION_DECK,0,1,nil)
 end
 function s.settg(e,tp,eg,ep,ev,re,r,rp,chk)
-	if chk==0 then return Duel.IsExistingMatchingCard(s.setfilter,tp,LOCATION_HAND+LOCATION_DECK,0,1,nil,e,tp) end
+	if chk==0 then return s.canmon(e,tp) or s.canst(tp) end
 end
 function s.setop(e,tp,eg,ep,ev,re,r,rp)
-	Duel.Hint(HINT_SELECTMSG,tp,HINTMSG_SET)
-	local tc=Duel.SelectMatchingCard(tp,s.setfilter,tp,LOCATION_HAND+LOCATION_DECK,0,1,1,nil,e,tp):GetFirst()
-	if not tc then return end
-	if tc:IsSpellTrap() then Duel.SSet(tp,tc)
-	elseif Duel.SpecialSummon(tc,0,tp,tp,false,false,POS_FACEDOWN_DEFENSE)>0 then Duel.ConfirmCards(1-tp,tc) end
+	local mon,st=s.canmon(e,tp),s.canst(tp)
+	if not mon and not st then return end
+	--Choose the kind first so a monster is never buried in a long mixed list.
+	local setmon=mon
+	if mon and st then setmon=Duel.SelectOption(tp,aux.Stringid(id,2),aux.Stringid(id,3))==0 end
+	if setmon then
+		Duel.Hint(HINT_SELECTMSG,tp,HINTMSG_SET)
+		local tc=Duel.SelectMatchingCard(tp,s.monfilter,tp,LOCATION_HAND+LOCATION_DECK,0,1,1,nil,e,tp):GetFirst()
+		if tc and Duel.SpecialSummon(tc,0,tp,tp,false,false,POS_FACEDOWN_DEFENSE)>0 then Duel.ConfirmCards(1-tp,tc) end
+	else
+		Duel.Hint(HINT_SELECTMSG,tp,HINTMSG_SET)
+		local tc=Duel.SelectMatchingCard(tp,s.stfilter,tp,LOCATION_HAND+LOCATION_DECK,0,1,1,nil):GetFirst()
+		if tc then Duel.SSet(tp,tc) end
+	end
 end
 function s.descon(e,tp,eg,ep,ev,re,r,rp)
 	return Duel.GetCurrentChain(true)>=3 and Duel.GetFlagEffect(tp,id+100)==0

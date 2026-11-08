@@ -29,6 +29,12 @@ if not Card.IsSpellTrap then
 	end
 	Link=Link or {}
 	Link.AddProcedure=Link.AddProcedure or function(c,f,min,max) return aux.AddLinkProcedure(c,f,min,max or 99) end
+	--Synchro.AddProcedure(c,tuner_f,1,1,nontuner_f,min,max) / Xyz.AddProcedure(c,f,lv,ct,...) (EDOPro proc_synchro/proc_xyz)
+	Synchro=Synchro or {}
+	Synchro.NonTuner=Synchro.NonTuner or function(f,...) return aux.NonTuner(f,...) end
+	Synchro.AddProcedure=Synchro.AddProcedure or function(c,f1,min1,max1,f2,min2,max2) return aux.AddSynchroProcedure(c,f1,f2,min2 or 1,max2 or 99) end
+	Xyz=Xyz or {}
+	Xyz.AddProcedure=Xyz.AddProcedure or function(c,f,lv,ct,alterf,desc,maxct,op) return aux.AddXyzProcedure(c,f,lv,ct,alterf,desc,maxct,op) end
 	Duel.CheckReleaseGroupCost=Duel.CheckReleaseGroupCost or function(tp,f,ct,use_hand,check,ex,...)
 		return Duel.CheckReleaseGroup(tp,f,ct,ex,...)
 	end
