@@ -37,8 +37,7 @@ function s.activate(e,tp,eg,ep,ev,re,r,rp)
 	if #tg==0 then return end
 	Duel.Hint(HINT_SELECTMSG,tp,HINTMSG_RTOHAND)
 	local g=Duel.SelectMatchingCard(tp,s.ownfilter,tp,LOCATION_MZONE,0,1,1,nil)
-	if #g==0 then return end
-	Duel.HintSelection(g)
+	if #g>0 then Duel.HintSelection(g) end
 	g:Merge(tg)
 	Duel.SendtoHand(g,nil,REASON_EFFECT)
 end

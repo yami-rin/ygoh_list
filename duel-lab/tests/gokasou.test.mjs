@@ -22,7 +22,7 @@ const x3=c=>[c,c,c];
 const MAIN=[77700301,77700302,77700303,77700304,77700305,77700306,77700307,77700308].flatMap(x3);
 // opponent: Blue-Eyes / Raigeki / Monster Reborn / Mirror Force
 const FILLER=[89631139,89631139,89631139,12580477,12580477,83764718,83764718,44095762,44095762,89631139,89631139,89631139];
-const CYCLONE=5318639,CALLED=24224830,IMPERMANENCE=10045474,BLUE_EYES=89631139,RAIGEKI=12580477,REBORN=83764718,MIRROR=44095762,TORRENTIAL=53582587,ASH=14558127,VEILER=97268402;
+const JAR=83968380,CYCLONE=5318639,CALLED=24224830,IMPERMANENCE=10045474,BLUE_EYES=89631139,RAIGEKI=12580477,REBORN=83764718,MIRROR=44095762,TORRENTIAL=53582587,ASH=14558127,VEILER=97268402;
 const snap=g=>g.snapshot(0).players;
 const count=(zone,code)=>zone.filter(c=>c?.code===code).length;
 
@@ -165,5 +165,31 @@ test('Gokasou: Remains survives battle, banishes on attack and attacks monsters 
     run(g,['攻撃：骸ノ業火葬','ヴェーラー','いいえ',pass]);
     assert.equal(snap(g)[1].monsters.filter(Boolean).length,1);
     assert(!g.prompt.choices.some(c=>c.label.startsWith('攻撃：')),'no 4th attack');
+  }finally{g.close();}
+});
+
+test('Gokasou: Admission ① needs the opponent to be able to mill, and does not search when nothing was milled',async()=>{
+  // empty opponent Deck → ① cannot be activated (only Set is offered)
+  let g=await Duel.create([{main:MAIN,extra:[]},{main:[],extra:[]}],{seed:1,fixtures:[fx(77700307)]});
+  try{
+    pass(g);
+    assert(!g.prompt.choices.some(c=>c.label.startsWith('効果発動：業火葬の受入')),g.prompt.choices.map(c=>c.label).join(' / '));
+  }finally{g.close();}
+  // 1 card in the opponent Deck: milling 1 still searches
+  g=await Duel.create([{main:MAIN,extra:[]},{main:[BLUE_EYES],extra:[]}],{seed:1,fixtures:[fx(77700307)]});
+  try{
+    pass(g);
+    run(g,['効果発動：業火葬の受入','自分 魔法・罠 1',pass,'1','焚き火',pass]);
+    assert.equal(count(snap(g)[1].grave,BLUE_EYES),1);
+    assert.equal(count(snap(g)[0].hand,77700306),1,'searched after milling 1');
+  }finally{g.close();}
+  // the opponent's Deck is emptied in response (Jar of Greed draws their last card): nothing is milled, so no search
+  g=await Duel.create([{main:MAIN,extra:[]},{main:[BLUE_EYES],extra:[]}],{seed:1,fixtures:[fx(77700307),fx(JAR,{team:1,location:8,position:10})]});
+  try{
+    pass(g);
+    run(g,['効果発動：業火葬の受入','自分 魔法・罠 1','発動：強欲な瓶',pass]);
+    assert.equal(snap(g)[1].grave.filter(c=>c?.code===BLUE_EYES).length,0);
+    assert.equal(g.prompt.type,'SELECT_IDLECMD',g.prompt.title);
+    assert.equal(snap(g)[0].hand.filter(Boolean).length,0,'no search');
   }finally{g.close();}
 });

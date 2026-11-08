@@ -24,8 +24,9 @@ function s.rtfilter(c,e,tp)
 	return c:IsFaceup() and c:IsSetCard(SET_YOIKOKU_BLADE) and c:IsAbleToHand() and Duel.GetMZoneCount(tp,c)>0
 		and Duel.IsExistingMatchingCard(s.spfilter,tp,LOCATION_DECK,0,1,nil,e,tp,c:GetCode())
 end
+--Extra Deck monsters would return to the Extra Deck, so they are not added to the hand
 function s.thfilter(c)
-	return c:IsSetCard(SET_YOIKOKU_BLADE) and c:IsMonster() and (c:IsLocation(LOCATION_GRAVE) or c:IsFaceup()) and c:IsAbleToHand()
+	return c:IsSetCard(SET_YOIKOKU_BLADE) and c:IsMonster() and not c:IsType(TYPE_FUSION+TYPE_SYNCHRO+TYPE_XYZ+TYPE_LINK) and (c:IsLocation(LOCATION_GRAVE) or c:IsFaceup()) and c:IsAbleToHand()
 end
 function s.target(e,tp,eg,ep,ev,re,r,rp,chk,chkc)
 	if chkc then

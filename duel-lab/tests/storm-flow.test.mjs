@@ -5,7 +5,7 @@ import {customCards} from '../custom-cards.mjs';
 import {Duel} from '../engine.mjs';
 
 const WESTERLIES=77700201,FRONT=77700202,TURBULENCE=77700203,EYE=77700204,ATMOSPHERE=77700205,BLOWBACK=77700206,
-  ABSOLUTE_ZERO=77700207,GALE=77700208,CYCLONE=77700209,GUST_MAX=77700210,RAIGEKI=12580477;
+  ABSOLUTE_ZERO=77700207,GALE=77700208,CYCLONE=77700209,GUST_MAX=77700210,RAIGEKI=12580477,EVACUATION=94192409;
 const LOC={hand:2,mzone:4,szone:8,grave:16,removed:32};
 // zones: {hand:[code...], mzone:['code@sequence'...], ...}; set: codes placed face-down in the Spell & Trap Zone
 async function duel({deck0=[],extra0=[],deck1=[],extra1=[],p0={},p1={},set=[]}){
@@ -84,6 +84,23 @@ test('Blowback returns your WIND Synchro and two opponent cards',async()=>{
     assert(names(g,0,'extra').includes('嵐気流－疾風圏'),'Gale went back to the Extra Deck');
     assert.equal(zone(g,1,'hand',1).length,5);
     assert.equal(zone(g,1,'monsters').length+zone(g,1,'spells').length,0);
+  }finally{g.close();}
+});
+
+test('Blowback needs a WIND monster you can return, and still returns the target if that monster is gone on resolution',async()=>{
+  // no WIND monster you control → cannot be activated (only Set is offered)
+  let g=await duel({deck0:[WESTERLIES],deck1:[FRONT,FRONT],p0:{hand:[BLOWBACK]},p1:{mzone:[FRONT]}});
+  try{
+    pass(g);
+    assert(!labels(g).some(l=>l.startsWith('効果発動：嵐気流－強烈な吹き返し')),labels(g).join(' / '));
+  }finally{g.close();}
+  // the opponent chains Compulsory Evacuation Device on your only WIND monster: the targeted card still returns
+  g=await duel({deck0:[WESTERLIES],deck1:[FRONT,FRONT],p0:{hand:[BLOWBACK],mzone:[FRONT]},p1:{mzone:[FRONT],szone:[EVACUATION]},set:[EVACUATION]});
+  try{
+    play(g,['PASS','効果発動：嵐気流－強烈な吹き返し','P2 モンスター 1','発動：強制脱出装置','P1 モンスター 1','PASS']);
+    assert.equal(zone(g,0,'monsters').length,0,'Front went back to the hand by the opponent');
+    assert.equal(zone(g,1,'monsters').length,0,'the target still returned');
+    assert.equal(names(g,0,'hand').filter(n=>n==='嵐気流－停滞する前線').length,1);
   }finally{g.close();}
 });
 

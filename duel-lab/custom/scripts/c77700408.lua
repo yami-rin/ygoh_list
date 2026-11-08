@@ -2,7 +2,7 @@
 --Dusk Hour Blade - Polar Night (original card)
 --① ("gains the ② effects of its "Dusk Hour Blade" Xyz Materials") follows the EDOPro idiom: the materials
 --("Lingering Night" / "White Night") register EFFECT_TYPE_XMATERIAL copies of their ② that work only for this card,
---sharing this card's ① once-per-turn count ({id,0}).
+--sharing one once-per-turn count under this card's name ({id,0}): the gained effects are usable once per turn in total.
 local s,id=GetID()
 local SET_YOIKOKU_BLADE=0x17c3
 function s.initial_effect(c)
@@ -30,7 +30,8 @@ function s.grcon(e,tp,eg,ep,ev,re,r,rp)
 end
 function s.grop(e,tp,eg,ep,ev,re,r,rp)
 	local c=e:GetHandler()
-	--● (granted) either player's turn: return this card to hand/Extra Deck, target 1 card on the field, destroy it
+	--● (granted) either player's turn: return this card to hand/Extra Deck, target 1 card on the field, destroy it.
+	--Once per turn, shared by every monster that gains it ({id,2} counts per player), so return/re-summon loops stop.
 	local e1=Effect.CreateEffect(c)
 	e1:SetDescription(aux.Stringid(id,2))
 	e1:SetCategory(CATEGORY_DESTROY)
@@ -39,6 +40,7 @@ function s.grop(e,tp,eg,ep,ev,re,r,rp)
 	e1:SetProperty(EFFECT_FLAG_CARD_TARGET)
 	e1:SetHintTiming(0,TIMINGS_CHECK_MONSTER_E+TIMING_END_PHASE)
 	e1:SetRange(LOCATION_MZONE)
+	e1:SetCountLimit(1,{id,2})
 	e1:SetCost(s.gcost)
 	e1:SetTarget(s.gtg)
 	e1:SetOperation(s.gop)

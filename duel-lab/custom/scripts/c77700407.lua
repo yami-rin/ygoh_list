@@ -50,8 +50,9 @@ function s.negate_effect(c,xmat)
 	e:SetOperation(s.negop)
 	return e
 end
+--Extra Deck monsters would return to the Extra Deck, so they are not added to the hand
 function s.thfilter(c)
-	return c:IsSetCard(SET_YOIKOKU) and c:IsAbleToHand()
+	return c:IsSetCard(SET_YOIKOKU) and not c:IsType(TYPE_FUSION+TYPE_SYNCHRO+TYPE_XYZ+TYPE_LINK) and c:IsAbleToHand()
 end
 function s.thtg(e,tp,eg,ep,ev,re,r,rp,chk)
 	if chk==0 then return Duel.IsExistingMatchingCard(s.thfilter,tp,LOCATION_DECK+LOCATION_GRAVE,0,1,nil) end

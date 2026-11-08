@@ -7,7 +7,7 @@ import {Duel} from '../engine.mjs';
 
 const HIEN=77700401,KASUMI=77700402,OBORO=77700403,TSUKIKAGE=77700404,YASHA=77700405,ZANYA=77700406,BYAKUYA=77700407,
   KYOKUYA=77700408,YAYOI=77700409,ENBU=77700410,BATTO=77700411,SHUKUCHI=77700412,KAGEGAMAE=77700413,ZETTO=77700414;
-const FRONT=77700202,ABSOLUTE_ZERO=77700207,RAIGEKI=12580477;
+const FRONT=77700202,ABSOLUTE_ZERO=77700207,RAIGEKI=12580477,DARK_HOLE=53129443;
 const LOC={hand:2,mzone:4,szone:8,grave:16,removed:32};
 // zones: {hand:[code...], mzone:['code@sequence'...], ...}; set: codes placed face-down in the Spell & Trap Zone
 async function duel({deck0=[],extra0=[],deck1=[],extra1=[],p0={},p1={},set=[]}){
@@ -176,5 +176,57 @@ test('Zanya ② column destruction, Shadow Stance, White Night ② and Severing 
     assert.equal(names(g,1,'grave').filter(n=>n==='サンダー・ボルト').length,1,'the second Raigeki went to the Deck');
     assert.equal(g.snapshot(1).players[1].deckCount,deckBefore+1);
     assert(names(g,0,'extra').includes('宵刻刃－白夜'));
+  }finally{g.close();}
+});
+
+test('Polar Night ● is once per turn across every monster that gains it: Kasumi ① / Sword Dance ② loop stops on the 2nd lap',async()=>{
+  const g=await duel({deck0:[OBORO,YASHA],extra0:[KYOKUYA],deck1:[FRONT,FRONT,FRONT],
+    p0:{hand:[HIEN,KASUMI,DARK_HOLE],mzone:[`${ZANYA}@0`,`${BYAKUYA}@1`],szone:[ENBU]},
+    p1:{szone:[ABSOLUTE_ZERO,ABSOLUTE_ZERO,ABSOLUTE_ZERO]},set:[ABSOLUTE_ZERO]});
+  try{
+    // Xyz Summon Polar Night, destroy it with Dark Hole → Polar Night ② grants ● this turn (Zanya ① is declined).
+    play(g,['PASS','特殊召喚：宵刻刃－極夜','選択：宵刻刃－残夜','選択：宵刻刃－白夜','PASS','効果発動：ブラック・ホール']);
+    play(g,['発動しない','発動しない','発動：宵刻刃－極夜 / 宵刻刃モンスターに効果を与える','発動しない','PASS']);
+    assert(names(g,0,'grave').includes('宵刻刃－極夜'));
+    // Hien is Normal Summoned (① declined), Kasumi ① Special Summons itself: both gain ●.
+    play(g,['召喚：宵刻刃－飛燕','いいえ','PASS','特殊召喚：宵刻刃－霞','PASS']);
+    const grant=l=>l.includes('戻してカードを破壊');
+    assert(labels(g).some(l=>l==='効果発動：宵刻刃－霞 / 戻してカードを破壊'),labels(g).join(' / '));
+    assert(labels(g).some(l=>l==='効果発動：宵刻刃－飛燕 / 戻してカードを破壊'),labels(g).join(' / '));
+    // 1st lap: Kasumi ● (Kasumi to the hand as cost) destroys 1 Set card; Sword Dance ② Normal Summons Kasumi again.
+    play(g,['効果発動：宵刻刃－霞 / 戻してカードを破壊','P2 魔法・罠 1','PASS','はい','PASS','宵刻刃－霞','PASS']);
+    assert.equal(zone(g,1,'spells').length,2);
+    assert(names(g,0,'monsters').includes('宵刻刃－霞'));
+    // 2nd lap: neither the re-summoned Kasumi nor Hien can use ● again this turn.
+    assert(!labels(g).some(grant),labels(g).join(' / '));
+  }finally{g.close();}
+});
+
+test('Yaksha ①, Unsheathing ● 2 and White Night ① do not add Extra Deck monsters to the hand',async()=>{
+  // Yaksha ①: Zanya (Synchro) in the GY is not a target; Moonshadow is.
+  let g=await duel({deck0:[OBORO],deck1:[FRONT,FRONT],p0:{hand:[YASHA],grave:[ZANYA,TSUKIKAGE]}});
+  try{
+    play(g,['PASS','召喚：宵刻刃－夜叉','はい']);
+    assert(labels(g).some(l=>l.includes('月影')),labels(g).join(' / '));
+    assert(!labels(g).some(l=>l.includes('残夜')),labels(g).join(' / '));
+  }finally{g.close();}
+  // Unsheathing: with only Zanya in the GY, the recovery choice is not offered (and cannot be activated at all).
+  g=await duel({deck0:[OBORO],deck1:[FRONT,FRONT],p0:{hand:[BATTO],grave:[ZANYA,BYAKUYA]}});
+  try{
+    pass(g);
+    assert(!labels(g).some(l=>l.startsWith('効果発動：宵刻の抜刀')),labels(g).join(' / '));
+  }finally{g.close();}
+  g=await duel({deck0:[OBORO],deck1:[FRONT,FRONT],p0:{hand:[BATTO],grave:[ZANYA,TSUKIKAGE]}});
+  try{
+    play(g,['PASS','効果発動：宵刻の抜刀','墓地・除外から回収']);
+    assert(labels(g).some(l=>l.includes('月影')),labels(g).join(' / '));
+    assert(!labels(g).some(l=>l.includes('残夜')),labels(g).join(' / '));
+  }finally{g.close();}
+  // White Night ①: Zanya in the GY is not offered; Sword Dance in the Deck is.
+  g=await duel({deck0:[ENBU],extra0:[BYAKUYA],deck1:[FRONT,FRONT],p0:{mzone:[KASUMI,YASHA],grave:[ZANYA]}});
+  try{
+    play(g,['PASS','特殊召喚：宵刻刃－白夜','選択：宵刻刃－霞','選択：宵刻刃－夜叉','はい','PASS']);
+    assert(labels(g).some(l=>l.includes('宵刻の演舞')),labels(g).join(' / '));
+    assert(!labels(g).some(l=>l.includes('残夜')),labels(g).join(' / '));
   }finally{g.close();}
 });
