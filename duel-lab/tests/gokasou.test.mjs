@@ -75,12 +75,13 @@ test('Gokasou: Apprentice → Purgatory → Admission, banishing chains into Sca
   }finally{g.close();}
 });
 
-test('Gokasou: Coffin Bearer destroys, Remains banishes, Forced Execution clears the GY with a Link Monster',async()=>{
+// Forced Execution clears the opponent's GY only when it holds 10 or more cards.
+for(const [extraGrave,cleared] of [[0,false],[7,true]])test(`Gokasou: Coffin Bearer destroys, Remains banishes, Forced Execution ${cleared?'clears a 10+ card GY':'leaves a GY under 10'} with a Link Monster`,async()=>{
   const g=await Duel.create([{main:MAIN,extra:[]},{main:FILLER,extra:[]}],{seed:1,fixtures:[
     fx(77700303,{location:4,sequence:0,position:1}),fx(77700301,{location:4,sequence:1,position:1}),fx(77700311,{location:4,sequence:5,position:1}),
     fx(77700308,{location:8,sequence:0,position:8}),
     fx(BLUE_EYES,{team:1,location:4,sequence:0,position:1}),fx(MIRROR,{team:1,location:8,sequence:0,position:8}),
-    ...[CYCLONE,CALLED,IMPERMANENCE,RAIGEKI].map(c=>grave(c))]});
+    ...[CYCLONE,CALLED,IMPERMANENCE,RAIGEKI,...Array(extraGrave).fill(RAIGEKI)].map(c=>grave(c))]});
   try{
     pass(g);
     run(g,['効果発動：業火葬－霊柩の担ぎ手','選択：業火葬－送り火の導き手','青眼',pass,'はい','サイクロン',pass]);
@@ -90,8 +91,9 @@ test('Gokasou: Coffin Bearer destroys, Remains banishes, Forced Execution clears
     assert.equal(snap(g)[1].banished.filter(Boolean).length,2);
     run(g,['効果発動：業火葬－強制執行',pass,'ミラーフォース']);
     const opp=snap(g)[1];
-    assert.equal(opp.grave.filter(Boolean).length,0,'whole GY banished');
-    assert.equal(opp.banished.filter(Boolean).length,6);
+    // GY before Execution: 4 starting cards + Blue-Eyes - Cyclone - Called by = 3, plus the extra cards
+    if(cleared){assert.equal(opp.grave.filter(Boolean).length,0,'whole GY banished');assert.equal(opp.banished.filter(Boolean).length,3+3+extraGrave);}
+    else{assert.equal(opp.grave.filter(Boolean).length,3,'GY under 10 is kept');assert.equal(opp.banished.filter(Boolean).length,3);}
     assert.equal(opp.spells.filter(Boolean).length,0);
   }finally{g.close();}
 });

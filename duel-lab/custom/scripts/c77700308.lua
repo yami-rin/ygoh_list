@@ -3,7 +3,7 @@
 local s,id=GetID()
 local SET_GOKASOU=0x7c2
 function s.initial_effect(c)
-	--① (1 per turn) banish 1 card on the field; with a "Gokasou" Link Monster and fewer than 10 cards in the opponent's GY, also banish their whole GY
+	--① (1 per turn) banish 1 card on the field; with a "Gokasou" Link Monster and 10 or more cards in the opponent's GY, also banish their whole GY
 	local e1=Effect.CreateEffect(c)
 	e1:SetCategory(CATEGORY_REMOVE)
 	e1:SetType(EFFECT_TYPE_ACTIVATE)
@@ -30,7 +30,7 @@ function s.activate(e,tp,eg,ep,ev,re,r,rp)
 	Duel.HintSelection(g)
 	Duel.Remove(g,POS_FACEUP,REASON_EFFECT)
 	if Duel.IsExistingMatchingCard(s.linkfilter,tp,LOCATION_MZONE,0,1,nil)
-		and Duel.GetFieldGroupCount(tp,0,LOCATION_GRAVE)<10 then
+		and Duel.GetFieldGroupCount(tp,0,LOCATION_GRAVE)>=10 then
 		local rg=Duel.GetMatchingGroup(Card.IsAbleToRemove,tp,0,LOCATION_GRAVE,nil)
 		if #rg>0 then Duel.Remove(rg,POS_FACEUP,REASON_EFFECT) end
 	end

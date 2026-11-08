@@ -23,7 +23,11 @@ if(fs.existsSync(CUSTOM)){
     fs.mkdirSync(target,{recursive:true});
     for(const lua of fs.readdirSync(source).filter(f=>/^c\d+\.lua$/.test(f))){
       const from=path.join(source,lua),to=path.join(target,lua);
-      if(!fs.existsSync(to)||fs.readFileSync(to,'utf8')!==fs.readFileSync(from,'utf8'))fs.copyFileSync(from,to);
+      if(fs.existsSync(to)&&fs.readFileSync(to,'utf8')===fs.readFileSync(from,'utf8'))continue;
+      // Parallel test processes copy at the same time: write aside and rename so no process reads a half-written script.
+      const tmp=`${to}.${process.pid}.tmp`;
+      fs.copyFileSync(from,tmp);
+      try{fs.renameSync(tmp,to);}catch(e){fs.rmSync(tmp,{force:true});if(!fs.existsSync(to))throw e;}
     }
   }
 }

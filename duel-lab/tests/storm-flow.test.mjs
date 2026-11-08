@@ -103,6 +103,21 @@ test('Westerlies ① ② and Eye ① ②: bounce, search, swap in and strip the 
   }finally{g.close();}
 });
 
+test('Eye ② is once per turn: a second Eye summoned with a face-up Spell on the field offers nothing',async()=>{
+  const MESSENGER=44656491,REBORN=83764718;
+  const g=await duel({deck0:[WESTERLIES,WESTERLIES],deck1:[FRONT,FRONT,FRONT],
+    p0:{hand:[EYE,MESSENGER,REBORN],mzone:[FRONT],grave:[EYE]},p1:{hand:[FRONT,TURBULENCE],szone:[ABSOLUTE_ZERO]}});
+  try{
+    play(g,['PASS','効果発動：嵐気流－眼の観測者','PASS','停滞する前線','PASS','はい','PASS']);
+    assert.equal(zone(g,1,'grave').length,1,'the first Eye ② resolved');
+    play(g,['発動：平和の使者','PASS','発動：死者蘇生','PASS','眼の観測者','PASS']);
+    assert.equal(names(g,0,'monsters').filter(n=>n==='嵐気流－眼の観測者').length,2);
+    assert(names(g,0,'spells').includes('平和の使者'),'a face-up Spell is there to return');
+    assert(!(g.prompt.choices||[]).some(c=>/眼の観測者/.test(c.label)&&!/召喚|特殊召喚：/.test(c.label)),'Eye ② is not offered again');
+    assert.equal(zone(g,1,'grave').length,1,'no second discard');
+  }finally{g.close();}
+});
+
 test('Eye ② chooses how many random cards to discard, up to the number returned',async()=>{
   const g=await duel({deck0:[WESTERLIES],deck1:[FRONT,FRONT,FRONT],
     p0:{hand:[EYE],mzone:[FRONT]},p1:{hand:[FRONT,TURBULENCE,ATMOSPHERE],szone:[ABSOLUTE_ZERO,ABSOLUTE_ZERO]}});
