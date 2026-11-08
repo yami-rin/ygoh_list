@@ -7,6 +7,7 @@ import readline from 'node:readline';
 import {startDeckRoute,deckHash} from '../scripts/import-replays.mjs';
 import {respond,board,hash,finishRoute} from '../scripts/route-harness.mjs';
 import {cards,cardInfo} from '../cards.mjs';
+import '../custom-cards.mjs';
 
 const DECKS={
   'user-malice':new URL('../presets/user-malice.json',import.meta.url),

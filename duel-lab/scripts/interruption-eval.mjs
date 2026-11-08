@@ -1,5 +1,6 @@
 // Interruption evaluator: replay a saved first-turn route, play a scripted opponent turn in the real core,
 // and search our responses for the largest number of resolved interferences (docs/INTERRUPTION_EVAL.md).
+import fs from 'node:fs';
 import assert from 'node:assert/strict';
 import {OcgMessageType as M,OcgQueryFlags as Q} from 'ocgcore-wasm';
 import {Duel} from '../engine.mjs';
@@ -24,8 +25,15 @@ function take(list,codes,what) {
   return left;
 }
 
+// Our deck: the route's own deck file (e.g. presets/user-malice.json) or preset.json. The opponent always uses preset.json.
+export function routeDeck(route) {
+  if(!route.deck)return preset;
+  const d=JSON.parse(fs.readFileSync(new URL(`../${route.deck}`,import.meta.url)));
+  return {main:d.main,extra:d.extra};
+}
+
 async function startScenario(route,scenario) {
-  const mine=structuredClone(preset),theirs=structuredClone(preset);
+  const mine=structuredClone(routeDeck(route)),theirs=structuredClone(preset);
   mine.main=take(mine.main,route.hand,'Hand');
   if(route.deckOrder){assert.deepEqual([...route.deckOrder].sort((a,b)=>a-b),[...mine.main].sort((a,b)=>a-b));mine.main=[...route.deckOrder];}
   theirs.main=take(theirs.main,scenario.hand,'Opponent hand');
@@ -107,7 +115,9 @@ function ownOptions(g) {
   if(p.type==='SELECT_IDLECMD'||p.type==='SELECT_BATTLECMD')return p.choices.filter(c=>c.label==='ターンを終了').map(c=>({action:c.id}));
   // Unselecting a material only loops back; every material set is reachable by selecting.
   if(p.type==='SELECT_UNSELECT_CARD')return p.choices.map(c=>({action:c.id})).filter(input=>!pointless(p,input));
-  if(['SELECT_CHAIN','SELECT_EFFECTYN','SELECT_YESNO','SELECT_OPTION'].includes(p.type))return p.choices.map(c=>({action:c.id}));
+  // Stand-in hand cards (route.deadHand, e.g. unnamed cards in a replay) are never played.
+  if(p.type==='SELECT_CHAIN')return p.choices.filter(c=>!(c.card&&c.card.location===2&&g.dead?.has(c.card.code))).map(c=>({action:c.id}));
+  if(['SELECT_EFFECTYN','SELECT_YESNO','SELECT_OPTION'].includes(p.type))return p.choices.map(c=>({action:c.id}));
   // Zone choice is fixed to the first legal zone (approximation recorded in the doc).
   if(p.mode==='multi'&&p.type!=='SELECT_PLACE'&&p.type!=='SELECT_DISFIELD'&&p.min===p.max&&p.min<=2){
     const rule=TARGET_RULES[g.activating];
@@ -137,6 +147,7 @@ export async function runLine(route,scenario,choices,visited=new Map()) {
   const g=await startScenario(route,scenario);
   try {
     replayRoute(g,route);
+    g.dead=new Set(route.deadHand||[]);
     const opp={actions:0},picks=[],trace=[];let open=null;
     for(let guard=0;guard<4000&&g.status==='playing'&&g.pending&&g.turn<=2;guard++){
       if((g.pending.player^g.first)===1){

@@ -3,6 +3,7 @@ import fs from 'node:fs';
 import path from 'node:path';
 import crypto from 'node:crypto';
 import {ROOT,DATA,cards,cardInfo,parseDeck} from './cards.mjs';
+import './custom-cards.mjs';
 import {Duel} from './engine.mjs';
 import {Astra,MODEL,MODEL_LABEL} from './astra.mjs';
 

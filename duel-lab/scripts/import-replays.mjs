@@ -172,7 +172,7 @@ export async function importReplay(replay,deck,{maxRuns=Number(process.env.MAX_R
       if(done.length===plan.summons.length&&g.prompt?.type==='SELECT_IDLECMD'&&!best.finalBoard){best.finalBoard=ownBoard(g);best.finalPath=path;}
       if(g.turn!==1||!g.pending)continue;
       if(done.length===plan.summons.length&&contains(done,plan.summons.map(x=>x.code))&&g.prompt.type==='SELECT_IDLECMD'&&matches(g,plan))
-        return {plan,runs,route:finishRoute(g,{id:`user-replay-${replay.id}`,title:replay.title,source:replay.url,deck:'presets/user-malice.json'}),board:ownBoard(g)};
+        return {plan,runs,route:finishRoute(g,{id:`user-replay-${replay.id}`,title:replay.title,source:replay.url,deck:'presets/user-malice.json',deadHand:[BLANK]}),board:ownBoard(g)};
       if(path.length>220)continue;
       const key=hash({b:board(g),p:g.pending,d:done.length,r:g.inputs.slice(-3).map(i=>i.response)});
       if(seen.has(key))continue;seen.add(key);

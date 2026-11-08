@@ -5,6 +5,7 @@ import crypto from 'node:crypto';
 import {pathToFileURL} from 'node:url';
 import {Astra,MODEL_LABEL} from './astra.mjs';
 import {ROOT} from './cards.mjs';
+import './custom-cards.mjs';
 import {compactNativePayload} from './native-payload.mjs';
 import {loadOpeningTemplates,NativeOpeningPolicy} from './opening-policy.mjs';
 
