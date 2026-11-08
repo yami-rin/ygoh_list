@@ -35,6 +35,10 @@ if not Card.IsSpellTrap then
 	Duel.SelectReleaseGroupCost=Duel.SelectReleaseGroupCost or function(tp,f,min,max,use_hand,check,ex,...)
 		return Duel.SelectReleaseGroup(tp,f,min,max,ex,...)
 	end
+	--YGOPro requires the "must use" material argument explicitly (nil is fine), EDOPro allows omitting it
+	local is_link_summonable,link_summon=Card.IsLinkSummonable,Duel.LinkSummon
+	Card.IsLinkSummonable=function(c,mustmat,...) return is_link_summonable(c,mustmat,...) end
+	Duel.LinkSummon=function(tp,c,mustmat,...) return link_summon(tp,c,mustmat,...) end
 	--HintSelection takes a Group on YGOPro
 	local hint_selection=Duel.HintSelection
 	Duel.HintSelection=function(g,...)
