@@ -87,6 +87,7 @@ MDに存在しない・未取得のカードは名前と効果全文で表示す
 ユーザーの通常M∀LICE（メイン41・EX15）は`presets/user-malice.json`。既定の`preset.json`とは別に置き、既存の探索資料・自動入力は変えていない。
 duel-simulatorの展開リプレイ5本はカード移動列として`routes/user-replays.source.json`に保存し、`node scripts/import-replays.mjs [replayId ...]`で実エンジンの手順へ変換する（`TIME_LIMIT`秒・`MAX_RUNS`回で打ち切り）。再現できた手順は1本ごとに`routes/user-replays.json`へ保存し、止まったものは召喚ごとの到達表と止まった局面を表示する。
 探索しない枝のルールは[PRUNE_RULES.md](docs/PRUNE_RULES.md)。
+2026-11-09時点で5本すべて再現済み。Dormouse・UNDERGROUND・NS＋コード・マジシャンは自動探索、White RabbitとCat＋March Hareはリプレイの移動を1手ずつ効果に読み替えて手で指した（`method: manual`）。リプレイは移動だけで効果や選択を記録しないため、自動探索は推測違い（セットする罠・除外対象・チェーンの有無）で止まりやすい。新しいリプレイは、まず手で指す方法を使う。
 
 ## MCP（ルールエンジンを1手ずつ操作）
 

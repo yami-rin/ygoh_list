@@ -16,6 +16,7 @@ const deckFile=new URL('../presets/user-malice.json',import.meta.url);
 const sourceFile=new URL('../routes/user-replays.source.json',import.meta.url);
 const outFile=new URL('../routes/user-replays.json',import.meta.url);
 const multiset=list=>[...list].sort((a,b)=>a-b);
+const LOCATION_TYPE={1:'deck',2:'hand',4:'monsterZone',8:'spellTrapZone',16:'graveyard',32:'banished',64:'extraDeck'};
 
 // Same fixture as route-harness startRoute, for a deck other than preset.json
 // (route-harness.mjs is hash-pinned by the search evidence, so it is not changed).
@@ -33,11 +34,13 @@ export function replayPlan(replay) {
   // Backup@Ignister's discard need it: fill with dead cards (the deck has three BLANKs).
   const hand=replay.hand.length?replay.hand.map(c=>c??BLANK):[replay.events[0].code,BLANK,BLANK,BLANK];
   // Each summon remembers the monsters the replay sent from the field since the previous summon (its materials).
-  const summons=[];let leaving=[];
+  // `at` is the summon's position in the named-card event list, used to look only a few moves ahead.
+  const summons=[];let leaving=[],pos=0;
   for(const e of replay.events){
     if(!e.code)continue;
     if(FIELD.has(e.from.type)&&!FIELD.has(e.to.type))leaving.push(e.code);
-    if(FIELD.has(e.to.type)){summons.push({code:e.code,to:e.to,materials:leaving});leaving=[];}
+    if(FIELD.has(e.to.type)){summons.push({code:e.code,to:e.to,materials:leaving,at:pos});leaving=[];}
+    pos++;
   }
   const at=new Map();
   for(const e of replay.events)at.set(e.ref,e);
@@ -81,16 +84,26 @@ export function summonGroups(log) {
   }
   return groups.map(g=>g.codes);
 }
-export const sameOrderish=(groups,want)=>{
+// The last group may still be filling (e.g. Accode Talker ① places its revived monsters one by one),
+// so it may match one card ahead when the replay also summons those two back to back (batched[k]).
+export const sameOrderish=(groups,want,batched=[],partial=false)=>{
   let i=0;
-  for(const codes of groups){const part=want.slice(i,i+codes.length);if(part.length<codes.length||!contains(part,codes))return false;i+=codes.length;}
+  for(const [k,codes] of groups.entries()){
+    const ahead=partial&&k===groups.length-1&&batched[i+codes.length-1]?1:0;
+    const part=want.slice(i,i+codes.length+ahead);
+    if(part.length<codes.length||!contains(part,codes))return false;
+    i+=codes.length;
+  }
   return true;
 };
 const summonCodes=g=>summonGroups(g.log).flat();
 
 // Prefer options that involve the next summoned card, then cards the replay moves soon.
-function ordered(g,plan,done) {
-  const p=g.prompt,next=plan.summons[done],soon=new Set(plan.events.slice(0).map(e=>e.code));
+export function ordered(g,plan,done) {
+  // "Soon" = cards the replay moves between the last matched summon and a few moves past the next one,
+  // so effects of cards that were only used earlier (e.g. Ringoriboh ②) are not preferred later.
+  const p=g.prompt,next=plan.summons[done],from=done?plan.summons[done-1].at+1:0;
+  const soon=new Set(plan.events.slice(from,(next?next.at:plan.events.length)+4).map(e=>e.code));
   const cardsOf=input=>input.action!==undefined?[p.choices.find(c=>c.id===input.action)?.card].filter(Boolean):(input.selection||[]).map(i=>p.cards?.[i]).filter(Boolean);
   const score=input=>{
     if(input.action!==undefined){const label=p.choices.find(c=>c.id===input.action)?.label||'';if(/ターンを終了|バトルフェイズ/.test(label))return -1000;}
@@ -101,10 +114,12 @@ function ordered(g,plan,done) {
     }
     const value=cardsOf(input).reduce((n,c)=>n+(next&&c.code===next.code?10:soon.has(c.code)?2:-1),0);
     // Discarding is a cost: keep the cards the replay still needs.
-    if(/捨て/.test(p.title)){
-      // Discard what the replay discards (hand → graveyard); otherwise keep cards the replay still needs.
-      const discarded=new Set(plan.events.filter(e=>e.from.type==='hand'&&e.to.type==='graveyard').map(e=>e.code));
-      return cardsOf(input).reduce((n,c)=>n+(discarded.has(c.code)?20:0),0)-value;
+    const to=/捨て|墓地へ送/.test(p.title)?'graveyard':/除外/.test(p.title)?'banished':/セット|フィールドに置/.test(p.title)?'spellTrapZone':null;
+    if(to){
+      // Costs and removals: pick what the replay moves the same way (e.g. WHITE BINDER ① banishes only TB-11);
+      // otherwise keep cards the replay still needs.
+      const done=new Set(plan.events.filter(e=>e.to.type===to).map(e=>`${e.from.type}:${e.code}`));
+      return cardsOf(input).reduce((n,c)=>n+(done.has(`${LOCATION_TYPE[c.location]}:${c.code}`)?20:0),0)-value;
     }
     return value-(input.selection?.length||0)*0.1;
   };
@@ -134,11 +149,11 @@ function prune(g,plan,done,inputs) {
   return kept;
 }
 
-export async function importReplay(replay,deck,{maxRuns=Number(process.env.MAX_RUNS||20000),seconds=Number(process.env.TIME_LIMIT||900),seed=123}={}) {
+export async function importReplay(replay,deck,{maxRuns=Number(process.env.MAX_RUNS||20000),seconds=Number(process.env.TIME_LIMIT||900),seed=123,start=[],trace=null}={}) {
   const deadline=Date.now()+seconds*1000;
   const plan=replayPlan(replay);
   // Progress-first search: always expand a line that has matched the most replay summons so far.
-  const buckets=[[[]]],seen=new Set();let runs=0,best=null;
+  const buckets=[[start]],seen=new Set();let runs=0,best=null;
   const pop=()=>{for(let d=buckets.length-1;d>=0;d--)if(buckets[d]?.length)return buckets[d].pop();return null;};
   let path;
   while(runs<maxRuns&&Date.now()<deadline&&(path=pop())){
@@ -149,11 +164,12 @@ export async function importReplay(replay,deck,{maxRuns=Number(process.env.MAX_R
       for(const input of path){respond(g,input);}
       const done=summonCodes(g);
       // Simultaneous summons (e.g. Wizard@Ignister ①) may be logged in either order: allow adjacent swaps.
-      ok=sameOrderish(summonGroups(g.log),plan.summons.map(s=>s.code));
+      // Mid-resolution (not back at the action menu) a batched summon may still be half placed.
+      ok=sameOrderish(summonGroups(g.log),plan.summons.map(s=>s.code),plan.summons.map((s,k)=>plan.summons[k+1]?.at===s.at+1),g.prompt?.type!=='SELECT_IDLECMD');
       if(!ok)continue;
-      if(!best||done.length>best.done)best={path,done:done.length,summoned:[...done],prompt:g.prompt?.type,title:g.prompt?.title,options:g.prompt?.choices?.map(c=>c.label).concat((g.prompt?.cards||[]).map(c=>c.label)),log:g.log.slice(-12).map(e=>e.text)};
+      if(!best||done.length>best.done)best={path,run:runs,done:done.length,summoned:[...done],prompt:g.prompt?.type,title:g.prompt?.title,options:g.prompt?.choices?.map(c=>c.label).concat((g.prompt?.cards||[]).map(c=>c.label)),log:g.log.slice(-12).map(e=>e.text)};
       // All summons matched but the board differs: remember the closest final board.
-      if(done.length===plan.summons.length&&g.prompt?.type==='SELECT_IDLECMD'&&!best.finalBoard)best.finalBoard=ownBoard(g);
+      if(done.length===plan.summons.length&&g.prompt?.type==='SELECT_IDLECMD'&&!best.finalBoard){best.finalBoard=ownBoard(g);best.finalPath=path;}
       if(g.turn!==1||!g.pending)continue;
       if(done.length===plan.summons.length&&contains(done,plan.summons.map(x=>x.code))&&g.prompt.type==='SELECT_IDLECMD'&&matches(g,plan))
         return {plan,runs,route:finishRoute(g,{id:`user-replay-${replay.id}`,title:replay.title,source:replay.url,deck:'presets/user-malice.json'}),board:ownBoard(g)};
