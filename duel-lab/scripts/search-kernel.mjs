@@ -19,7 +19,7 @@ const safe = value => JSON.parse(JSON.stringify(value, (_, v) => typeof v === 'b
 const inputOf = step => safe(step.input ?? step);
 const keyOf = frame => hash([frame.prefix, frame.nextCandidate ?? 0]);
 const LINK_UI_POLICY = 'fixed-preset-standard-link-ui-v1';
-const AUDITED_SCRIPTS_HASH = '767260fe45ec0d980c1f356639532f859463743713a4662520d9a444c119b41b';
+const AUDITED_SCRIPTS_HASH = '142e9f064205552856da0852e5f971a1a347addc3995c6858754e5a4f0e68173';
 const queryFlags = Object.values(Q).reduce((a, b) => a | b, 0);
 const allowedLinkMessages = new Set([M.HINT, M.SELECT_UNSELECT_CARD, M.SELECT_IDLECMD]);
 

@@ -28,13 +28,13 @@ const safe = value => JSON.parse(JSON.stringify(value, (_, v) => typeof v === 'b
 const inputOf = step => safe(step.input ?? step);
 const keyOf = frame => hash([frame.prefix, frame.nextCandidate ?? 0]);
 const LINK_UI_POLICY = 'fixed-preset-standard-link-ui-v1';
-const AUDITED_SCRIPTS_HASH = '767260fe45ec0d980c1f356639532f859463743713a4662520d9a444c119b41b';
+const AUDITED_SCRIPTS_HASH = '142e9f064205552856da0852e5f971a1a347addc3995c6858754e5a4f0e68173';
 const queryFlags = Object.values(Q).reduce((a, b) => a | b, 0);
 const allowedLinkMessages = new Set([M.HINT, M.SELECT_UNSELECT_CARD, M.SELECT_IDLECMD]);
 const AUDITED_TRIBUTE_CARDS = [72656408,33854624];
 const LEGACY_TRIBUTE_POLICY = 'fresh-initial-hand-bystial-normal-tribute-cancel-v1';
 const TRIBUTE_POLICY = 'fresh-initial-hand-bystial-normal-or-set-tribute-cancel-v1';
-const TRIBUTE_PIN = '6f43e013f78cf7f9fe40502ab79de5d55f2ca07f2d283c792a5ad705d81cedd6';
+const TRIBUTE_PIN = 'ae2a8e298c2aafc444e56867850c55898fc5a1ec341a109d07f28d8ad27bbd7e';
 const helpers = ('constant card_counter_constants archetype_setcode_constants utility debug_utility chain cards_specific_functions '+
   'proc_fusion proc_fusion_spell proc_ritual proc_synchro proc_union proc_xyz proc_pendulum proc_link proc_equip proc_persistent '+
   'proc_workaround proc_normal proc_skill proc_rush proc_maximum proc_gemini proc_spirit proc_unofficial deprecated_functions').split(' ');

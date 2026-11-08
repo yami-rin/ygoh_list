@@ -47,6 +47,20 @@ def prepare():
                     dest.write_bytes(z.read(entry))
         else:
             (DATA / target).write_bytes(payload)
+        if repo == 'ProjectIgnis/BabelCDB':
+            # Pre-release / newly released cards live in separate databases (Rush Duel excluded).
+            extra_dir = DATA / 'extra-cdb'
+            extra_dir.mkdir(exist_ok=True)
+            names = [f['name'] for f in json.loads(fetch(f'https://api.github.com/repos/{repo}/contents?ref={sha}'))
+                     if f['name'].endswith('.cdb') and f['name'].startswith(('prerelease-', 'release-')) and 'rush' not in f['name']]
+            manifest[repo]['extra'] = {}
+            for name in sorted(names):
+                extra = fetch(f'https://raw.githubusercontent.com/{repo}/{sha}/{name}')
+                (extra_dir / name).write_bytes(extra)
+                manifest[repo]['extra'][name] = hashlib.sha256(extra).hexdigest()
+            for old in extra_dir.glob('*.cdb'):
+                if old.name not in names:
+                    old.unlink()
         if target == 'japanese.cdb':
             (DATA / 'strings.conf').write_bytes(fetch(f'https://raw.githubusercontent.com/{repo}/{sha}/locales/ja-JP/strings.conf'))
     (DATA / 'sources.json').write_text(json.dumps(manifest, indent=2), encoding='utf-8')
@@ -63,8 +77,15 @@ def generate():
     db = sqlite3.connect(DATA / 'cards.cdb')
     db.row_factory = sqlite3.Row
     cards = {}
-    for r in db.execute('select datas.*,texts.name,texts.desc from datas join texts using(id)'):
-        d = dict(r)
+    rows = [dict(r) for r in db.execute('select datas.*,texts.name,texts.desc from datas join texts using(id)')]
+    # Newer cards from the pre-release/release databases; the main database wins on duplicates.
+    for extra in sorted((DATA / 'extra-cdb').glob('*.cdb')) if (DATA / 'extra-cdb').exists() else []:
+        edb = sqlite3.connect(extra)
+        edb.row_factory = sqlite3.Row
+        rows += [dict(r) for r in edb.execute('select datas.*,texts.name,texts.desc from datas join texts using(id)')]
+    for d in rows:
+        if d['id'] in cards:
+            continue
         t = translations.get(d['id'], {})
         display = t.get('name') or d['name']
         m = master.get(norm(display), {})
@@ -75,7 +96,7 @@ def generate():
             'link_marker': d['def'] if d['type'] & 0x4000000 else 0, 'name': m.get('名前', display), 'enName': d['name'],
             'text': m.get('カードテキスト') or t.get('desc') or d['desc'], 'strings': [t.get(f'str{i}', '') for i in range(1,17)],
             'cid': int(m['カードID']) if m.get('カードID','').isdigit() else None,
-            'script': (DATA / 'scripts' / 'official' / f"c{d['alias'] or d['id']}.lua").exists() or bool(d['type'] & 0x10)}
+            'script': any((DATA / 'scripts' / folder / f"c{d['alias'] or d['id']}.lua").exists() for folder in ('official', 'pre-release')) or bool(d['type'] & 0x10)}
     (DATA / 'cards.json').write_text(json.dumps(cards, ensure_ascii=False), encoding='utf-8')
     print(f'Prepared {len(cards)} cards; {sum(c["cid"] is not None for c in cards.values())} Japanese master matches')
 

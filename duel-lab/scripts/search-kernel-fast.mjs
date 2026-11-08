@@ -22,13 +22,13 @@ export const implementation = Object.freeze({
   // The audited baseline is copied deliberately: no modification of the frozen
   // implementation or its checkpoints is required to use this opt-in executor.
   baselineFile: 'scripts/search-kernel.mjs',
-  baselineSha256: '099f0170ae3f8247841bca270b30c2b5eeeb210b2385170b10738b048be0e161',
+  baselineSha256: '4ba0fc42b1e3c904de6b0dd39153d11ffc02dd9dc481087c4e6535b567ee0835',
 });
 const safe = value => JSON.parse(JSON.stringify(value, (_, v) => typeof v === 'bigint' ? String(v) : v));
 const inputOf = step => safe(step.input ?? step);
 const keyOf = frame => hash([frame.prefix, frame.nextCandidate ?? 0]);
 const LINK_UI_POLICY = 'fixed-preset-standard-link-ui-v1';
-const AUDITED_SCRIPTS_HASH = '767260fe45ec0d980c1f356639532f859463743713a4662520d9a444c119b41b';
+const AUDITED_SCRIPTS_HASH = '142e9f064205552856da0852e5f971a1a347addc3995c6858754e5a4f0e68173';
 const queryFlags = Object.values(Q).reduce((a, b) => a | b, 0);
 const allowedLinkMessages = new Set([M.HINT, M.SELECT_UNSELECT_CARD, M.SELECT_IDLECMD]);
 
