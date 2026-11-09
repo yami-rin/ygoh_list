@@ -36,11 +36,13 @@ function s.initial_effect(c)
 	e2:SetOperation(s.spop)
 	c:RegisterEffect(e2)
 	--③ the turn the opponent activated a monster effect: Xyz Summon using monsters you control;
-	--that Xyz Monster is unaffected by the opponent's monster effects
+	--that Xyz Monster is unaffected by the opponent's monster effects. Quick: usable on either turn once the condition is met.
 	local e3=Effect.CreateEffect(c)
 	e3:SetDescription(aux.Stringid(id,2))
 	e3:SetCategory(CATEGORY_SPECIAL_SUMMON)
-	e3:SetType(EFFECT_TYPE_IGNITION)
+	e3:SetType(EFFECT_TYPE_QUICK_O)
+	e3:SetCode(EVENT_FREE_CHAIN)
+	e3:SetHintTiming(0,TIMINGS_CHECK_MONSTER_E+TIMING_END_PHASE)
 	e3:SetRange(LOCATION_MZONE)
 	e3:SetCountLimit(1,{id,1})
 	e3:SetCondition(function(e,tp) return Duel.GetFlagEffect(tp,id)>0 end)

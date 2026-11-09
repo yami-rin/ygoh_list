@@ -157,6 +157,24 @@ test('Order: Lowell ① protects the other "Order" monsters, Sanctum ② detache
   }finally{g.close();}
 });
 
+test('Order: Cavalry ③ can be activated on the opponent\'s turn, in response to their monster effect',async()=>{
+  const MAXX_C=23434538;
+  const g=await Duel.create([{main:MAIN,extra:[LOWELL]},{main:FILLER,extra:[]}],{seed:1,fixtures:[
+    fx(CAVALRY,{location:4,sequence:5,position:1}),fx(VAPOR,{location:4,sequence:2,position:1}),fx(NOVRY,{location:4,sequence:3,position:1}),
+    fx(MAXX_C,{team:1})]});
+  try{
+    run(g,[pass,'ターンを終了',pass]);
+    // the opponent's Main Phase: Maxx "C" is a monster effect, so Cavalry ③ answers it in the chain
+    run(g,['発動：増殖するG']);
+    assert(offered(g,'発動：秩序騎士キャバルリー'),g.prompt.choices?.map(c=>c.label).join(' / '));
+    run(g,['発動：秩序騎士キャバルリー','ローウェル','選択：秩序騎士ヴェイパー','選択：無秩序騎士ノヴルィ']);
+    while(g.prompt?.type==='SELECT_PLACE'||g.prompt?.type==='SELECT_POSITION')pick(g,g.prompt.mode==='single'?'攻撃表示':'自分 モンスター');
+    pass(g);
+    assert(codes(snap(g)[0].monsters).includes(LOWELL),'Lowell was Xyz Summoned on the opponent\'s turn');
+    assert.deepEqual(g.errors,[]);
+  }finally{g.close();}
+});
+
 test('Order: Unquell ③ detaches to negate Effect Veiler, Cavalry ③ Xyz Summons an immune Lowell, Sanctum ③ revives from the GY',async()=>{
   const g=await Duel.create([{main:MAIN,extra:[LOWELL,CAVALRY]},{main:FILLER,extra:[]}],{seed:1,fixtures:[
     fx(SACRIFICE),fx(LAWRY,{location:4,sequence:0,position:1}),fx(EDURA,{location:4,sequence:1,position:1}),
