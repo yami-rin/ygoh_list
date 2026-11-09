@@ -4,6 +4,7 @@ Steps (default: all, in this order):
   fetch-arts    card art of mycard/hd-arts (pinned commit) -> runtime/friend-kit-build/hd-arts
   assemble      kit folder runtime/friend-kit-build/MDPro3-orika
   zip           C:/Project/artifacts/card_manager_web/friend-kit/MDPro3-orika-friend-<date>.zip + secret scan
+  decks         .../friend-kit/orika-sample-decks-<date>.zip: Deck/ (friend-kit/decks/*.ydk) + 入れ方.txt only
   clean         delete the large intermediates (kit folder, art cache, upstream Data)
 
 The player binaries come from runtime/MDPro3-client (build-native.ps1); a clean rebuild needs a Unity license.
@@ -30,11 +31,12 @@ import zipfile
 ROOT = Path(__file__).resolve().parents[1]
 RUNTIME = ROOT / 'runtime'
 WORK = RUNTIME / 'friend-kit-build'
-HOST_CLIENT = RUNTIME / 'MDPro3-client'     # player binaries, latest-ja.cdb + scripts, original-card decks
+HOST_CLIENT = RUNTIME / 'MDPro3-client'     # player binaries, latest-ja.cdb + scripts
 PRISTINE = WORK / 'pristine'
 ARTS = WORK / 'hd-arts'
 KIT = WORK / 'MDPro3-orika'
 KIT_SRC = ROOT / 'friend-kit'
+DECKS_SRC = KIT_SRC / 'decks'   # sample decks (*.ydk) and 入れ方.txt of the small deck-only zip
 OUT_DIR = Path('C:/Project/artifacts/card_manager_web/friend-kit')
 OFFICIAL_PATCH = RUNTIME / 'mdpro3-1.4.6-patch.zip'   # official MDPro3 update package (Data/cards*.json)
 HD_ARTS = {'project': 362, 'commit': 'cc8f64a55cf2eefec17a3a42c01e2941a97ac78d'}
@@ -188,6 +190,27 @@ def write_text(path, text, bom=False):
     path.write_bytes((b'\xef\xbb\xbf' if bom else b'') + text.replace('\r\n', '\n').replace('\n', '\r\n').encode('utf-8'))
 
 
+def sample_decks():
+    """Sample decks of the original themes (friend-kit/decks/*.ydk; tests/sample-decks.test.mjs checks them)."""
+    codes = custom_codes()
+    decks = sorted(DECKS_SRC.glob('*.ydk'))
+    for ydk in decks:
+        ids = [int(line) for line in ydk.read_text(encoding='utf-8-sig').splitlines() if line.strip().isdigit()]
+        if not ids or sum(i in codes for i in ids) * 2 < len(ids):
+            raise RuntimeError(f'{ydk.name} is not built around original cards')
+    return decks
+
+
+def write_decks(folder):
+    names = []
+    for ydk in sample_decks():
+        lines = ydk.read_text(encoding='utf-8-sig').replace('\r\n', '\n').split('\n')
+        body = [line for line in lines if not line.startswith('#created')]
+        write_text(folder / ydk.name, '#created by MDPro3\n' + '\n'.join(body).strip('\n') + '\n')
+        names.append(ydk.stem)
+    return names
+
+
 def assemble():
     from PIL import Image  # Pillow from duel-lab/.venv
     import sqlite3
@@ -250,15 +273,7 @@ def assemble():
     for diy in (RUNTIME / 'native-assets/Picture/DIY').glob('*'):
         link_or_copy(diy, KIT / 'Picture/DIY' / diy.name)
 
-    codes = custom_codes()
-    decks = []
-    for ydk in sorted((HOST_CLIENT / 'Deck').glob('*.ydk')):
-        lines = ydk.read_text(encoding='utf-8-sig').replace('\r\n', '\n').split('\n')
-        ids = [int(line) for line in lines if line.strip().isdigit()]
-        if ids and sum(i in codes for i in ids) * 2 >= len(ids):
-            body = [line for line in lines if not line.startswith('#created')]
-            write_text(KIT / 'Deck' / ydk.name, '#created by MDPro3\n' + '\n'.join(body).strip('\n') + '\n')
-            decks.append(ydk.stem)
+    decks = write_decks(KIT / 'Deck')
 
     config = [
         'Language->ja-JP',
@@ -272,7 +287,7 @@ def assemble():
         'Background->1',
     ]
     if decks:
-        config.append(f'DeckInUse->{decks[0]}')
+        config.append(f'DeckInUse->{"CHAIN_CODE" if "CHAIN_CODE" in decks else decks[0]}')
     write_text(KIT / 'Data/config.conf', '\n'.join(config) + '\n')
 
     shutil.copyfile(KIT_SRC / '遊ぶ.bat', KIT / '遊ぶ.bat')
@@ -350,16 +365,43 @@ def make_zip():
     return target
 
 
+def make_decks_zip():
+    """Small zip with only the sample decks, for friends who already have the kit (extract over the kit folder)."""
+    staging = WORK / 'sample-decks'
+    if staging.exists():
+        shutil.rmtree(staging)
+    names = write_decks(staging / 'Deck')
+    write_text(staging / '入れ方.txt', (DECKS_SRC / '入れ方.txt').read_text(encoding='utf-8-sig'), bom=True)
+    findings = scan(staging)
+    for finding in findings:
+        log('FOUND', *finding)
+    if findings:
+        raise SystemExit('Secret/personal string scan failed; deck zip not written')
+    OUT_DIR.mkdir(parents=True, exist_ok=True)
+    target = OUT_DIR / f'orika-sample-decks-{date.today():%Y%m%d}.zip'
+    partial = target.with_suffix('.zip.part')
+    with zipfile.ZipFile(partial, 'w', zipfile.ZIP_DEFLATED) as archive:
+        for path in sorted(staging.rglob('*')):
+            if path.is_file():
+                archive.write(path, path.relative_to(staging).as_posix())
+    partial.replace(target)
+    shutil.rmtree(staging)
+    if not any(WORK.iterdir()):
+        WORK.rmdir()
+    log(f'Wrote {target}: decks {names}')
+    return target
+
+
 def clean():
     if WORK.exists():
         shutil.rmtree(WORK)
         log('Removed', WORK)
 
 
-STEPS = {'fetch-arts': fetch_arts, 'assemble': assemble, 'zip': make_zip, 'clean': clean}
+STEPS = {'fetch-arts': fetch_arts, 'assemble': assemble, 'zip': make_zip, 'decks': make_decks_zip, 'clean': clean}
 
 if __name__ == '__main__':
-    selected = sys.argv[1:] or ['fetch-arts', 'assemble', 'zip']
+    selected = sys.argv[1:] or ['fetch-arts', 'assemble', 'zip', 'decks']
     unknown = [step for step in selected if step not in STEPS]
     if unknown:
         raise SystemExit(f'Unknown step {unknown}; choose from {list(STEPS)}')

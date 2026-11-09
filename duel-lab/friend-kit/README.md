@@ -5,7 +5,8 @@
 ## 配布物を作る
 
 ```powershell
-.venv/Scripts/python.exe scripts/build-friend-kit.py            # fetch-arts → assemble → zip
+.venv/Scripts/python.exe scripts/build-friend-kit.py            # fetch-arts → assemble → zip → decks
+.venv/Scripts/python.exe scripts/build-friend-kit.py decks      # サンプルデッキだけの小さなzip（配布済みの友だち向け）
 .venv/Scripts/python.exe scripts/build-friend-kit.py clean      # 大きな中間物（runtime/friend-kit-build）を消す
 ```
 
@@ -14,7 +15,8 @@
   デバッグ情報（`*.pdb`・`*_DoNotShip`）は入れず、ウィンドウ題名は同じ長さのまま「MDPro3」へ戻す。
 - Dataは固定コミットのupstream原本（`runtime/mdpro3-source.tar.gz`）。自作の禁止制限・AI用bot・FileGroupsの変更は入らない。
   `Data/config.conf`は日本語・プレイヤー名`Player`・接続先`127.0.0.1:7911`・壁紙と背景（同梱素材にある1番）だけ。`Data/hosts2.conf`の先頭に「部屋主 127.0.0.1 7911」を足す。
-- カード画像はmycard/hd-arts（固定コミット、gitのblobハッシュで検証）。オリカはcustom/のDB・スクリプト（互換ブロック付き）・イラスト（JPEGへ変換）、新カードは`latest-ja.cdb`と対応スクリプト、デッキはオリカ中心のydkだけ。
+- カード画像はmycard/hd-arts（固定コミット、gitのblobハッシュで検証）。オリカはcustom/のDB・スクリプト（互換ブロック付き）・イラスト（JPEGへ変換）、新カードは`latest-ja.cdb`と対応スクリプト、デッキは`decks/`のサンプル（9テーマ各40枚。テーマ各3枚＋共通の手札誘発10枚〔うらら2・G1・泡影3・ヴェーラー3・ニビル1〕＋空き枠に三戦の才3・抹殺の指名者・羽根帚・死者蘇生とテーマ補助。禁止制限2026.7。`tests/sample-decks.test.mjs`で適合と初動を確認）。
+- `decks`は`decks/*.ydk`と`decks/入れ方.txt`だけの`orika-sample-decks-<日付>.zip`を作る。MDPro3のフォルダへ展開して上書きする。
 - zipは`C:/Project/artifacts/card_manager_web/friend-kit/`へ。書く前に個人情報・秘密値・Astra関連の文字列検査を行い、許可リスト外が見つかれば作らない。
 
 | ファイル | zip内 | 役割 |
