@@ -22,6 +22,7 @@ function s.initial_effect(c)
 	local e2=Effect.CreateEffect(c)
 	e2:SetType(EFFECT_TYPE_EQUIP)
 	e2:SetCode(EFFECT_SET_POSITION)
+	e2:SetCondition(s.eqcon)
 	e2:SetValue(POS_FACEUP_DEFENSE)
 	c:RegisterEffect(e2)
 	local e4=e2:Clone()
@@ -95,4 +96,11 @@ end
 function s.spop(e,tp,eg,ep,ev,re,r,rp)
 	local c=e:GetHandler()
 	if c:IsRelateToEffect(e) then Duel.SpecialSummon(c,0,tp,tp,false,false,POS_FACEUP) end
+end
+--② "the monster equipped with this card gains ●": not applied while this card or the equipped monster is negated
+--(a negated Equip Card applies nothing by itself; the equipped monster's negation is checked here)
+function s.eqcon(e)
+	local c=e:GetHandler()
+	local ec=c:GetEquipTarget()
+	return ec~=nil and not c:IsDisabled() and not ec:IsDisabled()
 end

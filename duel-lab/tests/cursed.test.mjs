@@ -333,3 +333,105 @@ test('Hope: Holy Sword of Hope ① equips itself, ② while the equipped monster
     assert.deepEqual(g.errors,[]);
   }finally{g.close();}
 });
+
+// ---- 2026-11-10: Hero of Hope ② searches any self-equipping card; the gained ● stop when either card is negated
+
+test('Hope: Hero of Hope ② adds any card that equips itself as an Equip Card, official ones included (Union, Rainbow Kuriboh, Parallel Port Armor), not ones that equip other cards',async()=>{
+  const Y_HEAD=65622692,RAINBOW_KURIBOH=2830693,PARALLEL_PORT=879958,PALADIN=6075801,UNITED=56747793;
+  const g=await Duel.create([{main:[Y_HEAD,RAINBOW_KURIBOH,PARALLEL_PORT,PALADIN,UNITED,ARMOR,BLUE_EYES],extra:[]},{main:FILLER,extra:[]}],{seed:1,fixtures:[
+    fx(HERO,{location:4,sequence:0,position:1}),fx(SWORDS,{team:1,location:8,sequence:1,position:1})]});
+  try{
+    run(g,['効果発動：希望の勇者',pass,'光の護封剣']);
+    assert.deepEqual(g.prompt.cards.map(c=>c.label).sort(),['Y－ドラゴン・ヘッド','虹クリボー','パラレルポート・アーマー','呪われた鎧'].sort());
+    run(g,['Y－ドラゴン・ヘッド',pass]);
+    assert(codes(snap(g)[0].hand).includes(Y_HEAD));
+    assert.deepEqual(g.errors,[]);
+  }finally{g.close();}
+});
+
+// negation of the Equip Card: Imperial Order (all Spells, incl. monsters treated as Equip Cards);
+// negation of the equipped monster: Effect Veiler / Skill Drain
+const IMPERIAL_ORDER=61740673,SKILL_DRAIN=82732705,VEILER=97268402,THUNDER_BREAK=4178474;
+const negator=neg=>neg?[fx(neg,{team:1,location:8,sequence:4,position:1})]:[];
+
+test('Cursed: Sword ② (+1000 ATK) stops while the Sword or the equipped monster is negated (Imperial Order / Skill Drain / Effect Veiler)',async()=>{
+  for(const [neg,atk] of [[0,3000],[IMPERIAL_ORDER,2000],[SKILL_DRAIN,2000]]){
+    const g=await Duel.create([{main:FILLER,extra:[]},{main:FILLER,extra:[]}],{seed:1,fixtures:[fx(SWORD),fx(HERO,{location:4,sequence:0,position:1}),...negator(neg)]});
+    try{
+      run(g,['効果発動：呪われた剣','希望の勇者',pass]);
+      assert(codes(snap(g)[0].spells).includes(SWORD));
+      assert.equal(mon(g,0,HERO).attack,atk,`negated by ${neg}`);
+      assert.deepEqual(g.errors,[]);
+    }finally{g.close();}
+  }
+  // Effect Veiler on the equipped Hero of Hope in response to Sword ①
+  const g=await Duel.create([{main:FILLER,extra:[]},{main:FILLER,extra:[]}],{seed:1,fixtures:[fx(SWORD),fx(HERO,{location:4,sequence:0,position:1}),fx(VEILER,{team:1})]});
+  try{
+    run(g,['効果発動：呪われた剣','希望の勇者','発動：エフェクト・ヴェーラー','希望の勇者',pass]);
+    while(g.prompt?.type==='SELECT_CHAIN')pass(g);
+    assert(codes(snap(g)[0].spells).includes(SWORD));
+    assert.equal(mon(g,0,HERO).attack,2000,'Hero of Hope negated by Effect Veiler');
+    assert.deepEqual(g.errors,[]);
+  }finally{g.close();}
+});
+
+test('Cursed: Armor ② (not destroyed by card effects) stops while the Armor or the equipped monster is negated',async()=>{
+  for(const [neg,survives] of [[0,true],[IMPERIAL_ORDER,false],[SKILL_DRAIN,false]]){
+    const g=await Duel.create([{main:FILLER,extra:[]},{main:FILLER,extra:[]}],{seed:1,fixtures:[
+      fx(ARMOR),fx(HERO,{location:4,sequence:0,position:1}),fx(THUNDER_BREAK,{team:1,location:8,sequence:0,position:8}),...negator(neg)]});
+    try{
+      run(g,['効果発動：呪われた鎧','希望の勇者',pass]);
+      assert(codes(snap(g)[0].spells).includes(ARMOR));
+      // the opponent's Thunder Break destroys Hero of Hope unless Armor ② applies
+      pass(g);
+      run(g,['ターンを終了']);
+      for(let i=0;i<10&&g.prompt?.type==='SELECT_CHAIN'&&!g.prompt.choices.some(c=>c.label.includes('サンダー・ブレイク'));i++)pass(g);
+      run(g,['発動：サンダー・ブレイク']);
+      // discard 1 card, then target Hero of Hope
+      if(g.prompt?.mode!=='single'&&!g.prompt.cards.some(c=>c.label==='希望の勇者'))respondAs(g,{selection:[0]});
+      run(g,['希望の勇者',pass]);
+      while(g.prompt?.type==='SELECT_CHAIN')pass(g);
+      assert.equal(count(snap(g)[1].grave,THUNDER_BREAK),1);
+      assert.equal(!!mon(g,0,HERO),survives,`negated by ${neg}`);
+      assert.deepEqual(g.errors,[]);
+    }finally{g.close();}
+  }
+});
+
+test('Cursed: Demon Axe ② (granted: halve your LP each Standby Phase) stops while the Axe or the equipped monster is negated',async()=>{
+  for(const [neg,lp] of [[0,4000],[IMPERIAL_ORDER,8000],[SKILL_DRAIN,8000]]){
+    const g=await Duel.create([{main:FILLER,extra:[]},{main:FILLER,extra:[]}],{seed:1,fixtures:[
+      fx(AXE,{location:16,position:1}),fx(HERO,{location:4,sequence:0,position:1}),...negator(neg)]});
+    try{
+      run(g,['効果発動：呪われたデーモンの斧','希望の勇者',pass]);
+      assert(codes(snap(g)[0].spells).includes(AXE));
+      run(g,['ターンを終了',pass]);
+      const offered=g.prompt?.type==='SELECT_CHAIN'&&g.prompt.choices.some(c=>c.label.includes('LPを半分にする'));
+      assert.equal(offered,!neg,`negated by ${neg}: the granted effect is not activated`);
+      if(offered)run(g,['発動：希望の勇者',pass]);
+      while(g.prompt?.type==='SELECT_CHAIN')pass(g);
+      assert.equal(g.lp[0],lp);
+      assert.deepEqual(g.errors,[]);
+    }finally{g.close();}
+  }
+});
+
+test('Hope: Holy Sword of Hope ② (no activation while the equipped monster battles) stops while the Holy Sword or the equipped monster is negated',async()=>{
+  for(const neg of [0,IMPERIAL_ORDER,SKILL_DRAIN]){
+    // equipped to the opponent's Hero of Hope; it attacks directly on the opponent's turn and you hold Mirror Force
+    const g=await Duel.create([{main:FILLER,extra:[]},{main:FILLER,extra:[]}],{seed:1,fixtures:[
+      fx(HSWORD),fx(HERO,{team:1,location:4,sequence:0,position:1}),fx(MIRROR,{location:8,sequence:0,position:8}),...negator(neg)]});
+    try{
+      run(g,['効果発動：希望の聖剣','希望の勇者',pass]);
+      assert(codes(snap(g)[0].spells).includes(HSWORD));
+      run(g,['ターンを終了',pass]);
+      for(let i=0;i<20&&!offered(g,'バトルフェイズへ');i++)pass(g);
+      run(g,['バトルフェイズへ',pass,'攻撃：希望の勇者']);
+      place(g);
+      let mirror=false;
+      for(let i=0;i<20&&g.prompt?.type==='SELECT_CHAIN';i++){if(g.prompt.choices.some(c=>c.label.includes('ミラーフォース'))){mirror=true;break;}pass(g);}
+      assert.equal(mirror,!!neg,`negated by ${neg}: Mirror Force can be activated`);
+      assert.deepEqual(g.errors,[]);
+    }finally{g.close();}
+  }
+});

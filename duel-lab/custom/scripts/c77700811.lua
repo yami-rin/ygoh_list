@@ -85,8 +85,9 @@ function s.equip(owner,ec,tp,tc,step)
 end
 --the equipped monster is the attacker or the attack target (from the attack declaration to the end of the Damage Step)
 function s.batcon(e)
+	if not s.eqcon(e) then return false end
 	local ec=e:GetHandler():GetEquipTarget()
-	return ec~=nil and (Duel.GetAttacker()==ec or Duel.GetAttackTarget()==ec)
+	return Duel.GetAttacker()==ec or Duel.GetAttackTarget()==ec
 end
 --(the value / target can be evaluated outside the condition: check the equip target again)
 function s.actlimit(e,re,rp)
@@ -96,4 +97,11 @@ end
 function s.distg(e,tc)
 	local ec=e:GetHandler():GetEquipTarget()
 	return ec~=nil and tc:IsFaceup() and tc:IsControler(1-ec:GetControler())
+end
+--② "the monster equipped with this card gains ●": not applied while this card or the equipped monster is negated
+--(a negated Equip Card applies nothing by itself; the equipped monster's negation is checked here)
+function s.eqcon(e)
+	local c=e:GetHandler()
+	local ec=c:GetEquipTarget()
+	return ec~=nil and not c:IsDisabled() and not ec:IsDisabled()
 end

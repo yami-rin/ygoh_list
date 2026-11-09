@@ -34,6 +34,7 @@ function s.initial_effect(c)
 	local e2=Effect.CreateEffect(c)
 	e2:SetType(EFFECT_TYPE_EQUIP)
 	e2:SetCode(EFFECT_IMMUNE_EFFECT)
+	e2:SetCondition(s.eqcon)
 	e2:SetValue(s.immval)
 	c:RegisterEffect(e2)
 end
@@ -129,4 +130,11 @@ end
 --② unaffected by activated effects of non-"Cursed" cards
 function s.immval(e,te)
 	return te:IsActivated() and not te:GetHandler():IsSetCard(SET_CURSED)
+end
+--② "the monster equipped with this card gains ●": not applied while this card or the equipped monster is negated
+--(a negated Equip Card applies nothing by itself; the equipped monster's negation is checked here)
+function s.eqcon(e)
+	local c=e:GetHandler()
+	local ec=c:GetEquipTarget()
+	return ec~=nil and not c:IsDisabled() and not ec:IsDisabled()
 end

@@ -147,9 +147,16 @@ end
 --② only while equipped, outside either Main Phase, for the opponent of the equipped monster's controller
 function s.actcon(e)
 	local ph=Duel.GetCurrentPhase()
-	return e:GetHandler():GetEquipTarget()~=nil and ph~=PHASE_MAIN1 and ph~=PHASE_MAIN2
+	return s.eqcon(e) and ph~=PHASE_MAIN1 and ph~=PHASE_MAIN2
 end
 function s.actlimit(e,re,rp)
 	local ec=e:GetHandler():GetEquipTarget()
 	return ec~=nil and rp==1-ec:GetControler()
+end
+--② "the monster equipped with this card gains ●": not applied while this card or the equipped monster is negated
+--(a negated Equip Card applies nothing by itself; the equipped monster's negation is checked here)
+function s.eqcon(e)
+	local c=e:GetHandler()
+	local ec=c:GetEquipTarget()
+	return ec~=nil and not c:IsDisabled() and not ec:IsDisabled()
 end

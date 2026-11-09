@@ -85,8 +85,9 @@ function s.column(loc,seq,p,ref)
 	return col
 end
 function s.negcon(e,tp,eg,ep,ev,re,r,rp)
+	if not s.eqcon(e) then return false end
 	local ec=e:GetHandler():GetEquipTarget()
-	if not ec or not ec:IsLocation(LOCATION_MZONE) or re:GetHandler()==ec or not Duel.IsChainDisablable(ev) then return false end
+	if not ec:IsLocation(LOCATION_MZONE) or re:GetHandler()==ec or not Duel.IsChainDisablable(ev) then return false end
 	local loc,seq,p=Duel.GetChainInfo(ev,CHAININFO_TRIGGERING_LOCATION,CHAININFO_TRIGGERING_SEQUENCE,CHAININFO_TRIGGERING_CONTROLER)
 	local ref=ec:GetControler()
 	local col=s.column(loc,seq,p,ref)
@@ -112,4 +113,11 @@ end
 function s.spop(e,tp,eg,ep,ev,re,r,rp)
 	local c=e:GetHandler()
 	if c:IsRelateToEffect(e) then Duel.SpecialSummon(c,0,tp,tp,false,false,POS_FACEUP) end
+end
+--② "the monster equipped with this card gains ●": not applied while this card or the equipped monster is negated
+--(a negated Equip Card applies nothing by itself; the equipped monster's negation is checked here)
+function s.eqcon(e)
+	local c=e:GetHandler()
+	local ec=c:GetEquipTarget()
+	return ec~=nil and not c:IsDisabled() and not ec:IsDisabled()
 end

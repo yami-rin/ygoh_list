@@ -94,7 +94,7 @@ test('Overclock ① still Sets a "Chain Code" Spell/Trap',async()=>{
 // ---- 2026-11-10 audit: the scripts follow the text as written
 
 const FRONT=77700202,CYCLONE=5318639,SWORDS=72302403;
-test('Amplification ③ raises the ATK of the "Chain Code" monsters on the field when it resolves, not of ones Summoned later',async()=>{
+test('Amplification ③ raises the ATK of every "Chain Code" monster you control until the end of the turn, including ones Summoned later',async()=>{
   const g=await duel({deck0:[77700001,FRONT],deck1:[FRONT],p0:{szone:[77700007],mzone:[77700002],hand:[CYCLONE]},p1:{szone:[SWORDS]}});
   try{
     // Chain 1 Amplification ①, Chain 2 Cyclone: 2 Chain Counters when both resolve
@@ -108,7 +108,7 @@ test('Amplification ③ raises the ATK of the "Chain Code" monsters on the field
     play(g,['召喚：連鎖律－イニシエータ']);
     if(g.prompt?.type==='SELECT_EFFECTYN')pick(g,'いいえ');
     pass(g);
-    assert.equal(atk('連鎖律－イニシエータ'),1500,'Normal Summoned after resolution: original 1500');
+    assert.equal(atk('連鎖律－イニシエータ'),2000,'Normal Summoned after resolution: 1500 + 500');
   }finally{g.close();}
 });
 

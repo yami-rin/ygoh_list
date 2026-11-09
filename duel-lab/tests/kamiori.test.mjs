@@ -39,17 +39,27 @@ test('Kamiori: 11 original cards are loaded with setcode 0x7c5 (LIGHT Fairy, pro
   assert.deepEqual([MIHASHIRA,KOMANU,IWATO].map(c=>[cards[c].level,cards[c].link_marker]),[[1,2],[2,8|32],[3,1|2|4]]);
 });
 
-test('Kamiori: Orihime ① "この効果の発動後" locks to Fairies even when the effect is negated (Effect Veiler)',async()=>{
-  const g=await Duel.create([{main:without(MAIN,[ORIHIME]),extra:EXTRA},{main:FILLER,extra:[]}],{seed:1,fixtures:[
-    fx(ORIHIME),fx(TRICKY),fx(BLUE_EYES),fx(VEILER,{team:1})]});
-  try{
-    pass(g);
-    assert(offered(g,'特殊召喚：THE トリッキー'),'a non-Fairy can be Special Summoned before Orihime ①');
-    run(g,['召喚：神折の巫女','自分 モンスター 3','はい','発動：エフェクト・ヴェーラー','オリヒメ',pass]);
-    assert.deepEqual(codes(snap(g)[0].spells),[],'Orihime ① was negated: nothing was placed');
-    assert(!offered(g,'特殊召喚：THE トリッキー'),'the lock still applies after the effect was activated');
-    assert.deepEqual(g.errors,[]);
-  }finally{g.close();}
+// "この効果の発動後～" is part of the effect's resolution (ruling on Ancient Gear Wyvern): when the effect is negated
+// the lock does not apply; "この効果を発動するターン～" (a cost-like condition) would stay
+test('Kamiori: Orihime ① "この効果の発動後" lock applies when ① resolves, not when ① is negated (Effect Veiler)',async()=>{
+  for(const negated of [true,false]){
+    const g=await Duel.create([{main:without(MAIN,[ORIHIME]),extra:EXTRA},{main:FILLER,extra:[]}],{seed:1,fixtures:[
+      fx(ORIHIME),fx(TRICKY),fx(BLUE_EYES),fx(VEILER,{team:1})]});
+    try{
+      pass(g);
+      assert(offered(g,'特殊召喚：THE トリッキー'),'a non-Fairy can be Special Summoned before Orihime ①');
+      run(g,['召喚：神折の巫女','自分 モンスター 3','はい']);
+      if(negated){
+        run(g,['発動：エフェクト・ヴェーラー','オリヒメ',pass]);
+        assert.deepEqual(codes(snap(g)[0].spells),[],'Orihime ① was negated: nothing was placed');
+      }else{
+        run(g,[pass,'喜捨','カグラ','自分 魔法・罠 1','自分 魔法・罠 2',pass]);
+        assert.deepEqual(codes(snap(g)[0].spells).sort(),[KAGURA,KISHA]);
+      }
+      assert.equal(offered(g,'特殊召喚：THE トリッキー'),negated,negated?'negated: no lock':'resolved: only Fairies');
+      assert.deepEqual(g.errors,[]);
+    }finally{g.close();}
+  }
 });
 
 test('Kamiori: Orihime places 2 cards and locks to Fairies, the Deck and Links chain into Iwatogakure, Alms destroys and revives',async()=>{

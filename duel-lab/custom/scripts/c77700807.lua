@@ -38,10 +38,12 @@ function s.initial_effect(c)
 	e2:SetCode(EVENT_PHASE+PHASE_STANDBY)
 	e2:SetRange(LOCATION_MZONE)
 	e2:SetCountLimit(1)
+	e2:SetCondition(s.grantcon)
 	e2:SetOperation(s.lpop)
 	local e3=Effect.CreateEffect(c)
 	e3:SetType(EFFECT_TYPE_FIELD+EFFECT_TYPE_GRANT)
 	e3:SetRange(LOCATION_SZONE)
+	e3:SetCondition(s.eqcon)
 	e3:SetTargetRange(LOCATION_MZONE,LOCATION_MZONE)
 	e3:SetTarget(function(e,tc) return tc==e:GetHandler():GetEquipTarget() end)
 	e3:SetLabelObject(e2)
@@ -139,4 +141,19 @@ end
 --② halve the LP of the equipped monster's controller
 function s.lpop(e,tp,eg,ep,ev,re,r,rp)
 	Duel.SetLP(tp,math.ceil(Duel.GetLP(tp)/2))
+end
+--② "the monster equipped with this card gains ●": not applied while this card or the equipped monster is negated
+--(a negated Equip Card applies nothing by itself; the equipped monster's negation is checked here)
+function s.eqcon(e)
+	local c=e:GetHandler()
+	local ec=c:GetEquipTarget()
+	return ec~=nil and not c:IsDisabled() and not ec:IsDisabled()
+end
+--the granted ● (its handler is the equipped monster) stops while the equipped monster or the Axe that grants it is negated
+function s.grantsrc(c)
+	return c:IsCode(id) and c:IsFaceup() and not c:IsDisabled()
+end
+function s.grantcon(e)
+	local c=e:GetHandler()
+	return not c:IsDisabled() and c:GetEquipGroup():IsExists(s.grantsrc,1,nil)
 end

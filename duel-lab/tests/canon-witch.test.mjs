@@ -36,18 +36,29 @@ test('Canon Witch: 13 original cards are loaded with setcode 0x7c4',()=>{
   assert.equal(cards[77700509].name,'連弾魔女－フォルテ＆ピアノ');
 });
 
-test('Canon Witch: Sonata ② "この効果の発動後" locks the Extra Deck to Fusion Monsters even when the effect is negated (Effect Veiler)',async()=>{
+// "この効果の発動後～" is part of the effect's resolution (ruling on Ancient Gear Wyvern): when the effect is negated
+// the lock does not apply
+test('Canon Witch: Sonata ② "この効果の発動後" Extra Deck lock applies when ② resolves, not when ② is negated (Effect Veiler)',async()=>{
   const PROXY=22862454;
-  const g=await Duel.create([{main:without(MAIN,[SONATA]),extra:[PROXY]},{main:FILLER,extra:[]}],{seed:1,fixtures:[
-    fx(SONATA),fx(BLUE_EYES,{location:4,sequence:0,position:1}),fx(VEILER,{team:1})]});
-  try{
-    pass(g);
-    run(g,['召喚：連弾魔女－ソナタ','自分 モンスター 2','はい','発動：エフェクト・ヴェーラー','ソナタ',pass]);
-    assert.deepEqual(codes(snap(g)[0].monsters).sort(),[BLUE_EYES,SONATA].sort(),'Sonata ② was negated: nothing was Special Summoned');
-    pass(g);
-    assert(!g.prompt.choices.some(c=>c.label.startsWith('特殊召喚：プロキシー・ドラゴン')),'only Fusion Monsters from the Extra Deck: '+g.prompt.choices.map(c=>c.label).join(' / '));
-    assert.deepEqual(g.errors,[]);
-  }finally{g.close();}
+  for(const negated of [true,false]){
+    const g=await Duel.create([{main:without(MAIN,[SONATA]),extra:[PROXY]},{main:FILLER,extra:[]}],{seed:1,fixtures:[
+      fx(SONATA),fx(BLUE_EYES,{location:4,sequence:0,position:1}),fx(VEILER,{team:1})]});
+    try{
+      pass(g);
+      run(g,['召喚：連弾魔女－ソナタ','自分 モンスター 2','はい']);
+      if(negated){
+        run(g,['発動：エフェクト・ヴェーラー','ソナタ',pass]);
+        assert.deepEqual(codes(snap(g)[0].monsters).sort(),[BLUE_EYES,SONATA].sort(),'Sonata ② was negated: nothing was Special Summoned');
+      }else{
+        run(g,[pass,'フォルテ','自分 モンスター 3','攻撃表示',pass]);
+        assert.equal(snap(g)[0].monsters.filter(Boolean).length,3,'Sonata ② Special Summoned Forte');
+      }
+      pass(g);
+      const proxy=g.prompt.choices.some(c=>c.label.startsWith('特殊召喚：プロキシー・ドラゴン'));
+      assert.equal(proxy,negated,(negated?'negated: no lock':'resolved: only Fusion Monsters from the Extra Deck')+' | '+g.prompt.choices.map(c=>c.label).join(' / '));
+      assert.deepEqual(g.errors,[]);
+    }finally{g.close();}
+  }
 });
 
 test('Canon Witch: Hall → Piano sets Connect, Sonata + Connect fill the field, contact Fusions draw with Hall and split again',async()=>{
