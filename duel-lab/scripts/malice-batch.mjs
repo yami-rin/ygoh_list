@@ -23,7 +23,7 @@ export function distinctWindows(rows,max=8) {
 
 for(const trapName of trapArg.split(',')){
   const trap=TRAPS[trapName]||Number(trapName);
-  const table=JSON.parse(fs.readFileSync(new URL(`../runtime/malice/hits-${trap}.json`,import.meta.url)));
+  const table=JSON.parse(fs.readFileSync(new URL(`../runtime/malice/hits-${trap}${process.env.HITS_TAG||''}.json`,import.meta.url)));
   for(const t of table){
     const routeId=t.route.replace('user-replay-','');
     // WORST_FROM=<batch.jsonl>: only the window that hurt most there (the opponent's best timing), e.g. to test extenders.

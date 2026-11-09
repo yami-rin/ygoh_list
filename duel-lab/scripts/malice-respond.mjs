@@ -2,12 +2,12 @@
 // Replays the user's route with the opponent firing the trap at that window, then searches our best continuation
 // from where the route breaks (malice-search.mjs). Extra hand codes replace stand-in (blank) cards to test extenders.
 import fs from 'node:fs';
-import {REPLAYS,startLab,replaySteps,trapPolicy,summary} from './malice-lab.mjs';
+import {ALL_ROUTES,startLab,replaySteps,trapPolicy,summary} from './malice-lab.mjs';
 import {searchBest} from './malice-search.mjs';
 import {TRAPS} from './malice-traps.mjs';
 
 export async function respond({routeId,trap,window,seconds=60,extra=[],log=false,prefix}) {
-  const route=REPLAYS.find(r=>r.id.includes(routeId));
+  const route=ALL_ROUTES.find(r=>r.id===routeId)||ALL_ROUTES.find(r=>r.id.includes(routeId));
   const hand=[...route.hand];
   for(const code of extra){const i=hand.indexOf(6325660);if(i>=0)hand[i]=code;else hand.push(code);}
   const r={...route,hand,steps:prefix===undefined?route.steps:route.steps.slice(0,prefix)};

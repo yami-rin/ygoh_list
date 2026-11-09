@@ -11,6 +11,9 @@ import {cardInfo} from '../cards.mjs';
 
 export const USER_DECK=JSON.parse(fs.readFileSync(new URL('../presets/user-malice.json',import.meta.url)));
 export const REPLAYS=JSON.parse(fs.readFileSync(new URL('../routes/user-replays.json',import.meta.url))).routes;
+// Routes found by the searches (routes/malice-routes.json), replayable the same way.
+export const SAVED=fs.existsSync(new URL('../routes/malice-routes.json',import.meta.url))?JSON.parse(fs.readFileSync(new URL('../routes/malice-routes.json',import.meta.url))).routes:[];
+export const ALL_ROUTES=[...REPLAYS,...SAVED];
 const name=code=>cardInfo(code).name;
 const mine=g=>g.pending&&(g.pending.player^g.first)===0;
 
