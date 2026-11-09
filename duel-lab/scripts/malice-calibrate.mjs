@@ -14,8 +14,11 @@ for(const r of routes){
   if(done.has(r.id))continue;
   const g=await startLab({hand:r.hand,seed:r.seed});
   for(const s of r.steps){g.respond(0^g.first,g.revision,s.input,{snapshot:false});while(g.pending&&(g.pending.player^g.first)===1){const pass=g.prompt.choices.find(c=>c.label==='発動しない')||g.prompt.choices[0];g.respond(g.pending.player^g.first,g.revision,{action:pass.id},{snapshot:false});}}
+  // Cards drawn during the combo depend on the seed's deck order: they are not played in the opponent's turn.
+  const start=[...r.hand],drawn=[];
+  for(const c of g.snapshot(0).players[0].hand.map(c=>c.code)){const i=start.indexOf(c);if(i>=0)start.splice(i,1);else drawn.push(c);}
   const sc=score(g);g.close();
-  const e=await evaluateRoute(r,{maxLines:max,scenario});
+  const e=await evaluateRoute({...r,deadHand:[...new Set([...(r.deadHand||[]),...drawn])]},{maxLines:max,scenario});
   const row={id:r.id,title:r.title,score:sc.total,parts:sc.parts.map(p=>p[0]),interruptions:e.interruptions,breakdown:e.breakdown.map(b=>b.card),lines:e.lines};
   fs.appendFileSync(out,JSON.stringify(row)+'\n');done.set(r.id,row);
   console.log(`${r.title}: 点${sc.total} 妨害${e.interruptions}（${row.breakdown.join('・')}）`);
