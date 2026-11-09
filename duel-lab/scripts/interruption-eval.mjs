@@ -17,6 +17,9 @@ const own=b=>b.players[0];
 export const SCENARIOS={
   'malice-mirror':{label:'相手もM∀LICE（UNDERGROUND・バックアップ・Rabbit・Cat・テラ・フォーミング）',
     hand:[68337209,30118811,69272449,96676583,73628505]},
+  // The user's own deck as the opponent (UNDERGROUND, White Rabbit, Backup, March Hare, Cheshire Cat).
+  'user-mirror':{label:'相手はユーザーのM∀LICE（UNDERGROUND・Rabbit・バックアップ・March Hare・Cat）',deck:'presets/user-malice.json',
+    hand:[68337209,69272449,30118811,20938824,96676583]},
 };
 
 function take(list,codes,what) {
@@ -25,7 +28,7 @@ function take(list,codes,what) {
   return left;
 }
 
-// Our deck: the route's own deck file (e.g. presets/user-malice.json) or preset.json. The opponent always uses preset.json.
+// Our deck: the route's own deck file (e.g. presets/user-malice.json) or preset.json. The opponent uses the scenario's deck or preset.json.
 export function routeDeck(route) {
   if(!route.deck)return preset;
   const d=JSON.parse(fs.readFileSync(new URL(`../${route.deck}`,import.meta.url)));
@@ -33,7 +36,7 @@ export function routeDeck(route) {
 }
 
 async function startScenario(route,scenario) {
-  const mine=structuredClone(routeDeck(route)),theirs=structuredClone(preset);
+  const mine=structuredClone(routeDeck(route)),theirs=structuredClone(scenario.deck?routeDeck({deck:scenario.deck}):preset);
   mine.main=take(mine.main,route.hand,'Hand');
   if(route.deckOrder){assert.deepEqual([...route.deckOrder].sort((a,b)=>a-b),[...mine.main].sort((a,b)=>a-b));mine.main=[...route.deckOrder];}
   theirs.main=take(theirs.main,scenario.hand,'Opponent hand');
