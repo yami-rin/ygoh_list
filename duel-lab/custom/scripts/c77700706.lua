@@ -63,20 +63,22 @@ s.listed_series={SET_ORDER_KNIGHT}
 function s.checkop(e,tp,eg,ep,ev,re,r,rp)
 	if re:IsActiveType(TYPE_MONSTER) then Duel.RegisterFlagEffect(1-rp,id,RESET_PHASE+PHASE_END,0,1) end
 end
-function s.matfilter(c)
+--attaching affects the card: a monster unaffected by this effect (e.g. immune to other cards) cannot be attached
+function s.matfilter(c,e)
+	if c:IsImmuneToEffect(e) then return false end
 	if c:IsLocation(LOCATION_GRAVE) then return c:IsMonster() end
 	return not c:IsType(TYPE_TOKEN)
 end
 function s.mattg(e,tp,eg,ep,ev,re,r,rp,chk)
 	local c=e:GetHandler()
 	if chk==0 then return c:IsType(TYPE_XYZ)
-		and Duel.IsExistingMatchingCard(s.matfilter,tp,LOCATION_MZONE+LOCATION_GRAVE,LOCATION_MZONE+LOCATION_GRAVE,1,c) end
+		and Duel.IsExistingMatchingCard(s.matfilter,tp,LOCATION_MZONE+LOCATION_GRAVE,LOCATION_MZONE+LOCATION_GRAVE,1,c,e) end
 end
 function s.matop(e,tp,eg,ep,ev,re,r,rp)
 	local c=e:GetHandler()
 	if not (c:IsRelateToEffect(e) and c:IsFaceup()) then return end
 	Duel.Hint(HINT_SELECTMSG,tp,HINTMSG_XMATERIAL)
-	local g=Duel.SelectMatchingCard(tp,aux.NecroValleyFilter(s.matfilter),tp,LOCATION_MZONE+LOCATION_GRAVE,LOCATION_MZONE+LOCATION_GRAVE,1,1,c)
+	local g=Duel.SelectMatchingCard(tp,aux.NecroValleyFilter(s.matfilter),tp,LOCATION_MZONE+LOCATION_GRAVE,LOCATION_MZONE+LOCATION_GRAVE,1,1,c,e)
 	local tc=g:GetFirst()
 	if not tc then return end
 	Duel.HintSelection(g)

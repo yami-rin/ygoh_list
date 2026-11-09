@@ -157,6 +157,22 @@ test('Order: Lowell ① protects the other "Order" monsters, Sanctum ② detache
   }finally{g.close();}
 });
 
+test('Order: Cavalry ① cannot attach a monster unaffected by its effect (Dusk Hour Blade Yayoi)',async()=>{
+  const YAYOI=77700409;
+  const g=await Duel.create([{main:MAIN,extra:[CAVALRY]},{main:FILLER,extra:[YAYOI]},],{seed:1,fixtures:[
+    fx(LAWRY,{location:4,sequence:0,position:1}),fx(EDURA,{location:4,sequence:1,position:1}),
+    fx(YAYOI,{team:1,location:4,sequence:5,position:1}),fx(BLUE_EYES,{team:1,location:4,sequence:2,position:1})]});
+  try{
+    pass(g);
+    run(g,['特殊召喚：秩序騎士キャバルリー','選択：秩序騎士ロウリー','選択：秩序騎士エデュラ']);
+    if(g.prompt?.choices?.some(c=>c.label==='選択を確定'))pick(g,'選択を確定');
+    run(g,['自分 モンスター 1','守備表示','はい',pass]);
+    const choices=g.prompt.cards.map(c=>c.label);
+    assert(choices.some(l=>l.includes('青眼')),choices.join(' / '));
+    assert(!choices.some(l=>l.includes('夜宵')),'Yayoi is unaffected by other cards: '+choices.join(' / '));
+  }finally{g.close();}
+});
+
 test('Order: Cavalry ③ can be activated on the opponent\'s turn, in response to their monster effect',async()=>{
   const MAXX_C=23434538;
   const g=await Duel.create([{main:MAIN,extra:[LOWELL]},{main:FILLER,extra:[]}],{seed:1,fixtures:[

@@ -42,19 +42,20 @@ s.listed_series={SET_ORDER_KNIGHT}
 function s.mfilter(c)
 	return c:IsType(TYPE_XYZ) and c:IsRank(9) and c:IsSetCard(SET_ORDER_KNIGHT)
 end
-function s.matfilter(c)
-	return not c:IsType(TYPE_TOKEN)
+--attaching affects the card: a card unaffected by this effect (e.g. immune to other cards) cannot be attached
+function s.matfilter(c,e)
+	return not c:IsType(TYPE_TOKEN) and not c:IsImmuneToEffect(e)
 end
 function s.mattg(e,tp,eg,ep,ev,re,r,rp,chk)
 	local c=e:GetHandler()
 	if chk==0 then return c:IsType(TYPE_XYZ)
-		and Duel.IsExistingMatchingCard(s.matfilter,tp,LOCATION_ONFIELD+LOCATION_GRAVE,LOCATION_ONFIELD+LOCATION_GRAVE,1,c) end
+		and Duel.IsExistingMatchingCard(s.matfilter,tp,LOCATION_ONFIELD+LOCATION_GRAVE,LOCATION_ONFIELD+LOCATION_GRAVE,1,c,e) end
 end
 function s.matop(e,tp,eg,ep,ev,re,r,rp)
 	local c=e:GetHandler()
 	if not (c:IsRelateToEffect(e) and c:IsFaceup()) then return end
 	Duel.Hint(HINT_SELECTMSG,tp,HINTMSG_XMATERIAL)
-	local g=Duel.SelectMatchingCard(tp,aux.NecroValleyFilter(s.matfilter),tp,LOCATION_ONFIELD+LOCATION_GRAVE,LOCATION_ONFIELD+LOCATION_GRAVE,1,3,c)
+	local g=Duel.SelectMatchingCard(tp,aux.NecroValleyFilter(s.matfilter),tp,LOCATION_ONFIELD+LOCATION_GRAVE,LOCATION_ONFIELD+LOCATION_GRAVE,1,3,c,e)
 	if #g==0 then return end
 	Duel.HintSelection(g)
 	for tc in aux.Next(g) do
