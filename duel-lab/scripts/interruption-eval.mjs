@@ -210,7 +210,8 @@ export function summarize(events) {
 export async function evaluateRoute(route,{scenario='malice-mirror',maxLines=3000}={}) {
   const sc=SCENARIOS[scenario];assert(sc,`Unknown scenario ${scenario}`);
   const stack=[[]],visited=new Map();let best=null,lines=0,errors=0,pruned=0;const started=Date.now();
-  while(stack.length&&lines<maxLines){
+  // Pruned and failed lines also cost a replay: cap all attempts, not only finished lines.
+  while(stack.length&&lines<maxLines&&lines+pruned+errors<maxLines*20){
     const choices=stack.pop();
     const result=await runLine(route,sc,choices,visited);
     if(result.error||result.invalid){errors++;continue;}

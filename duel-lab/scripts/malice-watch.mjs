@@ -5,7 +5,7 @@ import {execFileSync} from 'node:child_process';
 
 const files=()=>fs.readdirSync('runtime/malice').filter(f=>/\.jsonl$/.test(f));
 const count=f=>fs.readFileSync(`runtime/malice/${f}`,'utf8').split('\n').filter(Boolean).length;
-const jobs=()=>execFileSync('powershell',['-NoProfile','-Command',"(Get-CimInstance Win32_Process -Filter \"Name='node.exe'\" | Where-Object { $_.CommandLine -match 'malice-(extenders|catalog|batch|improve|open)' -and $_.CommandLine -notmatch 'malice-watch' }).Count"],{encoding:'utf8'}).trim();
+const jobs=()=>execFileSync('powershell',['-NoProfile','-Command',"(Get-CimInstance Win32_Process -Filter \"Name='node.exe'\" | Where-Object { $_.CommandLine -match 'malice-(extenders|catalog|batch|improve|open|bait|calibrate|hits)' -and $_.CommandLine -notmatch 'malice-watch' }).Count"],{encoding:'utf8'}).trim();
 const seen=new Map(files().map(f=>[f,count(f)]));
 let last='';
 for(;;){
