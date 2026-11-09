@@ -65,8 +65,9 @@ end
 function s.sumcon(e,tp,eg,ep,ev,re,r,rp)
 	return eg:IsExists(s.sumfilter,1,nil,tp)
 end
+--"then add 1 'Gokasou' Spell/Trap from your GY": the milled cards go to the opponent's GY, so yours needs one already
 function s.millgytg(e,tp,eg,ep,ev,re,r,rp,chk)
-	if chk==0 then return Duel.IsPlayerCanDiscardDeck(1-tp,1) end
+	if chk==0 then return Duel.IsPlayerCanDiscardDeck(1-tp,1) and Duel.IsExistingMatchingCard(s.thfilter,tp,LOCATION_GRAVE,0,1,nil) end
 	Duel.SetOperationInfo(0,CATEGORY_DECKDES,nil,0,1-tp,1)
 	Duel.SetOperationInfo(0,CATEGORY_TOHAND,nil,1,tp,LOCATION_GRAVE)
 end

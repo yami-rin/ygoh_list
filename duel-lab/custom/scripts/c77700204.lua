@@ -63,9 +63,11 @@ end
 function s.stfilter(c)
 	return c:IsFaceup() and c:GetSequence()<5 and c:IsAbleToHand()
 end
+--"then send up to that many random cards from the opponent's hand": the opponent has a hand card,
+--or one of the returned cards goes to their hand
 function s.rttg(e,tp,eg,ep,ev,re,r,rp,chk)
 	local g=Duel.GetMatchingGroup(s.stfilter,tp,LOCATION_SZONE,LOCATION_SZONE,nil)
-	if chk==0 then return #g>0 end
+	if chk==0 then return #g>0 and (Duel.GetFieldGroupCount(tp,0,LOCATION_HAND)>0 or g:IsExists(function(tc) return tc:GetOwner()==1-tp end,1,nil)) end
 	Duel.SetOperationInfo(0,CATEGORY_TOHAND,g,#g,0,0)
 	Duel.SetOperationInfo(0,CATEGORY_HANDES,nil,0,1-tp,1)
 end

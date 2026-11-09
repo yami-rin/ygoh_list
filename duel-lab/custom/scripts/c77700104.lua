@@ -46,17 +46,26 @@ function s.tdcost(e,tp,eg,ep,ev,re,r,rp,chk)
 	Duel.ConfirmCards(1-tp,c)
 	Duel.SendtoDeck(c,nil,SEQ_DECKSHUFFLE,REASON_COST)
 end
---The core can only Normal Summon from the hand, so the chosen monster is added to the hand and summoned at once.
-function s.sumfilter(c)
-	return c:IsSetCard(SET_DECLINE) and c:IsMonster() and c:IsAbleToHand()
+--The core can only Normal Summon from the hand: "add 1 'Decline' monster that can be Normal Summoned from the Deck
+--to the hand, then Normal Summon it". The monster must be summonable once in the hand (Level 4 or lower, or the
+--Tributes are there; this card's own procedure counts for another "Decline Idol").
+function s.sumfilter(c,tp)
+	if not (c:IsSetCard(SET_DECLINE) and c:IsMonster() and c:IsAbleToHand()) then return false end
+	if not (c:IsSummonableCard() and Duel.IsPlayerCanSummon(tp,SUMMON_TYPE_NORMAL,c)) then return false end
+	local lv=c:GetLevel()
+	if lv<=4 then return Duel.GetLocationCount(tp,LOCATION_MZONE)>0 end
+	if Duel.CheckTribute(c,lv<=6 and 1 or 2) then return true end
+	return c:IsCode(id) and Duel.CheckTribute(c,1,1,Duel.GetMatchingGroup(s.otfilter,tp,LOCATION_MZONE,LOCATION_MZONE,nil,tp))
 end
 function s.sumtg(e,tp,eg,ep,ev,re,r,rp,chk)
-	if chk==0 then return Duel.IsExistingMatchingCard(s.sumfilter,tp,LOCATION_DECK,0,1,e:GetHandler()) end
+	if chk==0 then return Duel.IsExistingMatchingCard(s.sumfilter,tp,LOCATION_DECK,0,1,nil,tp) end
+	Duel.SetOperationInfo(0,CATEGORY_TOHAND,nil,1,tp,LOCATION_DECK)
 	Duel.SetOperationInfo(0,CATEGORY_SUMMON,nil,1,0,0)
 end
 function s.sumop(e,tp,eg,ep,ev,re,r,rp)
 	Duel.Hint(HINT_SELECTMSG,tp,HINTMSG_SUMMON)
-	local tc=Duel.SelectMatchingCard(tp,s.sumfilter,tp,LOCATION_DECK,0,1,1,nil):GetFirst()
+	--this card was shuffled into the Deck as the cost: it cannot pick itself
+	local tc=Duel.SelectMatchingCard(tp,s.sumfilter,tp,LOCATION_DECK,0,1,1,e:GetHandler(),tp):GetFirst()
 	if not tc or Duel.SendtoHand(tc,nil,REASON_EFFECT)==0 or not tc:IsLocation(LOCATION_HAND) then return end
 	Duel.ConfirmCards(1-tp,tc)
 	if tc:IsSummonable(true,nil) then Duel.Summon(tp,tc,true,nil) end

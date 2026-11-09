@@ -185,8 +185,9 @@ test('Polar Night ● cannot be used again this turn by a monster with the retur
     p1:{szone:[ABSOLUTE_ZERO,ABSOLUTE_ZERO,ABSOLUTE_ZERO]},set:[ABSOLUTE_ZERO]});
   try{
     // Xyz Summon Polar Night, destroy it with Dark Hole → Polar Night ② grants ● this turn (Zanya ① is declined).
+    // The opponent's cards are not in Polar Night's column, so its Zanya ② does not open a window of its own.
     play(g,['PASS','特殊召喚：宵刻刃－極夜','選択：宵刻刃－残夜','選択：宵刻刃－白夜','PASS','効果発動：ブラック・ホール']);
-    play(g,['発動しない','発動しない','発動：宵刻刃－極夜 / 宵刻刃モンスターに効果を与える','発動しない','PASS']);
+    play(g,['発動しない','発動：宵刻刃－極夜 / 宵刻刃モンスターに効果を与える','発動しない','PASS']);
     assert(names(g,0,'grave').includes('宵刻刃－極夜'));
     // Hien is Normal Summoned (① declined), Kasumi ① Special Summons itself: both gain ●.
     play(g,['召喚：宵刻刃－飛燕','いいえ','PASS','特殊召喚：宵刻刃－霞','PASS']);

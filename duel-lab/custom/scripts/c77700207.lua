@@ -26,25 +26,33 @@ s.listed_series={SET_STORM_FLOW}
 function s.condition(e,tp,eg,ep,ev,re,r,rp)
 	return Duel.GetCurrentChain()==0 and eg:IsExists(Card.IsSummonPlayer,1,nil,1-tp)
 end
-function s.rtfilter(c)
+--"then Special Summon a 'Storm Flow' Synchro Monster with a lower Level": the returned monster needs one in the Extra Deck
+function s.basefilter(c)
 	return c:IsFaceup() and c:IsAttribute(ATTRIBUTE_WIND) and c:IsType(TYPE_SYNCHRO) and c:IsAbleToExtra()
 end
+function s.rtfilter(c,e,tp)
+	return s.basefilter(c) and Duel.IsExistingMatchingCard(s.spfilter,tp,LOCATION_EXTRA,0,1,nil,e,tp,c:GetLevel(),c)
+end
 function s.target(e,tp,eg,ep,ev,re,r,rp,chk)
-	if chk==0 then return Duel.IsExistingMatchingCard(s.rtfilter,tp,LOCATION_MZONE,0,1,nil) end
+	if chk==0 then return Duel.IsExistingMatchingCard(s.rtfilter,tp,LOCATION_MZONE,0,1,nil,e,tp) end
 	local g=eg:Filter(Card.IsSummonPlayer,nil,1-tp)
 	Duel.SetOperationInfo(0,CATEGORY_DISABLE_SUMMON,g,#g,0,0)
 	Duel.SetOperationInfo(0,CATEGORY_TODECK,g,#g,0,0)
 	Duel.SetOperationInfo(0,CATEGORY_SPECIAL_SUMMON,nil,1,tp,LOCATION_EXTRA)
 end
-function s.spfilter(c,e,tp,lv)
+--mc: the monster that leaves the field first (its zone counts as free)
+function s.spfilter(c,e,tp,lv,mc)
 	return c:IsSetCard(SET_STORM_FLOW) and c:IsType(TYPE_SYNCHRO) and c:GetLevel()<lv
-		and c:IsCanBeSpecialSummoned(e,SUMMON_TYPE_SYNCHRO,tp,false,false) and Duel.GetLocationCountFromEx(tp,tp,nil,c)>0
+		and c:IsCanBeSpecialSummoned(e,SUMMON_TYPE_SYNCHRO,tp,false,false) and Duel.GetLocationCountFromEx(tp,tp,mc,c)>0
 end
 function s.operation(e,tp,eg,ep,ev,re,r,rp)
 	if not e:GetHandler():IsRelateToEffect(e) then return end
+	--prefer a monster that still leads to the Special Summon; the negation is done even if none is left
+	local rg=Duel.GetMatchingGroup(s.rtfilter,tp,LOCATION_MZONE,0,nil,e,tp)
+	if #rg==0 then rg=Duel.GetMatchingGroup(s.basefilter,tp,LOCATION_MZONE,0,nil) end
+	if #rg==0 then return end
 	Duel.Hint(HINT_SELECTMSG,tp,HINTMSG_TODECK)
-	local tc=Duel.SelectMatchingCard(tp,s.rtfilter,tp,LOCATION_MZONE,0,1,1,nil):GetFirst()
-	if not tc then return end
+	local tc=rg:Select(tp,1,1,nil):GetFirst()
 	Duel.HintSelection(tc)
 	local lv=tc:GetLevel()
 	if Duel.SendtoDeck(tc,nil,SEQ_DECKSHUFFLE,REASON_EFFECT)==0 or not tc:IsLocation(LOCATION_EXTRA) then return end

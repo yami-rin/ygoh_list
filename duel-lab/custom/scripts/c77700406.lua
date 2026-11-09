@@ -64,14 +64,16 @@ function s.spop(e,tp,eg,ep,ev,re,r,rp)
 	local sg=g:Select(tp,ct,ct,nil)
 	Duel.SpecialSummon(sg,0,tp,tp,false,false,POS_FACEUP)
 end
-function s.clfilter(c)
+--the target needs an opponent's card in its column to destroy
+function s.clfilter(c,tp)
 	return c:IsFaceup() and c:IsSetCard(SET_YOIKOKU_BLADE) and c:IsAbleToHand()
+		and c:GetColumnGroup():IsExists(Card.IsControler,1,nil,1-tp)
 end
 function s.cltg(e,tp,eg,ep,ev,re,r,rp,chk,chkc)
-	if chkc then return chkc:IsLocation(LOCATION_MZONE) and s.clfilter(chkc) end
-	if chk==0 then return Duel.IsExistingTarget(s.clfilter,tp,LOCATION_MZONE,LOCATION_MZONE,1,nil) end
+	if chkc then return chkc:IsLocation(LOCATION_MZONE) and s.clfilter(chkc,tp) end
+	if chk==0 then return Duel.IsExistingTarget(s.clfilter,tp,LOCATION_MZONE,LOCATION_MZONE,1,nil,tp) end
 	Duel.Hint(HINT_SELECTMSG,tp,HINTMSG_TARGET)
-	local tc=Duel.SelectTarget(tp,s.clfilter,tp,LOCATION_MZONE,LOCATION_MZONE,1,1,nil):GetFirst()
+	local tc=Duel.SelectTarget(tp,s.clfilter,tp,LOCATION_MZONE,LOCATION_MZONE,1,1,nil,tp):GetFirst()
 	local dg=tc:GetColumnGroup():Filter(Card.IsControler,nil,1-tp)
 	Duel.SetOperationInfo(0,CATEGORY_DESTROY,dg,#dg,0,0)
 	Duel.SetOperationInfo(0,CATEGORY_TOHAND,tc,1,0,0)

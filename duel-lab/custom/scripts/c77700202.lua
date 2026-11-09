@@ -35,8 +35,9 @@ s.listed_series={SET_STORM_FLOW}
 function s.thfilter(c)
 	return c:IsSetCard(SET_STORM_FLOW) and c:IsSpellTrap() and c:IsAbleToHand()
 end
+--"then return this card to the hand": this card has to be able to go back too
 function s.thtg(e,tp,eg,ep,ev,re,r,rp,chk)
-	if chk==0 then return Duel.IsExistingMatchingCard(s.thfilter,tp,LOCATION_DECK,0,1,nil) end
+	if chk==0 then return e:GetHandler():IsAbleToHand() and Duel.IsExistingMatchingCard(s.thfilter,tp,LOCATION_DECK,0,1,nil) end
 	Duel.SetOperationInfo(0,CATEGORY_TOHAND,nil,1,tp,LOCATION_DECK)
 end
 function s.thop(e,tp,eg,ep,ev,re,r,rp)

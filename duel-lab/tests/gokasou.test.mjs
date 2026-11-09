@@ -38,16 +38,19 @@ test('Gokasou: Apprentice → Purgatory → Admission, banishing chains into Sca
   const hand=[77700304,77700301,77700302];
   const own={main:[...MAIN],extra:[77700309,77700309,77700310,77700311]};
   for(const c of hand)own.main.splice(own.main.indexOf(c),1);
-  const g=await Duel.create([own,{main:FILLER,extra:[]}],{seed:1,fixtures:[...hand.map(c=>fx(c)),...[CYCLONE,CALLED,IMPERMANENCE,BLUE_EYES,RAIGEKI].map(c=>grave(c))]});
+  own.main.splice(own.main.indexOf(77700308),1);
+  const g=await Duel.create([own,{main:FILLER,extra:[]}],{seed:1,fixtures:[...hand.map(c=>fx(c)),grave(77700308,0),...[CYCLONE,CALLED,IMPERMANENCE,BLUE_EYES,RAIGEKI].map(c=>grave(c))]});
   try{
     pass(g);
     // Apprentice ①: discard, add Purgatory. Purgatory ①: add Admission. Admission ①: mill 3, add Bonfire.
     run(g,['効果発動：業火葬－点火する見習い',pass,'煉獄','手札に加える',pass,'効果発動：業火葬場',pass,'はい','受入',pass,
       '効果発動：業火葬の受入','自分 魔法・罠 1',pass,'3','焚き火',pass]);
     assert.equal(snap(g)[1].grave.filter(Boolean).length,8,'Admission milled 3');
-    // Guide ① searches Bearer, Admission ② mills 2 more
-    run(g,['召喚：業火葬－送り火の導き手','自分 モンスター 3','発動：業火葬－送り火の導き手','発動：業火葬の受入',pass,'2','霊柩',pass]);
+    // Guide ① searches Bearer, Admission ② mills 2 more, then adds Forced Execution from your GY
+    // (② needs a "Gokasou" Spell/Trap in your GY: the milled cards go to the opponent's GY)
+    run(g,['召喚：業火葬－送り火の導き手','自分 モンスター 3','発動：業火葬－送り火の導き手','発動：業火葬の受入',pass,'2','強制執行','霊柩',pass]);
     assert.equal(count(snap(g)[0].hand,77700303),1);
+    assert.equal(count(snap(g)[0].hand,77700308),1,'Admission ② added Forced Execution from the GY');
     // Guide ②: banish Cyclone → Purgatory 300, Apprentice ② returns to hand, Scatterer ① comes out of the hand
     run(g,['効果発動：業火葬－送り火の導き手','サイクロン',pass]);
     assert.equal(g.lp[1],7700);

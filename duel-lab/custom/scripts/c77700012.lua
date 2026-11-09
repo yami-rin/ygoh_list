@@ -22,9 +22,9 @@ function s.initial_effect(c)
 	c:RegisterEffect(e2)
 end
 s.listed_series={SET_CHAIN_CODE}
---"a Chain Code card on your field": cards other than this one (this card is always on the field while activating)
+--"a 'Chain Code' card other than this card on your field": face-up cards only (a Set card is not known to be one)
 function s.cfilter(c,ec)
-	return c~=ec and c:IsSetCard(SET_CHAIN_CODE) and (c:IsFaceup() or c:IsLocation(LOCATION_SZONE))
+	return c~=ec and c:IsFaceup() and c:IsSetCard(SET_CHAIN_CODE)
 end
 function s.condition(e,tp,eg,ep,ev,re,r,rp)
 	return Duel.IsChainNegatable(ev) and Duel.IsExistingMatchingCard(s.cfilter,tp,LOCATION_ONFIELD,0,1,nil,e:GetHandler())

@@ -50,11 +50,16 @@ end
 function s.val(e,c)
 	return Duel.GetMatchingGroupCount(aux.FaceupFilter(Card.IsSetCard,SET_DECLINE),e:GetHandlerPlayer(),LOCATION_MZONE,0,nil)*-300
 end
+--"then draw 1 card for each 1000 of its original ATK": the target gives at least 1 draw, and you can draw that many
+function s.atkfilter(c,tp)
+	local d=math.floor(math.max(c:GetBaseAttack(),0)/1000)
+	return c:IsFaceup() and d>0 and Duel.IsPlayerCanDraw(tp,d)
+end
 function s.atktg(e,tp,eg,ep,ev,re,r,rp,chk,chkc)
-	if chkc then return chkc:IsLocation(LOCATION_MZONE) and chkc:IsControler(1-tp) and chkc:IsFaceup() end
-	if chk==0 then return Duel.IsExistingTarget(Card.IsFaceup,tp,0,LOCATION_MZONE,1,nil) end
+	if chkc then return chkc:IsLocation(LOCATION_MZONE) and chkc:IsControler(1-tp) and s.atkfilter(chkc,tp) end
+	if chk==0 then return Duel.IsExistingTarget(s.atkfilter,tp,0,LOCATION_MZONE,1,nil,tp) end
 	Duel.Hint(HINT_SELECTMSG,tp,HINTMSG_FACEUP)
-	local tc=Duel.SelectTarget(tp,Card.IsFaceup,tp,0,LOCATION_MZONE,1,1,nil):GetFirst()
+	local tc=Duel.SelectTarget(tp,s.atkfilter,tp,0,LOCATION_MZONE,1,1,nil,tp):GetFirst()
 	local d=math.floor(math.max(tc:GetBaseAttack(),0)/1000)
 	if d>0 then Duel.SetOperationInfo(0,CATEGORY_DRAW,nil,0,tp,d) end
 end

@@ -131,13 +131,17 @@ end
 function s.canth(c)
 	return c:GetOriginalType()&(TYPE_FUSION+TYPE_SYNCHRO+TYPE_XYZ+TYPE_LINK)==0 and c:IsAbleToHand()
 end
+--"then equip the target to this card or send it to the GY": one of the two has to be possible for the target
+function s.mvfilter(c)
+	return c:IsAbleToGrave() or c:IsFaceup() and s.canequip(c)
+end
 function s.mvtg(e,tp,eg,ep,ev,re,r,rp,chk,chkc)
 	local c=e:GetHandler()
-	if chkc then return chkc:IsLocation(LOCATION_MZONE) and chkc~=c end
-	if chk==0 then return Duel.IsExistingTarget(nil,tp,LOCATION_MZONE,LOCATION_MZONE,1,c)
+	if chkc then return chkc:IsLocation(LOCATION_MZONE) and chkc~=c and s.mvfilter(chkc) end
+	if chk==0 then return Duel.IsExistingTarget(s.mvfilter,tp,LOCATION_MZONE,LOCATION_MZONE,1,c)
 		and Duel.IsExistingMatchingCard(s.eqcfilter,tp,LOCATION_SZONE,0,1,nil,e,tp) end
 	Duel.Hint(HINT_SELECTMSG,tp,HINTMSG_TARGET)
-	Duel.SelectTarget(tp,nil,tp,LOCATION_MZONE,LOCATION_MZONE,1,1,c)
+	Duel.SelectTarget(tp,s.mvfilter,tp,LOCATION_MZONE,LOCATION_MZONE,1,1,c)
 end
 function s.mvop(e,tp,eg,ep,ev,re,r,rp)
 	local c=e:GetHandler()

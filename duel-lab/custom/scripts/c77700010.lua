@@ -28,8 +28,13 @@ function s.setfilter(c)
 	return c:IsSetCard(SET_CHAIN_CODE) and c:IsSpellTrap() and c:IsSSetable() and (c:IsLocation(LOCATION_GRAVE) or c:IsFaceup())
 end
 function s.settg(e,tp,eg,ep,ev,re,r,rp,chk)
-	--this card itself is still on the field while activating, so it is never its own target
-	if chk==0 then return Duel.IsExistingMatchingCard(s.setfilter,tp,LOCATION_GRAVE+LOCATION_REMOVED,0,1,nil) end
+	--this card itself is still on the field while activating, so it is never its own target.
+	--Activated from the hand, it takes up a Spell & Trap Zone itself, so the Set card needs another one.
+	if chk==0 then
+		local ft=Duel.GetLocationCount(tp,LOCATION_SZONE)
+		if e:GetHandler():IsLocation(LOCATION_HAND) then ft=ft-1 end
+		return Duel.IsExistingMatchingCard(function(c) return s.setfilter(c) and (ft>0 or c:IsType(TYPE_FIELD)) end,tp,LOCATION_GRAVE+LOCATION_REMOVED,0,1,nil)
+	end
 	e:SetLabel(Duel.GetCurrentChain())
 end
 function s.setop(e,tp,eg,ep,ev,re,r,rp)

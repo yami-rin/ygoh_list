@@ -3,7 +3,7 @@
 local s,id=GetID()
 local SET_CHAIN_CODE=0x1f0
 function s.initial_effect(c)
-	--① when you activate an effect: Special Summon this card from hand/banishment, then negate 1 face-up opponent card (no target)
+	--① when you activate an effect: Special Summon this card from hand/banishment, then you can negate 1 face-up opponent card (no target)
 	local e1=Effect.CreateEffect(c)
 	e1:SetDescription(aux.Stringid(id,0))
 	e1:SetCategory(CATEGORY_SPECIAL_SUMMON+CATEGORY_DISABLE)
@@ -44,9 +44,12 @@ end
 function s.negfilter(c)
 	return c:IsFaceup() and c:IsNegatable()
 end
+--"Special Summon this card. Then, you can negate the effects of 1 face-up card your opponent controls until the end of
+--this turn": the negation is optional, so the effect can be activated with nothing to negate
 function s.spop(e,tp,eg,ep,ev,re,r,rp)
 	local c=e:GetHandler()
 	if not c:IsRelateToEffect(e) or Duel.SpecialSummon(c,0,tp,tp,false,false,POS_FACEUP)==0 then return end
+	if not Duel.IsExistingMatchingCard(s.negfilter,tp,0,LOCATION_ONFIELD,1,nil) or not Duel.SelectYesNo(tp,aux.Stringid(id,2)) then return end
 	Duel.Hint(HINT_SELECTMSG,tp,HINTMSG_NEGATE)
 	local tc=Duel.SelectMatchingCard(tp,s.negfilter,tp,0,LOCATION_ONFIELD,1,1,nil):GetFirst()
 	if not tc then return end

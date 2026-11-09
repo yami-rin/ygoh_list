@@ -49,7 +49,9 @@ end
 function s.thop(e,tp,eg,ep,ev,re,r,rp)
 	Duel.Hint(HINT_SELECTMSG,tp,HINTMSG_ATOHAND)
 	local g=Duel.SelectMatchingCard(tp,s.thfilter,tp,LOCATION_DECK,0,1,1,nil)
-	if #g>0 and Duel.SendtoHand(g,nil,REASON_EFFECT)>0 then Duel.ConfirmCards(1-tp,g) end
+	--"then": the ATK loss follows only a successful search
+	if #g==0 or Duel.SendtoHand(g,nil,REASON_EFFECT)==0 then return end
+	Duel.ConfirmCards(1-tp,g)
 	local mg=Duel.GetMatchingGroup(Card.IsFaceup,tp,0,LOCATION_MZONE,nil)
 	if #mg==0 then return end
 	Duel.BreakEffect()

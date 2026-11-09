@@ -50,13 +50,14 @@ end
 function s.effop(e,tp,eg,ep,ev,re,r,rp)
 	local c=e:GetHandler()
 	local rc=c:GetReasonCard()
-	--● Special Summoned: add 1 "Order" Spell/Trap from the Deck to the hand
+	--● Xyz Summoned: add 1 "Order" Spell/Trap from the Deck to the hand
 	local e1=Effect.CreateEffect(rc)
 	e1:SetDescription(aux.Stringid(id,1))
 	e1:SetCategory(CATEGORY_TOHAND+CATEGORY_SEARCH)
 	e1:SetType(EFFECT_TYPE_SINGLE+EFFECT_TYPE_TRIGGER_O)
 	e1:SetProperty(EFFECT_FLAG_DELAY)
 	e1:SetCode(EVENT_SPSUMMON_SUCCESS)
+	e1:SetCondition(function(e) return e:GetHandler():IsSummonType(SUMMON_TYPE_XYZ) end)
 	e1:SetCountLimit(1,{id,1})
 	e1:SetTarget(s.thtg)
 	e1:SetOperation(s.thop)

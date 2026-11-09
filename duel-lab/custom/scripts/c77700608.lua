@@ -61,10 +61,12 @@ function s.desop(e,tp,eg,ep,ev,re,r,rp)
 	local g=Duel.SelectMatchingCard(tp,aux.TRUE,tp,LOCATION_ONFIELD,LOCATION_ONFIELD,1,1,nil)
 	if #g==0 then return end
 	Duel.HintSelection(g)
-	Duel.Destroy(g,REASON_EFFECT)
+	--"then": the Special Summon follows only when the card was destroyed
+	if Duel.Destroy(g,REASON_EFFECT)==0 then return end
 	if Duel.IsExistingMatchingCard(s.lkfilter,tp,LOCATION_MZONE,0,1,nil) and Duel.GetLocationCount(tp,LOCATION_MZONE)>0
 		and Duel.IsExistingMatchingCard(aux.NecroValleyFilter(s.spfilter),tp,LOCATION_GRAVE,0,1,nil,e,tp)
 		and Duel.SelectYesNo(tp,aux.Stringid(id,2)) then
+		Duel.BreakEffect()
 		Duel.Hint(HINT_SELECTMSG,tp,HINTMSG_SPSUMMON)
 		local sg=Duel.SelectMatchingCard(tp,aux.NecroValleyFilter(s.spfilter),tp,LOCATION_GRAVE,0,1,1,nil,e,tp)
 		Duel.SpecialSummon(sg,0,tp,tp,false,false,POS_FACEUP)

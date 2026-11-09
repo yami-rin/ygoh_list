@@ -53,8 +53,26 @@ function s.freezones(c,tp,ex)
 	end
 	return flag
 end
+--opponent's cards in the column of your Main Monster Zone seq (their Monster/Spell & Trap Zone 4-seq and the
+--Extra Monster Zone above zone 1 or 3, which is the opponent's zone 6 or 5)
+function s.oppcolumn(tp,seq)
+	local g=Group.CreateGroup()
+	local list={{LOCATION_MZONE,4-seq},{LOCATION_SZONE,4-seq}}
+	if seq==1 then list[3]={LOCATION_MZONE,6} elseif seq==3 then list[3]={LOCATION_MZONE,5} end
+	for _,z in ipairs(list) do
+		local tc=Duel.GetFieldCard(1-tp,z[1],z[2])
+		if tc then g:AddCard(tc) end
+	end
+	return g
+end
+--"then return all of the opponent's cards in that column": some unused zone has to face a card that can be returned
 function s.cfilter(c,mc,tp)
-	return c:IsAbleToGraveAsCost() and s.freezones(mc,tp,c)~=0
+	if not c:IsAbleToGraveAsCost() then return false end
+	local flag=s.freezones(mc,tp,c)
+	for seq=0,4 do
+		if flag&(1<<seq)~=0 and s.oppcolumn(tp,seq):IsExists(Card.IsAbleToHand,1,nil) then return true end
+	end
+	return false
 end
 function s.mvcost(e,tp,eg,ep,ev,re,r,rp,chk)
 	local c=e:GetHandler()

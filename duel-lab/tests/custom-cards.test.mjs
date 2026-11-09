@@ -48,7 +48,8 @@ test('Decline: Herald Tribute Summons Tyrant, Tyrant adds Idol, Idol is Tribute 
     pass(g);pick(g,'召喚：凋落の先触れ－ヘラルド');pick(g,'自分 モンスター 3');pass(g);pick(g,'凋落の暴君－タイラント');
     pass(g);pick(g,'効果発動：凋落の先触れ－ヘラルド');pick(g,'凋落の暴君－タイラント');pick(g,'凋落の先触れ－ヘラルド');pick(g,'自分 モンスター 3');
     pass(g);pick(g,'効果発動：凋落の暴君－タイラント');
-    const p=g.prompt;g.respond(0,g.revision,{selection:[p.cards.findIndex(c=>c.label.includes('ダスト')),p.cards.findIndex(c=>c.label.includes('シェイド'))]},{snapshot:false});
+    // the 2 cards to banish are chosen one at a time (the pair must leave a "Decline" monster to add)
+    pick(g,'ダスト');pick(g,'シェイド');
     pick(g,'凋落の虚像－アイドル');pick(g,'凋落の虚像－アイドル');pick(g,'凋落の暴君－タイラント');pick(g,'自分 モンスター 3');
     assert(g.log.some(e=>/YOU：凋落の虚像－アイドル を召喚/.test(e.text)));
     assert.equal(g.snapshot(0).players[0].grave.filter(c=>c.code===77700105).length,1,'only Tyrant was Tributed');

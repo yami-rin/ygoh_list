@@ -26,11 +26,13 @@ function s.initial_effect(c)
 	c:RegisterEffect(e2)
 end
 s.listed_series={SET_CHAIN_CODE}
-function s.tgfilter(c)
-	return c:IsSetCard(SET_CHAIN_CODE) and (c:IsAbleToGrave() or c:IsAbleToHand())
+--Chain Link 3 or higher adds the card to the hand instead of sending it to the GY: check the action that will be done
+function s.tgfilter(c,tohand)
+	return c:IsSetCard(SET_CHAIN_CODE) and (tohand and c:IsAbleToHand() or not tohand and c:IsAbleToGrave())
 end
 function s.tgtg(e,tp,eg,ep,ev,re,r,rp,chk)
-	if chk==0 then return Duel.IsExistingMatchingCard(s.tgfilter,tp,LOCATION_DECK,0,1,nil) end
+	--before activation this card is not on the chain yet: it would be the next Chain Link
+	if chk==0 then return Duel.IsExistingMatchingCard(s.tgfilter,tp,LOCATION_DECK,0,1,nil,Duel.GetCurrentChain()+1>=3) end
 	e:SetLabel(Duel.GetCurrentChain())
 end
 function s.tgop(e,tp,eg,ep,ev,re,r,rp)

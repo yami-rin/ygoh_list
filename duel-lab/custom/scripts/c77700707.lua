@@ -63,14 +63,26 @@ function s.matop(e,tp,eg,ep,ev,re,r,rp)
 	end
 	Duel.Overlay(c,g)
 end
+--after detaching 1, this card must still have a material to count (2+ of its own, or 1 and another on the field)
 function s.rmtg(e,tp,eg,ep,ev,re,r,rp,chk)
+	local c=e:GetHandler()
+	local ct=c:GetOverlayCount()
 	if chk==0 then return Duel.CheckRemoveOverlayCard(tp,1,1,1,REASON_EFFECT)
+		and (ct>=2 or ct==1 and Duel.GetOverlayCount(tp,1,1)>ct)
 		and Duel.IsExistingMatchingCard(Card.IsAbleToRemove,tp,LOCATION_ONFIELD,LOCATION_ONFIELD,1,nil) end
 	Duel.SetOperationInfo(0,CATEGORY_REMOVE,nil,1,PLAYER_ALL,LOCATION_ONFIELD)
 end
+--with only 1 material left on this card, detach from another Xyz Monster so this card keeps a material to count
+function s.otherxyz(c,ec)
+	return c~=ec and c:GetOverlayCount()>0
+end
 function s.rmop(e,tp,eg,ep,ev,re,r,rp)
 	local c=e:GetHandler()
-	if Duel.RemoveOverlayCard(tp,1,1,1,1,REASON_EFFECT)==0 then return end
+	if c:IsRelateToEffect(e) and c:GetOverlayCount()==1 then
+		Duel.Hint(HINT_SELECTMSG,tp,HINTMSG_REMOVEXYZ)
+		local xc=Duel.SelectMatchingCard(tp,s.otherxyz,tp,LOCATION_MZONE,LOCATION_MZONE,1,1,nil,c):GetFirst()
+		if not xc or xc:RemoveOverlayCard(tp,1,1,REASON_EFFECT)==0 then return end
+	elseif Duel.RemoveOverlayCard(tp,1,1,1,1,REASON_EFFECT)==0 then return end
 	if not c:IsRelateToEffect(e) then return end
 	local ct=c:GetOverlayCount()
 	if ct==0 then return end
