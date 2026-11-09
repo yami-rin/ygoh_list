@@ -19,8 +19,7 @@ function s.initial_effect(c)
 	e2:SetCode(EFFECT_INDESTRUCTABLE_EFFECT)
 	e2:SetValue(aux.indoval)
 	c:RegisterEffect(e2)
-	--② once per turn (either turn): send 1 card you control to the GY, send 1 card to the GY.
-	--   "フィールド・墓地のカード": a card already in the GY cannot be sent to the GY, so only field cards can be chosen.
+	--② once per turn (either turn): send 1 card you control to the GY, send 1 card on the field to the GY.
 	local e3=Effect.CreateEffect(c)
 	e3:SetDescription(aux.Stringid(id,0))
 	e3:SetCategory(CATEGORY_TOGRAVE)

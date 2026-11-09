@@ -36,7 +36,7 @@ test('Kamiori: 11 original cards are loaded with setcode 0x7c5 (LIGHT Fairy, pro
   assert(theme.filter(c=>c.type&1).every(c=>c.attribute===0x10&&c.race==='4'));
   assert.equal(cards[ORIHIME].name,'神折の巫女－オリヒメ');
   // Link Arrows are not in the original text: Mihashira ↓, Komanu ↙↘, Iwatogakure ↙↓↘
-  assert.deepEqual([MIHASHIRA,KOMANU,IWATO].map(c=>[cards[c].level,cards[c].link_marker]),[[1,2],[2,1|4],[3,1|2|4]]);
+  assert.deepEqual([MIHASHIRA,KOMANU,IWATO].map(c=>[cards[c].level,cards[c].link_marker]),[[1,2],[2,8|32],[3,1|2|4]]);
 });
 
 test('Kamiori: Orihime places 2 cards and locks to Fairies, the Deck and Links chain into Iwatogakure, Alms destroys and revives',async()=>{
@@ -111,20 +111,20 @@ test('Kamiori: Iwatogakure ② sends itself, ③ brings Mihashira out as a Link 
 
 test('Kamiori: on the opponent\'s turn Komanu ② revives to its Link zone, ① makes the attacker send a card, Renzuru ① answers from the hand',async()=>{
   const g=await Duel.create([{main:MAIN,extra:[MIHASHIRA,IWATO]},{main:FILLER,extra:[]}],{seed:1,fixtures:[
-    fx(KOMANU,{location:4,sequence:5,position:1}),fx(KAGURA,{location:8,sequence:0,position:1}),fx(HITOGATA,{location:16,position:1}),
+    fx(KOMANU,{location:4,sequence:2,position:1}),fx(KAGURA,{location:8,sequence:0,position:1}),fx(HITOGATA,{location:16,position:1}),
     fx(BLUE_EYES,{team:1,location:4,sequence:2,position:1}),fx(SWORDS,{team:1,location:8,sequence:1,position:1}),fx(CYCLONE,{team:1,location:8,sequence:2,position:1})]});
   try{
     run(g,[pass,'ターンを終了',pass]);
     assert(!g.prompt.choices.some(c=>c.label.includes('コマヌ')),'not on your own turn');
-    // opponent moves to the Battle Phase: Komanu ② sends Kagura, Hitogata to a zone Komanu points to (↙ = Main Monster Zone 1)
+    // opponent moves to the Battle Phase: Komanu ② sends Kagura, Hitogata to a zone Komanu points to (← → from Main Monster Zone 3 = zones 2 and 4)
     run(g,['バトルフェイズへ','発動：神折神－コマヌ','カグラ',pass,'ヒトガタ']);
-    assert.deepEqual(g.prompt.cards.map(c=>c.label),['自分 モンスター 1','自分 モンスター 3'],'only the linked zones');
-    run(g,['自分 モンスター 1','守備表示','発動：神折の形代','発動：神折の演舞台',pass,'レンヅル',pass]);
-    assert.equal(snap(g)[0].monsters[0]?.code,HITOGATA);
+    assert.deepEqual(g.prompt.cards.map(c=>c.label),['自分 モンスター 2','自分 モンスター 4'],'only the linked zones');
+    run(g,['自分 モンスター 2','守備表示','発動：神折の形代','発動：神折の演舞台',pass,'レンヅル',pass]);
+    assert.equal(snap(g)[0].monsters[1]?.code,HITOGATA);
     // ①: Blue-Eyes may attack only after its controller sends 1 of their own cards to the GY
     run(g,['バトルフェイズへ',pass,'攻撃：青眼']);
     assert.deepEqual(g.prompt.cards.map(c=>c.label).sort(),['サイクロン','光の護封剣','青眼の白龍'].sort(),'the attacker pays with its own cards');
-    run(g,['サイクロン','コマヌ','発動：神折の霊鳥',pass,'自分 モンスター 2','守備表示','カブト',pass,'いいえ']);
+    run(g,['サイクロン','コマヌ','発動：神折の霊鳥',pass,'自分 モンスター 1','守備表示','カブト',pass,'いいえ']);
     assert.equal(count(snap(g)[1].grave,CYCLONE),1);
     assert(codes(snap(g)[0].monsters).includes(RENZURU),'Renzuru ① Special Summoned itself');
     assert(codes(snap(g)[0].hand).includes(KABUTO),'and added Kabuto');
