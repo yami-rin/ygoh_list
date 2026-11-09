@@ -30,6 +30,20 @@ test('the response search finishes the White Rabbit + Ash position and keeps onl
   assert.deepEqual(res.best.score.field,['リングリボー']);
 });
 
+test('Ash Blossom cannot answer UNDERGROUND or Dormouse ① (banish from the deck), only the later deck effects',async()=>{
+  const tops=async id=>(await hitTable(route(id),TRAPS.ash)).windows.map(w=>w.chain.at(-1));
+  assert.deepEqual(await tops('cEErE6ce'),['自:M∀LICE＜C＞TB－１１','自:サイバース・ウィキッド','自:バックアップ＠イグニスター','自:ファイアウォール・ドラゴン・ダークフルード－ネオテンペスト']);
+  const ug=await tops('3tnYxZAt');
+  assert(!ug.some(t=>/UNDERGROUND|Dormouse/.test(t)));
+  assert(ug.includes('自:M∀LICE＜Q＞WHITE BINDER'));
+});
+
+test('Astra instructions carry the engine-checked M∀LICE points',async()=>{
+  const {maliceGuide}=await import('../astra.mjs');
+  const text=maliceGuide();
+  for(const k of ['カード名ごとに1ターン1度','うららで止まらない','ディセーブルム','リンク先に自分のLモンスター','ドットスケーパー（地）'])assert(text.includes(k),k);
+});
+
 test('link arrows: Accord in the right Extra Monster Zone points at main zones 3-5, Wicked (↓↘) in the right EMZ at main 4-5 and nothing from a main zone',()=>{
   assert.deepEqual(pointsTo(C.accord,6).sort(),[2,3,4]);
   assert.deepEqual(pointsTo(52698008,6).sort(),[3,4]);
