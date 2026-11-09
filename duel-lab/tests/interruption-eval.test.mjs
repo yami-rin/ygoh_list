@@ -30,3 +30,9 @@ test('Little Knight: ① own M∀LICE only, ② own M∀LICE plus opponent monst
   assert.equal(rule.allow({code:30118811,controller:0},second),false);
   assert(cards[69272449].setcodes.includes(441));
 });
+
+test('user Dormouse replay: Neo Tempest ② sends Disablem first, which negates the opponent spell (found within 200 lines)',async()=>{
+  const replays=JSON.parse(fs.readFileSync(new URL('../routes/user-replays.json',import.meta.url))).routes;
+  const result=await evaluateRoute(replays.find(r=>r.id==='user-replay-cEErE6ce'),{maxLines:200});
+  assert(result.breakdown.some(b=>b.code===92422871&&b.kinds.includes('negate')));
+});

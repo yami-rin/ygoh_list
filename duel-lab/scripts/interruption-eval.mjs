@@ -109,6 +109,9 @@ function defaultInputs(p) {
   const n=Math.max(p.min||1,1);
   return [{selection:[...Array(n).keys()]},...p.cards.map((_,i)=>({selection:[i]}))].filter(x=>x.selection.every(i=>i<p.cards.length));
 }
+// Card choices tried first per resolving effect (order only). Neo Tempest ②: Disablem (negates a spell/trap from the GY),
+// Code of Soul (Link Summon in the opponent's Main Phase).
+export const PREFER={64211118:[92422871,74652966]};
 // Our decisions after the route are searched. Each option is one branch.
 function ownOptions(g) {
   const p=g.prompt;
@@ -127,6 +130,9 @@ function ownOptions(g) {
       if(![1,2,16,64].includes(c.location))return true;
       const key=`${c.controller}:${c.location}:${c.code}`;if(seen.has(key))return false;seen.add(key);return true;
     });
+    // Search order only (nothing is dropped): try the known interruption sources first so a capped run finds them.
+    const rank=PREFER[g.activating];
+    if(rank)unique.sort((a,b)=>(rank.indexOf(a.c.code)+1||99)-(rank.indexOf(b.c.code)+1||99));
     const sets=p.min===1?unique.map(x=>[x.i]):unique.flatMap((x,k)=>usable.filter(y=>y.i>x.i).map(y=>[x.i,y.i]));
     return sets.map(selection=>({selection}));
   }
