@@ -231,7 +231,7 @@ test('Renzuru ① needs a "Kamiori" monster in the Deck to add',async()=>{
   }
 });
 
-test('Mihashira ② needs an unused zone whose column has an opponent\'s card to return',async()=>{
+test('Mihashira ② needs only an unused zone to move to: returning the column is optional ("その後〜できる")',async()=>{
   const MIHASHIRA=77700609;
   // Mihashira in zone 0 (facing the opponent's zone 4), the cost is the monster in zone 1 (facing zone 3)
   for(const [seq,expect] of [[4,true],[3,true],[0,true]]){
@@ -352,6 +352,20 @@ test('Alms ① continues to the Special Summon only when the card was destroyed'
       play(g,['PASS','効果発動：神折の喜捨','停滞する前線','PASS',target]);
       pass(g);
       assert.equal(['SELECT_YESNO','SELECT_EFFECTYN'].includes(g.prompt?.type),expect,`${target}: ${g.prompt?.type} ${labels(g).join(' / ')}`);
+    }finally{g.close();}
+  }
+});
+
+// ---- C. 2026-11-10 audit: cards unaffected by the effect
+
+test('Declining Glory ③ "make its ATK 0. Then draw": no draw when the target is unaffected and keeps its ATK',async()=>{
+  const YAYOI=77700409;
+  for(const [opp,atk,hand] of [[YAYOI,5000,0],[FRONT,0,1]]){
+    const g=await duel({deck0:[FRONT,FRONT,FRONT,FRONT,FRONT,FRONT],deck1:[FRONT],p0:{szone:[GLORY]},p1:{mzone:[opp]}});
+    try{
+      play(g,['PASS','効果発動：凋落する栄華',opp===YAYOI?'宵刻刃－夜宵':'嵐気流－停滞する前線','PASS']);
+      assert.equal(zone(g,1,'monsters',0)[0].attack,atk,`${opp}`);
+      assert.equal(zone(g,0,'hand').length,hand,`${opp}: draws`);
     }finally{g.close();}
   }
 });

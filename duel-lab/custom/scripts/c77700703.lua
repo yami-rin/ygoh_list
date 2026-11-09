@@ -58,8 +58,10 @@ function s.spcon(e,c)
 	local tp=c:GetControler()
 	return Duel.GetLocationCount(tp,LOCATION_MZONE)>0 and Duel.GetFlagEffect(tp,id)>0
 end
---"treated as a Level 9 monster" (+ usable as your material while the opponent controls it); returns the effects to reset
-local function treat(c,tc,tp)
+--"treated as a Level 9 monster" (+ usable as your material while the opponent controls it); returns the effects to reset.
+--A monster unaffected by this effect (e) is not treated so: it can only be used as it is (your own Level 9 monster).
+local function treat(c,tc,tp,e)
+	if tc:IsImmuneToEffect(e) then return {} end
 	local e1=Effect.CreateEffect(c)
 	e1:SetType(EFFECT_TYPE_SINGLE)
 	e1:SetCode(EFFECT_XYZ_LEVEL)
@@ -84,18 +86,18 @@ end
 function s.xyzfilter(sc,mg)
 	return sc:IsType(TYPE_XYZ) and xyzable(sc,mg,2,2)
 end
-function s.mfilter(tc,tp,c)
+function s.mfilter(tc,tp,c,e)
 	--Xyz/Link Monsters have no Level, so they cannot be treated as Level 9
 	if tc==c or not (tc:IsLocation(LOCATION_MZONE) and tc:IsFaceup()) or tc:IsType(TYPE_XYZ+TYPE_LINK) then return false end
-	local effs=treat(c,tc,tp)
+	local effs=treat(c,tc,tp,e)
 	local res=Duel.IsExistingMatchingCard(s.xyzfilter,tp,LOCATION_EXTRA,0,1,nil,Group.FromCards(c,tc))
 	untreat(effs)
 	return res
 end
 function s.xyztg(e,tp,eg,ep,ev,re,r,rp,chk)
 	local c=e:GetHandler()
-	if chk==0 then return c:IsFaceup() and eg:IsExists(s.mfilter,1,nil,tp,c) end
-	local g=eg:Filter(s.mfilter,nil,tp,c)
+	if chk==0 then return c:IsFaceup() and eg:IsExists(s.mfilter,1,nil,tp,c,e) end
+	local g=eg:Filter(s.mfilter,nil,tp,c,e)
 	if #g>1 then
 		Duel.Hint(HINT_SELECTMSG,tp,HINTMSG_XMATERIAL)
 		g=g:Select(tp,1,1,nil)
@@ -107,7 +109,7 @@ function s.xyzop(e,tp,eg,ep,ev,re,r,rp)
 	local c=e:GetHandler()
 	local tc=Duel.GetFirstTarget()
 	if not (c:IsRelateToEffect(e) and c:IsFaceup() and tc and tc:IsRelateToEffect(e) and tc:IsFaceup()) then return end
-	local effs=treat(c,tc,tp)
+	local effs=treat(c,tc,tp,e)
 	local mg=Group.FromCards(c,tc)
 	Duel.Hint(HINT_SELECTMSG,tp,HINTMSG_SPSUMMON)
 	local sc=Duel.SelectMatchingCard(tp,s.xyzfilter,tp,LOCATION_EXTRA,0,1,1,nil,mg):GetFirst()

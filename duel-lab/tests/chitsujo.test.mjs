@@ -121,6 +121,28 @@ test('Order: Novry ② Xyz Summons with the opponent\'s Special Summoned monster
   }finally{g.close();}
 });
 
+test('Order: Novry ② does not treat a monster unaffected by its effect as Level 9 (the opponent\'s Sacrifice equipped with Cursed Lightning Sword)',async()=>{
+  const LIGHTNING=77700806;
+  const g=await Duel.create([{main:MAIN,extra:[LOWELL]},{main:FILLER,extra:[]}],{seed:1,fixtures:[
+    fx(SACRIFICE),fx(NOVRY,{location:4,sequence:0,position:1}),fx(LIGHTNING,{team:1,location:16,position:1})]});
+  try{
+    pass(g);
+    run(g,['特殊召喚：秩序の犠牲','相手 モンスター 3','攻撃表示','発動：無秩序騎士ノヴルィ']);
+    // the opponent chains Lightning Sword ① from the GY onto the Sacrifice: it is unaffected by activated effects of non-"Cursed" cards
+    run(g,['発動：呪われた稲妻の剣','秩序の犠牲','自分 魔法・罠 1']);
+    assert(codes(snap(g)[1].spells).includes(LIGHTNING));
+    pass(g);
+    // Novry ② resolves without an Xyz Summon; the next choice is Sacrifice ② (Chain Link 1) searching for its owner
+    assert(!g.prompt.cards.some(c=>c.label.includes('ローウェル')),'no Xyz Monster to choose: '+g.prompt.cards.map(c=>c.label).join(' / '));
+    run(g,['エデュラ',pass]);
+    assert(codes(snap(g)[0].hand).includes(EDURA));
+    assert(!mon(g,0,LOWELL),'the Level 3 Sacrifice cannot be treated as Level 9');
+    assert.equal(mon(g,1,SACRIFICE)?.code,SACRIFICE,'the Sacrifice stays on the opponent\'s field');
+    assert.equal(mon(g,0,NOVRY)?.code,NOVRY);
+    assert.deepEqual(g.errors,[]);
+  }finally{g.close();}
+});
+
 test('Order: Lowell ① protects the other "Order" monsters, Sanctum ② detaches to negate Effect Veiler once per turn, Lowell ② and ③ on the opponent\'s turn',async()=>{
   const g=await Duel.create([{main:MAIN,extra:[LOWELL,CAVALRY]},{main:FILLER,extra:[]}],{seed:1,fixtures:[
     fx(SACRIFICE),fx(LAWRY,{location:4,sequence:0,position:1}),fx(VAPOR,{location:4,sequence:1,position:1}),

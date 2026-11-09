@@ -63,12 +63,13 @@ function s.setop(e,tp,eg,ep,ev,re,r,rp)
 		if tc then Duel.SSet(tp,tc) end
 	end
 end
+--"(once per Chain)" is counted for each card: another "Chain Code - Overclock" can still use its own ②
 function s.descon(e,tp,eg,ep,ev,re,r,rp)
-	return Duel.GetCurrentChain(true)>=3 and Duel.GetFlagEffect(tp,id+100)==0
+	return Duel.GetCurrentChain(true)>=3 and e:GetHandler():GetFlagEffect(id)==0
 end
 function s.destg(e,tp,eg,ep,ev,re,r,rp,chk)
 	if chk==0 then return Duel.IsExistingMatchingCard(nil,tp,0,LOCATION_ONFIELD,1,nil) end
-	Duel.RegisterFlagEffect(tp,id+100,RESET_CHAIN,0,1)
+	e:GetHandler():RegisterFlagEffect(id,RESET_EVENT+RESETS_STANDARD+RESET_CHAIN,0,1)
 	--this effect's Chain Link number minus 1
 	e:SetLabel(Duel.GetCurrentChain()-1)
 	Duel.SetOperationInfo(0,CATEGORY_DESTROY,nil,1,1-tp,LOCATION_ONFIELD)

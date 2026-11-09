@@ -133,17 +133,18 @@ end
 function s.canth(c)
 	return c:GetOriginalType()&(TYPE_FUSION+TYPE_SYNCHRO+TYPE_XYZ+TYPE_LINK)==0 and c:IsAbleToHand()
 end
---"then equip the target to this card or send it to the GY": one of the two has to be possible for the target
-function s.mvfilter(c,e)
-	return not c:IsImmuneToEffect(e) and (c:IsAbleToGrave() or c:IsFaceup() and s.canequip(c))
+--"then equip the target to this card or send it to the GY": one of the two has to be possible for the target.
+--"フィールドのモンスター１体" includes this card (ec): it cannot be equipped to itself, so it can only be sent to the GY.
+function s.mvfilter(c,e,ec)
+	return not c:IsImmuneToEffect(e) and (c:IsAbleToGrave() or c~=ec and c:IsFaceup() and s.canequip(c))
 end
 function s.mvtg(e,tp,eg,ep,ev,re,r,rp,chk,chkc)
 	local c=e:GetHandler()
-	if chkc then return chkc:IsLocation(LOCATION_MZONE) and chkc~=c and s.mvfilter(chkc,e) end
-	if chk==0 then return Duel.IsExistingTarget(s.mvfilter,tp,LOCATION_MZONE,LOCATION_MZONE,1,c,e)
+	if chkc then return chkc:IsLocation(LOCATION_MZONE) and s.mvfilter(chkc,e,c) end
+	if chk==0 then return Duel.IsExistingTarget(s.mvfilter,tp,LOCATION_MZONE,LOCATION_MZONE,1,nil,e,c)
 		and Duel.IsExistingMatchingCard(s.eqcfilter,tp,LOCATION_SZONE,0,1,nil,e,tp) end
 	Duel.Hint(HINT_SELECTMSG,tp,HINTMSG_TARGET)
-	Duel.SelectTarget(tp,s.mvfilter,tp,LOCATION_MZONE,LOCATION_MZONE,1,1,c,e)
+	Duel.SelectTarget(tp,s.mvfilter,tp,LOCATION_MZONE,LOCATION_MZONE,1,1,nil,e,c)
 end
 function s.mvop(e,tp,eg,ep,ev,re,r,rp)
 	local c=e:GetHandler()

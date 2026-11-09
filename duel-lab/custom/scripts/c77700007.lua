@@ -73,13 +73,16 @@ function s.atkcost(e,tp,eg,ep,ev,re,r,rp,chk)
 	if chk==0 then return Duel.IsCanRemoveCounter(tp,1,0,COUNTER_CHAIN,2,REASON_COST) end
 	Duel.RemoveCounter(tp,1,0,COUNTER_CHAIN,2,REASON_COST)
 end
+--"until the end of this turn, 'Chain Code' monsters you control gain 500 ATK": the monsters on the field when it
+--resolves (as official cards with this wording are scripted); monsters Summoned afterwards do not gain ATK
 function s.atkop(e,tp,eg,ep,ev,re,r,rp)
-	local e1=Effect.CreateEffect(e:GetHandler())
-	e1:SetType(EFFECT_TYPE_FIELD)
-	e1:SetCode(EFFECT_UPDATE_ATTACK)
-	e1:SetTargetRange(LOCATION_MZONE,0)
-	e1:SetTarget(aux.TargetBoolFunction(Card.IsSetCard,SET_CHAIN_CODE))
-	e1:SetValue(500)
-	e1:SetReset(RESET_PHASE+PHASE_END)
-	Duel.RegisterEffect(e1,tp)
+	local c=e:GetHandler()
+	for tc in Duel.GetMatchingGroup(aux.FaceupFilter(Card.IsSetCard,SET_CHAIN_CODE),tp,LOCATION_MZONE,0,nil):Iter() do
+		local e1=Effect.CreateEffect(c)
+		e1:SetType(EFFECT_TYPE_SINGLE)
+		e1:SetCode(EFFECT_UPDATE_ATTACK)
+		e1:SetValue(500)
+		e1:SetReset(RESET_EVENT+RESETS_STANDARD+RESET_PHASE+PHASE_END)
+		tc:RegisterEffect(e1)
+	end
 end

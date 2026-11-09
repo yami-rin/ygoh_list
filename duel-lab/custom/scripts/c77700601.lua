@@ -35,9 +35,7 @@ function s.pltg(e,tp,eg,ep,ev,re,r,rp,chk)
 		local g=Duel.GetMatchingGroup(s.plfilter,tp,LOCATION_DECK,0,nil)
 		return Duel.GetLocationCount(tp,LOCATION_SZONE)>=2 and g:GetClassCount(Card.GetCode)>=2
 	end
-end
-function s.plop(e,tp,eg,ep,ev,re,r,rp)
-	--"この効果の発動後": applies even if the placement does not happen
+	--"この効果の発動後": applied on activation, so it stays even if the effect is negated or the placement does not happen
 	local e1=Effect.CreateEffect(e:GetHandler())
 	e1:SetType(EFFECT_TYPE_FIELD)
 	e1:SetProperty(EFFECT_FLAG_PLAYER_TARGET)
@@ -46,6 +44,8 @@ function s.plop(e,tp,eg,ep,ev,re,r,rp)
 	e1:SetTarget(function(_,sc) return not sc:IsRace(RACE_FAIRY) end)
 	e1:SetReset(RESET_PHASE+PHASE_END)
 	Duel.RegisterEffect(e1,tp)
+end
+function s.plop(e,tp,eg,ep,ev,re,r,rp)
 	local ct=math.min(2,(Duel.GetLocationCount(tp,LOCATION_SZONE)))
 	local g=Duel.GetMatchingGroup(s.plfilter,tp,LOCATION_DECK,0,nil)
 	if ct<=0 or #g==0 then return end

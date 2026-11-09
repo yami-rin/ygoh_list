@@ -165,6 +165,24 @@ test('Cursed: Treasure Chest ③ cannot target a monster unaffected by its effec
   }finally{g.close();}
 });
 
+test('Cursed: Treasure Chest ③ "フィールドのモンスター１体" includes the Chest itself: it cannot equip itself, so it is sent to the GY',async()=>{
+  const g=await Duel.create([{main:[HERO,SWORD,SHIELD,CROWN],extra:[]},{main:FILLER,extra:[]}],{seed:1,fixtures:[
+    fx(CHEST),fx(HERO,{location:4,sequence:0,position:1}),fx(BLUE_EYES,{team:1,location:4,sequence:1,position:1})]});
+  try{
+    // Hero of Hope ② destroys the only opponent's monster; Chest ① equips the Hero to the Chest: the Chest is the only monster left
+    run(g,['効果発動：希望の勇者',pass,'青眼','呪われた剣',pass]);
+    run(g,['効果発動：呪われた宝箱','希望の勇者',pass]);
+    assert.deepEqual(codes(snap(g)[0].monsters),[CHEST]);
+    assert.equal(snap(g)[1].monsters.filter(Boolean).length,0);
+    run(g,['効果発動：呪われた宝箱 / 装備カードのモンスター']);
+    assert.deepEqual(g.prompt.cards.map(c=>c.label),['呪われた宝箱'],'the Chest can target itself');
+    run(g,['呪われた宝箱',pass,'希望の勇者','特殊召喚する',pass]);
+    assert.deepEqual(codes(snap(g)[0].monsters),[HERO],'the Hero of Hope was Special Summoned');
+    assert.equal(count(snap(g)[0].grave,CHEST),1,'then the target (the Chest itself) was sent to the GY');
+    assert.deepEqual(g.errors,[]);
+  }finally{g.close();}
+});
+
 test('Cursed: Sword, Shield, Armor and Crown ① cannot equip themselves to a monster unaffected by them (Dusk Hour Blade Yayoi)',async()=>{
   const YAYOI=77700409;
   for(const card of [SWORD,SHIELD,ARMOR,CROWN]){

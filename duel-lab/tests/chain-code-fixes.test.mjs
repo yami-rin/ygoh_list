@@ -90,3 +90,41 @@ test('Overclock ① still Sets a "Chain Code" Spell/Trap',async()=>{
     assert(set);assert.equal(set.position,10,'face-down');
   }finally{g.close();}
 });
+
+// ---- 2026-11-10 audit: the scripts follow the text as written
+
+const FRONT=77700202,CYCLONE=5318639,SWORDS=72302403;
+test('Amplification ③ raises the ATK of the "Chain Code" monsters on the field when it resolves, not of ones Summoned later',async()=>{
+  const g=await duel({deck0:[77700001,FRONT],deck1:[FRONT],p0:{szone:[77700007],mzone:[77700002],hand:[CYCLONE]},p1:{szone:[SWORDS]}});
+  try{
+    // Chain 1 Amplification ①, Chain 2 Cyclone: 2 Chain Counters when both resolve
+    play(g,['PASS','効果発動：連鎖律の増幅','発動：サイクロン','護封剣']);
+    pass(g);
+    if(g.prompt?.mode==='multi')pick(g,'連鎖律－イニシエータ');
+    pass(g);
+    play(g,['効果発動：連鎖律の増幅 / 攻撃力アップ','PASS']);
+    const atk=name=>g.snapshot(0).players[0].monsters.filter(Boolean).find(c=>c.name===name).attack;
+    assert.equal(atk('連鎖律－エクステンダー'),1500,'on the field at resolution: 1000 + 500');
+    play(g,['召喚：連鎖律－イニシエータ']);
+    if(g.prompt?.type==='SELECT_EFFECTYN')pick(g,'いいえ');
+    pass(g);
+    assert.equal(atk('連鎖律－イニシエータ'),1500,'Normal Summoned after resolution: original 1500');
+  }finally{g.close();}
+});
+
+test('Overclock ② "(once per Chain)" is counted per card: a second Overclock can use its own ② in the same Chain',async()=>{
+  const g=await duel({deck0:chainDeck,deck1:[FRONT,FRONT],p0:{hand:[77700001,77700002,77700004],mzone:[77700006,77700006]},p1:{mzone:[FRONT,FRONT]}});
+  try{
+    play(g,toChain3);
+    const destroy=()=>g.prompt.choices.filter(c=>c.label.includes('発動：連鎖律－オーバークロック / 相手のカードを破壊'));
+    assert.equal(destroy().length,2,labels(g).join(' / '));
+    const first=destroy()[0].card.sequence;
+    pick(g,'発動：連鎖律－オーバークロック / 相手のカードを破壊');auto(g);
+    // Chain 4 is Overclock ② itself, also an effect activated as Chain Link 3 or higher: the other copy can respond
+    while(g.prompt?.type==='SELECT_CHAIN'&&!destroy().length&&g.prompt.choices.some(c=>c.label==='発動しない')){pick(g,'発動しない');auto(g);}
+    assert.equal(g.prompt?.type,'SELECT_CHAIN',`${g.prompt?.type} ${labels(g).join(' / ')}`);
+    const left=destroy();
+    assert.equal(left.length,1,labels(g).join(' / '));
+    assert.notEqual(left[0].card.sequence,first,'the copy that has not used ② in this Chain');
+  }finally{g.close();}
+});
