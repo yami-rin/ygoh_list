@@ -97,7 +97,7 @@ test('Kamiori: Iwatogakure ② sends itself, ③ brings Mihashira out as a Link 
     run(g,['はい',pass,'カグラ','自分 魔法・罠 1',pass]);
     assert.deepEqual(codes(snap(g)[0].spells),[KAGURA]);
     // ②: send Kagura, move to Main Monster Zone 2 → the opponent's Veiler and Swords in that column return to the hand
-    run(g,['効果発動：神折神－ミハシラ','カグラ',pass,'自分 モンスター 2','はい',pass]);
+    run(g,['効果発動：神折神－ミハシラ','カグラ',pass,'自分 モンスター 2','はい','はい',pass]);
     const [own,opp]=snap(g);
     assert.equal(own.monsters[1]?.code,MIHASHIRA);
     assert.equal(opp.hand.filter(Boolean).length,2,'Veiler and Swords bounced');

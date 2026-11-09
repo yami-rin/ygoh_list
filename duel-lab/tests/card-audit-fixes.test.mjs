@@ -234,7 +234,7 @@ test('Renzuru ① needs a "Kamiori" monster in the Deck to add',async()=>{
 test('Mihashira ② needs an unused zone whose column has an opponent\'s card to return',async()=>{
   const MIHASHIRA=77700609;
   // Mihashira in zone 0 (facing the opponent's zone 4), the cost is the monster in zone 1 (facing zone 3)
-  for(const [seq,expect] of [[4,false],[3,true],[0,true]]){
+  for(const [seq,expect] of [[4,true],[3,true],[0,true]]){
     const g=await duel({deck0:[FRONT],deck1:[FRONT],p0:{mzone:[`${MIHASHIRA}@0`,`${FRONT}@1`]},p1:{mzone:[`${FRONT}@${seq}`]}});
     try{
       pass(g);

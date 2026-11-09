@@ -65,14 +65,9 @@ function s.oppcolumn(tp,seq)
 	end
 	return g
 end
---"then return all of the opponent's cards in that column": some unused zone has to face a card that can be returned
+--the move needs an unused zone; "then you can return" the column is optional
 function s.cfilter(c,mc,tp)
-	if not c:IsAbleToGraveAsCost() then return false end
-	local flag=s.freezones(mc,tp,c)
-	for seq=0,4 do
-		if flag&(1<<seq)~=0 and s.oppcolumn(tp,seq):IsExists(Card.IsAbleToHand,1,nil) then return true end
-	end
-	return false
+	return c:IsAbleToGraveAsCost() and s.freezones(mc,tp,c)~=0
 end
 function s.mvcost(e,tp,eg,ep,ev,re,r,rp,chk)
 	local c=e:GetHandler()
@@ -98,7 +93,7 @@ function s.mvop(e,tp,eg,ep,ev,re,r,rp)
 	Duel.MoveSequence(c,nseq)
 	if c:GetSequence()~=nseq then return end
 	local g=c:GetColumnGroup():Filter(Card.IsControler,nil,1-tp)
-	if #g>0 then
+	if #g>0 and Duel.SelectYesNo(tp,aux.Stringid(id,2)) then
 		Duel.BreakEffect()
 		Duel.SendtoHand(g,nil,REASON_EFFECT)
 	end
