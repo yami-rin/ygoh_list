@@ -77,17 +77,18 @@ end
 function s.canequip(c)
 	return not c:IsType(TYPE_TOKEN) and not c:IsForbidden()
 end
-function s.spfilter(c)
-	return c:IsFaceup() and c:GetFlagEffect(id)>0 and s.canequip(c)
+--equipping and sending to the GY affect the card: a monster unaffected by this effect cannot be chosen
+function s.spfilter(c,e)
+	return c:IsFaceup() and c:GetFlagEffect(id)>0 and s.canequip(c) and not c:IsImmuneToEffect(e)
 end
 function s.sptg(e,tp,eg,ep,ev,re,r,rp,chk,chkc)
 	local c=e:GetHandler()
-	if chkc then return chkc:IsLocation(LOCATION_MZONE) and s.spfilter(chkc) end
+	if chkc then return chkc:IsLocation(LOCATION_MZONE) and s.spfilter(chkc,e) end
 	if chk==0 then return Duel.GetLocationCount(tp,LOCATION_MZONE)>0 and Duel.GetLocationCount(tp,LOCATION_SZONE)>0
 		and c:IsCanBeSpecialSummoned(e,0,tp,false,false)
-		and Duel.IsExistingTarget(s.spfilter,tp,LOCATION_MZONE,LOCATION_MZONE,1,nil) end
+		and Duel.IsExistingTarget(s.spfilter,tp,LOCATION_MZONE,LOCATION_MZONE,1,nil,e) end
 	Duel.Hint(HINT_SELECTMSG,tp,HINTMSG_EQUIP)
-	local g=Duel.SelectTarget(tp,s.spfilter,tp,LOCATION_MZONE,LOCATION_MZONE,1,1,nil)
+	local g=Duel.SelectTarget(tp,s.spfilter,tp,LOCATION_MZONE,LOCATION_MZONE,1,1,nil,e)
 	Duel.SetOperationInfo(0,CATEGORY_SPECIAL_SUMMON,c,1,0,0)
 	Duel.SetOperationInfo(0,CATEGORY_EQUIP,g,1,0,0)
 end
@@ -95,7 +96,7 @@ function s.spop(e,tp,eg,ep,ev,re,r,rp)
 	local c=e:GetHandler()
 	local tc=Duel.GetFirstTarget()
 	if not c:IsRelateToEffect(e) or Duel.SpecialSummon(c,0,tp,tp,false,false,POS_FACEUP)==0 then return end
-	if tc and tc:IsRelateToEffect(e) and tc:IsFaceup() and tc:IsLocation(LOCATION_MZONE) and s.canequip(tc)
+	if tc and tc:IsRelateToEffect(e) and tc:IsFaceup() and tc:IsLocation(LOCATION_MZONE) and s.canequip(tc) and not tc:IsImmuneToEffect(e)
 		and Duel.GetLocationCount(tp,LOCATION_SZONE)>0 then
 		s.equip(c,tc,tp,c)
 	end
@@ -132,16 +133,16 @@ function s.canth(c)
 	return c:GetOriginalType()&(TYPE_FUSION+TYPE_SYNCHRO+TYPE_XYZ+TYPE_LINK)==0 and c:IsAbleToHand()
 end
 --"then equip the target to this card or send it to the GY": one of the two has to be possible for the target
-function s.mvfilter(c)
-	return c:IsAbleToGrave() or c:IsFaceup() and s.canequip(c)
+function s.mvfilter(c,e)
+	return not c:IsImmuneToEffect(e) and (c:IsAbleToGrave() or c:IsFaceup() and s.canequip(c))
 end
 function s.mvtg(e,tp,eg,ep,ev,re,r,rp,chk,chkc)
 	local c=e:GetHandler()
-	if chkc then return chkc:IsLocation(LOCATION_MZONE) and chkc~=c and s.mvfilter(chkc) end
-	if chk==0 then return Duel.IsExistingTarget(s.mvfilter,tp,LOCATION_MZONE,LOCATION_MZONE,1,c)
+	if chkc then return chkc:IsLocation(LOCATION_MZONE) and chkc~=c and s.mvfilter(chkc,e) end
+	if chk==0 then return Duel.IsExistingTarget(s.mvfilter,tp,LOCATION_MZONE,LOCATION_MZONE,1,c,e)
 		and Duel.IsExistingMatchingCard(s.eqcfilter,tp,LOCATION_SZONE,0,1,nil,e,tp) end
 	Duel.Hint(HINT_SELECTMSG,tp,HINTMSG_TARGET)
-	Duel.SelectTarget(tp,s.mvfilter,tp,LOCATION_MZONE,LOCATION_MZONE,1,1,c)
+	Duel.SelectTarget(tp,s.mvfilter,tp,LOCATION_MZONE,LOCATION_MZONE,1,1,c,e)
 end
 function s.mvop(e,tp,eg,ep,ev,re,r,rp)
 	local c=e:GetHandler()
@@ -161,7 +162,7 @@ function s.mvop(e,tp,eg,ep,ev,re,r,rp)
 		done=Duel.SendtoHand(sc,nil,REASON_EFFECT)>0
 		if done then Duel.ConfirmCards(1-tp,sc) end
 	end
-	if not done or not (tc and tc:IsRelateToEffect(e) and tc:IsLocation(LOCATION_MZONE)) then return end
+	if not done or not (tc and tc:IsRelateToEffect(e) and tc:IsLocation(LOCATION_MZONE)) or tc:IsImmuneToEffect(e) then return end
 	--then: equip the target to this card or send it to the GY
 	local e1=c:IsRelateToEffect(e) and c:IsFaceup() and c:IsLocation(LOCATION_MZONE) and tc~=c and tc:IsFaceup()
 		and s.canequip(tc) and Duel.GetLocationCount(tp,LOCATION_SZONE)>0

@@ -135,6 +135,21 @@ test('Cursed: Treasure Chest ① takes a monster that activated its effect this 
   }finally{g.close();}
 });
 
+test('Cursed: Treasure Chest ③ cannot target a monster unaffected by its effect (Dusk Hour Blade Yayoi)',async()=>{
+  const YAYOI=77700409;
+  const g=await Duel.create([{main:[HERO,SWORD,SHIELD,CROWN],extra:[]},{main:FILLER,extra:[YAYOI]}],{seed:1,fixtures:[
+    fx(CHEST),fx(HERO,{location:4,sequence:0,position:1}),fx(BLUE_EYES,{team:1,location:4,sequence:1,position:1}),
+    fx(BLUE_EYES,{team:1,location:4,sequence:2,position:1}),fx(YAYOI,{team:1,location:4,sequence:5,position:1})]});
+  try{
+    run(g,['効果発動：希望の勇者',pass,'青眼','呪われた剣',pass]);
+    run(g,['効果発動：呪われた宝箱','希望の勇者',pass]);
+    run(g,['効果発動：呪われた宝箱 / 装備カードのモンスター']);
+    const targets=g.prompt.cards.map(c=>c.label);
+    assert(targets.some(l=>l.includes('青眼')),targets.join(' / '));
+    assert(!targets.some(l=>l.includes('夜宵')),'Yayoi is unaffected by other cards: '+targets.join(' / '));
+  }finally{g.close();}
+});
+
 test('Cursed: Shield ② (Defense Position, not destroyed by battle), Armor ② and Lightning Sword ① from the GY / ② survive Raigeki',async()=>{
   const g=await Duel.create([{main:FILLER,extra:[]},{main:FILLER,extra:[]}],{seed:1,fixtures:[
     fx(SHIELD),fx(ARMOR),fx(RAIGEKI),fx(LIGHTNING,{location:16,position:1}),fx(BLUE_EYES,{location:4,sequence:0,position:1}),
