@@ -146,7 +146,7 @@ test('Gokasou: Purifying Bonfire burns and negates Ash Blossom this turn; its �
   }finally{g.close();}
 });
 
-test('Gokasou: Remains survives battle, banishes on attack and attacks monsters once per 3 banished cards',async()=>{
+test('Gokasou: Remains survives battle, banishes on attack and attacks monsters once more per 3 banished cards',async()=>{
   // first:1 → the opponent takes turn 1, so our turn 2 has a Battle Phase. Our cards use core team 1.
   const g=await Duel.create([{main:MAIN,extra:[]},{main:FILLER,extra:[]}],{seed:1,first:1,fixtures:[
     fx(77700311,{team:1,location:4,sequence:5,position:1}),
@@ -155,16 +155,18 @@ test('Gokasou: Remains survives battle, banishes on attack and attacks monsters 
     ...[RAIGEKI,RAIGEKI,REBORN,REBORN,MIRROR,MIRROR].map(c=>fx(c,{team:0,location:32,position:1}))]});
   try{
     run(g,[pass,'ターンを終了',pass,'バトルフェイズへ',pass]);
-    // 6 banished → 2 attacks on monsters. Blue-Eyes (3000) is destroyed, Remains is not.
+    // 6 banished → 1 + 2 attacks on monsters. Blue-Eyes (3000) is destroyed, Remains is not.
     run(g,['攻撃：骸ノ業火葬','青眼','いいえ',pass]);
     assert(snap(g)[0].monsters.some(c=>c?.code===77700311),'not destroyed by battle');
     assert.equal(count(snap(g)[1].grave,BLUE_EYES),1);
-    // ③ banishes 3 → 9 banished → 3 attacks, ATK 3600
+    // ③ banishes 3 → 9 banished → 1 + 3 attacks, ATK 3600
     run(g,['攻撃：骸ノ業火葬','灰流','はい',pass,['サイクロン','墓穴','無限泡影'],pass]);
     assert.equal(snap(g)[0].monsters.find(c=>c?.code===77700311).attack,3600);
     run(g,['攻撃：骸ノ業火葬','ヴェーラー','いいえ',pass]);
     assert.equal(snap(g)[1].monsters.filter(Boolean).length,1);
-    assert(!g.prompt.choices.some(c=>c.label.startsWith('攻撃：')),'no 4th attack');
+    run(g,['攻撃：骸ノ業火葬','灰流','いいえ',pass]);
+    assert.equal(snap(g)[1].monsters.filter(Boolean).length,0);
+    assert(!g.prompt.choices.some(c=>c.label.startsWith('攻撃：')),'no 5th attack');
   }finally{g.close();}
 });
 

@@ -133,3 +133,14 @@ test('Canon Witch: Forte & Coda attacks twice in the Battle Phase of the turn it
     assert.equal(g.lp[1^g.first],8000-3000-3000);
   }finally{g.close();}
 });
+
+test('Canon Witch: Coda ② may add every targeted "Canon Witch" card to the hand',async()=>{
+  const g=await Duel.create([{main:MAIN,extra:EXTRA},{main:FILLER,extra:[]}],{seed:1,fixtures:[
+    fx(CODA,{location:4,sequence:0,position:1}),fx(PIANO,{location:16,position:1}),fx(SONATA,{location:16,position:1})]});
+  try{
+    pass(g);
+    run(g,['効果発動：連弾魔女－コーダ',['ピアノ','ソナタ'],pass,'はい',['ピアノ','ソナタ'],pass]);
+    assert.deepEqual(codes(snap(g)[0].hand).sort(),[PIANO,SONATA].sort());
+    assert.equal(snap(g)[0].grave.filter(Boolean).length,0);
+  }finally{g.close();}
+});

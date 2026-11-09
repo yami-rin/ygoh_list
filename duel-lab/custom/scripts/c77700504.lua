@@ -49,7 +49,7 @@ function s.tdtg(e,tp,eg,ep,ev,re,r,rp,chk,chkc)
 	local g=Duel.SelectTarget(tp,Card.IsAbleToDeck,tp,LOCATION_GRAVE,LOCATION_GRAVE,1,2,nil)
 	Duel.SetOperationInfo(0,CATEGORY_TODECK,g,#g,0,0)
 end
---a targeted "Canon Witch" card that can go to the hand (Extra Deck monsters would return to the Extra Deck)
+--targeted "Canon Witch" cards may go to the hand instead of the Deck (Extra Deck monsters would return to the Extra Deck)
 function s.thfilter(c)
 	return c:IsSetCard(SET_CANON_WITCH) and not c:IsType(TYPE_FUSION+TYPE_SYNCHRO+TYPE_XYZ+TYPE_LINK) and c:IsAbleToHand()
 end
@@ -59,10 +59,10 @@ function s.tdop(e,tp,eg,ep,ev,re,r,rp)
 	local hg=tg:Filter(aux.NecroValleyFilter(s.thfilter),nil)
 	if #hg>0 and Duel.SelectYesNo(tp,aux.Stringid(id,2)) then
 		Duel.Hint(HINT_SELECTMSG,tp,HINTMSG_ATOHAND)
-		local hc=hg:Select(tp,1,1,nil):GetFirst()
-		Duel.SendtoHand(hc,nil,REASON_EFFECT)
-		Duel.ConfirmCards(1-tp,hc)
-		tg:RemoveCard(hc)
+		local sg=hg:Select(tp,1,#hg,nil)
+		Duel.SendtoHand(sg,nil,REASON_EFFECT)
+		Duel.ConfirmCards(1-tp,sg)
+		tg:Sub(sg)
 	end
 	if #tg>0 then Duel.SendtoDeck(tg,nil,SEQ_DECKSHUFFLE,REASON_EFFECT) end
 end

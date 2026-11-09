@@ -83,5 +83,5 @@ function s.atkop(e,tp,eg,ep,ev,re,r,rp)
 	end
 end
 function s.extraval(e,c)
-	return math.max(0,math.floor(Duel.GetFieldGroupCount(e:GetHandlerPlayer(),0,LOCATION_REMOVED)/3)-1)
+	return math.floor(Duel.GetFieldGroupCount(e:GetHandlerPlayer(),0,LOCATION_REMOVED)/3)
 end
