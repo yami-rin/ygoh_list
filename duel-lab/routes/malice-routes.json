@@ -18780,6 +18780,1220 @@
    "deadHand": [
     6325660
    ]
+  },
+  {
+   "id": "malice-dormouse-set-spark",
+   "title": "Dormouse１枚初動＋最後に霆王を伏せる",
+   "deck": "presets/user-malice.json",
+   "hand": [
+    32061192,
+    6325660,
+    6325660,
+    6325660
+   ],
+   "seed": 123,
+   "steps": [
+    {
+     "prompt": "SELECT_IDLECMD",
+     "label": "召喚：M∀LICE＜P＞Dormouse",
+     "before": "13ce86decb1da4b9d433e9e801000e384da2eeedef979cfb32454f69fcc83686",
+     "input": {
+      "action": 0
+     }
+    },
+    {
+     "prompt": "SELECT_PLACE",
+     "label": "自分 モンスター 3",
+     "before": "a9002a753aa042c50e5b933f912abf653444405b04785d3e4f7f9fe76a198b21",
+     "input": {
+      "selection": [
+       2
+      ]
+     }
+    },
+    {
+     "prompt": "SELECT_IDLECMD",
+     "label": "特殊召喚：リングリボー",
+     "before": "bfcb2c6a056fb9a940b43269796ea8ffff972d5c57f211b7abc901acad186ce8",
+     "input": {
+      "action": 1
+     }
+    },
+    {
+     "prompt": "SELECT_UNSELECT_CARD",
+     "label": "キャンセル",
+     "before": "d82a8921285dc45138853a9c74f3309b11c6e497efeb271f6f1720e8e0ad901d",
+     "input": {
+      "action": 1
+     }
+    },
+    {
+     "prompt": "SELECT_IDLECMD",
+     "label": "特殊召喚：リングリボー",
+     "before": "bfcb2c6a056fb9a940b43269796ea8ffff972d5c57f211b7abc901acad186ce8",
+     "input": {
+      "action": 1
+     }
+    },
+    {
+     "prompt": "SELECT_UNSELECT_CARD",
+     "label": "キャンセル",
+     "before": "d82a8921285dc45138853a9c74f3309b11c6e497efeb271f6f1720e8e0ad901d",
+     "input": {
+      "action": 1
+     }
+    },
+    {
+     "prompt": "SELECT_IDLECMD",
+     "label": "特殊召喚：リンク・デコーダー",
+     "before": "bfcb2c6a056fb9a940b43269796ea8ffff972d5c57f211b7abc901acad186ce8",
+     "input": {
+      "action": 2
+     }
+    },
+    {
+     "prompt": "SELECT_UNSELECT_CARD",
+     "label": "キャンセル",
+     "before": "d82a8921285dc45138853a9c74f3309b11c6e497efeb271f6f1720e8e0ad901d",
+     "input": {
+      "action": 1
+     }
+    },
+    {
+     "prompt": "SELECT_IDLECMD",
+     "label": "効果発動：M∀LICE＜P＞Dormouse / 除外",
+     "before": "bfcb2c6a056fb9a940b43269796ea8ffff972d5c57f211b7abc901acad186ce8",
+     "input": {
+      "action": 6
+     }
+    },
+    {
+     "prompt": "SELECT_CARD",
+     "label": "M∀LICE＜P＞White Rabbit",
+     "before": "ef1127220afdaf3a8582112e8d8a55951a5a6b43377df02e71a8cbf2919c3784",
+     "input": {
+      "selection": [
+       5
+      ]
+     }
+    },
+    {
+     "prompt": "SELECT_EFFECTYN",
+     "label": "はい",
+     "before": "77e2234b6874367ac9716d46718c2fab1dfd46112fe8f2d9e9e6582e74c061fa",
+     "input": {
+      "action": 0
+     }
+    },
+    {
+     "prompt": "SELECT_PLACE",
+     "label": "自分 モンスター 4",
+     "before": "0cfc99f42a40d4c60d4a015d6ef272701a8cc66b9ff2bc7163273cd7689c4998",
+     "input": {
+      "selection": [
+       2
+      ]
+     }
+    },
+    {
+     "prompt": "SELECT_POSITION",
+     "label": "攻撃表示",
+     "before": "0479ef52135cfc4e544d58530c93e5132317a795ae0757c6e75a3ea62b05f971",
+     "input": {
+      "action": 0
+     }
+    },
+    {
+     "prompt": "SELECT_EFFECTYN",
+     "label": "はい",
+     "before": "a7127506e38371b2f34d0c41bc1a6d7f2f4834a2ad5b35fa399d718603464088",
+     "input": {
+      "action": 0
+     }
+    },
+    {
+     "prompt": "SELECT_CARD",
+     "label": "M∀LICE＜C＞TB－１１",
+     "before": "868219e710f2738b93b9153b8d5411ef93cbb19c5ef6509f9286f68b4405a860",
+     "input": {
+      "selection": [
+       0
+      ]
+     }
+    },
+    {
+     "prompt": "SELECT_PLACE",
+     "label": "自分 魔法・罠 1",
+     "before": "00e31497f890720069ba91798d62598ab49e3758e274accf1c97b2b95070f032",
+     "input": {
+      "selection": [
+       0
+      ]
+     }
+    },
+    {
+     "prompt": "SELECT_CHAIN",
+     "label": "発動：M∀LICE＜C＞TB－１１ / M∀LICE＜C＞TB－１１：効果 1",
+     "before": "5714ea202d1ae09830e837a732a74042e2097f4fe3709cddc304271b93989fe7",
+     "input": {
+      "action": 0
+     }
+    },
+    {
+     "prompt": "SELECT_CARD",
+     "label": "M∀LICE＜P＞Dormouse",
+     "before": "9374a3d6b43d3643384c8500d8a966e9852b0c8fc6ad58f2bddb4d9ccb054e66",
+     "input": {
+      "selection": [
+       0
+      ]
+     }
+    },
+    {
+     "prompt": "SELECT_CARD",
+     "label": "M∀LICE＜P＞Cheshire Cat",
+     "before": "764ae44bc174104c31786e1cd9490ac1fb14450846c60e8820769666eb0ac422",
+     "input": {
+      "selection": [
+       3
+      ]
+     }
+    },
+    {
+     "prompt": "SELECT_PLACE",
+     "label": "自分 モンスター 3",
+     "before": "e8ee51a6e48e1b8026e2ea7366472b57822ff7c39286c4917bd8ca3d05c88207",
+     "input": {
+      "selection": [
+       2
+      ]
+     }
+    },
+    {
+     "prompt": "SELECT_POSITION",
+     "label": "攻撃表示",
+     "before": "69e8287c6bab5a2e1ec1292334add47c38bb6f0694ff4dfdfc50f047228859cd",
+     "input": {
+      "action": 0
+     }
+    },
+    {
+     "prompt": "SELECT_EFFECTYN",
+     "label": "はい",
+     "before": "2b339cc0eb36b40292c4e4c463b2269443967884fcddbad960d8e055c47df036",
+     "input": {
+      "action": 0
+     }
+    },
+    {
+     "prompt": "SELECT_PLACE",
+     "label": "自分 モンスター 2",
+     "before": "796ee8131658f9269ec02999d7cf6df3d7ae3c8d91629a08bb8b4e5ba8e82b80",
+     "input": {
+      "selection": [
+       1
+      ]
+     }
+    },
+    {
+     "prompt": "SELECT_POSITION",
+     "label": "攻撃表示",
+     "before": "17d333faeb6591ed02c8bc26577c00c47df014296af68eaf065c2e07c8d0592a",
+     "input": {
+      "action": 0
+     }
+    },
+    {
+     "prompt": "SELECT_IDLECMD",
+     "label": "特殊召喚：サイバース・ウィキッド",
+     "before": "966acab790fe96b05d43cb95426d70c2fc171962f76b110b8cf1b6ebe0c3d190",
+     "input": {
+      "action": 2
+     }
+    },
+    {
+     "prompt": "SELECT_UNSELECT_CARD",
+     "label": "選択：M∀LICE＜P＞Cheshire Cat",
+     "before": "4181ceacb5556e9183d49b8cb8e590ac98fd0ce2c097a8d8322be9154ad3a364",
+     "input": {
+      "action": 1
+     }
+    },
+    {
+     "prompt": "SELECT_UNSELECT_CARD",
+     "label": "選択：M∀LICE＜P＞White Rabbit",
+     "before": "619dd5a1e3cc448016d8ac87631b9d4e8b0cf37d4576d0bfb22873aea01ecea4",
+     "input": {
+      "action": 1
+     }
+    },
+    {
+     "prompt": "SELECT_PLACE",
+     "label": "自分 モンスター EX 2",
+     "before": "0fa6f388c7227b3a6c6020920ac1fedf2969d141123083bd496c79a5b851d8fe",
+     "input": {
+      "selection": [
+       1
+      ]
+     }
+    },
+    {
+     "prompt": "SELECT_IDLECMD",
+     "label": "特殊召喚：リンク・デコーダー",
+     "before": "86284d054091223c5eadeac1ef89abc94600e979b64dbb5d6c1e1a2c16d3c7de",
+     "input": {
+      "action": 1
+     }
+    },
+    {
+     "prompt": "SELECT_UNSELECT_CARD",
+     "label": "選択：M∀LICE＜P＞Dormouse",
+     "before": "887b18652100670aa1c95bc58f13921b383e8055011efca23b995e2a874b9986",
+     "input": {
+      "action": 0
+     }
+    },
+    {
+     "prompt": "SELECT_PLACE",
+     "label": "自分 モンスター 5",
+     "before": "b8321324f3350e7b4804afa1baa416bab606ad80dbd84aa82b561b7e022df8a5",
+     "input": {
+      "selection": [
+       1
+      ]
+     }
+    },
+    {
+     "prompt": "SELECT_EFFECTYN",
+     "label": "はい",
+     "before": "c215f6870edc9a6a016448703712a5ac92c98d3ec3c135db66dac33345f6c6e1",
+     "input": {
+      "action": 0
+     }
+    },
+    {
+     "prompt": "SELECT_CARD",
+     "label": "M∀LICE＜P＞Cheshire Cat",
+     "before": "5b683299f6d11b01ba0450f9b71cb33a74604c3274a17e129e2dbf888a553574",
+     "input": {
+      "selection": [
+       2
+      ]
+     }
+    },
+    {
+     "prompt": "SELECT_CARD",
+     "label": "バックアップ＠イグニスター",
+     "before": "24fe40d9599efab16e41cd637699ac90316e6d754024a39b30dd51de4decc0d8",
+     "input": {
+      "selection": [
+       0
+      ]
+     }
+    },
+    {
+     "prompt": "SELECT_EFFECTYN",
+     "label": "はい",
+     "before": "be86e18c030d06f3b21cbe358bf0ec41b925bb50d1f1969d78eca20f8981bbc3",
+     "input": {
+      "action": 0
+     }
+    },
+    {
+     "prompt": "SELECT_PLACE",
+     "label": "自分 モンスター 3",
+     "before": "f212348891d3844d81c6bc9718da04318ef2bc6d18224521478584212db38b4e",
+     "input": {
+      "selection": [
+       2
+      ]
+     }
+    },
+    {
+     "prompt": "SELECT_POSITION",
+     "label": "攻撃表示",
+     "before": "47494c24c82d953849bfc6edcb5f251f56fff629ef077289e8838d6b50cbcdb5",
+     "input": {
+      "action": 0
+     }
+    },
+    {
+     "prompt": "SELECT_IDLECMD",
+     "label": "特殊召喚：トランスコード・トーカー",
+     "before": "6cb8bd6908aa0eb706b03e66d5d8bb2f002437840e83382e9335f6fd40d6562b",
+     "input": {
+      "action": 5
+     }
+    },
+    {
+     "prompt": "SELECT_UNSELECT_CARD",
+     "label": "選択：リンク・デコーダー",
+     "before": "ff184a0df27e13dd7282a08abd14ac9288219ccaa5696223436bc02286620266",
+     "input": {
+      "action": 1
+     }
+    },
+    {
+     "prompt": "SELECT_UNSELECT_CARD",
+     "label": "選択：サイバース・ウィキッド",
+     "before": "d14f930fed06e46074baecd67dd7c73e49eff2ed3ed0aa378aab69bac402d847",
+     "input": {
+      "action": 1
+     }
+    },
+    {
+     "prompt": "SELECT_UNSELECT_CARD",
+     "label": "選択を確定",
+     "before": "eee4d4dadf42deb4830964a0b6b02dfdf879aa5ca09272cca0d593acd2585b14",
+     "input": {
+      "action": 3
+     }
+    },
+    {
+     "prompt": "SELECT_PLACE",
+     "label": "自分 モンスター EX 2",
+     "before": "d07d4ab7b9a2eeb6b228e686b40be1b1191e61f0cd140f2b34d2cdab460dbf9d",
+     "input": {
+      "selection": [
+       1
+      ]
+     }
+    },
+    {
+     "prompt": "SELECT_EFFECTYN",
+     "label": "はい",
+     "before": "6a75e498061b4144bbf47fac2e0124e8908665c171dcea1b857b513b088b7859",
+     "input": {
+      "action": 0
+     }
+    },
+    {
+     "prompt": "SELECT_PLACE",
+     "label": "自分 モンスター 5",
+     "before": "3970acdde52e2ec6afa6459458fd0349d0e34e4baebff7172575ceb61e4d6022",
+     "input": {
+      "selection": [
+       3
+      ]
+     }
+    },
+    {
+     "prompt": "SELECT_IDLECMD",
+     "label": "特殊召喚：リングリボー",
+     "before": "0d62092d3eb8cadb6dab1cf4dae054495dc4cfcf1b5d07f8f15606102e743d24",
+     "input": {
+      "action": 0
+     }
+    },
+    {
+     "prompt": "SELECT_UNSELECT_CARD",
+     "label": "キャンセル",
+     "before": "77f0f46de040fc4bda46e9b5760c0a17be43ffceb80e82619ff493bec7a3c413",
+     "input": {
+      "action": 1
+     }
+    },
+    {
+     "prompt": "SELECT_IDLECMD",
+     "label": "特殊召喚：リングリボー",
+     "before": "0d62092d3eb8cadb6dab1cf4dae054495dc4cfcf1b5d07f8f15606102e743d24",
+     "input": {
+      "action": 0
+     }
+    },
+    {
+     "prompt": "SELECT_UNSELECT_CARD",
+     "label": "キャンセル",
+     "before": "77f0f46de040fc4bda46e9b5760c0a17be43ffceb80e82619ff493bec7a3c413",
+     "input": {
+      "action": 1
+     }
+    },
+    {
+     "prompt": "SELECT_IDLECMD",
+     "label": "特殊召喚：M∀LICE＜Q＞WHITE BINDER",
+     "before": "0d62092d3eb8cadb6dab1cf4dae054495dc4cfcf1b5d07f8f15606102e743d24",
+     "input": {
+      "action": 3
+     }
+    },
+    {
+     "prompt": "SELECT_UNSELECT_CARD",
+     "label": "キャンセル",
+     "before": "c371670567e36d05be6a7e06d1bf50a5bd7961323f9fab39fe5f63be3ba90dfc",
+     "input": {
+      "action": 3
+     }
+    },
+    {
+     "prompt": "SELECT_IDLECMD",
+     "label": "特殊召喚：アコード・トーカー＠イグニスター",
+     "before": "0d62092d3eb8cadb6dab1cf4dae054495dc4cfcf1b5d07f8f15606102e743d24",
+     "input": {
+      "action": 7
+     }
+    },
+    {
+     "prompt": "SELECT_UNSELECT_CARD",
+     "label": "キャンセル",
+     "before": "c371670567e36d05be6a7e06d1bf50a5bd7961323f9fab39fe5f63be3ba90dfc",
+     "input": {
+      "action": 3
+     }
+    },
+    {
+     "prompt": "SELECT_IDLECMD",
+     "label": "特殊召喚：ファイアウォール・ドラゴン・ダークフルード－ネオテンペスト",
+     "before": "0d62092d3eb8cadb6dab1cf4dae054495dc4cfcf1b5d07f8f15606102e743d24",
+     "input": {
+      "action": 8
+     }
+    },
+    {
+     "prompt": "SELECT_UNSELECT_CARD",
+     "label": "キャンセル",
+     "before": "c371670567e36d05be6a7e06d1bf50a5bd7961323f9fab39fe5f63be3ba90dfc",
+     "input": {
+      "action": 3
+     }
+    },
+    {
+     "prompt": "SELECT_IDLECMD",
+     "label": "効果発動：トランスコード・トーカー / トランスコード・トーカー：効果 1",
+     "before": "0d62092d3eb8cadb6dab1cf4dae054495dc4cfcf1b5d07f8f15606102e743d24",
+     "input": {
+      "action": 13
+     }
+    },
+    {
+     "prompt": "SELECT_CARD",
+     "label": "サイバース・ウィキッド",
+     "before": "1793fe885c5297daf91f818666214d6d66d8e4ab42f9106decb691a48afc72e4",
+     "input": {
+      "selection": [
+       0
+      ]
+     }
+    },
+    {
+     "prompt": "SELECT_PLACE",
+     "label": "自分 モンスター 4",
+     "before": "554246305232c3f0b8a4190cd390dafc3538b406d7ba2f6635cf9e5e7fc9b5af",
+     "input": {
+      "selection": [
+       0
+      ]
+     }
+    },
+    {
+     "prompt": "SELECT_IDLECMD",
+     "label": "特殊召喚：アコード・トーカー＠イグニスター",
+     "before": "8fb115679bdaa254d128137b39d6197b8615398cb4d43de7f87371e4f10be6fd",
+     "input": {
+      "action": 5
+     }
+    },
+    {
+     "prompt": "SELECT_UNSELECT_CARD",
+     "label": "選択：M∀LICE＜P＞Cheshire Cat",
+     "before": "ad04d873d5a8616958aea2f4bce5514aee8be30c93696feaaa9773fbf60548c7",
+     "input": {
+      "action": 0
+     }
+    },
+    {
+     "prompt": "SELECT_UNSELECT_CARD",
+     "label": "選択：リンク・デコーダー",
+     "before": "c7aa8f5da0808bb4c351927738338ee56436a364fee782f656b31db8f21188d9",
+     "input": {
+      "action": 1
+     }
+    },
+    {
+     "prompt": "SELECT_UNSELECT_CARD",
+     "label": "選択：トランスコード・トーカー",
+     "before": "05f160a435e66950465df7c2fe156fb905582ea455df3140051dc16fef78686f",
+     "input": {
+      "action": 1
+     }
+    },
+    {
+     "prompt": "SELECT_UNSELECT_CARD",
+     "label": "選択を確定",
+     "before": "5e7e561a9b0a4c63526383775a47c0475461d5442febe43ce0081d26f06f46e3",
+     "input": {
+      "action": 4
+     }
+    },
+    {
+     "prompt": "SELECT_PLACE",
+     "label": "自分 モンスター EX 2",
+     "before": "c37a5454439752ffe6b87469ad426299df7646e2b156f1c7f255386f93d44cb4",
+     "input": {
+      "selection": [
+       1
+      ]
+     }
+    },
+    {
+     "prompt": "SELECT_EFFECTYN",
+     "label": "いいえ",
+     "before": "cede40abbe4cae4754e8991149315cf30f2771742a66eecbea769ff1a50bf3e3",
+     "input": {
+      "action": 1
+     }
+    },
+    {
+     "prompt": "SELECT_IDLECMD",
+     "label": "効果発動：バックアップ＠イグニスター / 特殊召喚",
+     "before": "09c029bdf37db018888fb1b6e25d0246c51f47afc304c96f1e7daa451f96c4f4",
+     "input": {
+      "action": 4
+     }
+    },
+    {
+     "prompt": "SELECT_PLACE",
+     "label": "自分 モンスター 3",
+     "before": "528d500f15373abfe64928ef858ecb5111908e4ce6ff9deed611384d63b89b5e",
+     "input": {
+      "selection": [
+       2
+      ]
+     }
+    },
+    {
+     "prompt": "SELECT_POSITION",
+     "label": "攻撃表示",
+     "before": "353b4c7ccf19276f0d47de284ef553e0aed718a00c13dab3d16612f6ec476beb",
+     "input": {
+      "action": 0
+     }
+    },
+    {
+     "prompt": "SELECT_EFFECTYN",
+     "label": "はい",
+     "before": "eb3a46b8056091540568fd711ec4459ecbd0f0d018872bc452548c078b51bb4e",
+     "input": {
+      "action": 0
+     }
+    },
+    {
+     "prompt": "SELECT_CARD",
+     "label": "ウィザード＠イグニスター",
+     "before": "e71b05f7f6ac182f81a45c9a9aa015ae0c860c032f6ff97aeece7f89c9d29a5f",
+     "input": {
+      "selection": [
+       1
+      ]
+     }
+    },
+    {
+     "prompt": "SELECT_CARD",
+     "label": "霆王の閃光",
+     "before": "42b9d4b9654f680f6843659f9cc89efb19d0788dd96f83092799476e607e09f6",
+     "input": {
+      "selection": [
+       0
+      ]
+     }
+    },
+    {
+     "prompt": "SELECT_IDLECMD",
+     "label": "効果発動：ウィザード＠イグニスター / 特殊召喚",
+     "before": "8b15376fccbec2d5a0e450ea5e2689bea6d7c39414150776d524c1f2c064e078",
+     "input": {
+      "action": 6
+     }
+    },
+    {
+     "prompt": "SELECT_CARD",
+     "label": "M∀LICE＜P＞Dormouse",
+     "before": "d2b39498da55b0d0e986bb1dc6e42e4bab67682e528d927f7aebe1198038ba18",
+     "input": {
+      "selection": [
+       1
+      ]
+     }
+    },
+    {
+     "prompt": "SELECT_PLACE",
+     "label": "自分 モンスター 2",
+     "before": "69777a10437c76c0c7f07c68d7c4bf6f8a90be1a5d9cb868cd0595ccd7f40655",
+     "input": {
+      "selection": [
+       1
+      ]
+     }
+    },
+    {
+     "prompt": "SELECT_PLACE",
+     "label": "自分 モンスター 5",
+     "before": "3e3ffc32e1a8b0be4e7bd7ebb8c7bc1c9b670b38394a536c7fec7f446a8a3989",
+     "input": {
+      "selection": [
+       1
+      ]
+     }
+    },
+    {
+     "prompt": "SELECT_IDLECMD",
+     "label": "特殊召喚：リングリボー",
+     "before": "113ce5ed4d48bb7d9c8f95a6b1b38c261fb5c79ba183fe240f8b91d81f47f045",
+     "input": {
+      "action": 0
+     }
+    },
+    {
+     "prompt": "SELECT_UNSELECT_CARD",
+     "label": "選択：バックアップ＠イグニスター",
+     "before": "3638303f65993a9903caa969a905d76194e8b6b24b8fdb343b3cb02878a2df73",
+     "input": {
+      "action": 0
+     }
+    },
+    {
+     "prompt": "SELECT_PLACE",
+     "label": "自分 モンスター 3",
+     "before": "5568a831a3328988be291b2b8ccb72bdc28fb643c11c20ee154045611fe6d3f0",
+     "input": {
+      "selection": [
+       0
+      ]
+     }
+    },
+    {
+     "prompt": "SELECT_IDLECMD",
+     "label": "特殊召喚：M∀LICE＜Q＞WHITE BINDER",
+     "before": "d8effb24d5121a8400ccc9639e8a1d88a5f94d2e381c5e359bb209332b04876c",
+     "input": {
+      "action": 1
+     }
+    },
+    {
+     "prompt": "SELECT_UNSELECT_CARD",
+     "label": "選択：サイバース・ウィキッド",
+     "before": "8d276785a5892603e5d762f96bac711fc15c543195f3aae06b327c39d5680a71",
+     "input": {
+      "action": 2
+     }
+    },
+    {
+     "prompt": "SELECT_UNSELECT_CARD",
+     "label": "選択：M∀LICE＜P＞Dormouse",
+     "before": "d6217aeb212d7cb2c19415ccda6f9cdfcceff64969b547aee9a84e7d2cfbec98",
+     "input": {
+      "action": 2
+     }
+    },
+    {
+     "prompt": "SELECT_UNSELECT_CARD",
+     "label": "選択を確定",
+     "before": "6531989ddfdc13dc863961a0cefcc61ec365efeec29dcdb4ee5e96d7919d82cb",
+     "input": {
+      "action": 5
+     }
+    },
+    {
+     "prompt": "SELECT_PLACE",
+     "label": "自分 モンスター 5",
+     "before": "efcf5c763f1d05a1ffadb53b4432a86e2f3142bedf291ceb0dd969885ade950a",
+     "input": {
+      "selection": [
+       1
+      ]
+     }
+    },
+    {
+     "prompt": "SELECT_EFFECTYN",
+     "label": "はい",
+     "before": "2d0349595c454b5d020c58d2660e3403021cc955b974905e19904cb61d3ca9e8",
+     "input": {
+      "action": 0
+     }
+    },
+    {
+     "prompt": "SELECT_CARD",
+     "label": "M∀LICE＜P＞Dormouse / サイバース・ウィキッド / バックアップ＠イグニスター",
+     "before": "d1ed43dcad50b01ba799d3bb93e07305fc169804b7d2699e09d923f9f1796786",
+     "input": {
+      "selection": [
+       0,
+       1,
+       2
+      ]
+     }
+    },
+    {
+     "prompt": "SELECT_IDLECMD",
+     "label": "特殊召喚：ファイアウォール・ドラゴン・ダークフルード－ネオテンペスト",
+     "before": "22aec428dfdbccaafd46b57164c6a015a7776045f83d0ec5eaa6ee75e5e65aa9",
+     "input": {
+      "action": 4
+     }
+    },
+    {
+     "prompt": "SELECT_UNSELECT_CARD",
+     "label": "キャンセル",
+     "before": "6319aca8ac4f8a3c6555222c18235b19e6a28aacf02d0a0f8f9a63e2fd756bbe",
+     "input": {
+      "action": 4
+     }
+    },
+    {
+     "prompt": "SELECT_IDLECMD",
+     "label": "特殊召喚：ファイアウォール・ドラゴン・ダークフルード－ネオテンペスト",
+     "before": "22aec428dfdbccaafd46b57164c6a015a7776045f83d0ec5eaa6ee75e5e65aa9",
+     "input": {
+      "action": 4
+     }
+    },
+    {
+     "prompt": "SELECT_UNSELECT_CARD",
+     "label": "キャンセル",
+     "before": "6319aca8ac4f8a3c6555222c18235b19e6a28aacf02d0a0f8f9a63e2fd756bbe",
+     "input": {
+      "action": 4
+     }
+    },
+    {
+     "prompt": "SELECT_IDLECMD",
+     "label": "効果発動：M∀LICE＜Q＞WHITE BINDER / 「Ｍ∀ＬＩＣＥ」罠カードをセット",
+     "before": "22aec428dfdbccaafd46b57164c6a015a7776045f83d0ec5eaa6ee75e5e65aa9",
+     "input": {
+      "action": 7
+     }
+    },
+    {
+     "prompt": "SELECT_CARD",
+     "label": "M∀LICE＜C＞GWC－０６",
+     "before": "9e705ff22eff66241b4514a1e792b82f0f72a035c26a595de6734edd2055697c",
+     "input": {
+      "selection": [
+       0
+      ]
+     }
+    },
+    {
+     "prompt": "SELECT_PLACE",
+     "label": "自分 魔法・罠 1",
+     "before": "65ce9c2ba4b8ebb62122f9cf216c53c62c68dfb231272e74462dbafaa9eb3baf",
+     "input": {
+      "selection": [
+       0
+      ]
+     }
+    },
+    {
+     "prompt": "SELECT_CHAIN",
+     "label": "発動しない",
+     "before": "2b4a6d4034ed8e3c3ff233fbd5a222e28fef5b56506e88527490e9ccb07b6bed",
+     "input": {
+      "action": 1
+     }
+    },
+    {
+     "prompt": "SELECT_IDLECMD",
+     "label": "特殊召喚：ファイアウォール・ドラゴン・ダークフルード－ネオテンペスト",
+     "before": "62d2b655a39162a32f13a1fb79b3800c65048181c648077569c070e49ffadc1b",
+     "input": {
+      "action": 4
+     }
+    },
+    {
+     "prompt": "SELECT_UNSELECT_CARD",
+     "label": "選択：ウィザード＠イグニスター",
+     "before": "6f37d2e442381de2f44e17fe852397035f823329d6d20a92c303f47913934d0a",
+     "input": {
+      "action": 0
+     }
+    },
+    {
+     "prompt": "SELECT_UNSELECT_CARD",
+     "label": "選択：リングリボー",
+     "before": "cfad1480597875706c15a0d52aa2ad8042306a1d993e0f344cc652146e26b039",
+     "input": {
+      "action": 0
+     }
+    },
+    {
+     "prompt": "SELECT_UNSELECT_CARD",
+     "label": "選択：M∀LICE＜Q＞WHITE BINDER",
+     "before": "f04b0093ef5cd3279a40d67f86a93887dd97df4adef18e9df3cc9d8916eb6baa",
+     "input": {
+      "action": 0
+     }
+    },
+    {
+     "prompt": "SELECT_PLACE",
+     "label": "自分 モンスター 5",
+     "before": "b2cc43e43f94c1dc661bc932474b00de5fd9750b24b135a039885ad3526251aa",
+     "input": {
+      "selection": [
+       2
+      ]
+     }
+    },
+    {
+     "prompt": "SELECT_CHAIN",
+     "label": "発動：ファイアウォール・ドラゴン・ダークフルード－ネオテンペスト / ファイアウォール・ドラゴン・ダークフルード－ネオテンペスト：効果 1",
+     "before": "dd77742cc86db037e3d1e7002afbe0c57d7502e6ac1742ebda277c9fc7db2ae3",
+     "input": {
+      "action": 1
+     }
+    },
+    {
+     "prompt": "SELECT_CHAIN",
+     "label": "発動しない",
+     "before": "78bf76ecee2857d9b11b7628181535347099fb9a8cf3964d9686881efad853d3",
+     "input": {
+      "action": 1
+     }
+    },
+    {
+     "prompt": "SELECT_CARD",
+     "label": "コード・オブ・ソウル",
+     "before": "fb7cf21219b75672a6c8619379f868528c76e7e42c700f616ae164dd9b947415",
+     "input": {
+      "selection": [
+       0
+      ]
+     }
+    },
+    {
+     "prompt": "SELECT_CHAIN",
+     "label": "発動しない",
+     "before": "aee22c86f37a57d71eab4e392372983147fc304c79c375ecd0dc8829d9522e51",
+     "input": {
+      "action": 1
+     }
+    },
+    {
+     "prompt": "SELECT_IDLECMD",
+     "label": "魔法・罠セット：霆王の閃光",
+     "before": "1440d021f53d8455c80187ddbc81b96d1c8c8b847e93ddbf35bec7fbf5c2c9d9",
+     "input": {
+      "action": 1
+     }
+    },
+    {
+     "prompt": "SELECT_PLACE",
+     "label": "自分 魔法・罠 2",
+     "before": "e5d091fa2df36fd8c316513da30e64a0563e197d8c58072fa7f201229cd87984",
+     "input": {
+      "selection": [
+       0
+      ]
+     }
+    }
+   ],
+   "final": {
+    "turn": 1,
+    "phase": "MAIN 1",
+    "lp": [
+     7100,
+     8000
+    ],
+    "players": [
+     {
+      "hand": [
+       {
+        "code": 6325660,
+        "position": 10,
+        "sequence": 0
+       }
+      ],
+      "monsters": [
+       null,
+       null,
+       null,
+       null,
+       {
+        "code": 64211118,
+        "position": 1,
+        "sequence": 4
+       },
+       null,
+       {
+        "code": 39138610,
+        "position": 1,
+        "sequence": 6
+       }
+      ],
+      "spells": [
+       {
+        "code": 20726052,
+        "position": 10,
+        "sequence": 0
+       },
+       {
+        "code": 6325660,
+        "position": 10,
+        "sequence": 1
+       },
+       null,
+       null,
+       null,
+       null,
+       null,
+       null
+      ],
+      "grave": [
+       {
+        "code": 57111661,
+        "position": 5,
+        "sequence": 0
+       },
+       {
+        "code": 69272449,
+        "position": 5,
+        "sequence": 1
+       },
+       {
+        "code": 96676583,
+        "position": 5,
+        "sequence": 2
+       },
+       {
+        "code": 46947713,
+        "position": 5,
+        "sequence": 3
+       },
+       {
+        "code": 6325660,
+        "position": 5,
+        "sequence": 4
+       },
+       {
+        "code": 3723262,
+        "position": 5,
+        "sequence": 5
+       },
+       {
+        "code": 24842059,
+        "position": 5,
+        "sequence": 6
+       },
+       {
+        "code": 95454996,
+        "position": 5,
+        "sequence": 7
+       },
+       {
+        "code": 74652966,
+        "position": 5,
+        "sequence": 8
+       }
+      ],
+      "banished": [
+       {
+        "code": 30342076,
+        "position": 5,
+        "sequence": 0
+       },
+       {
+        "code": 32061192,
+        "position": 5,
+        "sequence": 1
+       },
+       {
+        "code": 52698008,
+        "position": 5,
+        "sequence": 2
+       },
+       {
+        "code": 30118811,
+        "position": 5,
+        "sequence": 3
+       }
+      ],
+      "extra": [
+       {
+        "code": 98978921,
+        "position": 8,
+        "sequence": 0
+       },
+       {
+        "code": 60303245,
+        "position": 8,
+        "sequence": 1
+       },
+       {
+        "code": 29301450,
+        "position": 8,
+        "sequence": 2
+       },
+       {
+        "code": 37458564,
+        "position": 8,
+        "sequence": 3
+       },
+       {
+        "code": 21848500,
+        "position": 8,
+        "sequence": 4
+       },
+       {
+        "code": 5043010,
+        "position": 8,
+        "sequence": 5
+       },
+       {
+        "code": 86066372,
+        "position": 8,
+        "sequence": 6
+       },
+       {
+        "code": 92422871,
+        "position": 8,
+        "sequence": 7
+       }
+      ]
+     },
+     {
+      "hand": [],
+      "monsters": [
+       null,
+       null,
+       null,
+       null,
+       null,
+       null,
+       null
+      ],
+      "spells": [
+       null,
+       null,
+       null,
+       null,
+       null,
+       null,
+       null,
+       null
+      ],
+      "grave": [],
+      "banished": [],
+      "extra": [
+       {
+        "code": 0,
+        "position": 8,
+        "sequence": 0
+       },
+       {
+        "code": 0,
+        "position": 8,
+        "sequence": 1
+       },
+       {
+        "code": 0,
+        "position": 8,
+        "sequence": 2
+       },
+       {
+        "code": 0,
+        "position": 8,
+        "sequence": 3
+       },
+       {
+        "code": 0,
+        "position": 8,
+        "sequence": 4
+       },
+       {
+        "code": 0,
+        "position": 8,
+        "sequence": 5
+       },
+       {
+        "code": 0,
+        "position": 8,
+        "sequence": 6
+       },
+       {
+        "code": 0,
+        "position": 8,
+        "sequence": 7
+       },
+       {
+        "code": 0,
+        "position": 8,
+        "sequence": 8
+       },
+       {
+        "code": 0,
+        "position": 8,
+        "sequence": 9
+       },
+       {
+        "code": 0,
+        "position": 8,
+        "sequence": 10
+       },
+       {
+        "code": 0,
+        "position": 8,
+        "sequence": 11
+       },
+       {
+        "code": 0,
+        "position": 8,
+        "sequence": 12
+       },
+       {
+        "code": 0,
+        "position": 8,
+        "sequence": 13
+       },
+       {
+        "code": 0,
+        "position": 8,
+        "sequence": 14
+       }
+      ]
+     }
+    ]
+   },
+   "finalHash": "5cd9c64f1f3a1ccacce1798b7e4ec7a568e9f3247fe344cff3b1a7e0947f6447",
+   "summary": {
+    "lp": 7100,
+    "monsters": [
+     "ファイアウォール・ドラゴン・ダークフルード－ネオテンペスト",
+     "アコード・トーカー＠イグニスター"
+    ],
+    "spells": [
+     "M∀LICE＜C＞GWC－０６(伏)",
+     "霆王の閃光(伏)"
+    ],
+    "hand": [
+     "霆王の閃光"
+    ],
+    "grave": [
+     "M∀LICE＜C＞TB－１１",
+     "M∀LICE＜P＞White Rabbit",
+     "M∀LICE＜P＞Cheshire Cat",
+     "トランスコード・トーカー",
+     "霆王の閃光",
+     "ウィザード＠イグニスター",
+     "リングリボー",
+     "M∀LICE＜Q＞WHITE BINDER",
+     "コード・オブ・ソウル"
+    ],
+    "banished": [
+     "リンク・デコーダー",
+     "M∀LICE＜P＞Dormouse",
+     "サイバース・ウィキッド",
+     "バックアップ＠イグニスター"
+    ],
+    "opp": {
+     "hand": [],
+     "monsters": [],
+     "spells": [],
+     "grave": []
+    }
+   },
+   "verified": true,
+   "deadHand": [
+    6325660
+   ]
   }
  ]
 }
