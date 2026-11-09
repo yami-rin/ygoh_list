@@ -1,8 +1,8 @@
 --呪われた宝箱
 --Cursed Treasure Chest (original card)
---① "a monster that activated its effect this turn": the card is flagged when it activates a monster effect.
---  The flag lasts until the End Phase and survives moving from the hand/GY to the field (it is reset when the
---  card leaves the field or is turned face-down, as it is then a new card).
+--① "a monster on the field that activated its effect this turn": the card is flagged when it activates a monster
+--  effect while it is in the Monster Zone (effects activated in the hand or GY do not count). The flag lasts until
+--  the End Phase and is reset when the card leaves the field or is turned face-down, as it is then a new card.
 local s,id=GetID()
 local SET_CURSED=0x7c7
 function s.initial_effect(c)
@@ -56,7 +56,8 @@ function s.initial_effect(c)
 end
 s.listed_series={SET_CURSED}
 function s.checkop(e,tp,eg,ep,ev,re,r,rp)
-	if re:IsActiveType(TYPE_MONSTER) then
+	local loc=Duel.GetChainInfo(ev,CHAININFO_TRIGGERING_LOCATION)
+	if re:IsActiveType(TYPE_MONSTER) and loc and loc&LOCATION_MZONE~=0 then
 		re:GetHandler():RegisterFlagEffect(id,RESET_EVENT+RESET_LEAVE+RESET_TEMP_REMOVE+RESET_TURN_SET+RESET_PHASE+PHASE_END,0,1)
 	end
 end

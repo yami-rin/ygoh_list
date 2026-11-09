@@ -135,6 +135,21 @@ test('Cursed: Treasure Chest ① takes a monster that activated its effect this 
   }finally{g.close();}
 });
 
+test('Cursed: Treasure Chest ① does not count an effect activated in the hand (Renzuru Special Summons itself), only one activated on the field',async()=>{
+  const RENZURU=77700603,ORIHIME=77700601;
+  const g=await Duel.create([{main:[ORIHIME,ORIHIME,ORIHIME],extra:[]},{main:FILLER,extra:[]}],{seed:1,fixtures:[
+    fx(CHEST),fx(RENZURU),fx(BLUE_EYES,{team:1,location:4,sequence:1,position:1})]});
+  try{
+    // Renzuru ① from the hand: it Special Summons itself and searches, but it activated in the hand
+    run(g,['効果発動：神折の霊鳥',pass]);
+    place(g);
+    while(g.prompt?.mode==='multi')respondAs(g,{selection:[0]});
+    pass(g);
+    assert(codes(snap(g)[0].monsters).includes(RENZURU),'Renzuru is on the field');
+    assert(!offered(g,'効果発動：呪われた宝箱'),'an effect activated in the hand does not count');
+  }finally{g.close();}
+});
+
 test('Cursed: Treasure Chest ③ cannot target a monster unaffected by its effect (Dusk Hour Blade Yayoi)',async()=>{
   const YAYOI=77700409;
   const g=await Duel.create([{main:[HERO,SWORD,SHIELD,CROWN],extra:[]},{main:FILLER,extra:[YAYOI]}],{seed:1,fixtures:[
