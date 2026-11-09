@@ -119,7 +119,14 @@ function ownOptions(g) {
   // Unselecting a material only loops back; every material set is reachable by selecting.
   if(p.type==='SELECT_UNSELECT_CARD')return p.choices.map(c=>({action:c.id})).filter(input=>!pointless(p,input));
   // Stand-in hand cards (route.deadHand, e.g. unnamed cards in a replay) are never played.
-  if(p.type==='SELECT_CHAIN')return p.choices.filter(c=>!(c.card&&c.card.location===2&&g.dead?.has(c.card.code))).map(c=>({action:c.id}));
+  if(p.type==='SELECT_CHAIN'){
+    // Order only: answer an opponent chain link with an effect first; with no opponent link on the chain, pass first,
+    // except Neo Tempest ② (sending Disablem early is how it works). Nothing is dropped.
+    const list=p.choices.filter(c=>!(c.card&&c.card.location===2&&g.dead?.has(c.card.code)));
+    const oppLink=g.stack.some(l=>l?.player===1),isPass=c=>c.response?.index===null;
+    const rank=c=>oppLink?(isPass(c)?1:0):c.card?.code===64211118?0:isPass(c)?1:2;
+    return list.map((c,i)=>({c,i})).sort((a,b)=>rank(a.c)-rank(b.c)||a.i-b.i).map(({c})=>({action:c.id}));
+  }
   if(['SELECT_EFFECTYN','SELECT_YESNO','SELECT_OPTION'].includes(p.type))return p.choices.map(c=>({action:c.id}));
   // Zone choice is fixed to the first legal zone (approximation recorded in the doc).
   if(p.mode==='multi'&&p.type!=='SELECT_PLACE'&&p.type!=='SELECT_DISFIELD'&&p.min===p.max&&p.min<=2){
