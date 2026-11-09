@@ -179,7 +179,7 @@ test('Zanya ② column destruction, Shadow Stance, White Night ② and Severing 
   }finally{g.close();}
 });
 
-test('Polar Night ● is once per turn across every monster that gains it: Kasumi ① / Sword Dance ② loop stops on the 2nd lap',async()=>{
+test('Polar Night ● cannot be used again this turn by a monster with the returned monster name: Kasumi ① / Sword Dance ② loop stops, Hien still can',async()=>{
   const g=await duel({deck0:[OBORO,YASHA],extra0:[KYOKUYA],deck1:[FRONT,FRONT,FRONT],
     p0:{hand:[HIEN,KASUMI,DARK_HOLE],mzone:[`${ZANYA}@0`,`${BYAKUYA}@1`],szone:[ENBU]},
     p1:{szone:[ABSOLUTE_ZERO,ABSOLUTE_ZERO,ABSOLUTE_ZERO]},set:[ABSOLUTE_ZERO]});
@@ -197,8 +197,12 @@ test('Polar Night ● is once per turn across every monster that gains it: Kasum
     play(g,['効果発動：宵刻刃－霞 / 戻してカードを破壊','P2 魔法・罠 1','PASS','はい','PASS','宵刻刃－霞','PASS']);
     assert.equal(zone(g,1,'spells').length,2);
     assert(names(g,0,'monsters').includes('宵刻刃－霞'));
-    // 2nd lap: neither the re-summoned Kasumi nor Hien can use ● again this turn.
-    assert(!labels(g).some(grant),labels(g).join(' / '));
+    // 2nd lap: the re-summoned Kasumi cannot use ● again this turn, Hien (another name) still can.
+    assert(!labels(g).some(l=>l==='効果発動：宵刻刃－霞 / 戻してカードを破壊'),labels(g).join(' / '));
+    assert(labels(g).some(l=>l==='効果発動：宵刻刃－飛燕 / 戻してカードを破壊'),labels(g).join(' / '));
+    play(g,['効果発動：宵刻刃－飛燕 / 戻してカードを破壊','P2 魔法・罠 2','PASS']);
+    assert.equal(zone(g,1,'spells').length,1);
+    assert(!labels(g).some(grant),'Hien name is used up too');
   }finally{g.close();}
 });
 

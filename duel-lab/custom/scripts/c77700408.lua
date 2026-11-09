@@ -31,7 +31,8 @@ end
 function s.grop(e,tp,eg,ep,ev,re,r,rp)
 	local c=e:GetHandler()
 	--● (granted) either player's turn: return this card to hand/Extra Deck, target 1 card on the field, destroy it.
-	--Once per turn, shared by every monster that gains it ({id,2} counts per player), so return/re-summon loops stop.
+	--Once per turn per card name: after a monster is returned for it, monsters with that name cannot use it again this turn,
+	--so return/re-summon loops (Kasumi ①, Sword Dance ②) stop.
 	local e1=Effect.CreateEffect(c)
 	e1:SetDescription(aux.Stringid(id,2))
 	e1:SetCategory(CATEGORY_DESTROY)
@@ -40,7 +41,7 @@ function s.grop(e,tp,eg,ep,ev,re,r,rp)
 	e1:SetProperty(EFFECT_FLAG_CARD_TARGET)
 	e1:SetHintTiming(0,TIMINGS_CHECK_MONSTER_E+TIMING_END_PHASE)
 	e1:SetRange(LOCATION_MZONE)
-	e1:SetCountLimit(1,{id,2})
+	e1:SetCondition(s.gcon)
 	e1:SetCost(s.gcost)
 	e1:SetTarget(s.gtg)
 	e1:SetOperation(s.gop)
@@ -52,9 +53,15 @@ function s.grop(e,tp,eg,ep,ev,re,r,rp)
 	e2:SetReset(RESET_PHASE+PHASE_END)
 	Duel.RegisterEffect(e2,tp)
 end
+--player flag per returned card name (77790000 + the last 4 digits of the code)
+local function nameflag(c) return 77790000+c:GetCode()%10000 end
+function s.gcon(e,tp,eg,ep,ev,re,r,rp)
+	return Duel.GetFlagEffect(tp,nameflag(e:GetHandler()))==0
+end
 function s.gcost(e,tp,eg,ep,ev,re,r,rp,chk)
 	local c=e:GetHandler()
 	if chk==0 then return c:IsAbleToHandAsCost() or c:IsAbleToExtraAsCost() end
+	Duel.RegisterFlagEffect(tp,nameflag(c),RESET_PHASE+PHASE_END,0,1)
 	Duel.SendtoHand(c,nil,REASON_COST)
 end
 function s.gtg(e,tp,eg,ep,ev,re,r,rp,chk,chkc)
