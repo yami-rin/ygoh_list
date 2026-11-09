@@ -34,7 +34,7 @@ function s.column_effect(c,xmat)
 	e:SetHintTiming(0,TIMINGS_CHECK_MONSTER_E+TIMING_END_PHASE)
 	if xmat then
 		e:SetType(EFFECT_TYPE_XMATERIAL+EFFECT_TYPE_QUICK_O)
-		e:SetCountLimit(1,{CARD_POLAR_NIGHT,0})
+		e:SetCountLimit(1,{id,1})
 		e:SetCondition(function(ef) local xc=ef:GetHandler() return xc:IsCode(CARD_POLAR_NIGHT) and not xc:IsDisabled() end)
 	else
 		e:SetType(EFFECT_TYPE_QUICK_O)

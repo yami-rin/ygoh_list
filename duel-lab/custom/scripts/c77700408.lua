@@ -1,8 +1,8 @@
 --宵刻刃－極夜
 --Dusk Hour Blade - Polar Night (original card)
 --① ("gains the ② effects of its "Dusk Hour Blade" Xyz Materials") follows the EDOPro idiom: the materials
---("Lingering Night" / "White Night") register EFFECT_TYPE_XMATERIAL copies of their ② that work only for this card,
---sharing one once-per-turn count under this card's name ({id,0}): the gained effects are usable once per turn in total.
+--("Lingering Night" / "White Night") register EFFECT_TYPE_XMATERIAL copies of their ② that work only for this card;
+--a gained effect keeps the once-per-turn limit of the material's own name ({material id,1}).
 local s,id=GetID()
 local SET_YOIKOKU_BLADE=0x17c3
 function s.initial_effect(c)

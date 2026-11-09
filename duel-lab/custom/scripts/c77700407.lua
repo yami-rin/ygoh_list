@@ -34,7 +34,7 @@ function s.negate_effect(c,xmat)
 	e:SetProperty(EFFECT_FLAG_DAMAGE_STEP+EFFECT_FLAG_DAMAGE_CAL)
 	if xmat then
 		e:SetType(EFFECT_TYPE_XMATERIAL+EFFECT_TYPE_QUICK_O)
-		e:SetCountLimit(1,{CARD_POLAR_NIGHT,0})
+		e:SetCountLimit(1,{id,1})
 		e:SetCondition(function(ef,tp,eg,ep,ev,re,r,rp)
 			local xc=ef:GetHandler()
 			return xc:IsCode(CARD_POLAR_NIGHT) and not xc:IsDisabled() and s.negcon(ef,tp,eg,ep,ev,re,r,rp)
