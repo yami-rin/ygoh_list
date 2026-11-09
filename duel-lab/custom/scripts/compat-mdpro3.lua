@@ -34,7 +34,15 @@ if not Card.IsSpellTrap then
 	Synchro.NonTuner=Synchro.NonTuner or function(f,...) return aux.NonTuner(f,...) end
 	Synchro.AddProcedure=Synchro.AddProcedure or function(c,f1,min1,max1,f2,min2,max2) return aux.AddSynchroProcedure(c,f1,f2,min2 or 1,max2 or 99) end
 	Xyz=Xyz or {}
-	Xyz.AddProcedure=Xyz.AddProcedure or function(c,f,lv,ct,alterf,desc,maxct,op) return aux.AddXyzProcedure(c,f,lv,ct,alterf,desc,maxct,op) end
+	Xyz.InfiniteMats=Xyz.InfiniteMats or 99
+	--no Level (lv nil, e.g. "2+ Rank 9 Xyz Monsters") uses the level-free procedure
+	Xyz.AddProcedure=Xyz.AddProcedure or function(c,f,lv,ct,alterf,desc,maxct,op)
+		if not lv then return aux.AddXyzProcedureLevelFree(c,f,nil,ct,maxct or ct,alterf,desc,op) end
+		return aux.AddXyzProcedure(c,f,lv,ct,alterf,desc,maxct,op)
+	end
+	--EDOPro Card.IsXyzSummonable/Duel.XyzSummon take a "must use" group before the materials, YGOPro does not:
+	--original scripts check this flag and drop that argument
+	Xyz.NoMustArg=true
 	Duel.CheckReleaseGroupCost=Duel.CheckReleaseGroupCost or function(tp,f,ct,use_hand,check,ex,...)
 		return Duel.CheckReleaseGroup(tp,f,ct,ex,...)
 	end
