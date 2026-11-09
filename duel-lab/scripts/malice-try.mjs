@@ -4,6 +4,7 @@
 // Prints where the plan stops, the board, and the prompt waiting at the end.
 import fs from 'node:fs';
 import {REPLAYS,startLab,replaySteps,trapPolicy,passPolicy,play,summary} from './malice-lab.mjs';
+import {score} from './malice-search.mjs';
 
 const spec=JSON.parse(fs.readFileSync(process.argv[2],'utf8'));
 const route=spec.route?REPLAYS.find(r=>r.id.includes(spec.route)):null;
@@ -19,6 +20,7 @@ try{
   if(spec.plan){try{play(g,spec.plan,policy);result.plan='完了';}catch(e){result.plan=e.message;}}
   result.fired=policy.state?.firedAt;
   result.board=summary(g);
+  const sc=score(g);result.score={total:sc.total,parts:sc.parts.map(p=>p.join(':'))};
   result.prompt=g.pending?{who:(g.pending.player^g.first)?'相手':'自分',type:g.prompt.type,choices:g.prompt.choices.map(c=>c.label),cards:(g.prompt.cards||[]).map(c=>c.label)}:g.status;
   result.trail=g.trail.slice(-(spec.tail??12)).map(t=>`${t.who?'相':'自'} ${t.prompt} ${t.label}`);
   console.log(JSON.stringify(result,null,1));
