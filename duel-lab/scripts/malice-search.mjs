@@ -87,11 +87,23 @@ function zoneGroups(g,p,prefer=-1) {
 }
 
 function optionLabel(p,o){return o.action!==undefined?p.choices.find(c=>c.id===o.action)?.label:(o.selection||[]).map(i=>p.cards?.[i]?.label).join(' / ');}
-// The guide (a stored route) is tried first: its next step goes to the front while the line still follows it.
+// The guide (a stored route) is tried first: the first of its next GUIDE_AHEAD steps that matches an option goes to the
+// front. Looking ahead lets a guide from a similar opening (other first card) still steer the rest of the line.
+const GUIDE_AHEAD=8,GENERIC=new Set(['SELECT_PLACE','SELECT_DISFIELD','SELECT_POSITION','SELECT_EFFECTYN','SELECT_YESNO','SELECT_OPTION']);
+function guideStep(g,labels) {
+  if(!g.guide||g.guideAt<0)return -1;
+  // Zone, position and yes/no labels are too generic to skip ahead for: they match only the very next step.
+  const ahead=GENERIC.has(g.prompt.type)?1:GUIDE_AHEAD;
+  for(let j=g.guideAt;j<Math.min(g.guide.length,g.guideAt+ahead);j++){
+    const st=g.guide[j];if(st.prompt===g.prompt.type&&labels.includes(st.label))return j;
+  }
+  return -1;
+}
 function options(g) {
-  const list=rawOptions(g),step=g.guide?.[g.guideAt];
-  if(!step||step.prompt!==g.prompt.type)return list;
-  const i=list.findIndex(o=>optionLabel(g.prompt,o)===step.label);
+  const list=rawOptions(g);
+  const j=guideStep(g,list.map(o=>optionLabel(g.prompt,o)));
+  if(j<0)return list;
+  const i=list.findIndex(o=>optionLabel(g.prompt,o)===g.guide[j].label);
   if(i>0)list.unshift(...list.splice(i,1));
   return list;
 }
@@ -107,7 +119,7 @@ function rawOptions(g) {
   // Cancelling a Link Summon only returns to the same idle state.
   if(p.type==='SELECT_UNSELECT_CARD')return p.choices.filter(c=>!pointless(p,{action:c.id})&&!(c.label==='キャンセル'&&p.choices.length>1)).map(c=>({action:c.id}));
   if(['SELECT_EFFECTYN','SELECT_YESNO','SELECT_OPTION'].includes(p.type))return p.choices.map(c=>({action:c.id}));
-  if(p.type==='SELECT_PLACE'||p.type==='SELECT_DISFIELD'){const st=g.guide?.[g.guideAt];return zoneGroups(g,p,st&&st.prompt===p.type?p.cards.findIndex(c=>c.label===st.label):-1);}
+  if(p.type==='SELECT_PLACE'||p.type==='SELECT_DISFIELD'){const j=guideStep(g,p.cards.map(c=>c.label));return zoneGroups(g,p,j<0?-1:p.cards.findIndex(c=>c.label===g.guide[j].label));}
   if(p.mode==='single')return p.choices.slice(0,1).map(c=>({action:c.id}));
   if(p.mode==='order')return [{selection:p.cards.map((_,i)=>i)}];
   if(p.mode==='counter')return [{counters:p.cards.map((_,i)=>i===0?p.count:0)}];
@@ -133,7 +145,7 @@ function apply(g,input,policy) {
   else if(p.type==='SELECT_EFFECTYN'&&g.pending.code)g.activating=g.pending.code;
   if(p.type==='SELECT_IDLECMD'&&c?.card&&/特殊召喚|召喚/.test(c.label))g.placing=c.card.code;
   const label=c?.label||(input.selection||[]).map(i=>p.cards?.[i]?.label).join(' / ');
-  if(g.guide&&g.guideAt>=0){const st=g.guide[g.guideAt];g.guideAt=st&&st.prompt===p.type&&st.label===label?g.guideAt+1:-1;}
+  {const j=guideStep(g,[label]);if(j>=0)g.guideAt=j+1;}
   g.trail.push({who:0,prompt:p.type,label});
   const {code,label:_,...raw}=input;
   g.respond(0^g.first,g.revision,raw,{snapshot:false});

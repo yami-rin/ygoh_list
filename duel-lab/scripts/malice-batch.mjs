@@ -26,7 +26,15 @@ for(const trapName of trapArg.split(',')){
   const table=JSON.parse(fs.readFileSync(new URL(`../runtime/malice/hits-${trap}.json`,import.meta.url)));
   for(const t of table){
     const routeId=t.route.replace('user-replay-','');
-    for(const w of distinctWindows(t.windows)){
+    // WORST_FROM=<batch.jsonl>: only the window that hurt most there (the opponent's best timing), e.g. to test extenders.
+    let windows=distinctWindows(t.windows);
+    if(process.env.WORST_FROM){
+      const prev=fs.readFileSync(process.env.WORST_FROM,'utf8').split('\n').filter(Boolean).map(l=>JSON.parse(l)).filter(o=>o.routeId===routeId&&o.trap===trap);
+      if(!prev.length)continue;
+      const worst=prev.reduce((a,b)=>(b.score?.total??0)<(a.score?.total??0)?b:a);
+      windows=t.windows.filter(w=>w.window===worst.window);
+    }
+    for(const w of windows){
       const key=`${routeId}:${trap}:${w.window}:${extra.join('+')}`;
       if(done.has(key))continue;
       const r=await respond({routeId,trap,window:w.window,seconds:Number(sec),extra});

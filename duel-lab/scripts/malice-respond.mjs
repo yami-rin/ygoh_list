@@ -23,7 +23,7 @@ export async function respond({routeId,trap,window,seconds=60,extra=[],log=false
   return {route:route.title,hand,trap,window,fired,broken,...result};
 }
 
-if(import.meta.url===`file:///${process.argv[1].replace(/\\/g,'/')}`){
+if(process.argv[1]&&import.meta.url===`file:///${process.argv[1].replace(/\\/g,'/')}`){
   const [routeId,trapArg,win,sec,extraArg,prefixArg]=process.argv.slice(2);
   const trap=TRAPS[trapArg]||Number(trapArg);
   const out=await respond({routeId,trap,window:Number(win||0),seconds:Number(sec||60),extra:extraArg?extraArg.split(',').map(Number):[],log:true,prefix:prefixArg===undefined?undefined:Number(prefixArg)});

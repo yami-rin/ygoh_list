@@ -14,7 +14,7 @@ export async function improve(route,{seconds=300,maxDev=Infinity,log=false,hand=
   return searchBest(setup,{ms:seconds*1000,guide:guideOf(route),maxDev,log});
 }
 
-if(import.meta.url===`file:///${process.argv[1].replace(/\\/g,'/')}`){
+if(process.argv[1]&&import.meta.url===`file:///${process.argv[1].replace(/\\/g,'/')}`){
   const [id,sec='300',dev]=process.argv.slice(2);
   const route=REPLAYS.find(r=>r.id.includes(id));
   const r=await improve(route,{seconds:Number(sec),maxDev:dev===undefined?Infinity:Number(dev),log:true});

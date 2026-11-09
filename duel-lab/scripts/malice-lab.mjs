@@ -45,7 +45,8 @@ const pass=p=>p.choices.find(c=>c.response?.index===null&&c.label==='発動し�
 
 // Opponent policy: fire `trap` at its `at`-th legal window (0-based); otherwise pass. Targets: the newest own chain link
 // card if offered, else `prefer` codes, else the first card.
-export function trapPolicy(trap,at,{prefer=[]}={}) {
+// on: fire instead at the first window whose newest chain link is our effect of one of these cards (e.g. the key search).
+export function trapPolicy(trap,at,{prefer=[],on=null}={}) {
   const st={seen:-1,fired:false,windows:[]};
   const fn=g=>{
     const p=g.prompt;
@@ -53,7 +54,8 @@ export function trapPolicy(trap,at,{prefer=[]}={}) {
       const c=p.choices.find(c=>c.card?.code===trap);
       if(c&&!st.fired){
         st.seen++;st.windows.push({index:st.seen,chain:g.stack.filter(Boolean).map(l=>`${l.player?'相':'自'}:${name(l.code)}`),last:lastEvent(g),step:g.stepIndex});
-        if(st.seen===at){st.fired=true;st.firedAt={...st.windows.at(-1)};return {action:c.id,label:c.label};}
+        const top=g.stack.filter(Boolean).at(-1);
+        if(on?(top&&top.player===0&&on.includes(top.code)):st.seen===at){st.fired=true;st.firedAt={...st.windows.at(-1)};return {action:c.id,label:c.label};}
       }
       const x=pass(p);return {action:x.id,label:x.label};
     }
