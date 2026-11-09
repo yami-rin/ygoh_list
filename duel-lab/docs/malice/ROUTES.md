@@ -15,7 +15,7 @@
 
 ## 改善候補（ユーザーの手順を案内にした探索で発見、各300秒）
 
-### R1 Cat＋March Hare：先にCat①でMHを除外して2ドロー（`malice-cat-hare-plus`）
+### R1 Cat＋March Hare：先にCat①でMHを除外して2ドロー（`malice-cat-hare-plus`）【推奨：ユーザー回答 Q4】
 
 1. Cat を召喚 → **Cat①：手札のMarch Hareを除外して2ドロー**。
 2. **MH③（300LP）：除外されたMH自身を対象に手札へ戻す**。
