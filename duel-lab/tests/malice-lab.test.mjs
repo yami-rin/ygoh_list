@@ -44,6 +44,19 @@ test('Astra instructions carry the engine-checked M∀LICE points',async()=>{
   for(const k of ['カード名ごとに1ターン1度','うららで止まらない','ディセーブルム','リンク先に自分のLモンスター','ドットスケーパー（地）'])assert(text.includes(k),k);
 });
 
+test('saved M∀LICE routes (routes/malice-routes.json) replay to their stored final board',async()=>{
+  const fs=await import('node:fs');const {board,hash}=await import('../scripts/route-harness.mjs');
+  const routes=JSON.parse(fs.readFileSync(new URL('../routes/malice-routes.json',import.meta.url))).routes;
+  assert(routes.length>=4);
+  for(const r of routes){
+    const g=await startLab({hand:r.hand,seed:r.seed});
+    try{
+      for(const s of r.steps){assert.equal(g.prompt.type,s.prompt,r.id);g.respond(0^g.first,g.revision,s.input,{snapshot:false});assert.equal(g.validationError,null,`${r.id} ${s.label}`);}
+      assert.equal(hash(board(g)),r.finalHash,r.id);
+    } finally {g.close();}
+  }
+});
+
 test('link arrows: Accord in the right Extra Monster Zone points at main zones 3-5, Wicked (↓↘) in the right EMZ at main 4-5 and nothing from a main zone',()=>{
   assert.deepEqual(pointsTo(C.accord,6).sort(),[2,3,4]);
   assert.deepEqual(pointsTo(52698008,6).sort(),[3,4]);
