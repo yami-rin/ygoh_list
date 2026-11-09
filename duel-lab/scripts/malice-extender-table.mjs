@@ -21,5 +21,13 @@ for(const [k,w] of worst){
   if(cells.every(c=>!c))continue;
   out.push(`| ${w.route} | ${w.trapName} | ${cell(w)} | ${cells.join(' | ')} |`);
 }
+// Summary per extender over its own cells, with the stand-in score of the same cells for comparison.
+out.push('','## 2枚目ごとの平均','','| 2枚目 | マス | 平均 | 最低 | 同じマスの代役平均 |','| --- | --- | --- | --- | --- |');
+for(const e of ext){
+  const pairs=e.rows.map(r=>[r.score?.total??0,worst.get(`${r.routeId}|${r.trap}`)?.score?.total??0]);
+  if(!pairs.length)continue;
+  const avg=i=>(pairs.reduce((n,p)=>n+p[i],0)/pairs.length).toFixed(2);
+  out.push(`| ${cardInfo(e.code).name} | ${pairs.length} | ${avg(0)} | ${Math.min(...pairs.map(p=>p[0])).toFixed(2)} | ${avg(1)} |`);
+}
 fs.writeFileSync(new URL('../docs/malice/EXTENDERS.md',import.meta.url),out.join('\n')+'\n');
 console.log(out.slice(5).join('\n'));

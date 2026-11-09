@@ -37,7 +37,10 @@ for(const trapName of trapArg.split(',')){
     for(const w of windows){
       const key=`${routeId}:${trap}:${w.window}:${extra.join('+')}`;
       if(done.has(key))continue;
-      const r=await respond({routeId,trap,window:w.window,seconds:Number(sec),extra});
+      let r;
+      // A hand the deck cannot supply (e.g. a second copy of a 1-of) is skipped.
+      try{r=await respond({routeId,trap,window:w.window,seconds:Number(sec),extra});}
+      catch(e){console.log(`スキップ ${t.title} ${t.trap}: ${e.message}`);continue;}
       const row={routeId,route:t.title,trap,trapName:t.trap,window:w.window,step:w.step,chain:w.chain,extra,
         brokenAt:r.broken?.broken??null,complete:r.complete,lines:r.lines,ms:r.ms,
         score:r.best?.score??null,trail:r.best?.trail??[]};
