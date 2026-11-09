@@ -150,6 +150,19 @@ test('Cursed: Treasure Chest ③ cannot target a monster unaffected by its effec
   }finally{g.close();}
 });
 
+test('Cursed: Sword, Shield, Armor and Crown ① cannot equip themselves to a monster unaffected by them (Dusk Hour Blade Yayoi)',async()=>{
+  const YAYOI=77700409;
+  for(const card of [SWORD,SHIELD,ARMOR,CROWN]){
+    const g=await Duel.create([{main:FILLER,extra:[]},{main:FILLER,extra:[YAYOI]}],{seed:1,fixtures:[
+      fx(card),fx(BLUE_EYES,{team:1,location:4,sequence:1,position:1}),fx(YAYOI,{team:1,location:4,sequence:5,position:1})]});
+    try{
+      run(g,['効果発動：'+cards[card].name]);
+      const targets=g.prompt.cards.map(c=>c.label);
+      assert.deepEqual(targets,['青眼の白龍'],`${cards[card].name}: ${targets.join(' / ')}`);
+    }finally{g.close();}
+  }
+});
+
 test('Cursed: Shield ② (Defense Position, not destroyed by battle), Armor ② and Lightning Sword ① from the GY / ② survive Raigeki',async()=>{
   const g=await Duel.create([{main:FILLER,extra:[]},{main:FILLER,extra:[]}],{seed:1,fixtures:[
     fx(SHIELD),fx(ARMOR),fx(RAIGEKI),fx(LIGHTNING,{location:16,position:1}),fx(BLUE_EYES,{location:4,sequence:0,position:1}),

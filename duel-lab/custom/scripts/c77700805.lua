@@ -40,22 +40,23 @@ function s.initial_effect(c)
 	c:RegisterEffect(e3)
 end
 s.listed_series={SET_CURSED}
-function s.eqfilter(c,ec)
-	return c:IsFaceup() and c~=ec
+--equipping affects the monster: one unaffected by this effect cannot be chosen
+function s.eqfilter(c,ec,e)
+	return c:IsFaceup() and c~=ec and not c:IsImmuneToEffect(e)
 end
 function s.eqtg(e,tp,eg,ep,ev,re,r,rp,chk,chkc)
 	local c=e:GetHandler()
-	if chkc then return chkc:IsLocation(LOCATION_MZONE) and s.eqfilter(chkc,c) end
+	if chkc then return chkc:IsLocation(LOCATION_MZONE) and s.eqfilter(chkc,c,e) end
 	if chk==0 then return Duel.GetLocationCount(tp,LOCATION_SZONE)>0 and not c:IsForbidden()
-		and Duel.IsExistingTarget(s.eqfilter,tp,LOCATION_MZONE,LOCATION_MZONE,1,c,c) end
+		and Duel.IsExistingTarget(s.eqfilter,tp,LOCATION_MZONE,LOCATION_MZONE,1,c,c,e) end
 	Duel.Hint(HINT_SELECTMSG,tp,HINTMSG_EQUIP)
-	Duel.SelectTarget(tp,s.eqfilter,tp,LOCATION_MZONE,LOCATION_MZONE,1,1,c,c)
+	Duel.SelectTarget(tp,s.eqfilter,tp,LOCATION_MZONE,LOCATION_MZONE,1,1,c,c,e)
 	Duel.SetOperationInfo(0,CATEGORY_EQUIP,c,1,0,0)
 end
 function s.eqop(e,tp,eg,ep,ev,re,r,rp)
 	local c=e:GetHandler()
 	local tc=Duel.GetFirstTarget()
-	if not (c:IsRelateToEffect(e) and tc and tc:IsRelateToEffect(e) and tc:IsFaceup() and tc:IsLocation(LOCATION_MZONE)) then return end
+	if not (c:IsRelateToEffect(e) and tc and tc:IsRelateToEffect(e) and tc:IsFaceup() and tc:IsLocation(LOCATION_MZONE) and not tc:IsImmuneToEffect(e)) then return end
 	if Duel.GetLocationCount(tp,LOCATION_SZONE)<=0 then return end
 	s.equip(c,c,tp,tc)
 end
