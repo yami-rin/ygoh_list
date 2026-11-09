@@ -1,5 +1,5 @@
 {
- "generated": "2026-11-09T19:46:42.348Z",
+ "generated": "2026-11-09T20:21:46.075Z",
  "baseline": {
   "cEErE6ce": 3.3091,
   "3tnYxZAt": 3.6095,
@@ -563,6 +563,80 @@
      "chain": "自:ファイアウォール・ドラゴン・ダークフルード－ネオテンペスト",
      "score": 1.8091,
      "complete": true
+    }
+   ]
+  },
+  {
+   "routeId": "cEErE6ce",
+   "route": "Dormouse１枚初動",
+   "extra": [],
+   "trap": "原始生命態ニビル",
+   "window": 0,
+   "step": 28,
+   "chain": [],
+   "score": 0.0104,
+   "parts": [],
+   "field": [
+    "原始生命態トークン"
+   ],
+   "sets": [],
+   "complete": true,
+   "windows": [
+    {
+     "window": 0,
+     "step": 28,
+     "chain": null,
+     "score": 0.0104,
+     "complete": true
+    },
+    {
+     "window": 1,
+     "step": 33,
+     "chain": "自:サイバース・ウィキッド",
+     "score": 2.0091,
+     "complete": false
+    },
+    {
+     "window": 2,
+     "step": 35,
+     "chain": "自:M∀LICE＜P＞Cheshire Cat",
+     "score": 2.0091,
+     "complete": false
+    },
+    {
+     "window": 4,
+     "step": 43,
+     "chain": "自:リンク・デコーダー",
+     "score": 2.0091,
+     "complete": false
+    },
+    {
+     "window": 6,
+     "step": 56,
+     "chain": "自:トランスコード・トーカー",
+     "score": 1.5101,
+     "complete": false
+    },
+    {
+     "window": 8,
+     "step": 64,
+     "chain": null,
+     "score": 1.5101,
+     "complete": false
+    },
+    {
+     "window": 9,
+     "step": 65,
+     "chain": "自:バックアップ＠イグニスター",
+     "score": 0.8101,
+     "complete": false
+    },
+    {
+     "window": 12,
+     "step": 72,
+     "chain": "自:ウィザード＠イグニスター",
+     "score": 0.5091,
+     "complete": false
     }
    ]
   },
@@ -1173,6 +1247,94 @@
    ]
   },
   {
+   "routeId": "3tnYxZAt",
+   "route": "UNDERGROUND１枚初動",
+   "extra": [],
+   "trap": "原始生命態ニビル",
+   "window": 13,
+   "step": 81,
+   "chain": [
+    "自:M∀LICE＜Q＞WHITE BINDER"
+   ],
+   "score": 0.6095,
+   "parts": [
+    [
+     "GWC－06",
+     0.3
+    ],
+    [
+     "ドロー分",
+     0.3
+    ]
+   ],
+   "field": [
+    "原始生命態トークン",
+    "M∀LICE＜Q＞WHITE BINDER"
+   ],
+   "sets": [
+    "M∀LICE＜C＞GWC－０６"
+   ],
+   "complete": true,
+   "windows": [
+    {
+     "window": 0,
+     "step": 40,
+     "chain": "自:サイバース・ウィキッド",
+     "score": 2.3085,
+     "complete": false
+    },
+    {
+     "window": 3,
+     "step": 49,
+     "chain": "自:リンク・デコーダー",
+     "score": 2.3085,
+     "complete": false
+    },
+    {
+     "window": 5,
+     "step": 52,
+     "chain": "自:トランスコード・トーカー",
+     "score": 1.6102,
+     "complete": false
+    },
+    {
+     "window": 7,
+     "step": 56,
+     "chain": "自:バックアップ＠イグニスター",
+     "score": 0.8094,
+     "complete": true
+    },
+    {
+     "window": 9,
+     "step": 65,
+     "chain": null,
+     "score": 0.8094,
+     "complete": true
+    },
+    {
+     "window": 10,
+     "step": 67,
+     "chain": "自:ウィザード＠イグニスター",
+     "score": 1.3104,
+     "complete": false
+    },
+    {
+     "window": 13,
+     "step": 81,
+     "chain": "自:M∀LICE＜Q＞WHITE BINDER",
+     "score": 0.6095,
+     "complete": true
+    },
+    {
+     "window": 14,
+     "step": 83,
+     "chain": "自:M∀LICE＜C＞TB－１１",
+     "score": 2.6095,
+     "complete": false
+    }
+   ]
+  },
+  {
    "routeId": "Q5Vc2nzV",
    "route": "NS＋コードマジシャン２枚初動",
    "extra": [],
@@ -1741,6 +1903,88 @@
    ]
   },
   {
+   "routeId": "Q5Vc2nzV",
+   "route": "NS＋コードマジシャン２枚初動",
+   "extra": [],
+   "trap": "原始生命態ニビル",
+   "window": 15,
+   "step": 80,
+   "chain": [
+    "自:M∀LICE＜Q＞WHITE BINDER"
+   ],
+   "score": 0.5078,
+   "parts": [
+    [
+     "リングリボー①",
+     0.5
+    ]
+   ],
+   "field": [
+    "リンク・スパイダー",
+    "リングリボー"
+   ],
+   "sets": [],
+   "complete": true,
+   "windows": [
+    {
+     "window": 0,
+     "step": 21,
+     "chain": "自:バックアップ＠イグニスター",
+     "score": 1.008,
+     "complete": false
+    },
+    {
+     "window": 3,
+     "step": 32,
+     "chain": "自:リンク・デコーダー",
+     "score": 0.508,
+     "complete": true
+    },
+    {
+     "window": 5,
+     "step": 43,
+     "chain": "自:トランスコード・トーカー",
+     "score": 0.508,
+     "complete": true
+    },
+    {
+     "window": 7,
+     "step": 51,
+     "chain": "自:ファイアウォール・ドラゴン・ダークフルード－ネオテンペスト",
+     "score": 1.3074,
+     "complete": false
+    },
+    {
+     "window": 9,
+     "step": 54,
+     "chain": "自:ウィザード＠イグニスター",
+     "score": 1.3085,
+     "complete": false
+    },
+    {
+     "window": 11,
+     "step": 65,
+     "chain": "自:M∀LICE＜P＞Dormouse",
+     "score": 0.8077,
+     "complete": true
+    },
+    {
+     "window": 12,
+     "step": 67,
+     "chain": "自:M∀LICE＜P＞White Rabbit",
+     "score": 0.8077,
+     "complete": true
+    },
+    {
+     "window": 15,
+     "step": 80,
+     "chain": "自:M∀LICE＜Q＞WHITE BINDER",
+     "score": 0.5078,
+     "complete": true
+    }
+   ]
+  },
+  {
    "routeId": "BmA74rcx",
    "route": "猫＋ヘア２枚初動",
    "extra": [],
@@ -2290,6 +2534,108 @@
      "chain": "自:M∀LICE＜P＞March Hare",
      "score": 1.5114,
      "complete": false
+    },
+    {
+     "window": 7,
+     "step": 29,
+     "chain": "自:リンク・デコーダー",
+     "score": 1.3114,
+     "complete": false
+    },
+    {
+     "window": 9,
+     "step": 32,
+     "chain": "自:トランスコード・トーカー",
+     "score": 1.3095,
+     "complete": false
+    },
+    {
+     "window": 11,
+     "step": 34,
+     "chain": "自:バックアップ＠イグニスター",
+     "score": 2.6105,
+     "complete": false
+    },
+    {
+     "window": 14,
+     "step": 46,
+     "chain": "自:ファイアウォール・ドラゴン・ダークフルード－ネオテンペスト",
+     "score": 1.6105,
+     "complete": false
+    }
+   ]
+  },
+  {
+   "routeId": "BmA74rcx",
+   "route": "猫＋ヘア２枚初動",
+   "extra": [],
+   "trap": "原始生命態ニビル",
+   "window": 0,
+   "step": 16,
+   "chain": [],
+   "score": 0.0107,
+   "parts": [],
+   "field": [
+    "原始生命態トークン"
+   ],
+   "sets": [],
+   "complete": true,
+   "windows": [
+    {
+     "window": 0,
+     "step": 16,
+     "chain": null,
+     "score": 0.0107,
+     "complete": true
+    },
+    {
+     "window": 1,
+     "step": 21,
+     "chain": "自:サイバース・ウィキッド",
+     "score": 1.3114,
+     "complete": false
+    },
+    {
+     "window": 2,
+     "step": 24,
+     "chain": "自:M∀LICE＜P＞March Hare",
+     "score": 1.3114,
+     "complete": false
+    },
+    {
+     "window": 4,
+     "step": 29,
+     "chain": "自:リンク・デコーダー",
+     "score": 2.0104,
+     "complete": false
+    },
+    {
+     "window": 6,
+     "step": 32,
+     "chain": "自:トランスコード・トーカー",
+     "score": 1.0114,
+     "complete": false
+    },
+    {
+     "window": 8,
+     "step": 34,
+     "chain": "自:バックアップ＠イグニスター",
+     "score": 0.9115,
+     "complete": false
+    },
+    {
+     "window": 11,
+     "step": 46,
+     "chain": "自:ファイアウォール・ドラゴン・ダークフルード－ネオテンペスト",
+     "score": 1.3083,
+     "complete": false
+    },
+    {
+     "window": 13,
+     "step": 49,
+     "chain": "自:ウィザード＠イグニスター",
+     "score": 1.9115,
+     "complete": false
     }
    ]
   },
@@ -2776,6 +3122,157 @@
      "chain": "自:リンク・デコーダー",
      "score": 2.3074,
      "complete": true
+    }
+   ]
+  },
+  {
+   "routeId": "G9pZztFA",
+   "route": "WhiteRabbit１枚初動",
+   "extra": [],
+   "trap": "霆王の閃光",
+   "window": 0,
+   "step": 53,
+   "chain": [
+    "自:M∀LICE＜P＞March Hare"
+   ],
+   "score": 0.3102,
+   "parts": [
+    [
+     "ドロー分",
+     0.3
+    ]
+   ],
+   "field": [
+    "M∀LICE＜P＞March Hare"
+   ],
+   "sets": [],
+   "complete": true,
+   "windows": [
+    {
+     "window": 0,
+     "step": 53,
+     "chain": "自:M∀LICE＜P＞March Hare",
+     "score": 0.3102,
+     "complete": true
+    },
+    {
+     "window": 2,
+     "step": 62,
+     "chain": "自:サイバース・ウィキッド",
+     "score": 1.3099,
+     "complete": true
+    },
+    {
+     "window": 3,
+     "step": 65,
+     "chain": "自:M∀LICE＜P＞March Hare",
+     "score": 1.6109,
+     "complete": false
+    },
+    {
+     "window": 5,
+     "step": 66,
+     "chain": "自:バックアップ＠イグニスター",
+     "score": 1.6109,
+     "complete": false
+    },
+    {
+     "window": 8,
+     "step": 73,
+     "chain": "自:ウィザード＠イグニスター",
+     "score": 1.3099,
+     "complete": true
+    },
+    {
+     "window": 10,
+     "step": 81,
+     "chain": "自:リンク・デコーダー",
+     "score": 2.0089,
+     "complete": false
+    },
+    {
+     "window": 12,
+     "step": 91,
+     "chain": "自:ファイアウォール・ドラゴン・ダークフルード－ネオテンペスト",
+     "score": 1.0089,
+     "complete": true
+    }
+   ]
+  },
+  {
+   "routeId": "G9pZztFA",
+   "route": "WhiteRabbit１枚初動",
+   "extra": [],
+   "trap": "原始生命態ニビル",
+   "window": 3,
+   "step": 26,
+   "chain": [
+    "自:M∀LICE＜P＞Dormouse"
+   ],
+   "score": 0.0101,
+   "parts": [],
+   "field": [
+    "原始生命態トークン",
+    "M∀LICE＜P＞Cheshire Cat"
+   ],
+   "sets": [],
+   "complete": true,
+   "windows": [
+    {
+     "window": 0,
+     "step": 22,
+     "chain": "自:S：Pリトルナイト",
+     "score": 0.3102,
+     "complete": false
+    },
+    {
+     "window": 1,
+     "step": 23,
+     "chain": "自:M∀LICE＜P＞Dormouse",
+     "score": 0.3102,
+     "complete": false
+    },
+    {
+     "window": 3,
+     "step": 26,
+     "chain": "自:M∀LICE＜P＞Dormouse",
+     "score": 0.0101,
+     "complete": true
+    },
+    {
+     "window": 4,
+     "step": 28,
+     "chain": "自:M∀LICE＜P＞Cheshire Cat",
+     "score": 0.0101,
+     "complete": true
+    },
+    {
+     "window": 6,
+     "step": 36,
+     "chain": null,
+     "score": 0.0101,
+     "complete": true
+    },
+    {
+     "window": 7,
+     "step": 37,
+     "chain": "自:M∀LICE＜Q＞WHITE BINDER",
+     "score": 0.3101,
+     "complete": true
+    },
+    {
+     "window": 8,
+     "step": 41,
+     "chain": "自:M∀LICE＜C＞MTP－０７",
+     "score": 2.3102,
+     "complete": false
+    },
+    {
+     "window": 9,
+     "step": 43,
+     "chain": "自:M∀LICE＜Q＞WHITE BINDER",
+     "score": 2.3102,
+     "complete": false
     }
    ]
   }
