@@ -6,7 +6,7 @@
 
 | 手札にあるもの | 目安 | 手順書 |
 | --- | --- | --- |
-| UNDERGROUND＋コード・オブ・ソウル | 4.5点（最上位） | GUIDE「UNDERGROUND＋コード・オブ・ソウル」 |
+| UNDERGROUND＋コード・オブ・ソウル／Dormouse＋ソウル | 3.8点（上位） | GUIDE「UNDERGROUND＋コード・オブ・ソウル」 |
 | Dormouse＋ソウル／UG＋Cat／UG＋WR／Dormouse＋MH | 3.8〜4.1点 | GUIDE 各項 |
 | Cat＋March Hare | 3.9点：**最初にCat①でMHを除外して2ドロー→MH③でMHを回収**、WHITE BINDER②は最後に回してMTP－07 | GUIDE「Cat＋March Hare（R1b）」 |
 | UG・Dormouse 1枚 | 3.3〜3.6点（ユーザーの手順どおり。DormouseはGWC－06を伏せて終える） | GUIDE「Dormouse 1枚」「UNDERGROUND 1枚」 |
