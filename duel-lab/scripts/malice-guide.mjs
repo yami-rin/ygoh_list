@@ -47,6 +47,8 @@ function lines(route) {
 const md=['# 先攻展開の手順書（自動生成）','','`scripts/malice-guide.mjs` が保存ルートをエンジンで再生して作る。（）は選ぶカード（素材・対象・サーチ先など）。「〇〇 効果」には、発動の確認に「はい」と答える場面（M∀LICE③など）も含む。',
   '点は静的な見積もり、妨害は評価器（相手＝ユーザーのデッキ、200手順、[CALIBRATION-user-mirror.md](CALIBRATION-user-mirror.md)）。',''];
 const cal=new Map((fs.existsSync(new URL('../runtime/malice/calibrate-user-mirror.jsonl',import.meta.url))?fs.readFileSync(new URL('../runtime/malice/calibrate-user-mirror.jsonl',import.meta.url),'utf8').split('\n').filter(Boolean).map(l=>JSON.parse(l)):[]).map(r=>[r.id,r]));
+// Worst-window results per route and hand trap (malice-report outputs).
+const trapCells=['handtrap-results.json','handtraps-saved-results.json'].flatMap(f=>{const u=new URL('../docs/malice/'+f,import.meta.url);return fs.existsSync(u)?JSON.parse(fs.readFileSync(u,'utf8')).cells.filter(c=>!c.extra?.length):[];});
 for(const [id,name] of RECOMMENDED){
   const r=all.find(x=>x.id===id);if(!r)continue;
   const g=await startLab({hand:r.hand,seed:r.seed});
@@ -57,6 +59,8 @@ for(const [id,name] of RECOMMENDED){
   md.push(`## ${name}`,'',`手札：${r.hand.filter(x=>x!==6325660).map(x=>cardInfo(x).name).join('・')}（残りは代役） / ルート \`${id}\``,'',
     `最終盤面：${sm.monsters.join('・')}${sm.spells.length?' ／ 伏せ '+sm.spells.join('・'):''} ／ LP ${sm.lp} ／ 点 ${sc.total.toFixed(2)}${c?` ／ 評価器の妨害 ${c.interruptions}`:''}`,'');
   lines({...r,steps}).forEach((l,i)=>md.push(`${i+1}. ${l}`));
+  const cells=trapCells.filter(c=>c.routeId===id.replace('user-replay-',''));
+  if(cells.length)md.push('',`誘発を最も痛い窓に受けた時の最善（他の手札は代役）：${cells.map(c=>`${c.trap} ${c.score.toFixed(2)}（${c.chain.at(-1)?.replace(/^自:/,'')||'チェーンなし'}）`).join('／')}`);
   md.push('');
 }
 fs.writeFileSync(new URL('../docs/malice/GUIDE.md',import.meta.url),md.join('\n')+'\n');
