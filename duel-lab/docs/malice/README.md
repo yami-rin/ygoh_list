@@ -32,6 +32,7 @@
 | `malice-improve` / `malice-improve-saved` / `malice-catalog` | ユーザーの手順・保存ルートを案内にした改善探索、2枚初動のカタログ |
 | `malice-bait` | 相手が最初の機会に誘発を撃つ前提で順番を組み替える探索 |
 | `malice-diff` | 2本の保存ルートの手順と最終盤面を並べる（CAUSAL.mdの根拠） |
+| `malice-stop-points` / `malice-maxx` | Gを受けた時：保存ルートを途中で止めた盤面／特殊召喚の回数上限つきで順番自由の最善 |
 | `malice-route` / `malice-catalog-save` | 探索結果を再生可能な保存ルート（`routes/malice-routes.json`）にする |
 | `malice-eval-routes` / `malice-calibrate` | 妨害評価器（`interruption-eval.mjs`、シナリオ malice-mirror / user-mirror）で相手ターンの妨害数を数える |
 | `malice-report` / `malice-extender-table` / `malice-bait-table` / `malice-guide` | 自動生成の表・手順書を作る |
