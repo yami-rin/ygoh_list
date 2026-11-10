@@ -1,7 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import {REPLAYS,startLab,replaySteps,trapPolicy,passPolicy,hitTable,summary} from '../scripts/malice-lab.mjs';
-import {searchBest,score,pointsTo,C} from '../scripts/malice-search.mjs';
+import {searchBest,score,pointsTo,soulTargets,C} from '../scripts/malice-search.mjs';
 import {TRAPS} from '../scripts/malice-traps.mjs';
 
 const route=id=>REPLAYS.find(r=>r.id.includes(id));
@@ -64,6 +64,15 @@ test('revival limit: a HEARTS sent from the Extra Deck is not a GWC－06 target,
   const gwc=g=>score(g).parts.find(p=>p[0]==='GWC－06')?.[1];
   assert.equal(gwc(board([])),0);
   assert.equal(gwc(board([{event:'summon',code:C.hearts}])),1);
+});
+
+test('Code of Soul ③ counts only when HEARTS / Firewall / WHITE BINDER can be Link Summoned from the field',async()=>{
+  assert.deepEqual(soulTargets([C.neo,52698008],0),[]);            // Neo Tempest (5) + Wicked (2): no exact 3 incl. M∀LICE, no sum 4
+  assert(soulTargets([C.neo,C.accord],1).includes('HEARTS'));     // + a GWC－06 body (M∀LICE): exactly 3
+  assert(soulTargets([C.ringo,52698008,C.neo],0).includes('ファイアウォール')); // 1+2+1 = 4
+  const parts=async id=>{const r=route(id);const g=await startLab({hand:r.hand,seed:r.seed});try{replaySteps(g,r);return score(g).parts.map(p=>p[0]);}finally{g.close();}};
+  assert(!(await parts('G9pZztFA')).some(k=>k.startsWith('コード・オブ・ソウル')));
+  assert((await parts('cEErE6ce')).includes('コード・オブ・ソウル③'));
 });
 
 test('link arrows: Accord in the right Extra Monster Zone points at main zones 3-5, Wicked (↓↘) in the right EMZ at main 4-5 and nothing from a main zone',()=>{

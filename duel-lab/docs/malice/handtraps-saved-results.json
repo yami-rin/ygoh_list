@@ -1,10 +1,10 @@
 {
- "generated": "2026-11-10T10:00:19.681Z",
+ "generated": "2026-11-10T11:00:56.312Z",
  "baseline": {
-  "malice-dormouse-gwc-now": 3.8092,
+  "malice-dormouse-gwc-now": 2.8092,
   "malice-ns-codemagician-plus": 3.1085,
   "malice-cat-hare-plus-2": 3.9112,
-  "malice-open-32061192-96676583-2": 4.1102,
+  "malice-open-32061192-96676583-2": 3.1102,
   "malice-open-68337209-30118811": 3.8085,
   "malice-open-68337209-74652966": 3.8104,
   "malice-open-32061192-74652966": 3.8091
@@ -109,21 +109,21 @@
      "window": 2,
      "step": 5,
      "chain": "自:M∀LICE＜P＞White Rabbit",
-     "score": 3.8092,
+     "score": 2.8092,
      "complete": true
     },
     {
      "window": 4,
      "step": 12,
      "chain": "自:M∀LICE＜C＞TB－１１",
-     "score": 3.8092,
+     "score": 2.8092,
      "complete": true
     },
     {
      "window": 5,
      "step": 16,
      "chain": "自:M∀LICE＜P＞Dormouse",
-     "score": 3.8092,
+     "score": 2.8092,
      "complete": true
     },
     {
@@ -137,14 +137,14 @@
      "window": 9,
      "step": 29,
      "chain": "自:M∀LICE＜P＞Cheshire Cat",
-     "score": 3.8092,
+     "score": 2.8092,
      "complete": true
     },
     {
      "window": 11,
      "step": 37,
      "chain": "自:リンク・デコーダー",
-     "score": 3.8092,
+     "score": 2.8092,
      "complete": true
     }
    ]
@@ -189,14 +189,14 @@
      "window": 1,
      "step": 54,
      "chain": null,
-     "score": 3.5082,
+     "score": 2.5082,
      "complete": false
     },
     {
      "window": 2,
      "step": 80,
      "chain": null,
-     "score": 3.8092,
+     "score": 2.8092,
      "complete": true
     }
    ]
@@ -249,21 +249,21 @@
      "window": 3,
      "step": 29,
      "chain": "自:M∀LICE＜P＞Cheshire Cat",
-     "score": 2.8101,
+     "score": 1.8101,
      "complete": false
     },
     {
      "window": 4,
      "step": 37,
      "chain": "自:リンク・デコーダー",
-     "score": 2.8101,
+     "score": 1.8101,
      "complete": false
     },
     {
      "window": 5,
      "step": 40,
      "chain": "自:トランスコード・トーカー",
-     "score": 2.8101,
+     "score": 1.8101,
      "complete": false
     },
     {
@@ -330,14 +330,14 @@
      "window": 6,
      "step": 40,
      "chain": "自:トランスコード・トーカー",
-     "score": 1.5101,
+     "score": 0.5101,
      "complete": false
     },
     {
      "window": 8,
      "step": 48,
      "chain": null,
-     "score": 1.5101,
+     "score": 0.5101,
      "complete": false
     },
     {
@@ -392,7 +392,7 @@
      "window": 2,
      "step": 21,
      "chain": "自:バックアップ＠イグニスター",
-     "score": 2.009,
+     "score": 1.009,
      "complete": false
     },
     {
@@ -495,7 +495,7 @@
      "window": 12,
      "step": 35,
      "chain": "自:トランスコード・トーカー",
-     "score": 2.508,
+     "score": 1.508,
      "complete": false
     }
    ]
@@ -508,14 +508,10 @@
    "window": 0,
    "step": 17,
    "chain": [],
-   "score": 2.009,
+   "score": 1.009,
    "parts": [
     [
      "ネオテン②→ディセーブルム",
-     1
-    ],
-    [
-     "コード・オブ・ソウル③",
      1
     ]
    ],
@@ -530,7 +526,7 @@
      "window": 0,
      "step": 17,
      "chain": null,
-     "score": 2.009,
+     "score": 1.009,
      "complete": false
     },
     {
@@ -578,14 +574,14 @@
      "window": 2,
      "step": 32,
      "chain": "自:リンク・デコーダー",
-     "score": 2.508,
+     "score": 1.508,
      "complete": false
     },
     {
      "window": 3,
      "step": 35,
      "chain": "自:トランスコード・トーカー",
-     "score": 2.508,
+     "score": 1.508,
      "complete": false
     },
     {
@@ -752,7 +748,7 @@
      "window": 2,
      "step": 40,
      "chain": "自:バックアップ＠イグニスター",
-     "score": 3.1124,
+     "score": 2.1124,
      "complete": true
     },
     {
@@ -855,14 +851,14 @@
      "window": 10,
      "step": 32,
      "chain": "自:リンク・デコーダー",
-     "score": 2.6124,
+     "score": 1.6124,
      "complete": false
     },
     {
      "window": 12,
      "step": 35,
      "chain": "自:トランスコード・トーカー",
-     "score": 2.6124,
+     "score": 1.6124,
      "complete": false
     }
    ]
@@ -909,7 +905,7 @@
      "window": 1,
      "step": 27,
      "chain": null,
-     "score": 3.1124,
+     "score": 2.1124,
      "complete": true
     },
     {
@@ -984,7 +980,7 @@
      "window": 3,
      "step": 35,
      "chain": "自:トランスコード・トーカー",
-     "score": 2.6124,
+     "score": 1.6124,
      "complete": false
     },
     {
@@ -1155,7 +1151,7 @@
      "window": 4,
      "step": 81,
      "chain": "自:M∀LICE＜P＞Cheshire Cat",
-     "score": 3.5092,
+     "score": 2.5092,
      "complete": false
     },
     {
@@ -1206,21 +1202,21 @@
      "window": 2,
      "step": 5,
      "chain": "自:M∀LICE＜P＞White Rabbit",
-     "score": 4.1102,
+     "score": 3.1102,
      "complete": true
     },
     {
      "window": 4,
      "step": 12,
      "chain": "自:M∀LICE＜C＞TB－１１",
-     "score": 4.1102,
+     "score": 3.1102,
      "complete": true
     },
     {
      "window": 5,
      "step": 16,
      "chain": "自:M∀LICE＜P＞Dormouse",
-     "score": 4.1102,
+     "score": 3.1102,
      "complete": true
     },
     {
@@ -1234,14 +1230,14 @@
      "window": 9,
      "step": 29,
      "chain": "自:M∀LICE＜P＞Cheshire Cat",
-     "score": 4.1102,
+     "score": 3.1102,
      "complete": true
     },
     {
      "window": 11,
      "step": 37,
      "chain": "自:リンク・デコーダー",
-     "score": 4.1102,
+     "score": 3.1102,
      "complete": true
     }
    ]
@@ -1286,14 +1282,14 @@
      "window": 1,
      "step": 54,
      "chain": null,
-     "score": 3.5082,
+     "score": 2.5082,
      "complete": false
     },
     {
      "window": 2,
      "step": 80,
      "chain": null,
-     "score": 3.5082,
+     "score": 2.5082,
      "complete": false
     }
    ]
@@ -1346,21 +1342,21 @@
      "window": 3,
      "step": 29,
      "chain": "自:M∀LICE＜P＞Cheshire Cat",
-     "score": 2.8101,
+     "score": 1.8101,
      "complete": false
     },
     {
      "window": 4,
      "step": 37,
      "chain": "自:リンク・デコーダー",
-     "score": 3.1111,
+     "score": 2.1111,
      "complete": false
     },
     {
      "window": 5,
      "step": 40,
      "chain": "自:トランスコード・トーカー",
-     "score": 3.1111,
+     "score": 2.1111,
      "complete": false
     },
     {
@@ -1427,14 +1423,14 @@
      "window": 6,
      "step": 40,
      "chain": "自:トランスコード・トーカー",
-     "score": 1.5101,
+     "score": 0.5101,
      "complete": false
     },
     {
      "window": 8,
      "step": 48,
      "chain": null,
-     "score": 1.5101,
+     "score": 0.5101,
      "complete": false
     },
     {
@@ -1458,55 +1454,57 @@
    "route": "M∀LICE IN UNDERGROUND＋バックアップ＠イグニスター（初動カタログの最善、3.8085点）",
    "extra": [],
    "trap": "灰流うらら",
-   "window": 5,
-   "step": 76,
+   "window": 0,
+   "step": 21,
    "chain": [
-    "自:M∀LICE＜Q＞WHITE BINDER"
+    "自:サイバース・コントラクト・ウィッチ"
    ],
-   "score": 2.0075,
+   "score": 1.3084,
    "parts": [
     [
-     "アコード②",
+     "ネオテン②→ディセーブルム",
      1
     ],
     [
-     "HEARTS①",
-     1
+     "TB－11",
+     0.3
     ]
    ],
    "field": [
-    "M∀LICE＜Q＞HEARTS OF CRYPTER",
-    "アコード・トーカー＠イグニスター"
+    "リンク・デコーダー",
+    "ファイアウォール・ドラゴン・ダークフルード－ネオテンペスト"
    ],
-   "sets": [],
-   "complete": true,
+   "sets": [
+    "M∀LICE＜C＞TB－１１"
+   ],
+   "complete": false,
    "windows": [
     {
      "window": 0,
      "step": 21,
      "chain": "自:サイバース・コントラクト・ウィッチ",
-     "score": 2.3084,
+     "score": 1.3084,
      "complete": false
     },
     {
      "window": 1,
      "step": 27,
      "chain": "自:サイバース・コード・マジシャン",
-     "score": 2.3094,
+     "score": 1.3094,
      "complete": false
     },
     {
      "window": 2,
      "step": 33,
      "chain": "自:サイバース・ウィキッド",
-     "score": 2.3091,
+     "score": 1.3091,
      "complete": false
     },
     {
      "window": 3,
      "step": 49,
      "chain": "自:バックアップ＠イグニスター",
-     "score": 3.0094,
+     "score": 2.0094,
      "complete": false
     },
     {
@@ -1540,14 +1538,10 @@
    "window": 0,
    "step": 6,
    "chain": [],
-   "score": 2.0097,
+   "score": 1.0097,
    "parts": [
     [
      "ネオテン②→ディセーブルム",
-     1
-    ],
-    [
-     "コード・オブ・ソウル③",
      1
     ]
    ],
@@ -1562,14 +1556,14 @@
      "window": 0,
      "step": 6,
      "chain": null,
-     "score": 2.0097,
+     "score": 1.0097,
      "complete": false
     },
     {
      "window": 1,
      "step": 7,
      "chain": "自:M∀LICE＜P＞Dormouse",
-     "score": 2.0097,
+     "score": 1.0097,
      "complete": false
     },
     {
@@ -1583,35 +1577,35 @@
      "window": 5,
      "step": 21,
      "chain": "自:サイバース・コントラクト・ウィッチ",
-     "score": 2.3084,
+     "score": 1.3084,
      "complete": false
     },
     {
      "window": 7,
      "step": 27,
      "chain": "自:サイバース・コード・マジシャン",
-     "score": 2.3091,
+     "score": 1.3091,
      "complete": false
     },
     {
      "window": 8,
      "step": 29,
      "chain": "自:ドットスケーパー",
-     "score": 2.3091,
+     "score": 1.3091,
      "complete": false
     },
     {
      "window": 9,
      "step": 33,
      "chain": "自:サイバース・ウィキッド",
-     "score": 2.3091,
+     "score": 1.3091,
      "complete": false
     },
     {
      "window": 12,
      "step": 42,
      "chain": "自:リンク・デコーダー",
-     "score": 3.1094,
+     "score": 2.1094,
      "complete": false
     }
    ]
@@ -1624,14 +1618,10 @@
    "window": 0,
    "step": 22,
    "chain": [],
-   "score": 2.8094,
+   "score": 1.8094,
    "parts": [
     [
      "ネオテン②→ディセーブルム",
-     1
-    ],
-    [
-     "コード・オブ・ソウル③",
      1
     ],
     [
@@ -1656,14 +1646,14 @@
      "window": 0,
      "step": 22,
      "chain": null,
-     "score": 2.8094,
+     "score": 1.8094,
      "complete": false
     },
     {
      "window": 1,
      "step": 34,
      "chain": null,
-     "score": 3.0094,
+     "score": 2.0094,
      "complete": false
     },
     {
@@ -1687,62 +1677,58 @@
    "route": "M∀LICE IN UNDERGROUND＋バックアップ＠イグニスター（初動カタログの最善、3.8085点）",
    "extra": [],
    "trap": "霊王の波動",
-   "window": 7,
-   "step": 76,
+   "window": 0,
+   "step": 4,
    "chain": [
-    "自:M∀LICE＜Q＞WHITE BINDER"
+    "自:M∀LICE＜P＞Dormouse"
    ],
-   "score": 2.0075,
+   "score": 1.0087,
    "parts": [
     [
-     "アコード②",
-     1
-    ],
-    [
-     "HEARTS①",
+     "ネオテン②→ディセーブルム",
      1
     ]
    ],
    "field": [
-    "M∀LICE＜Q＞HEARTS OF CRYPTER",
-    "アコード・トーカー＠イグニスター"
+    "バックアップ＠イグニスター",
+    "ファイアウォール・ドラゴン・ダークフルード－ネオテンペスト"
    ],
    "sets": [],
-   "complete": true,
+   "complete": false,
    "windows": [
     {
      "window": 0,
      "step": 4,
      "chain": "自:M∀LICE＜P＞Dormouse",
-     "score": 2.0087,
+     "score": 1.0087,
      "complete": false
     },
     {
      "window": 1,
      "step": 9,
      "chain": "自:M∀LICE＜P＞White Rabbit",
-     "score": 2.0094,
+     "score": 1.0094,
      "complete": false
     },
     {
      "window": 2,
      "step": 29,
      "chain": "自:ドットスケーパー",
-     "score": 2.3094,
+     "score": 1.3094,
      "complete": false
     },
     {
      "window": 3,
      "step": 42,
      "chain": "自:リンク・デコーダー",
-     "score": 3.1094,
+     "score": 2.1094,
      "complete": false
     },
     {
      "window": 4,
      "step": 45,
      "chain": "自:トランスコード・トーカー",
-     "score": 3.1094,
+     "score": 2.1094,
      "complete": false
     },
     {
@@ -1773,25 +1759,21 @@
    "route": "M∀LICE IN UNDERGROUND＋バックアップ＠イグニスター（初動カタログの最善、3.8085点）",
    "extra": [],
    "trap": "原始生命態ニビル",
-   "window": 7,
-   "step": 49,
+   "window": 5,
+   "step": 45,
    "chain": [
-    "自:バックアップ＠イグニスター"
+    "自:トランスコード・トーカー"
    ],
-   "score": 1.3086,
+   "score": 1.0075,
    "parts": [
     [
-     "HEARTS①",
+     "ネオテン②→ディセーブルム",
      1
-    ],
-    [
-     "ドロー分",
-     0.3
     ]
    ],
    "field": [
-    "M∀LICE＜Q＞WHITE BINDER",
-    "M∀LICE＜Q＞HEARTS OF CRYPTER"
+    "ファイアウォール・ドラゴン・ダークフルード－ネオテンペスト",
+    "リンク・スパイダー"
    ],
    "sets": [],
    "complete": false,
@@ -1800,21 +1782,21 @@
      "window": 0,
      "step": 33,
      "chain": "自:サイバース・ウィキッド",
-     "score": 2.8074,
+     "score": 1.8074,
      "complete": false
     },
     {
      "window": 3,
      "step": 42,
      "chain": "自:リンク・デコーダー",
-     "score": 2.5074,
+     "score": 1.5074,
      "complete": false
     },
     {
      "window": 5,
      "step": 45,
      "chain": "自:トランスコード・トーカー",
-     "score": 2.0075,
+     "score": 1.0075,
      "complete": false
     },
     {
@@ -1835,14 +1817,14 @@
      "window": 10,
      "step": 60,
      "chain": "自:ウィザード＠イグニスター",
-     "score": 2.5094,
+     "score": 1.5094,
      "complete": false
     },
     {
      "window": 12,
      "step": 70,
      "chain": "自:M∀LICE＜Q＞WHITE BINDER",
-     "score": 2.3085,
+     "score": 1.3085,
      "complete": false
     },
     {
@@ -1859,38 +1841,40 @@
    "route": "M∀LICE IN UNDERGROUND＋コード・オブ・ソウル（初動カタログの最善、3.8104点）",
    "extra": [],
    "trap": "灰流うらら",
-   "window": 1,
-   "step": 27,
+   "window": 0,
+   "step": 21,
    "chain": [
-    "自:サイバース・コード・マジシャン"
+    "自:サイバース・コントラクト・ウィッチ"
    ],
-   "score": 2.3094,
+   "score": 1.8094,
    "parts": [
     [
-     "コード・オブ・ソウル③",
+     "ネオテン②→ディセーブルム",
      1
     ],
     [
-     "S:Pリトルナイト②",
-     1
-    ],
-    [
-     "ドロー分",
+     "TB－11",
      0.3
+    ],
+    [
+     "リングリボー①",
+     0.5
     ]
    ],
    "field": [
-    "S：Pリトルナイト",
-    "サイバース・ウィキッド"
+    "リングリボー",
+    "ファイアウォール・ドラゴン・ダークフルード－ネオテンペスト"
    ],
-   "sets": [],
-   "complete": false,
+   "sets": [
+    "M∀LICE＜C＞TB－１１"
+   ],
+   "complete": true,
    "windows": [
     {
      "window": 0,
      "step": 21,
      "chain": "自:サイバース・コントラクト・ウィッチ",
-     "score": 2.8094,
+     "score": 1.8094,
      "complete": true
     },
     {
@@ -1911,14 +1895,14 @@
      "window": 3,
      "step": 49,
      "chain": "自:バックアップ＠イグニスター",
-     "score": 3.1104,
+     "score": 2.1104,
      "complete": false
     },
     {
      "window": 4,
      "step": 76,
      "chain": "自:M∀LICE＜C＞TB－１１",
-     "score": 3.8095,
+     "score": 2.8095,
      "complete": false
     },
     {
@@ -1935,47 +1919,39 @@
    "route": "M∀LICE IN UNDERGROUND＋コード・オブ・ソウル（初動カタログの最善、3.8104点）",
    "extra": [],
    "trap": "無限泡影",
-   "window": 7,
-   "step": 27,
-   "chain": [
-    "自:サイバース・コード・マジシャン"
-   ],
-   "score": 2.3094,
+   "window": 0,
+   "step": 6,
+   "chain": [],
+   "score": 1.5097,
    "parts": [
     [
-     "コード・オブ・ソウル③",
+     "ネオテン②→ディセーブルム",
      1
     ],
     [
-     "アコード②",
-     1
-    ],
-    [
-     "TB－11",
-     0.3
+     "リングリボー①",
+     0.5
     ]
    ],
    "field": [
-    "トランスコード・トーカー",
-    "アコード・トーカー＠イグニスター"
+    "リングリボー",
+    "ファイアウォール・ドラゴン・ダークフルード－ネオテンペスト"
    ],
-   "sets": [
-    "M∀LICE＜C＞TB－１１"
-   ],
+   "sets": [],
    "complete": false,
    "windows": [
     {
      "window": 0,
      "step": 6,
      "chain": null,
-     "score": 2.5097,
+     "score": 1.5097,
      "complete": false
     },
     {
      "window": 1,
      "step": 7,
      "chain": "自:M∀LICE＜P＞Dormouse",
-     "score": 2.5097,
+     "score": 1.5097,
      "complete": false
     },
     {
@@ -1989,7 +1965,7 @@
      "window": 5,
      "step": 21,
      "chain": "自:サイバース・コントラクト・ウィッチ",
-     "score": 2.8094,
+     "score": 1.8094,
      "complete": true
     },
     {
@@ -2003,21 +1979,21 @@
      "window": 8,
      "step": 29,
      "chain": "自:ドットスケーパー",
-     "score": 2.8094,
+     "score": 1.8094,
      "complete": false
     },
     {
      "window": 9,
      "step": 33,
      "chain": "自:サイバース・ウィキッド",
-     "score": 2.8094,
+     "score": 1.8094,
      "complete": false
     },
     {
      "window": 12,
      "step": 42,
      "chain": "自:リンク・デコーダー",
-     "score": 3.1094,
+     "score": 2.1094,
      "complete": false
     }
    ]
@@ -2027,27 +2003,32 @@
    "route": "M∀LICE IN UNDERGROUND＋コード・オブ・ソウル（初動カタログの最善、3.8104点）",
    "extra": [],
    "trap": "ドロール＆ロックバード",
-   "window": 0,
-   "step": 22,
+   "window": 1,
+   "step": 34,
    "chain": [],
-   "score": 2.3094,
+   "score": 2.1104,
    "parts": [
     [
-     "コード・オブ・ソウル③",
-     1
-    ],
-    [
-     "アコード②",
-     1
-    ],
-    [
      "TB－11",
+     0.3
+    ],
+    [
+     "リングリボー①",
+     0.5
+    ],
+    [
+     "ファイアウォール①",
+     1
+    ],
+    [
+     "ドロー分",
      0.3
     ]
    ],
    "field": [
-    "トランスコード・トーカー",
-    "アコード・トーカー＠イグニスター"
+    "リングリボー",
+    "ファイアウォール・ドラゴン",
+    "トランスコード・トーカー"
    ],
    "sets": [
     "M∀LICE＜C＞TB－１１"
@@ -2065,14 +2046,14 @@
      "window": 1,
      "step": 34,
      "chain": null,
-     "score": 3.1104,
+     "score": 2.1104,
      "complete": false
     },
     {
      "window": 2,
      "step": 51,
      "chain": null,
-     "score": 3.8085,
+     "score": 2.8085,
      "complete": false
     },
     {
@@ -2118,14 +2099,14 @@
      "window": 1,
      "step": 9,
      "chain": "自:M∀LICE＜P＞White Rabbit",
-     "score": 2.5094,
+     "score": 1.5094,
      "complete": false
     },
     {
      "window": 2,
      "step": 29,
      "chain": "自:ドットスケーパー",
-     "score": 2.3084,
+     "score": 1.3084,
      "complete": false
     },
     {
@@ -2139,7 +2120,7 @@
      "window": 4,
      "step": 45,
      "chain": "自:トランスコード・トーカー",
-     "score": 3.1094,
+     "score": 2.1094,
      "complete": false
     },
     {
@@ -2153,7 +2134,7 @@
      "window": 6,
      "step": 76,
      "chain": "自:M∀LICE＜C＞TB－１１",
-     "score": 3.8095,
+     "score": 2.8095,
      "complete": false
     },
     {
@@ -2170,25 +2151,25 @@
    "route": "M∀LICE IN UNDERGROUND＋コード・オブ・ソウル（初動カタログの最善、3.8104点）",
    "extra": [],
    "trap": "原始生命態ニビル",
-   "window": 10,
-   "step": 60,
+   "window": 13,
+   "step": 74,
    "chain": [
-    "自:ウィザード＠イグニスター"
+    "自:M∀LICE＜Q＞WHITE BINDER"
    ],
-   "score": 2.0091,
+   "score": 1.3118,
    "parts": [
     [
-     "コード・オブ・ソウル③",
+     "ファイアウォール①",
      1
     ],
     [
-     "HEARTS①",
-     1
+     "ドロー分",
+     0.3
     ]
    ],
    "field": [
-    "M∀LICE＜P＞March Hare",
-    "M∀LICE＜Q＞HEARTS OF CRYPTER"
+    "ファイアウォール・ドラゴン",
+    "リンク・スパイダー"
    ],
    "sets": [],
    "complete": false,
@@ -2197,14 +2178,14 @@
      "window": 0,
      "step": 33,
      "chain": "自:サイバース・ウィキッド",
-     "score": 2.6084,
+     "score": 1.6084,
      "complete": false
     },
     {
      "window": 3,
      "step": 42,
      "chain": "自:リンク・デコーダー",
-     "score": 2.6084,
+     "score": 1.6084,
      "complete": false
     },
     {
@@ -2239,7 +2220,7 @@
      "window": 13,
      "step": 74,
      "chain": "自:M∀LICE＜Q＞WHITE BINDER",
-     "score": 2.3118,
+     "score": 1.3118,
      "complete": false
     },
     {
@@ -2261,12 +2242,8 @@
    "chain": [
     "自:M∀LICE＜C＞TB－１１"
    ],
-   "score": 2.5094,
+   "score": 1.5094,
    "parts": [
-    [
-     "コード・オブ・ソウル③",
-     1
-    ],
     [
      "リングリボー①",
      0.5
@@ -2287,21 +2264,21 @@
      "window": 0,
      "step": 12,
      "chain": "自:M∀LICE＜C＞TB－１１",
-     "score": 2.5094,
+     "score": 1.5094,
      "complete": false
     },
     {
      "window": 1,
      "step": 27,
      "chain": "自:サイバース・ウィキッド",
-     "score": 3.0091,
+     "score": 2.0091,
      "complete": false
     },
     {
      "window": 2,
      "step": 52,
      "chain": "自:バックアップ＠イグニスター",
-     "score": 3.3101,
+     "score": 2.3101,
      "complete": false
     },
     {
@@ -2321,11 +2298,11 @@
    "window": 0,
    "step": 2,
    "chain": [],
-   "score": 2.0097,
+   "score": 1.5097,
    "parts": [
     [
-     "コード・オブ・ソウル③",
-     1
+     "コード・オブ・ソウル③（BINDER）",
+     0.5
     ],
     [
      "S:Pリトルナイト②",
@@ -2343,14 +2320,14 @@
      "window": 0,
      "step": 2,
      "chain": null,
-     "score": 2.0097,
+     "score": 1.5097,
      "complete": false
     },
     {
      "window": 1,
      "step": 3,
      "chain": "自:M∀LICE＜P＞Dormouse",
-     "score": 2.0097,
+     "score": 1.5097,
      "complete": false
     },
     {
@@ -2378,7 +2355,7 @@
      "window": 8,
      "step": 27,
      "chain": "自:サイバース・ウィキッド",
-     "score": 3.0091,
+     "score": 2.0091,
      "complete": false
     },
     {
@@ -2407,12 +2384,8 @@
    "chain": [
     "自:M∀LICE＜P＞Cheshire Cat"
    ],
-   "score": 3.3101,
+   "score": 2.3101,
    "parts": [
-    [
-     "コード・オブ・ソウル③",
-     1
-    ],
     [
      "アコード②",
      1
@@ -2437,7 +2410,7 @@
      "window": 0,
      "step": 29,
      "chain": "自:M∀LICE＜P＞Cheshire Cat",
-     "score": 3.3101,
+     "score": 2.3101,
      "complete": false
     },
     {
@@ -2459,11 +2432,11 @@
    "chain": [
     "自:M∀LICE＜P＞White Rabbit"
    ],
-   "score": 2.0094,
+   "score": 1.5094,
    "parts": [
     [
-     "コード・オブ・ソウル③",
-     1
+     "コード・オブ・ソウル③（BINDER）",
+     0.5
     ],
     [
      "S:Pリトルナイト②",
@@ -2481,14 +2454,14 @@
      "window": 0,
      "step": 5,
      "chain": "自:M∀LICE＜P＞White Rabbit",
-     "score": 2.0094,
+     "score": 1.5094,
      "complete": false
     },
     {
      "window": 1,
      "step": 12,
      "chain": "自:M∀LICE＜C＞TB－１１",
-     "score": 2.8094,
+     "score": 1.8094,
      "complete": false
     },
     {
@@ -2509,14 +2482,14 @@
      "window": 4,
      "step": 37,
      "chain": "自:リンク・デコーダー",
-     "score": 3.3098,
+     "score": 2.3098,
      "complete": false
     },
     {
      "window": 5,
      "step": 40,
      "chain": "自:トランスコード・トーカー",
-     "score": 2.8101,
+     "score": 1.8101,
      "complete": false
     },
     {
@@ -2540,17 +2513,13 @@
    "route": "M∀LICE＜P＞Dormouse＋コード・オブ・ソウル（初動カタログの最善、3.8091点）",
    "extra": [],
    "trap": "原始生命態ニビル",
-   "window": 12,
-   "step": 56,
+   "window": 9,
+   "step": 49,
    "chain": [
-    "自:ウィザード＠イグニスター"
+    "自:バックアップ＠イグニスター"
    ],
-   "score": 1.8092,
+   "score": 0.8101,
    "parts": [
-    [
-     "コード・オブ・ソウル③",
-     1
-    ],
     [
      "リングリボー①",
      0.5
@@ -2562,7 +2531,7 @@
    ],
    "field": [
     "リングリボー",
-    "M∀LICE＜Q＞WHITE BINDER"
+    "リンク・スパイダー"
    ],
    "sets": [],
    "complete": false,
@@ -2571,28 +2540,28 @@
      "window": 0,
      "step": 22,
      "chain": null,
-     "score": 2.0091,
+     "score": 1.5091,
      "complete": false
     },
     {
      "window": 1,
      "step": 27,
      "chain": "自:サイバース・ウィキッド",
-     "score": 2.8101,
+     "score": 1.8101,
      "complete": false
     },
     {
      "window": 2,
      "step": 29,
      "chain": "自:M∀LICE＜P＞Cheshire Cat",
-     "score": 2.8101,
+     "score": 1.8101,
      "complete": false
     },
     {
      "window": 4,
      "step": 37,
      "chain": "自:リンク・デコーダー",
-     "score": 2.8101,
+     "score": 1.8101,
      "complete": false
     },
     {
@@ -2613,7 +2582,7 @@
      "window": 9,
      "step": 49,
      "chain": "自:バックアップ＠イグニスター",
-     "score": 1.8101,
+     "score": 0.8101,
      "complete": false
     },
     {

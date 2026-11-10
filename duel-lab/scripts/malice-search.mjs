@@ -29,6 +29,18 @@ export function pointsTo(code,seq) {
   return ARROWS.filter(([bit])=>m&bit).map(([,dc,dr])=>at(col(seq)+dc,row(seq)+dr)).filter(z=>z>=0);
 }
 
+const SOUL_LINKS={HEARTS:21848500,'WHITE BINDER':95454996,'ファイアウォール':5043010};
+// Link 3+ summons Code of Soul ③ can make from these monsters. A material counts 1 or, if a Link Monster, its rating.
+// HEARTS: exactly 3 incl. a M∀LICE. WHITE BINDER: 2+ incl. a M∀LICE, sum 3. Firewall Dragon: 2+, sum 4.
+export function soulTargets(field,body){
+  const mats=[...field,...(body?[69272449]:[])],out=[];
+  const subsets=[];for(let m=1;m<1<<mats.length;m++)subsets.push(mats.filter((_,i)=>m>>i&1));
+  const sums=s=>s.reduce((acc,c)=>acc.flatMap(v=>[v+1,...(isLink(c)?[v+cards[c].level]:[])]),[0]);
+  if(subsets.some(s=>s.length===3&&s.some(isMalice)))out.push('HEARTS');
+  if(subsets.some(s=>s.length>=2&&s.some(isMalice)&&sums(s).includes(3)))out.push('WHITE BINDER');
+  if(subsets.some(s=>s.length>=2&&sums(s).includes(4)))out.push('ファイアウォール');
+  return out;
+}
 // Static estimate of interruptions available in the opponent's next turn, plus small tiebreaks.
 export function score(g) {
   const s=g.snapshot(0),me=s.players[0];
@@ -44,7 +56,11 @@ export function score(g) {
   const summoned=new Set(g.log.filter(e=>e.event==='summon').map(e=>e.code));
   const revivable=code=>isMalice(code)&&(!isLink(code)||summoned.has(code));
   const gwcBody=sets.includes(C.gwc)&&grave.concat(banished).some(revivable)?1:0;
-  if(grave.includes(C.soul)&&mons.length+gwcBody>=2&&(inExtra(C.hearts)||inExtra(C.firewall)))parts.push(['コード・オブ・ソウル③',1]);
+  // Code of Soul ③ is worth something only if the field (plus a GWC－06 body) can make HEARTS (removal), Firewall (bounce)
+  // or WHITE BINDER (banish from the GY) under their material rules (audit 2026-11-10: "2+ monsters" over-counted 13/24 routes).
+  const soul=grave.includes(C.soul)?soulTargets(mons.map(m=>m.code),gwcBody).filter(n=>inExtra(SOUL_LINKS[n])):[];
+  if(soul.includes('HEARTS')||soul.includes('ファイアウォール'))parts.push(['コード・オブ・ソウル③',1]);
+  else if(soul.includes('WHITE BINDER'))parts.push(['コード・オブ・ソウル③（BINDER）',0.5]);
   else if(has(C.neo)&&!inExtra(C.disablem)&&!grave.includes(C.soul))parts.push(['ネオテン②→ソウル',0.5]);
   const accord=mons.find(m=>m.code===C.accord);
   if(accord&&pointsTo(C.accord,accord.seq).some(z=>mons.some(m=>m.seq===z&&isLink(m.code))))parts.push(['アコード②',1]);

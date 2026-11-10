@@ -1,11 +1,11 @@
 {
- "generated": "2026-11-09T20:21:46.075Z",
+ "generated": "2026-11-10T11:00:55.893Z",
  "baseline": {
   "cEErE6ce": 3.3091,
   "3tnYxZAt": 3.6095,
   "Q5Vc2nzV": 2.8078,
   "BmA74rcx": 2.6102,
-  "G9pZztFA": 2.3099
+  "G9pZztFA": 1.3099
  },
  "cells": [
   {
@@ -233,21 +233,21 @@
      "window": 3,
      "step": 35,
      "chain": "自:M∀LICE＜P＞Cheshire Cat",
-     "score": 2.8101,
+     "score": 1.8101,
      "complete": false
     },
     {
      "window": 4,
      "step": 43,
      "chain": "自:リンク・デコーダー",
-     "score": 2.8101,
+     "score": 1.8101,
      "complete": false
     },
     {
      "window": 5,
      "step": 56,
      "chain": "自:トランスコード・トーカー",
-     "score": 2.8101,
+     "score": 1.8101,
      "complete": false
     },
     {
@@ -271,15 +271,15 @@
    "route": "Dormouse１枚初動",
    "extra": [],
    "trap": "屋敷わらし",
-   "window": 2,
-   "step": 72,
+   "window": 0,
+   "step": 43,
    "chain": [
-    "自:ウィザード＠イグニスター"
+    "自:リンク・デコーダー"
    ],
    "score": 1.8101,
    "parts": [
     [
-     "アコード②",
+     "ネオテン②→ディセーブルム",
      1
     ],
     [
@@ -293,24 +293,23 @@
    ],
    "field": [
     "リングリボー",
-    "サイバース・ウィキッド",
-    "アコード・トーカー＠イグニスター"
+    "ファイアウォール・ドラゴン・ダークフルード－ネオテンペスト"
    ],
    "sets": [],
-   "complete": true,
+   "complete": false,
    "windows": [
     {
      "window": 0,
      "step": 43,
      "chain": "自:リンク・デコーダー",
-     "score": 2.8101,
+     "score": 1.8101,
      "complete": false
     },
     {
      "window": 1,
      "step": 56,
      "chain": "自:トランスコード・トーカー",
-     "score": 3.3098,
+     "score": 2.3098,
      "complete": false
     },
     {
@@ -372,14 +371,14 @@
      "window": 3,
      "step": 56,
      "chain": "自:トランスコード・トーカー",
-     "score": 1.5101,
+     "score": 0.5101,
      "complete": false
     },
     {
      "window": 4,
      "step": 68,
      "chain": "自:バックアップ＠イグニスター",
-     "score": 2.8092,
+     "score": 1.8092,
      "complete": false
     },
     {
@@ -393,7 +392,7 @@
      "window": 7,
      "step": 98,
      "chain": "自:ファイアウォール・ドラゴン・ダークフルード－ネオテンペスト",
-     "score": 1.8091,
+     "score": 0.8091,
      "complete": true
     }
    ]
@@ -446,7 +445,7 @@
      "window": 6,
      "step": 43,
      "chain": "自:リンク・デコーダー",
-     "score": 2.8078,
+     "score": 1.8078,
      "complete": false
     },
     {
@@ -474,7 +473,7 @@
      "window": 12,
      "step": 84,
      "chain": "自:M∀LICE＜Q＞WHITE BINDER",
-     "score": 3.0068,
+     "score": 2.0068,
      "complete": true
     }
    ]
@@ -484,16 +483,16 @@
    "route": "Dormouse１枚初動",
    "extra": [],
    "trap": "霆王の閃光",
-   "window": 8,
-   "step": 72,
+   "window": 15,
+   "step": 98,
    "chain": [
-    "自:ウィザード＠イグニスター"
+    "自:ファイアウォール・ドラゴン・ダークフルード－ネオテンペスト"
    ],
-   "score": 1.5091,
+   "score": 0.8091,
    "parts": [
     [
-     "アコード②",
-     1
+     "GWC－06",
+     0.3
     ],
     [
      "リングリボー①",
@@ -501,18 +500,18 @@
     ]
    ],
    "field": [
-    "リングリボー",
-    "サイバース・ウィキッド",
-    "アコード・トーカー＠イグニスター"
+    "リングリボー"
    ],
-   "sets": [],
+   "sets": [
+    "M∀LICE＜C＞GWC－０６"
+   ],
    "complete": true,
    "windows": [
     {
      "window": 0,
      "step": 43,
      "chain": "自:リンク・デコーダー",
-     "score": 3.0091,
+     "score": 2.0091,
      "complete": false
     },
     {
@@ -526,14 +525,14 @@
      "window": 4,
      "step": 64,
      "chain": null,
-     "score": 2.5101,
+     "score": 1.5101,
      "complete": false
     },
     {
      "window": 5,
      "step": 65,
      "chain": "自:バックアップ＠イグニスター",
-     "score": 2.5101,
+     "score": 1.5101,
      "complete": false
     },
     {
@@ -547,7 +546,7 @@
      "window": 11,
      "step": 84,
      "chain": "自:M∀LICE＜Q＞WHITE BINDER",
-     "score": 3.3092,
+     "score": 2.3092,
      "complete": false
     },
     {
@@ -561,7 +560,7 @@
      "window": 15,
      "step": 98,
      "chain": "自:ファイアウォール・ドラゴン・ダークフルード－ネオテンペスト",
-     "score": 1.8091,
+     "score": 0.8091,
      "complete": true
     }
    ]
@@ -614,14 +613,14 @@
      "window": 6,
      "step": 56,
      "chain": "自:トランスコード・トーカー",
-     "score": 1.5101,
+     "score": 0.5101,
      "complete": false
     },
     {
      "window": 8,
      "step": 64,
      "chain": null,
-     "score": 1.5101,
+     "score": 0.5101,
      "complete": false
     },
     {
@@ -690,14 +689,14 @@
      "window": 3,
      "step": 56,
      "chain": "自:バックアップ＠イグニスター",
-     "score": 2.8104,
+     "score": 1.8104,
      "complete": true
     },
     {
      "window": 4,
      "step": 83,
      "chain": "自:M∀LICE＜C＞TB－１１",
-     "score": 2.6095,
+     "score": 1.6095,
      "complete": true
     },
     {
@@ -794,7 +793,7 @@
      "window": 12,
      "step": 49,
      "chain": "自:リンク・デコーダー",
-     "score": 2.8094,
+     "score": 1.8094,
      "complete": false
     }
    ]
@@ -838,14 +837,14 @@
      "window": 1,
      "step": 41,
      "chain": null,
-     "score": 2.8104,
+     "score": 1.8104,
      "complete": true
     },
     {
      "window": 2,
      "step": 58,
      "chain": null,
-     "score": 3.5094,
+     "score": 2.5094,
      "complete": false
     },
     {
@@ -898,14 +897,14 @@
      "window": 3,
      "step": 49,
      "chain": "自:リンク・デコーダー",
-     "score": 2.8094,
+     "score": 1.8094,
      "complete": false
     },
     {
      "window": 4,
      "step": 52,
      "chain": "自:トランスコード・トーカー",
-     "score": 2.8094,
+     "score": 1.8094,
      "complete": false
     },
     {
@@ -919,7 +918,7 @@
      "window": 6,
      "step": 83,
      "chain": "自:M∀LICE＜C＞TB－１１",
-     "score": 2.6095,
+     "score": 1.6095,
      "complete": true
     },
     {
@@ -965,14 +964,14 @@
      "window": 2,
      "step": 49,
      "chain": "自:リンク・デコーダー",
-     "score": 2.8094,
+     "score": 1.8094,
      "complete": false
     },
     {
      "window": 3,
      "step": 52,
      "chain": "自:トランスコード・トーカー",
-     "score": 2.8094,
+     "score": 1.8094,
      "complete": false
     },
     {
@@ -1071,7 +1070,7 @@
      "window": 8,
      "step": 103,
      "chain": "自:ファイアウォール・ドラゴン・ダークフルード－ネオテンペスト",
-     "score": 2.1095,
+     "score": 1.1095,
      "complete": true
     }
    ]
@@ -1112,7 +1111,7 @@
      "window": 1,
      "step": 19,
      "chain": "自:M∀LICE＜P＞White Rabbit",
-     "score": 2.0082,
+     "score": 1.0082,
      "complete": false
     },
     {
@@ -1140,7 +1139,7 @@
      "window": 6,
      "step": 49,
      "chain": "自:リンク・デコーダー",
-     "score": 2.8071,
+     "score": 1.8071,
      "complete": false
     },
     {
@@ -1206,7 +1205,7 @@
      "window": 2,
      "step": 40,
      "chain": "自:サイバース・ウィキッド",
-     "score": 2.3095,
+     "score": 1.3095,
      "complete": false
     },
     {
@@ -1280,14 +1279,14 @@
      "window": 0,
      "step": 40,
      "chain": "自:サイバース・ウィキッド",
-     "score": 2.3085,
+     "score": 1.3085,
      "complete": false
     },
     {
      "window": 3,
      "step": 49,
      "chain": "自:リンク・デコーダー",
-     "score": 2.3085,
+     "score": 1.3085,
      "complete": false
     },
     {
@@ -1329,7 +1328,7 @@
      "window": 14,
      "step": 83,
      "chain": "自:M∀LICE＜C＞TB－１１",
-     "score": 2.6095,
+     "score": 1.6095,
      "complete": false
     }
    ]
@@ -1370,7 +1369,7 @@
      "window": 2,
      "step": 21,
      "chain": "自:バックアップ＠イグニスター",
-     "score": 2.009,
+     "score": 1.009,
      "complete": false
     },
     {
@@ -1473,7 +1472,7 @@
      "window": 12,
      "step": 43,
      "chain": "自:トランスコード・トーカー",
-     "score": 2.508,
+     "score": 1.508,
      "complete": false
     }
    ]
@@ -1486,14 +1485,10 @@
    "window": 0,
    "step": 17,
    "chain": [],
-   "score": 2.009,
+   "score": 1.009,
    "parts": [
     [
      "ネオテン②→ディセーブルム",
-     1
-    ],
-    [
-     "コード・オブ・ソウル③",
      1
     ]
    ],
@@ -1508,7 +1503,7 @@
      "window": 0,
      "step": 17,
      "chain": null,
-     "score": 2.009,
+     "score": 1.009,
      "complete": false
     },
     {
@@ -1556,14 +1551,14 @@
      "window": 2,
      "step": 32,
      "chain": "自:リンク・デコーダー",
-     "score": 2.508,
+     "score": 1.508,
      "complete": false
     },
     {
      "window": 3,
      "step": 43,
      "chain": "自:トランスコード・トーカー",
-     "score": 2.508,
+     "score": 1.508,
      "complete": false
     },
     {
@@ -1625,14 +1620,14 @@
      "window": 1,
      "step": 32,
      "chain": "自:リンク・デコーダー",
-     "score": 2.508,
+     "score": 1.508,
      "complete": false
     },
     {
      "window": 2,
      "step": 43,
      "chain": "自:トランスコード・トーカー",
-     "score": 2.508,
+     "score": 1.508,
      "complete": false
     },
     {
@@ -1692,7 +1687,7 @@
      "window": 1,
      "step": 21,
      "chain": "自:バックアップ＠イグニスター",
-     "score": 2.508,
+     "score": 1.508,
      "complete": false
     },
     {
@@ -1744,24 +1739,24 @@
    "route": "NS＋コードマジシャン２枚初動",
    "extra": [],
    "trap": "朔夜しぐれ",
-   "window": 1,
-   "step": 10,
+   "window": 3,
+   "step": 21,
    "chain": [
-    "自:サイバース・コード・マジシャン"
+    "自:バックアップ＠イグニスター"
    ],
-   "score": 1.0082,
+   "score": 1.0078,
    "parts": [
     [
-     "アコード②",
+     "ネオテン②→ディセーブルム",
      1
     ]
    ],
    "field": [
-    "トランスコード・トーカー",
-    "アコード・トーカー＠イグニスター"
+    "リンク・デコーダー",
+    "ファイアウォール・ドラゴン・ダークフルード－ネオテンペスト"
    ],
    "sets": [],
-   "complete": true,
+   "complete": false,
    "windows": [
     {
      "window": 0,
@@ -1788,14 +1783,14 @@
      "window": 3,
      "step": 21,
      "chain": "自:バックアップ＠イグニスター",
-     "score": 2.0078,
+     "score": 1.0078,
      "complete": false
     },
     {
      "window": 5,
      "step": 32,
      "chain": "自:リンク・デコーダー",
-     "score": 2.5057,
+     "score": 1.5057,
      "complete": false
     },
     {
@@ -1826,12 +1821,12 @@
    "route": "NS＋コードマジシャン２枚初動",
    "extra": [],
    "trap": "霆王の閃光",
-   "window": 0,
-   "step": 10,
+   "window": 12,
+   "step": 51,
    "chain": [
-    "自:サイバース・コード・マジシャン"
+    "自:ファイアウォール・ドラゴン・ダークフルード－ネオテンペスト"
    ],
-   "score": 0.509,
+   "score": 0.508,
    "parts": [
     [
      "リングリボー①",
@@ -1839,6 +1834,7 @@
     ]
    ],
    "field": [
+    "サイバース・ウィキッド",
     "リングリボー"
    ],
    "sets": [],
@@ -1862,28 +1858,28 @@
      "window": 2,
      "step": 16,
      "chain": "自:サイバース・ウィキッド",
-     "score": 2.008,
+     "score": 1.008,
      "complete": false
     },
     {
      "window": 4,
      "step": 18,
      "chain": "自:バックアップ＠イグニスター",
-     "score": 2.508,
+     "score": 1.508,
      "complete": false
     },
     {
      "window": 7,
      "step": 26,
      "chain": null,
-     "score": 2.008,
+     "score": 1.008,
      "complete": false
     },
     {
      "window": 8,
      "step": 32,
      "chain": "自:リンク・デコーダー",
-     "score": 2.508,
+     "score": 1.508,
      "complete": true
     },
     {
@@ -1897,7 +1893,7 @@
      "window": 12,
      "step": 51,
      "chain": "自:ファイアウォール・ドラゴン・ダークフルード－ネオテンペスト",
-     "score": 1.508,
+     "score": 0.508,
      "complete": true
     }
    ]
@@ -2018,7 +2014,7 @@
      "window": 1,
      "step": 37,
      "chain": "自:バックアップ＠イグニスター",
-     "score": 2.0114,
+     "score": 1.0114,
      "complete": false
     },
     {
@@ -2106,14 +2102,14 @@
      "window": 8,
      "step": 29,
      "chain": "自:リンク・デコーダー",
-     "score": 2.0114,
+     "score": 1.0114,
      "complete": false
     },
     {
      "window": 10,
      "step": 32,
      "chain": "自:トランスコード・トーカー",
-     "score": 2.0114,
+     "score": 1.0114,
      "complete": false
     },
     {
@@ -2135,14 +2131,10 @@
    "chain": [
     "自:M∀LICE＜P＞March Hare"
    ],
-   "score": 2.0114,
+   "score": 1.0114,
    "parts": [
     [
      "ネオテン②→ディセーブルム",
-     1
-    ],
-    [
-     "コード・オブ・ソウル③",
      1
     ]
    ],
@@ -2157,7 +2149,7 @@
      "window": 0,
      "step": 24,
      "chain": "自:M∀LICE＜P＞March Hare",
-     "score": 2.0114,
+     "score": 1.0114,
      "complete": false
     },
     {
@@ -2217,14 +2209,14 @@
      "window": 2,
      "step": 29,
      "chain": "自:リンク・デコーダー",
-     "score": 2.0114,
+     "score": 1.0114,
      "complete": false
     },
     {
      "window": 3,
      "step": 32,
      "chain": "自:トランスコード・トーカー",
-     "score": 2.0114,
+     "score": 1.0114,
      "complete": false
     },
     {
@@ -2291,14 +2283,14 @@
      "window": 1,
      "step": 29,
      "chain": "自:リンク・デコーダー",
-     "score": 2.0114,
+     "score": 1.0114,
      "complete": false
     },
     {
      "window": 2,
      "step": 32,
      "chain": "自:トランスコード・トーカー",
-     "score": 2.0114,
+     "score": 1.0114,
      "complete": false
     },
     {
@@ -2365,7 +2357,7 @@
      "window": 2,
      "step": 37,
      "chain": "自:バックアップ＠イグニスター",
-     "score": 2.0104,
+     "score": 1.0104,
      "complete": false
     },
     {
@@ -2410,21 +2402,24 @@
    "route": "猫＋ヘア２枚初動",
    "extra": [],
    "trap": "朔夜しぐれ",
-   "window": 2,
-   "step": 16,
-   "chain": [],
-   "score": 1.0106,
+   "window": 4,
+   "step": 29,
+   "chain": [
+    "自:リンク・デコーダー"
+   ],
+   "score": 1.0091,
    "parts": [
     [
-     "S:Pリトルナイト②",
+     "ネオテン②→ディセーブルム",
      1
     ]
    ],
    "field": [
-    "S：Pリトルナイト"
+    "ドットスケーパー",
+    "ファイアウォール・ドラゴン・ダークフルード－ネオテンペスト"
    ],
    "sets": [],
-   "complete": true,
+   "complete": false,
    "windows": [
     {
      "window": 0,
@@ -2451,14 +2446,14 @@
      "window": 4,
      "step": 29,
      "chain": "自:リンク・デコーダー",
-     "score": 2.0091,
+     "score": 1.0091,
      "complete": false
     },
     {
      "window": 6,
      "step": 37,
      "chain": "自:バックアップ＠イグニスター",
-     "score": 2.0114,
+     "score": 1.0114,
      "complete": false
     },
     {
@@ -2553,7 +2548,7 @@
      "window": 11,
      "step": 34,
      "chain": "自:バックアップ＠イグニスター",
-     "score": 2.6105,
+     "score": 1.6105,
      "complete": false
     },
     {
@@ -2613,7 +2608,7 @@
      "window": 6,
      "step": 32,
      "chain": "自:トランスコード・トーカー",
-     "score": 1.0114,
+     "score": 0.0114,
      "complete": false
     },
     {
@@ -2737,7 +2732,7 @@
      "window": 2,
      "step": 13,
      "chain": null,
-     "score": 2.3099,
+     "score": 1.3099,
      "complete": true
     },
     {
@@ -2751,7 +2746,7 @@
      "window": 5,
      "step": 23,
      "chain": "自:M∀LICE＜P＞Dormouse",
-     "score": 2.3099,
+     "score": 1.3099,
      "complete": true
     },
     {
@@ -2765,14 +2760,14 @@
      "window": 8,
      "step": 28,
      "chain": "自:M∀LICE＜P＞Cheshire Cat",
-     "score": 2.3099,
+     "score": 1.3099,
      "complete": true
     },
     {
      "window": 10,
      "step": 36,
      "chain": null,
-     "score": 2.3099,
+     "score": 1.3099,
      "complete": true
     },
     {
@@ -2789,37 +2784,30 @@
    "route": "WhiteRabbit１枚初動",
    "extra": [],
    "trap": "ドロール＆ロックバード",
-   "window": 2,
-   "step": 65,
+   "window": 0,
+   "step": 43,
    "chain": [
-    "自:M∀LICE＜P＞March Hare"
+    "自:M∀LICE＜Q＞WHITE BINDER"
    ],
-   "score": 1.6109,
+   "score": 1.0092,
    "parts": [
     [
      "ネオテン②→ディセーブルム",
      1
-    ],
-    [
-     "ドロー分",
-     0.3
-    ],
-    [
-     "ドロー分",
-     0.3
     ]
    ],
    "field": [
+    "リンク・デコーダー",
     "ファイアウォール・ドラゴン・ダークフルード－ネオテンペスト"
    ],
    "sets": [],
-   "complete": true,
+   "complete": false,
    "windows": [
     {
      "window": 0,
      "step": 43,
      "chain": "自:M∀LICE＜Q＞WHITE BINDER",
-     "score": 2.0092,
+     "score": 1.0092,
      "complete": false
     },
     {
@@ -3020,7 +3008,7 @@
      "window": 4,
      "step": 62,
      "chain": "自:サイバース・ウィキッド",
-     "score": 2.3099,
+     "score": 1.3099,
      "complete": true
     },
     {
@@ -3034,7 +3022,7 @@
      "window": 6,
      "step": 91,
      "chain": "自:ファイアウォール・ドラゴン・ダークフルード－ネオテンペスト",
-     "score": 2.3099,
+     "score": 1.3099,
      "complete": true
     }
    ]
@@ -3071,7 +3059,7 @@
      "window": 0,
      "step": 11,
      "chain": "自:M∀LICE＜P＞White Rabbit",
-     "score": 2.309,
+     "score": 1.309,
      "complete": true
     },
     {
@@ -3085,14 +3073,14 @@
      "window": 5,
      "step": 30,
      "chain": null,
-     "score": 2.3084,
+     "score": 1.3084,
      "complete": true
     },
     {
      "window": 7,
      "step": 48,
      "chain": null,
-     "score": 2.3076,
+     "score": 1.3076,
      "complete": true
     },
     {
@@ -3106,7 +3094,7 @@
      "window": 9,
      "step": 62,
      "chain": "自:サイバース・ウィキッド",
-     "score": 2.3096,
+     "score": 1.3096,
      "complete": true
     },
     {
@@ -3120,7 +3108,7 @@
      "window": 12,
      "step": 81,
      "chain": "自:リンク・デコーダー",
-     "score": 2.3074,
+     "score": 1.3074,
      "complete": true
     }
    ]
@@ -3166,14 +3154,14 @@
      "window": 3,
      "step": 65,
      "chain": "自:M∀LICE＜P＞March Hare",
-     "score": 1.6109,
+     "score": 0.6109,
      "complete": false
     },
     {
      "window": 5,
      "step": 66,
      "chain": "自:バックアップ＠イグニスター",
-     "score": 1.6109,
+     "score": 0.6109,
      "complete": false
     },
     {
@@ -3187,14 +3175,14 @@
      "window": 10,
      "step": 81,
      "chain": "自:リンク・デコーダー",
-     "score": 2.0089,
+     "score": 1.0089,
      "complete": false
     },
     {
      "window": 12,
      "step": 91,
      "chain": "自:ファイアウォール・ドラゴン・ダークフルード－ネオテンペスト",
-     "score": 1.0089,
+     "score": 0.5089,
      "complete": true
     }
    ]
@@ -3264,14 +3252,14 @@
      "window": 8,
      "step": 41,
      "chain": "自:M∀LICE＜C＞MTP－０７",
-     "score": 2.3102,
+     "score": 1.3102,
      "complete": false
     },
     {
      "window": 9,
      "step": 43,
      "chain": "自:M∀LICE＜Q＞WHITE BINDER",
-     "score": 2.3102,
+     "score": 1.3102,
      "complete": false
     }
    ]
