@@ -39,7 +39,11 @@ export function score(g) {
   const sets=me.spells.filter(c=>c?.code&&(c.position&8)).map(c=>c.code);
     const parts=[];
   if(has(C.neo)&&inExtra(C.disablem))parts.push(['ネオテン②→ディセーブルム',1]);
-  const gwcBody=sets.includes(C.gwc)&&grave.concat(banished).some(isMalice)?1:0;
+  // Revival limit: an Extra Deck monster in the GY/banished can be revived (GWC－06) only if it was properly summoned.
+  // Neo Tempest ② sending HEARTS from the Extra Deck does not make it a GWC target (user correction 2026-11-10).
+  const summoned=new Set(g.log.filter(e=>e.event==='summon').map(e=>e.code));
+  const revivable=code=>isMalice(code)&&(!isLink(code)||summoned.has(code));
+  const gwcBody=sets.includes(C.gwc)&&grave.concat(banished).some(revivable)?1:0;
   if(grave.includes(C.soul)&&mons.length+gwcBody>=2&&(inExtra(C.hearts)||inExtra(C.firewall)))parts.push(['コード・オブ・ソウル③',1]);
   else if(has(C.neo)&&!inExtra(C.disablem)&&!grave.includes(C.soul))parts.push(['ネオテン②→ソウル',0.5]);
   const accord=mons.find(m=>m.code===C.accord);
@@ -48,7 +52,7 @@ export function score(g) {
   const maliceLink=mons.some(m=>m.up&&isMalice(m.code)&&isLink(m.code));
   // Traps set this turn are activated normally in the opponent's turn (no banish cost needed).
   if(sets.includes(C.mtp))parts.push(['MTP－07',maliceLink?1:0.3]);
-  if(sets.includes(C.gwc))parts.push(['GWC－06',(grave.includes(C.hearts)||banished.includes(C.hearts))?1:grave.concat(banished).some(isMalice)?0.3:0]);
+  if(sets.includes(C.gwc))parts.push(['GWC－06',grave.concat(banished).some(c=>c===C.hearts&&revivable(c))?1:grave.concat(banished).some(revivable)?0.3:0]);
   if(sets.includes(C.tb))parts.push(['TB－11',0.3]);
   if(has(C.ringo))parts.push(['リングリボー①',0.5]);
   const fw=mons.find(m=>m.code===C.firewall);

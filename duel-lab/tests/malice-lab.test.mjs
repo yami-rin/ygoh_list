@@ -57,6 +57,15 @@ test('saved M∀LICE routes (routes/malice-routes.json) replay to their stored f
   }
 });
 
+test('revival limit: a HEARTS sent from the Extra Deck is not a GWC－06 target, a Link Summoned one is',()=>{
+  const board=log=>({log,startHand:[],snapshot:()=>({players:[{lp:8000,hand:[],extra:[],banished:[],
+    grave:[{code:C.hearts}],monsters:[{code:C.neo,position:1},null,null,null,null,null,null],
+    spells:[{code:C.gwc,position:10},null,null,null,null,null,null,null]}]})});
+  const gwc=g=>score(g).parts.find(p=>p[0]==='GWC－06')?.[1];
+  assert.equal(gwc(board([])),0);
+  assert.equal(gwc(board([{event:'summon',code:C.hearts}])),1);
+});
+
 test('link arrows: Accord in the right Extra Monster Zone points at main zones 3-5, Wicked (↓↘) in the right EMZ at main 4-5 and nothing from a main zone',()=>{
   assert.deepEqual(pointsTo(C.accord,6).sort(),[2,3,4]);
   assert.deepEqual(pointsTo(52698008,6).sort(),[3,4]);
