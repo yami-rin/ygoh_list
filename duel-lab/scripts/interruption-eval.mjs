@@ -127,7 +127,10 @@ function ownOptions(g) {
     // except Neo Tempest ② (sending Disablem early is how it works). Nothing is dropped.
     const list=p.choices.filter(c=>!(c.card&&c.card.location===2&&g.dead?.has(c.card.code)));
     const oppLink=g.stack.some(l=>l?.player===1),isPass=c=>c.response?.index===null;
-    const rank=c=>oppLink?(isPass(c)?1:0):c.card?.code===64211118?0:isPass(c)?1:2;
+    // Removal that needs an opponent card (Firewall ① bounce, HEARTS ① banish) waits while the opponent's field is empty.
+    const b=board(g),oppCards=[...b.players[1].monsters,...b.players[1].spells].filter(c=>c&&c.code).length;
+    const idle=c=>!oppCards&&[5043010,21848500].includes(c.card?.code);
+    const rank=c=>oppLink?(isPass(c)?1:idle(c)?1.5:0):c.card?.code===64211118?0:isPass(c)?1:2;
     return list.map((c,i)=>({c,i})).sort((a,b)=>rank(a.c)-rank(b.c)||a.i-b.i).map(({c})=>({action:c.id}));
   }
   if(['SELECT_EFFECTYN','SELECT_YESNO','SELECT_OPTION'].includes(p.type))return p.choices.map(c=>({action:c.id}));
@@ -143,6 +146,8 @@ function ownOptions(g) {
     // Search order only (nothing is dropped): try the known interruption sources first so a capped run finds them.
     const rank=PREFER[g.activating];
     if(rank)unique.sort((a,b)=>(rank.indexOf(a.c.code)+1||99)-(rank.indexOf(b.c.code)+1||99));
+    // In the opponent's turn, targets on the opponent's side first (Firewall ①, HEARTS ①, S:P ② removal), own cards after.
+    else if(g.turn===2)unique.sort((a,b)=>(b.c.controller===1)-(a.c.controller===1));
     const sets=p.min===1?unique.map(x=>[x.i]):unique.flatMap((x,k)=>usable.filter(y=>y.i>x.i).map(y=>[x.i,y.i]));
     return sets.map(selection=>({selection}));
   }

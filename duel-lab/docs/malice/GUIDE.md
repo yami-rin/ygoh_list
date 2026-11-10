@@ -487,34 +487,36 @@
 
 ## White Rabbit＋March Hare
 
-手札：M∀LICE＜P＞White Rabbit・M∀LICE＜P＞March Hare（残りは代役） / ルート `malice-open-69272449-20938824-2`
+手札：M∀LICE＜P＞White Rabbit・M∀LICE＜P＞March Hare（残りは代役） / ルート `malice-open-69272449-20938824`
 
-最終盤面：M∀LICE＜Q＞HEARTS OF CRYPTER・S：Pリトルナイト・サイバース・ウィキッド ／ LP 5900 ／ 点 2.91
+最終盤面：ファイアウォール・ドラゴン・ダークフルード－ネオテンペスト・サイバース・ウィキッド ／ LP 5900 ／ 点 1.91 ／ 評価器の妨害 1
 
 1. White Rabbit 召喚
 2. White Rabbit 効果（TB－１１）
-3. リングリボー リンク召喚/特殊召喚（White Rabbit）
-4. March Hare 効果（チェーン）（White Rabbit）
-5. White Rabbit 効果
-6. TB－１１ 効果（チェーン）（March Hare、Dormouse）
-7. March Hare 効果（March Hare）
-8. リンク・デコーダー リンク召喚/特殊召喚（Dormouse）
-9. WHITE BINDER リンク召喚/特殊召喚（White Rabbit、リングリボー、リンク・デコーダー）
-10. リンク・デコーダー 効果（チェーン）
-11. WHITE BINDER 効果（チェーン）（Dormouse）
-12. Dormouse 効果
-13. Dormouse 効果（Cheshire Cat）
-14. Cheshire Cat 効果
-15. WHITE BINDER 効果（MTP－０７）
-16. MTP－０７ 効果（チェーン）（WHITE BINDER、March Hare）
-17. WHITE BINDER 効果
-18. Cheshire Cat 効果（March Hare）
+3. TB－１１ 効果（チェーン）（White Rabbit、Dormouse）
+4. White Rabbit 効果
+5. March Hare 効果（チェーン）（TB－１１）
+6. リングリボー リンク召喚/特殊召喚（White Rabbit）
+7. S：Pリトルナイト リンク召喚/特殊召喚（リングリボー、Dormouse）
+8. S：Pリトルナイト 効果（Dormouse）
+9. Dormouse 効果
+10. Dormouse 効果（Cheshire Cat）
+11. Cheshire Cat 効果
+12. WHITE BINDER リンク召喚/特殊召喚（S：Pリトルナイト、Dormouse）
+13. WHITE BINDER 効果（MTP－０７）
+14. MTP－０７ 効果（チェーン）（WHITE BINDER、March Hare）
+15. WHITE BINDER 効果
+16. WHITE BINDER 効果（MTP－０７）
+17. Cheshire Cat 効果（March Hare）
+18. March Hare 効果（March Hare）
 19. ウィキッド リンク召喚/特殊召喚（WHITE BINDER、Cheshire Cat）
-20. S：Pリトルナイト リンク召喚/特殊召喚（リンク・デコーダー、Dormouse）
-21. S：Pリトルナイト 効果（チェーン）（Dormouse）
-22. ウィキッド 効果（チェーン）（Dormouse、バックアップ）
-23. バックアップ 効果
-24. バックアップ 効果（ウィザード、March Hare）
-25. ウィザード 効果（March Hare）
-26. HEARTS OF CRYPTER リンク召喚/特殊召喚（バックアップ、ウィザード、March Hare）
+20. リンク・デコーダー リンク召喚/特殊召喚（March Hare）
+21. ウィキッド 効果（March Hare、バックアップ）
+22. バックアップ 効果
+23. バックアップ 効果（ウィザード、March Hare）
+24. ウィザード 効果（Dormouse）
+25. HEARTS OF CRYPTER リンク召喚/特殊召喚（バックアップ、Dormouse、リンク・デコーダー）
+26. リンク・デコーダー 効果
+27. ネオテンペスト リンク召喚/特殊召喚（ウィザード、HEARTS OF CRYPTER、リンク・デコーダー）
+28. ネオテンペスト 効果（チェーン）（コード・オブ・ソウル）
 
