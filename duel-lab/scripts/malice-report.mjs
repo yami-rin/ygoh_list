@@ -6,7 +6,13 @@ import {score} from './malice-search.mjs';
 import {cardInfo} from '../cards.mjs';
 
 const files=process.argv.slice(2).length?process.argv.slice(2):fs.readdirSync(new URL('../runtime/malice/',import.meta.url)).filter(f=>/^batch-.*\.jsonl$/.test(f)).map(f=>`runtime/malice/${f}`);
-const rows=files.flatMap(f=>fs.readFileSync(f,'utf8').split('\n').filter(Boolean).map(l=>JSON.parse(l)));
+// The same window searched again with a longer budget (malice-deepen.mjs) keeps its best result.
+const byWindow=new Map();
+for(const r of files.flatMap(f=>fs.readFileSync(f,'utf8').split('\n').filter(Boolean).map(l=>JSON.parse(l)))){
+  const k=`${r.routeId}|${r.trap}|${r.window}|${r.extra.join('+')}`,o=byWindow.get(k);
+  if(!o||(r.score?.total??0)>(o.score?.total??0))byWindow.set(k,r);
+}
+const rows=[...byWindow.values()];
 const base={};
 for(const r of ALL_ROUTES){const id=r.id.replace('user-replay-','');if(!rows.some(x=>x.routeId===id))continue;const g=await startLab({hand:r.hand,seed:r.seed});replaySteps(g,r);base[id]=score(g);g.close();}
 const extraName=e=>e.length?e.map(c=>cardInfo(c).name).join('＋'):'なし';
