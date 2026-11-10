@@ -177,7 +177,7 @@ function apply(g,input,policy) {
 }
 
 // setup(): async () => {g, policy} at our decision. Returns the best line found within the budget.
-export async function searchBest(setup,{ms=60000,maxLines=50000,log=false,guide=null,maxDev=Infinity}={}) {
+export async function searchBest(setup,{ms=60000,maxLines=50000,log=false,guide=null,maxDev=Infinity,ssLimit=Infinity}={}) {
   const started=Date.now(),seen=new Set();
   let best=null,lines=0,nodes=0,cut=0,invalid=0;
   // Limited discrepancy order: lines with fewer non-first choices (deviations from the guide/heuristic order) first.
@@ -195,6 +195,8 @@ export async function searchBest(setup,{ms=60000,maxLines=50000,log=false,guide=
       for(let guard=0;guard<600;guard++){
         if(!g.pending||g.status!=='playing'||!mine(g)||g.turn>1){break;}
         if(g.prompt.type==='SELECT_IDLECMD'){
+          // ssLimit: only boards reached within that many Special Summons count (e.g. stopping against Maxx "C").
+          if(ssLimit<Infinity&&g.log.filter(e=>/を特殊召喚/.test(e.text)).length>ssLimit)break;
           const sc=score(g);
           if(!best||sc.total>best.score.total){best={score:sc,path:[...taken],trail:g.trail.map(t=>`${t.who?'相':'自'} ${t.prompt} ${t.label}`)};if(log)console.error(`best ${sc.total} ${sc.parts.map(p=>p[0]).join('・')} @${Date.now()-started}ms`);}
         }
