@@ -8,6 +8,9 @@ import {cardInfo} from '../cards.mjs';
 
 const RECOMMENDED=[
   ['malice-open-68337209-74652966','UNDERGROUND＋コード・オブ・ソウル'],
+  ['malice-open-32061192-74652966','Dormouse＋コード・オブ・ソウル'],
+  ['malice-open-68337209-30118811','UNDERGROUND＋バックアップ'],
+  ['malice-open-32061192-30118811-2','Dormouse＋バックアップ'],
   ['user-replay-cEErE6ce','Dormouse 1枚'],
   ['user-replay-3tnYxZAt','UNDERGROUND 1枚'],
   ['malice-open-30118811','バックアップ 1枚'],
