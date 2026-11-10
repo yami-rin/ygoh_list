@@ -4,8 +4,9 @@
 
 | 資料 | 内容 |
 | --- | --- |
+| [CAUSAL.md](CAUSAL.md) | **まずここ**：何を持っていたら手順のどこが変わり、盤面と相手ターンの妨害がどう変わるか（カードごと・誘発ごと・初動×2枚目。保存ルートの手順差分が根拠） |
 | [INVENTORY.md](INVENTORY.md) | 棚卸し：全カードの役割、判定基準、計画（最初に作成） |
-| [CHEATSHEET.md](CHEATSHEET.md) | 1ページの早見表（手札別の目安・展開の約束・誘発の受け・相手ターン） |
+| [CHEATSHEET.md](CHEATSHEET.md) | 1ページの早見表（盤面の部品→手札の骨格と着地→2枚目で変わる所→誘発の止まる所と続き方→約束の理由） |
 | [GUIDE.md](GUIDE.md) | 先攻展開の手順書（推奨ルート10本、番号付き、自動生成） |
 | [THEORY.md](THEORY.md) | 考え方：目標盤面、誘発ごとの被害、2枚目の価値、展開順の原則 |
 | [ROUTES.md](ROUTES.md) | 展開ルート：ユーザーのリプレイ、改善ルート、2枚初動カタログ |
@@ -30,6 +31,7 @@
 | `malice-respond` / `malice-batch` / `malice-extenders` | 誘発を受けた後の最善の一括探索（代役版・2枚目あり） |
 | `malice-improve` / `malice-improve-saved` / `malice-catalog` | ユーザーの手順・保存ルートを案内にした改善探索、2枚初動のカタログ |
 | `malice-bait` | 相手が最初の機会に誘発を撃つ前提で順番を組み替える探索 |
+| `malice-diff` | 2本の保存ルートの手順と最終盤面を並べる（CAUSAL.mdの根拠） |
 | `malice-route` / `malice-catalog-save` | 探索結果を再生可能な保存ルート（`routes/malice-routes.json`）にする |
 | `malice-eval-routes` / `malice-calibrate` | 妨害評価器（`interruption-eval.mjs`、シナリオ malice-mirror / user-mirror）で相手ターンの妨害数を数える |
 | `malice-report` / `malice-extender-table` / `malice-bait-table` / `malice-guide` | 自動生成の表・手順書を作る |
