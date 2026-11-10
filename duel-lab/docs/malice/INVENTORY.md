@@ -172,7 +172,7 @@
 
 | # | 状況 | 根拠 |
 | --- | --- | --- |
-| C1 初動 | 1枚初動5種（Dormouse・UG・WR・バックアップ・黄金櫃）と2枚初動20種の最善の既知ルートをエンジンで検証・保存（`routes/malice-routes.json` 37本＋リプレイ5本、再生テスト付き）。実戦5枚手札40通りでネオテン到達90% | [ROUTES.md](ROUTES.md)・[GUIDE.md](GUIDE.md)・[SAMPLE.md](SAMPLE.md) |
+| C1 初動 | 1枚初動5種（Dormouse・UG・WR・バックアップ・黄金櫃）と2枚初動20種の最善の既知ルートをエンジンで検証・保存（`routes/malice-routes.json` 30本＋リプレイ5本、再生テスト付き。WR＋MH・WR＋Catは2.9点前後が上限で、WRの①③が初動側と重なるため）。実戦5枚手札40通りでネオテン到達90% | [ROUTES.md](ROUTES.md)・[GUIDE.md](GUIDE.md)・[SAMPLE.md](SAMPLE.md) |
 | C2 誘発 | 15誘発×5リプレイの当たり所を全列挙、受けの探索は代役版304行・2枚目あり170マス・推奨ルート35マス・囮40組。誘発ごとの最悪の窓と残る盤面、2枚目の価値（バックアップ・ソウルが最良）を表に | [HANDTRAPS.md](HANDTRAPS.md)・[EXTENDERS.md](EXTENDERS.md)・[BAIT.md](BAIT.md)・[HANDTRAPS-SAVED.md](HANDTRAPS-SAVED.md) |
 | C3 妨害の発見 | 6種すべて評価器で発見：ディセーブルム（ネオテン②の先落とし）・ソウル③（ファイアウォール）・アコード②・GWC－06（→WR→MTP－07）・HEARTS①・リングリボー。相手シナリオ2種、較正（相関0.63/0.42） | [CALIBRATION-user-mirror.md](CALIBRATION-user-mirror.md)、THEORY §6・§8 |
 | C4 リプレイを上回る | 5本中3本で上回る手順を発見：Cat＋MH（R1→R1b、評価器で妨害2→4、ユーザー承認済み）、NS＋コード・マジシャン（R3、3→4）、Dormouse（R2は評価器で劣り不採用、元の手順を推奨） | [ROUTES.md](ROUTES.md) |
