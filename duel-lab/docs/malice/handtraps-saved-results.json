@@ -1,5 +1,5 @@
 {
- "generated": "2026-11-10T01:57:32.409Z",
+ "generated": "2026-11-10T02:59:24.596Z",
  "baseline": {
   "malice-dormouse-gwc-now": 3.8092,
   "malice-ns-codemagician-plus": 3.1085,
@@ -508,7 +508,7 @@
    "window": 0,
    "step": 17,
    "chain": [],
-   "score": 2.009,
+   "score": 2.509,
    "parts": [
     [
      "ネオテン②→ディセーブルム",
@@ -517,10 +517,14 @@
     [
      "コード・オブ・ソウル③",
      1
+    ],
+    [
+     "リングリボー①",
+     0.5
     ]
    ],
    "field": [
-    "リンク・デコーダー",
+    "リングリボー",
     "ファイアウォール・ドラゴン・ダークフルード－ネオテンペスト"
    ],
    "sets": [],
@@ -530,7 +534,7 @@
      "window": 0,
      "step": 17,
      "chain": null,
-     "score": 2.009,
+     "score": 2.509,
      "complete": false
     },
     {
@@ -1773,11 +1777,9 @@
    "route": "M∀LICE IN UNDERGROUND＋バックアップ＠イグニスター（初動カタログの最善、3.8085点）",
    "extra": [],
    "trap": "原始生命態ニビル",
-   "window": 7,
-   "step": 49,
-   "chain": [
-    "自:バックアップ＠イグニスター"
-   ],
+   "window": 9,
+   "step": 58,
+   "chain": [],
    "score": 1.3086,
    "parts": [
     [
@@ -1821,7 +1823,7 @@
      "window": 7,
      "step": 49,
      "chain": "自:バックアップ＠イグニスター",
-     "score": 1.3086,
+     "score": 2.3071,
      "complete": false
     },
     {
@@ -1859,32 +1861,38 @@
    "route": "M∀LICE IN UNDERGROUND＋コード・オブ・ソウル（初動カタログの最善、4.5085点）",
    "extra": [],
    "trap": "灰流うらら",
-   "window": 1,
-   "step": 27,
+   "window": 0,
+   "step": 21,
    "chain": [
-    "自:サイバース・コード・マジシャン"
+    "自:サイバース・コントラクト・ウィッチ"
    ],
-   "score": 2.3094,
+   "score": 2.8094,
    "parts": [
+    [
+     "ネオテン②→ディセーブルム",
+     1
+    ],
     [
      "コード・オブ・ソウル③",
      1
     ],
     [
-     "S:Pリトルナイト②",
-     1
+     "TB－11",
+     0.3
     ],
     [
-     "ドロー分",
-     0.3
+     "リングリボー①",
+     0.5
     ]
    ],
    "field": [
-    "S：Pリトルナイト",
-    "サイバース・ウィキッド"
+    "リングリボー",
+    "ファイアウォール・ドラゴン・ダークフルード－ネオテンペスト"
    ],
-   "sets": [],
-   "complete": false,
+   "sets": [
+    "M∀LICE＜C＞TB－１１"
+   ],
+   "complete": true,
    "windows": [
     {
      "window": 0,
@@ -1897,7 +1905,7 @@
      "window": 1,
      "step": 27,
      "chain": "自:サイバース・コード・マジシャン",
-     "score": 2.3094,
+     "score": 3.0084,
      "complete": false
     },
     {
@@ -2033,24 +2041,28 @@
    "window": 0,
    "step": 22,
    "chain": [],
-   "score": 2.3094,
+   "score": 2.8094,
    "parts": [
+    [
+     "ネオテン②→ディセーブルム",
+     1
+    ],
     [
      "コード・オブ・ソウル③",
      1
     ],
     [
-     "アコード②",
-     1
-    ],
-    [
      "TB－11",
      0.3
+    ],
+    [
+     "リングリボー①",
+     0.5
     ]
    ],
    "field": [
-    "トランスコード・トーカー",
-    "アコード・トーカー＠イグニスター"
+    "リングリボー",
+    "ファイアウォール・ドラゴン・ダークフルード－ネオテンペスト"
    ],
    "sets": [
     "M∀LICE＜C＞TB－１１"
@@ -2061,7 +2073,7 @@
      "window": 0,
      "step": 22,
      "chain": null,
-     "score": 2.3094,
+     "score": 2.8094,
      "complete": false
     },
     {
@@ -2173,33 +2185,31 @@
    "route": "M∀LICE IN UNDERGROUND＋コード・オブ・ソウル（初動カタログの最善、4.5085点）",
    "extra": [],
    "trap": "原始生命態ニビル",
-   "window": 12,
-   "step": 70,
+   "window": 7,
+   "step": 49,
    "chain": [
-    "自:M∀LICE＜Q＞WHITE BINDER"
+    "自:バックアップ＠イグニスター"
    ],
-   "score": 1.8085,
+   "score": 2.3086,
    "parts": [
     [
      "コード・オブ・ソウル③",
      1
     ],
     [
-     "GWC－06",
-     0.3
+     "HEARTS①",
+     1
     ],
     [
-     "リングリボー①",
-     0.5
+     "ドロー分",
+     0.3
     ]
    ],
    "field": [
-    "リングリボー",
-    "ファイアウォール・ドラゴン"
+    "M∀LICE＜Q＞WHITE BINDER",
+    "M∀LICE＜Q＞HEARTS OF CRYPTER"
    ],
-   "sets": [
-    "M∀LICE＜C＞GWC－０６"
-   ],
+   "sets": [],
    "complete": false,
    "windows": [
     {
@@ -2248,7 +2258,7 @@
      "window": 12,
      "step": 70,
      "chain": "自:M∀LICE＜Q＞WHITE BINDER",
-     "score": 1.8085,
+     "score": 3.0085,
      "complete": false
     },
     {
@@ -2270,7 +2280,7 @@
    "chain": [
     "自:M∀LICE＜C＞TB－１１"
    ],
-   "score": 2.5094,
+   "score": 2.8094,
    "parts": [
     [
      "コード・オブ・ソウル③",
@@ -2283,11 +2293,15 @@
     [
      "S:Pリトルナイト②",
      1
+    ],
+    [
+     "ドロー分",
+     0.3
     ]
    ],
    "field": [
-    "S：Pリトルナイト",
-    "リングリボー"
+    "リングリボー",
+    "S：Pリトルナイト"
    ],
    "sets": [],
    "complete": false,
@@ -2296,7 +2310,7 @@
      "window": 0,
      "step": 12,
      "chain": "自:M∀LICE＜C＞TB－１１",
-     "score": 2.5094,
+     "score": 2.8094,
      "complete": false
     },
     {
