@@ -14,7 +14,9 @@
 | [EXTENDERS.md](EXTENDERS.md) | 自動生成：2枚目の手札があれば受けられるか |
 | [BAIT.md](BAIT.md) | 自動生成：最初の機会に誘発を撃つ相手に、順番を組み替えた場合 |
 | [CALIBRATION-user-mirror.md](CALIBRATION-user-mirror.md) / [CALIBRATION.md](CALIBRATION.md) | 自動生成：静的な点数と妨害評価器の対応（相手＝ユーザーのデッキ／旧ミラー） |
-| [HANDTRAPS-SAVED.md](HANDTRAPS-SAVED.md) | 自動生成：改善ルートの誘発耐性 |
+| [HANDTRAPS-SAVED.md](HANDTRAPS-SAVED.md) | 自動生成：改善・推奨ルートの誘発耐性 |
+| [EXTENDERS-TOP.md](EXTENDERS-TOP.md) | 自動生成：推奨ルートに3枚目があるときの受け |
+| [SAMPLE.md](SAMPLE.md) | 自動生成：実戦の5枚手札40通り（誘発なし・相手うらら・泡影・ニビル・霊王） |
 | [QUESTIONS.md](QUESTIONS.md) | ユーザーへの確認事項 |
 | [PROGRESS.md](PROGRESS.md) | 毎時の進捗 |
 
@@ -32,5 +34,8 @@
 | `malice-eval-routes` / `malice-calibrate` | 妨害評価器（`interruption-eval.mjs`、シナリオ malice-mirror / user-mirror）で相手ターンの妨害数を数える |
 | `malice-report` / `malice-extender-table` / `malice-bait-table` / `malice-guide` | 自動生成の表・手順書を作る |
 | `malice-opp-turn` | 評価器が相手ターンにどの妨害をどう使ったかを表示 |
+| `malice-sample` / `malice-sample-table` | 実戦の5枚手札を無作為に配って最善を探し、分布を出す |
+| `malice-deepen` / `malice-cell-extenders` / `malice-improve-hand` | 打ち切りマスの再探索、1マスを2枚目ごとに調べる、別ルートを案内に手札を探す |
+| `malice-watch` | 長時間ジョブの見張り |
 
 大きな中間結果は `runtime/malice/`（Git対象外）に置く。表はそこから再生成できる。
