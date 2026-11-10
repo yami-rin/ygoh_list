@@ -180,3 +180,16 @@
 
 次の1時間
 - UG＋ソウル×霊王（Dormouse③に撃たれて0.51点、完走で確定）の受けを2枚目ありで調べる。
+
+## 2026-11-10 16:05 推奨ルートの3枚目と誘発の受け
+
+できたこと（数字）
+- UG＋ソウル×霊王（0.51点で確定）の受け：3枚目にMH 2.61・Cat 2.51・WR 2.51・コード・マジシャン 2.31・バックアップ 2.01（F15）。
+- ニビル後に効く3枚目はMH・コード・マジシャン、バックアップは効かない（F16）。
+- 推奨3ルート×5誘発×3枚目（MH・バックアップ・Cat 各15マス、WR 7マス）：MHが平均2.64・最低2.31で最も受けを広げる（THEORY §10、[EXTENDERS-TOP.md](EXTENDERS-TOP.md)）。早見表（CHEATSHEET）に反映。
+
+やめたこと・方針変更
+- **PCのメモリ不足でシステムが2回バックグラウンド処理を停止**（霊王の実戦サンプル残り6手札、推奨ルートの3枚目バッチのWR残り8マス・コード・マジシャン・ソウル）。再開は指示待ち（再開コマンドは各スクリプトが続きから動く：`node scripts/malice-sample.mjs 40 90 purge`、`HITS_TAG=-top WORST_FROM=runtime/malice/batch-top.jsonl node scripts/malice-batch.mjs runtime/malice/batch-top-x<code>.jsonl 60 ash,imperm,droll,purge,nibiru <code>`）。
+
+次の1時間
+- 重い探索は止め、資料の整合（GUIDE・CHEATSHEET・THEORY・INVENTORYの数字の突き合わせ）と最終まとめの準備。
