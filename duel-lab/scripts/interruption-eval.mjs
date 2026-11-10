@@ -20,6 +20,10 @@ export const SCENARIOS={
   // The user's own deck as the opponent (UNDERGROUND, White Rabbit, Backup, March Hare, Cheshire Cat).
   'user-mirror':{label:'相手はユーザーのM∀LICE（UNDERGROUND・Rabbit・バックアップ・March Hare・Cat）',deck:'presets/user-malice.json',
     hand:[68337209,69272449,30118811,20938824,96676583]},
+  // Same, plus Ash Blossom and Infinite Impermanence. The scripted opponent fires them in its own turn at the first
+  // legal window (e.g. Ash on Neo Tempest ② sending Disablem, Impermanence on the first monster effect we activate).
+  'user-mirror-traps':{label:'相手はユーザーのM∀LICE＋灰流うらら・無限泡影（自分のターンに最初に撃てる所で撃つ）',deck:'presets/user-malice.json',
+    hand:[68337209,69272449,30118811,20938824,96676583,14558127,10045474]},
 };
 
 function take(list,codes,what) {

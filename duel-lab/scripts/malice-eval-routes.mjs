@@ -7,7 +7,7 @@ const all=[...JSON.parse(fs.readFileSync(new URL('../routes/user-replays.json',i
   ...(fs.existsSync(new URL('../routes/malice-routes.json',import.meta.url))?JSON.parse(fs.readFileSync(new URL('../routes/malice-routes.json',import.meta.url))).routes:[])];
 const [ids,max='600',scenario='malice-mirror']=process.argv.slice(2);
 for(const part of ids.split(',')){
-  const route=all.find(r=>r.id.includes(part));
+  const route=all.find(r=>r.id===part)||all.find(r=>r.id.includes(part));
   const r=await evaluateRoute(route,{maxLines:Number(max),scenario});
   const row={id:route.id,title:route.title,scenario,maxLines:Number(max),lines:r.lines,complete:r.complete,ms:r.ms,interruptions:r.interruptions,targets:r.targets,breakdown:r.breakdown};
   fs.appendFileSync(new URL('../runtime/malice/eval.jsonl',import.meta.url),JSON.stringify(row)+'\n');

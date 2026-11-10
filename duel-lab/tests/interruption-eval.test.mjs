@@ -36,3 +36,10 @@ test('user Dormouse replay: Neo Tempest ② sends Disablem first, which negates 
   const result=await evaluateRoute(replays.find(r=>r.id==='user-replay-cEErE6ce'),{maxLines:200});
   assert(result.breakdown.some(b=>b.code===92422871&&b.kinds.includes('negate')));
 });
+
+test('user-mirror-traps: the opponent holds Ash Blossom and Impermanence and fires them in its turn (Accord answers its Ash)',async()=>{
+  const replays=JSON.parse(fs.readFileSync(new URL('../routes/user-replays.json',import.meta.url))).routes;
+  const result=await evaluateRoute(replays.find(r=>r.id==='user-replay-cEErE6ce'),{maxLines:200,scenario:'user-mirror-traps'});
+  assert(result.interruptions>=3);
+  assert(result.breakdown.some(b=>b.code===39138610&&b.targets.includes('灰流うらら')));
+});
