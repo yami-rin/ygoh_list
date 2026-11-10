@@ -20,7 +20,7 @@ const RECOMMENDED=[
   ['malice-open-32061192-20938824','Dormouse＋March Hare'],
   ['malice-open-68337209-96676583','UNDERGROUND＋Cat'],
   ['malice-open-32061192-96676583','Dormouse＋Cat'],
-  ['malice-rabbit-plus-2','White Rabbit 1枚（HEARTS＋ファイアウォール）'],
+  ['user-replay-G9pZztFA','White Rabbit 1枚'],
   ['malice-open-69272449-20938824','White Rabbit＋March Hare'],
 ];
 const all=[...JSON.parse(fs.readFileSync(new URL('../routes/user-replays.json',import.meta.url))).routes,

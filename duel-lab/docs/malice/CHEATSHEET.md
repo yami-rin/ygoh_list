@@ -12,7 +12,7 @@
 | Cat＋March Hare | 3.9点：**最初にCat①でMHを除外して2ドロー→MH③でMHを回収**、WHITE BINDER②は最後に回してMTP－07 | GUIDE「Cat＋March Hare（R1b）」 |
 | UG・Dormouse 1枚 | 3.3〜3.6点（ユーザーの手順どおり。DormouseはGWC－06を伏せて終える） | GUIDE「Dormouse 1枚」「UNDERGROUND 1枚」 |
 | バックアップ 1枚 | 1.5点（ネオテン＋リングリボー）、LPを使わない | GUIDE「バックアップ 1枚」 |
-| WR 1枚／WR＋MH・Cat | 1.3〜2.9点（WRの①③が重なり伸びにくい。ネオテン＋ウィキッドではソウル③のリンク先がないので、HEARTS＋ファイアウォールで終える手順もある） | GUIDE「White Rabbit 1枚」「White Rabbit＋March Hare」 |
+| WR 1枚／WR＋MH・Cat | 1.3〜2.9点（WRの①③が重なり伸びにくい。ネオテン＋ウィキッドではソウル③のリンク先がない。HEARTS＋ファイアウォールで終える別手順は評価器で未確定） | GUIDE「White Rabbit 1枚」「White Rabbit＋March Hare」 |
 | 初動札0枚（M∀LICE・UG・バックアップ・ソウル・コード・マジシャンなし） | 事故。誘発を構えて渡す | — |
 
 2枚目に **ソウル・バックアップ・コード・マジシャン・UG** があれば、1枚初動が誘発を受けても1.3〜1.6点（代役だけなら0.6点）が残る。WR・Catの重ね引きは受けにならない（0.8点）。
