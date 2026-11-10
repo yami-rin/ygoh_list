@@ -5,10 +5,13 @@ import {cardInfo} from '../cards.mjs';
 
 const dir=new URL('../runtime/malice/',import.meta.url);
 const read=f=>fs.readFileSync(new URL(f,dir),'utf8').split('\n').filter(Boolean).map(l=>JSON.parse(l));
-const blank=read('batch-blank.jsonl');
+// BASE / PREFIX / OUT env select another set, e.g. the recommended routes:
+// BASE=batch-top.jsonl PREFIX=batch-top-x OUT=EXTENDERS-TOP
+const BASE=process.env.BASE||'batch-blank.jsonl',PREFIX=process.env.PREFIX||'batch-x',OUT=process.env.OUT||'EXTENDERS';
+const blank=read(BASE);
 const worst=new Map();
 for(const r of blank){const k=`${r.routeId}|${r.trap}`;const w=worst.get(k);if(!w||(r.score?.total??0)<(w.score?.total??0))worst.set(k,r);}
-const ext=fs.readdirSync(dir).filter(f=>/^batch-x\d+\.jsonl$/.test(f)).map(f=>({code:Number(f.match(/\d+/)[0]),rows:read(f)}));
+const ext=fs.readdirSync(dir).filter(f=>f.startsWith(PREFIX)&&/^\d+\.jsonl$/.test(f.slice(PREFIX.length))).map(f=>({code:Number(f.slice(PREFIX.length).match(/\d+/)[0]),rows:read(f)}));
 const out=['# 2枚目の手札で受けられるか（自動生成）','',
   '`scripts/malice-extender-table.mjs` が生成。各マスは「相手がその誘発を、代役版で最も痛い窓に撃った場合」の最善盤面の点数（[HANDTRAPS.md](HANDTRAPS.md) と同じ静的見積もり）。',
   '左端は代役3枚のとき、右は代役1枚をそのカードに替えたとき。*は60秒で探索が終わらず見つかった中の最善（下限）。','',
@@ -29,5 +32,5 @@ for(const e of ext){
   const avg=i=>(pairs.reduce((n,p)=>n+p[i],0)/pairs.length).toFixed(2);
   out.push(`| ${cardInfo(e.code).name} | ${pairs.length} | ${avg(0)} | ${Math.min(...pairs.map(p=>p[0])).toFixed(2)} | ${avg(1)} |`);
 }
-fs.writeFileSync(new URL('../docs/malice/EXTENDERS.md',import.meta.url),out.join('\n')+'\n');
+fs.writeFileSync(new URL(`../docs/malice/${OUT}.md`,import.meta.url),out.join('\n')+'\n');
 console.log(out.slice(5).join('\n'));
