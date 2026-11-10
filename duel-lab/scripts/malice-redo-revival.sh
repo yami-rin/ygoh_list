@@ -7,12 +7,14 @@ CHANGED="malice-open-68337209-74652966 malice-open-32061192-74652966"
 node scripts/malice-catalog.mjs 300
 node scripts/malice-catalog-save.mjs
 # 2. Hand-trap tables of the recommended routes whose steps changed.
-for id in $CHANGED; do grep -v "\"routeId\":\"$id\"" $R/batch-top.jsonl > $R/batch-top.tmp || true; mv $R/batch-top.tmp $R/batch-top.jsonl; done
-node scripts/malice-hits.mjs ash,imperm,droll,purge,nibiru malice-open-68337209-74652966,malice-open-32061192-74652966,malice-open-68337209-30118811 -top
+[ -f $R/.redo-top-cleaned ] || for id in $CHANGED; do grep -v "\"routeId\":\"$id\"" $R/batch-top.jsonl > $R/batch-top.tmp || true; mv $R/batch-top.tmp $R/batch-top.jsonl; done
+touch $R/.redo-top-cleaned
+[ -f $R/hits-14558127-top.json ] && [ $R/hits-14558127-top.json -nt $R/.redo-top-cleaned ] || node scripts/malice-hits.mjs ash,imperm,droll,purge,nibiru malice-open-68337209-74652966,malice-open-32061192-74652966,malice-open-68337209-30118811 -top
 HITS_TAG=-top node scripts/malice-batch.mjs $R/batch-top.jsonl 60 ash,imperm,droll,purge,nibiru
 cat $R/batch-saved.jsonl $R/batch-top.jsonl > $R/recommended.jsonl
 # 3. Calibration of the changed routes.
-for id in $CHANGED; do grep -v "\"id\":\"$id\"" $R/calibrate-user-mirror.jsonl > $R/cal.tmp || true; mv $R/cal.tmp $R/calibrate-user-mirror.jsonl; done
+[ -f $R/.redo-cal-cleaned ] || for id in $CHANGED; do grep -v "\"id\":\"$id\"" $R/calibrate-user-mirror.jsonl > $R/cal.tmp || true; mv $R/cal.tmp $R/calibrate-user-mirror.jsonl; done
+touch $R/.redo-cal-cleaned
 node scripts/malice-calibrate.mjs 200 user-mirror
 # 4. Sample rows that were removed.
 node scripts/malice-sample.mjs 80 120
