@@ -7,6 +7,7 @@ import {score} from './malice-search.mjs';
 import {cardInfo} from '../cards.mjs';
 
 const RECOMMENDED=[
+  ['malice-open-68337209-74652966','UNDERGROUND＋コード・オブ・ソウル'],
   ['user-replay-cEErE6ce','Dormouse 1枚'],
   ['user-replay-3tnYxZAt','UNDERGROUND 1枚'],
   ['malice-open-30118811','バックアップ 1枚'],

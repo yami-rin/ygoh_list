@@ -12,6 +12,9 @@ export const HANDS=[
   {hand:[DM,MH],guide:'cEErE6ce'},{hand:[DM,CAT],guide:'cEErE6ce'},{hand:[UG,MH],guide:'3tnYxZAt'},
   {hand:[UG,CAT],guide:'3tnYxZAt'},{hand:[BK],guide:'Q5Vc2nzV'},{hand:[BK,MH],guide:'Q5Vc2nzV'},
   {hand:[MH,MH],guide:'BmA74rcx'},{hand:[CAT,CAT],guide:'BmA74rcx'},{hand:[DROLL,CM,MH],guide:'Q5Vc2nzV'},
+  // Backup and Code of Soul were the best second cards (EXTENDERS.md).
+  {hand:[UG,BK],guide:'3tnYxZAt'},{hand:[DM,BK],guide:'cEErE6ce'},{hand:[WR,BK],guide:'G9pZztFA'},{hand:[CAT,BK],guide:'BmA74rcx'},
+  {hand:[UG,SOUL],guide:'3tnYxZAt'},{hand:[DM,SOUL],guide:'cEErE6ce'},{hand:[BK,SOUL],guide:'Q5Vc2nzV'},{hand:[CAT,MH,BK],guide:'BmA74rcx'},
 ];
 const sec=Number(process.argv[2]||300),out=new URL('../runtime/malice/catalog.jsonl',import.meta.url);
 const done=new Set(fs.existsSync(out)?fs.readFileSync(out,'utf8').split('\n').filter(Boolean).map(l=>JSON.parse(l).hand.join(',')):[]);
