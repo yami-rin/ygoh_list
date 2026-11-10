@@ -6,15 +6,16 @@
 
 | 手札にあるもの | 目安 | 手順書 |
 | --- | --- | --- |
-| UNDERGROUND＋コード・オブ・ソウル／Dormouse＋ソウル | 3.8点（上位） | GUIDE「UNDERGROUND＋コード・オブ・ソウル」 |
-| Dormouse＋ソウル／UG＋Cat／UG＋WR／Dormouse＋MH | 3.8〜4.1点 | GUIDE 各項 |
+| Cat＋March Hare（＋バックアップ） | 3.9点（最上位、下の行） |
+| UNDERGROUND＋コード・オブ・ソウル／Dormouse＋ソウル | 3.8点 | GUIDE「UNDERGROUND＋コード・オブ・ソウル」 |
+| UG＋Cat／UG＋WR／UG＋バックアップ／Dormouse＋MH | 3.8点 | GUIDE 各項 |
 | Cat＋March Hare | 3.9点：**最初にCat①でMHを除外して2ドロー→MH③でMHを回収**、WHITE BINDER②は最後に回してMTP－07 | GUIDE「Cat＋March Hare（R1b）」 |
 | UG・Dormouse 1枚 | 3.3〜3.6点（ユーザーの手順どおり。DormouseはGWC－06を伏せて終える） | GUIDE「Dormouse 1枚」「UNDERGROUND 1枚」 |
-| バックアップ 1枚 | 2.5点、LPを使わない | GUIDE「バックアップ 1枚」 |
-| WR 1枚／WR＋MH・Cat | 2.3〜2.9点（WRの①③が重なり伸びにくい） | GUIDE「White Rabbit 1枚」 |
+| バックアップ 1枚 | 1.5点（ネオテン＋リングリボー）、LPを使わない | GUIDE「バックアップ 1枚」 |
+| WR 1枚／WR＋MH・Cat | 1.3〜2.9点（WRの①③が重なり伸びにくい。ネオテン＋ウィキッドではソウル③のリンク先がないので、HEARTS＋ファイアウォールで終える手順もある） | GUIDE「White Rabbit 1枚」「White Rabbit＋March Hare」 |
 | 初動札0枚（M∀LICE・UG・バックアップ・ソウル・コード・マジシャンなし） | 事故。誘発を構えて渡す | — |
 
-2枚目に **バックアップかソウル** があれば、誘発を受けても2点前後が残る。WR・Catの重ね引きは受けにならない。
+2枚目に **ソウル・バックアップ・コード・マジシャン・UG** があれば、1枚初動が誘発を受けても1.3〜1.6点（代役だけなら0.6点）が残る。WR・Catの重ね引きは受けにならない（0.8点）。
 
 ## 2. 展開中の約束
 
