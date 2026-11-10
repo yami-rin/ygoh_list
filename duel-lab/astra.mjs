@@ -43,7 +43,8 @@ export function maliceGuide(){return `
 ・Cat＋March Hareは先にCat①でMHを除外して2ドローし、MH③でMH自身を回収（盤面は同じで手札+2、うららの囮にもなる）。
 ・ニビルを受けたら、自分の場に出たトークン（通常モンスター扱い）をリンク・スパイダーの素材にして展開を続ける。
 ・相手ターン：伏せGWC－06で墓地のWRを蘇生→WR①でMTP－07をセット→WRを除外してその場でMTP－07（MHサーチ＋M∀LICE Lがいれば除去）→MH①で相手メインフェイズに特殊召喚、と伸ばせる。アコード②は相手の最初の要の発動に使う。
-・初動1枚は誘発1枚で止まりやすい。2枚目はバックアップ＠イグニスターが最も堅く、M∀LICE始動ならMarch Hare・UNDERGROUNDも続きを作れる。`;}
+・ソウル③は、相手メインフェイズに場の素材でHEARTS（M∀LICEを含むちょうど3体）かファイアウォール・ドラゴン（リンク合計ちょうど4）を出せる時だけ妨害になる。ネオテン＋ウィキッドだけ等では出せない。
+・初動1枚は誘発1枚で止まりやすい。2枚目はコード・オブ・ソウルとバックアップ＠イグニスターが堅く、M∀LICE始動ならMarch Hare・UNDERGROUNDも続きを作れる。`;}
 
 function handTrapGuide() {
   const list=HAND_TRAPS.map(cardInfo).filter(c=>c.code).map(c=>`・${c.name}：${c.text.replace(/\s+/g,' ').trim()}`).join('\n');
