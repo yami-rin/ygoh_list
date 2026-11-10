@@ -39,7 +39,7 @@
 28. March Hare 効果（March Hare）
 29. HEARTS OF CRYPTER リンク召喚/特殊召喚（White Rabbit、WHITE BINDER、コード・オブ・ソウル）
 
-誘発を最も痛い窓に受けた時の最善（他の手札は代役）：灰流うらら 2.31（サイバース・コード・マジシャン）／無限泡影 2.51（チェーンなし）
+誘発を最も痛い窓に受けた時の最善（他の手札は代役）：灰流うらら 1.81（サイバース・コントラクト・ウィッチ）／無限泡影 1.51（チェーンなし）／ドロール＆ロックバード 2.11（チェーンなし）／霊王の波動 0.51（M∀LICE＜P＞Dormouse）／原始生命態ニビル 1.31（M∀LICE＜Q＞WHITE BINDER）
 
 ## Dormouse＋コード・オブ・ソウル
 
@@ -72,7 +72,7 @@
 23. ドットスケーパー 効果
 24. リングリボー リンク召喚/特殊召喚（ドットスケーパー）
 
-誘発を最も痛い窓に受けた時の最善（他の手札は代役）：灰流うらら 2.51（M∀LICE＜C＞TB－１１）
+誘発を最も痛い窓に受けた時の最善（他の手札は代役）：灰流うらら 1.51（M∀LICE＜C＞TB－１１）／無限泡影 1.51（チェーンなし）／ドロール＆ロックバード 2.31（M∀LICE＜P＞Cheshire Cat）／霊王の波動 1.51（M∀LICE＜P＞White Rabbit）／原始生命態ニビル 0.81（バックアップ＠イグニスター）
 
 ## UNDERGROUND＋バックアップ
 
@@ -109,13 +109,13 @@
 27. バックアップ 効果
 28. リングリボー リンク召喚/特殊召喚（バックアップ）
 
-誘発を最も痛い窓に受けた時の最善（他の手札は代役）：灰流うらら 2.01（M∀LICE＜Q＞WHITE BINDER）／無限泡影 2.01（チェーンなし）／ドロール＆ロックバード 2.81（チェーンなし）／霊王の波動 2.01（M∀LICE＜Q＞WHITE BINDER）／原始生命態ニビル 1.31（バックアップ＠イグニスター）
+誘発を最も痛い窓に受けた時の最善（他の手札は代役）：灰流うらら 1.31（サイバース・コントラクト・ウィッチ）／無限泡影 1.01（チェーンなし）／ドロール＆ロックバード 1.81（チェーンなし）／霊王の波動 1.01（M∀LICE＜P＞Dormouse）／原始生命態ニビル 1.01（トランスコード・トーカー）
 
 ## Dormouse＋バックアップ
 
 手札：M∀LICE＜P＞Dormouse・バックアップ＠イグニスター（残りは代役） / ルート `malice-open-32061192-30118811-2`
 
-最終盤面：リングリボー・ファイアウォール・ドラゴン・ダークフルード－ネオテンペスト・アコード・トーカー＠イグニスター ／ LP 6200 ／ 点 3.81 ／ 評価器の妨害 3
+最終盤面：M∀LICE＜Q＞WHITE BINDER・アコード・トーカー＠イグニスター ／ 伏せ M∀LICE＜C＞GWC－０６(伏) ／ LP 6200 ／ 点 3.01 ／ 評価器の妨害 3
 
 1. Dormouse 召喚
 2. Dormouse 効果（White Rabbit）
@@ -127,21 +127,19 @@
 8. リンク・デコーダー リンク召喚/特殊召喚（Dormouse）
 9. ウィキッド 効果（Cheshire Cat、バックアップ）
 10. Cheshire Cat 効果
-11. トランスコード・トーカー リンク召喚/特殊召喚（リンク・デコーダー、ウィキッド）
+11. HEARTS OF CRYPTER リンク召喚/特殊召喚（リンク・デコーダー、ウィキッド、Cheshire Cat）
 12. リンク・デコーダー 効果
-13. トランスコード・トーカー 効果（ウィキッド）
-14. アコード・トーカー リンク召喚/特殊召喚（Cheshire Cat、リンク・デコーダー、トランスコード・トーカー）
-15. バックアップ 効果
-16. バックアップ 効果（ウィザード、バックアップ）
-17. ウィザード 効果（Dormouse）
-18. リングリボー リンク召喚/特殊召喚（バックアップ）
-19. WHITE BINDER リンク召喚/特殊召喚（ウィキッド、Dormouse）
-20. WHITE BINDER 効果（Dormouse）
-21. WHITE BINDER 効果（GWC－０６）
-22. GWC－０６ 効果（WHITE BINDER、Cheshire Cat）
-23. WHITE BINDER 効果
-24. ネオテンペスト リンク召喚/特殊召喚（ウィザード、WHITE BINDER、Cheshire Cat）
-25. ネオテンペスト 効果（チェーン）（コード・オブ・ソウル）
+13. S：Pリトルナイト リンク召喚/特殊召喚（リンク・デコーダー、HEARTS OF CRYPTER）
+14. S：Pリトルナイト 効果（HEARTS OF CRYPTER）
+15. HEARTS OF CRYPTER 効果
+16. WHITE BINDER リンク召喚/特殊召喚（HEARTS OF CRYPTER、S：Pリトルナイト）
+17. WHITE BINDER 効果（ウィキッド）
+18. バックアップ 効果
+19. バックアップ 効果（コード・マジシャン、霆王の閃光）
+20. アコード・トーカー リンク召喚/特殊召喚（コード・マジシャン、バックアップ、WHITE BINDER）
+21. コード・マジシャン 効果（チェーン）
+22. アコード・トーカー 効果（チェーン）（WHITE BINDER、コード・オブ・ソウル）
+23. WHITE BINDER 効果（GWC－０６）
 
 ## Dormouse 1枚
 
@@ -183,7 +181,7 @@
 32. ネオテンペスト リンク召喚/特殊召喚（ウィザード、リングリボー、WHITE BINDER）
 33. ネオテンペスト 効果（チェーン）（コード・オブ・ソウル）
 
-誘発を最も痛い窓に受けた時の最善（他の手札は代役）：灰流うらら 1.01（M∀LICE＜C＞TB－１１）／無限泡影 0.51（チェーンなし）／ドロール＆ロックバード 1.51（M∀LICE＜P＞Cheshire Cat）／霊王の波動 0.51（M∀LICE＜P＞White Rabbit）／屋敷わらし 1.81（ウィザード＠イグニスター）／幽鬼うさぎ 0.01（M∀LICE＜P＞White Rabbit）／朔夜しぐれ 1.01（M∀LICE＜P＞White Rabbit）／霆王の閃光 1.51（ウィザード＠イグニスター）／原始生命態ニビル 0.01（チェーンなし）
+誘発を最も痛い窓に受けた時の最善（他の手札は代役）：灰流うらら 1.01（M∀LICE＜C＞TB－１１）／無限泡影 0.51（チェーンなし）／ドロール＆ロックバード 1.51（M∀LICE＜P＞Cheshire Cat）／霊王の波動 0.51（M∀LICE＜P＞White Rabbit）／屋敷わらし 1.81（リンク・デコーダー）／幽鬼うさぎ 0.01（M∀LICE＜P＞White Rabbit）／朔夜しぐれ 1.01（M∀LICE＜P＞White Rabbit）／霆王の閃光 0.81（ファイアウォール・ドラゴン・ダークフルード－ネオテンペスト）／原始生命態ニビル 0.01（チェーンなし）
 
 ## UNDERGROUND 1枚
 
@@ -231,7 +229,7 @@
 
 手札：バックアップ＠イグニスター（残りは代役） / ルート `malice-open-30118811`
 
-最終盤面：リングリボー・ファイアウォール・ドラゴン・ダークフルード－ネオテンペスト ／ LP 8000 ／ 点 2.51 ／ 評価器の妨害 2
+最終盤面：リングリボー・ファイアウォール・ドラゴン・ダークフルード－ネオテンペスト ／ LP 8000 ／ 点 1.51 ／ 評価器の妨害 2
 
 1. バックアップ 召喚
 2. バックアップ 効果（コード・マジシャン、霆王の閃光）
@@ -318,7 +316,7 @@
 26. March Hare 効果（March Hare）
 27. WHITE BINDER 効果（GWC－０６）
 
-誘発を最も痛い窓に受けた時の最善（他の手札は代役）：灰流うらら 0.01（サイバース・コード・マジシャン）／無限泡影 1.01（サイバース・コード・マジシャン）／ドロール＆ロックバード 2.01（チェーンなし）／霊王の波動 0.01（ドットスケーパー）／原始生命態ニビル 0.51（リンク・デコーダー）
+誘発を最も痛い窓に受けた時の最善（他の手札は代役）：灰流うらら 0.01（サイバース・コード・マジシャン）／無限泡影 1.01（サイバース・コード・マジシャン）／ドロール＆ロックバード 1.01（チェーンなし）／霊王の波動 0.01（ドットスケーパー）／原始生命態ニビル 0.51（リンク・デコーダー）
 
 ## White Rabbit＋UNDERGROUND
 
@@ -423,9 +421,9 @@
 
 ## Dormouse＋Cat
 
-手札：M∀LICE＜P＞Dormouse・M∀LICE＜P＞Cheshire Cat（残りは代役） / ルート `malice-open-32061192-96676583-2`
+手札：M∀LICE＜P＞Dormouse・M∀LICE＜P＞Cheshire Cat（残りは代役） / ルート `malice-open-32061192-96676583`
 
-最終盤面：リングリボー・ファイアウォール・ドラゴン・ダークフルード－ネオテンペスト・アコード・トーカー＠イグニスター ／ LP 6200 ／ 点 4.11 ／ 評価器の妨害 3
+最終盤面：M∀LICE＜P＞Cheshire Cat・ファイアウォール・ドラゴン・ダークフルード－ネオテンペスト・アコード・トーカー＠イグニスター ／ LP 6200 ／ 点 3.61 ／ 評価器の妨害 2
 
 1. Dormouse 召喚
 2. Dormouse 効果（White Rabbit）
@@ -451,16 +449,14 @@
 22. GWC－０６ 効果（WHITE BINDER、Cheshire Cat）
 23. WHITE BINDER 効果
 24. Cheshire Cat 効果（Cheshire Cat）
-25. ネオテンペスト リンク召喚/特殊召喚（ウィザード、WHITE BINDER、Cheshire Cat）
+25. ネオテンペスト リンク召喚/特殊召喚（ウィザード、リングリボー、WHITE BINDER）
 26. ネオテンペスト 効果（チェーン）（コード・オブ・ソウル）
 
-誘発を最も痛い窓に受けた時の最善（他の手札は代役）：灰流うらら 1.01（M∀LICE＜C＞TB－１１）／無限泡影 0.51（チェーンなし）／ドロール＆ロックバード 1.51（M∀LICE＜P＞Cheshire Cat）／霊王の波動 0.51（M∀LICE＜P＞White Rabbit）／原始生命態ニビル 0.01（チェーンなし）
+## White Rabbit 1枚（HEARTS＋ファイアウォール）
 
-## White Rabbit 1枚
+手札：M∀LICE＜P＞White Rabbit（残りは代役） / ルート `malice-rabbit-plus-2`
 
-手札：M∀LICE＜P＞White Rabbit（残りは代役） / ルート `user-replay-G9pZztFA`
-
-最終盤面：ファイアウォール・ドラゴン・ダークフルード－ネオテンペスト・サイバース・ウィキッド ／ LP 5900 ／ 点 2.31 ／ 評価器の妨害 1
+最終盤面：M∀LICE＜Q＞HEARTS OF CRYPTER・ファイアウォール・ドラゴン ／ LP 5900 ／ 点 2.91
 
 1. White Rabbit 召喚
 2. White Rabbit 効果（TB－１１）
@@ -477,17 +473,48 @@
 13. MTP－０７ 効果（チェーン）（WHITE BINDER、March Hare）
 14. WHITE BINDER 効果
 15. ウィキッド リンク召喚/特殊召喚（WHITE BINDER、Cheshire Cat）
-16. March Hare 効果（チェーン）（Cheshire Cat）
+16. March Hare 効果（チェーン）（Dormouse）
 17. リンク・デコーダー リンク召喚/特殊召喚（March Hare）
 18. ウィキッド 効果（March Hare、バックアップ）
 19. March Hare 効果（March Hare）
 20. バックアップ 効果
-21. バックアップ 効果（ウィザード、無限泡影）
-22. ウィザード 効果（Dormouse）
-23. HEARTS OF CRYPTER リンク召喚/特殊召喚（バックアップ、Dormouse、リンク・デコーダー）
-24. リンク・デコーダー 効果
-25. ネオテンペスト リンク召喚/特殊召喚（ウィザード、HEARTS OF CRYPTER、リンク・デコーダー）
-26. ネオテンペスト 効果（チェーン）（コード・オブ・ソウル）
+21. バックアップ 効果（ウィザード、霆王の閃光）
+22. ファイアウォール・ドラゴン リンク召喚/特殊召喚（バックアップ、リンク・デコーダー、ウィキッド）
+23. リンク・デコーダー 効果
+24. ウィザード 効果（Cheshire Cat）
+25. Cheshire Cat 効果（March Hare）
+26. HEARTS OF CRYPTER リンク召喚/特殊召喚（リンク・デコーダー、Cheshire Cat、ウィザード）
 
-誘発を最も痛い窓に受けた時の最善（他の手札は代役）：灰流うらら 0.31（M∀LICE＜C＞MTP－０７）／無限泡影 0.01（M∀LICE＜Q＞WHITE BINDER）／ドロール＆ロックバード 1.61（M∀LICE＜P＞March Hare）／霊王の波動 0.51（M∀LICE＜C＞TB－１１）／屋敷わらし 0.61（M∀LICE＜P＞March Hare）／幽鬼うさぎ 0.01（S：Pリトルナイト）／朔夜しぐれ 0.61（M∀LICE＜P＞March Hare）／霆王の閃光 0.31（M∀LICE＜P＞March Hare）／原始生命態ニビル 0.01（M∀LICE＜P＞Dormouse）
+## White Rabbit＋March Hare
+
+手札：M∀LICE＜P＞White Rabbit・M∀LICE＜P＞March Hare（残りは代役） / ルート `malice-open-69272449-20938824-2`
+
+最終盤面：M∀LICE＜Q＞HEARTS OF CRYPTER・S：Pリトルナイト・サイバース・ウィキッド ／ LP 5900 ／ 点 2.91
+
+1. White Rabbit 召喚
+2. White Rabbit 効果（TB－１１）
+3. リングリボー リンク召喚/特殊召喚（White Rabbit）
+4. March Hare 効果（チェーン）（White Rabbit）
+5. White Rabbit 効果
+6. TB－１１ 効果（チェーン）（March Hare、Dormouse）
+7. March Hare 効果（March Hare）
+8. リンク・デコーダー リンク召喚/特殊召喚（Dormouse）
+9. WHITE BINDER リンク召喚/特殊召喚（White Rabbit、リングリボー、リンク・デコーダー）
+10. リンク・デコーダー 効果（チェーン）
+11. WHITE BINDER 効果（チェーン）（Dormouse）
+12. Dormouse 効果
+13. Dormouse 効果（Cheshire Cat）
+14. Cheshire Cat 効果
+15. WHITE BINDER 効果（MTP－０７）
+16. MTP－０７ 効果（チェーン）（WHITE BINDER、March Hare）
+17. WHITE BINDER 効果
+18. Cheshire Cat 効果（March Hare）
+19. ウィキッド リンク召喚/特殊召喚（WHITE BINDER、Cheshire Cat）
+20. S：Pリトルナイト リンク召喚/特殊召喚（リンク・デコーダー、Dormouse）
+21. S：Pリトルナイト 効果（チェーン）（Dormouse）
+22. ウィキッド 効果（チェーン）（Dormouse、バックアップ）
+23. バックアップ 効果
+24. バックアップ 効果（ウィザード、March Hare）
+25. ウィザード 効果（March Hare）
+26. HEARTS OF CRYPTER リンク召喚/特殊召喚（バックアップ、ウィザード、March Hare）
 
