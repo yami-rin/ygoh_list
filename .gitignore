@@ -63,3 +63,6 @@ analyze_*.py
 .rewrite-harness/
 tests/shots_gallery/
 workers/.wrangler/
+
+# Firestore -> D1 の移行ダンプ。利用者のデータが入るので公開repositoryへ入れない（2026-11-18）
+workers/migration*.sql
