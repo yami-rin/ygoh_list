@@ -28,6 +28,6 @@
 
 ## 部屋主の手順
 
-1. Tailscaleを起動しておく。`tailscale funnel status`で`tcp://desktop-euas96s.tail26dd2a.ts.net:10000`が`localhost:7911`へ転送されていることを確認する。
+1. Tailscaleを起動しておく。`tailscale funnel status`で`tcp://<このPCのTailscale名>:10000`が`localhost:7911`へ転送されていることを確認する。
 2. 自分のMDPro3（`runtime/MDPro3-client/MDPro3.exe`）で「ネット対戦」→「LAN対戦」。リミットレギュレーションは友だちにもある「2026.7」など（「Astra OCG」は友だち側に無い）を選び「部屋を建てる」。ポート7911で建つこと（このPCで`遊ぶ.bat`を起動しない。7911が埋まると別ポートになり届かない）。
 3. 友だちが入ったら両者「準備完了」→「ゲーム開始」。LANの部屋にパスワードは無い。Funnelのアドレスを知る人は誰でも入れるので、遊ぶ時だけ部屋を建てる。

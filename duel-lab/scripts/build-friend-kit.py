@@ -15,12 +15,14 @@ window title back to "MDPro3". Needs Pillow (duel-lab/.venv): .venv/Scripts/pyth
 from concurrent.futures import ThreadPoolExecutor
 from datetime import date
 from pathlib import Path
+import functools
 import hashlib
 import importlib.util
 import json
 import os
 import re
 import shutil
+import subprocess
 import sys
 import tarfile
 import time
@@ -50,10 +52,11 @@ TITLE = b'MDPro3'.ljust(len(ASTRA_TITLE))   # same length keeps the serialized U
 FORBIDDEN = [r'(?<![a-z])tofu(?![a-z])', 'wadopasu', r'yami-?rin', 'Astra ?Duel', 'Astra ?OCG', 'AstraDecision',
              'AstraExecutor', 'AI_Astra', 'ASTRA_', 'Claude', 'anthropic', 'Opus 5', 'GPT-6', r'C:[\\/]+Users[\\/]',
              'card_manager_web', 'duel-lab', 'tskey-', 'MyCardToken->', 'DISCORD_', 'secrets\\.env',
-             'tail26dd2a', 'desktop-euas96s', 'gmail\\.com']
+             'gmail\\.com']
+HOST_PLACEHOLDER = b'@FUNNEL_HOST@'   # in friend-kit/duel-bridge.ps1; the real name is filled in only inside the kit
+BRIDGE_REASON = "the bridge must name the host's Funnel address"
 # Explained occurrences (pattern regex, path regex, reason); anything else stops the zip.
 KNOWN = [
-    ('tail26dd2a|desktop-euas96s', r'^tools/duel-bridge\.ps1$', "the bridge must name the host's Funnel address"),
     ('tofu', r'\.(jpg|zip)$|^MDPro3_Data/StandaloneWindows64/', 'chance byte match inside compressed upstream data'),
     ('Astra|ASTRA', r'^MDPro3_Data/(Managed/Assembly-CSharp\.dll|globalgamemanagers\.assets)$',
      'dormant Astra hook code compiled into the player (runs only for the bot deck "Astra" via start-native.ps1)'),
@@ -64,6 +67,24 @@ KNOWN = [
 
 def log(*args):
     print(*args, flush=True)
+
+
+@functools.lru_cache(maxsize=None)
+def funnel_host():
+    """This PC's Tailscale name, which the kit's bridge dials. It is personal, so it is never written into the repository."""
+    host = os.environ.get('DUEL_FUNNEL_HOST', '').strip()
+    if not host:
+        status = subprocess.run(['tailscale', 'status', '--json'], capture_output=True, text=True, encoding='utf-8')
+        if status.returncode == 0:
+            host = (json.loads(status.stdout).get('Self') or {}).get('DNSName', '').rstrip('.')
+    if not re.fullmatch(r'[a-z0-9-]+(\.[a-z0-9-]+)+\.ts\.net', host):
+        raise SystemExit('Tailscale name not found: start Tailscale, or set DUEL_FUNNEL_HOST=<pc>.<tailnet>.ts.net')
+    return host
+
+
+def host_words():
+    """PC name and tailnet name: forbidden everywhere in the kit except the bridge script."""
+    return [re.escape(part) for part in funnel_host().split('.')[:2]]
 
 
 # ---------------------------------------------------------------- fetch-arts
@@ -294,7 +315,10 @@ def assemble():
     shutil.copyfile(KIT_SRC / 'はじめに.txt', KIT / 'はじめに.txt')
     (KIT / 'tools').mkdir()
     shutil.copyfile(KIT_SRC / 'play.ps1', KIT / 'tools/play.ps1')
-    shutil.copyfile(KIT_SRC / 'duel-bridge.ps1', KIT / 'tools/duel-bridge.ps1')
+    bridge = (KIT_SRC / 'duel-bridge.ps1').read_bytes()
+    if bridge.count(HOST_PLACEHOLDER) != 1:
+        raise SystemExit('friend-kit/duel-bridge.ps1 must contain the host placeholder exactly once')
+    (KIT / 'tools/duel-bridge.ps1').write_bytes(bridge.replace(HOST_PLACEHOLDER, funnel_host().encode('ascii')))
     log(f'Kit assembled at {KIT}: {arts} hd-arts, {len(custom_arts)} original arts, '
         f'{len(custom_scripts)} original scripts, {latest_scripts} latest scripts, decks {decks}')
 
@@ -306,7 +330,7 @@ STORED = {'.jpg', '.png', '.ogg', '.mp4', '.zip', '.bundle', '.ypk', '.resS'}
 def scan(root):
     """Byte search (UTF-8 and UTF-16LE, case-insensitive) for personal or project strings."""
     findings = []
-    patterns = [(word, re.compile(word, re.I)) for word in FORBIDDEN]
+    patterns = [(word, re.compile(word, re.I)) for word in FORBIDDEN + host_words()]
     media = {'.jpg', '.png', '.ogg', '.mp4'}
     for path in sorted(root.rglob('*')):
         if not path.is_file():
@@ -328,6 +352,8 @@ def scan(root):
 
 def explain(finding):
     word, relative, _where = finding
+    if word in host_words() and relative == 'tools/duel-bridge.ps1':
+        return BRIDGE_REASON
     for word_rule, path_rule, reason in KNOWN:
         if re.search(word_rule, word) and re.search(path_rule, relative):
             return reason

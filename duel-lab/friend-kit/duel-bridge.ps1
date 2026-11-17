@@ -2,11 +2,13 @@
 # the connection over TLS to the host's Tailscale Funnel (TLS-terminated TCP), which hands it to the host's
 # MDPro3 room on port 7911. No installation needed: it only uses .NET classes built into Windows.
 param(
-  [string]$RemoteHost = 'desktop-euas96s.tail26dd2a.ts.net',
+  [string]$RemoteHost = '@FUNNEL_HOST@',
   [int]$RemotePort = 10000,
   [int]$LocalPort = 7911
 )
 $ErrorActionPreference = 'Stop'
+# build-friend-kit.py writes the host's address into the copy it packs; the repository copy has none.
+if ($RemoteHost -like '@*@') { throw 'This copy has no host address. Use tools\duel-bridge.ps1 from the kit zip.' }
 $listener = New-Object System.Net.Sockets.TcpListener ([System.Net.IPAddress]::Loopback), $LocalPort
 $listener.Start()
 Write-Host "Duel bridge: 127.0.0.1:$LocalPort -> ${RemoteHost}:$RemotePort (TLS)"
